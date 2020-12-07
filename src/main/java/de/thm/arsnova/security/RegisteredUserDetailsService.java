@@ -51,7 +51,7 @@ public class RegisteredUserDetailsService implements UserDetailsService {
 	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 		final String loginId = username.toLowerCase();
 		final Collection<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
-		if (userService.isAdmin(loginId)) {
+		if (userService.isAdmin(loginId, UserProfile.AuthProvider.ARSNOVA)) {
 			grantedAuthorities.add(User.ROLE_ADMIN);
 		}
 		return userService.loadUser(UserProfile.AuthProvider.ARSNOVA, loginId,

@@ -67,6 +67,9 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 
 		final Collection<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
 		grantedAuthorities.addAll(authorities);
+		if (userService.isAdmin(ldapUsername, UserProfile.AuthProvider.LDAP)) {
+			grantedAuthorities.add(User.ROLE_ADMIN);
+		}
 
 		return userService.loadUser(UserProfile.AuthProvider.LDAP, ldapUsername,
 				grantedAuthorities, true);

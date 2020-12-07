@@ -19,7 +19,6 @@
 package de.thm.arsnova.security;
 
 import java.io.Serializable;
-import java.util.List;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Content;
@@ -59,8 +57,6 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	public static final String OWNER_PERMISSION = "owner";
 	private static final Logger logger = LoggerFactory.getLogger(ApplicationPermissionEvaluator.class);
 
-	private List<String> adminAccounts;
-
 	@Autowired
 	private RoomRepository roomRepository;
 
@@ -78,10 +74,6 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	@Autowired
 	private MotdRepository motdRepository;
-
-	public ApplicationPermissionEvaluator(final SecurityProperties securityProperties) {
-		adminAccounts = securityProperties.getAdminAccounts();
-	}
 
 	@Override
 	public boolean hasPermission(
@@ -378,7 +370,6 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	}
 
 	private boolean isAdminAccess(final Authentication auth) {
-		/* TODO: only allow accounts from arsnova db */
 		return auth.getAuthorities().stream().anyMatch(ga -> ga.getAuthority().equals("ROLE_ADMIN"));
 	}
 

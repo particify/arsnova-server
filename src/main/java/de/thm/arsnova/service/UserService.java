@@ -41,7 +41,7 @@ public interface UserService extends EntityService<UserProfile> {
 
 	de.thm.arsnova.model.ClientAuthentication getCurrentClientAuthentication(boolean refresh);
 
-	boolean isAdmin(String username);
+	boolean isAdmin(String loginId, UserProfile.AuthProvider authProvider);
 
 	boolean isBannedFromLogin(String addr);
 

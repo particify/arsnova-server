@@ -253,8 +253,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public boolean isAdmin(final String username) {
-		return securityProperties.getAdminAccounts().contains(username);
+	public boolean isAdmin(final String loginId, final UserProfile.AuthProvider authProvider) {
+		return securityProperties.getAdminAccounts().contains(
+				new SecurityProperties.AdminAccount(loginId, authProvider));
 	}
 
 	@Override
