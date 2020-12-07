@@ -1713,8 +1713,14 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public List<Session> getCourseSessions(final List<Course> courses) {
+	public List<Session> getCourseSessions(final List<Course> courses, final int start, final int limit) {
 		final ExtendedView view = new ExtendedView("session/by_courseid");
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
 		view.setCourseIdKeys(courses);
 
 		final ViewResults sessions = getDatabase().view(view);

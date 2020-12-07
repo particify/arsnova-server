@@ -34,6 +34,7 @@ import de.thm.arsnova.events.StatusSessionEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.exceptions.PayloadTooLargeException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import net.particify.arsnova.connector.client.ConnectorClient;
@@ -50,7 +51,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Performs all session related operations.
@@ -248,8 +248,35 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	public List<SessionInfo> getMyCourseSessionsInfo(final int offset, final int limit) {
+		final User user = userService.getCurrentUser();
+		return SessionInfo.fromSessionList(getCourseSessions(user, offset, limit));
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public List<Session> getMyCourseSessions(final int offset, final int limit) {
+		final User user = userService.getCurrentUser();
+		return getCourseSessions(user, offset, limit);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
 	public List<Session> getMyVisitedSessions(final int offset, final int limit) {
-		return databaseDao.getMyVisitedSessions(userService.getCurrentUser(), offset, limit);
+		User user = userService.getCurrentUser();
+		List<Session> sessions = databaseDao.getMyVisitedSessions(user, offset, limit);
+
+		if (null != connectorClient) {
+			for (Session session : getCourseSessions(user, offset, limit)) {
+				if (!sessions.contains(session)) {
+					sessions.add(session);
+
+				}
+			}
+			Collections.sort(sessions, new SessionNameComparator());
+		}
+
+		return sessions;
 	}
 
 	@Override
@@ -315,8 +342,20 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	}
 
 	@Override
+	public List<Session> getCourseSessions(final User user, final int offset, final int limit) {
+		if (connectorClient == null || user.getType().equals(User.GUEST)) {
+			return Collections.emptyList();
+		}
+
+		final List<Course> courses = connectorClient.getCourses(user.getUsername()).getCourse();
+		List<Session> sessions = databaseDao.getCourseSessions(courses, offset, limit);
+
+		return sessions;
+	}
+
+	@Override
 	public int countSessions(final List<Course> courses) {
-		final List<Session> sessions = databaseDao.getCourseSessions(courses);
+		final List<Session> sessions = databaseDao.getCourseSessions(courses, -1, -1);
 		if (sessions == null) {
 			return 0;
 		}
