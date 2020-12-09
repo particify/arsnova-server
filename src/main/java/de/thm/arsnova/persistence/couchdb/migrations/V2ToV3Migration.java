@@ -682,6 +682,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 				group.setRoomId(roomId);
 				group.setName(name);
 				group.setContentIds(groups.get(name));
+				group.setCreationTimestamp(new Date());
 				contentGroups.add(group);
 			}
 			toConnector.executeBulk(contentGroups);
