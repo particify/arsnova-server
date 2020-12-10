@@ -48,12 +48,11 @@ public class MigrationExecutor {
 		logger.debug("Initialized {} migration(s).", this.migrations.size());
 	}
 
-	public boolean runMigrations(@NonNull final MigrationState migrationState, final Runnable stateUpdateHandler) {
+	public void runMigrations(@NonNull final MigrationState migrationState, final Runnable stateUpdateHandler) {
 		final Thread shutdownHook = new Thread(stateUpdateHandler);
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		final List<Migration> pendingMigrations = migrations.stream()
 				.filter(m -> !migrationState.getCompleted().contains(m.getId())).collect(Collectors.toList());
-		boolean stateChange = false;
 		logger.info("Pending migrations: " + pendingMigrations.stream()
 				.map(Migration::getId).collect(Collectors.joining()));
 		for (final Migration migration : pendingMigrations) {
@@ -66,7 +65,6 @@ public class MigrationExecutor {
 			} else {
 				migrationState.setActive(migration.getId(), new Date());
 			}
-			stateChange = true;
 			final int initialStep = migrationState.getActive() != null ? migrationState.getActive().getStep() : 0;
 			for (int i = initialStep; i < migration.getStepCount(); i++) {
 				logger.info("Performing migration {} step {}...", migration.getId(), i);
@@ -83,9 +81,8 @@ public class MigrationExecutor {
 			}
 			migrationState.getCompleted().add(migration.getId());
 			migrationState.setActive(null);
+			stateUpdateHandler.run();
 		}
 		Runtime.getRuntime().removeShutdownHook(shutdownHook);
-
-		return stateChange;
 	}
 }
