@@ -129,6 +129,7 @@ public class ContentGroupService extends DefaultEntityServiceImpl<ContentGroup> 
 						.filter(c -> c.getRoomId().equals(contentGroup.getRoomId()))
 						.map(Content::getId).collect(Collectors.toCollection(LinkedHashSet::new));
 			contentGroup.setContentIds(contentIds);
+			contentGroup.setAutoSort(false);
 			if (contentGroup.getId() != null) {
 				return update(contentGroup);
 			} else {

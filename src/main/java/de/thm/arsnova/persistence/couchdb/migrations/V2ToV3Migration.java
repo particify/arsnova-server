@@ -21,6 +21,7 @@ package de.thm.arsnova.persistence.couchdb.migrations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentNotFoundException;
@@ -610,7 +612,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 			queryOptions.put("importJobId", importJob.getId());
 		}
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
-		query.setFields(Arrays.asList("sessionId", "questionVariant", "_id"));
+		query.setFields(Arrays.asList("sessionId", "questionVariant", "_id", "subject", "text"));
 		final ArrayList<MangoCouchDbConnector.MangoQuery.Sort> sort = new ArrayList<>();
 		if (importJob != null) {
 			sort.add(new MangoCouchDbConnector.MangoQuery.Sort("importJobId", false));
@@ -623,7 +625,9 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		String bookmark = (String) state.getState();
 
 		final Map<String, Set<String>> groups = new HashMap<>();
-		String roomId = "";
+		final Map<String, String> sortMapping = new HashMap<>();
+		String prevRoomId = "";
+		String prevGroupName = "";
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
 			query.setBookmark(bookmark);
@@ -640,17 +644,33 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 				if (!contentRepository.existsById(contentV2.getId())) {
 					continue;
 				}
-				if (!contentV2.getSession().equals(roomId)) {
-					createContentGroups(roomId, groups);
-					roomId = contentV2.getSessionId();
+				if (!groupName.equals(prevGroupName)
+						|| !contentV2.getSession().equals(prevRoomId)) {
+					if (!prevGroupName.isEmpty()) {
+						groups.put(prevGroupName, groups.get(prevGroupName).stream()
+								.sorted(Comparator.comparing(sortMapping::get))
+								.collect(Collectors.toCollection(LinkedHashSet::new)));
+					}
+					prevGroupName = groupName;
+					sortMapping.clear();
+
+					if (!contentV2.getSession().equals(prevRoomId)) {
+						createContentGroups(prevRoomId, groups);
+						prevRoomId = contentV2.getSessionId();
+					}
 				}
 				final Set<String> contentIds = groups.getOrDefault(groupName, new LinkedHashSet<>());
 				groups.put(groupName, contentIds);
 				contentIds.add(contentV2.getId());
+				final String sortString = contentV2.getSubject() + " " + contentV2.getText();
+				sortMapping.put(contentV2.getId(), sortString.length() > 50 ? sortString.substring(0, 50) : sortString);
 			}
 			state.setState(bookmark);
 		}
-		createContentGroups(roomId, groups);
+		groups.put(prevGroupName, groups.get(prevGroupName).stream()
+				.sorted(Comparator.comparing(sortMapping::get))
+				.collect(Collectors.toCollection(LinkedHashSet::new)));
+		createContentGroups(prevRoomId, groups);
 		state.setState(null);
 	}
 
@@ -661,8 +681,8 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 				final ContentGroup group = new ContentGroup();
 				group.setRoomId(roomId);
 				group.setName(name);
-				group.setAutoSort(true);
 				group.setContentIds(groups.get(name));
+				group.setCreationTimestamp(new Date());
 				contentGroups.add(group);
 			}
 			toConnector.executeBulk(contentGroups);
