@@ -39,4 +39,10 @@ public class SecuredContentService extends AbstractSecuredEntityServiceImpl<Cont
 	public int countByRoomIdAndGroup(final String roomId, final String group) {
 		return contentService.countByRoomIdAndGroup(roomId, group);
 	}
+
+	@Override
+	@PreAuthorize("hasPermission(#contentId, 'content', 'read-correct-options')")
+	public List<Integer> getCorrectChoiceIndexes(final String contentId) {
+		return contentService.getCorrectChoiceIndexes(contentId);
+	}
 }

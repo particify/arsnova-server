@@ -39,6 +39,7 @@ public class ContentController extends AbstractEntityController<Content> {
 	protected static final String REQUEST_MAPPING = "/content";
 	private static final String GET_ANSWER_STATISTICS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
 	private static final String DELETE_ANSWERS_MAPPING = DEFAULT_ID_MAPPING + "/answer";
+	private static final String CORRECT_CHOICE_INDEXES_MAPPING = DEFAULT_ID_MAPPING + "/correct-choice-indexes";
 	private static final String CONTENT_COUNT_MAPPING = NO_ID_MAPPING + "/count";
 
 	private ContentService contentService;
@@ -65,6 +66,11 @@ public class ContentController extends AbstractEntityController<Content> {
 	@DeleteMapping(DELETE_ANSWERS_MAPPING)
 	public void deleteAnswers(@PathVariable final String id) {
 		answerService.deleteAnswers(id);
+	}
+
+	@GetMapping(CORRECT_CHOICE_INDEXES_MAPPING)
+	public List<Integer> getCorrectOptionIndexes(@PathVariable final String id) {
+		return contentService.getCorrectChoiceIndexes(id);
 	}
 
 	@GetMapping(CONTENT_COUNT_MAPPING)
