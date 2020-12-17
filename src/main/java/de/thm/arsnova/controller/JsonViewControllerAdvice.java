@@ -65,24 +65,33 @@ public class JsonViewControllerAdvice extends AbstractMappingJacksonResponseBody
 		}
 		final String view = viewList.get(0);
 		logger.debug("'{}' parameter found in request URI: {}", VIEW_PARAMETER, view);
-		if (bodyContainer.getValue() instanceof Collection) {
-			logger.warn("'{}' parameter is currently not supported for listing endpoints.", VIEW_PARAMETER);
-		}
+		final String permission;
 		switch (view) {
 			case "extended":
-				tryAccess(bodyContainer.getValue(), "read-extended");
+				permission = "read-extended";
 				bodyContainer.setSerializationView(View.Extended.class);
 				break;
 			case "owner":
-				tryAccess(bodyContainer.getValue(), "owner");
+				permission = "owner";
 				bodyContainer.setSerializationView(View.Owner.class);
 				break;
 			case "admin":
-				tryAccess(bodyContainer.getValue(), "admin");
+				permission = "admin";
 				bodyContainer.setSerializationView(View.Admin.class);
 				break;
 			default:
 				return;
+		}
+		if (bodyContainer.getValue() instanceof Collection) {
+			tryAccess((Collection) bodyContainer.getValue(), permission);
+		} else {
+			tryAccess(bodyContainer.getValue(), permission);
+		}
+	}
+
+	protected void tryAccess(final Collection targetDomainObjects, final Object permission) {
+		for (final Object targetDomainObject : targetDomainObjects) {
+			tryAccess(targetDomainObject, permission);
 		}
 	}
 
