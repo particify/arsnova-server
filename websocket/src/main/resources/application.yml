@@ -1,5 +1,7 @@
 server:
   port: 8099
+  use-forward-headers: true
+  forward-headers-strategy: NATIVE
 management:
   endpoints:
     web:
