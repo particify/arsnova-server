@@ -8,13 +8,13 @@
 
 	<properties>
 		<!-- Maven dependency/plugin versions -->
-		<spring-boot.version>2.4.0</spring-boot.version>
+		<spring-boot.version>2.4.1</spring-boot.version>
 		<commons-lang.version>2.6</commons-lang.version>
-		<guava.version>30.0-jre</guava.version>
-		<netty.version>4.1.54.Final</netty.version>
+		<guava.version>30.1-jre</guava.version>
+		<netty.version>4.1.56.Final</netty.version>
 		<aspectj.version>1.9.6</aspectj.version>
 		<jakarta-xml-bind.version>2.3.3</jakarta-xml-bind.version>
-		<pac4j.version>4.2.0</pac4j.version>
+		<pac4j.version>4.3.0</pac4j.version>
 		<graalvm.version>20.3.0</graalvm.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -282,7 +282,7 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.11.0</version>
+			<version>3.12.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.pac4j</groupId>
@@ -337,7 +337,7 @@
 		<dependency>
 			<groupId>org.checkerframework</groupId>
 			<artifactId>checker-qual</artifactId>
-			<version>3.7.1</version>
+			<version>3.9.0</version>
 		</dependency>
 
 		<!-- Provided -->
@@ -457,7 +457,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.35.v20201120</version>
+				<version>10.0.0</version>
 				<configuration>
 					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<webApp>
@@ -483,7 +483,7 @@
 			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
-				<version>2.6.0</version>
+				<version>2.7.0</version>
 				<configuration>
 					<from>
 						<image>gcr.io/distroless/java-debian10/jetty:java11</image>
