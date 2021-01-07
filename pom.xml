@@ -307,7 +307,7 @@
 		<dependency>
 			<groupId>net.particify.arsnova.integrations</groupId>
 			<artifactId>connector-client</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
