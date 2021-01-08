@@ -22,7 +22,7 @@ A good starting point to run ARSnova 3 yourself is the [Docker Orchestration pro
 
 ## Documentation
 
-We provide separate documentations for lectures and students, administrators and developers:
+We provide separate documentations for lecturers and students, administrators and developers:
 
 * [For end-users](https://arsnova.thm.de/blog/en/arsnova-manual/)
 * For admins
