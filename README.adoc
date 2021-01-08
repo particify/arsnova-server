@@ -1,0 +1,49 @@
+= ARSnova
+Particify <arsnova@particify.de>
+
+ARSnova is a modern, web-based approach to Audience Response Systems (ARS).
+It is the basis for the https://particify.de[online service Particify] and released under an open-source license.
+
+image::https://gitlab.com/particify/dev/foss/arsnova/-/raw/master/assets/showcase.png[A showcase of ARSnova's quiz feature,700]
+
+The ARSnova software is composed of multiple components:
+the https://gitlab.com/particify/dev/foss/arsnova-webclient[web client] and multiple backend services.
+This repository contains the core backend service, a single component of the ARSnova software, and is mainly of interest to developers.
+Information about the software in general is available in the https://gitlab.com/particify/dev/foss/arsnova[ARSnova repository].
+
+
+== Get started
+
+A good starting point to run ARSnova yourself is the https://gitlab.com/particify/dev/foss/docker-orchestration[Docker Orchestration repository].
+
+Documentation for end-users, administrators and developers is available:
+
+* https://particify.de/manual/[End-user documentation] (German only, an English version is planned)
+* https://gitlab.com/particify/dev/foss/docker-orchestration[Installation guide]
+* link:src/site/markdown/development.md[Developer documentation]
+
+
+== Releases
+
+Starting from version 3, we are using a rolling release model for ARSnova development.
+We provide container images for all services which are continuously updated.
+
+
+== Support
+
+=== Community support
+
+Discuss ARSnova-related questions with other ARSnova users:
+
+* General discussions: https://gitter.im/particify-foss/arsnova-community
+* Development-related discussions: https://gitter.im/particify-foss/arsnova-dev
+
+
+=== Commercial support
+
+If you need professional support with quick response times, we've got you covered.
+We offer https://particify.de/arsnova/dienstleistungen[support services around ARSnova] (German website) through Particify which include:
+
+* installation and integration
+* updates and data migration
+* customization
