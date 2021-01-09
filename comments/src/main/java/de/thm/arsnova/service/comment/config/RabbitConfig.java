@@ -20,6 +20,7 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 public class RabbitConfig implements RabbitListenerConfigurer {
     public static final String BACKEND_COMMENT_FANOUT_NAME = "backend.event.comment.beforecreation";
     public static final String BACKEND_COMMENT_QUEUE_NAME = BACKEND_COMMENT_FANOUT_NAME + ".consumer.comment-service";
+    public static final String COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME = "commentservice.event.comment.deleted";
 
     @Value("${spring.rabbitmq.host}") private String rabbitmqHost;
     @Value("${spring.rabbitmq.port}") private int rabbitmqPort;
@@ -73,7 +74,9 @@ public class RabbitConfig implements RabbitListenerConfigurer {
         final Queue queue = new Queue(BACKEND_COMMENT_QUEUE_NAME, true, false, false);
         final Binding binding = BindingBuilder.bind(queue).to(fanoutExchange);
 
-        return new Declarables(fanoutExchange, queue, binding);
+        final FanoutExchange deleteFanoutExchange = new FanoutExchange(COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME);
+
+        return new Declarables(fanoutExchange, queue, binding, deleteFanoutExchange);
     }
 
     @Override

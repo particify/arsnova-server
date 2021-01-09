@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.core.AmqpTemplate;
 
+import de.thm.arsnova.service.comment.config.RabbitConfig;
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.Settings;
 import de.thm.arsnova.service.comment.model.command.CreateComment;
@@ -163,14 +164,19 @@ public class CommentCommandHandlerTest {
 
         verify(commentService, times(1)).get(id);
         verify(commentService, times(1)).delete(id);
-        verify(messagingTemplate, times(1)).convertAndSend(
+        verify(messagingTemplate, times(2)).convertAndSend(
                 keyCaptor.capture(),
                 topicCaptor.capture(),
                 eventCaptor.capture()
         );
 
-        assertThat(topicCaptor.getValue()).isEqualTo(roomId + ".comment.stream");
-        assertThat(eventCaptor.getValue()).isEqualTo(expectedEvent);
+        List<String> capturedTopics = topicCaptor.getAllValues();
+        List<String> capturedKeys = keyCaptor.getAllValues();
+        assertThat(capturedTopics.get(0)).isEqualTo(roomId + ".comment.stream");
+        assertThat(capturedKeys.get(1)).isEqualTo(RabbitConfig.COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME);
+        List<CommentDeleted> capturedEvents = eventCaptor.getAllValues();
+        assertThat(capturedEvents.get(0)).isEqualTo(expectedEvent);
+        assertThat(capturedEvents.get(1)).isEqualTo(expectedEvent);
     }
 
     @Test
@@ -243,7 +249,7 @@ public class CommentCommandHandlerTest {
         CommentDeleted e2 = new CommentDeleted(p2, roomId);
 
 
-        verify(messagingTemplate, times(2)).convertAndSend(
+        verify(messagingTemplate, times(4)).convertAndSend(
                 keyCaptor.capture(),
                 topicCaptor.capture(),
                 eventCaptor.capture()
@@ -251,10 +257,10 @@ public class CommentCommandHandlerTest {
 
         List<String> capturedTopics = topicCaptor.getAllValues();
         assertThat(capturedTopics.get(0)).isEqualTo(roomId + ".comment.stream");
-        assertThat(capturedTopics.get(1)).isEqualTo(roomId + ".comment.stream");
+        assertThat(capturedTopics.get(2)).isEqualTo(roomId + ".comment.stream");
         List<CommentDeleted> capturedEvents = eventCaptor.getAllValues();
         assertThat(capturedEvents.get(0)).isEqualTo(e1);
-        assertThat(capturedEvents.get(1)).isEqualTo(e2);
+        assertThat(capturedEvents.get(2)).isEqualTo(e2);
     }
 
 }
