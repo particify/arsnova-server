@@ -81,6 +81,11 @@ arsnova:
             - body
             - timestamp
             - read
+        - entity-type: Content
+          event-type: AfterDeletion
+          included-properties:
+            - id
+            - roomId
 
     # Formatting service
     formatting-service:
