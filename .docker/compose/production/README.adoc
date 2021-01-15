@@ -49,6 +49,7 @@ The default configuration can be adjusted via environment variables:
 |COMMENT_TAG |master |Docker tag (repository branch) for Comment Service
 |WEB_TAG |master |Docker tag (repository branch) for Webclient
 |WEB_LEGACY_TAG |master |Docker tag (repository branch) for Webclient (legacy)
+|FORMATTING_TAG| master |Docker tag (repository branch) for Formatting Service
 |=======
 
 Example: `PORT=8100 WEB_TAG=my-dev-branch docker-compose up`
