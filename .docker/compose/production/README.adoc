@@ -9,11 +9,6 @@ This repository contains files to integrate all of the Particify services and se
 
 === Preparations
 
-. Create a GitLab
-  https://gitlab.com/profile/personal_access_tokens[Personal Access Token]
-  with `read_registry` scope.
-. Authenticate the Docker environment with the GitLab registry:
-  `docker login registry.gitlab.com`
 . Clone this repository.
 . Inside the repositories root directory run `./set-env.sh <env>`. env can be `prod` or `dev`.
 
