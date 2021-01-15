@@ -5,6 +5,20 @@ This repository contains files to integrate all of the Particify services and se
 * Configuration for Docker Compose
 * Dockerfiles (and additional assets) to create modified versions of thirdparty images
 
+== Requirements
+
+=== Hardware
+
+* CPU: 4 Cores or vCPU
+* RAM: 8 GiB
+* Storage: 10 GiB for Docker images and containers, additional storage for volumes containing user data depends on usage
+
+=== Software
+
+* Linux is the recommended OS, but basically any OS that is supported by Docker Engine and runs shell scripts should work.
+* https://docs.docker.com/engine/install/[Docker Engine] >= 20.10 (older versions might work but are not tested for compatibility)
+* https://docs.docker.com/compose/install/[Docker Compose]
+
 == Usage
 
 === Preparations
