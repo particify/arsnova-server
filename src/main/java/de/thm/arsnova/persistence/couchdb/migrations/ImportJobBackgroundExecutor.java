@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -147,6 +148,11 @@ public class ImportJobBackgroundExecutor implements ApplicationEventPublisherAwa
 			return TYPE;
 		}
 
+		public String generateRoomId() {
+			return UUID.nameUUIDFromBytes(("j:" + id + ":" + sessionId).getBytes())
+					.toString().replace("-", "");
+		}
+
 		@Override
 		public String toString() {
 			return new ToStringCreator(this)
@@ -241,7 +247,7 @@ public class ImportJobBackgroundExecutor implements ApplicationEventPublisherAwa
 						}
 						Optional<Room> room;
 						try {
-							room = roomRepository.findById(importJob.getSessionId());
+							room = roomRepository.findById(importJob.generateRoomId());
 						} catch (final NullPointerException e) {
 							/* A NPE might be thrown because of an incompatibility of Ektorp with newer versions of
 							 * HttpClient. See https://gitlab.com/particify/dev/foss/arsnova-backend/-/issues/81 */

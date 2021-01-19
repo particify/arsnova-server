@@ -434,7 +434,11 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 						continue;
 					}
 				}
-				roomsV3.add(migrator.migrate(roomV2, profile, true));
+				final Room roomV3 = migrator.migrate(roomV2, profile, true);
+				while (importJob != null && roomRepository.findByShortId(roomV3.getShortId()) != null) {
+					roomV3.setShortId(generateShortId());
+				}
+				roomsV3.add(roomV3);
 				roomsV3.stream().forEach(room -> room.setImportMetadata(metadata));
 			}
 
@@ -481,7 +485,9 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 
 			for (final de.thm.arsnova.model.migration.v2.Motd motdV2 : motdsV2) {
 				if (motdV2.getAudience().equals("session")) {
-					final Room room = roomRepository.findByShortId(motdV2.getSessionkey());
+					final Room room = importJob == null
+							? roomRepository.findByShortId(motdV2.getSessionkey())
+							: roomRepository.findOne(importJob.generateRoomId());
 					/* sessionId has not been set for some old MotDs */
 					if (room == null) {
 						logger.warn("Skipping migration of Motd {}. Room {} does not exist.",
@@ -772,5 +778,11 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		final List<MotdList> motdListList = fromConnector.query(motdListQuery, MotdList.class);
 
 		return motdListList.size() > 0 ? motdListList.get(0) : null;
+	}
+
+	private String generateShortId() {
+		final int low = 10000000;
+		final int high = 100000000;
+		return String.valueOf((int) (Math.random() * (high - low) + low));
 	}
 }
