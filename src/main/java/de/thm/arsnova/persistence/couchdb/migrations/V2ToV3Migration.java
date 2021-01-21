@@ -667,9 +667,11 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 			}
 			state.setState(bookmark);
 		}
-		groups.put(prevGroupName, groups.get(prevGroupName).stream()
-				.sorted(Comparator.comparing(sortMapping::get))
-				.collect(Collectors.toCollection(LinkedHashSet::new)));
+		if (!prevGroupName.isEmpty()) {
+			groups.put(prevGroupName, groups.get(prevGroupName).stream()
+					.sorted(Comparator.comparing(sortMapping::get))
+					.collect(Collectors.toCollection(LinkedHashSet::new)));
+		}
 		createContentGroups(prevRoomId, groups);
 		state.setState(null);
 	}
