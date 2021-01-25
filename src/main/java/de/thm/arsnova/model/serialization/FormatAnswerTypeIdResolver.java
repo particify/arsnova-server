@@ -34,7 +34,8 @@ public class FormatAnswerTypeIdResolver extends TypeIdResolverBase {
 	@Override
 	public String idFromValue(final Object value) {
 		if (value instanceof Answer) {
-			return ((Answer) value).getFormat().toString();
+			final Answer answer = (Answer) value;
+			return answer.getFormat() != null ? answer.getFormat().toString() : null;
 		} else {
 			throw new IllegalArgumentException("Unsupported type.");
 		}
