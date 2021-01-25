@@ -547,6 +547,17 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		return databaseDao.updateSession(session).getFlipFlashcards();
 	}
 
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	public Session deleteCourseLink(final String sessionkey) {
+		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		session.setCourseType(null);
+		session.setCourseId(null);
+		databaseDao.updateSession(session);
+
+		return session;
+	}
+
 	private void handleLogo(Session session) {
 		if (session.getPpLogo() != null) {
 			if (session.getPpLogo().startsWith("http")) {

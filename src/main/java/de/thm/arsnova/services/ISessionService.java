@@ -102,6 +102,8 @@ public interface ISessionService {
 
 	boolean flipFlashcards(String sessionkey, Boolean flip);
 
+	Session deleteCourseLink(String sessionkey);
+
 	void deleteInactiveSessions();
 
 	void deleteInactiveVisitedSessionLists();
