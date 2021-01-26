@@ -207,7 +207,7 @@ connector.password=test
 # Enable MathJax to allow the use of Math formulas written in TeX syntax in
 # text fields.
 features.mathjax.enabled=true
-features.mathjax.src=//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js
+features.mathjax.src=//cdn.jsdelivr.net/npm/mathjax@2/MathJax.js
 
 # The following features are considered experimental because they have not been
 # tested in a production environment over a longer time frame and/or their
