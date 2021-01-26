@@ -7,8 +7,8 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<spring-boot-version>2.4.1</spring-boot-version>
-		<io.netty-version>4.1.56.Final</io.netty-version>
+		<spring-boot-version>2.4.2</spring-boot-version>
+		<io.netty-version>4.1.58.Final</io.netty-version>
 		<jakarta-xml-bind.version>2.3.3</jakarta-xml-bind.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
@@ -307,7 +307,7 @@
 		<dependency>
 			<groupId>net.particify.arsnova.integrations</groupId>
 			<artifactId>connector-client</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
@@ -339,7 +339,7 @@
 		<dependency>
 			<groupId>org.checkerframework</groupId>
 			<artifactId>checker-qual</artifactId>
-			<version>3.9.0</version>
+			<version>3.9.1</version>
 		</dependency>
 	</dependencies>
 
@@ -399,7 +399,7 @@
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
-				<version>3.7.0.1746</version>
+				<version>3.8.0.2131</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
