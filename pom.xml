@@ -24,32 +24,32 @@
 		</developer>
 		<developer>
 			<name>Daniel Gerhardt</name>
-			<organization>Technische Hochschule Mittelhessen</organization>
-			<organizationUrl>https://www.thm.de</organizationUrl>
-			<email>daniel.gerhardt@mni.thm.de</email>
+			<organization>Particify</organization>
+			<organizationUrl>https://particify.de</organizationUrl>
+			<email>dg@particify.de</email>
 		</developer>
 		<developer>
 			<name>Tom Käsler</name>
-			<organization>Technische Hochschule Mittelhessen</organization>
-			<organizationUrl>https://www.thm.de</organizationUrl>
-			<email>tom.kaesler@mni.thm.de</email>
+			<organization>Particify</organization>
+			<organizationUrl>https://particify.de</organizationUrl>
+			<email>tk@particify.de</email>
 		</developer>
 	</developers>
 
 	<issueManagement>
 		<system>GitLab</system>
-		<url>https://git.thm.de/arsnova/arsnova/issues</url>
+		<url>https://gitlab.com/particify/dev/foss/arsnova-backend/-/issues</url>
 	</issueManagement>
 
 	<ciManagement>
 		<system>GitLab CI</system>
-		<url>https://git.thm.de/arsnova/arsnova-backend/pipelines</url>
+		<url>https://gitlab.com/particify/dev/foss/arsnova-backend/-/pipelines</url>
 	</ciManagement>
 
 	<scm>
-		<url>https://github.com/thm-projects/arsnova-backend</url>
-		<connection>scm:git:https://github.com/thm-projects/arsnova-backend.git</connection>
-		<developerConnection>scm:git:ssh://git@git.thm.de/arsnova/arsnova-backend.git</developerConnection>
+		<url>https://gitlab.com/particify/dev/foss/arsnova-backend</url>
+		<connection>scm:git:https://gitlab.com/particify/dev/foss/arsnova-backend.git</connection>
+		<developerConnection>scm:git:ssh://git@gitlab.com:particify/dev/foss/arsnova-backend.git</developerConnection>
 	</scm>
 
 	<licenses>
@@ -524,10 +524,10 @@
 	</build>
 
 	<name>ARSnova Backend</name>
-	<description>ARSnova is a great audience response system</description>
-	<url>https://arsnova.github.io</url>
+	<description>ARSnova is a modern, web-based approach to Audience Response Systems (ARS).</description>
+	<url>https://particify.de</url>
 	<organization>
-		<name>Technische Hochschule Mittelhessen</name>
-		<url>https://www.thm.de</url>
+		<name>Particify</name>
+		<url>https://particify.de</url>
 	</organization>
 </project>
