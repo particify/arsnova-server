@@ -78,6 +78,7 @@ public class MessageBrokerProperties {
 	public static class Rabbitmq extends Server {
 		private String virtualHost;
 		private boolean manageDeclarations;
+		private Listener listener;
 
 		public String getVirtualHost() {
 			return virtualHost;
@@ -93,6 +94,26 @@ public class MessageBrokerProperties {
 
 		public void setManageDeclarations(final boolean manageDeclarations) {
 			this.manageDeclarations = manageDeclarations;
+		}
+
+		public Listener getListener() {
+			return listener;
+		}
+
+		public void setListener(final Listener listener) {
+			this.listener = listener;
+		}
+	}
+
+	public static class Listener {
+		private int maxAttempts;
+
+		public int getMaxAttempts() {
+			return maxAttempts;
+		}
+
+		public void setMaxAttempts(final int maxAttempts) {
+			this.maxAttempts = maxAttempts;
 		}
 	}
 

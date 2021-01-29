@@ -52,6 +52,8 @@ arsnova:
         password: arsnova
         virtual-host: /
         manage-declarations: true
+        listener:
+          max-attempts: 3
       published-events:
         - entity-type: UserProfile
           event-type: AfterCreation
