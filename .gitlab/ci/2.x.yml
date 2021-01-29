@@ -27,14 +27,6 @@ compile:
   script:
     - mvn $MAVEN_CLI_OPTS test-compile
 
-checkstyle:
-  extends: .maven
-  stage: test
-  needs: []
-  allow_failure: true
-  script:
-    - mvn $MAVEN_CLI_OPTS checkstyle:check -Dcheckstyle.missing-javadoc.severity=info
-
 unit_test:
   extends: .maven
   stage: test
