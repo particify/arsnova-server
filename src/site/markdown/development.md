@@ -9,8 +9,8 @@ Before you can get started developing ARSnova you need to make sure the followin
 
 And additionally if you want to run ARSnova locally:
 
-* Apache CouchDB 1.x
-* Python 2.7
+* Apache CouchDB 2 or later
+* Python 3.2 or later
 * [ARSnova Setup Tool](https://github.com/thm-projects/arsnova-setuptool)
 
 Next, you need to setup an ARSnova configuration file.
@@ -37,29 +37,24 @@ Run the following command to download the dependencies, and startup the backend 
 
 After a few seconds the ARSnova API will be accessible at <http://localhost:8080/>.
 
-You can adjust the amount of debug logging by changing the log levels in [log4j-dev.properties](../../main/resources/log4j-dev.properties).
+You can adjust the amount of debug logging by changing the log levels in [logback.xml](../../main/resources/logback.xml).
 Additionally, you can enable exception messages in API responses by setting the boolean property `api.expose-error-messages` in `arsnova.properties`.
 
 
 ## Continuous Integration
 
-Our code repositories are located on a [GitLab server](https://git.thm.de/arsnova) for internal development.
-They are automatically mirrored to [GitHub](https://github.com/thm-projects) on code changes.
+Our [code repositories](https://gitlab.com/particify/dev/foss) are located at GitLab.
 
-Apart from mirroring GitLab CI triggers various jobs to:
+GitLab CI triggers various jobs for new commits to:
 
-* check the code quality (static code analysis with SonarQube)
-* build a web archive
+* check the code quality
+* build packages (web archives)
 * execute unit tests
-* deploy to our staging/production servers
-
-In addition to GitLab CI for our internal repositories, we use Travis CI which is able to run against merge requests on GitHub.
-Travis CI only runs unit tests for the backend.
 
 The current build status for the master branch:
 
-* [![Build Status](https://travis-ci.org/thm-projects/arsnova-backend.svg?branch=master)](https://travis-ci.org/thm-projects/arsnova-backend) for ARSnova Backend
-* [![Build Status](https://travis-ci.org/thm-projects/arsnova-mobile.svg?branch=master)](https://travis-ci.org/thm-projects/arsnova-mobile) for ARSnova Mobile
+* [![Build Status](https://gitlab.com/particify/dev/foss/arsnova-backend/badges/2.x/pipeline.svg)](https://gitlab.com/particify/dev/foss/arsnova-backend/-/pipelines?scope=branches&ref=2.x) for ARSnova Backend
+* [![Build Status](https://gitlab.com/particify/dev/foss/arsnova-webclient-legacy/badges/2.x/pipeline.svg)](https://gitlab.com/particify/dev/foss/arsnova-webclient-legacy/-/pipelines?scope=branches&ref=2.x) for ARSnova Mobile
 
 
 ## Further Documentation

@@ -1,7 +1,7 @@
 # Installation
 
 This document describes the necessary steps to install ARSnova Backend.
-If you are viewing this file from the repository, please make sure you are on the corresponding `x.y-stable` branch for the target version.
+If you are viewing this file from the repository, please make sure you are on the corresponding stable branch (e.g. `2.8`) for the target version.
 
 
 ## Requirements
@@ -48,13 +48,13 @@ You want to change the paths to make them match your environment.
 In order to build up a full featured server installation you have to install at least the following software:
 
 * OpenJDK 8/11 (JRE)
-* Apache Tomcat 8 (or newer)
-* Apache CouchDB 1.x (1.2 or newer recommended)
+* Apache Tomcat 8 (or later)
+* Apache CouchDB 1.x (1.2 or later recommended)
 * One of the following webservers acting as a reverse proxy:
-	* Nginx 1.3 (or newer), 1.9.5 (or newer) recommended for HTTP/2 support
-	* Apache HTTP Server 2.4.5 (or newer) with builtin modules `mod_proxy`, `mod_proxy_http`, `mod_proxy_wstunnel` and `mod_rewrite`
+	* Nginx 1.3 (or later), 1.9.5 (or later) recommended for HTTP/2 support
+	* Apache HTTP Server 2.4.5 (or later) with builtin modules `mod_proxy`, `mod_proxy_http`, `mod_proxy_wstunnel` and `mod_rewrite`
 
-Additionally, you need Python 2.7 (3.0 or newer will not work) to run the "Setup Tool".
+Additionally, you need Python 3.2 or later to run the "Setup Tool".
 We further recommend installing the "Apache Portable Runtime (APR) based Native library for Tomcat" (libapr and libtcnative) for improved performance.
 
 Most of this software can easily be installed on Linux systems using the distribution's package manager:
@@ -67,7 +67,7 @@ A reverse proxy significantly simplifies the setup of HTTPS and allows running W
 ### CouchDB
 
 If you are installing ARSnova for the first time and don't have any data from an older version that needs to be migrated,
-you can follow CouchDB's guides to set up CouchDB 2:
+you can follow CouchDB's guides to set up CouchDB 2 or later:
 * [Installation](https://docs.couchdb.org/en/stable/install/unix.html)
 * [Single Node Setup](https://docs.couchdb.org/en/stable/setup/single-node.html)
 

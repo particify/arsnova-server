@@ -28,12 +28,8 @@
 	<bannerLeft>
 		<name>ARSnova</name>
 		<src>arsnova.png</src>
-		<href>https://arsnova.thm.de/</href>
+		<href>https://particify.de</href>
 	</bannerLeft>
-
-	<bannerRight>
-		<src>thm_logo.png</src>
-	</bannerRight>
 
 	<body>
 		<head>
@@ -42,7 +38,8 @@
 			]]>
 		</head>
 		<links>
-			<item name="THM" href="https://www.thm.de/" />
+			<item name="Particify" href="https://particify.de" />
+			<item name="THM" href="https://www.thm.de" />
 		</links>
 		<menu name="Overview">
 			<item name="Introduction" href="index.html" />
@@ -59,7 +56,6 @@
 		<menu name="Further Information">
 			<item name="Source Repository" href="scm.html" />
 			<item name="Issue Tracking" href="issue-management.html" />
-			<item name="SonarQube Metrics" href="https://scm.thm.de/sonar/dashboard/index/de.thm.arsnova:arsnova-backend" />
 			<item name="Continuous Integration" href="ci-management.html" />
 		</menu>
 	</body>
