@@ -11,7 +11,7 @@ And additionally if you want to run ARSnova locally:
 
 * Apache CouchDB 2 or later
 * Python 3.2 or later
-* [ARSnova Setup Tool](https://github.com/thm-projects/arsnova-setuptool)
+* [ARSnova 2 Setup Tool](https://gitlab.com/particify/dev/foss/arsnova-2-setup-tool)
 
 Next, you need to setup an ARSnova configuration file.
 Create a copy of [arsnova.properties.example](../../main/resources/arsnova.properties.example) at `/etc/arsnova/arsnova.properties`.

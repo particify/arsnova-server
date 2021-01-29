@@ -75,7 +75,7 @@ After CouchDB is installed successfully, [set up an admin user](https://docs.cou
 with the credentials set before for `couchdb.username` and `couchdb.password`.
 
 We provide a Python script that will set up a new database for ARSnova.
-This "Setup Tool" is located at [thm-projects/arsnova-setuptool](https://github.com/thm-projects/arsnova-setuptool).
+It is part of the [ARSnova 2 Setup Tool](https://gitlab.com/particify/dev/foss/arsnova-2-setup-tool).
 
 To set up the database, run:
 
