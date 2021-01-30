@@ -1,5 +1,54 @@
 # Changelog
 
+## 2.8
+This release brings improved compatibility with newer software stacks,
+improvements for existing features and additional capabilities for
+administration and development.
+
+Version 2.8 is the final release for ARSnova 2. It is mainly intended to support
+organizations with existing installations that need more time before switching
+to ARSnova 3. Security and other important bug fixes will still be released if
+necessary but you should not expect any new features.
+
+For new installations, we highly recommend to use ARSnova 3.
+
+Features:
+* Java 11 support
+* User impersonation: A new API endpoint to impersonate users has been added for
+  administration and debugging purposes
+  (`POST /auth/impersonate?username=<username>`).
+
+Improvements:
+* LMS courses sessions:
+    * Sessions linked to an LMS course are now listed for students with
+      membership even if they have not yet joined the session.
+    * Courses listed for session creation are now sorted by the start date
+      (instead of the name).
+    * Sessions can be unlinked from a course.
+    * Course data is cached to improve performance and reduce queries to the LMS
+      database.
+* Improved logging: Logging is now handled through Logback (replaces Log4j).
+
+Bug fixes:
+* The "question-based" learning progress is now correctly calculated after
+  exporting and reimporting a session.
+* The "point-based" learning progress calculation no longer throws an exception
+  if there are no answers to questions.
+* Data caches are now cleared in intervals as intended.
+
+Configuration changes:
+* If a `login-dialog-path` setting starts a `/` or is an absolute URL, it is no
+  longer prefixed with the customization path.
+
+Requirements:
+* If the optional LMS connector is used, it needs to be updated to version 1.0.
+
+**This version is brought to you by:**
+Lead programming: Daniel Gerhardt ([Particify](https://particify.de))
+Contributors: Christoph Thelen, Daniel Ziegenberg (setuptool)
+Special thanks: Klaus Quibeldey-Cirkel ([THM](https://www.thm.de))
+
+
 ## 2.7.4
 This is a maintenance release which only brings libraries up to date to fix
 potential bugs.
