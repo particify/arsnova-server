@@ -463,7 +463,7 @@
 								<version>${project.version}</version>
 								<description>This is the documentation of the ARSnova API</description>
 								<contact>
-									<email>info@arsnova.eu</email>
+									<email>arsnova@particify.de</email>
 								</contact>
 							</info>
 							<swaggerDirectory>${project.build.directory}/classes</swaggerDirectory>
