@@ -52,15 +52,6 @@ public class ConfigurationController extends AbstractController {
 	@Value("${mobile.path}")
 	private String mobilePath;
 
-	@Value("${presenter.path}")
-	private String presenterPath;
-
-	@Value("${links.overlay.url}")
-	private String overlayUrl;
-
-	@Value("${links.organization.url}")
-	private String organizationUrl;
-
 	@Value("${links.imprint.url}")
 	private String imprintUrl;
 
@@ -72,9 +63,6 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${links.documentation.url}")
 	private String documentationUrl;
-
-	@Value("${links.presenter-documentation.url}")
-	private String presenterDocumentationUrl;
 
 	@Value("${feedback.warning:5}")
 	private String feedbackWarningOffset;
@@ -96,9 +84,6 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${features.public-pool.enabled:false}")
 	private String publicPoolEnabled;
-
-	@Value("${features.export-to-click.enabled:false}")
-	private String exportToClickEnabled;
 
 	@Value("${question.answer-option-limit:8}")
 	private String answerOptionLimit;
@@ -184,24 +169,12 @@ public class ConfigurationController extends AbstractController {
 		if (!"".equals(mobilePath)) {
 			config.put("mobilePath", mobilePath);
 		}
-		if (!"".equals(presenterPath)) {
-			config.put("presenterPath", presenterPath);
-		}
 
 		if (!"".equals(documentationUrl)) {
 			config.put("documentationUrl", documentationUrl);
 		}
 		if (!"".equals(blogUrl)) {
 			config.put("blogUrl", blogUrl);
-		}
-		if (!"".equals(presenterDocumentationUrl)) {
-			config.put("presenterDocumentationUrl", presenterDocumentationUrl);
-		}
-		if (!"".equals(overlayUrl)) {
-			config.put("overlayUrl", overlayUrl);
-		}
-		if (!"".equals(organizationUrl)) {
-			config.put("organizationUrl", organizationUrl);
 		}
 		if (!"".equals(imprintUrl)) {
 			config.put("imprintUrl", imprintUrl);
@@ -235,7 +208,7 @@ public class ConfigurationController extends AbstractController {
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
 		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));
 		features.put("publicPool", "true".equals(publicPoolEnabled));
-		features.put("exportToClick", "true".equals(exportToClickEnabled));
+		features.put("exportToClick", false);
 
 		// add public pool configuration on demand
 		if (features.get("publicPool")) {

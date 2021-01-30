@@ -13,7 +13,6 @@ root-url=https://example.com
 # The context paths where the ARSnova modules have been deployed
 customization.path=/customization
 mobile.path=/mobile
-presenter.path=/presenter
 
 # WebSockets server
 socketio.bind-address=localhost
@@ -207,7 +206,7 @@ connector.password=test
 # Enable MathJax to allow the use of Math formulas written in TeX syntax in
 # text fields.
 features.mathjax.enabled=true
-features.mathjax.src=//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js
+features.mathjax.src=//cdn.jsdelivr.net/npm/mathjax@2/MathJax.js
 
 # The following features are considered experimental because they have not been
 # tested in a production environment over a longer time frame and/or their
@@ -221,7 +220,6 @@ features.question-format.grid-square.enabled=true
 #
 features.session-import-export.enabled=true
 features.public-pool.enabled=true
-features.export-to-click.enabled=true
 
 ################################################################################
 # Customization
@@ -249,9 +247,9 @@ question.answer-option-limit=8
 question.parse-answer-option-formatting=false
 
 # Demo session id to show above session login button
-# You can freely use the demo session of https://arsnova.eu/mobile which can be
-# imported from the repro:
-# https://github.com/thm-projects/arsnova-mobile/tree/master/demo-sessions
+# You can create your own session or import the default demo session which is
+# found in the web client's repository:
+# https://gitlab.com/particify/dev/foss/arsnova-webclient-legacy/-/tree/master/demo-sessions
 session.demo-id=
 
 # Delete guest sessions automatically after X days of owner inactivity.
@@ -279,11 +277,8 @@ ui.splashscreen.min-delay=3000
 
 # Links which are displayed in the frontend applications
 #
-links.blog.url=https://arsnova.eu/blog/
-links.documentation.url=https://arsnova.eu/manual/
-links.presenter-documentation.url=
-links.overlay.url=https://arsnova.eu/overlay/
-links.organization.url=
+links.blog.url=https://particify.de/l/arsnova2-blog
+links.documentation.url=https://particify.de/l/arsnova2-manual
 links.imprint.url=
 links.privacy-policy.url=
 
