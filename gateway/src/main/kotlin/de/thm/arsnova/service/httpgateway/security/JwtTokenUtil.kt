@@ -24,6 +24,7 @@ class JwtTokenUtil(
         const val ROLE_AUTHORITY_PREFIX = "ROLE_"
         val rolesClaimName = "roles"
         val roomFeaturesClaimName = "features"
+        val tierIdClaimName = "tierId"
     }
 
     private val publicAlgorithm = Algorithm.HMAC256(httpGatewayProperties.security.jwt.publicSecret)
@@ -90,6 +91,7 @@ class JwtTokenUtil(
             .withSubject(roomAccess.userId)
             .withArrayClaim(rolesClaimName, roles)
             .withArrayClaim(roomFeaturesClaimName, roomFeaturesArray)
+            .withClaim(tierIdClaimName, roomFeatures.tierId)
             .sign(internalAlgorithm)
     }
 }

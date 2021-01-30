@@ -65,7 +65,7 @@ class AuthFilter (
                                         logger.trace("Auth service didn't give specific role", exception)
                                         Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT"))
                                     },
-                                subscriptionService.getRoomFeatures(roomId),
+                                subscriptionService.getRoomFeatures(roomId, true),
                                 Mono.just(authorities)
                         )
                     }
