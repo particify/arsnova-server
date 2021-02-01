@@ -12,11 +12,13 @@ import org.springframework.amqp.core.Declarables;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
+import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.event.AmqpEventDispatcher;
@@ -197,6 +200,15 @@ public class RabbitConfig {
 		return factory;
 	}
 
+	public RetryOperationsInterceptor retryInterceptor(
+			final int maxAttempts
+	) {
+		return RetryInterceptorBuilder.stateless()
+				.maxAttempts(maxAttempts)
+				.recoverer(new RejectAndDontRequeueRecoverer())
+				.build();
+	}
+
 	@Bean
 	@ConditionalOnProperty(
 			name = RabbitConfigProperties.RABBIT_ENABLED,
@@ -210,6 +222,8 @@ public class RabbitConfig {
 		factory.setConnectionFactory(connectionFactory(executor, messageBrokerProperties));
 		factory.setMessageConverter(jsonMessageConverter());
 		factory.setMaxConcurrentConsumers(5);
+		factory.setAdviceChain(retryInterceptor(messageBrokerProperties.getRabbitmq().getListener().getMaxAttempts()));
+
 		return factory;
 	}
 }
