@@ -20,9 +20,7 @@ package de.thm.arsnova.service;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,8 +33,6 @@ import de.thm.arsnova.security.User;
  * The functionality the user service should provide.
  */
 public interface UserService extends EntityService<UserProfile> {
-	UserProfile getCurrentUserProfile();
-
 	User getCurrentUser();
 
 	de.thm.arsnova.model.ClientAuthentication getCurrentClientAuthentication(boolean refresh);
@@ -50,28 +46,6 @@ public interface UserService extends EntityService<UserProfile> {
 	void increaseFailedLoginCount(String addr);
 
 	void increaseSentMailCount(String addr);
-
-	String getUserIdToSocketId(UUID socketId);
-
-	void putUserIdToSocketId(UUID socketId, String userId);
-
-	void removeUserToSocketId(UUID socketId);
-
-	Set<Map.Entry<UUID, String>> getSocketIdToUserId();
-
-	boolean isUserInRoom(String userId, String roomId);
-
-	Set<String> getUsersByRoomId(String roomId);
-
-	String getRoomIdByUserId(String userId);
-
-	void addUserToRoomBySocketId(UUID socketId, String roomId);
-
-	void removeUserFromRoomBySocketId(UUID socketId);
-
-	void removeUserIdFromMaps(String userId);
-
-	int loggedInUsers();
 
 	void authenticate(UsernamePasswordAuthenticationToken token, UserProfile.AuthProvider authProvider,
 			String clientAddress);
@@ -93,8 +67,6 @@ public interface UserService extends EntityService<UserProfile> {
 
 	UserProfile update(UserProfile userProfile);
 
-	UserProfile deleteByUsername(String username);
-
 	Set<UserProfile.RoomHistoryEntry> getRoomHistory(UserProfile userProfile);
 
 	void addRoomToHistory(UserProfile userProfile, Room room);
@@ -108,10 +80,6 @@ public interface UserService extends EntityService<UserProfile> {
 	void initiatePasswordReset(UserProfile userProfile);
 
 	boolean resetPassword(UserProfile userProfile, String key, String password);
-
-	void addWsSessionToJwtMapping(String wsSessionId, String jwt);
-
-	User getAuthenticatedUserByWsSession(String wsSessionId);
 
 	UserProfile resetActivation(String id, String clientAddress);
 }

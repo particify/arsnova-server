@@ -32,10 +32,6 @@ public interface FeedbackService {
 
 	int countFeedbackByRoomId(String roomId);
 
-	double calculateAverageFeedback(String roomId);
-
-	long calculateRoundedAverageFeedback(String roomId);
-
 	boolean save(String roomId, int value, String userId);
 
 	Integer getByRoomIdAndUserId(String roomId, String userId);

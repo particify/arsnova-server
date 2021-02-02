@@ -21,10 +21,8 @@ package de.thm.arsnova.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -60,49 +58,6 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	}
 
 	@Override
-	@PreAuthorize("hasPermission('', 'motd', 'admin')")
-	public List<Motd> getAdminMotds() {
-		return motdRepository.findGlobalForAdmin();
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#roomId, 'room', 'owner')")
-	public List<Motd> getAllRoomMotds(final String roomId) {
-		return motdRepository.findByRoomId(roomId);
-	}
-
-	@Override
-	@Cacheable(cacheNames = "motds", key = "'ROOM' + #roomId")
-	public List<Motd> getCurrentRoomMotds(final Date clientdate, final String roomId) {
-		final List<Motd> motds = motdRepository.findByRoomId(roomId);
-		return filterMotdsByDate(motds, clientdate);
-	}
-
-	@Override
-	@Cacheable(cacheNames = "motds", key = "#audience")
-	public List<Motd> getCurrentMotds(final Date clientdate, final String audience) {
-		final List<Motd> motds;
-		switch (audience) {
-			case "all":
-				motds = motdRepository.findGlobalForAll();
-				break;
-			case "loggedIn":
-				motds = motdRepository.findGlobalForLoggedIn();
-				break;
-			case "students":
-				motds = motdRepository.findForStudents();
-				break;
-			case "tutors":
-				motds = motdRepository.findGlobalForTutors();
-				break;
-			default:
-				throw new IllegalArgumentException("Invalid audience.");
-		}
-
-		return filterMotdsByDate(motds, clientdate);
-	}
-
-	@Override
 	public List<Motd> filterMotdsByDate(final List<Motd> list, final Date clientdate) {
 		final List<Motd> returns = new ArrayList<>();
 		for (final Motd motd : list) {
@@ -111,11 +66,6 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 			}
 		}
 		return returns;
-	}
-
-	@Override
-	public List<Motd> filterMotdsByList(final List<Motd> list, final List<String> ids) {
-		return list.stream().filter(id -> ids.contains(id)).collect(Collectors.toList());
 	}
 
 	@Override

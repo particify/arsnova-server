@@ -28,9 +28,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -66,8 +64,6 @@ import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Validator;
 
 import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
@@ -111,13 +107,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-	private static final ConcurrentHashMap<UUID, String> socketIdToUserId = new ConcurrentHashMap<>();
-
 	/* for the new STOMP over ws functionality */
 	private static final ConcurrentHashMap<String, String> wsSessionIdToJwt = new ConcurrentHashMap<>();
-
-	/* used for Socket.IO online check solution (new) */
-	private static final ConcurrentHashMap<String, String> userIdToRoomId = new ConcurrentHashMap<>();
 
 	private UserRepository userRepository;
 	private JwtService jwtService;
@@ -220,12 +211,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public UserProfile getCurrentUserProfile() {
-		final User user = getCurrentUser();
-		return getByAuthProviderAndLoginId(user.getAuthProvider(), user.getUsername());
-	}
-
-	@Override
 	public User getCurrentUser() {
 		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
@@ -297,87 +282,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 				resendMailBans.add(addr);
 			}
 		}
-	}
-
-	@Override
-	public String getUserIdToSocketId(final UUID socketId) {
-		return socketIdToUserId.get(socketId);
-	}
-
-	@Override
-	public void putUserIdToSocketId(final UUID socketId, final String userId) {
-		socketIdToUserId.put(socketId, userId);
-	}
-
-	@Override
-	public Set<Entry<UUID, String>> getSocketIdToUserId() {
-		return socketIdToUserId.entrySet();
-	}
-
-	@Override
-	public void removeUserToSocketId(final UUID socketId) {
-		socketIdToUserId.remove(socketId);
-	}
-
-	@Override
-	public boolean isUserInRoom(final String userId, final String expectedRoomId) {
-		final String actualRoomId = userIdToRoomId.get(userId);
-
-		return actualRoomId != null && actualRoomId.equals(expectedRoomId);
-	}
-
-	@Override
-	public Set<String> getUsersByRoomId(final String roomId) {
-		final Set<String> result = new HashSet<>();
-		for (final Entry<String, String> e : userIdToRoomId.entrySet()) {
-			if (e.getValue().equals(roomId)) {
-				result.add(e.getKey());
-			}
-		}
-
-		return result;
-	}
-
-	@Override
-	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public void addUserToRoomBySocketId(final UUID socketId, final String roomId) {
-		final String userId = socketIdToUserId.get(socketId);
-		userIdToRoomId.put(userId, roomId);
-	}
-
-	@Override
-	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public void removeUserFromRoomBySocketId(final UUID socketId) {
-		final String userId = socketIdToUserId.get(socketId);
-		if (null == userId) {
-			logger.warn("No user exists for socket {}.", socketId);
-
-			return;
-		}
-		userIdToRoomId.remove(userId);
-	}
-
-	@Override
-	public String getRoomIdByUserId(final String userId) {
-		for (final Entry<String, String> entry  : userIdToRoomId.entrySet()) {
-			if (entry.getKey().equals(userId)) {
-				return entry.getValue();
-			}
-		}
-
-		return null;
-	}
-
-	@Override
-	public void removeUserIdFromMaps(final String userId) {
-		if (userId != null) {
-			userIdToRoomId.remove(userId);
-		}
-	}
-
-	@Override
-	public int loggedInUsers() {
-		return userIdToRoomId.size();
 	}
 
 	@Override
@@ -559,17 +463,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 					Pattern.CASE_INSENSITIVE);
 			logger.info("Allowed e-mail addresses (pattern) for registration: '{}'.", mailPattern.pattern());
 		}
-	}
-
-	@Override
-	public UserProfile deleteByUsername(final String username) {
-		final UserProfile userProfile = getByUsername(username);
-		if (null == userProfile) {
-			throw new NotFoundException();
-		}
-		delete(userProfile);
-
-		return userProfile;
 	}
 
 	@Override

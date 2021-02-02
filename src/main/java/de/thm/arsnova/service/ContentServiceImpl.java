@@ -18,20 +18,13 @@
 
 package de.thm.arsnova.service;
 
-import java.io.IOException;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.annotation.Secured;
@@ -223,21 +216,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		}
 	}
 
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void delete(final String contentId) {
-		final Content content = get(contentId);
-		if (content == null) {
-			throw new NotFoundException();
-		}
-
-		try {
-			delete(content);
-		} catch (final IllegalArgumentException e) {
-			logger.error("Could not delete content {}.", contentId, e);
-		}
-	}
-
 	@PreAuthorize("isAuthenticated()")
 	private void deleteByRoomAndGroupName(final Room room, final String groupName) {
 		if ("all".equals(groupName)) {
@@ -248,215 +226,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			contents.forEach(c -> c.setRoomId(room.getId()));
 			delete(contents);
 		}
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void deleteAllContents(final String roomId) {
-		final Room room = getRoomWithAuthCheck(roomId);
-		deleteByRoomAndGroupName(room, "all");
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void deleteLectureContents(final String roomId) {
-		final Room room = getRoomWithAuthCheck(roomId);
-		deleteByRoomAndGroupName(room, "lecture");
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void deletePreparationContents(final String roomId) {
-		final Room room = getRoomWithAuthCheck(roomId);
-		deleteByRoomAndGroupName(room, "preparation");
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void deleteFlashcards(final String roomId) {
-		final Room room = getRoomWithAuthCheck(roomId);
-		deleteByRoomAndGroupName(room, "flashcard");
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
-	public void setVotingAdmission(final String contentId, final boolean disableVoting) {
-		final Content content = get(contentId);
-		content.getState().setResponsesEnabled(!disableVoting);
-
-		if (!disableVoting && !content.getState().isVisible()) {
-			content.getState().setVisible(true);
-			update(content);
-		} else {
-			update(content);
-		}
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "contentlists", key = "#roomId"),
-			@CacheEvict(value = "lecturecontentlists", key = "#roomId"),
-			@CacheEvict(value = "preparationcontentlists", key = "#roomId"),
-			@CacheEvict(value = "flashcardcontentlists", key = "#roomId") })
-	public void setVotingAdmissions(final String roomId, final boolean disableVoting, final Iterable<Content> contents) {
-		final User user = getCurrentUser();
-		final Room room = roomService.get(roomId);
-		if (!room.getOwnerId().equals(user.getId())) {
-			throw new UnauthorizedException();
-		}
-		/* FIXME: Filter flashcards - flashcard format not yet implemented */
-		//contents.stream().filter(c -> c.getFormat() != Format.?).collect(Collectors.toList());
-		final Map<String, Object> patches = new HashMap<>();
-		patches.put("responsesEnabled", !disableVoting);
-		try {
-			patch(contents, patches, Content::getState);
-		} catch (final IOException e) {
-			logger.error("Patching of contents failed", e);
-		}
-	}
-
-	private Room getRoomWithAuthCheck(final String roomId) {
-		final User user = userService.getCurrentUser();
-		final Room room = roomService.get(roomId);
-		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
-			throw new UnauthorizedException();
-		}
-		return room;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<String> getUnAnsweredContentIds(final String roomId) {
-		final User user = getCurrentUser();
-		return contentRepository.findUnansweredIdsByRoomIdAndUser(roomId, user.getId());
-	}
-
-	private User getCurrentUser() {
-		final User user = userService.getCurrentUser();
-		if (user == null) {
-			throw new UnauthorizedException();
-		}
-		return user;
-	}
-
-	/*
-	 * The "internal" suffix means it is called by internal services that have no authentication!
-	 * TODO: Find a better way of doing this...
-	 */
-	@Override
-	public int countFlashcardsForUserInternal(final String roomId) {
-		return contentRepository.findByRoomIdOnlyFlashcardVariantAndActive(roomId).size();
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<String> getUnAnsweredLectureContentIds(final String roomId) {
-		final User user = getCurrentUser();
-		return this.getUnAnsweredLectureContentIds(roomId, user.getId());
-	}
-
-	@Override
-	public List<String> getUnAnsweredLectureContentIds(final String roomId, final String userId) {
-		final List<String> ids = contentRepository.findUnansweredIdsByRoomIdAndUser(roomId, userId);
-		ids.retainAll(contentGroupService.getByRoomIdAndName(roomId, "lecture").getContentIds());
-
-		return ids;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<String> getUnAnsweredPreparationContentIds(final String roomId) {
-		final User user = getCurrentUser();
-		return this.getUnAnsweredPreparationContentIds(roomId, user.getId());
-	}
-
-	@Override
-	public List<String> getUnAnsweredPreparationContentIds(final String roomId, final String userId) {
-		final List<String> ids = contentRepository.findUnansweredIdsByRoomIdAndUser(roomId, userId);
-		ids.retainAll(contentGroupService.getByRoomIdAndName(roomId, "preparation").getContentIds());
-
-		return ids;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void publishAll(final String roomId, final boolean publish) throws IOException {
-		/* TODO: resolve redundancies */
-		final User user = getCurrentUser();
-		final Room room = roomService.get(roomId);
-		if (!room.getOwnerId().equals(user.getId())) {
-			throw new UnauthorizedException();
-		}
-		final List<Content> contents = contentRepository.findByRoomId(room.getId());
-		publishContents(roomId, publish, contents);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "contentlists", key = "#roomId"),
-			@CacheEvict(value = "lecturecontentlists", key = "#roomId"),
-			@CacheEvict(value = "preparationcontentlists", key = "#roomId"),
-			@CacheEvict(value = "flashcardcontentlists", key = "#roomId") })
-	public void publishContents(final String roomId, final boolean publish, final Iterable<Content> contents)
-			throws IOException {
-		final User user = getCurrentUser();
-		final Room room = roomService.get(roomId);
-		if (!room.getOwnerId().equals(user.getId())) {
-			throw new UnauthorizedException();
-		}
-		patch(contents, Collections.singletonMap("visible", publish), Content::getState);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void deleteAllContentsAnswers(final String roomId) {
-		final User user = getCurrentUser();
-		final Room room = roomService.get(roomId);
-		if (!room.getOwnerId().equals(user.getId())) {
-			throw new UnauthorizedException();
-		}
-
-		final List<Content> contents = contentRepository.findByRoomIdAndVariantAndActive(room.getId());
-		resetContentsRoundState(room.getId(), contents);
-		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
-		answerService.delete(answerRepository.findStubsByContentIds(contentIds));
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void deleteAllPreparationAnswers(final String roomId) {
-		final Room room = roomService.get(roomId);
-		contentGroupService.getByRoomIdAndName(roomId, "preparation").getContentIds();
-		final Set<String> contentIds = contentGroupService.getByRoomIdAndName(roomId, "preparation").getContentIds();
-		resetContentsRoundState(room.getId(), get(contentIds));
-		answerService.delete(answerRepository.findStubsByContentIds(contentIds));
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void deleteAllLectureAnswers(final String roomId) {
-		final Room room = roomService.get(roomId);
-		contentGroupService.getByRoomIdAndName(roomId, "lecture").getContentIds();
-		final Set<String> contentIds = contentGroupService.getByRoomIdAndName(roomId, "lecture").getContentIds();
-		resetContentsRoundState(room.getId(), get(contentIds));
-		answerService.delete(answerRepository.findStubsByContentIds(contentIds));
-	}
-
-	@Caching(evict = {
-			@CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "contentlists", key = "#roomId"),
-			@CacheEvict(value = "lecturecontentlists", key = "#roomId"),
-			@CacheEvict(value = "preparationcontentlists", key = "#roomId"),
-			@CacheEvict(value = "flashcardcontentlists", key = "#roomId") })
-	private void resetContentsRoundState(final String roomId, final Iterable<Content> contents) {
-		for (final Content q : contents) {
-			/* TODO: Check if setting the sessionId is necessary. */
-			q.setRoomId(roomId);
-			q.resetState();
-		}
-		contentRepository.saveAll(contents);
 	}
 
 	@EventListener

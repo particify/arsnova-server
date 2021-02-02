@@ -67,27 +67,6 @@ public class FeedbackServiceTest {
 	}
 
 	@Test
-	public void shouldCalculateAverageFeedback() {
-		feedbackService.save(roomId, 0, "user-id-one");
-		feedbackService.save(roomId, 3, "user-id-two");
-
-		final double expected = 1.5;
-		final double actual = feedbackService.calculateAverageFeedback(roomId);
-
-		assertEquals(expected, actual, 0.01);
-	}
-
-	@Test(expected = NoContentException.class)
-	public void averageCalculationShouldThrowNoContentExceptionWhenNoFeedbackIsPresent() {
-		feedbackService.calculateAverageFeedback(roomId);
-	}
-
-	@Test(expected = NotFoundException.class)
-	public void averageCalculationShouldThrowNotFoundExceptionWhenRoomIsUnknown() {
-		feedbackService.calculateAverageFeedback("room-id-does-not-exist");
-	}
-
-	@Test
 	public void shouldReturnCompleteFeedbackEntity() {
 		feedbackService.save(roomId, 0, "user-id-one");
 		feedbackService.save(roomId, 3, "user-id-two");

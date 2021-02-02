@@ -27,17 +27,7 @@ import de.thm.arsnova.model.Motd;
  * The functionality the motd service should provide.
  */
 public interface MotdService extends EntityService<Motd> {
-	List<Motd> getAdminMotds();  //all w/o the sessionmotds
-
-	List<Motd> getAllRoomMotds(String roomId);
-
-	List<Motd> getCurrentMotds(Date clientdate, String audience);
-
-	List<Motd> getCurrentRoomMotds(Date clientdate, String roomId);
-
 	List<Motd> filterMotdsByDate(List<Motd> list, Date clientdate);
-
-	List<Motd> filterMotdsByList(List<Motd> list, List<String> ids);
 
 	Motd save(Motd motd);
 

@@ -18,7 +18,6 @@
 
 package de.thm.arsnova.service;
 
-import java.io.IOException;
 import java.util.List;
 
 import de.thm.arsnova.model.Content;
@@ -36,40 +35,4 @@ public interface ContentService extends EntityService<Content> {
 	int countByRoomId(String roomId);
 
 	int countByRoomIdAndGroup(String roomId, String group);
-
-	void delete(String questionId);
-
-	List<String> getUnAnsweredContentIds(String roomId);
-
-	int countFlashcardsForUserInternal(String roomId);
-
-	void deleteAllContents(String roomId);
-
-	void deleteLectureContents(String roomId);
-
-	void deletePreparationContents(String roomId);
-
-	void deleteFlashcards(String roomId);
-
-	List<String> getUnAnsweredLectureContentIds(String roomId);
-
-	List<String> getUnAnsweredLectureContentIds(String roomId, String userId);
-
-	List<String> getUnAnsweredPreparationContentIds(String roomId);
-
-	List<String> getUnAnsweredPreparationContentIds(String roomId, String userId);
-
-	void publishAll(String roomId, boolean publish) throws IOException;
-
-	void publishContents(String roomId, boolean publish, Iterable<Content> contents) throws IOException;
-
-	void deleteAllContentsAnswers(String roomId);
-
-	void deleteAllPreparationAnswers(String roomId);
-
-	void deleteAllLectureAnswers(String roomId);
-
-	void setVotingAdmission(String contentId, boolean disableVoting);
-
-	void setVotingAdmissions(String roomId, boolean disableVoting, Iterable<Content> contents);
 }

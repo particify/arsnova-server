@@ -33,7 +33,6 @@ import de.thm.arsnova.event.DeleteFeedbackForRoomsEvent;
 import de.thm.arsnova.event.NewFeedbackEvent;
 import de.thm.arsnova.model.Feedback;
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.web.exceptions.NoContentException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 
 /**
@@ -126,17 +125,6 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	public int countFeedbackByRoomId(final String roomId) {
 		final Feedback feedback = this.getByRoomId(roomId);
 		return feedback.getCount();
-	}
-
-	@Override
-	public double calculateAverageFeedback(final String roomId) {
-		final Feedback feedback = this.getByRoomId(roomId);
-		return feedback.getAverage().orElseThrow(NoContentException::new);
-	}
-
-	@Override
-	public long calculateRoundedAverageFeedback(final String roomId) {
-		return Math.round(calculateAverageFeedback(roomId));
 	}
 
 	@Override
