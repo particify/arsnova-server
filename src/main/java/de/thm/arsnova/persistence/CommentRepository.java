@@ -13,7 +13,5 @@ public interface CommentRepository extends CrudRepository<Comment, String> {
 
 	Iterable<Comment> findStubsByRoomId(String roomId);
 
-	Iterable<Comment> findStubsByRoomIdAndUserId(String roomId, String userId);
-
 	Comment findOne(String commentId);
 }

@@ -18,14 +18,6 @@ var designDoc = {
 			},
             "reduce": "_count"
 		},
-		"by_contentid_round_body_subject": {
-			"map": function (doc) {
-				if (doc.type === "Answer") {
-					emit([doc.contentId, doc.round, doc.abstention, doc.body, doc.subject, doc.successfulFreeTextAnswer], {_rev: doc._rev});
-				}
-			},
-			"reduce": "_count"
-		},
 		"by_contentid_round_selectedchoiceindexes": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
@@ -34,27 +26,12 @@ var designDoc = {
 			},
 			"reduce": "_count"
 		},
-		"by_contentid_creationtimestamp": {
-			"map": function (doc) {
-				if (doc.type === "Answer") {
-					emit([doc.contentId, new Date(doc.creationTimestamp).getTime()], {_rev: doc._rev});
-				}
-			}
-		},
 		"by_contentid_creatorid_round": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
 					emit([doc.contentId, doc.creatorId, doc.round], {_rev: doc._rev});
 				}
 			}
-		},
-		"by_roomid": {
-			"map": function (doc) {
-				if (doc.type === "Answer") {
-					emit(doc.roomId, {_rev: doc._rev});
-				}
-			},
-			"reduce": "_count"
 		},
 		"by_creatorid_roomid": {
 			"map": function (doc) {

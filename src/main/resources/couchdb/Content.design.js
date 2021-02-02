@@ -10,14 +10,6 @@ var designDoc = {
 			},
 			"reduce": "_count"
 		},
-		"by_roomid": {
-			"map": function (doc) {
-				if (doc.type === "Content") {
-					emit(doc.roomId, {_rev: doc._rev});
-				}
-			},
-			"reduce": "_count"
-		},
 		"by_roomid_locked": {
 			"map": function (doc) {
 				if (doc.type === "Content") {

@@ -93,13 +93,6 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 		return createEntityStubs(db.queryView(createQuery("by_roomid").key(roomId).reduce(false)));
 	}
 
-	@Override
-	public Iterable<Comment> findStubsByRoomIdAndUserId(final String roomId, final String userId) {
-		return createEntityStubs(db.queryView(createQuery("by_roomid_creatorid_read")
-				.startKey(ComplexKey.of(roomId, userId))
-				.endKey(ComplexKey.of(roomId, userId, ComplexKey.emptyObject()))));
-	}
-
 	protected Iterable<Comment> createEntityStubs(final ViewResult viewResult) {
 		return super.createEntityStubs(viewResult, Comment::setRoomId);
 	}
