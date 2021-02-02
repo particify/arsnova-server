@@ -73,8 +73,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	private UserService userService;
 
-	private FeedbackService feedbackService;
-
 	private ConnectorClient connectorClient;
 
 	private JwtService jwtService;
@@ -113,11 +111,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Autowired
 	public void setAnswerRepository(final AnswerRepository answerRepository) {
 		this.answerRepository = answerRepository;
-	}
-
-	@Autowired
-	public void setFeedbackService(final FeedbackService feedbackService) {
-		this.feedbackService = feedbackService;
 	}
 
 	public static class RoomNameComparator implements Comparator<Room>, Serializable {
