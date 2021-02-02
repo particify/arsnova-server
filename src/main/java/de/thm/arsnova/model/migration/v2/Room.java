@@ -144,10 +144,6 @@ public class Room implements Entity {
 		this.lastOwnerActivity = lastOwnerActivity;
 	}
 
-	public boolean isCreator(final ClientAuthentication user) {
-		return user.getUsername().equals(creator);
-	}
-
 	@ApiModelProperty(required = true, value = "the source the course comes from (example: moodle)")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getCourseType() {
