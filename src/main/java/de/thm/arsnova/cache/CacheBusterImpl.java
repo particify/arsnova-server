@@ -24,8 +24,6 @@ import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.AfterDeletionEvent;
-import de.thm.arsnova.event.ChangeScoreEvent;
-import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Room;
 
@@ -35,7 +33,6 @@ import de.thm.arsnova.model.Room;
  */
 @Component
 public class CacheBusterImpl implements CacheBuster {
-
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
 	public void handleAfterCommentCreation(final AfterCreationEvent<Comment> event) {
@@ -45,18 +42,6 @@ public class CacheBusterImpl implements CacheBuster {
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
 	public void handleAfterCommentDeletion(final AfterDeletionEvent<Comment> event) {
-		/* Implementation provided by caching aspect. */
-	}
-
-	@CacheEvict(value = "answerlists", key = "#event.content.id")
-	@EventListener
-	public void handleAfterAnswerCreation(final AfterCreationEvent<Answer> event) {
-		/* Implementation provided by caching aspect. */
-	}
-
-	@CacheEvict(value = "statistics", allEntries = true)
-	@EventListener
-	public void handleChangeScore(final ChangeScoreEvent event) {
 		/* Implementation provided by caching aspect. */
 	}
 

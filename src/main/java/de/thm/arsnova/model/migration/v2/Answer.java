@@ -20,8 +20,6 @@ package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import de.thm.arsnova.model.serialization.View;
 
@@ -32,7 +30,6 @@ import de.thm.arsnova.model.serialization.View;
  * This class has additional fields to transport generated answer statistics.
  * </p>
  */
-@ApiModel(value = "Answer", description = "Answer entity - Can represent a single answer or summarized statistics")
 public class Answer implements Entity {
 	private String id;
 	private String rev;
@@ -60,7 +57,6 @@ public class Answer implements Entity {
 		this.type = "skill_question_answer";
 	}
 
-	@ApiModelProperty(required = true, value = "the couchDB ID")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getId() {
 		return id;
@@ -81,7 +77,6 @@ public class Answer implements Entity {
 		return rev;
 	}
 
-	@ApiModelProperty(required = true, value = "ID of the session, the answer is assigned to")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getSessionId() {
 		return sessionId;
@@ -92,7 +87,6 @@ public class Answer implements Entity {
 		this.sessionId = sessionId;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display question id")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getQuestionId() {
 		return questionId;
@@ -103,7 +97,6 @@ public class Answer implements Entity {
 		this.questionId = questionId;
 	}
 
-	@ApiModelProperty(required = true, value = "the answer text")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getAnswerText() {
 		return answerText;
@@ -124,7 +117,6 @@ public class Answer implements Entity {
 		this.answerTextRaw = answerTextRaw;
 	}
 
-	@ApiModelProperty(required = true, value = "the answer subject")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getAnswerSubject() {
 		return answerSubject;
@@ -145,7 +137,6 @@ public class Answer implements Entity {
 		this.successfulFreeTextAnswer = successfulFreeTextAnswer;
 	}
 
-	@ApiModelProperty(required = true, value = "the peer instruction round nr.")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getPiRound() {
 		return piRound;
@@ -156,7 +147,6 @@ public class Answer implements Entity {
 		this.piRound = piRound;
 	}
 
-	@ApiModelProperty(required = true, value = "the user")
 	@JsonView(View.Persistence.class)
 	public final String getUser() {
 		return user;
@@ -167,7 +157,6 @@ public class Answer implements Entity {
 		this.user = user;
 	}
 
-	@ApiModelProperty(required = true, value = "the answer image")
 	@JsonView(View.Persistence.class)
 	public String getAnswerImage() {
 		return answerImage;
@@ -178,7 +167,6 @@ public class Answer implements Entity {
 		this.answerImage = answerImage;
 	}
 
-	@ApiModelProperty(required = true, value = "the answer thumbnail")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getAnswerThumbnailImage() {
 		return answerThumbnailImage;
@@ -189,7 +177,6 @@ public class Answer implements Entity {
 		this.answerThumbnailImage = answerThumbnailImage;
 	}
 
-	@ApiModelProperty(required = true, value = "the creation date timestamp")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public long getTimestamp() {
 		return timestamp;
@@ -200,7 +187,6 @@ public class Answer implements Entity {
 		this.timestamp = timestamp;
 	}
 
-	@ApiModelProperty(required = true, value = "displays whether the answer is read")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isRead() {
 		return read;
@@ -211,7 +197,6 @@ public class Answer implements Entity {
 		this.read = read;
 	}
 
-	@ApiModelProperty(required = true, value = "the number of answers given. used for statistics")
 	@JsonView(View.Public.class)
 	public final int getAnswerCount() {
 		return answerCount;
@@ -221,7 +206,6 @@ public class Answer implements Entity {
 		this.answerCount = answerCount;
 	}
 
-	@ApiModelProperty(required = true, value = "the abstention")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isAbstention() {
 		return abstention;
@@ -232,7 +216,6 @@ public class Answer implements Entity {
 		this.abstention = abstention;
 	}
 
-	@ApiModelProperty(required = true, value = "the number of abstentions given. used for statistics")
 	@JsonView(View.Public.class)
 	public int getAbstentionCount() {
 		return abstentionCount;
@@ -242,7 +225,6 @@ public class Answer implements Entity {
 		this.abstentionCount = abstentionCount;
 	}
 
-	@ApiModelProperty(required = true, value = "either lecture or preparation")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getQuestionVariant() {
 		return questionVariant;
@@ -253,7 +235,6 @@ public class Answer implements Entity {
 		this.questionVariant = questionVariant;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display question value")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getQuestionValue() {
 		return questionValue;

@@ -19,22 +19,18 @@
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import de.thm.arsnova.model.serialization.View;
 
 /**
  * Contains a list of MotD IDs a user has acknowledged.
  */
-@ApiModel(value = "MotdList", description = "Motd List entity - Contains IDs of MotDs a user has acknowledged")
 public class MotdList implements Entity {
 	private String id;
 	private String rev;
 	private String motdkeys;
 	private String username;
 
-	@ApiModelProperty(required = true, value = "the couchDB ID")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getId() {
 		return id;
@@ -55,7 +51,6 @@ public class MotdList implements Entity {
 		return rev;
 	}
 
-	@ApiModelProperty(required = true, value = "the motdkeylist")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getMotdkeys() {
 		return motdkeys;
@@ -66,7 +61,6 @@ public class MotdList implements Entity {
 		motdkeys = motds;
 	}
 
-	@ApiModelProperty(required = true, value = "the username")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getUsername() {
 		return username;

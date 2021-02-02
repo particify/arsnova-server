@@ -19,8 +19,6 @@
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 
 import de.thm.arsnova.model.serialization.View;
@@ -28,7 +26,6 @@ import de.thm.arsnova.model.serialization.View;
 /**
  * A session's settings regarding the calculation of the score.
  */
-@ApiModel(value = "score options", description = "the score entity")
 public class ScoreOptions implements Serializable {
 
 	private String type = "questions";
@@ -45,7 +42,6 @@ public class ScoreOptions implements Serializable {
 
 	}
 
-	@ApiModelProperty(required = true, value = "the type")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getType() {
 		return type;
@@ -56,7 +52,6 @@ public class ScoreOptions implements Serializable {
 		this.type = type;
 	}
 
-	@ApiModelProperty(required = true, value = "either lecture or preparation")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getQuestionVariant() {
 		return questionVariant;

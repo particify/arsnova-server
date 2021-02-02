@@ -23,7 +23,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 
 /**
  * UserDetails implementation which identifies a user by internal (database) and external (AuthProvider + loginId) ID.
@@ -61,15 +60,6 @@ public class User implements org.springframework.security.core.userdetails.UserD
 			final org.springframework.security.core.userdetails.UserDetails details) {
 		this(profile, authorities);
 		providerUserDetails = details;
-	}
-
-	public User(final ClientAuthentication clientAuthentication,
-			final Collection<? extends GrantedAuthority> authorities) {
-		id = clientAuthentication.getId();
-		loginId = clientAuthentication.getUsername();
-		authProvider = clientAuthentication.getAuthProvider();
-		this.authorities = authorities;
-		enabled = true;
 	}
 
 	@Override

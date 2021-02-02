@@ -19,26 +19,21 @@
 package de.thm.arsnova.model.transport;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import de.thm.arsnova.model.migration.v2.Answer;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.migration.v2.Comment;
 import de.thm.arsnova.model.migration.v2.Content;
 import de.thm.arsnova.model.migration.v2.Motd;
 import de.thm.arsnova.model.migration.v2.Room;
 import de.thm.arsnova.model.migration.v2.RoomFeature;
-import de.thm.arsnova.model.migration.v2.RoomInfo;
 import de.thm.arsnova.model.serialization.View;
 
 /**
  * This class is used to allow the import and export of a session.
  */
-@ApiModel(value = "session/import and export", description = "the import export session API")
 public class ImportExportContainer {
 
 	private ImportExportRoom session;
@@ -49,16 +44,12 @@ public class ImportExportContainer {
 
 	private List<Motd> motds;
 
-	private RoomInfo sessionInfo;
-
 	public ImportExportContainer() {
 		questions = new ArrayList<>();
 		feedbackQuestions = new ArrayList<>();
 		motds = new ArrayList<>();
-		sessionInfo = null;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display session")
 	@JsonView(View.Public.class)
 	public ImportExportRoom getSession() {
 		return session;
@@ -68,7 +59,6 @@ public class ImportExportContainer {
 		this.session = session;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display questions")
 	@JsonView(View.Public.class)
 	public List<ImportExportContent> getQuestions() {
 		return questions;
@@ -78,7 +68,6 @@ public class ImportExportContainer {
 		this.questions = questions;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display questions feedback")
 	@JsonView(View.Public.class)
 	public List<Comment> getFeedbackQuestions() {
 		return feedbackQuestions;
@@ -106,15 +95,6 @@ public class ImportExportContainer {
 		session.sessionFeature = roomFeature;
 	}
 
-	@JsonView(View.Public.class)
-	public RoomInfo getSessionInfo() {
-		return sessionInfo;
-	}
-
-	public void setSessionInfo(final RoomInfo roomInfo) {
-		sessionInfo = roomInfo;
-	}
-
 	public void setSessionFromSessionObject(final Room s) {
 		final ImportExportRoom importExportRoom = new ImportExportRoom();
 		importExportRoom.setName(s.getName());
@@ -133,7 +113,7 @@ public class ImportExportContainer {
 		questions.add(importExportContent);
 	}
 
-	public Room generateSessionEntity(final ClientAuthentication user) {
+	public Room generateSessionEntity() {
 		final Room room = new Room();
 		// import fields
 		room.setActive(session.isActive());
@@ -156,7 +136,6 @@ public class ImportExportContainer {
 			room.setPpUniversity(session.getPublicPool().getPpUniversity());
 		}
 		// other fields
-		room.setCreator(user.getUsername());
 		room.setCreationTime(new Date().getTime());
 		return room;
 	}
@@ -225,7 +204,6 @@ public class ImportExportContainer {
 			setRating(content.getRating());
 		}
 
-		@ApiModelProperty(required = true, value = " used to display answers")
 		@JsonView(View.Public.class)
 		public List<Answer> getAnswers() {
 			return answers;
@@ -250,7 +228,6 @@ public class ImportExportContainer {
 
 		private RoomFeature sessionFeature = new RoomFeature();
 
-		@ApiModelProperty(required = true, value = "used to display short name")
 		@JsonView(View.Public.class)
 		public String getName() {
 			return name;
@@ -260,7 +237,6 @@ public class ImportExportContainer {
 			this.name = name;
 		}
 
-		@ApiModelProperty(required = false, value = "used to identify public pool sessions")
 		@JsonView(View.Public.class)
 		public String getSessionType() {
 			return sessionType;
@@ -270,7 +246,6 @@ public class ImportExportContainer {
 			this.sessionType = sessionType;
 		}
 
-		@ApiModelProperty(required = true, value = "used to display short name")
 		@JsonView(View.Public.class)
 		public String getShortName() {
 			return shortName;
@@ -280,7 +255,6 @@ public class ImportExportContainer {
 			this.shortName = shortName;
 		}
 
-		@ApiModelProperty(required = true, value = "active")
 		@JsonView(View.Public.class)
 		public boolean isActive() {
 			return active;
@@ -290,7 +264,6 @@ public class ImportExportContainer {
 			this.active = active;
 		}
 
-		@ApiModelProperty(required = true, value = "used to display public pool")
 		@JsonView(View.Public.class)
 		public PublicPool getPublicPool() {
 			return publicPool;
@@ -348,7 +321,6 @@ public class ImportExportContainer {
 			shortName = room.getShortName();
 		}
 
-		@ApiModelProperty(required = true, value = "used to display author name")
 		@JsonView(View.Public.class)
 		public String getPpAuthorName() {
 			return ppAuthorName;
@@ -358,7 +330,6 @@ public class ImportExportContainer {
 			this.ppAuthorName = ppAuthorName;
 		}
 
-		@ApiModelProperty(required = true, value = "used to display author mail")
 		@JsonView(View.Public.class)
 		public String getPpAuthorMail() {
 			return ppAuthorMail;
@@ -368,7 +339,6 @@ public class ImportExportContainer {
 			this.ppAuthorMail = ppAuthorMail;
 		}
 
-		@ApiModelProperty(required = true, value = "used to display university")
 		@JsonView(View.Public.class)
 		public String getPpUniversity() {
 			return ppUniversity;
@@ -378,7 +348,6 @@ public class ImportExportContainer {
 			this.ppUniversity = ppUniversity;
 		}
 
-		@ApiModelProperty(required = true, value = "used to display logo")
 		@JsonView(View.Public.class)
 		public String getPpLogo() {
 			return ppLogo;
@@ -388,7 +357,6 @@ public class ImportExportContainer {
 			this.ppLogo = ppLogo;
 		}
 
-		@ApiModelProperty(required = true, value = "used to display subject")
 		@JsonView(View.Public.class)
 		public String getPpSubject() {
 			return ppSubject;
@@ -398,7 +366,6 @@ public class ImportExportContainer {
 			this.ppSubject = ppSubject;
 		}
 
-		@ApiModelProperty(required = true, value = "used to display license")
 		@JsonView(View.Public.class)
 		public String getPpLicense() {
 			return ppLicense;
@@ -408,7 +375,6 @@ public class ImportExportContainer {
 			this.ppLicense = ppLicense;
 		}
 
-		@ApiModelProperty(required = true, value = "used to display level")
 		@JsonView(View.Public.class)
 		public String getPpLevel() {
 			return ppLevel;
@@ -418,7 +384,6 @@ public class ImportExportContainer {
 			this.ppLevel = ppLevel;
 		}
 
-		@ApiModelProperty(required = true, value = "used to display description")
 		@JsonView(View.Public.class)
 		public String getPpDescription() {
 			return ppDescription;
@@ -428,7 +393,6 @@ public class ImportExportContainer {
 			this.ppDescription = ppDescription;
 		}
 
-		@ApiModelProperty(required = true, value = "used to display faculty")
 		@JsonView(View.Public.class)
 		public String getPpFaculty() {
 			return ppFaculty;
@@ -438,7 +402,6 @@ public class ImportExportContainer {
 			this.ppFaculty = ppFaculty;
 		}
 
-		@ApiModelProperty(required = true, value = "used to display name")
 		@JsonView(View.Public.class)
 		public String getName() {
 			return name;
@@ -448,7 +411,6 @@ public class ImportExportContainer {
 			this.name = name;
 		}
 
-		@ApiModelProperty(required = true, value = "used to display short name")
 		@JsonView(View.Public.class)
 		public String getShortName() {
 			return shortName;

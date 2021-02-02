@@ -19,8 +19,6 @@
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
 
 import de.thm.arsnova.model.serialization.View;
@@ -28,7 +26,6 @@ import de.thm.arsnova.model.serialization.View;
 /**
  * Represents a Message of the Day.
  */
-@ApiModel(value = "Motd", description = "Message of the Day entity")
 public class Motd implements Entity {
 
 	private String motdkey; //ID
@@ -42,7 +39,6 @@ public class Motd implements Entity {
 	private String id;
 	private String rev;
 
-	@ApiModelProperty(required = true, value = "the identification string")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getMotdkey() {
 		return motdkey;
@@ -53,7 +49,6 @@ public class Motd implements Entity {
 		motdkey = key;
 	}
 
-	@ApiModelProperty(required = true, value = "startdate for showing this message (timestamp format)")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Date getStartdate() {
 		return startdate;
@@ -64,7 +59,6 @@ public class Motd implements Entity {
 		startdate = timestamp;
 	}
 
-	@ApiModelProperty(required = true, value = "enddate for showing this message (timestamp format)")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Date getEnddate() {
 		return enddate;
@@ -75,7 +69,6 @@ public class Motd implements Entity {
 		enddate = timestamp;
 	}
 
-	@ApiModelProperty(required = true, value = "tite of the message")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getTitle() {
 		return title;
@@ -86,7 +79,6 @@ public class Motd implements Entity {
 		this.title = title;
 	}
 
-	@ApiModelProperty(required = true, value = "text of the message")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getText() {
 		return text;
@@ -97,8 +89,6 @@ public class Motd implements Entity {
 		text = ttext;
 	}
 
-	@ApiModelProperty(required = true, value = "defines the target audience for this motd (one of the following: "
-			+ "'student', 'tutor', 'loggedIn', 'all')")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getAudience() {
 		return audience;
@@ -119,8 +109,6 @@ public class Motd implements Entity {
 		this.sessionId = sessionId;
 	}
 
-	@ApiModelProperty(required = true,
-			value = "when audience equals session, the sessionkey referes to the session the messages belong to")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSessionkey() {
 		return sessionkey;
@@ -131,7 +119,6 @@ public class Motd implements Entity {
 		sessionkey = a;
 	}
 
-	@ApiModelProperty(required = true, value = "the couchDB ID")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getId() {
 		return id;

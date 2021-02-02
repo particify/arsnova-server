@@ -37,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.RoomStatistics;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.transport.ImportExportContainer;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.MotdRepository;
@@ -106,11 +105,6 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	private Room calculateSessionInfo(final ImportExportContainer importExportSession, final Room room) {
 		/* FIXME: not yet migrated - move to service layer */
 		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<Room> findByOwner(final ClientAuthentication owner, final int start, final int limit) {
-		return findByOwnerId(owner.getId(), start, limit);
 	}
 
 	@Override
