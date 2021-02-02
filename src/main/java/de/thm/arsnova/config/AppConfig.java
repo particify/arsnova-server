@@ -77,7 +77,6 @@ import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.util.ImageUtils;
 import de.thm.arsnova.web.CacheControlInterceptorHandler;
 import de.thm.arsnova.web.CorsFilter;
-import de.thm.arsnova.web.DeprecatedApiInterceptorHandler;
 import de.thm.arsnova.web.PathBasedContentNegotiationStrategy;
 import de.thm.arsnova.web.ResponseInterceptorHandler;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
@@ -125,9 +124,7 @@ import net.particify.arsnova.connector.client.ConnectorClientImpl;
 		FeatureProperties.class,
 		SystemProperties.class})
 public class AppConfig implements WebMvcConfigurer {
-	public static final String API_V2_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v2+json";
 	public static final String API_V3_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v3+json";
-	public static final MediaType API_V2_MEDIA_TYPE = MediaType.valueOf(API_V2_MEDIA_TYPE_VALUE);
 	public static final MediaType API_V3_MEDIA_TYPE = MediaType.valueOf(API_V3_MEDIA_TYPE_VALUE);
 	public static final MediaType ACTUATOR_MEDIA_TYPE = MediaType.valueOf(ActuatorMediaType.V2_JSON);
 
@@ -177,7 +174,6 @@ public class AppConfig implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(final InterceptorRegistry registry) {
 		registry.addInterceptor(cacheControlInterceptorHandler());
-		registry.addInterceptor(deprecatedApiInterceptorHandler());
 		registry.addInterceptor(responseInterceptorHandler());
 	}
 
@@ -198,11 +194,6 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean
 	public CacheControlInterceptorHandler cacheControlInterceptorHandler() {
 		return new CacheControlInterceptorHandler();
-	}
-
-	@Bean
-	public DeprecatedApiInterceptorHandler deprecatedApiInterceptorHandler() {
-		return new DeprecatedApiInterceptorHandler();
 	}
 
 	@Bean
@@ -256,7 +247,6 @@ public class AppConfig implements WebMvcConfigurer {
 		mapper.setConfig(mapper.getSerializationConfig().withView(View.Public.class));
 		final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
 		final List<MediaType> mediaTypes = new ArrayList<>();
-		mediaTypes.add(API_V2_MEDIA_TYPE);
 		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
 		converter.setSupportedMediaTypes(mediaTypes);
 

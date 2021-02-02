@@ -585,52 +585,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>com.github.kongchen</groupId>
-				<artifactId>swagger-maven-plugin</artifactId>
-				<version>3.1.8</version>
-				<configuration>
-					<apiSources>
-						<apiSource>
-							<springmvc>true</springmvc>
-							<locations>
-								<location>de.thm.arsnova.controller.v2</location>
-								<location>de.thm.arsnova.model.v2</location>
-							</locations>
-							<schemes>
-								<scheme>http</scheme>
-								<scheme>https</scheme>
-							</schemes>
-							<basePath>/api</basePath>
-							<info>
-								<title>ARSnova API Documentation</title>
-								<version>${project.version}</version>
-								<description>Documentation of the ARSnova API</description>
-								<contact>
-									<email>info@arsnova.eu</email>
-								</contact>
-							</info>
-							<swaggerDirectory>${project.build.directory}/classes</swaggerDirectory>
-							<outputFormats>json</outputFormats>
-						</apiSource>
-					</apiSources>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>compile</phase>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>jakarta.xml.bind</groupId>
-						<artifactId>jakarta.xml.bind-api</artifactId>
-						<version>${jakarta-xml-bind.version}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
 				<version>3.7.0.1746</version>
