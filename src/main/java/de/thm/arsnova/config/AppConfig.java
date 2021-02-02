@@ -73,7 +73,6 @@ import de.thm.arsnova.model.migration.FromV2Migrator;
 import de.thm.arsnova.model.migration.ToV2Migrator;
 import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
 import de.thm.arsnova.model.serialization.View;
-import de.thm.arsnova.util.ImageUtils;
 import de.thm.arsnova.web.CacheControlInterceptorHandler;
 import de.thm.arsnova.web.CorsFilter;
 import de.thm.arsnova.web.PathBasedContentNegotiationStrategy;
@@ -311,11 +310,6 @@ public class AppConfig implements WebMvcConfigurer {
 		mailSender.setHost(systemProperties.getMail().getHost());
 
 		return mailSender;
-	}
-
-	@Bean
-	public ImageUtils imageUtils() {
-		return new ImageUtils();
 	}
 
 	@Bean
