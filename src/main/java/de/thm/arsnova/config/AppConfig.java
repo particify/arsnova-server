@@ -42,7 +42,6 @@ import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -79,8 +78,6 @@ import de.thm.arsnova.web.CacheControlInterceptorHandler;
 import de.thm.arsnova.web.CorsFilter;
 import de.thm.arsnova.web.PathBasedContentNegotiationStrategy;
 import de.thm.arsnova.web.ResponseInterceptorHandler;
-import de.thm.arsnova.websocket.ArsnovaSocketioServer;
-import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 import net.particify.arsnova.connector.client.ConnectorClient;
 import net.particify.arsnova.connector.client.ConnectorClientImpl;
 
@@ -301,16 +298,6 @@ public class AppConfig implements WebMvcConfigurer {
 		connectorClient.setUsername(systemProperties.getLmsConnector().getUsername());
 		connectorClient.setPassword(systemProperties.getLmsConnector().getPassword());
 		return connectorClient;
-	}
-
-	@Profile("!test")
-	@Bean(name = "socketServer", initMethod = "startServer", destroyMethod = "stopServer")
-	public ArsnovaSocketioServer socketServer() {
-		final ArsnovaSocketioServerImpl socketioServer = new ArsnovaSocketioServerImpl();
-		socketioServer.setHostIp(systemProperties.getSocketio().getBindAddress());
-		socketioServer.setPortNumber(systemProperties.getSocketio().getPort());
-
-		return socketioServer;
 	}
 
 	@Bean

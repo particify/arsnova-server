@@ -101,12 +101,6 @@ arsnova:
       username: test
       password: test
 
-    # Legacy WebSocket server
-    socketio:
-      bind-address: localhost
-      port: 8090
-      proxy-path: /socket.io
-
     inactivity-thresholds:
       # Anonymize user content for users with X days of inactivity
       anonymize-users: 180

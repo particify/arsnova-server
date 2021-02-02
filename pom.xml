@@ -300,11 +300,6 @@
 			<version>${pac4j.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.corundumstudio.socketio</groupId>
-			<artifactId>netty-socketio</artifactId>
-			<version>1.7.18</version>
-		</dependency>
-		<dependency>
 			<groupId>org.ektorp</groupId>
 			<artifactId>org.ektorp</artifactId>
 			<version>1.5.0</version>
