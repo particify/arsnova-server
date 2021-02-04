@@ -32,20 +32,16 @@ import de.thm.arsnova.config.properties.CouchDbMainProperties;
 import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
 import de.thm.arsnova.model.serialization.CouchDbObjectMapperFactory;
 import de.thm.arsnova.persistence.AnswerRepository;
-import de.thm.arsnova.persistence.CommentRepository;
 import de.thm.arsnova.persistence.ContentGroupRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
-import de.thm.arsnova.persistence.MotdRepository;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.persistence.StatisticsRepository;
 import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbAnswerRepository;
-import de.thm.arsnova.persistence.couchdb.CouchDbCommentRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbContentGroupRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbContentRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbLogEntryRepository;
-import de.thm.arsnova.persistence.couchdb.CouchDbMotdRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbRoomRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbStatisticsRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbUserRepository;
@@ -161,11 +157,6 @@ public class PersistenceConfig {
 	}
 
 	@Bean
-	public CommentRepository commentRepository() throws Exception {
-		return new CouchDbCommentRepository(couchDbConnector(), false);
-	}
-
-	@Bean
 	public ContentRepository contentRepository() throws Exception {
 		return new CouchDbContentRepository(couchDbConnector(), false);
 	}
@@ -178,11 +169,6 @@ public class PersistenceConfig {
 	@Bean
 	public AnswerRepository answerRepository() throws Exception {
 		return new CouchDbAnswerRepository(couchDbConnector(), false);
-	}
-
-	@Bean
-	public MotdRepository motdRepository() throws Exception {
-		return new CouchDbMotdRepository(couchDbConnector(), false);
 	}
 
 	@Bean
