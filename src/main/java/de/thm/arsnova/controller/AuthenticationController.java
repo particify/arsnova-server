@@ -31,6 +31,7 @@ import org.pac4j.core.exception.http.WithLocationAction;
 import org.pac4j.oidc.client.OidcClient;
 import org.pac4j.saml.client.SAML2Client;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
@@ -63,7 +64,7 @@ public class AuthenticationController {
 	private String apiPath;
 
 	public AuthenticationController(
-			final UserService userService,
+			@Qualifier("securedUserService") final UserService userService,
 			final SystemProperties systemProperties,
 			final ServletContext servletContext) {
 		this.userService = userService;

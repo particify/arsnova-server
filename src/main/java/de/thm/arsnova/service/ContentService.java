@@ -26,8 +26,6 @@ import de.thm.arsnova.model.Content;
  * The functionality the question service should provide.
  */
 public interface ContentService extends EntityService<Content> {
-	Content get(String id);
-
 	List<Content> getByRoomId(String roomId);
 
 	Iterable<Content> getByRoomIdAndGroup(String roomId, String group);

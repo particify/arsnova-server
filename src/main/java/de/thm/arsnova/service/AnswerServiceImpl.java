@@ -29,11 +29,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
@@ -57,6 +57,7 @@ import de.thm.arsnova.web.exceptions.UnauthorizedException;
  * Performs all answer related operations.
  */
 @Service
+@Primary
 public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implements AnswerService {
 	private static final Logger logger = LoggerFactory.getLogger(AnswerServiceImpl.class);
 
@@ -118,7 +119,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
 	public void deleteAnswers(final String contentId) {
 		final Content content = contentService.get(contentId);
 		content.resetState();
@@ -130,7 +130,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
 	public Answer getMyAnswer(final String contentId) {
 		final Content content = contentService.get(contentId);
 		if (content == null) {
@@ -141,7 +140,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
 	public AnswerStatistics getStatistics(final String contentId, final int round) {
 		final Content content = contentService.get(contentId);
 		if (content == null) {
@@ -170,7 +168,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
 	public AnswerStatistics getStatistics(final String contentId) {
 		final Content content = contentService.get(contentId);
 		if (content == null) {
@@ -181,7 +178,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
 	public AnswerStatistics getAllStatistics(final String contentId) {
 		final Content content = contentService.get(contentId);
 		if (content == null) {
@@ -195,19 +191,16 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
 	public List<String> getAnswerIdsByContentId(final String contentId) {
 		return answerRepository.findIdsByContentId(contentId);
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
 	public List<String> getAnswerIdsByCreatorIdRoomId(final String creatorId, final String roomId) {
 		return answerRepository.findIdsByCreatorIdRoomId(creatorId, roomId);
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
 	public List<String> getAnswerIdsByCreatorIdContentIdsRound(
 			final String creatorId, final List<String> contentIds, final int round) {
 		final List<String> ids = new ArrayList<>();
@@ -222,7 +215,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
 	public Answer getAnswerByContentIdAndUserIdAndCurrentRound(final String contentId, final String userId) {
 		final Content content = contentService.get(contentId);
 		if (content == null) {
@@ -235,7 +227,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() && hasPermission(#answer, 'create')")
 	public Answer create(final Answer answer) {
 		prepareCreate(answer);
 		answerQueue.offer(answer);

@@ -54,6 +54,7 @@ import de.thm.arsnova.model.FindQuery;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.EntityService;
 import de.thm.arsnova.service.FindQueryService;
+import de.thm.arsnova.service.SecuredService;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 
 /**
@@ -85,6 +86,9 @@ public abstract class AbstractEntityController<E extends Entity> {
 	protected FindQueryService<E> findQueryService;
 
 	protected AbstractEntityController(final EntityService<E> entityService) {
+		if (!(entityService instanceof SecuredService)) {
+			throw new SecurityException("Only EntityServices implementing SecuredService are accepted.");
+		}
 		this.entityService = entityService;
 	}
 

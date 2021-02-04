@@ -25,13 +25,15 @@ import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.EntityService;
+import de.thm.arsnova.service.SecuredService;
 import de.thm.arsnova.test.context.support.WithMockUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
@@ -60,7 +62,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
 		TestSecurityConfig.class})
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "JsonViewControllerAdviceTest"})
 public class JsonViewControllerAdviceTest {
 	private static final Logger logger = LoggerFactory.getLogger(JsonViewControllerAdviceTest.class);
 
@@ -69,11 +71,11 @@ public class JsonViewControllerAdviceTest {
 
 	private MockMvc mockMvc;
 
-	@InjectMocks
-	private DummyEntityController dummyEntityController;
+	@MockBean(extraInterfaces = SecuredService.class)
+	private DummyEntityService dummyEntityService;
 
 	@Autowired
-	private EntityService<DummyEntity> dummyEntityService;
+	private DummyEntityController dummyEntityController;
 
 	@BeforeEach
 	public void setup() {
@@ -95,6 +97,7 @@ public class JsonViewControllerAdviceTest {
 	public void testShouldSerializeAdminViewForAdmin() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
 				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
 				.andExpect(status().isOk());
 	}
@@ -104,6 +107,7 @@ public class JsonViewControllerAdviceTest {
 	public void testShouldSerializeOwnerViewForAdmin() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=owner").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
 				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
 				.andExpect(status().isOk());
 	}
@@ -113,6 +117,7 @@ public class JsonViewControllerAdviceTest {
 	public void testAdminViewShouldContainAdminProperties() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
 				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
 				.andExpect(jsonPath("$.adminReadableString").exists())
 				.andExpect(jsonPath("$.ownerReadableString").exists())
@@ -124,6 +129,7 @@ public class JsonViewControllerAdviceTest {
 	public void testOwnerViewShouldContainOwnerProperties() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=owner").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
 				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
 				.andExpect(jsonPath("$.adminReadableString").doesNotExist())
 				.andExpect(jsonPath("$.ownerReadableString").exists())
@@ -135,6 +141,7 @@ public class JsonViewControllerAdviceTest {
 	public void testDefaultViewShouldContainPublicProperties() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
 				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
 				.andExpect(jsonPath("$.adminReadableString").doesNotExist())
 				.andExpect(jsonPath("$.ownerReadableString").doesNotExist())
@@ -143,11 +150,12 @@ public class JsonViewControllerAdviceTest {
 
 	@RestController
 	@RequestMapping(DummyEntityController.REQUEST_MAPPING)
+	@Profile("JsonViewControllerAdviceTest")
 	static class DummyEntityController extends AbstractEntityController<DummyEntity> {
 		private static final String REQUEST_MAPPING = "/dummy";
 
-		protected DummyEntityController(final EntityService<DummyEntity> entityService) {
-			super(entityService);
+		protected DummyEntityController(final DummyEntityService dummyEntityService) {
+			super(dummyEntityService);
 		}
 
 		@Override
@@ -156,9 +164,12 @@ public class JsonViewControllerAdviceTest {
 		}
 	}
 
-	public static class DummyEntity extends Entity {
+	static class DummyEntity extends Entity {
 		@JsonView(View.Public.class) public String publicReadableString = "public";
 		@JsonView(View.Owner.class) public String ownerReadableString = "owner";
 		@JsonView(View.Admin.class) public String adminReadableString = "admin";
+	}
+
+	interface DummyEntityService extends EntityService<DummyEntity> {
 	}
 }

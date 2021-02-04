@@ -26,7 +26,7 @@ public class ImportServiceImpl implements ImportService {
 
 	private ContentService contentService;
 
-	private ContentGroupService contentGroupService;
+	private ContentGroupServiceImpl contentGroupService;
 
 	private AnswerService answerService;
 
@@ -40,7 +40,7 @@ public class ImportServiceImpl implements ImportService {
 	public ImportServiceImpl(
 			final RoomService roomService,
 			final ContentService contentService,
-			final ContentGroupService contentGroupService,
+			final ContentGroupServiceImpl contentGroupService,
 			final AnswerService answerService,
 			final UserService userService,
 			final FromV2Migrator fromV2Migrator

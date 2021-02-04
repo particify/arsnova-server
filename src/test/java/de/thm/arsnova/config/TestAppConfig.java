@@ -22,9 +22,6 @@ import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
-import de.thm.arsnova.controller.JsonViewControllerAdviceTest;
-import de.thm.arsnova.service.EntityService;
-import org.mockito.Mockito;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -98,7 +95,7 @@ public class TestAppConfig {
 		return configurer;
 	}
 
-	@Bean
+	@Bean("userServiceImpl")
 	@Primary
 	public StubUserService stubUserService(
 			final UserRepository repository,
@@ -111,11 +108,6 @@ public class TestAppConfig {
 			final Validator validator) {
 		return new StubUserService(repository, systemProperties, securityProperties, authenticationProviderProperties,
 				mailSender, jackson2HttpMessageConverter, validator);
-	}
-
-	@Bean
-	public EntityService<JsonViewControllerAdviceTest.DummyEntity> dummyEntityService() {
-		return Mockito.mock(EntityService.class);
 	}
 
 	@Bean

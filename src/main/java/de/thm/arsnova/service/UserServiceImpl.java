@@ -42,13 +42,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -84,6 +83,7 @@ import de.thm.arsnova.web.exceptions.NotFoundException;
  * Performs all user related operations.
  */
 @Service
+@Primary
 public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> implements UserService {
 
 	private static final int LOGIN_TRY_RESET_DELAY_MS = 30 * 1000;
@@ -243,18 +243,15 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 				new SecurityProperties.AdminAccount(loginId, authProvider));
 	}
 
-	@Override
-	public boolean isBannedFromLogin(final String addr) {
+	private boolean isBannedFromLogin(final String addr) {
 		return loginBans.contains(addr);
 	}
 
-	@Override
-	public boolean isBannedFromSendingActivationMail(final String addr) {
+	private boolean isBannedFromSendingActivationMail(final String addr) {
 		return resendMailBans.contains(addr);
 	}
 
-	@Override
-	public void increaseFailedLoginCount(final String addr) {
+	private void increaseFailedLoginCount(final String addr) {
 		Byte tries = loginTries.get(addr);
 		if (null == tries) {
 			tries = 0;
@@ -268,8 +265,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		}
 	}
 
-	@Override
-	public void increaseSentMailCount(final String addr) {
+	private void increaseSentMailCount(final String addr) {
 		Byte tries = resentMailCount.get(addr);
 		if (null == tries) {
 			tries = 0;
@@ -473,7 +469,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#userProfile, 'update')")
 	public void addRoomToHistory(final UserProfile userProfile, final Room room) {
 		if (userProfile.getId().equals(room.getOwnerId())) {
 			return;
@@ -493,7 +488,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#userProfile, 'update')")
 	public void deleteRoomFromHistory(final UserProfile userProfile, final Room room) {
 		final Set<UserProfile.RoomHistoryEntry> roomHistory = userProfile.getRoomHistory();
 
@@ -512,7 +506,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	@Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
 	public UserProfile resetActivation(final String id, final String clientAddress) {
 		if (isBannedFromSendingActivationMail(clientAddress)) {
 			return null;
@@ -530,7 +523,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	@Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
 	public boolean activateAccount(final String id, final String key, final String clientAddress) {
 		if (isBannedFromLogin(clientAddress)) {
 			return false;
@@ -562,7 +554,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	@Secured("ROLE_ADMIN")
 	public void activateAccount(final String id) {
 		final UserProfile userProfile = get(id, true);
 		userProfile.getAccount().setActivationKey(null);
@@ -571,7 +562,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	@Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
 	public void initiatePasswordReset(final UserProfile userProfile) {
 		if (null == userProfile) {
 			logger.info("Password reset failed. User does not exist.");
@@ -610,7 +600,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	@Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
 	public boolean resetPassword(final UserProfile userProfile, final String key, final String password) {
 		final UserProfile.Account account = userProfile.getAccount();
 		if (null == key || "".equals(key) || !key.equals(account.getPasswordResetKey())) {

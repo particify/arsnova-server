@@ -34,8 +34,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.event.EventListener;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
@@ -84,7 +82,6 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#id, #this.this.getTypeName(), 'read')")
 	public T get(final String id) {
 		return get(id, false);
 	}
@@ -103,7 +100,6 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
-	@PreFilter(value = "hasPermission(filterObject, #this.this.getTypeName(), 'read')", filterTarget = "ids")
 	public List<T> get(final Iterable<String> ids) {
 		final List<T> entities = repository.findAllById(ids);
 		entities.forEach(this::modifyRetrieved);
@@ -112,7 +108,6 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#entity, 'create')")
 	public T create(final T entity) {
 		if (entity.getId() != null || entity.getRevision() != null) {
 			throw new IllegalArgumentException("Entity is not new.");
@@ -153,7 +148,6 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#oldEntity, 'update')")
 	public T update(final T oldEntity, final T newEntity) {
 		newEntity.setId(oldEntity.getId());
 		newEntity.setUpdateTimestamp(new Date());
@@ -204,7 +198,6 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#entity, 'update')")
 	public T patch(final T entity, final Map<String, Object> changes,
 			final Function<T, ? extends Object> propertyGetter, final Class<?> view) throws IOException {
 		final T oldEntity = cloneEntity(entity);
@@ -241,7 +234,6 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
-	@PreFilter(value = "hasPermission(filterObject, 'update')", filterTarget = "entities")
 	public List<T> patch(final Iterable<T> entities, final Map<String, Object> changes,
 			final Function<T, ? extends Object> propertyGetter, final Class<?> view) throws IOException {
 		final JsonNode tree = objectMapperForPatchTree.valueToTree(changes);
@@ -280,7 +272,6 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#entity, 'delete')")
 	public void delete(final T entity) {
 		prepareDelete(entity);
 		eventPublisher.publishEvent(new BeforeDeletionEvent<>(this, entity));
@@ -289,7 +280,6 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
-	@PreFilter(value = "hasPermission(filterObject, 'delete')", filterTarget = "entities")
 	public void delete(final Iterable<T> entities) {
 		for (final T entity : entities) {
 			prepareDelete(entity);

@@ -42,7 +42,6 @@ public class CasUserDetailsService extends AbstractCasAssertionUserDetailsServic
 			ROLE_CAS_USER
 	);
 
-	@Autowired
 	private UserService userService;
 
 	@Override
@@ -55,5 +54,10 @@ public class CasUserDetailsService extends AbstractCasAssertionUserDetailsServic
 
 		return userService.loadUser(UserProfile.AuthProvider.CAS, assertion.getPrincipal().getName(),
 				grantedAuthorities, true);
+	}
+
+	@Autowired
+	public void setUserService(final UserService userService) {
+		this.userService = userService;
 	}
 }
