@@ -22,7 +22,6 @@ import java.io.Serializable;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -36,10 +35,10 @@ import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Motd;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.persistence.AnswerRepository;
-import de.thm.arsnova.persistence.ContentGroupRepository;
-import de.thm.arsnova.persistence.ContentRepository;
-import de.thm.arsnova.persistence.RoomRepository;
+import de.thm.arsnova.service.AnswerService;
+import de.thm.arsnova.service.ContentGroupService;
+import de.thm.arsnova.service.ContentService;
+import de.thm.arsnova.service.RoomService;
 
 /**
  * Provides access control methods that can be used in annotations.
@@ -52,19 +51,25 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	public static final String UPDATE_PERMISSION = "update";
 	public static final String DELETE_PERMISSION = "delete";
 	public static final String OWNER_PERMISSION = "owner";
+
 	private static final Logger logger = LoggerFactory.getLogger(ApplicationPermissionEvaluator.class);
 
-	@Autowired
-	private RoomRepository roomRepository;
+	private final RoomService roomService;
+	private final ContentService contentService;
+	private final ContentGroupService contentGroupService;
+	private final AnswerService answerService;
 
-	@Autowired
-	private ContentRepository contentRepository;
-
-	@Autowired
-	ContentGroupRepository contentGroupRepository;
-
-	@Autowired
-	private AnswerRepository answerRepository;
+	public ApplicationPermissionEvaluator(
+			final RoomService roomService,
+			final ContentService contentService,
+			final ContentGroupService contentGroupService,
+			final AnswerService answerService
+	) {
+		this.roomService = roomService;
+		this.contentService = contentService;
+		this.contentGroupService = contentGroupService;
+		this.answerService = answerService;
+	}
 
 	@Override
 	public boolean hasPermission(
@@ -119,17 +124,17 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 					return isAccountManagementAccess(authentication)
 							|| hasUserProfilePermission(userId, targetUserProfile, permission.toString());
 				case "room":
-					final Room targetRoom = roomRepository.findOne(targetId.toString());
+					final Room targetRoom = roomService.get(targetId.toString());
 					return targetRoom != null && hasRoomPermission(userId, targetRoom, permission.toString());
 				case "content":
-					final Content targetContent = contentRepository.findOne(targetId.toString());
+					final Content targetContent = contentService.get(targetId.toString());
 					return targetContent != null && hasContentPermission(userId, targetContent, permission.toString());
 				case "contentgroup":
-					final ContentGroup targetContentGroup = contentGroupRepository.findOne(targetId.toString());
+					final ContentGroup targetContentGroup = contentGroupService.get(targetId.toString());
 					return targetContentGroup != null
 							&& hasContentGroupPermission(userId, targetContentGroup, permission.toString());
 				case "answer":
-					final Answer targetAnswer = answerRepository.findOne(targetId.toString());
+					final Answer targetAnswer = answerService.get(targetId.toString());
 					return targetAnswer != null && hasAnswerPermission(userId, targetAnswer, permission.toString());
 				default:
 					return false;
@@ -188,7 +193,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String userId,
 			final Content targetContent,
 			final String permission) {
-		final Room room = roomRepository.findOne(targetContent.getRoomId());
+		final Room room = roomService.get(targetContent.getRoomId());
 		if (room == null) {
 			return false;
 		}
@@ -215,7 +220,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String userId,
 			final ContentGroup targetContentGroup,
 			final String permission) {
-		final Room room = roomRepository.findOne(targetContentGroup.getRoomId());
+		final Room room = roomService.get(targetContentGroup.getRoomId());
 		if (room == null) {
 			return false;
 		}
@@ -237,7 +242,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String userId,
 			final Answer targetAnswer,
 			final String permission) {
-		final Content content = contentRepository.findOne(targetAnswer.getContentId());
+		final Content content = contentService.get(targetAnswer.getContentId());
 		if (!hasContentPermission(userId, content, "read")) {
 			return false;
 		}
@@ -247,7 +252,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				if (content.getState().isResponsesVisible() || userId.equals(targetAnswer.getCreatorId())) {
 					return true;
 				}
-				room = roomRepository.findOne(targetAnswer.getRoomId());
+				room = roomService.get(targetAnswer.getRoomId());
 				return room != null && hasUserIdRoomModeratingPermission(room, userId);
 			case CREATE_PERMISSION:
 				return content.getState().isResponsesEnabled();
@@ -257,7 +262,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				/* TODO */
 				return false;
 			case DELETE_PERMISSION:
-				room = roomRepository.findOne(targetAnswer.getRoomId());
+				room = roomService.get(targetAnswer.getRoomId());
 				return room != null && hasUserIdRoomModeratingPermission(room, userId);
 			default:
 				return false;
@@ -276,7 +281,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				if (userId.isEmpty() || targetMotd.getRoomId() == null || targetMotd.getAudience() != Motd.Audience.ROOM) {
 					return false;
 				}
-				room = roomRepository.findOne(targetMotd.getRoomId());
+				room = roomService.get(targetMotd.getRoomId());
 				if (room == null) {
 					return false;
 				}
@@ -287,7 +292,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				if (targetMotd.getAudience() != Motd.Audience.ROOM) {
 					return true;
 				}
-				room = roomRepository.findOne(targetMotd.getRoomId());
+				room = roomService.get(targetMotd.getRoomId());
 
 				return room != null && (!room.isClosed() || hasUserIdRoomModeratingPermission(room, userId));
 			default:
