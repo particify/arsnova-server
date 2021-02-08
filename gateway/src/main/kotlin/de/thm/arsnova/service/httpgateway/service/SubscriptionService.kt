@@ -50,18 +50,18 @@ class SubscriptionService(
         }
     }
 
-    fun getRoomFeatures(roomId: String): Mono<RoomFeatures> {
+    fun getRoomFeatures(roomId: String, withTierId: Boolean): Mono<RoomFeatures> {
         return if (httpGatewayProperties.httpClient.subscriptionService != null) {
-            val url = "${httpGatewayProperties.httpClient.subscriptionService}/feature/by-room?ids=${roomId}"
+            val url = "${httpGatewayProperties.httpClient.subscriptionService}/feature/by-room?ids=${roomId}&withTierId=${withTierId}"
             logger.trace("Querying subscription service for features by room with url: {}", url)
             webClient.get().uri(url)
                     .retrieve().bodyToFlux(RoomFeatures::class.java).next()
                     .onErrorResume { error ->
                         logger.warn("Error from querying subscription service: {}", error)
-                        Mono.just(RoomFeatures(roomId, emptyList()))
+                        Mono.just(RoomFeatures(roomId, emptyList(), null))
                     }
         } else {
-            Mono.just(RoomFeatures(roomId, emptyList()))
+            Mono.just(RoomFeatures(roomId, emptyList(), null))
         }
     }
 }
