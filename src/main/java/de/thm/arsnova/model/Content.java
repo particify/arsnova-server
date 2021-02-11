@@ -51,7 +51,8 @@ public class Content extends Entity {
 		TEXT,
 		GRID,
 		SLIDE,
-		SORT
+		SORT,
+		FLASHCARD
 	}
 
 	public static class State {
@@ -245,7 +246,7 @@ public class Content extends Entity {
 	public void setFormat(final Format format) {
 		this.format = format;
 		this.bodyRenderingOptions.setMarkdownFeatureset(
-				format == Format.SLIDE
+				format == Format.SLIDE || format == Format.FLASHCARD
 				? TextRenderingOptions.MarkdownFeatureset.EXTENDED
 				: TextRenderingOptions.MarkdownFeatureset.SIMPLE);
 	}
@@ -289,7 +290,7 @@ public class Content extends Entity {
 		this.timestamp = timestamp;
 	}
 
-	@JsonView({View.Persistence.class, View.Extended.class})
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getAdditionalText() {
 		return additionalText;
 	}

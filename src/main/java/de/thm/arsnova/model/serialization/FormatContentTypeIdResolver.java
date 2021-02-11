@@ -62,6 +62,8 @@ public class FormatContentTypeIdResolver extends TypeIdResolverBase {
 				return TypeFactory.defaultInstance().constructType(Content.class);
 			case SLIDE:
 				return TypeFactory.defaultInstance().constructType(Content.class);
+			case FLASHCARD:
+				return TypeFactory.defaultInstance().constructType(Content.class);
 			case GRID:
 				return TypeFactory.defaultInstance().constructType(GridImageContent.class);
 			default:
