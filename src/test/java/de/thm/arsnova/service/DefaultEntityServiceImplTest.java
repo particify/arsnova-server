@@ -18,8 +18,7 @@
 
 package de.thm.arsnova.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.any;
@@ -33,9 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.validation.ValidationException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
@@ -44,9 +42,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.validation.Validator;
 
 import de.thm.arsnova.config.AppConfig;
@@ -60,10 +56,7 @@ import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.test.context.support.WithMockUser;
 
-
-@RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration(classes = {
+@SpringJUnitWebConfig({
 		AppConfig.class,
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
@@ -91,7 +84,7 @@ public class DefaultEntityServiceImplTest {
 	@Autowired
 	private EventListenerConfig eventListenerConfig;
 
-	@Before
+	@BeforeEach
 	public void prepare() {
 		eventListenerConfig.resetEvents();
 	}
@@ -232,15 +225,15 @@ public class DefaultEntityServiceImplTest {
 		when(roomRepository.findById(any(String.class))).thenReturn(Optional.of(room2));
 		when(roomRepository.findOne(any(String.class))).thenReturn(room2);
 		assertSame(room1, entityService.get(room1.getId()));
-		assertSame("Cache should not be used if internal == true.", room2, entityService.get(room1.getId(), true));
+		assertSame(room2, entityService.get(room1.getId(), true), "Cache should not be used if internal == true.");
 
 		entityService.delete(room1);
 		/* room1 should no longer be cached for room1.id */
-		assertSame("Entity should not be cached.", null, cacheManager.getCache("entity").get("room-" + room1.getId()));
+		assertSame(null, cacheManager.getCache("entity").get("room-" + room1.getId()), "Entity should not be cached.");
 		assertSame(room2, entityService.get(room1.getId()));
 	}
 
-	@Test(expected = ValidationException.class)
+	@Test
 	@WithMockUser("TestUser")
 	public void testValidation() {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
@@ -254,7 +247,7 @@ public class DefaultEntityServiceImplTest {
 		room1.setOwnerId("TestUser");
 		room1.setName("");
 
-		entityService.create(room1);
+		assertThrows(ValidationException.class, () -> entityService.create(room1));
 	}
 
 	private void prefillRoomFields(final Room room) {

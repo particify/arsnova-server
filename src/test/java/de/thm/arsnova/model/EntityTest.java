@@ -18,14 +18,13 @@
 
 package de.thm.arsnova.model;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Date;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.style.ToStringCreator;
 
 /**
