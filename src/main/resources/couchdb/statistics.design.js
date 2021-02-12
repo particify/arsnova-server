@@ -42,9 +42,6 @@ var designDoc = {
 						case "Answer":
 							emit([doc.payload.type, "deleted"], doc.payload.answerCount || 1);
 							break;
-						case "Comment":
-							emit([doc.payload.type, "deleted"], doc.payload.commentCount || 1);
-							break;
 						}
 					}
 					break;

@@ -27,12 +27,9 @@ import org.springframework.context.annotation.Profile;
 import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
 import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.persistence.AnswerRepository;
-import de.thm.arsnova.persistence.AttachmentRepository;
-import de.thm.arsnova.persistence.CommentRepository;
 import de.thm.arsnova.persistence.ContentGroupRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
-import de.thm.arsnova.persistence.MotdRepository;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.persistence.StatisticsRepository;
 import de.thm.arsnova.persistence.UserRepository;
@@ -57,11 +54,6 @@ public class TestPersistanceConfig {
 	}
 
 	@Bean
-	public CommentRepository commentRepository() {
-		return Mockito.mock(CommentRepository.class);
-	}
-
-	@Bean
 	public ContentRepository contentRepository() {
 		return Mockito.mock(ContentRepository.class);
 	}
@@ -74,16 +66,6 @@ public class TestPersistanceConfig {
 	@Bean
 	public AnswerRepository answerRepository() {
 		return Mockito.mock(AnswerRepository.class);
-	}
-
-	@Bean
-	public AttachmentRepository attachmentRepository() {
-		return Mockito.mock(AttachmentRepository.class);
-	}
-
-	@Bean
-	public MotdRepository motdRepository() {
-		return Mockito.mock(MotdRepository.class);
 	}
 
 	@Bean

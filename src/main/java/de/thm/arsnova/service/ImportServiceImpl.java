@@ -30,8 +30,6 @@ public class ImportServiceImpl implements ImportService {
 
 	private AnswerService answerService;
 
-	private MotdService motdService;
-
 	private UserService userService;
 
 	private FromV2Migrator fromV2Migrator;
@@ -44,7 +42,6 @@ public class ImportServiceImpl implements ImportService {
 			final ContentService contentService,
 			final ContentGroupService contentGroupService,
 			final AnswerService answerService,
-			final MotdService motdService,
 			final UserService userService,
 			final FromV2Migrator fromV2Migrator
 	) {
@@ -52,7 +49,6 @@ public class ImportServiceImpl implements ImportService {
 		this.contentService = contentService;
 		this.contentGroupService = contentGroupService;
 		this.answerService = answerService;
-		this.motdService = motdService;
 		this.userService = userService;
 		this.fromV2Migrator = fromV2Migrator;
 	}

@@ -42,7 +42,6 @@ import de.thm.arsnova.event.BeforeFullUpdateEvent;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.persistence.AnswerRepository;
-import de.thm.arsnova.persistence.CommentRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
@@ -69,8 +68,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	private AnswerRepository answerRepository;
 
-	private CommentRepository commentRepository;
-
 	private UserService userService;
 
 	private ConnectorClient connectorClient;
@@ -96,11 +93,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		this.dbLogger = dbLogger;
 		this.userService = userService;
 		this.jwtService = jwtService;
-	}
-
-	@Autowired
-	public void setCommentRepository(final CommentRepository commentRepository) {
-		this.commentRepository = commentRepository;
 	}
 
 	@Autowired
