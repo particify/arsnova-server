@@ -208,24 +208,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Configuration
-	@Order(1)
-	@Profile("!test")
-	public class StatefulHttpSecurityConfig extends HttpSecurityConfig {
-		public StatefulHttpSecurityConfig(
-				@Qualifier("restAuthenticationEntryPoint") final AuthenticationEntryPoint authenticationEntryPoint,
-				final AccessDeniedHandler accessDeniedHandler) {
-			super(authenticationEntryPoint, accessDeniedHandler);
-		}
-
-		@Override
-		protected void configure(final HttpSecurity http) throws Exception {
-			super.configure(http);
-			http.requestMatchers().antMatchers(AUTH_CALLBACK_PATH + "/**", "/v2/**");
-			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
-		}
-	}
-
-	@Configuration
 	@Order(Ordered.HIGHEST_PRECEDENCE)
 	@Profile("!test")
 	public class ManagementHttpSecurityConfig extends HttpSecurityConfig {

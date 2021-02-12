@@ -19,8 +19,6 @@
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 
 import de.thm.arsnova.model.serialization.View;
@@ -28,7 +26,6 @@ import de.thm.arsnova.model.serialization.View;
 /**
  * Represents an Answer (Possible Answer) of Content.
  */
-@ApiModel(value = "AnswerOption", description = "Answer Option (Possible Answer) entity")
 public class AnswerOption implements Serializable {
 
 	private String id;
@@ -36,7 +33,6 @@ public class AnswerOption implements Serializable {
 	private boolean correct;
 	private int value;
 
-	@ApiModelProperty(required = true, value = "the ID")
 	public String getId() {
 		return this.id;
 	}
@@ -45,7 +41,6 @@ public class AnswerOption implements Serializable {
 		this.id = id;
 	}
 
-	@ApiModelProperty(required = true, value = "the text")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getText() {
 		return text;
@@ -56,7 +51,6 @@ public class AnswerOption implements Serializable {
 		this.text = text;
 	}
 
-	@ApiModelProperty(required = true, value = "true for a correct answer")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isCorrect() {
 		return correct;
@@ -67,7 +61,6 @@ public class AnswerOption implements Serializable {
 		this.correct = correct;
 	}
 
-	@ApiModelProperty(required = true, value = "the value")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getValue() {
 		return value;

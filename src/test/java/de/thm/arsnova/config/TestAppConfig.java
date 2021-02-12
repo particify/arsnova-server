@@ -56,8 +56,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.service.StubUserService;
-import de.thm.arsnova.websocket.ArsnovaSocketioServer;
-import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 
 @ComponentScan({
 		"de.thm.arsnova.aop",
@@ -98,16 +96,6 @@ public class TestAppConfig {
 		configurer.addScope("session", new SimpleThreadScope());
 
 		return configurer;
-	}
-
-	@Bean(name = "socketServer", initMethod = "startServer", destroyMethod = "stopServer")
-	public ArsnovaSocketioServer socketTestServer() {
-		final int testSocketPort = 1234 + testPortOffset++ % 10;
-		final ArsnovaSocketioServerImpl socketServer = new ArsnovaSocketioServerImpl();
-		socketServer.setHostIp(systemProperties.getSocketio().getBindAddress());
-		socketServer.setPortNumber(systemProperties.getSocketio().getPort() + testSocketPort);
-
-		return socketServer;
 	}
 
 	@Bean

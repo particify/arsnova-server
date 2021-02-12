@@ -18,13 +18,10 @@
 
 package de.thm.arsnova.service;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
@@ -32,9 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.annotation.Secured;
@@ -44,10 +39,8 @@ import org.springframework.validation.Validator;
 
 import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.event.BeforeFullUpdateEvent;
-import de.thm.arsnova.event.FlipFlashcardsEvent;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.transport.ImportExportContainer;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.CommentRepository;
 import de.thm.arsnova.persistence.ContentRepository;
@@ -58,7 +51,6 @@ import de.thm.arsnova.security.jwt.JwtService;
 import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import net.particify.arsnova.connector.client.ConnectorClient;
-import net.particify.arsnova.connector.model.Course;
 
 /**
  * Performs all room related operations.
@@ -80,8 +72,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	private CommentRepository commentRepository;
 
 	private UserService userService;
-
-	private FeedbackService feedbackService;
 
 	private ConnectorClient connectorClient;
 
@@ -121,11 +111,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Autowired
 	public void setAnswerRepository(final AnswerRepository answerRepository) {
 		this.answerRepository = answerRepository;
-	}
-
-	@Autowired
-	public void setFeedbackService(final FeedbackService feedbackService) {
-		this.feedbackService = feedbackService;
 	}
 
 	public static class RoomNameComparator implements Comparator<Room>, Serializable {
@@ -168,35 +153,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	public Room join(final String id, final UUID socketId) {
-		final Room room = null != id ? get(id) : null;
-		if (null == room) {
-			userService.removeUserFromRoomBySocketId(socketId);
-			return null;
-		}
-
-		/* FIXME: migrate LMS course support
-		if (connectorClient != null && room.isCourseSession()) {
-			final String courseid = room.getCourseId();
-			if (!connectorClient.getMembership(user.getUsername(), courseid).isMember()) {
-				throw new ForbiddenException("User is no course member.");
-			}
-		}
-		*/
-
-		userService.addUserToRoomBySocketId(socketId, id);
-		userService.addRoomToHistory(userService.getCurrentUserProfile(), room);
-
-		return room;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public Room getByShortId(final String shortId) {
-		return get(getIdByShortId(shortId));
-	}
-
-	@Override
 	@Cacheable("room.id-by-shortid")
 	public String getIdByShortId(final String shortId) {
 		if (shortId == null) {
@@ -234,13 +190,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	/* TODO: Updated SpEL expression has not been tested yet */
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#userId, 'userprofile', 'owner')")
-	public List<Room> getUserRooms(final String userId) {
-		return roomRepository.findByOwnerId(userId, 0, 0);
-	}
-
-	/* TODO: Updated SpEL expression has not been tested yet */
-	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#userId, 'userprofile', 'owner')")
 	public List<String> getUserRoomIds(final String userId) {
 		return roomRepository.findIdsByOwnerId(userId);
 	}
@@ -252,38 +201,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<Room> getMyRooms(final int offset, final int limit) {
-		return roomRepository.findByOwnerId(userService.getCurrentUser().getId(), offset, limit);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<Room> getPublicPoolRoomsInfo() {
-		return roomRepository.findInfosForPublicPool();
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<Room> getMyPublicPoolRoomsInfo() {
-		return roomRepository.findInfosForPublicPoolByOwnerId(userService.getCurrentUser().getId());
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<Room> getMyRoomsInfo(final int offset, final int limit) {
-		final User user = userService.getCurrentUser();
-		return roomRepository.getRoomsWithStatsForOwnerId(user.getId(), offset, limit);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<Room> getMyRoomHistory(final int offset, final int limit) {
-		/* TODO: implement pagination */
-		return getUserRoomHistory(userService.getCurrentUser().getId());
-	}
-
-	@Override
 	@PreAuthorize("hasPermission(#userId, 'userprofile', 'read')")
 	public List<Room> getUserRoomHistory(final String userId) {
 		final UserProfile profile = userService.get(userId);
@@ -291,15 +208,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 				.map(entry -> entry.getRoomId()).collect(Collectors.toList());
 		final List<Room> rooms = new ArrayList<>();
 		roomRepository.findAllById(roomIds).forEach(rooms::add);
-
-		return rooms;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<Room> getMyRoomHistoryInfo(final int offset, final int limit) {
-		final List<Room> rooms = getMyRoomHistory(0, 0);
-		roomRepository.getRoomHistoryWithStatsForUser(rooms, userService.getCurrentUser().getId());
 
 		return rooms;
 	}
@@ -355,29 +263,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	public int countRoomsByCourses(final List<Course> courses) {
-		final List<Room> rooms = roomRepository.findRoomsByCourses(courses);
-		if (rooms == null) {
-			return 0;
-		}
-		return rooms.size();
-	}
-
-	@Override
-	public int activeUsers(final String id) {
-		return userService.getUsersByRoomId(id).size();
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public Room setActive(final String id, final Boolean lock) throws IOException {
-		final Room room = get(id);
-		patch(room, Collections.singletonMap("closed", lock));
-
-		return room;
-	}
-
-	@Override
 	/* TODO: move caching to DefaultEntityServiceImpl */
 	//@CachePut(value = "rooms", key = "#room")
 	protected void prepareUpdate(final Room room) {
@@ -390,13 +275,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		/* TODO: only publish event when feedback has changed */
 		/* FIXME: event */
 		// this.publisher.publishEvent(new FeatureChangeEvent(this, room));
-	}
-
-	@Override
-	@PreAuthorize("hasPermission('', 'motd', 'admin')")
-	@Caching(evict = { @CacheEvict("rooms"), @CacheEvict(cacheNames = "rooms", key = "#id") })
-	public Room updateCreator(final String id, final String newCreator) {
-		throw new UnsupportedOperationException("No longer implemented.");
 	}
 
 	@Override
@@ -419,72 +297,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		final User user = jwtService.verifyToken(targetUserToken);
 		room.setOwnerId(user.getId());
 		return update(room);
-	}
-
-	@Override
-	@PreAuthorize("hasPermission('', 'room', 'create')")
-	public Room importRooms(final ImportExportContainer importRoom) {
-		final User user = userService.getCurrentUser();
-		final Room info = roomRepository.importRoom(user.getId(), importRoom);
-		if (info == null) {
-			throw new NullPointerException("Could not import room.");
-		}
-		return info;
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public ImportExportContainer exportRoom(
-			final String id, final Boolean withAnswerStatistics, final Boolean withFeedbackQuestions) {
-		return roomRepository.exportRoom(id, withAnswerStatistics, withFeedbackQuestions);
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public Room copyRoomToPublicPool(final String id, final ImportExportContainer.PublicPool pp) {
-		final ImportExportContainer temp = roomRepository.exportRoom(id, false, false);
-		temp.getSession().setPublicPool(pp);
-		temp.getSession().setSessionType("public_pool");
-		final User user = userService.getCurrentUser();
-		return roomRepository.importRoom(user.getId(), temp);
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#id, 'room', 'read')")
-	public Room.Settings getFeatures(final String id) {
-		return get(id).getSettings();
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public Room.Settings updateFeatures(final String id, final Room.Settings settings) {
-		final Room room = get(id);
-		room.setSettings(settings);
-
-		update(room);
-
-		return room.getSettings();
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public boolean lockFeedbackInput(final String id, final Boolean lock) throws IOException {
-		final Room room = get(id);
-		if (!lock) {
-			feedbackService.cleanFeedbackVotesByRoomId(id, 0);
-		}
-		patch(room, Collections.singletonMap("feedbackLocked", lock), Room::getSettings);
-
-		return room.getSettings().isFeedbackLocked();
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public boolean flipFlashcards(final String id, final Boolean flip) {
-		final Room room = get(id);
-		this.eventPublisher.publishEvent(new FlipFlashcardsEvent(this, room.getId()));
-
-		return flip;
 	}
 
 	private void handleLogo(final Room room) {

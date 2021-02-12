@@ -21,7 +21,6 @@ package de.thm.arsnova.persistence.couchdb;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -66,11 +65,6 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 	@Override
 	public Iterable<Answer> findStubsByContentId(final String contentId) {
 		return createEntityStubs(db.queryView(createQuery("by_contentid").reduce(false).key(contentId)));
-	}
-
-	@Override
-	public Iterable<Answer> findStubsByContentIds(final Collection<String> contentIds) {
-		return createEntityStubs(db.queryView(createQuery("by_contentid").reduce(false).keys(contentIds)));
 	}
 
 	@Override
@@ -152,69 +146,5 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 		stats.setRoundStatistics(roundStatisticsList);
 
 		return stats;
-	}
-
-	@Override
-	public int countByContentId(final String contentId) {
-		final ViewResult result = db.queryView(createQuery("by_contentid_round_body_subject")
-				.reduce(true)
-				.startKey(ComplexKey.of(contentId))
-				.endKey(ComplexKey.of(contentId, ComplexKey.emptyObject())));
-
-		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
-	}
-
-	@Override
-	public int countByContentIdRound(final String contentId, final int round) {
-		final ViewResult result = db.queryView(createQuery("by_contentid_round_body_subject")
-				.reduce(true)
-				.startKey(ComplexKey.of(contentId, round))
-				.endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())));
-
-		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
-	}
-
-	@Override
-	public int countByContentIds(final Collection<String> contentIds) {
-		final ViewResult result = db.queryView(createQuery("by_contentid")
-				.reduce(true)
-				.group(true)
-				.keys(contentIds));
-
-		return result.isEmpty() ? 0 : result.getRows().stream()
-				.map(ViewResult.Row::getValueAsInt)
-				.reduce(0, (a, b) -> a + b);
-	}
-
-	@Override
-	public <T extends Answer> List<T> findByContentId(
-			final String contentId, final Class<T> type, final int start, final int limit) {
-		final int qSkip = start > 0 ? start : -1;
-		final int qLimit = limit > 0 ? limit : -1;
-
-		final List<T> answers = db.queryView(createQuery("by_contentid_creationtimestamp")
-						.skip(qSkip)
-						.limit(qLimit)
-						.includeDocs(true)
-						.startKey(ComplexKey.of(contentId, ComplexKey.emptyObject()))
-						.endKey(ComplexKey.of(contentId))
-						.descending(true),
-				type);
-
-		return answers;
-	}
-
-	@Override
-	public List<Answer> findByUserIdRoomId(final String userId, final String roomId) {
-		return queryView("by_creatorid_roomid", ComplexKey.of(userId, roomId));
-	}
-
-	@Override
-	public int countByRoomId(final String roomId) {
-		final ViewResult result = db.queryView(createQuery("by_roomid")
-				.key(roomId)
-				.reduce(true));
-
-		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
 	}
 }

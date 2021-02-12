@@ -20,8 +20,6 @@ package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import de.thm.arsnova.model.ScoreOptions;
 import de.thm.arsnova.model.serialization.View;
@@ -29,7 +27,6 @@ import de.thm.arsnova.model.serialization.View;
 /**
  * Represents a Room (Session).
  */
-@ApiModel(value = "Room", description = "Room (Session) entity")
 public class Room implements Entity {
 	private String id;
 	private String rev;
@@ -78,7 +75,6 @@ public class Room implements Entity {
 		this.rev = rev;
 	}
 
-	@ApiModelProperty(required = true, value = "the name")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getName() {
 		return name;
@@ -89,7 +85,6 @@ public class Room implements Entity {
 		this.name = name;
 	}
 
-	@ApiModelProperty(required = true, value = "the short name")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getShortName() {
 		return shortName;
@@ -100,7 +95,6 @@ public class Room implements Entity {
 		this.shortName = shortName;
 	}
 
-	@ApiModelProperty(required = true, value = "the keyword")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getKeyword() {
 		return keyword;
@@ -111,7 +105,6 @@ public class Room implements Entity {
 		this.keyword = keyword;
 	}
 
-	@ApiModelProperty(required = true, value = "the session creator")
 	@JsonView(View.Persistence.class)
 	public String getCreator() {
 		return creator;
@@ -122,7 +115,6 @@ public class Room implements Entity {
 		this.creator = creator;
 	}
 
-	@ApiModelProperty(required = true, value = "true for active session")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isActive() {
 		return active;
@@ -133,7 +125,6 @@ public class Room implements Entity {
 		this.active = active;
 	}
 
-	@ApiModelProperty(required = true, value = "timestamp from the last activity of the owner")
 	@JsonView(View.Persistence.class)
 	public long getLastOwnerActivity() {
 		return lastOwnerActivity;
@@ -144,11 +135,6 @@ public class Room implements Entity {
 		this.lastOwnerActivity = lastOwnerActivity;
 	}
 
-	public boolean isCreator(final ClientAuthentication user) {
-		return user.getUsername().equals(creator);
-	}
-
-	@ApiModelProperty(required = true, value = "the source the course comes from (example: moodle)")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getCourseType() {
 		return courseType;
@@ -159,7 +145,6 @@ public class Room implements Entity {
 		this.courseType = courseType;
 	}
 
-	@ApiModelProperty(required = true, value = "the course ID")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getCourseId() {
 		return courseId;
@@ -175,7 +160,6 @@ public class Room implements Entity {
 		return getCourseId() != null && !getCourseId().isEmpty();
 	}
 
-	@ApiModelProperty(required = true, value = "creation timestamp")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public long getCreationTime() {
 		return creationTime;
@@ -186,7 +170,6 @@ public class Room implements Entity {
 		this.creationTime = creationTime;
 	}
 
-	@ApiModelProperty(required = true, value = "the score options")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public ScoreOptions getLearningProgressOptions() {
 		return learningProgressOptions;
@@ -197,8 +180,6 @@ public class Room implements Entity {
 		this.learningProgressOptions = learningProgressOptions;
 	}
 
-	@ApiModelProperty(required = true,
-			value = "the enabled features (e.g. feedback, interposed, learning Progress, lecture)")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public RoomFeature getFeatures() {
 		return features;
@@ -209,7 +190,6 @@ public class Room implements Entity {
 		this.features = features;
 	}
 
-	@ApiModelProperty(required = true, value = "the public pool author name")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpAuthorName() {
 		return ppAuthorName;
@@ -220,7 +200,6 @@ public class Room implements Entity {
 		this.ppAuthorName = ppAuthorName;
 	}
 
-	@ApiModelProperty(required = true, value = "the public pool author email")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpAuthorMail() {
 		return ppAuthorMail;
@@ -231,7 +210,6 @@ public class Room implements Entity {
 		this.ppAuthorMail = ppAuthorMail;
 	}
 
-	@ApiModelProperty(required = true, value = "the public pool university")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpUniversity() {
 		return ppUniversity;
@@ -242,7 +220,6 @@ public class Room implements Entity {
 		this.ppUniversity = ppUniversity;
 	}
 
-	@ApiModelProperty(required = true, value = "the public pool logo")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpLogo() {
 		return ppLogo;
@@ -253,7 +230,6 @@ public class Room implements Entity {
 		this.ppLogo = ppLogo;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display subject")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpSubject() {
 		return ppSubject;
@@ -264,7 +240,6 @@ public class Room implements Entity {
 		this.ppSubject = ppSubject;
 	}
 
-	@ApiModelProperty(required = true, value = "the public pool license")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpLicense() {
 		return ppLicense;
@@ -275,7 +250,6 @@ public class Room implements Entity {
 		this.ppLicense = ppLicense;
 	}
 
-	@ApiModelProperty(required = true, value = "the public pool description")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpDescription() {
 		return ppDescription;
@@ -286,7 +260,6 @@ public class Room implements Entity {
 		this.ppDescription = ppDescription;
 	}
 
-	@ApiModelProperty(required = true, value = "the public pool faculty")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpFaculty() {
 		return ppFaculty;
@@ -297,7 +270,6 @@ public class Room implements Entity {
 		this.ppFaculty = ppFaculty;
 	}
 
-	@ApiModelProperty(required = true, value = "the public pool level")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpLevel() {
 		return ppLevel;
@@ -308,7 +280,6 @@ public class Room implements Entity {
 		this.ppLevel = ppLevel;
 	}
 
-	@ApiModelProperty(required = true, value = "the session type")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSessionType() {
 		return sessionType;
@@ -319,7 +290,6 @@ public class Room implements Entity {
 		this.sessionType = sessionType;
 	}
 
-	@ApiModelProperty(required = true, value = "the feedback lock status")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean getFeedbackLock() {
 		return feedbackLock;
@@ -330,7 +300,6 @@ public class Room implements Entity {
 		this.feedbackLock = lock;
 	}
 
-	@ApiModelProperty(required = true, value = "the flashcard flip condition")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean getFlipFlashcards() {
 		return flipFlashcards;

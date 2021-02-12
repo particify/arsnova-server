@@ -61,10 +61,6 @@ public class PathBasedContentNegotiationStrategy implements ContentNegotiationSt
 			logger.trace("Negotiating content based on path for management API");
 			mediaTypes.add(AppConfig.ACTUATOR_MEDIA_TYPE);
 			mediaTypes.add(MediaType.TEXT_PLAIN);
-		} else if (servletRequest.getServletPath().startsWith("/v2/")) {
-			logger.trace("Negotiating content based on path for API v2");
-			mediaTypes.add(AppConfig.API_V2_MEDIA_TYPE);
-			mediaTypes.add(MediaType.TEXT_PLAIN);
 		} else {
 			logger.trace("Content negotiation falling back to {}", fallback);
 			if (servletRequest.getHeader(HttpHeaders.ACCEPT) == null

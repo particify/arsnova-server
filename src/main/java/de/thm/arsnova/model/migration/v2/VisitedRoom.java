@@ -20,15 +20,12 @@ package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiModel;
 
 import de.thm.arsnova.model.serialization.View;
 
 /**
  * A Room (Session) a user has visited previously.
  */
-@ApiModel(value = "VisitedRoom",
-		description = "Visited Room (Session) entity - An entry of the Room History for the Logged In entity")
 public class VisitedRoom {
 	@JsonProperty("_id")
 	private String id;

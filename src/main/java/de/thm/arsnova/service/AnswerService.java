@@ -19,16 +19,12 @@
 package de.thm.arsnova.service;
 
 import java.util.List;
-import java.util.Map;
 
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
-import de.thm.arsnova.model.TextAnswer;
 
 public interface AnswerService extends EntityService<Answer> {
 	Answer getMyAnswer(String contentId);
-
-	void getFreetextAnswerAndMarkRead(String answerId, String userId);
 
 	AnswerStatistics getStatistics(String contentId, int piRound);
 
@@ -42,41 +38,11 @@ public interface AnswerService extends EntityService<Answer> {
 
 	List<String> getAnswerIdsByCreatorIdContentIdsRound(String creatorId, List<String> contentIds, int round);
 
-	List<TextAnswer> getTextAnswers(String contentId, int piRound, int offset, int limit);
-
-	List<TextAnswer> getTextAnswers(String contentId, int offset, int limit);
-
-	List<TextAnswer> getAllTextAnswers(String contentId, int offset, int limit);
-
-	int countAnswersByContentIdAndRound(String contentId);
-
-	int countAnswersByContentIdAndRound(String contentId, int piRound);
-
-	List<TextAnswer> getTextAnswersByContentId(String contentId, int offset, int limit);
-
 	Answer getAnswerByContentIdAndUserIdAndCurrentRound(String contentId, String userId);
-
-	List<Answer> getMyAnswersByRoomId(String roomId);
-
-	int countTotalAnswersByRoomId(String roomId);
-
-	int countTotalAnswersByContentId(String contentId);
 
 	void deleteAnswers(String contentId);
 
 	Answer create(Answer answer);
 
 	Answer update(Answer answer);
-
-	Map<String, Object> countAnswersAndAbstentionsInternal(String contentId);
-
-	int countLectureContentAnswers(String roomId);
-
-	int countLectureQuestionAnswersInternal(String roomId);
-
-	int countPreparationContentAnswers(String roomId);
-
-	int countPreparationQuestionAnswersInternal(String roomId);
-
-	int countTotalAbstentionsByContentId(String contentId);
 }

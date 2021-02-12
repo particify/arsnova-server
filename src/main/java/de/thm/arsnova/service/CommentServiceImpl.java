@@ -18,11 +18,8 @@
 
 package de.thm.arsnova.service;
 
-import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -34,11 +31,8 @@ import org.springframework.validation.Validator;
 import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.migration.v2.CommentReadingCount;
 import de.thm.arsnova.persistence.CommentRepository;
 import de.thm.arsnova.security.User;
-import de.thm.arsnova.web.exceptions.ForbiddenException;
-import de.thm.arsnova.web.exceptions.NotFoundException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
 
 /**
@@ -80,38 +74,8 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteByRoomId(final String roomId) {
-		final Room room = roomService.get(roomId);
-		if (room == null) {
-			throw new UnauthorizedException();
-		}
-		final User user = getCurrentUser();
-		if (room.getOwnerId().equals(user.getId())) {
-			delete(commentRepository.findStubsByRoomId(room.getId()));
-		} else {
-			delete(commentRepository.findStubsByRoomIdAndUserId(room.getId(), user.getId()));
-		}
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
 	public int count(final String roomId) {
 		return commentRepository.countByRoomId(roomId);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public CommentReadingCount countRead(final String roomId, final String username) {
-		if (username == null) {
-			return commentRepository.countReadingByRoomId(roomId);
-		} else {
-			final User user = userService.getCurrentUser();
-			if (!user.getUsername().equals(username)) {
-				throw new ForbiddenException();
-			}
-
-			return commentRepository.countReadingByRoomIdAndUserId(roomId, user.getId());
-		}
 	}
 
 	@Override
@@ -124,20 +88,6 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		} else {
 			return commentRepository.findByRoomIdAndUserId(room.getId(), user.getId(), offset, limit);
 		}
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#commentId, 'comment', 'update')")
-	public Comment getAndMarkRead(final String commentId) throws IOException {
-		final Comment comment = get(commentId);
-		if (comment == null) {
-			throw new NotFoundException();
-		}
-		final Map<String, Object> changes = new HashMap<>();
-		changes.put("read", true);
-		patch(comment, changes);
-
-		return comment;
 	}
 
 	private User getCurrentUser() {

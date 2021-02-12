@@ -18,7 +18,6 @@
 
 package de.thm.arsnova.persistence;
 
-import java.util.Collection;
 import java.util.List;
 
 import de.thm.arsnova.model.Answer;
@@ -29,25 +28,11 @@ public interface AnswerRepository extends CrudRepository<Answer, String> {
 
 	AnswerStatistics findByContentIdRound(String contentId, int round, int optionCount);
 
-	int countByContentIdRound(String contentId, int round);
-
-	int countByContentId(String contentId);
-
-	int countByContentIds(Collection<String> contentIds);
-
-	<T extends Answer> List<T> findByContentId(String contentId, Class<T> type, int start, int limit);
-
-	List<Answer> findByUserIdRoomId(String userId, String roomId);
-
 	Iterable<Answer> findStubsByContentId(String contentId);
-
-	Iterable<Answer> findStubsByContentIds(Collection<String> contentId);
 
 	List<String> findIdsByContentId(String contentId);
 
 	List<String> findIdsByCreatorIdRoomId(String creatorId, String roomId);
 
 	List<String> findIdsByCreatorIdContentIdsRound(String creatorId, List<String> contentIds, int round);
-
-	int countByRoomId(String roomId);
 }

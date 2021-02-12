@@ -21,7 +21,6 @@ package de.thm.arsnova.persistence.couchdb;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
@@ -73,14 +72,6 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> findIdsByRoomId(final String roomId) {
-		return collectQuestionIds(db.queryView(createQuery("by_roomid_locked")
-				.startKey(ComplexKey.of(roomId))
-				.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))
-				.reduce(false)));
-	}
-
-	@Override
 	public Iterable<Content> findStubsByIds(final Set<String> ids) {
 		return super.createEntityStubs(db.queryView(createQuery("by_id")
 				.keys(ids)
@@ -100,25 +91,6 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> findUnansweredIdsByRoomIdAndUser(final String roomId, final String userId) {
-		final ViewResult result = db.queryView(createQuery("contentid_by_creatorid_roomid")
-				.designDocId("_design/Answer")
-				.startKey(ComplexKey.of(userId, roomId))
-				.endKey(ComplexKey.of(userId, roomId, ComplexKey.emptyObject())));
-		final List<String> answeredIds = new ArrayList<>();
-		for (final ViewResult.Row row : result.getRows()) {
-			answeredIds.add(row.getId());
-		}
-
-		return collectUnansweredQuestionIds(findIdsByRoomId(roomId), answeredIds);
-	}
-
-	@Override
-	public List<Content> findByRoomIdOnlyFlashcardVariantAndActive(final String roomId) {
-		return findByRoomIdAndVariantAndActive(roomId, "flashcard", true);
-	}
-
-	@Override
 	public List<Content> findByRoomId(final String roomId) {
 		return findByRoomIdAndVariantAndActive(roomId);
 	}
@@ -134,42 +106,5 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 						.startKey(ComplexKey.of(keys))
 						.endKey(ComplexKey.of(endKeys)),
 				Content.class);
-	}
-
-	private List<String> collectUnansweredQuestionIds(
-			final List<String> contentIds,
-			final List<String> answeredContentIds) {
-		final List<String> unanswered = new ArrayList<>();
-		for (final String contentId : contentIds) {
-			if (!answeredContentIds.contains(contentId)) {
-				unanswered.add(contentId);
-			}
-		}
-		return unanswered;
-	}
-
-	private List<String> collectUnansweredQuestionIdsByPiRound(
-			final List<Content> contents,
-			final Map<String, Integer> answeredQuestions) {
-		final List<String> unanswered = new ArrayList<>();
-
-		for (final Content content : contents) {
-			// TODO: Set correct format for slides, which currently aren't implemented
-			if (Content.Format.TEXT != content.getFormat() && (!answeredQuestions.containsKey(content.getId())
-					|| (answeredQuestions.containsKey(content.getId())
-					&& answeredQuestions.get(content.getId()) != content.getState().getRound()))) {
-				unanswered.add(content.getId());
-			}
-		}
-
-		return unanswered;
-	}
-
-	private List<String> collectQuestionIds(final ViewResult viewResult) {
-		final List<String> ids = new ArrayList<>();
-		for (final ViewResult.Row row : viewResult.getRows()) {
-			ids.add(row.getId());
-		}
-		return ids;
 	}
 }

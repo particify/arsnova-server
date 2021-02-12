@@ -10,13 +10,6 @@ var designDoc = {
 			},
 			"reduce": "_count"
 		},
-		"by_courseid": {
-			"map": function (doc) {
-				if (doc.type === "Room" && doc.courseId  && !doc.poolProperties) {
-					emit(doc.courseId, {_rev: doc._rev});
-				}
-			}
-		},
 		"by_shortid": {
 			"map": function (doc) {
 				if (doc.type === "Room") {
@@ -49,17 +42,6 @@ var designDoc = {
 						locked: doc.locked,
 						courseType: doc.courseType,
 						creationTimestamp: doc.creationTimestamp
-					});
-				}
-			}
-		},
-		"partial_by_category_name_for_pool": {
-			"map": function (doc) {
-				if (doc.type === "Room" && doc.poolProperties) {
-					emit([doc.poolProperties.category, doc.name], {
-						name: doc.name,
-						shortId: doc.shortId,
-						poolProperties: doc.poolProperties
 					});
 				}
 			}

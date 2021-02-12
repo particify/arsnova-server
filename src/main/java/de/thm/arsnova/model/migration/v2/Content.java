@@ -19,8 +19,6 @@
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +28,6 @@ import de.thm.arsnova.model.serialization.View;
 /**
  * Represents Content (Skill/Lecturer Question) in a Room.
  */
-@ApiModel(value = "Content", description = "Content (Skill/Lecturer Question) entity")
 public class Content implements Entity {
 	private String id;
 	private String rev;
@@ -93,7 +90,6 @@ public class Content implements Entity {
 	private String hint;
 	private String solution;
 
-	@ApiModelProperty(required = true, value = "the couchDB ID")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getId() {
 		return id;
@@ -114,7 +110,6 @@ public class Content implements Entity {
 		return rev;
 	}
 
-	@ApiModelProperty(required = true, value = "the question type")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getQuestionType() {
 		return questionType;
@@ -125,7 +120,6 @@ public class Content implements Entity {
 		this.questionType = questionType;
 	}
 
-	@ApiModelProperty(required = true, value = "either lecture or preparation")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getQuestionVariant() {
 		return questionVariant;
@@ -136,7 +130,6 @@ public class Content implements Entity {
 		this.questionVariant = questionVariant;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display subject")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getSubject() {
 		return subject;
@@ -147,7 +140,6 @@ public class Content implements Entity {
 		this.subject = subject;
 	}
 
-	@ApiModelProperty(required = true, value = "the text")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getText() {
 		return text;
@@ -158,7 +150,6 @@ public class Content implements Entity {
 		this.text = text;
 	}
 
-	@ApiModelProperty(required = true, value = "true for active question")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final boolean isActive() {
 		return active;
@@ -169,7 +160,6 @@ public class Content implements Entity {
 		this.active = active;
 	}
 
-	@ApiModelProperty(required = true, value = "deprecated - previously used to limitate the audience")
 	public final String getReleasedFor() {
 		return releasedFor;
 	}
@@ -178,7 +168,6 @@ public class Content implements Entity {
 		this.releasedFor = releasedFor;
 	}
 
-	@ApiModelProperty(required = true, value = "list of possible answers")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final List<AnswerOption> getPossibleAnswers() {
 		return possibleAnswers != null ? possibleAnswers : new ArrayList<>();
@@ -189,7 +178,6 @@ public class Content implements Entity {
 		this.possibleAnswers = possibleAnswers;
 	}
 
-	@ApiModelProperty(required = true, value = "if true, no answer is marked correct")
 	public final boolean isNoCorrect() {
 		return noCorrect;
 	}
@@ -198,7 +186,6 @@ public class Content implements Entity {
 		this.noCorrect = noCorrect;
 	}
 
-	@ApiModelProperty(required = true, value = "couchDB ID of the session, the question is assigned to")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getSessionId() {
 		return sessionId;
@@ -209,7 +196,6 @@ public class Content implements Entity {
 		this.sessionId = sessionId;
 	}
 
-	@ApiModelProperty(required = true, value = "couchDB ID of the session, the question is assigned to")
 	public final String getSession() {
 		return sessionId;
 	}
@@ -218,7 +204,6 @@ public class Content implements Entity {
 		sessionId = session;
 	}
 
-	@ApiModelProperty(required = true, value = "the room keyword, the question is assigned to")
 	public final String getSessionKeyword() {
 		return sessionKeyword;
 	}
@@ -228,7 +213,6 @@ public class Content implements Entity {
 		sessionKeyword = keyword;
 	}
 
-	@ApiModelProperty(required = true, value = "creation date timestamp")
 	@JsonView(View.Persistence.class)
 	public final long getTimestamp() {
 		return timestamp;
@@ -239,7 +223,6 @@ public class Content implements Entity {
 		this.timestamp = timestamp;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display number")
 	public final int getNumber() {
 		return number;
 	}
@@ -248,7 +231,6 @@ public class Content implements Entity {
 		this.number = number;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display duration")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final int getDuration() {
 		return duration;
@@ -259,7 +241,6 @@ public class Content implements Entity {
 		this.duration = duration;
 	}
 
-	@ApiModelProperty(required = true, value = "true for image question")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final boolean isImageQuestion() {
 		return imageQuestion;
@@ -270,7 +251,6 @@ public class Content implements Entity {
 		this.imageQuestion = imageQuestion;
 	}
 
-	@ApiModelProperty(required = true, value = "the peer instruction round no.")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getPiRound() {
 		return piRound;
@@ -281,7 +261,6 @@ public class Content implements Entity {
 		this.piRound = piRound;
 	}
 
-	@ApiModelProperty(required = true, value = "the peer instruction round end timestamp")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public long getPiRoundEndTime() {
 		return piRoundEndTime;
@@ -292,7 +271,6 @@ public class Content implements Entity {
 		this.piRoundEndTime = piRoundEndTime;
 	}
 
-	@ApiModelProperty(required = true, value = "the peer instruction round start timestamp")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public long getPiRoundStartTime() {
 		return piRoundStartTime;
@@ -303,7 +281,6 @@ public class Content implements Entity {
 		this.piRoundStartTime = piRoundStartTime;
 	}
 
-	@ApiModelProperty(required = true, value = "true for active peer instruction round")
 	public boolean isPiRoundActive() {
 		return piRoundActive;
 	}
@@ -312,7 +289,6 @@ public class Content implements Entity {
 		this.piRoundActive = piRoundActive;
 	}
 
-	@ApiModelProperty(required = true, value = "true for finished peer instruction round")
 	public boolean isPiRoundFinished() {
 		return piRoundFinished;
 	}
@@ -321,7 +297,6 @@ public class Content implements Entity {
 		this.piRoundFinished = piRoundFinished;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display showStatistic")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isShowStatistic() {
 		return showStatistic;
@@ -332,7 +307,6 @@ public class Content implements Entity {
 		this.showStatistic = showStatistic;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display cvIsColored")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean getCvIsColored() {
 		return cvIsColored;
@@ -343,7 +317,6 @@ public class Content implements Entity {
 		this.cvIsColored = cvIsColored;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display showAnswer")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isShowAnswer() {
 		return showAnswer;
@@ -354,7 +327,6 @@ public class Content implements Entity {
 		this.showAnswer = showAnswer;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display abstention")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isAbstention() {
 		return abstention;
@@ -435,7 +407,6 @@ public class Content implements Entity {
 		this.correctAnswer = correctAnswer;
 	}
 
-	@ApiModelProperty(required = true, value = "the image")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getImage() {
 		return image;
@@ -446,7 +417,6 @@ public class Content implements Entity {
 		this.image = image;
 	}
 
-	@ApiModelProperty(required = true, value = "the fcImage")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getFcImage() {
 		return fcImage;
@@ -457,7 +427,6 @@ public class Content implements Entity {
 		this.fcImage = fcImage;
 	}
 
-	@ApiModelProperty(required = true, value = "the grid size")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getGridSize() {
 		return gridSize;
@@ -468,7 +437,6 @@ public class Content implements Entity {
 		this.gridSize = gridSize;
 	}
 
-	@ApiModelProperty(required = true, value = "the image X offset")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getOffsetX() {
 		return offsetX;
@@ -479,7 +447,6 @@ public class Content implements Entity {
 		this.offsetX = offsetX;
 	}
 
-	@ApiModelProperty(required = true, value = "the image Y offset")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getOffsetY() {
 		return offsetY;
@@ -490,7 +457,6 @@ public class Content implements Entity {
 		this.offsetY = offsetY;
 	}
 
-	@ApiModelProperty(required = true, value = "the image zoom level")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getZoomLvl() {
 		return zoomLvl;
@@ -501,7 +467,6 @@ public class Content implements Entity {
 		this.zoomLvl = zoomLvl;
 	}
 
-	@ApiModelProperty(required = true, value = "the grid X offset")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getGridOffsetX() {
 		return gridOffsetX;
@@ -512,7 +477,6 @@ public class Content implements Entity {
 		this.gridOffsetX = gridOffsetX;
 	}
 
-	@ApiModelProperty(required = true, value = "the grid Y offset")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getGridOffsetY() {
 		return gridOffsetY;
@@ -523,7 +487,6 @@ public class Content implements Entity {
 		this.gridOffsetY = gridOffsetY;
 	}
 
-	@ApiModelProperty(required = true, value = "the grid zoom lvl")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getGridZoomLvl() {
 		return gridZoomLvl;
@@ -534,7 +497,6 @@ public class Content implements Entity {
 		this.gridZoomLvl = gridZoomLvl;
 	}
 
-	@ApiModelProperty(required = true, value = "the grid X size")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getGridSizeX() {
 		return gridSizeX;
@@ -545,7 +507,6 @@ public class Content implements Entity {
 		this.gridSizeX = gridSizeX;
 	}
 
-	@ApiModelProperty(required = true, value = "the grid Y size")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getGridSizeY() {
 		return gridSizeY;
@@ -556,7 +517,6 @@ public class Content implements Entity {
 		this.gridSizeY = gridSizeY;
 	}
 
-	@ApiModelProperty(required = true, value = "true for hidden grid")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean getGridIsHidden() {
 		return gridIsHidden;
@@ -567,7 +527,6 @@ public class Content implements Entity {
 		this.gridIsHidden = gridIsHidden;
 	}
 
-	@ApiModelProperty(required = true, value = "the image rotation")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getImgRotation() {
 		return imgRotation;
@@ -578,7 +537,6 @@ public class Content implements Entity {
 		this.imgRotation = imgRotation;
 	}
 
-	@ApiModelProperty(required = true, value = "the toggled left fields")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean getToggleFieldsLeft() {
 		return toggleFieldsLeft;
@@ -589,7 +547,6 @@ public class Content implements Entity {
 		this.toggleFieldsLeft = toggleFieldsLeft;
 	}
 
-	@ApiModelProperty(required = true, value = "the number of clickable fields")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getNumClickableFields() {
 		return numClickableFields;
@@ -600,7 +557,6 @@ public class Content implements Entity {
 		this.numClickableFields = numClickableFields;
 	}
 
-	@ApiModelProperty(required = true, value = "the threshold of correct answers")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getThresholdCorrectAnswers() {
 		return thresholdCorrectAnswers;
@@ -611,7 +567,6 @@ public class Content implements Entity {
 		this.thresholdCorrectAnswers = thresholdCorrectAnswers;
 	}
 
-	@ApiModelProperty(required = true, value = "the grid line color")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getGridLineColor() {
 		return gridLineColor;
@@ -622,7 +577,6 @@ public class Content implements Entity {
 		this.gridLineColor = gridLineColor;
 	}
 
-	@ApiModelProperty(required = true, value = "the number of dots")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getNumberOfDots() {
 		return numberOfDots;
@@ -633,7 +587,6 @@ public class Content implements Entity {
 		this.numberOfDots = numberOfDots;
 	}
 
-	@ApiModelProperty(required = true, value = "the grid type")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getGridType() {
 		return gridType;
@@ -649,7 +602,6 @@ public class Content implements Entity {
 		this.scaleFactor = scaleFactor;
 	}
 
-	@ApiModelProperty(required = true, value = "the image scale factor")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getScaleFactor() {
 		return this.scaleFactor;
@@ -660,13 +612,11 @@ public class Content implements Entity {
 		this.gridScaleFactor = scaleFactor;
 	}
 
-	@ApiModelProperty(required = true, value = "the grid scale factor")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getGridScaleFactor() {
 		return this.gridScaleFactor;
 	}
 
-	@ApiModelProperty(required = true, value = "true for a question that can be answered via text")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isTextAnswerEnabled() {
 		return this.textAnswerEnabled;
@@ -677,7 +627,6 @@ public class Content implements Entity {
 		this.textAnswerEnabled = textAnswerEnabled;
 	}
 
-	@ApiModelProperty(required = true, value = "true for disabled voting")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isVotingDisabled() {
 		return votingDisabled;

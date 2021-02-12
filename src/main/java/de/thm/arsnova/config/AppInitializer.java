@@ -54,14 +54,12 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 		final DelegatingFilterProxy webMvcMetricsFilter = new DelegatingFilterProxy("webMvcMetricsFilterOverride");
 		final DelegatingFilterProxy corsFilter = new DelegatingFilterProxy("corsFilter");
 		final DelegatingFilterProxy maintenanceModeFilter = new DelegatingFilterProxy("maintenanceModeFilter");
-		final DelegatingFilterProxy v2ContentTypeOverrideFilter = new DelegatingFilterProxy("v2ContentTypeOverrideFilter");
 
 		return new Filter[] {
 				webMvcMetricsFilter,
 				characterEncodingFilter,
 				corsFilter,
-				maintenanceModeFilter,
-				v2ContentTypeOverrideFilter
+				maintenanceModeFilter
 		};
 	}
 

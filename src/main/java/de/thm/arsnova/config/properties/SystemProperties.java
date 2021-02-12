@@ -144,42 +144,11 @@ public class SystemProperties {
 		}
 	}
 
-	public static class Socketio {
-		private String bindAddress;
-		private int port;
-		private String proxyPath;
-
-		public String getBindAddress() {
-			return bindAddress;
-		}
-
-		public void setBindAddress(final String bindAddress) {
-			this.bindAddress = bindAddress;
-		}
-
-		public int getPort() {
-			return port;
-		}
-
-		public void setPort(final int port) {
-			this.port = port;
-		}
-
-		public String getProxyPath() {
-			return proxyPath;
-		}
-
-		public void setProxyPath(final String proxyPath) {
-			this.proxyPath = proxyPath;
-		}
-	}
-
 	private String rootUrl;
 	private Api api;
 	private Mail mail;
 	private FormattingService formattingService;
 	private LmsConnector lmsConnector;
-	private Socketio socketio;
 
 	public String getRootUrl() {
 		return rootUrl;
@@ -219,13 +188,5 @@ public class SystemProperties {
 
 	public void setLmsConnector(final LmsConnector lmsConnector) {
 		this.lmsConnector = lmsConnector;
-	}
-
-	public Socketio getSocketio() {
-		return socketio;
-	}
-
-	public void setSocketio(final Socketio socketio) {
-		this.socketio = socketio;
 	}
 }

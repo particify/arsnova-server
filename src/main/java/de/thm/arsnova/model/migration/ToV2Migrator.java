@@ -48,7 +48,6 @@ import java.util.stream.Collectors;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.GridImageContent;
-import de.thm.arsnova.model.RoomStatistics;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.v2.Answer;
 import de.thm.arsnova.model.migration.v2.AnswerOption;
@@ -60,7 +59,6 @@ import de.thm.arsnova.model.migration.v2.Motd;
 import de.thm.arsnova.model.migration.v2.MotdList;
 import de.thm.arsnova.model.migration.v2.Room;
 import de.thm.arsnova.model.migration.v2.RoomFeature;
-import de.thm.arsnova.model.migration.v2.RoomInfo;
 import de.thm.arsnova.model.migration.v2.VisitedRoom;
 
 /**
@@ -512,18 +510,6 @@ public class ToV2Migrator {
 		copyCommonProperties(from, to);
 		to.setUsername(from.getLoginId());
 		to.setMotdkeys(String.join(",", from.getAcknowledgedMotds()));
-
-		return to;
-	}
-
-	public RoomInfo migrateStats(final de.thm.arsnova.model.Room from) {
-		final RoomInfo to = new RoomInfo(migrate(from));
-		final RoomStatistics stats = from.getStatistics();
-		to.setNumQuestions(stats.getContentCount());
-		to.setNumUnanswered(stats.getUnansweredContentCount());
-		to.setNumAnswers(stats.getAnswerCount());
-		to.setNumInterposed(stats.getCommentCount());
-		to.setNumUnredInterposed(stats.getUnreadCommentCount());
 
 		return to;
 	}

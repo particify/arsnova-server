@@ -21,36 +21,13 @@ package de.thm.arsnova.persistence;
 import java.util.List;
 
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-import de.thm.arsnova.model.transport.ImportExportContainer;
-import net.particify.arsnova.connector.model.Course;
 
 public interface RoomRepository extends CrudRepository<Room, String> {
 	Room findByShortId(String shortId);
-
-	List<Room> findByOwner(ClientAuthentication owner, int start, int limit);
 
 	List<Room> findByOwnerId(String ownerId, int start, int limit);
 
 	List<String> findIdsByOwnerId(String ownerId);
 
 	List<String> findIdsByModeratorId(String moderatorId);
-
-	List<Room> findAllForPublicPool();
-
-	List<Room> findForPublicPoolByOwnerId(String ownerId);
-
-	List<Room> getRoomsWithStatsForOwnerId(String ownerId, int start, int limit);
-
-	List<Room> getRoomHistoryWithStatsForUser(List<Room> rooms, String ownerId);
-
-	List<Room> findInfosForPublicPool();
-
-	List<Room> findInfosForPublicPoolByOwnerId(String ownerId);
-
-	List<Room> findRoomsByCourses(List<Course> courses);
-
-	Room importRoom(String userId, ImportExportContainer importRoom);
-
-	ImportExportContainer exportRoom(String id, Boolean withAnswer, Boolean withFeedbackQuestions);
 }

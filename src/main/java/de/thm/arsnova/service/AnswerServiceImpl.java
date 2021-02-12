@@ -19,11 +19,8 @@
 package de.thm.arsnova.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,7 +47,6 @@ import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.GridImageContent;
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.web.exceptions.ForbiddenException;
@@ -145,23 +141,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	}
 
 	@Override
-	public void getFreetextAnswerAndMarkRead(final String answerId, final String userId) {
-		final Answer answer = get(answerId);
-		if (!(answer instanceof TextAnswer)) {
-			throw new NotFoundException();
-		}
-		final TextAnswer textAnswer = (TextAnswer) answer;
-		if (textAnswer.isRead()) {
-			return;
-		}
-		final Room room = roomService.get(textAnswer.getRoomId());
-		if (room.getOwnerId().equals(userId)) {
-			textAnswer.setRead(true);
-			update(textAnswer);
-		}
-	}
-
-	@Override
 	@PreAuthorize("isAuthenticated()")
 	public AnswerStatistics getStatistics(final String contentId, final int round) {
 		final Content content = contentService.get(contentId);
@@ -217,83 +196,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<TextAnswer> getTextAnswers(final String contentId, final int piRound, final int offset, final int limit) {
-		/* FIXME: round support not implemented */
-		final Content content = contentService.get(contentId);
-		if (content == null) {
-			throw new NotFoundException();
-		}
-
-		return getTextAnswersByContentId(contentId, offset, limit);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<TextAnswer> getTextAnswers(final String contentId, final int offset, final int limit) {
-		return getTextAnswers(contentId, 0, offset, limit);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<TextAnswer> getAllTextAnswers(final String contentId, final int offset, final int limit) {
-		final Content content = contentService.get(contentId);
-		if (content == null) {
-			throw new NotFoundException();
-		}
-
-		return getTextAnswersByContentId(contentId, offset, limit);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public int countAnswersByContentIdAndRound(final String contentId) {
-		final Content content = contentService.get(contentId);
-		if (content == null) {
-			return 0;
-		}
-
-		if (content.getFormat() == Content.Format.TEXT) {
-			return answerRepository.countByContentId(content.getId());
-		} else {
-			return answerRepository.countByContentIdRound(content.getId(), content.getState().getRound());
-		}
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public int countAnswersByContentIdAndRound(final String contentId, final int piRound) {
-		final Content content = contentService.get(contentId);
-		if (content == null) {
-			return 0;
-		}
-
-		return answerRepository.countByContentIdRound(content.getId(), piRound);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public int countTotalAbstentionsByContentId(final String contentId) {
-		final Content content = contentService.get(contentId);
-		if (content == null) {
-			return 0;
-		}
-
-		return answerRepository.countByContentId(contentId);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public int countTotalAnswersByContentId(final String contentId) {
-		final Content content = contentService.get(contentId);
-		if (content == null) {
-			return 0;
-		}
-
-		return answerRepository.countByContentId(content.getId());
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
 	public List<String> getAnswerIdsByContentId(final String contentId) {
 		return answerRepository.findIdsByContentId(contentId);
 	}
@@ -321,17 +223,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<TextAnswer> getTextAnswersByContentId(final String contentId, final int offset, final int limit) {
-		final List<TextAnswer> answers = answerRepository.findByContentId(contentId, TextAnswer.class, offset, limit);
-		if (answers == null) {
-			throw new NotFoundException();
-		}
-
-		return answers;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
 	public Answer getAnswerByContentIdAndUserIdAndCurrentRound(final String contentId, final String userId) {
 		final Content content = contentService.get(contentId);
 		if (content == null) {
@@ -341,42 +232,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		final int piRound = content.getState().getRound();
 
 		return answerRepository.findByContentIdUserIdPiRound(contentId, Answer.class, userId, piRound);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getMyAnswersByRoomId(final String roomId) {
-		// Load contents first because we are only interested in answers of the latest piRound.
-		final List<Content> contents = contentService.getByRoomId(roomId);
-		final Map<String, Content> contentIdToContent = new HashMap<>();
-		for (final Content content : contents) {
-			contentIdToContent.put(content.getId(), content);
-		}
-
-		/* filter answers by active piRound per content */
-		final List<Answer> answers = answerRepository.findByUserIdRoomId(userService.getCurrentUser().getId(), roomId);
-		final List<Answer> filteredAnswers = new ArrayList<>();
-		for (final Answer answer : answers) {
-			final Content content = contentIdToContent.get(answer.getContentId());
-			if (content == null) {
-				// Content is not present. Most likely it has been locked by the
-				// Room's creator. Locked Questions do not appear in this list.
-				continue;
-			}
-
-			// discard all answers that aren't in the same piRound as the content
-			if (answer.getRound() == content.getState().getRound()) {
-				filteredAnswers.add(answer);
-			}
-		}
-
-		return filteredAnswers;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public int countTotalAnswersByRoomId(final String roomId) {
-		return answerRepository.countByRoomId(roomId);
 	}
 
 	@Override
@@ -454,56 +309,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		answer.setCreatorId(user.getId());
 		answer.setContentId(content.getId());
 		answer.setRoomId(room.getId());
-	}
-
-	@Override
-	public Map<String, Object> countAnswersAndAbstentionsInternal(final String contentId) {
-		final Content content = contentService.get(contentId);
-		final HashMap<String, Object> map = new HashMap<>();
-
-		if (content == null) {
-			return null;
-		}
-
-		map.put("_id", contentId);
-		map.put("answers", answerRepository.countByContentIdRound(content.getId(), content.getState().getRound()));
-		map.put("abstentions", answerRepository.countByContentId(contentId));
-
-		return map;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public int countLectureContentAnswers(final String roomId) {
-		return this.countLectureQuestionAnswersInternal(roomId);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public int countPreparationContentAnswers(final String roomId) {
-		return this.countPreparationQuestionAnswersInternal(roomId);
-	}
-
-	/*
-	 * The "internal" suffix means it is called by internal services that have no authentication!
-	 * TODO: Find a better way of doing this...
-	 */
-	@Override
-	public int countLectureQuestionAnswersInternal(final String roomId) {
-		final Set<String> contentIds =
-				contentGroupService.getByRoomIdAndName(roomId, "lecture").getContentIds();
-		return answerRepository.countByContentIds(contentIds);
-	}
-
-	/*
-	 * The "internal" suffix means it is called by internal services that have no authentication!
-	 * TODO: Find a better way of doing this...
-	 */
-	@Override
-	public int countPreparationQuestionAnswersInternal(final String roomId) {
-		final Set<String> contentIds =
-				contentGroupService.getByRoomIdAndName(roomId, "preparation").getContentIds();
-		return answerRepository.countByContentIds(contentIds);
 	}
 
 	@EventListener

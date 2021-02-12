@@ -20,15 +20,12 @@ package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import de.thm.arsnova.model.serialization.View;
 
 /**
  * A Comment (Interposed/Feedback/Audience question) from a attendee in a Room.
  */
-@ApiModel(value = "Comment", description = "Comment (Interposed/Feedback/Audience Question) entity")
 public class Comment implements Entity {
 	private String id;
 	private String rev;
@@ -72,7 +69,6 @@ public class Comment implements Entity {
 		return id;
 	}
 
-	@ApiModelProperty(required = true, value = "is read")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isRead() {
 		return read;
@@ -83,7 +79,6 @@ public class Comment implements Entity {
 		this.read = read;
 	}
 
-	@ApiModelProperty(required = true, value = "the subject")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSubject() {
 		return subject;
@@ -94,7 +89,6 @@ public class Comment implements Entity {
 		this.subject = subject;
 	}
 
-	@ApiModelProperty(required = true, value = "the Text")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getText() {
 		return text;
@@ -105,7 +99,6 @@ public class Comment implements Entity {
 		this.text = text;
 	}
 
-	@ApiModelProperty(required = true, value = "ID of the session, the comment is assigned to")
 	@JsonView(View.Persistence.class)
 	public String getSessionId() {
 		return sessionId;
@@ -116,7 +109,6 @@ public class Comment implements Entity {
 		this.sessionId = sessionId;
 	}
 
-	@ApiModelProperty(required = true, value = "creation date timestamp")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public long getTimestamp() {
 		return timestamp;
@@ -135,9 +127,5 @@ public class Comment implements Entity {
 	@JsonView(View.Persistence.class)
 	public void setCreator(final String creator) {
 		this.creator = creator;
-	}
-
-	public boolean isCreator(final ClientAuthentication user) {
-		return user.getUsername().equals(creator);
 	}
 }

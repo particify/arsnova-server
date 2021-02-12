@@ -18,7 +18,6 @@
 
 package de.thm.arsnova.persistence.couchdb;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.ektorp.CouchDbConnector;
 import org.slf4j.Logger;
@@ -35,45 +34,8 @@ public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implement
 	}
 
 	@Override
-	public List<Motd> findGlobalForAdmin() {
-		return find(null);
-	}
-
-	@Override
-	public List<Motd> findGlobalForAll() {
-		return find(Motd.Audience.ALL);
-	}
-
-	@Override
-	public List<Motd> findGlobalForLoggedIn() {
-		return find(Motd.Audience.AUTHENTICATED);
-	}
-
-	@Override
-	public List<Motd> findGlobalForTutors() {
-		final List<Motd> union = new ArrayList<>();
-		union.addAll(find(Motd.Audience.AUTHENTICATED));
-		union.addAll(find(Motd.Audience.AUTHORS));
-
-		return union;
-	}
-
-	@Override
-	public List<Motd> findForStudents() {
-		final List<Motd> union = new ArrayList<>();
-		union.addAll(find(Motd.Audience.AUTHENTICATED));
-		union.addAll(find(Motd.Audience.PARTICIPANTS));
-
-		return union;
-	}
-
-	@Override
 	public List<Motd> findByRoomId(final String roomId) {
 		return find("by_roomid", roomId);
-	}
-
-	private List<Motd> find(final Motd.Audience audience) {
-		return queryView("by_audience_for_global", audience.toString());
 	}
 
 	private List<Motd> find(final String viewName, final String key) {

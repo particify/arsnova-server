@@ -22,74 +22,14 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-/** This component cleares caches at fixed time intervals.
- *
- * <p>Time intervals:
- * <ul>
- *   <li><code>sessions</code>: 6h</li>
- *   <li><code>skillquestions</code>, <code>lecturequestions</code>, <code>preparationquestions</code>,
- *     <code>flashcardquestions</code>: 30min</li>
- *   <li><code>questions</code>: 30min</li>
- *   <li><code>answers</code>: 15min</li>
- *   <li><code>learningprogress</code>: 15min</li>
- * </ul>
- * </p>
+/**
+ * This component cleares caches at fixed time intervals.
  */
 @Component
 public class ScheduledCacheBuster {
-
-	@CacheEvict(value = "rooms", allEntries = true)
-	@Scheduled(initialDelay = 1000 * 25, fixedRate = 1000 * 60 * 60 * 6)
-	private void clearSessionCache() {
-		/* Implementation provided by caching aspect. */
-	}
-
-	@CacheEvict(value = "contents", allEntries = true)
-	@Scheduled(initialDelay = 1000 * 50, fixedRate = 1000 * 60 * 30)
-	private void clearQuestionCache() {
-		/* Implementation provided by caching aspect. */
-	}
-
-	@CacheEvict(value = "contentlists", allEntries = true)
-	@Scheduled(initialDelay = 1000 * 75, fixedRate = 1000 * 60 * 30)
-	private void clearSkillQuestionCache() {
-		/* Implementation provided by caching aspect. */
-	}
-
-	@CacheEvict(value = "lecturecontentlists", allEntries = true)
-	@Scheduled(initialDelay = 1000 * 100, fixedRate = 1000 * 60 * 30)
-	private void clearLectureQuestionCache() {
-		/* Implementation provided by caching aspect. */
-	}
-
-	@CacheEvict(value = "preparationcontentlists", allEntries = true)
-	@Scheduled(initialDelay = 1000 * 125, fixedRate = 1000 * 60 * 30)
-	private void clearPreparationQuestionCache() {
-		/* Implementation provided by caching aspect. */
-	}
-
-	@CacheEvict(value = "flashcardcontentlists", allEntries = true)
-	@Scheduled(initialDelay = 1000 * 150, fixedRate = 1000 * 60 * 30)
-	private void clearFlashcardQuestionCache() {
-		/* Implementation provided by caching aspect. */
-	}
-
-	@CacheEvict(value = "answerlists", allEntries = true)
-	@Scheduled(initialDelay = 1000 * 175, fixedRate = 1000 * 60 * 15)
-	private void clearAnswerCache() {
-		/* Implementation provided by caching aspect. */
-	}
-
-	@CacheEvict(value = "score", allEntries = true)
-	@Scheduled(initialDelay = 1000 * 200, fixedRate = 1000 * 60 * 15)
-	private void clearLearningProgressCache() {
-		/* Implementation provided by caching aspect. */
-	}
-
 	@CacheEvict(value = "rendered-texts", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 225, fixedRate = 1000 * 60 * 30)
 	private void clearRenderedTextCache() {
 		/* Implementation provided by caching aspect. */
 	}
-
 }

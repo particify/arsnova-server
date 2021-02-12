@@ -19,8 +19,6 @@
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 
 import de.thm.arsnova.model.serialization.View;
@@ -28,8 +26,6 @@ import de.thm.arsnova.model.serialization.View;
 /**
  * Contains fields that describe which specific Feature is activated for a Room.
  */
-@ApiModel(value = "RoomFeature",
-		description = "Room (Session) Feature entity - Represents feature/use case settings of a Room")
 public class RoomFeature implements Serializable {
 
 	private boolean custom = false;
@@ -88,7 +84,6 @@ public class RoomFeature implements Serializable {
 		this.lecture = lecture;
 	}
 
-	@ApiModelProperty(required = true, value = "jitt")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isJitt() {
 		return jitt;
@@ -99,7 +94,6 @@ public class RoomFeature implements Serializable {
 		this.jitt = jitt;
 	}
 
-	@ApiModelProperty(required = true, value = "feedback")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isFeedback() {
 		return feedback;
@@ -110,7 +104,6 @@ public class RoomFeature implements Serializable {
 		this.feedback = feedback;
 	}
 
-	@ApiModelProperty(required = true, value = "interposed")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isInterposed() {
 		return interposed;
@@ -121,7 +114,6 @@ public class RoomFeature implements Serializable {
 		this.interposed = interposed;
 	}
 
-	@ApiModelProperty(required = true, value = "peer instruction")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isPi() {
 		return pi;
@@ -132,7 +124,6 @@ public class RoomFeature implements Serializable {
 		this.pi = pi;
 	}
 
-	@ApiModelProperty(required = true, value = "score")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isLearningProgress() {
 		return learningProgress;
