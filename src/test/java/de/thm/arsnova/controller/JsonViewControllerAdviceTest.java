@@ -26,9 +26,8 @@ import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.EntityService;
 import de.thm.arsnova.test.context.support.WithMockUser;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,9 +55,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Daniel Gerhardt
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration(classes = {
+@SpringJUnitWebConfig({
 		AppConfig.class,
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
@@ -80,7 +75,7 @@ public class JsonViewControllerAdviceTest {
 	@Autowired
 	private EntityService<DummyEntity> dummyEntityService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 		when(dummyEntityService.get("1")).thenReturn(new DummyEntity());

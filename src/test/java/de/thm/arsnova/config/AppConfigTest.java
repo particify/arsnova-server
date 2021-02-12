@@ -18,35 +18,27 @@
 
 package de.thm.arsnova.config;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collections;
 import java.util.stream.Collectors;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 
 import de.thm.arsnova.config.properties.SecurityProperties;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-
 import net.particify.arsnova.connector.client.ConnectorClient;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration(classes = {
+@SpringJUnitWebConfig({
 		AppConfig.class,
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
 		TestSecurityConfig.class})
 @ActiveProfiles("test")
-public class AppConfigTest extends AbstractJUnit4SpringContextTests {
+public class AppConfigTest {
 	@Autowired
 	private SecurityProperties securityProperties;
 
@@ -66,6 +58,6 @@ public class AppConfigTest extends AbstractJUnit4SpringContextTests {
 		final List<String> actual = securityProperties.getAdminAccounts().stream()
 				.map(adminAccount -> adminAccount.getLoginId()).collect(Collectors.toList());
 
-		assertEquals("Configuration did not load correct property file", expected, actual);
+		assertEquals(expected, actual, "Configuration did not load correct property file");
 	}
 }

@@ -18,19 +18,16 @@
 
 package de.thm.arsnova.model.migration;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 
 import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
@@ -45,9 +42,7 @@ import de.thm.arsnova.model.migration.v2.Answer;
 /**
  * @author Daniel Gerhardt
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration(classes = {
+@SpringJUnitWebConfig({
 		AppConfig.class,
 		TestAppConfig.class,
 		TestPersistanceConfig.class,

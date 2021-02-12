@@ -18,7 +18,7 @@
 
 package de.thm.arsnova.event;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -29,9 +29,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
@@ -39,9 +38,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.validation.Validator;
 
 import de.thm.arsnova.config.AppConfig;
@@ -55,9 +52,7 @@ import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.service.DefaultEntityServiceImpl;
 import de.thm.arsnova.test.context.support.WithMockUser;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration(classes = {
+@SpringJUnitWebConfig({
 		AppConfig.class,
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
@@ -91,7 +86,7 @@ public class StateEventDispatcherTest {
 	@Autowired
 	private ContentRepository contentRepository;
 
-	@Before
+	@BeforeEach
 	public void prepare() {
 		eventListenerConfig.resetEvents();
 	}

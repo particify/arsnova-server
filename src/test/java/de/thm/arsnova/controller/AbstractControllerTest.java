@@ -20,17 +20,13 @@ package de.thm.arsnova.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.After;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 
 import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
@@ -38,15 +34,13 @@ import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.service.StubUserService;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration(classes = {
+@SpringJUnitWebConfig({
 		AppConfig.class,
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
 		TestSecurityConfig.class})
 @ActiveProfiles("test")
-public abstract class AbstractControllerTest extends AbstractJUnit4SpringContextTests {
+public abstract class AbstractControllerTest {
 
 	@Autowired protected StubUserService userService;
 
@@ -65,7 +59,7 @@ public abstract class AbstractControllerTest extends AbstractJUnit4SpringContext
 		}
 	}
 
-	@After
+	@AfterEach
 	public void cleanup() {
 		SecurityContextHolder.clearContext();
 		userService.setUserAuthenticated(false);

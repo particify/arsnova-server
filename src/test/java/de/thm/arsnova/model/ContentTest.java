@@ -18,10 +18,10 @@
 
 package de.thm.arsnova.model;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import de.thm.arsnova.model.migration.v2.Answer;
 import de.thm.arsnova.model.migration.v2.AnswerOption;

@@ -8,19 +8,19 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.service.RoomService;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class RoomAccessEventDispatcherTest {
 	private static final String TEST_USER_ID = "TestUser";
 	private static final String SOME_TEXT = "SomeText";
@@ -74,7 +74,7 @@ public class RoomAccessEventDispatcherTest {
 		return moderators;
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.roomAccessEventDispatcher = new RoomAccessEventDispatcher(messagingTemplate, roomService);
 	}

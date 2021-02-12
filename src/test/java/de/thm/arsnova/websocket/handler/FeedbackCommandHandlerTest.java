@@ -9,16 +9,16 @@ import de.thm.arsnova.model.Room;
 import de.thm.arsnova.service.FeedbackStorageService;
 import de.thm.arsnova.service.RoomService;
 import de.thm.arsnova.websocket.message.*;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class FeedbackCommandHandlerTest {
 
 	@MockBean
@@ -39,7 +39,7 @@ public class FeedbackCommandHandlerTest {
 		return r;
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.commandHandler = new FeedbackCommandHandler(messagingTemplate, feedbackStorage, roomService);
 	}
