@@ -18,6 +18,7 @@
 
 package de.thm.arsnova.controller;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,7 +32,8 @@ public class AnswerController extends AbstractEntityController<Answer> {
 
 	private AnswerService answerService;
 
-	public AnswerController(final AnswerService answerService) {
+	public AnswerController(
+			@Qualifier("securedAnswerService") final AnswerService answerService) {
 		super(answerService);
 		this.answerService = answerService;
 	}

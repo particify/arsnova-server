@@ -139,6 +139,7 @@ public class StateEventDispatcherTest {
 	}
 
 	private void prefillContentFields(final Content content) {
+		content.setRoomId(TEST_ROOM_ID);
 		content.setSubject(SOME_TEXT);
 		content.setBody(SOME_TEXT);
 		content.setFormat(Content.Format.CHOICE);

@@ -20,6 +20,7 @@ package de.thm.arsnova.controller;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,7 +44,9 @@ public class ContentController extends AbstractEntityController<Content> {
 	private ContentService contentService;
 	private AnswerService answerService;
 
-	public ContentController(final ContentService contentService, final AnswerService answerService) {
+	public ContentController(
+			@Qualifier("securedContentService") final ContentService contentService,
+			@Qualifier("securedAnswerService") final AnswerService answerService) {
 		super(contentService);
 		this.contentService = contentService;
 		this.answerService = answerService;

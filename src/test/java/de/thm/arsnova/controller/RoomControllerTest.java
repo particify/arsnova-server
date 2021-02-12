@@ -53,6 +53,7 @@ import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
@@ -80,6 +81,7 @@ import de.thm.arsnova.test.context.support.WithMockUser;
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
 		TestSecurityConfig.class})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ActiveProfiles("test")
 public class RoomControllerTest {
 
@@ -199,13 +201,16 @@ public class RoomControllerTest {
 	}
 
 	@Test
+	@WithMockUser(value = "TestUser")
 	public void shouldGetContentGroup() throws Exception {
-		final String roomId = "Test-RoomId";
+		final Room room = new Room();
+		room.setId("Test-RoomId");
 		final ContentGroup contentGroup = new ContentGroup();
 		contentGroup.setName("ContentGroupNameTest");
 
-		when(contentGroupRepository.findByRoomIdAndName(roomId, contentGroup.getName())).thenReturn(contentGroup);
-		mockMvc.perform(get("/room/" + roomId + "/contentgroup/" + contentGroup.getName())
+		when(roomRepository.findOne(room.getId())).thenReturn(room);
+		when(contentGroupRepository.findByRoomIdAndName(room.getId(), contentGroup.getName())).thenReturn(contentGroup);
+		mockMvc.perform(get("/room/" + room.getId() + "/contentgroup/" + contentGroup.getName())
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(content().string(containsString(contentGroup.getName())));
@@ -216,9 +221,13 @@ public class RoomControllerTest {
 	public void shouldCreateContentGroupWithContentWhenNoGroupExists() throws Exception {
 		final Room room = this.getRoomForUserWithDatabaseDetails(user);
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
-		final String contentGroupName = "Test-ContentGroupName";
-		final String contentId = "Test-ID-ContentGroup";
 
+		final String contentId = "Test-ID-ContentGroup";
+		final Content content = new Content();
+		content.setRoomId(room.getId());
+		when(contentRepository.findOne(contentId)).thenReturn(content);
+
+		final String contentGroupName = "Test-ContentGroupName";
 		when(contentGroupRepository.findByRoomIdAndName(room.getId(), contentGroupName)).thenReturn(null);
 		when(contentGroupRepository.save(any(ContentGroup.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -237,11 +246,14 @@ public class RoomControllerTest {
 	public void shouldAddContentIdToGroupWhenGroupAlreadyExists() throws Exception {
 		final Room room = this.getRoomForUserWithDatabaseDetails(user);
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
+
 		final String contentId1 = "pre-existing-content-id";
 		final String contentId2 = "content-id-to-add";
+		final Content content2 = new Content();
+		content2.setRoomId(room.getId());
+		when(contentRepository.findOne(contentId2)).thenReturn(content2);
 
 		final ContentGroup contentGroup = createContentGroupWithRoomIdAndContentIds(room.getId(), contentId1);
-
 		when(contentGroupRepository.findByRoomIdAndName(room.getId(), contentGroup.getName())).thenReturn(contentGroup);
 		when(contentGroupRepository.findOne(any())).thenReturn(contentGroup);
 		when(contentGroupRepository.save(any(ContentGroup.class))).thenAnswer(i -> i.getArgument(0));
@@ -305,12 +317,14 @@ public class RoomControllerTest {
 	}
 
 	@Test
+	@WithMockUser(value = "TestUser")
 	public void shouldGetStatsForRoom() throws Exception {
 		final int groupSize = 3;
 		final int contentSize = 2;
 		final Room room = this.getRoomForUserWithDatabaseDetails(user);
 		final List<ContentGroup> listOfContentGroup = createContentGroupsWithContents(room.getId(), groupSize, contentSize);
 
+		when(roomRepository.findOne(room.getId())).thenReturn(room);
 		when(contentGroupService.getByRoomId(room.getId())).thenReturn(listOfContentGroup);
 
 		final String requestBody = mockMvc.perform(get("/room/" + room.getId() + "/stats")

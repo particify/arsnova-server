@@ -48,7 +48,6 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 			ROLE_LDAP_USER
 	);
 
-	@Autowired
 	private UserService userService;
 
 	public CustomLdapUserDetailsMapper(final String ldapUserIdAttr) {
@@ -73,5 +72,10 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 
 		return userService.loadUser(UserProfile.AuthProvider.LDAP, ldapUsername,
 				grantedAuthorities, true);
+	}
+
+	@Autowired
+	public void setUserService(final UserService userService) {
+		this.userService = userService;
 	}
 }

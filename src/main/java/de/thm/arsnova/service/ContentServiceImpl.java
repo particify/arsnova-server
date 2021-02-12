@@ -25,10 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
@@ -47,6 +47,7 @@ import de.thm.arsnova.web.exceptions.UnauthorizedException;
  * Performs all content related operations.
  */
 @Service
+@Primary
 public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implements ContentService {
 	private UserService userService;
 
@@ -56,7 +57,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	private ContentRepository contentRepository;
 
-	private ContentGroupService contentGroupService;
+	private ContentGroupServiceImpl contentGroupService;
 
 	private AnswerService answerService;
 
@@ -87,7 +88,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	@Autowired
-	public void setContentGroupService(final ContentGroupService contentGroupService) {
+	public void setContentGroupService(final ContentGroupServiceImpl contentGroupService) {
 		this.contentGroupService = contentGroupService;
 	}
 
@@ -101,7 +102,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	/* FIXME: caching */
 	@Override
-	@PreAuthorize("isAuthenticated()")
 	//@Cacheable("contentlists")
 	public List<Content> getByRoomId(final String roomId) {
 		final Room room = roomService.get(roomId);
@@ -125,7 +125,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
 	public int countByRoomId(final String roomId) {
 		return contentRepository.countByRoomId(roomId);
 	}
@@ -216,7 +215,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		}
 	}
 
-	@PreAuthorize("isAuthenticated()")
 	private void deleteByRoomAndGroupName(final Room room, final String groupName) {
 		if ("all".equals(groupName)) {
 			delete(contentRepository.findStubsByRoomId(room.getId()));

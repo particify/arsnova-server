@@ -39,14 +39,6 @@ public interface UserService extends EntityService<UserProfile> {
 
 	boolean isAdmin(String loginId, UserProfile.AuthProvider authProvider);
 
-	boolean isBannedFromLogin(String addr);
-
-	boolean isBannedFromSendingActivationMail(String addr);
-
-	void increaseFailedLoginCount(String addr);
-
-	void increaseSentMailCount(String addr);
-
 	void authenticate(UsernamePasswordAuthenticationToken token, UserProfile.AuthProvider authProvider,
 			String clientAddress);
 
@@ -64,8 +56,6 @@ public interface UserService extends EntityService<UserProfile> {
 	UserProfile create(String username, String password);
 
 	UserProfile createAnonymizedGuestUser();
-
-	UserProfile update(UserProfile userProfile);
 
 	Set<UserProfile.RoomHistoryEntry> getRoomHistory(UserProfile userProfile);
 

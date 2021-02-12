@@ -28,10 +28,6 @@ import de.thm.arsnova.model.Room;
 public interface RoomService extends EntityService<Room> {
 	String getIdByShortId(String shortId);
 
-	boolean isShortIdAvailable(String shortId);
-
-	String generateShortId();
-
 	List<String> getUserRoomIds(String userId);
 
 	List<String> getRoomIdsByModeratorId(String userId);

@@ -30,10 +30,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
@@ -55,6 +55,7 @@ import net.particify.arsnova.connector.client.ConnectorClient;
  * Performs all room related operations.
  */
 @Service
+@Primary
 public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements RoomService {
 	private static final long ROOM_INACTIVITY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
 
@@ -158,7 +159,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		return room.getId();
 	}
 
-	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
 	public Room getForAdmin(final String id) {
 		return get(id);
 	}
@@ -179,21 +179,17 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		return room;
 	}
 
-	/* TODO: Updated SpEL expression has not been tested yet */
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#userId, 'userprofile', 'owner')")
 	public List<String> getUserRoomIds(final String userId) {
 		return roomRepository.findIdsByOwnerId(userId);
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#userId, 'userprofile', 'owner')")
 	public List<String> getRoomIdsByModeratorId(final String userId) {
 		return roomRepository.findIdsByModeratorId(userId);
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#userId, 'userprofile', 'read')")
 	public List<Room> getUserRoomHistory(final String userId) {
 		final UserProfile profile = userService.get(userId);
 		final List<String> roomIds = profile.getRoomHistory().stream()
@@ -232,7 +228,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		// this.publisher.publishEvent(new NewRoomEvent(this, result));
 	}
 
-	@Override
 	public boolean isShortIdAvailable(final String shortId) {
 		try {
 			return getIdByShortId(shortId) == null;
@@ -241,7 +236,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		}
 	}
 
-	@Override
 	public String generateShortId() {
 		final int low = 10000000;
 		final int high = 100000000;
@@ -270,7 +264,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN')")
 	public Room transferOwnership(final Room room, final String newOwnerId) {
 		final UserProfile newOwner;
 		try {
@@ -284,7 +277,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#room, 'owner')")
 	public Room transferOwnershipThroughToken(final Room room, final String targetUserToken) {
 		final User user = jwtService.verifyToken(targetUserToken);
 		room.setOwnerId(user.getId());

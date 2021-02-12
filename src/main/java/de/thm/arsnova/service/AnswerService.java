@@ -43,6 +43,4 @@ public interface AnswerService extends EntityService<Answer> {
 	void deleteAnswers(String contentId);
 
 	Answer create(Answer answer);
-
-	Answer update(Answer answer);
 }

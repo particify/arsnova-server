@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -58,7 +59,9 @@ public class RoomController extends AbstractEntityController<Room> {
 	private RoomService roomService;
 	private ContentGroupService contentGroupService;
 
-	public RoomController(final RoomService roomService, final ContentGroupService contentGroupService) {
+	public RoomController(
+			@Qualifier("securedRoomService") final RoomService roomService,
+			@Qualifier("securedContentGroupService") final ContentGroupService contentGroupService) {
 		super(roomService);
 		this.roomService = roomService;
 		this.contentGroupService = contentGroupService;
