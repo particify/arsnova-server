@@ -24,6 +24,7 @@ class RoomIdFilter : AbstractGatewayFilterFactory<RoomIdFilter.Config>(Config::c
         val topicRoomIdLength = 32
         val roomIdRegex: Regex = Regex("[0-9a-f]{$topicRoomIdLength}")
         val roomPrefix = "/room"
+        val roomIdHeaderName = "ARS_ROOM_ID"
     }
 
     private val logger = LoggerFactory.getLogger(RoomIdFilter::class.java)
@@ -40,7 +41,10 @@ class RoomIdFilter : AbstractGatewayFilterFactory<RoomIdFilter.Config>(Config::c
 
             // The +1 is for the extra '/' that needs to be cut
             val strippedPath = request.path.value().substring(topicRoomIdLength + 1 + roomPrefix.length)
-            var modifiedRequest: ServerHttpRequest = exchange.request.mutate().path(strippedPath).build()
+            var modifiedRequest: ServerHttpRequest = exchange.request
+                    .mutate().path(strippedPath)
+                    .header(roomIdHeaderName, roomId)
+                    .build()
 
             chain.filter(exchange.mutate().request(modifiedRequest).build())
         }
