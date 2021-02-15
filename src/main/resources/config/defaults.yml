@@ -89,6 +89,10 @@ arsnova:
             - id
             - roomId
 
+    caching:
+      max-entries: 100000
+      expiry: 12H
+
     # Formatting service
     formatting-service:
       enabled: true

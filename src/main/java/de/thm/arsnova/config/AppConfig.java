@@ -21,10 +21,12 @@ package de.thm.arsnova.config;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.CharEncoding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -37,7 +39,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -300,8 +302,19 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 
 	@Bean
-	public CacheManager cacheManager() {
-		return new ConcurrentMapCacheManager();
+	public CacheManager cacheManager(final Caffeine caffeine) {
+		final CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
+		caffeineCacheManager.setCaffeine(caffeine);
+
+		return caffeineCacheManager;
+	}
+
+	@Bean
+	public Caffeine caffeineConfig() {
+		final long expiryInMinutes = systemProperties.getCaching().getExpiry().toMinutes();
+		return Caffeine.newBuilder()
+				.expireAfterAccess(expiryInMinutes, TimeUnit.MINUTES)
+				.maximumSize(systemProperties.getCaching().getMaxEntries());
 	}
 
 	@Bean

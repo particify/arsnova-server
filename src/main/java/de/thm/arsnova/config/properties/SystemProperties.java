@@ -18,7 +18,10 @@
 
 package de.thm.arsnova.config.properties;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.convert.DurationUnit;
 
 @ConfigurationProperties(SystemProperties.PREFIX)
 public class SystemProperties {
@@ -81,6 +84,29 @@ public class SystemProperties {
 
 		public void setHost(final String host) {
 			this.host = host;
+		}
+	}
+
+	public static class Caching {
+		private long maxEntries;
+
+		@DurationUnit(ChronoUnit.MINUTES)
+		private Duration expiry;
+
+		public long getMaxEntries() {
+			return maxEntries;
+		}
+
+		public void setMaxEntries(final long maxEntries) {
+			this.maxEntries = maxEntries;
+		}
+
+		public Duration getExpiry() {
+			return expiry;
+		}
+
+		public void setExpiry(final Duration expiry) {
+			this.expiry = expiry;
 		}
 	}
 
@@ -147,6 +173,7 @@ public class SystemProperties {
 	private String rootUrl;
 	private Api api;
 	private Mail mail;
+	private Caching caching;
 	private FormattingService formattingService;
 	private LmsConnector lmsConnector;
 
@@ -172,6 +199,14 @@ public class SystemProperties {
 
 	public void setMail(final Mail mail) {
 		this.mail = mail;
+	}
+
+	public Caching getCaching() {
+		return caching;
+	}
+
+	public void setCaching(final Caching caching) {
+		this.caching = caching;
 	}
 
 	public FormattingService getFormattingService() {
