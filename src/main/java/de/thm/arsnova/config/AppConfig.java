@@ -304,6 +304,11 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean
 	public CacheManager cacheManager(final Caffeine caffeine) {
 		final CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
+		caffeineCacheManager.setCacheNames(List.of(
+				"entity",
+				"rendered-texts",
+				"room.id-by-shortid",
+				"statistics"));
 		caffeineCacheManager.setCaffeine(caffeine);
 
 		return caffeineCacheManager;
@@ -314,7 +319,8 @@ public class AppConfig implements WebMvcConfigurer {
 		final long expiryInMinutes = systemProperties.getCaching().getExpiry().toMinutes();
 		return Caffeine.newBuilder()
 				.expireAfterAccess(expiryInMinutes, TimeUnit.MINUTES)
-				.maximumSize(systemProperties.getCaching().getMaxEntries());
+				.maximumSize(systemProperties.getCaching().getMaxEntries())
+				.recordStats();
 	}
 
 	@Bean
