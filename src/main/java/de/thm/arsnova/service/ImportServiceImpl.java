@@ -82,8 +82,6 @@ public class ImportServiceImpl implements ImportService {
 			final Content newContent = fromV2Migrator.migrate(importExportContent);
 			logger.trace("Import content: {}", newContent);
 			newContent.setRoomId(savedRoom.getId());
-			final Content.State contentStage = newContent.getState();
-			contentStage.setResponsesEnabled(true);
 			final Content savedContent = contentService.create(newContent);
 
 			if (importExportContent.getQuestionVariant().equals("preparation")) {

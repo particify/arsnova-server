@@ -59,11 +59,8 @@ public class Content extends Entity {
 		@Positive
 		private int round = 1;
 
-		private Date roundEndTimestamp;
-		private boolean visible = true;
-		private boolean additionalTextVisible = true;
-		private boolean responsesEnabled = true;
-		private boolean responsesVisible = false;
+		private Date answeringEndTime;
+		private boolean answersPublished;
 
 		@JsonView({View.Persistence.class, View.Public.class})
 		public int getRound() {
@@ -76,58 +73,32 @@ public class Content extends Entity {
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public Date getRoundEndTimestamp() {
-			return roundEndTimestamp;
+		public Date getAnsweringEndTime() {
+			return answeringEndTime;
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public void setRoundEndTimestamp(final Date roundEndTimestamp) {
-			this.roundEndTimestamp = roundEndTimestamp;
+		public void setAnsweringEndTime(final Date answeringEndTime) {
+			this.answeringEndTime = answeringEndTime;
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isVisible() {
-			return visible;
+		public boolean isAnswersPublished() {
+			return answersPublished;
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isAdditionalTextVisible() {
-			return additionalTextVisible;
+		public void setAnswersPublished(final boolean answersPublished) {
+			this.answersPublished = answersPublished;
 		}
 
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setAdditionalTextVisible(final boolean additionalTextVisible) {
-			this.additionalTextVisible = additionalTextVisible;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setVisible(final boolean visible) {
-			this.visible = visible;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isResponsesEnabled() {
-			return responsesEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setResponsesEnabled(final boolean responsesEnabled) {
-			this.responsesEnabled = responsesEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isResponsesVisible() {
-			return responsesVisible;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setResponsesVisible(final boolean responsesVisible) {
-			this.responsesVisible = responsesVisible;
+		public boolean isAnswerable() {
+			return answeringEndTime == null || answeringEndTime.compareTo(new Date()) > 0;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(round, roundEndTimestamp, visible, additionalTextVisible, responsesEnabled, responsesVisible);
+			return Objects.hash(round, answeringEndTime);
 		}
 
 		@Override
@@ -141,22 +112,14 @@ public class Content extends Entity {
 			final State state = (State) o;
 
 			return round == state.round
-					&& visible == state.visible
-					&& additionalTextVisible == state.additionalTextVisible
-					&& responsesEnabled == state.responsesEnabled
-					&& responsesVisible == state.responsesVisible
-					&& Objects.equals(roundEndTimestamp, state.roundEndTimestamp);
+					&& Objects.equals(answeringEndTime, state.answeringEndTime);
 		}
 
 		@Override
 		public String toString() {
 			return new ToStringCreator(this)
 					.append("round", round)
-					.append("roundEndTimestamp", roundEndTimestamp)
-					.append("visible", visible)
-					.append("solutionVisible", additionalTextVisible)
-					.append("responsesEnabled", responsesEnabled)
-					.append("responsesVisible", responsesVisible)
+					.append("answeringEndTime", answeringEndTime)
 					.toString();
 		}
 	}

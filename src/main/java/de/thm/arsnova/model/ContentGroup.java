@@ -36,10 +36,11 @@ public class ContentGroup extends Entity {
 	private String name;
 
 	private List<String> contentIds;
-	private boolean autoSort;
 	private boolean published;
 	private int firstPublishedIndex = -1;
 	private int lastPublishedIndex = -1;
+	private boolean statisticsPublished = true;
+	private boolean correctOptionsPublished = true;
 
 	public ContentGroup() {
 
@@ -85,16 +86,6 @@ public class ContentGroup extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public boolean isAutoSort() {
-		return autoSort;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAutoSort(final boolean autoSort) {
-		this.autoSort = autoSort;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isPublished() {
 		return published;
 	}
@@ -124,6 +115,26 @@ public class ContentGroup extends Entity {
 		this.lastPublishedIndex = lastPublishedIndex;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
+	public boolean isStatisticsPublished() {
+		return statisticsPublished;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setStatisticsPublished(final boolean statisticsPublished) {
+		this.statisticsPublished = statisticsPublished;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public boolean isCorrectOptionsPublished() {
+		return correctOptionsPublished;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setCorrectOptionsPublished(final boolean correctOptionsPublished) {
+		this.correctOptionsPublished = correctOptionsPublished;
+	}
+
 	public boolean isContentPublished(final String contentId) {
 		final int i = contentIds.indexOf(contentId);
 		return i > -1 && (firstPublishedIndex == -1 || i >= firstPublishedIndex)
@@ -132,7 +143,7 @@ public class ContentGroup extends Entity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, contentIds, autoSort);
+		return Objects.hash(name, contentIds);
 	}
 
 	@Override
@@ -145,8 +156,7 @@ public class ContentGroup extends Entity {
 		}
 		final ContentGroup that = (ContentGroup) o;
 
-		return autoSort == that.autoSort
-			&& Objects.equals(name, that.name)
+		return Objects.equals(name, that.name)
 			&& Objects.equals(contentIds, that.contentIds);
 	}
 
@@ -155,10 +165,11 @@ public class ContentGroup extends Entity {
 		return new ToStringCreator(this)
 				.append("name", name)
 				.append("contentIds", contentIds)
-				.append("autoSort", autoSort)
 				.append("published", published)
 				.append("firstPublishedIndex", firstPublishedIndex)
 				.append("lastPublishedIndex", lastPublishedIndex)
+				.append("statisticsPublished", statisticsPublished)
+				.append("correctOptionsPublished", correctOptionsPublished)
 				.toString();
 	}
 }

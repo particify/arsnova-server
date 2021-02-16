@@ -137,7 +137,6 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
 						.distinct()
 						.collect(Collectors.toList());
 			contentGroup.setContentIds(contentIds);
-			contentGroup.setAutoSort(false);
 			if (contentGroup.getId() != null) {
 				return update(contentGroup);
 			} else {

@@ -249,13 +249,13 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		final Room room;
 		switch (permission) {
 			case READ_PERMISSION:
-				if (content.getState().isResponsesVisible() || userId.equals(targetAnswer.getCreatorId())) {
+				if (content.getState().isAnswersPublished() || userId.equals(targetAnswer.getCreatorId())) {
 					return true;
 				}
 				room = roomService.get(targetAnswer.getRoomId());
 				return room != null && hasUserIdRoomModeratingPermission(room, userId);
 			case CREATE_PERMISSION:
-				return content.getState().isResponsesEnabled();
+				return content.getState().isAnswerable();
 			case OWNER_PERMISSION:
 				return userId.equals(targetAnswer.getCreatorId());
 			case UPDATE_PERMISSION:
