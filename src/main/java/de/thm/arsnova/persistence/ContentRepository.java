@@ -1,7 +1,6 @@
 package de.thm.arsnova.persistence;
 
 import java.util.List;
-import java.util.Set;
 
 import de.thm.arsnova.model.Content;
 
@@ -14,7 +13,7 @@ public interface ContentRepository extends CrudRepository<Content, String> {
 
 	int countByRoomId(String roomId);
 
-	Iterable<Content> findStubsByIds(Set<String> ids);
+	Iterable<Content> findStubsByIds(List<String> ids);
 
 	Iterable<Content> findStubsByRoomId(String roomId);
 

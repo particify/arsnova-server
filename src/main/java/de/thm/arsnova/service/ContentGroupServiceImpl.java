@@ -18,10 +18,8 @@
 
 package de.thm.arsnova.service;
 
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,7 +110,7 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
 						throw new BadRequestException("Room ID does not match.");
 					}
 					cg.setContentIds(cg.getContentIds().stream()
-							.filter(id -> !id.equals(contentId)).collect(Collectors.toSet()));
+							.filter(id -> !id.equals(contentId)).collect(Collectors.toList()));
 					if (!cg.getContentIds().isEmpty()) {
 						update(cg);
 					} else {
@@ -132,10 +130,12 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
 
 			return new ContentGroup();
 		} else {
-			final Set<String> contentIds = StreamSupport.stream(
+			final List<String> contentIds = StreamSupport.stream(
 					contentService.get(contentGroup.getContentIds()).spliterator(), false)
 						.filter(c -> c.getRoomId().equals(contentGroup.getRoomId()))
-						.map(Content::getId).collect(Collectors.toCollection(LinkedHashSet::new));
+						.map(Content::getId)
+						.distinct()
+						.collect(Collectors.toList());
 			contentGroup.setContentIds(contentIds);
 			contentGroup.setAutoSort(false);
 			if (contentGroup.getId() != null) {

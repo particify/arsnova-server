@@ -19,10 +19,9 @@
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import org.springframework.core.style.ToStringCreator;
@@ -36,8 +35,11 @@ public class ContentGroup extends Entity {
 	@NotBlank
 	private String name;
 
-	private Set<String> contentIds;
+	private List<String> contentIds;
 	private boolean autoSort;
+	private boolean published;
+	private int firstPublishedIndex = -1;
+	private int lastPublishedIndex = -1;
 
 	public ContentGroup() {
 
@@ -69,17 +71,16 @@ public class ContentGroup extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public Set<String> getContentIds() {
+	public List<String> getContentIds() {
 		if (contentIds == null) {
-			contentIds = new LinkedHashSet<>();
+			contentIds = new ArrayList<>();
 		}
 
 		return contentIds;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	@JsonDeserialize(as = LinkedHashSet.class)
-	public void setContentIds(final Set<String> contentIds) {
+	public void setContentIds(final List<String> contentIds) {
 		this.contentIds = contentIds;
 	}
 
@@ -91,6 +92,42 @@ public class ContentGroup extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setAutoSort(final boolean autoSort) {
 		this.autoSort = autoSort;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public boolean isPublished() {
+		return published;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setPublished(final boolean published) {
+		this.published = published;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public int getFirstPublishedIndex() {
+		return firstPublishedIndex;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setFirstPublishedIndex(final int firstPublishedIndex) {
+		this.firstPublishedIndex = firstPublishedIndex;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public int getLastPublishedIndex() {
+		return lastPublishedIndex;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setLastPublishedIndex(final int lastPublishedIndex) {
+		this.lastPublishedIndex = lastPublishedIndex;
+	}
+
+	public boolean isContentPublished(final String contentId) {
+		final int i = contentIds.indexOf(contentId);
+		return i > -1 && (firstPublishedIndex == -1 || i >= firstPublishedIndex)
+				&& (lastPublishedIndex == -1 || i <= lastPublishedIndex);
 	}
 
 	@Override
@@ -116,9 +153,12 @@ public class ContentGroup extends Entity {
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)
-			.append("name", name)
-			.append("contentIds", contentIds)
-			.append("autoSort", autoSort)
-			.toString();
+				.append("name", name)
+				.append("contentIds", contentIds)
+				.append("autoSort", autoSort)
+				.append("published", published)
+				.append("firstPublishedIndex", firstPublishedIndex)
+				.append("lastPublishedIndex", lastPublishedIndex)
+				.toString();
 	}
 }
