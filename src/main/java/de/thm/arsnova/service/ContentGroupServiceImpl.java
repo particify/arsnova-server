@@ -89,6 +89,11 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
 	}
 
 	@Override
+	public List<ContentGroup> getByRoomIdAndContainingContentId(final String roomId, final String contentId) {
+		return getByRoomId(roomId).stream().filter(cg -> cg.containsContent(contentId)).collect(Collectors.toList());
+	}
+
+	@Override
 	public void addContentToGroup(final String roomId, final String groupName, final String contentId) {
 		ContentGroup contentGroup = getByRoomIdAndName(roomId, groupName);
 		if (contentGroup == null) {

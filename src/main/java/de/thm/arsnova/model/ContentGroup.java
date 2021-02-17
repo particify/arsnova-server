@@ -141,6 +141,10 @@ public class ContentGroup extends Entity {
 				&& (lastPublishedIndex == -1 || i <= lastPublishedIndex);
 	}
 
+	public boolean containsContent(final String contentId) {
+		return contentIds.contains(contentId);
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(name, contentIds);

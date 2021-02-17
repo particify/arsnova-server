@@ -29,6 +29,12 @@ public class SecuredContentGroupService extends AbstractSecuredEntityServiceImpl
 	}
 
 	@Override
+	@PreAuthorize("hasPermission(#roomId, 'room', 'read') and hasPermission(#contentId, 'content', 'read')\"")
+	public List<ContentGroup> getByRoomIdAndContainingContentId(final String roomId, final String contentId) {
+		return contentGroupService.getByRoomIdAndContainingContentId(roomId, contentId);
+	}
+
+	@Override
 	@PreAuthorize("hasPermission(#roomId, 'room', 'update') and hasPermission(#contentId, 'content', 'update')")
 	public void addContentToGroup(final String roomId, final String groupName, final String contentId) {
 		contentGroupService.addContentToGroup(roomId, groupName, contentId);

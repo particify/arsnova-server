@@ -200,7 +200,12 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 		switch (permission) {
 			case READ_PERMISSION:
-				return !room.isClosed() || hasUserIdRoomModeratingPermission(room, userId);
+				if (hasUserIdRoomModeratingPermission(room, userId)) {
+					return true;
+				}
+				return !room.isClosed() && contentGroupService.getByRoomIdAndContainingContentId(
+						targetContent.getRoomId(), targetContent.getId()).stream()
+						.anyMatch(cg -> cg.isContentPublished(targetContent.getId()));
 			case READ_EXTENDED_PERMISSION:
 				return userId.equals(room.getOwnerId())
 						|| hasUserIdRoomModeratingPermission(room, userId);
