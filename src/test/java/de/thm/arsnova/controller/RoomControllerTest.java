@@ -207,6 +207,8 @@ public class RoomControllerTest {
 		room.setId("Test-RoomId");
 		final ContentGroup contentGroup = new ContentGroup();
 		contentGroup.setName("ContentGroupNameTest");
+		contentGroup.setRoomId(room.getId());
+		contentGroup.setPublished(true);
 
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
 		when(contentGroupRepository.findByRoomIdAndName(room.getId(), contentGroup.getName())).thenReturn(contentGroup);
@@ -348,6 +350,7 @@ public class RoomControllerTest {
 		contentGroup.setName("Test-ContentGroupName");
 		contentGroup.setContentIds(Arrays.stream(contentIds).collect(Collectors.toList()));
 		contentGroup.setRoomId(roomId);
+		contentGroup.setPublished(true);
 		return contentGroup;
 	}
 
@@ -359,6 +362,7 @@ public class RoomControllerTest {
 			contentGroup.setName("ContentGroupNameTest-" + (i + 1));
 			contentGroup.setRoomId(roomId);
 			contentGroup.setRevision("ContentGroupRevID");
+			contentGroup.setPublished(true);
 			final List<String> listOfContentsGroups = new ArrayList<>();
 			for (int ii = 0; ii < numberOfContents; ii++) {
 				listOfContentsGroups.add("ID-Content-" + UUID.randomUUID());

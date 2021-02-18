@@ -232,7 +232,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 		switch (permission) {
 			case "read":
-				return !room.isClosed() || hasUserIdRoomModeratingPermission(room, userId);
+				return (!room.isClosed() && targetContentGroup.isPublished())
+						|| hasUserIdRoomModeratingPermission(room, userId);
 			case "create":
 			case "update":
 			case "delete":
