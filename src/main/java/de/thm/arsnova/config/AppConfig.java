@@ -307,7 +307,7 @@ public class AppConfig implements WebMvcConfigurer {
 				"entity",
 				"rendered-texts",
 				"room.id-by-shortid",
-				"statistics"));
+				"system"));
 		caffeineCacheManager.setCaffeine(caffeine);
 
 		return caffeineCacheManager;

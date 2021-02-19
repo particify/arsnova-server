@@ -18,6 +18,9 @@
 
 package de.thm.arsnova.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -31,31 +34,24 @@ import de.thm.arsnova.persistence.StatisticsRepository;
  */
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
+	private static final long STATISTICS_REFRESH_INTERVAL_MS = 30000;
+	private static final Logger logger = LoggerFactory.getLogger(StatisticsServiceImpl.class);
 	private StatisticsRepository statisticsRepository;
 
-	private UserService userService;
-
-	public StatisticsServiceImpl(
-			final StatisticsRepository repository,
-			final UserService userService) {
+	public StatisticsServiceImpl(final StatisticsRepository repository) {
 		this.statisticsRepository = repository;
-		this.userService = userService;
 	}
 
-	private Statistics statistics = new Statistics();
-
-	@Scheduled(initialDelay = 0, fixedRate = 10000)
-	private void refreshStatistics() {
-		statistics = loadStatistics();
-	}
-
-	@Cacheable("statistics")
-	private Statistics loadStatistics() {
-		return statisticsRepository.getStatistics();
+	@Scheduled(initialDelay = 0, fixedRate = STATISTICS_REFRESH_INTERVAL_MS)
+	@CacheEvict(value = "system", key = "'statistics'")
+	private void clearCachedStatistics() {
+		logger.trace("Evicting statistics from cache.");
 	}
 
 	@Override
+	@Cacheable(value = "system", key = "'statistics'")
 	public Statistics getStatistics() {
-		return statistics;
+		logger.debug("Loading statistics (uncached).");
+		return statisticsRepository.getStatistics();
 	}
 }
