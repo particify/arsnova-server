@@ -72,7 +72,6 @@ import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.FromV2Migrator;
-import de.thm.arsnova.model.migration.ToV2Migrator;
 import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.web.CacheControlInterceptorHandler;
@@ -337,10 +336,5 @@ public class AppConfig implements WebMvcConfigurer {
 				? couchDbMigrationProperties.getAuthenticationProviderFallback()
 				: UserProfile.AuthProvider.UNKNOWN;
 		return new FromV2Migrator(authProviderFallback, couchDbMigrationProperties.getContentGroupNames());
-	}
-
-	@Bean
-	public ToV2Migrator toV2Migrator(final CouchDbMigrationProperties couchDbMigrationProperties) {
-		return new ToV2Migrator(couchDbMigrationProperties.getContentGroupNames());
 	}
 }
