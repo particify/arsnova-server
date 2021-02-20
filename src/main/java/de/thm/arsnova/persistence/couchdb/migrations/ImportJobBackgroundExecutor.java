@@ -226,8 +226,10 @@ public class ImportJobBackgroundExecutor implements ApplicationEventPublisherAwa
 						break;
 					}
 
+					logger.info("Retrieved {} pending import jobs for processing.",
+							importJobResponse.getEntities().size());
 					for (final ImportJob importJob : importJobResponse.getEntities()) {
-						logger.info("Running import job ID {} for user ID {}.", importJob.id, importJob.userId);
+						logger.debug("Processing import job ID {} for user ID {}.", importJob.id, importJob.userId);
 						final MigrationState.Migration state = importJob.getMigration() != null
 								? importJob.getMigration()
 								: new MigrationState.Migration(v2ToV3Migration.getId(), new Date());
@@ -258,7 +260,7 @@ public class ImportJobBackgroundExecutor implements ApplicationEventPublisherAwa
 								r -> {
 									importJob.setMigrationState(ImportMigrationState.FINISHED);
 									applicationEventPublisher.publishEvent(new AfterCreationEvent<>(this, r));
-									logger.info("Finished import job ID {}.", importJob.id, importJob.userId);
+									logger.debug("Finished import job ID {}.", importJob.id, importJob.userId);
 								},
 								() -> {
 									importJob.setMigrationState(ImportMigrationState.FAILED);

@@ -98,7 +98,7 @@ public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> im
 		}
 
 		if (count > 0) {
-			logger.info("Deleted {} inactive users.", count);
+			logger.info("Deleted {} non-activated user accounts.", count);
 			log("cleanup", "type", "user", "count", count);
 		}
 
