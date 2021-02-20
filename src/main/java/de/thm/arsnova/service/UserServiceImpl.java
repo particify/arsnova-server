@@ -173,7 +173,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	@Scheduled(fixedDelay = LOGIN_TRY_RESET_DELAY_MS)
 	public void resetLoginTries() {
 		if (!loginTries.isEmpty()) {
-			logger.debug("Reset failed login counters.");
+			logger.debug("Resetting counters for failed logins.");
 			loginTries.clear();
 		}
 	}
@@ -181,7 +181,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	@Scheduled(fixedDelay = LOGIN_BAN_RESET_DELAY_MS)
 	public void resetLoginBans() {
 		if (!loginBans.isEmpty()) {
-			logger.info("Reset temporary login bans.");
+			logger.info("Clearing temporary bans for failed logins ({}).", loginBans.size());
 			loginBans.clear();
 		}
 	}
@@ -189,7 +189,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	@Scheduled(fixedDelay = MAIL_RESEND_TRY_RESET_DELAY_MS)
 	public void resetResendingActivationTries() {
 		if (!resentMailCount.isEmpty()) {
-			logger.info("Reset failed mail activation resending counters.");
+			logger.debug("Resetting counters for resent activation mails.");
 			resentMailCount.clear();
 		}
 	}
@@ -197,14 +197,14 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	@Scheduled(fixedDelay = MAIL_RESEND_BAN_RESET_DELAY_MS)
 	public void resetResendingActivationBan() {
 		if (!resendMailBans.isEmpty()) {
-			logger.info("Reset temporary bans from resending activation mail.");
+			logger.info("Clearing temporary bans for resent activation mails ({}).", loginBans.size());
 			resendMailBans.clear();
 		}
 	}
 
 	@Scheduled(fixedDelay = ACTIVATION_KEY_CHECK_INTERVAL_MS)
 	public void deleteInactiveUsers() {
-		logger.info("Delete inactive users.");
+		logger.debug("Deleting non-activated user accounts.");
 		final long unixTime = System.currentTimeMillis();
 		final long lastActivityBefore = unixTime - ACTIVATION_KEY_DURABILITY_MS;
 		userRepository.deleteInactiveUsers(lastActivityBefore);

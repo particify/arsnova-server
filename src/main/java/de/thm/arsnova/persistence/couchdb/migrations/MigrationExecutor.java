@@ -53,8 +53,10 @@ public class MigrationExecutor {
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		final List<Migration> pendingMigrations = migrations.stream()
 				.filter(m -> !migrationState.getCompleted().contains(m.getId())).collect(Collectors.toList());
-		logger.info("Pending migrations: " + pendingMigrations.stream()
-				.map(Migration::getId).collect(Collectors.joining()));
+		logger.info("Pending migrations: " + (!pendingMigrations.isEmpty()
+				? pendingMigrations.stream()
+				.map(Migration::getId).collect(Collectors.joining())
+				: "(none)"));
 		for (final Migration migration : pendingMigrations) {
 			if (migrationState.getActive() != null) {
 				logger.info("Trying to continue from aborted migration: " + migrationState.getActive());
