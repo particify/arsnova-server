@@ -173,9 +173,11 @@ public abstract class AbstractEntityController<E extends Entity> {
 	}
 
 	@DeleteMapping(DELETE_MAPPING)
-	public void delete(@PathVariable final String id) {
+	public void delete(@PathVariable final String id, final HttpServletResponse httpServletResponse) {
 		final E entity = entityService.get(id);
 		entityService.delete(entity);
+		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
+		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
 	}
 
 	@PostMapping({FIND_MAPPING, LEGACY_FIND_MAPPING})
