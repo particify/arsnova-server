@@ -562,7 +562,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public void initiatePasswordReset(final UserProfile userProfile) {
+	public void initiatePasswordReset(final String id) {
+		final UserProfile userProfile = get(id);
 		if (null == userProfile) {
 			logger.info("Password reset failed. User does not exist.");
 
@@ -600,7 +601,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public boolean resetPassword(final UserProfile userProfile, final String key, final String password) {
+	public boolean resetPassword(final String id, final String key, final String password) {
+		final UserProfile userProfile = get(id);
+		if (userProfile == null || userProfile.getAccount() == null) {
+			return false;
+		}
 		final UserProfile.Account account = userProfile.getAccount();
 		if (null == key || "".equals(key) || !key.equals(account.getPasswordResetKey())) {
 			logger.info("Password reset failed. Invalid key provided for User {}.", userProfile.getLoginId());

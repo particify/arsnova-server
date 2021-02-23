@@ -135,17 +135,12 @@ public class UserController extends AbstractEntityController<UserProfile> {
 	public void resetPassword(
 			@PathVariable final String id,
 			@RequestBody final PasswordReset passwordReset) {
-		final UserProfile userProfile = userService.get(id, true);
-		if (userProfile == null) {
-			throw new BadRequestException();
-		}
-
 		if (passwordReset.getKey() != null) {
-			if (!userService.resetPassword(userProfile, passwordReset.getKey(), passwordReset.getPassword())) {
+			if (!userService.resetPassword(id, passwordReset.getKey(), passwordReset.getPassword())) {
 				throw new ForbiddenException();
 			}
 		} else {
-			userService.initiatePasswordReset(userProfile);
+			userService.initiatePasswordReset(id);
 		}
 	}
 
