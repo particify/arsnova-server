@@ -131,14 +131,14 @@ public class SecuredUserService extends AbstractSecuredEntityServiceImpl<UserPro
 
 	@Override
 	@Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
-	public void initiatePasswordReset(final UserProfile userProfile) {
-		userService.initiatePasswordReset(userProfile);
+	public void initiatePasswordReset(final String id) {
+		userService.initiatePasswordReset(id);
 	}
 
 	@Override
 	@Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
-	public boolean resetPassword(final UserProfile userProfile, final String key, final String password) {
-		return userService.resetPassword(userProfile, key, password);
+	public boolean resetPassword(final String id, final String key, final String password) {
+		return userService.resetPassword(id, key, password);
 	}
 
 	@Override
