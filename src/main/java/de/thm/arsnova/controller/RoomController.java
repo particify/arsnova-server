@@ -174,14 +174,26 @@ public class RoomController extends AbstractEntityController<Room> {
 	}
 
 	@PostMapping(value = TRANSFER_MAPPING, params = "newOwnerId")
-	public Room transferOwnership(@PathVariable final String id, @RequestParam final String newOwnerId) {
+	public Room transferOwnership(
+			@PathVariable final String id,
+			@RequestParam final String newOwnerId,
+			final HttpServletResponse httpServletResponse) {
 		final Room room = roomService.get(id);
-		return roomService.transferOwnership(room, newOwnerId);
+		final Room updatedRoom = roomService.transferOwnership(room, newOwnerId);
+		httpServletResponse.setHeader(ENTITY_ID_HEADER, room.getId());
+		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, room.getRevision());
+		return updatedRoom;
 	}
 
 	@PostMapping(value = TRANSFER_MAPPING, params = "newOwnerToken")
-	public Room transferOwnershipThroughToken(@PathVariable final String id, @RequestParam final String newOwnerToken) {
+	public Room transferOwnershipThroughToken(
+			@PathVariable final String id,
+			@RequestParam final String newOwnerToken,
+			final HttpServletResponse httpServletResponse) {
 		final Room room = roomService.get(id);
-		return roomService.transferOwnershipThroughToken(room, newOwnerToken);
+		final Room updatedRoom =  roomService.transferOwnershipThroughToken(room, newOwnerToken);
+		httpServletResponse.setHeader(ENTITY_ID_HEADER, room.getId());
+		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, room.getRevision());
+		return updatedRoom;
 	}
 }
