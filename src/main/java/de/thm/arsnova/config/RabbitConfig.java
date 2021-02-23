@@ -85,28 +85,6 @@ public class RabbitConfig {
 				.map(FanoutExchange::new).collect(Collectors.toList());
 
 		declarables.add(new Queue(
-				RoomAccessEventDispatcher.ROOM_ACCESS_GRANTED_QUEUE_NAME,
-				true,
-				false,
-				false,
-				Map.of(
-						"x-dead-letter-exchange", "",
-						"x-dead-letter-routing-key", RoomAccessEventDispatcher.ROOM_ACCESS_GRANTED_QUEUE_NAME + ".dlq"
-				)
-		));
-		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_GRANTED_QUEUE_NAME + ".dlq"));
-		declarables.add(new Queue(
-				RoomAccessEventDispatcher.ROOM_ACCESS_REVOKED_QUEUE_NAME,
-				true,
-				false,
-				false,
-				Map.of(
-						"x-dead-letter-exchange", "",
-						"x-dead-letter-routing-key", RoomAccessEventDispatcher.ROOM_ACCESS_REVOKED_QUEUE_NAME + ".dlq"
-				)
-		));
-		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_REVOKED_QUEUE_NAME + ".dlq"));
-		declarables.add(new Queue(
 				RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME,
 				true,
 				false,
