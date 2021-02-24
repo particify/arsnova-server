@@ -30,25 +30,34 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.DbAccessException;
+import org.ektorp.DocumentOperationResult;
+import org.ektorp.Options;
+import org.ektorp.ViewQuery;
 import org.ektorp.http.HttpResponse;
+import org.ektorp.http.ResponseCallback;
 import org.ektorp.http.StdResponseHandler;
 import org.ektorp.impl.ObjectMapperFactory;
 import org.ektorp.impl.StdCouchDbConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 
+import de.thm.arsnova.event.ReadRepositoryEvent;
+import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.serialization.View;
 
 /**
  * This Connector adds a query method which uses CouchDB's Mango API to retrieve data.
  */
-public class MangoCouchDbConnector extends StdCouchDbConnector {
+public class MangoCouchDbConnector extends StdCouchDbConnector implements ApplicationEventPublisherAware {
 	@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 	/**
 	 * Represents a <code>_find</code> query for CouchDB's Mango API.
@@ -228,6 +237,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(MangoCouchDbConnector.class);
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	public MangoCouchDbConnector(final String databaseName, final CouchDbInstance dbInstance) {
 		super(databaseName, dbInstance);
@@ -235,6 +245,32 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 
 	public MangoCouchDbConnector(final String databaseName, final CouchDbInstance dbi, final ObjectMapperFactory om) {
 		super(databaseName, dbi, om);
+	}
+
+	@Override
+	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+		this.applicationEventPublisher = applicationEventPublisher;
+	}
+
+	@Override
+	public <T> T get(final Class<T> c, final String id, final Options options) {
+		publishQueryEvent(c);
+		return super.get(c, id, options);
+	}
+
+	@Override
+	protected <T> T executeQuery(final ViewQuery query, final ResponseCallback<T> rh) {
+		publishQueryEvent(
+				query.getDesignDocId(),
+				query.hasMultipleKeys() || query.getStartKey() != null || query.getEndKey() != null,
+				query.isIncludeDocs(),
+				query.isReduce());
+		return super.executeQuery(query, rh);
+	}
+
+	@Override
+	public List<DocumentOperationResult> executeBulk(final Collection<?> objects, final boolean allOrNothing) {
+		return super.executeBulk(objects, allOrNothing);
 	}
 
 	/**
@@ -359,6 +395,21 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 					}
 				}
 		);
+	}
+
+	protected void publishQueryEvent(final Class<?> clazz) {
+		final String repositoryName = Entity.class.isAssignableFrom(clazz)
+				? clazz.getSimpleName()
+				: "n/a";
+		this.applicationEventPublisher.publishEvent(
+				new ReadRepositoryEvent(this, repositoryName, false, true, false));
+	}
+
+	protected void publishQueryEvent(
+			final String designDocId, final boolean multiple, final boolean includeDocs, final boolean reduce) {
+		final String repositoryName = designDocId.substring("_design/".length());
+		this.applicationEventPublisher.publishEvent(
+				new ReadRepositoryEvent(this, repositoryName, multiple, !includeDocs, reduce));
 	}
 
 	@JsonIgnoreProperties("purge_seq")

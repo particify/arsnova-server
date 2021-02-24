@@ -29,15 +29,20 @@ import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.ViewResult;
 import org.ektorp.support.CouchDbRepositorySupport;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.data.repository.NoRepositoryBean;
 
+import de.thm.arsnova.event.WriteRepositoryEvent;
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.persistence.CrudRepository;
 
 @NoRepositoryBean
 abstract class CouchDbCrudRepository<T extends Entity>
-		extends CouchDbRepositorySupport<T> implements CrudRepository<T, String> {
+		extends CouchDbRepositorySupport<T> implements CrudRepository<T, String>, ApplicationEventPublisherAware {
+	private final Class<T> type;
 	private String countableAllViewName;
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	protected CouchDbCrudRepository(
 			final Class<T> type,
@@ -46,6 +51,7 @@ abstract class CouchDbCrudRepository<T extends Entity>
 			final String countableAllViewName,
 			final boolean createIfNotExists) {
 		super(type, db, designDocName, createIfNotExists);
+		this.type = type;
 		this.countableAllViewName = countableAllViewName;
 	}
 
@@ -55,6 +61,7 @@ abstract class CouchDbCrudRepository<T extends Entity>
 			final String countableAllViewName,
 			final boolean createIfNotExists) {
 		super(type, db, createIfNotExists);
+		this.type = type;
 		this.countableAllViewName = countableAllViewName;
 	}
 
@@ -63,7 +70,13 @@ abstract class CouchDbCrudRepository<T extends Entity>
 	}
 
 	@Override
+	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+		this.applicationEventPublisher = applicationEventPublisher;
+	}
+
+	@Override
 	public <S extends T> S save(final S entity) {
+		publishWriteEvent(false);
 		final String id = entity.getId();
 		if (id != null) {
 			db.update(entity);
@@ -79,6 +92,7 @@ abstract class CouchDbCrudRepository<T extends Entity>
 		if (!(entities instanceof List)) {
 			throw new IllegalArgumentException("Implementation only supports Lists.");
 		}
+		publishWriteEvent(true);
 		final List<S> entityList = (List<S>) entities;
 		db.executeBulk(entityList);
 
@@ -131,12 +145,14 @@ abstract class CouchDbCrudRepository<T extends Entity>
 
 	@Override
 	public void deleteById(final String id) {
+		publishWriteEvent(false);
 		final T entity = get(id);
 		db.delete(id, entity.getRevision());
 	}
 
 	@Override
 	public void delete(final T entity) {
+		publishWriteEvent(false);
 		db.delete(entity);
 	}
 
@@ -146,6 +162,7 @@ abstract class CouchDbCrudRepository<T extends Entity>
 			throw new IllegalArgumentException("Implementation only supports Collections.");
 		}
 
+		publishWriteEvent(true);
 		final List<BulkDeleteDocument> docs = ((Collection<? extends T>) entities).stream()
 				.map(entity -> new BulkDeleteDocument(entity.getId(), entity.getRevision()))
 				.collect(Collectors.toList());
@@ -181,5 +198,10 @@ abstract class CouchDbCrudRepository<T extends Entity>
 				return null;
 			}
 		}).collect(Collectors.toList());
+	}
+
+	protected void publishWriteEvent(final boolean multiple) {
+		this.applicationEventPublisher.publishEvent(
+				new WriteRepositoryEvent(this, type.getSimpleName(), multiple));
 	}
 }
