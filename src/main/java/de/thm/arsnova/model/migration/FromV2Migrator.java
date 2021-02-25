@@ -90,7 +90,7 @@ public class FromV2Migrator {
 		formatMapping.put(V2_TYPE_YESNO, de.thm.arsnova.model.Content.Format.BINARY);
 		formatMapping.put(V2_TYPE_FREETEXT, de.thm.arsnova.model.Content.Format.TEXT);
 		formatMapping.put(V2_TYPE_SLIDE, de.thm.arsnova.model.Content.Format.SLIDE);
-		formatMapping.put(V2_TYPE_FLASHCARD, de.thm.arsnova.model.Content.Format.SLIDE);
+		formatMapping.put(V2_TYPE_FLASHCARD, de.thm.arsnova.model.Content.Format.FLASHCARD);
 		formatMapping.put(V2_TYPE_GRID, de.thm.arsnova.model.Content.Format.GRID);
 	}
 
@@ -271,15 +271,9 @@ public class FromV2Migrator {
 				break;
 			case V2_TYPE_FLASHCARD:
 				to = new de.thm.arsnova.model.Content();
-				to.setFormat(de.thm.arsnova.model.Content.Format.SLIDE);
-				extensions = new HashMap<>();
-				to.setExtensions(extensions);
-				v2 = new HashMap<>();
-				extensions.put("v2", v2);
-				v2.put("format", V2_TYPE_FLASHCARD);
+				to.setFormat(de.thm.arsnova.model.Content.Format.FLASHCARD);
 				if (!from.getPossibleAnswers().isEmpty()) {
 					to.setAdditionalText(from.getPossibleAnswers().get(0).getText());
-					to.setAdditionalTextTitle("Back");
 				}
 
 				break;

@@ -51,7 +51,8 @@ public class Content extends Entity {
 		TEXT,
 		GRID,
 		SLIDE,
-		SORT
+		SORT,
+		FLASHCARD
 	}
 
 	public static class State {
@@ -181,6 +182,7 @@ public class Content extends Entity {
 	private State state;
 	private Date timestamp;
 	private String additionalText;
+	private String renderedAdditionalText;
 	private String additionalTextTitle;
 	private Map<String, Map<String, Object>> extensions;
 	private Map<String, String> attachments;
@@ -192,6 +194,10 @@ public class Content extends Entity {
 		this.addRenderingMapping(
 				this::getBody,
 				this::setRenderedBody,
+				this.bodyRenderingOptions);
+		this.addRenderingMapping(
+				this::getAdditionalText,
+				this::setRenderedAdditionalText,
 				this.bodyRenderingOptions);
 	}
 
@@ -245,7 +251,7 @@ public class Content extends Entity {
 	public void setFormat(final Format format) {
 		this.format = format;
 		this.bodyRenderingOptions.setMarkdownFeatureset(
-				format == Format.SLIDE
+				format == Format.SLIDE || format == Format.FLASHCARD
 				? TextRenderingOptions.MarkdownFeatureset.EXTENDED
 				: TextRenderingOptions.MarkdownFeatureset.SIMPLE);
 	}
@@ -289,7 +295,7 @@ public class Content extends Entity {
 		this.timestamp = timestamp;
 	}
 
-	@JsonView({View.Persistence.class, View.Extended.class})
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getAdditionalText() {
 		return additionalText;
 	}
@@ -307,6 +313,15 @@ public class Content extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setAdditionalTextTitle(final String additionalTextTitle) {
 		this.additionalTextTitle = additionalTextTitle;
+	}
+
+	@JsonView(View.Public.class)
+	public String getRenderedAdditionalText() {
+		return renderedAdditionalText;
+	}
+
+	public void setRenderedAdditionalText(final String renderedAdditionalText) {
+		this.renderedAdditionalText = renderedAdditionalText;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
