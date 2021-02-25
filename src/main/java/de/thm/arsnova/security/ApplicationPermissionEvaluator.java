@@ -200,7 +200,12 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 		switch (permission) {
 			case READ_PERMISSION:
-				return !room.isClosed() || hasUserIdRoomModeratingPermission(room, userId);
+				if (hasUserIdRoomModeratingPermission(room, userId)) {
+					return true;
+				}
+				return !room.isClosed() && contentGroupService.getByRoomIdAndContainingContentId(
+						targetContent.getRoomId(), targetContent.getId()).stream()
+						.anyMatch(cg -> cg.isContentPublished(targetContent.getId()));
 			case READ_EXTENDED_PERMISSION:
 				return userId.equals(room.getOwnerId())
 						|| hasUserIdRoomModeratingPermission(room, userId);
@@ -227,7 +232,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 		switch (permission) {
 			case "read":
-				return !room.isClosed() || hasUserIdRoomModeratingPermission(room, userId);
+				return (!room.isClosed() && targetContentGroup.isPublished())
+						|| hasUserIdRoomModeratingPermission(room, userId);
 			case "create":
 			case "update":
 			case "delete":
@@ -249,13 +255,13 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		final Room room;
 		switch (permission) {
 			case READ_PERMISSION:
-				if (content.getState().isResponsesVisible() || userId.equals(targetAnswer.getCreatorId())) {
+				if (content.getState().isAnswersPublished() || userId.equals(targetAnswer.getCreatorId())) {
 					return true;
 				}
 				room = roomService.get(targetAnswer.getRoomId());
 				return room != null && hasUserIdRoomModeratingPermission(room, userId);
 			case CREATE_PERMISSION:
-				return content.getState().isResponsesEnabled();
+				return content.getState().isAnswerable();
 			case OWNER_PERMISSION:
 				return userId.equals(targetAnswer.getCreatorId());
 			case UPDATE_PERMISSION:

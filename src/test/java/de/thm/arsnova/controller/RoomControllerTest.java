@@ -41,11 +41,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -207,6 +207,8 @@ public class RoomControllerTest {
 		room.setId("Test-RoomId");
 		final ContentGroup contentGroup = new ContentGroup();
 		contentGroup.setName("ContentGroupNameTest");
+		contentGroup.setRoomId(room.getId());
+		contentGroup.setPublished(true);
 
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
 		when(contentGroupRepository.findByRoomIdAndName(room.getId(), contentGroup.getName())).thenReturn(contentGroup);
@@ -305,7 +307,7 @@ public class RoomControllerTest {
 		contentGroup.setId("SOME_ID");
 		contentGroup.setName("Test-ContentGroupName");
 		contentGroup.setRoomId(room.getId());
-		contentGroup.setContentIds(new LinkedHashSet<>()); // empty list of contents
+		contentGroup.setContentIds(new ArrayList<>()); // empty list of contents
 
 		mockMvc.perform(put("/room/" + room.getId() + "/contentgroup/" + contentGroup.getName())
 				.with(csrf())
@@ -346,8 +348,9 @@ public class RoomControllerTest {
 		contentGroup.setId("Test-ContentGroupId");
 		contentGroup.setRevision("Test-ContentGroupRev");
 		contentGroup.setName("Test-ContentGroupName");
-		contentGroup.setContentIds(new LinkedHashSet<>(Arrays.asList(contentIds)));
+		contentGroup.setContentIds(Arrays.stream(contentIds).collect(Collectors.toList()));
 		contentGroup.setRoomId(roomId);
+		contentGroup.setPublished(true);
 		return contentGroup;
 	}
 
@@ -359,7 +362,8 @@ public class RoomControllerTest {
 			contentGroup.setName("ContentGroupNameTest-" + (i + 1));
 			contentGroup.setRoomId(roomId);
 			contentGroup.setRevision("ContentGroupRevID");
-			final Set<String> listOfContentsGroups = new LinkedHashSet<>();
+			contentGroup.setPublished(true);
+			final List<String> listOfContentsGroups = new ArrayList<>();
 			for (int ii = 0; ii < numberOfContents; ii++) {
 				listOfContentsGroups.add("ID-Content-" + UUID.randomUUID());
 			}

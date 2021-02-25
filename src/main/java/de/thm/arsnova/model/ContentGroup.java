@@ -19,10 +19,9 @@
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import org.springframework.core.style.ToStringCreator;
@@ -36,8 +35,12 @@ public class ContentGroup extends Entity {
 	@NotBlank
 	private String name;
 
-	private Set<String> contentIds;
-	private boolean autoSort;
+	private List<String> contentIds;
+	private boolean published;
+	private int firstPublishedIndex = -1;
+	private int lastPublishedIndex = -1;
+	private boolean statisticsPublished = true;
+	private boolean correctOptionsPublished = true;
 
 	public ContentGroup() {
 
@@ -69,33 +72,82 @@ public class ContentGroup extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public Set<String> getContentIds() {
+	public List<String> getContentIds() {
 		if (contentIds == null) {
-			contentIds = new LinkedHashSet<>();
+			contentIds = new ArrayList<>();
 		}
 
 		return contentIds;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	@JsonDeserialize(as = LinkedHashSet.class)
-	public void setContentIds(final Set<String> contentIds) {
+	public void setContentIds(final List<String> contentIds) {
 		this.contentIds = contentIds;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public boolean isAutoSort() {
-		return autoSort;
+	public boolean isPublished() {
+		return published;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAutoSort(final boolean autoSort) {
-		this.autoSort = autoSort;
+	public void setPublished(final boolean published) {
+		this.published = published;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public int getFirstPublishedIndex() {
+		return firstPublishedIndex;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setFirstPublishedIndex(final int firstPublishedIndex) {
+		this.firstPublishedIndex = firstPublishedIndex;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public int getLastPublishedIndex() {
+		return lastPublishedIndex;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setLastPublishedIndex(final int lastPublishedIndex) {
+		this.lastPublishedIndex = lastPublishedIndex;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public boolean isStatisticsPublished() {
+		return statisticsPublished;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setStatisticsPublished(final boolean statisticsPublished) {
+		this.statisticsPublished = statisticsPublished;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public boolean isCorrectOptionsPublished() {
+		return correctOptionsPublished;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setCorrectOptionsPublished(final boolean correctOptionsPublished) {
+		this.correctOptionsPublished = correctOptionsPublished;
+	}
+
+	public boolean isContentPublished(final String contentId) {
+		final int i = contentIds.indexOf(contentId);
+		return i > -1 && (firstPublishedIndex == -1 || i >= firstPublishedIndex)
+				&& (lastPublishedIndex == -1 || i <= lastPublishedIndex);
+	}
+
+	public boolean containsContent(final String contentId) {
+		return contentIds.contains(contentId);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, contentIds, autoSort);
+		return Objects.hash(name, contentIds);
 	}
 
 	@Override
@@ -108,17 +160,20 @@ public class ContentGroup extends Entity {
 		}
 		final ContentGroup that = (ContentGroup) o;
 
-		return autoSort == that.autoSort
-			&& Objects.equals(name, that.name)
+		return Objects.equals(name, that.name)
 			&& Objects.equals(contentIds, that.contentIds);
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)
-			.append("name", name)
-			.append("contentIds", contentIds)
-			.append("autoSort", autoSort)
-			.toString();
+				.append("name", name)
+				.append("contentIds", contentIds)
+				.append("published", published)
+				.append("firstPublishedIndex", firstPublishedIndex)
+				.append("lastPublishedIndex", lastPublishedIndex)
+				.append("statisticsPublished", statisticsPublished)
+				.append("correctOptionsPublished", correctOptionsPublished)
+				.toString();
 	}
 }

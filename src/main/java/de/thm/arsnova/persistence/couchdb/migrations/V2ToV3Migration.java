@@ -25,7 +25,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -630,7 +629,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		query.setLimit(LIMIT);
 		String bookmark = (String) state.getState();
 
-		final Map<String, Set<String>> groups = new HashMap<>();
+		final Map<String, List<String>> groups = new HashMap<>();
 		final Map<String, String> sortMapping = new HashMap<>();
 		String prevRoomId = "";
 		String prevGroupName = "";
@@ -655,7 +654,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 					if (!prevGroupName.isEmpty()) {
 						groups.put(prevGroupName, groups.get(prevGroupName).stream()
 								.sorted(Comparator.comparing(sortMapping::get))
-								.collect(Collectors.toCollection(LinkedHashSet::new)));
+								.collect(Collectors.toList()));
 					}
 					prevGroupName = groupName;
 					sortMapping.clear();
@@ -665,7 +664,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 						prevRoomId = contentV2.getSessionId();
 					}
 				}
-				final Set<String> contentIds = groups.getOrDefault(groupName, new LinkedHashSet<>());
+				final List<String> contentIds = groups.getOrDefault(groupName, new ArrayList<>());
 				groups.put(groupName, contentIds);
 				contentIds.add(contentV2.getId());
 				final String sortString = contentV2.getSubject() + " " + contentV2.getText();
@@ -676,13 +675,13 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		if (!prevGroupName.isEmpty()) {
 			groups.put(prevGroupName, groups.get(prevGroupName).stream()
 					.sorted(Comparator.comparing(sortMapping::get))
-					.collect(Collectors.toCollection(LinkedHashSet::new)));
+					.collect(Collectors.toList()));
 		}
 		createContentGroups(prevRoomId, groups);
 		state.setState(null);
 	}
 
-	private void createContentGroups(final String roomId, final Map<String, Set<String>> groups) {
+	private void createContentGroups(final String roomId, final Map<String, List<String>> groups) {
 		if (!groups.isEmpty()) {
 			final List<ContentGroup> contentGroups = new ArrayList<>();
 			for (final String name : groups.keySet()) {

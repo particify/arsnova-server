@@ -1,6 +1,6 @@
 package de.thm.arsnova.service;
 
-import java.util.Set;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.annotation.Secured;
@@ -62,11 +62,11 @@ public class ImportServiceImpl implements ImportService {
 
 		final ContentGroup preparationContentGroup = new ContentGroup();
 		preparationContentGroup.setName(V2_PREPARATION_QUESTION_CONTENT_GROUP_NAME);
-		final Set<String> preparationContentGroupIds = preparationContentGroup.getContentIds();
+		final List<String> preparationContentGroupIds = preparationContentGroup.getContentIds();
 
 		final ContentGroup lectureContentGroup = new ContentGroup();
 		lectureContentGroup.setName(V2_LECTURE_QUESTION_CONTENT_GROUP_NAME);
-		final Set<String> lectureContentGroupIds = lectureContentGroup.getContentIds();
+		final List<String> lectureContentGroupIds = lectureContentGroup.getContentIds();
 
 		final ImportExportContainer.ImportExportRoom toImport = container.getSession();
 
@@ -82,8 +82,6 @@ public class ImportServiceImpl implements ImportService {
 			final Content newContent = fromV2Migrator.migrate(importExportContent);
 			logger.trace("Import content: {}", newContent);
 			newContent.setRoomId(savedRoom.getId());
-			final Content.State contentStage = newContent.getState();
-			contentStage.setResponsesEnabled(true);
 			final Content savedContent = contentService.create(newContent);
 
 			if (importExportContent.getQuestionVariant().equals("preparation")) {

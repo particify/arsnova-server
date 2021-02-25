@@ -20,7 +20,6 @@ package de.thm.arsnova.service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -203,7 +202,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	protected void prepareDelete(final Content content) {
 		final List<ContentGroup> contentGroups = contentGroupService.getByRoomId(content.getRoomId());
 		for (final ContentGroup contentGroup : contentGroups) {
-			final Set<String> ids = contentGroup.getContentIds();
+			final List<String> ids = contentGroup.getContentIds();
 			if (ids.contains(content.getId())) {
 				ids.remove(content.getId());
 				if (!ids.isEmpty()) {
@@ -219,7 +218,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		if ("all".equals(groupName)) {
 			delete(contentRepository.findStubsByRoomId(room.getId()));
 		} else {
-			final Set<String> ids = contentGroupService.getByRoomIdAndName(room.getId(), groupName).getContentIds();
+			final List<String> ids = contentGroupService.getByRoomIdAndName(room.getId(), groupName).getContentIds();
 			final Iterable<Content> contents = contentRepository.findStubsByIds(ids);
 			contents.forEach(c -> c.setRoomId(room.getId()));
 			delete(contents);

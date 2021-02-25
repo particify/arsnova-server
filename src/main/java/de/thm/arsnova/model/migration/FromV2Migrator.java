@@ -346,10 +346,6 @@ public class FromV2Migrator {
 		}
 		final de.thm.arsnova.model.Content.State state = to.getState();
 		state.setRound(from.getPiRound());
-		state.setVisible(from.isActive());
-		state.setResponsesVisible(from.isShowStatistic());
-		state.setAdditionalTextVisible(from.isShowAnswer());
-		state.setResponsesEnabled(!from.isVotingDisabled());
 
 		return to;
 	}

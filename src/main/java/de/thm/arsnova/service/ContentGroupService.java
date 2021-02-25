@@ -9,6 +9,8 @@ public interface ContentGroupService extends EntityService<ContentGroup> {
 
 	List<ContentGroup> getByRoomId(String roomId);
 
+	List<ContentGroup> getByRoomIdAndContainingContentId(String roomId, String contentId);
+
 	void addContentToGroup(String roomId, String groupName, String contentId);
 
 	void removeContentFromGroup(String roomId, String groupId, String contentId);
