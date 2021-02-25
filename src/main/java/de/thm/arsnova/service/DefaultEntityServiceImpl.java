@@ -27,7 +27,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -62,6 +67,8 @@ import de.thm.arsnova.persistence.CrudRepository;
  * @author Daniel Gerhardt
  */
 public class DefaultEntityServiceImpl<T extends Entity> implements EntityService<T>, ApplicationEventPublisherAware {
+	private static final Logger logger = LoggerFactory.getLogger(DefaultEntityServiceImpl.class);
+
 	protected Class<T> type;
 	protected CrudRepository<T, String> repository;
 	protected ApplicationEventPublisher eventPublisher;
@@ -101,10 +108,41 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 
 	@Override
 	public List<T> get(final Iterable<String> ids) {
-		final List<T> entities = repository.findAllById(ids);
-		entities.forEach(this::modifyRetrieved);
+		final Map<String, Optional<T>> cachedEntities = StreamSupport.stream(ids.spliterator(), false)
+				.map(id -> Map.entry(id, Optional.ofNullable(getCachedOrNull(id))))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+		final List<String> missingIds = cachedEntities.entrySet().stream()
+				.filter(entry -> entry.getValue().isEmpty())
+				.map(entry -> entry.getKey())
+				.collect(Collectors.toList());
 
-		return entities;
+		if (!missingIds.isEmpty()) {
+			logger.trace("Some entities in list have not yet been cached ({} out of {}).",
+					missingIds.size(), cachedEntities.size());
+			final List<T> entities = repository.findAllById(missingIds);
+			for (final T entity : entities) {
+				modifyRetrieved(entity);
+				putInCache(entity);
+				cachedEntities.put(entity.getId(), Optional.of(entity));
+			}
+		}
+
+		return cachedEntities.entrySet().stream()
+				.map(Map.Entry::getValue)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toList());
+	}
+
+	/** Check the cache without modifying it and return the cached entity or null if the entity is not cached. */
+	@Cacheable(cacheNames = "entity", key = "#root.target.getTypeName() + '-' + #id", unless = "true")
+	private T getCachedOrNull(final String id) {
+		return null;
+	}
+
+	@CachePut(cacheNames = "entity", key = "#root.target.getTypeName() + '-' + #entity.id")
+	private T putInCache(final T entity) {
+		return entity;
 	}
 
 	@Override
