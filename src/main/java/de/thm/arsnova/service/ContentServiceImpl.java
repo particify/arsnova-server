@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
 import de.thm.arsnova.event.BeforeDeletionEvent;
+import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
@@ -212,6 +213,17 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 				}
 			}
 		}
+	}
+
+	@Override
+	public List<Integer> getCorrectChoiceIndexes(final String contentId) {
+		final Content content = get(contentId);
+		if (content instanceof ChoiceQuestionContent) {
+			final ChoiceQuestionContent choiceQuestionContent = (ChoiceQuestionContent) content;
+			return choiceQuestionContent.getCorrectOptionIndexes();
+		}
+
+		throw new IllegalArgumentException("Content has no choice indexes.");
 	}
 
 	private void deleteByRoomAndGroupName(final Room room, final String groupName) {

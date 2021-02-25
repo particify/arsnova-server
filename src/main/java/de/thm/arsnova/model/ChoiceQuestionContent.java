@@ -108,8 +108,7 @@ public class ChoiceQuestionContent extends Content {
 		this.options = options;
 	}
 
-	/* TODO: A new JsonView is needed here. */
-	@JsonView(View.Persistence.class)
+	@JsonView({View.Persistence.class, View.Extended.class})
 	public List<Integer> getCorrectOptionIndexes() {
 		return correctOptionIndexes;
 	}

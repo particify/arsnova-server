@@ -45,12 +45,16 @@ import de.thm.arsnova.service.RoomService;
  */
 @Component
 public class ApplicationPermissionEvaluator implements PermissionEvaluator {
+	/* common permissions */
 	public static final String READ_PERMISSION = "read";
 	public static final String READ_EXTENDED_PERMISSION = "read-extended";
 	public static final String CREATE_PERMISSION = "create";
 	public static final String UPDATE_PERMISSION = "update";
 	public static final String DELETE_PERMISSION = "delete";
 	public static final String OWNER_PERMISSION = "owner";
+
+	/* specialized permissions */
+	public static final String READ_CORRECT_OPTIONS_PERMISSION = "read-correct-options";
 
 	private static final Logger logger = LoggerFactory.getLogger(ApplicationPermissionEvaluator.class);
 
@@ -209,6 +213,13 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			case READ_EXTENDED_PERMISSION:
 				return userId.equals(room.getOwnerId())
 						|| hasUserIdRoomModeratingPermission(room, userId);
+			case READ_CORRECT_OPTIONS_PERMISSION:
+				if (hasUserIdRoomModeratingPermission(room, userId)) {
+					return true;
+				}
+				return !room.isClosed() && contentGroupService.getByRoomIdAndContainingContentId(
+						targetContent.getRoomId(), targetContent.getId()).stream()
+						.anyMatch(cg -> cg.isContentPublished(targetContent.getId()) && cg.isCorrectOptionsPublished());
 			case CREATE_PERMISSION:
 			case UPDATE_PERMISSION:
 			case DELETE_PERMISSION:

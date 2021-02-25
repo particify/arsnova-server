@@ -33,4 +33,6 @@ public interface ContentService extends EntityService<Content> {
 	int countByRoomId(String roomId);
 
 	int countByRoomIdAndGroup(String roomId, String group);
+
+	List<Integer> getCorrectChoiceIndexes(String contentId);
 }
