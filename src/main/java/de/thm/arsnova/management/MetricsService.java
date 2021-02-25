@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.AfterDeletionEvent;
 import de.thm.arsnova.event.NewFeedbackEvent;
+import de.thm.arsnova.event.ReadRepositoryEvent;
+import de.thm.arsnova.event.WriteRepositoryEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.Room;
@@ -29,6 +31,13 @@ public class MetricsService {
 	private static final String ACCOUNT_AUTH_PROVIDER_TYPE = "account";
 	private static final String GUEST_AUTH_PROVIDER_TYPE = "guest";
 	private static final String SSO_AUTH_PROVIDER_TYPE = "sso";
+	private static final String REPOSITORY_READ_EVENT_NAME = EVENT_PREFIX + "repository.read";
+	private static final String REPOSITORY_WRITE_EVENT_NAME = EVENT_PREFIX + "repository.write";
+	private static final String REPOSITORY_TYPE_KEY = "type";
+	private static final String REPOSITORY_OPERATION_MODE_KEY = "operation.mode";
+	private static final String REPOSITORY_ENTITY_MODE_KEY = "entity.mode";
+
+	private final MeterRegistry meterRegistry;
 
 	private final Counter accountUsersCreatedCounter;
 	private final Counter guestUsersCreatedCounter;
@@ -49,6 +58,8 @@ public class MetricsService {
 	private final Counter surveyVoteCounter;
 
 	public MetricsService(final MeterRegistry meterRegistry) {
+		this.meterRegistry = meterRegistry;
+
 		accountUsersCreatedCounter = meterRegistry.counter(USER_EVENT_NAME, List.of(
 				Tag.of(EVENT_TYPE_KEY, CREATION_EVENT_TYPE),
 				Tag.of(AUTH_PROVIDER_TYPE_KEY, ACCOUNT_AUTH_PROVIDER_TYPE)));
@@ -154,5 +165,28 @@ public class MetricsService {
 	@EventListener
 	public void countSurveyVote(final NewFeedbackEvent event) {
 		surveyVoteCounter.increment();
+	}
+
+	@EventListener
+	public void handleReadRepositoryEvent(final ReadRepositoryEvent event) {
+		final Counter counter = meterRegistry.counter(REPOSITORY_READ_EVENT_NAME, List.of(
+				Tag.of(REPOSITORY_TYPE_KEY, event.getTypeName()),
+				Tag.of(REPOSITORY_OPERATION_MODE_KEY, event.isReduced()
+						? "aggregated"
+						: (event.isMultiple() ? "list" : "single")),
+				Tag.of(REPOSITORY_ENTITY_MODE_KEY, event.isReduced()
+						? "n/a"
+						: event.isPartial() ? "partial" : "full")
+		));
+		counter.increment();
+	}
+
+	@EventListener
+	public void handleWriteRepositoryEvent(final WriteRepositoryEvent event) {
+		final Counter counter = meterRegistry.counter(REPOSITORY_WRITE_EVENT_NAME, List.of(
+				Tag.of(REPOSITORY_TYPE_KEY, event.getTypeName()),
+				Tag.of(REPOSITORY_OPERATION_MODE_KEY, event.isMultiple() ? "bulk" : "single")
+		));
+		counter.increment();
 	}
 }
