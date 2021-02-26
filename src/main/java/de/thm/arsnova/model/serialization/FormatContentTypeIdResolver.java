@@ -33,7 +33,8 @@ public class FormatContentTypeIdResolver extends TypeIdResolverBase {
 	@Override
 	public String idFromValue(final Object value) {
 		if (value instanceof Content) {
-			return ((Content) value).getFormat().toString();
+			final Content content = (Content) value;
+			return content.getFormat() != null ? content.getFormat().toString() : null;
 		} else {
 			throw new IllegalArgumentException("Unsupported type.");
 		}
