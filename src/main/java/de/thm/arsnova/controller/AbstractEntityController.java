@@ -108,17 +108,19 @@ public abstract class AbstractEntityController<E extends Entity> {
 		 * modified in meantime. */
 		final List<String> requestedIds = List.copyOf(ids);
 		final List<E> entities = entityService.get(ids);
-		if (skipMissing || entities.size() == requestedIds.size()) {
-			return entities;
-		}
 
-		/* Add nulls for missing entities (not found or no read permission). */
+		/* Create mapping which is used later to restore ordering and add nulls
+		 * for missing entities (not found or no read permission) if skipMissing
+		 * is false. */
 		final Map<String, E> idEntityMappings = entities.stream().collect(Collectors.toMap(
 				e -> e.getId(),
 				e -> e
 		));
 
-		return requestedIds.stream().map(id -> idEntityMappings.get(id)).collect(Collectors.toList());
+		return requestedIds.stream()
+				.filter(id -> !skipMissing || idEntityMappings.get(id) != null)
+				.map(id -> idEntityMappings.get(id))
+				.collect(Collectors.toList());
 	}
 
 	@PutMapping(value = PUT_MAPPING, produces = MEDIATYPE_EMPTY)
