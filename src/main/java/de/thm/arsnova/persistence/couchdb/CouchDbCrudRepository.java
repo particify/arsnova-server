@@ -40,9 +40,10 @@ import de.thm.arsnova.persistence.CrudRepository;
 @NoRepositoryBean
 abstract class CouchDbCrudRepository<T extends Entity>
 		extends CouchDbRepositorySupport<T> implements CrudRepository<T, String>, ApplicationEventPublisherAware {
+	protected ApplicationEventPublisher applicationEventPublisher;
+
 	private final Class<T> type;
 	private String countableAllViewName;
-	private ApplicationEventPublisher applicationEventPublisher;
 
 	protected CouchDbCrudRepository(
 			final Class<T> type,
