@@ -3,6 +3,7 @@ package de.thm.arsnova.service.httpgateway.config
 import de.thm.arsnova.service.httpgateway.filter.AuthFilter
 import de.thm.arsnova.service.httpgateway.filter.JwtUserIdFilter
 import de.thm.arsnova.service.httpgateway.filter.RequestRateLimiter
+import de.thm.arsnova.service.httpgateway.filter.RoomAuthFilter
 import de.thm.arsnova.service.httpgateway.filter.RoomIdFilter
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory
@@ -44,25 +45,10 @@ class GatewayConfig (
             builder: RouteLocatorBuilder,
             authFilter: AuthFilter,
             roomIdFilter: RoomIdFilter,
+            roomAuthFilter: RoomAuthFilter,
             jwtUserIdFilter: JwtUserIdFilter
     ): RouteLocator? {
         val routes = builder.routes()
-
-        routes.route("core") { p ->
-            p
-                .path(
-                    "/room/{roomId}/content/**",
-                    "/room/{roomId}/answer/**"
-                )
-                .filters { f ->
-                    f.filter(authFilter.apply(AuthFilter.Config()))
-                    f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
-                    f.requestRateLimiter { r ->
-                        r.rateLimiter = requestRateLimiter
-                    }
-                }
-                .uri(httpGatewayProperties.routing.endpoints.core)
-        }
 
         routes.route("roomaccess") {p ->
             p
@@ -232,6 +218,39 @@ class GatewayConfig (
                         }
                         .uri(httpGatewayProperties.routing.endpoints.proxyMetrics)
             }
+        }
+
+        routes.route("core") { p ->
+            p
+                .path(
+                    "/room/{roomId}/content/**",
+                    "/room/{roomId}/answer/**"
+                )
+                .filters { f ->
+                    f.filter(authFilter.apply(AuthFilter.Config()))
+                    f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
+                    }
+                }
+                .uri(httpGatewayProperties.routing.endpoints.core)
+        }
+
+        routes.route("room") { p ->
+            p
+                .path(
+                    "/room/",
+                    "/room/{roomId}",
+                    "/room/{roomId}/moderator/**",
+                    "/room/{roomId}/transfer**",
+                )
+                .filters { f ->
+                    f.filter(roomAuthFilter.apply(RoomAuthFilter.Config()))
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
+                    }
+                }
+                .uri(httpGatewayProperties.routing.endpoints.core)
         }
 
         routes.route("core") { p ->
