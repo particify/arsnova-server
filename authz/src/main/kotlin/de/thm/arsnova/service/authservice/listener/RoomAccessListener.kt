@@ -2,12 +2,11 @@ package de.thm.arsnova.service.authservice.listener
 
 import de.thm.arsnova.service.authservice.config.RabbitConfig
 import de.thm.arsnova.service.authservice.handler.RoomAccessHandler
-import de.thm.arsnova.service.authservice.model.command.CreateRoomAccessCommand
-import de.thm.arsnova.service.authservice.model.command.DeleteRoomAccessCommand
+import de.thm.arsnova.service.authservice.model.RoomAccess
 import de.thm.arsnova.service.authservice.model.command.SyncRoomAccessCommand
-import de.thm.arsnova.service.authservice.model.event.RoomAccessGrantedEvent
-import de.thm.arsnova.service.authservice.model.event.RoomAccessRevokedEvent
 import de.thm.arsnova.service.authservice.model.event.RoomAccessSyncEvent
+import de.thm.arsnova.service.authservice.model.event.RoomCreatedEvent
+import de.thm.arsnova.service.authservice.model.event.RoomDeletedEvent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.annotation.RabbitListener
@@ -19,16 +18,16 @@ class RoomAccessListener (
 ) {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    @RabbitListener(queues = [RabbitConfig.roomAccessGrantedQueueName])
-    fun receiveRoomAccessGrantedEvent(event: RoomAccessGrantedEvent) {
-        logger.debug("Got event on room access granted queue: {}", event)
-        handler.handleCreateRoomAccessCommand(CreateRoomAccessCommand(event.rev, event.roomId, event.userId, event.role))
+    @RabbitListener(queues = [RabbitConfig.roomCreatedQueueName])
+    fun receiveRoomCreatedEvent(event: RoomCreatedEvent) {
+        logger.debug("Got event on room created queue: {}", event)
+        handler.create(RoomAccess(event.id, event.ownerId, "1-0", "CREATOR"))
     }
 
-    @RabbitListener(queues = [RabbitConfig.roomAccessRevokedQueueName])
-    fun receiveRoomAccessRevokedEvent(event: RoomAccessRevokedEvent) {
-        logger.debug("Got event on room access revoked queue: {}", event)
-        handler.handleDeleteRoomAccessCommand(DeleteRoomAccessCommand(event.rev, event.roomId, event.userId))
+    @RabbitListener(queues = [RabbitConfig.roomDeletedQueueName])
+    fun receiveRoomDeletedEvent(event: RoomDeletedEvent) {
+        logger.debug("Got event on room deleted queue: {}", event)
+        handler.deleteByRoomId(event.id)
     }
 
     @RabbitListener(queues = [RabbitConfig.roomAccessSyncResponseQueueName])
