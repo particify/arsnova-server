@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Spliterator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -127,8 +128,8 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 			}
 		}
 
-		return cachedEntities.entrySet().stream()
-				.map(Map.Entry::getValue)
+		return StreamSupport.stream(() -> ids.spliterator(), Spliterator.ORDERED, false)
+				.map(id -> cachedEntities.get(id))
 				.filter(Optional::isPresent)
 				.map(Optional::get)
 				.collect(Collectors.toList());

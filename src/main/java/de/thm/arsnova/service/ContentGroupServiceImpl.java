@@ -21,7 +21,6 @@ package de.thm.arsnova.service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
@@ -135,12 +134,11 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
 
 			return new ContentGroup();
 		} else {
-			final List<String> contentIds = StreamSupport.stream(
-					contentService.get(contentGroup.getContentIds()).spliterator(), false)
-						.filter(c -> c.getRoomId().equals(contentGroup.getRoomId()))
-						.map(Content::getId)
-						.distinct()
-						.collect(Collectors.toList());
+			final List<String> contentIds = contentService.get(contentGroup.getContentIds()).stream()
+					.filter(c -> c.getRoomId().equals(contentGroup.getRoomId()))
+					.map(Content::getId)
+					.distinct()
+					.collect(Collectors.toList());
 			contentGroup.setContentIds(contentIds);
 			if (contentGroup.getId() != null) {
 				return update(contentGroup);
