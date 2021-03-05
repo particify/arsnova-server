@@ -18,7 +18,9 @@
 
 package de.thm.arsnova.controller;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
@@ -27,6 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -40,9 +43,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.RoomStatistics;
+import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.ContentGroupService;
 import de.thm.arsnova.service.RoomService;
 import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
 
 @RestController
 @RequestMapping(RoomController.REQUEST_MAPPING)
@@ -159,6 +164,21 @@ public class RoomController extends AbstractEntityController<Room> {
 		}
 
 		return updatedContentGroup;
+	}
+
+	@PatchMapping(CONTENTGROUP_MAPPING)
+	public ContentGroup patchGroup(@PathVariable("groupName") final String groupId,
+			@RequestBody final Map<String, Object> changes,
+			final HttpServletResponse httpServletResponse) throws IOException {
+		final ContentGroup contentGroup = contentGroupService.get(groupId);
+		if (contentGroup == null) {
+			throw new NotFoundException("Content group does not exist.");
+		}
+		contentGroupService.patch(contentGroup, changes, View.Public.class);
+		httpServletResponse.setHeader(ENTITY_ID_HEADER, contentGroup.getId());
+		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, contentGroup.getRevision());
+
+		return contentGroup;
 	}
 
 	@GetMapping(STATS_MAPPING)
