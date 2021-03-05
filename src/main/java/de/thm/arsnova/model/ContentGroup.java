@@ -37,8 +37,15 @@ public class ContentGroup extends Entity {
 
 	private List<String> contentIds;
 	private boolean published;
-	private int firstPublishedIndex = -1;
+
+	/* The index in contentIds of the first content to publish. No
+	 * contents are published if set to <code>-1</code>. */
+	private int firstPublishedIndex = 0;
+
+	/* The index in contentIds of the last content to publish. All contents
+	 * after the first published one are published if set to <code>-1</code>. */
 	private int lastPublishedIndex = -1;
+
 	private boolean statisticsPublished = true;
 	private boolean correctOptionsPublished = true;
 
@@ -137,7 +144,7 @@ public class ContentGroup extends Entity {
 
 	public boolean isContentPublished(final String contentId) {
 		final int i = contentIds.indexOf(contentId);
-		return i > -1 && (firstPublishedIndex == -1 || i >= firstPublishedIndex)
+		return i > -1 && firstPublishedIndex > -1 && i >= firstPublishedIndex
 				&& (lastPublishedIndex == -1 || i <= lastPublishedIndex);
 	}
 
