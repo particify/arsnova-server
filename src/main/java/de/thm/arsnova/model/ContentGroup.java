@@ -28,7 +28,7 @@ import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
 
-public class ContentGroup extends Entity {
+public class ContentGroup extends Entity implements RoomIdAware {
 	@NotEmpty
 	private String roomId;
 

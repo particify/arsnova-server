@@ -24,6 +24,7 @@ import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -306,6 +307,37 @@ public class DefaultEntityServiceImplTest {
 		room1.setName("");
 
 		assertThrows(ValidationException.class, () -> entityService.create(room1));
+	}
+
+	@Test
+	public void testChangeDetection() throws JsonProcessingException {
+		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
+		final DefaultEntityServiceImpl<Room> entityService =
+				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
+		entityService.setApplicationEventPublisher(eventPublisher);
+
+		when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
+
+		final Room room1 = new Room();
+		prefillRoomFields(room1);
+		room1.setId("ID");
+		room1.setOwnerId("TestUser");
+		room1.setName("TestName");
+		room1.getSettings().setQuickSurveyEnabled(true);
+		final Room room2 = new Room();
+		prefillRoomFields(room2);
+		room2.setId("ID");
+		room2.setOwnerId("PrivatePropertyChange");
+		room2.setName("ChangedTestName");
+		room2.getSettings().setQuickSurveyEnabled(false);
+		final Map<String, Object> expectedChanges = Map.of(
+				"name", room2.getName(),
+				"settings", Map.of("quickSurveyEnabled", room2.getSettings().isQuickSurveyEnabled())
+		);
+
+		entityService.update(room1, room2);
+		Map<String, Object> changes = eventListenerConfig.getRoomAfterUpdateEvents().get(0).getChanges();
+		assertEquals(expectedChanges, changes);
 	}
 
 	private void prefillRoomFields(final Room room) {

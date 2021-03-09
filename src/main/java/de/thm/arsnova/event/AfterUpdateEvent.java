@@ -18,17 +18,30 @@
 
 package de.thm.arsnova.event;
 
+import java.util.Map;
+
 import de.thm.arsnova.model.Entity;
 
 public abstract class AfterUpdateEvent<E extends Entity> extends CrudEvent<E> {
 	private final E oldEntity;
+	private final Map<String, Object> changes;
 
-	public AfterUpdateEvent(final Object source, final E entity, final E oldEntity) {
+	public AfterUpdateEvent(final Object source, final E entity, final E oldEntity,
+			final Map<String, Object> changes) {
 		super(source, entity);
 		this.oldEntity = oldEntity;
+		this.changes = changes;
 	}
 
 	public E getOldEntity() {
 		return oldEntity;
+	}
+
+	public Map<String, Object> getChanges() {
+		return changes;
+	}
+
+	public Map<String, Object> getRequestedChanges() {
+		return changes;
 	}
 }

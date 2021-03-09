@@ -42,7 +42,7 @@ import de.thm.arsnova.model.serialization.View;
 		defaultImpl = Content.class
 )
 @JsonTypeIdResolver(FormatContentTypeIdResolver.class)
-public class Content extends Entity {
+public class Content extends Entity implements RoomIdAware {
 	public enum Format {
 		CHOICE,
 		BINARY,

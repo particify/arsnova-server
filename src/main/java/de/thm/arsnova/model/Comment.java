@@ -29,7 +29,7 @@ import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
 
-public class Comment extends Entity {
+public class Comment extends Entity implements RoomIdAware {
 	@NotEmpty
 	private String roomId;
 
