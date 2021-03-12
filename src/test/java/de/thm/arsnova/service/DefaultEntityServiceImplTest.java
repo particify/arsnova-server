@@ -53,8 +53,10 @@ import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.event.AfterUpdateEvent;
 import de.thm.arsnova.event.BeforeUpdateEvent;
+import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.serialization.View;
+import de.thm.arsnova.persistence.ContentGroupRepository;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.test.context.support.WithMockUser;
 
@@ -82,6 +84,9 @@ public class DefaultEntityServiceImplTest {
 
 	@Autowired
 	private RoomRepository roomRepository;
+
+	@Autowired
+	private ContentGroupRepository contentGroupRepository;
 
 	@Autowired
 	private EventListenerConfig eventListenerConfig;
@@ -192,6 +197,54 @@ public class DefaultEntityServiceImplTest {
 		assertEquals(originalName2, eventListenerConfig.getRoomAfterUpdateEvents().get(1).getOldEntity().getName());
 		assertEquals(room2.getName(), eventListenerConfig.getRoomBeforeUpdateEvents().get(1).getEntity().getName());
 		assertEquals(room2.getName(), eventListenerConfig.getRoomAfterUpdateEvents().get(1).getEntity().getName());
+	}
+
+	@Test
+	@WithMockUser("TestUser")
+	public void testPatchReplacesLists() throws IOException {
+		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
+		final DefaultEntityServiceImpl<ContentGroup> entityService =
+				new DefaultEntityServiceImpl<>(ContentGroup.class, contentGroupRepository, objectMapper, validator);
+		entityService.setApplicationEventPublisher(eventPublisher);
+
+		when(contentGroupRepository.save(any(ContentGroup.class))).then(returnsFirstArg());
+
+		final ContentGroup contentGroup = new ContentGroup();
+		contentGroup.setId("ContentGroup1");
+		contentGroup.setRoomId("RoomId1");
+		contentGroup.setName("ContentGroupName");
+		contentGroup.setContentIds(List.of("X", "Y", "A", "B"));
+		final Map<String, Object> mapForPatching = Map.of(
+				"name", "UpdatedName",
+				"contentIds", List.of("A", "B", "C")
+		);
+		entityService.patch(contentGroup, mapForPatching);
+
+		assertEquals(List.of("A", "B", "C"), contentGroup.getContentIds());
+	}
+
+	@Test
+	@WithMockUser("TestUser")
+	public void testPatchUpdatesListElementOrder() throws IOException {
+		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
+		final DefaultEntityServiceImpl<ContentGroup> entityService =
+				new DefaultEntityServiceImpl<>(ContentGroup.class, contentGroupRepository, objectMapper, validator);
+		entityService.setApplicationEventPublisher(eventPublisher);
+
+		when(contentGroupRepository.save(any(ContentGroup.class))).then(returnsFirstArg());
+
+		final ContentGroup contentGroup = new ContentGroup();
+		contentGroup.setId("ContentGroup1");
+		contentGroup.setRoomId("RoomId1");
+		contentGroup.setName("ContentGroupName");
+		contentGroup.setContentIds(List.of("C", "A", "B"));
+		final Map<String, Object> mapForPatching = Map.of(
+				"name", "UpdatedName",
+				"contentIds", List.of("B", "C", "A")
+		);
+		entityService.patch(contentGroup, mapForPatching, View.Public.class);
+
+		assertEquals(List.of("B", "C", "A"), contentGroup.getContentIds());
 	}
 
 	@Test
