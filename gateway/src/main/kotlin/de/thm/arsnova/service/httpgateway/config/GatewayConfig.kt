@@ -224,6 +224,7 @@ class GatewayConfig (
             p
                 .path(
                     "/room/{roomId}/content/**",
+                    "/room/{roomId}/contentgroup/**",
                     "/room/{roomId}/answer/**"
                 )
                 .filters { f ->
