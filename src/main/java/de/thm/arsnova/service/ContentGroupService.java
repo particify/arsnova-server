@@ -13,7 +13,7 @@ public interface ContentGroupService extends EntityService<ContentGroup> {
 
 	void addContentToGroup(String roomId, String groupName, String contentId);
 
-	void removeContentFromGroup(String roomId, String groupId, String contentId);
+	void removeContentFromGroup(String groupId, String contentId);
 
 	ContentGroup createOrUpdateContentGroup(ContentGroup contentGroup);
 }
