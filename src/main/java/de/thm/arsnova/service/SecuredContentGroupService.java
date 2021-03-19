@@ -45,9 +45,9 @@ public class SecuredContentGroupService extends AbstractSecuredEntityServiceImpl
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#roomId, 'room', 'update') and hasPermission(#contentId, 'content', 'update')")
-	public void removeContentFromGroup(final String roomId, final String groupId, final String contentId) {
-		contentGroupService.removeContentFromGroup(roomId, groupId, contentId);
+	@PreAuthorize("hasPermission(#groupId, 'contentgroup', 'update') and hasPermission(#contentId, 'content', 'update')")
+	public void removeContentFromGroup(final String groupId, final String contentId) {
+		contentGroupService.removeContentFromGroup(groupId, contentId);
 	}
 
 	@Override

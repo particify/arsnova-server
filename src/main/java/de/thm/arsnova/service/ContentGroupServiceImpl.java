@@ -106,13 +106,10 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
 	}
 
 	@Override
-	public void removeContentFromGroup(final String roomId, final String groupId, final String contentId) {
+	public void removeContentFromGroup(final String groupId, final String contentId) {
 		final Optional<ContentGroup> contentGroup = contentGroupRepository.findById(groupId);
 		contentGroup.ifPresentOrElse(
 				cg -> {
-					if (!cg.getRoomId().equals(roomId)) {
-						throw new BadRequestException("Room ID does not match.");
-					}
 					cg.setContentIds(cg.getContentIds().stream()
 							.filter(id -> !id.equals(contentId)).collect(Collectors.toList()));
 					if (!cg.getContentIds().isEmpty()) {

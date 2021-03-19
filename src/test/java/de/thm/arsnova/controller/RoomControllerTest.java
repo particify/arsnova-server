@@ -95,9 +95,6 @@ public class RoomControllerTest {
 	private RoomRepository roomRepository;
 
 	@Autowired
-	private ContentGroupRepository contentGroupRepository;
-
-	@Autowired
 	private ContentGroupService contentGroupService;
 
 	@Autowired
@@ -109,7 +106,7 @@ public class RoomControllerTest {
 	@BeforeEach
 	public void setup() {
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
-		Mockito.reset(roomRepository, contentGroupRepository, contentRepository);
+		Mockito.reset(roomRepository, contentRepository);
 
 		// Name and user need to match @WithMockUser annotation
 		stubUserService.setUserAuthenticated(true, "TestUser", "1234");
@@ -202,124 +199,6 @@ public class RoomControllerTest {
 
 	@Test
 	@WithMockUser(value = "TestUser")
-	public void shouldGetContentGroup() throws Exception {
-		final Room room = new Room();
-		room.setId("Test-RoomId");
-		final ContentGroup contentGroup = new ContentGroup();
-		contentGroup.setName("ContentGroupNameTest");
-		contentGroup.setRoomId(room.getId());
-		contentGroup.setPublished(true);
-
-		when(roomRepository.findOne(room.getId())).thenReturn(room);
-		when(contentGroupRepository.findByRoomIdAndName(room.getId(), contentGroup.getName())).thenReturn(contentGroup);
-		mockMvc.perform(get("/room/" + room.getId() + "/contentgroup/" + contentGroup.getName())
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().string(containsString(contentGroup.getName())));
-	}
-
-	@Test
-	@WithMockUser(value = "TestUser", userId = "1234")
-	public void shouldCreateContentGroupWithContentWhenNoGroupExists() throws Exception {
-		final Room room = this.getRoomForUserWithDatabaseDetails(user);
-		when(roomRepository.findOne(room.getId())).thenReturn(room);
-
-		final String contentId = "Test-ID-ContentGroup";
-		final Content content = new Content();
-		content.setRoomId(room.getId());
-		when(contentRepository.findOne(contentId)).thenReturn(content);
-
-		final String contentGroupName = "Test-ContentGroupName";
-		when(contentGroupRepository.findByRoomIdAndName(room.getId(), contentGroupName)).thenReturn(null);
-		when(contentGroupRepository.save(any(ContentGroup.class))).thenAnswer(i -> i.getArgument(0));
-
-		mockMvc.perform(post("/room/" + room.getId() + "/contentgroup/" + contentGroupName + "/" + contentId)
-				.with(csrf())
-				.content(contentId)
-				.contentType(MediaType.TEXT_PLAIN)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().string(emptyString()));
-		verify(contentGroupRepository).save(argThat(containsContentGroupWithRoomIdAndContentIds(room.getId(), contentId)));
-	}
-
-	@Test
-	@WithMockUser(value = "TestUser", userId = "1234")
-	public void shouldAddContentIdToGroupWhenGroupAlreadyExists() throws Exception {
-		final Room room = this.getRoomForUserWithDatabaseDetails(user);
-		when(roomRepository.findOne(room.getId())).thenReturn(room);
-
-		final String contentId1 = "pre-existing-content-id";
-		final String contentId2 = "content-id-to-add";
-		final Content content2 = new Content();
-		content2.setRoomId(room.getId());
-		when(contentRepository.findOne(contentId2)).thenReturn(content2);
-
-		final ContentGroup contentGroup = createContentGroupWithRoomIdAndContentIds(room.getId(), contentId1);
-		when(contentGroupRepository.findByRoomIdAndName(room.getId(), contentGroup.getName())).thenReturn(contentGroup);
-		when(contentGroupRepository.findOne(any())).thenReturn(contentGroup);
-		when(contentGroupRepository.save(any(ContentGroup.class))).thenAnswer(i -> i.getArgument(0));
-
-		mockMvc.perform(post("/room/" + room.getId() + "/contentgroup/" + contentGroup.getName() + "/" + contentId2)
-				.with(csrf())
-				.content(contentId2)
-				.contentType(MediaType.TEXT_PLAIN)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().string(emptyString()));
-		verify(contentGroupRepository).save(argThat(
-				containsContentGroupWithRoomIdAndContentIds(room.getId(), contentId1, contentId2)));
-	}
-
-	@Test
-	@WithMockUser(value = "TestUser", userId = "1234")
-	public void shouldUpdateContentGroupWhenContentIdsAreNotEmpty() throws Exception {
-		final String contentId = "ID-Content-1";
-		final Room room = this.getRoomForUserWithDatabaseDetails(user);
-		final Content content = new Content();
-		content.setId(contentId);
-		content.setRoomId(room.getId());
-		when(roomRepository.findOne(room.getId())).thenReturn(room);
-		when(contentRepository.findOne(any())).thenReturn(content);
-		when(contentRepository.findAllById(any())).thenReturn(Collections.singletonList(content));
-
-		final ContentGroup contentGroup = createContentGroupWithRoomIdAndContentIds(room.getId(), contentId);
-
-		when(contentGroupRepository.findOne(contentGroup.getId())).thenReturn(contentGroup);
-		when(contentGroupRepository.save(any(ContentGroup.class))).thenAnswer(i -> i.getArgument(0));
-
-		mockMvc.perform(put("/room/" + room.getId() + "/contentgroup/" + contentGroup.getName())
-				.with(csrf())
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(contentGroup))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-		verify(contentGroupRepository).save(argThat(containsContentGroupWithRoomIdAndContentIds(room.getId(), contentId)));
-	}
-
-	@Test
-	@WithMockUser(value = "TestUser", userId = "1234")
-	public void shouldDeleteContentGroupWhenGroupIsEmpty() throws Exception {
-		final Room room = this.getRoomForUserWithDatabaseDetails(user);
-		when(roomRepository.findOne(room.getId())).thenReturn(room);
-
-		final ContentGroup contentGroup = new ContentGroup();
-		contentGroup.setId("SOME_ID");
-		contentGroup.setName("Test-ContentGroupName");
-		contentGroup.setRoomId(room.getId());
-		contentGroup.setContentIds(new ArrayList<>()); // empty list of contents
-
-		mockMvc.perform(put("/room/" + room.getId() + "/contentgroup/" + contentGroup.getName())
-				.with(csrf())
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(contentGroup))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-		verify(contentGroupRepository).delete(contentGroup);
-	}
-
-	@Test
-	@WithMockUser(value = "TestUser")
 	public void shouldGetStatsForRoom() throws Exception {
 		final int groupSize = 3;
 		final int contentSize = 2;
@@ -343,17 +222,6 @@ public class RoomControllerTest {
 		assertEquals(listOfContentGroup.get(0).getName(), stats.getGroupStats().get(0).getGroupName());
 	}
 
-	private ContentGroup createContentGroupWithRoomIdAndContentIds(final String roomId, final String... contentIds) {
-		final ContentGroup contentGroup = new ContentGroup();
-		contentGroup.setId("Test-ContentGroupId");
-		contentGroup.setRevision("Test-ContentGroupRev");
-		contentGroup.setName("Test-ContentGroupName");
-		contentGroup.setContentIds(Arrays.stream(contentIds).collect(Collectors.toList()));
-		contentGroup.setRoomId(roomId);
-		contentGroup.setPublished(true);
-		return contentGroup;
-	}
-
 	private List<ContentGroup> createContentGroupsWithContents(
 			final String roomId, final int numberOfGroups, final int numberOfContents) {
 		final List<ContentGroup> listOfGroups = new ArrayList<>();
@@ -371,11 +239,6 @@ public class RoomControllerTest {
 			listOfGroups.add(contentGroup);
 		}
 		return listOfGroups;
-	}
-
-	private ArgumentMatcher<ContentGroup> containsContentGroupWithRoomIdAndContentIds(
-			final String roomId, final String... contentIds) {
-		return a -> a.getRoomId().equals(roomId) && a.getContentIds().containsAll(Arrays.asList(contentIds));
 	}
 
 	private Set<Room.Moderator> createModerators(final int nb) {

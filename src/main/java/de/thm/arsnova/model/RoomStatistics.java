@@ -123,6 +123,7 @@ public class RoomStatistics {
 	}
 
 	public static class ContentGroupStatistics {
+		private String id;
 		private String groupName;
 		private int contentCount = 0;
 
@@ -131,8 +132,18 @@ public class RoomStatistics {
 		}
 
 		public ContentGroupStatistics(final ContentGroup contentGroup) {
+			this.setId(contentGroup.getId());
 			this.setGroupName(contentGroup.getName());
 			this.setContentCount(contentGroup.getContentIds().size());
+		}
+
+		@JsonView(View.Public.class)
+		public String getId() {
+			return id;
+		}
+
+		public void setId(final String id) {
+			this.id = id;
 		}
 
 		@JsonView(View.Public.class)
@@ -156,6 +167,7 @@ public class RoomStatistics {
 		@Override
 		public String toString() {
 			return new ToStringCreator(this)
+				.append("id", id)
 				.append("groupName", groupName)
 				.append("contentCount", contentCount)
 				.toString();
