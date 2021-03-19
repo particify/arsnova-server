@@ -22,7 +22,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -195,7 +197,8 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		eventPublisher.publishEvent(new BeforeFullUpdateEvent<>(this, newEntity, oldEntity));
 		validate(newEntity);
 		final T updatedEntity = repository.save(newEntity);
-		eventPublisher.publishEvent(new AfterFullUpdateEvent<>(this, updatedEntity, oldEntity));
+		eventPublisher.publishEvent(new AfterFullUpdateEvent<>(
+				this, updatedEntity, oldEntity, getChanges(oldEntity, updatedEntity)));
 		finalizeUpdate(updatedEntity);
 		modifyRetrieved(updatedEntity);
 
@@ -249,7 +252,8 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, oldEntity, propertyGetter, changes));
 		validate(entity);
 		final T patchedEntity = repository.save(entity);
-		eventPublisher.publishEvent(new AfterPatchEvent<>(this, patchedEntity, oldEntity, propertyGetter, changes));
+		eventPublisher.publishEvent(new AfterPatchEvent<>(
+				this, patchedEntity, oldEntity, propertyGetter, getChanges(oldEntity, patchedEntity), changes));
 		modifyRetrieved(patchedEntity);
 
 		return patchedEntity;
@@ -292,7 +296,8 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		final List<T> patchedEntities = repository.saveAll(entities);
 		patchedEntities.forEach((e) -> {
 			eventPublisher.publishEvent(new AfterPatchEvent<>(
-					this, e, oldEntities.get(e.getId()), propertyGetter, changes));
+					this, e, oldEntities.get(e.getId()), propertyGetter,
+					getChanges(oldEntities.get(e.getId()), e), changes));
 			modifyRetrieved(e);
 		});
 		eventPublisher.publishEvent(new BulkChangeEvent<>(this, this.type, entities));
@@ -362,6 +367,34 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		return objectMapper.readerFor(entity.getClass()).withView(View.Persistence.class).readValue(
 				objectMapper.writerWithView(View.Persistence.class)
 				.writeValueAsString(entity));
+	}
+
+	private Map<String, Object> getChanges(final T oldEntity, final T newEntity) {
+		final JsonNode oldEntityTree = objectMapper.valueToTree(oldEntity);
+		final JsonNode newEntityTree = objectMapper.valueToTree(newEntity);
+		final JsonNode changes = getChangesRecursively(oldEntityTree, newEntityTree);
+		try {
+			return objectMapper.treeToValue(changes, Map.class);
+		} catch (final JsonProcessingException e) {
+			logger.error("Failed to transform entity changes tree for {}.", type.getName(), e);
+			return Collections.emptyMap();
+		}
+	}
+
+	private JsonNode getChangesRecursively(final JsonNode oldNode, final JsonNode newNode) {
+		final ObjectNode changes = objectMapper.createObjectNode();
+		oldNode.fields().forEachRemaining((entry) -> {
+			final JsonNode newInnerNode = newNode.get(entry.getKey());
+			if (!entry.getValue().isObject()) {
+				if (!entry.getValue().equals(newInnerNode)) {
+					changes.set(entry.getKey(), newInnerNode);
+				}
+				return;
+			}
+			changes.set(entry.getKey(), getChangesRecursively(entry.getValue(), newInnerNode));
+		});
+
+		return changes;
 	}
 
 	public String getTypeName() {

@@ -30,7 +30,7 @@ import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
 
-public class Room extends Entity {
+public class Room extends Entity implements RoomIdAware {
 	public static class Moderator {
 		public enum Role {
 			EDITING_MODERATOR,
@@ -471,6 +471,11 @@ public class Room extends Entity {
 				this::getDescription,
 				this::setRenderedDescription,
 				options);
+	}
+
+	@Override
+	public String getRoomId() {
+		return id;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})

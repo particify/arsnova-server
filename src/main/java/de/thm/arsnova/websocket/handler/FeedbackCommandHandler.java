@@ -52,7 +52,7 @@ public class FeedbackCommandHandler {
 
 	@EventListener
 	public void handleLockFeedback(final AfterPatchEvent<Room> event) {
-		if (event.getChanges().containsKey("settings")) {
+		if (event.getRequestedChanges().containsKey("settings")) {
 			final String roomId = event.getEntity().getId();
 			final Room.Settings settings = event.getEntity().getSettings();
 			if (settings.isFeedbackLocked()) {

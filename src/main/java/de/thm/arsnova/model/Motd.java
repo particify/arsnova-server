@@ -28,7 +28,7 @@ import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
 
-public class Motd extends Entity {
+public class Motd extends Entity implements RoomIdAware {
 	public enum Audience {
 		ALL,
 		AUTHENTICATED,

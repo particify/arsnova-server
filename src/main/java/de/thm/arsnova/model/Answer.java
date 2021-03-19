@@ -38,7 +38,7 @@ import de.thm.arsnova.model.serialization.View;
 		defaultImpl = Answer.class
 )
 @JsonTypeIdResolver(FormatAnswerTypeIdResolver.class)
-public class Answer extends Entity {
+public class Answer extends Entity implements RoomIdAware {
 	@NotEmpty
 	private String contentId;
 

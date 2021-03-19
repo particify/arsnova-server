@@ -98,7 +98,7 @@ import net.particify.arsnova.connector.client.ConnectorClientImpl;
 		"de.thm.arsnova.security",
 		"de.thm.arsnova.service",
 		"de.thm.arsnova.web",
-		"de.thm.arsnova.websocket.handler"})
+		"de.thm.arsnova.websocket"})
 @Configuration
 @EnableAsync(mode = AdviceMode.ASPECTJ)
 @EnableAutoConfiguration
