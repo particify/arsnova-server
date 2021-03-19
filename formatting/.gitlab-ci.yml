@@ -1,6 +1,6 @@
 variables:
   BUILD_DIR: lib
-  NODE_VERSION: "12.18"
+  NODE_VERSION: "14.16"
   IMAGE_VARIANT: alpine
   YARN_CACHE_FOLDER: .yarn-cache
 
