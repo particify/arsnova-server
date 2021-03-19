@@ -434,8 +434,11 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 					}
 				}
 				final Room roomV3 = migrator.migrate(roomV2, profile, true);
-				while (importJob != null && roomRepository.findByShortId(roomV3.getShortId()) != null) {
-					roomV3.setShortId(generateShortId());
+				if (importJob != null) {
+					roomV3.setClosed(false);
+					while (roomRepository.findByShortId(roomV3.getShortId()) != null) {
+						roomV3.setShortId(generateShortId());
+					}
 				}
 				roomsV3.add(roomV3);
 				roomsV3.stream().forEach(room -> room.setImportMetadata(metadata));
