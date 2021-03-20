@@ -29,10 +29,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -381,18 +384,28 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		}
 	}
 
-	private JsonNode getChangesRecursively(final JsonNode oldNode, final JsonNode newNode) {
+	private ObjectNode getChangesRecursively(final JsonNode oldNode, final JsonNode newNode) {
 		final ObjectNode changes = objectMapper.createObjectNode();
-		oldNode.fields().forEachRemaining((entry) -> {
-			final JsonNode newInnerNode = newNode.get(entry.getKey());
-			if (!entry.getValue().isObject()) {
-				if (!entry.getValue().equals(newInnerNode)) {
-					changes.set(entry.getKey(), newInnerNode);
+		final Iterable<String> oldFieldNames = () -> oldNode.fieldNames();
+		final Iterable<String> newFieldNames = () -> newNode.fieldNames();
+		final Set<String> fieldNames = Stream.concat(
+				StreamSupport.stream(oldFieldNames.spliterator(), false),
+				StreamSupport.stream(newFieldNames.spliterator(), false))
+				.collect(Collectors.toSet());
+		for (final String fieldName : fieldNames) {
+			final JsonNode oldInnerNode = oldNode.get(fieldName);
+			final JsonNode newInnerNode = newNode.get(fieldName);
+			if (oldInnerNode == null || newInnerNode == null || !oldInnerNode.isObject() || !newInnerNode.isObject()) {
+				if (!Objects.equals(oldInnerNode, newInnerNode)) {
+					changes.set(fieldName, newInnerNode);
 				}
-				return;
+			} else {
+				final ObjectNode innerChanges = getChangesRecursively(oldInnerNode, newInnerNode);
+				if (innerChanges.size() > 0) {
+					changes.set(fieldName, innerChanges);
+				}
 			}
-			changes.set(entry.getKey(), getChangesRecursively(entry.getValue(), newInnerNode));
-		});
+		}
 
 		return changes;
 	}
