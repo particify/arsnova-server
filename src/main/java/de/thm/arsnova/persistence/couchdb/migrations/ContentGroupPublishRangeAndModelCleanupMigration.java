@@ -61,8 +61,10 @@ public class ContentGroupPublishRangeAndModelCleanupMigration implements Migrati
 	private static final String ID = "20210216102500";
 	private static final int LIMIT = 200;
 	private static final String CONTENT_GROUP_INDEX = "migration-20210216102500-contentgroup-index";
+	private static final String CONTENT_INDEX = "migration-20210216102500-content-index";
 	private static final String CONTENT_DESIGN_DOC = "_design/Content";
 	private static final String CONTENT_BY_ID_VIEW = "by_id";
+	private static final Map<String, Boolean> existsSelector = Map.of("$exists", true);
 	private static final Map<String, Boolean> notExistsSelector = Map.of("$exists", false);
 	private static final Logger logger = LoggerFactory.getLogger(ContentGroupPublishRangeAndModelCleanupMigration.class);
 
@@ -80,7 +82,7 @@ public class ContentGroupPublishRangeAndModelCleanupMigration implements Migrati
 
 	@Override
 	public int getStepCount() {
-		return 1;
+		return 2;
 	}
 
 	@Override
@@ -89,6 +91,9 @@ public class ContentGroupPublishRangeAndModelCleanupMigration implements Migrati
 			switch (state.getStep()) {
 				case 0:
 					migrateContentState(state);
+					break;
+				case 1:
+					migrateContentWithoutGroupState(state);
 					break;
 				default:
 					throw new IllegalStateException("Invalid migration step:" + state.getStep() + ".");
@@ -102,6 +107,13 @@ public class ContentGroupPublishRangeAndModelCleanupMigration implements Migrati
 		final Map<String, Object> filterSelector = new HashMap<>();
 		filterSelector.put("type", "ContentGroup");
 		filterSelector.put("published", notExistsSelector);
+		connector.createPartialJsonIndex(CONTENT_GROUP_INDEX, Collections.emptyList(), filterSelector);
+	}
+
+	private void createContentIndex() {
+		final Map<String, Object> filterSelector = new HashMap<>();
+		filterSelector.put("type", "Content");
+		filterSelector.put("state.visible", existsSelector);
 		connector.createPartialJsonIndex(CONTENT_GROUP_INDEX, Collections.emptyList(), filterSelector);
 	}
 
@@ -162,7 +174,7 @@ public class ContentGroupPublishRangeAndModelCleanupMigration implements Migrati
 				} else if (contentGroup.getContentIds().size() == contentIds.size()) {
 					logger.debug("All contents published for {}.", contentGroup.getId());
 					contentGroup.setPublished(true);
-					contentGroup.setFirstPublishedIndex(-1);
+					contentGroup.setFirstPublishedIndex(0);
 					contentGroup.setLastPublishedIndex(-1);
 				} else {
 					logger.debug("Some contents published for {}.", contentGroup.getId());
@@ -179,6 +191,36 @@ public class ContentGroupPublishRangeAndModelCleanupMigration implements Migrati
 				connector.executeBulk(entitiesForUpdate);
 				entitiesForUpdate.clear();
 			}
+
+			state.setState(bookmark);
+		}
+		state.setState(null);
+	}
+
+	public void migrateContentWithoutGroupState(final MigrationState.Migration state) throws InterruptedException {
+		createContentGroupIndex();
+		waitForIndex(CONTENT_INDEX);
+
+		final Map<String, Object> queryOptions = new HashMap<>();
+		queryOptions.put("type", "Content");
+		queryOptions.put("state.visible", existsSelector);
+		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		query.setLimit(LIMIT);
+		String bookmark = (String) state.getState();
+
+		for (int skip = 0;; skip += LIMIT) {
+			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
+			query.setBookmark(bookmark);
+			final PagedMangoResponse<ContentMigrationEntity> response =
+					connector.queryForPage(query, ContentMigrationEntity.class);
+			final List<ContentMigrationEntity> contents = response.getEntities();
+			bookmark = response.getBookmark();
+			if (contents.size() == 0) {
+				break;
+			}
+
+			/* Update Contents to adjust their models. */
+			connector.executeBulk(contents);
 
 			state.setState(bookmark);
 		}
