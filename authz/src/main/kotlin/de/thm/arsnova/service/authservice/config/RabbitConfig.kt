@@ -38,7 +38,7 @@ class RabbitConfig (
         const val roomCreatedExchangeName: String = "backend.event.room.aftercreation"
         const val roomDeletedExchangeName: String = "backend.event.room.afterdeletion"
         const val roomCreatedQueueName: String = "backend.event.room.aftercreation.consumer.auth-service"
-        const val roomDeletedQueueName: String = "backend.event.room.aftercreation.consumer.auth-service"
+        const val roomDeletedQueueName: String = "backend.event.room.afterdeletion.consumer.auth-service"
     }
 
     @Bean
