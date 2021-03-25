@@ -34,8 +34,6 @@ public class ChoiceQuestionContent extends Content {
 
 		private String renderedLabel;
 
-		private int points;
-
 		@JsonView({View.Persistence.class, View.Public.class})
 		public String getLabel() {
 			return label;
@@ -55,19 +53,9 @@ public class ChoiceQuestionContent extends Content {
 			this.renderedLabel = renderedLabel;
 		}
 
-		@JsonView({View.Persistence.class, View.Public.class})
-		public int getPoints() {
-			return points;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setPoints(final int points) {
-			this.points = points;
-		}
-
 		@Override
 		public int hashCode() {
-			return Objects.hash(label, points);
+			return Objects.hash(label);
 		}
 
 		@Override
@@ -80,15 +68,13 @@ public class ChoiceQuestionContent extends Content {
 			}
 			final AnswerOption that = (AnswerOption) o;
 
-			return points == that.points
-					&& Objects.equals(label, that.label);
+			return Objects.equals(label, that.label);
 		}
 
 		@Override
 		public String toString() {
 			return new ToStringCreator(this)
 					.append("label", label)
-					.append("points", points)
 					.toString();
 		}
 

@@ -251,7 +251,6 @@ public class FromV2Migrator {
 					final de.thm.arsnova.model.migration.v2.AnswerOption fromOption = from.getPossibleAnswers().get(i);
 					final ChoiceQuestionContent.AnswerOption toOption = new ChoiceQuestionContent.AnswerOption();
 					toOption.setLabel(prefixedLabels ? fromOption.getText().substring(3) : fromOption.getText());
-					toOption.setPoints(fromOption.getValue());
 					choiceQuestionContent.getOptions().add(toOption);
 					if (fromOption.isCorrect()) {
 						choiceQuestionContent.getCorrectOptionIndexes().add(i);
