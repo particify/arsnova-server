@@ -114,7 +114,7 @@ public class ContentGroupPublishRangeAndModelCleanupMigration implements Migrati
 		final Map<String, Object> filterSelector = new HashMap<>();
 		filterSelector.put("type", "Content");
 		filterSelector.put("state.visible", existsSelector);
-		connector.createPartialJsonIndex(CONTENT_GROUP_INDEX, Collections.emptyList(), filterSelector);
+		connector.createPartialJsonIndex(CONTENT_INDEX, Collections.emptyList(), filterSelector);
 	}
 
 	private void waitForIndex(final String name) throws InterruptedException {
@@ -198,7 +198,7 @@ public class ContentGroupPublishRangeAndModelCleanupMigration implements Migrati
 	}
 
 	public void migrateContentWithoutGroupState(final MigrationState.Migration state) throws InterruptedException {
-		createContentGroupIndex();
+		createContentIndex();
 		waitForIndex(CONTENT_INDEX);
 
 		final Map<String, Object> queryOptions = new HashMap<>();
