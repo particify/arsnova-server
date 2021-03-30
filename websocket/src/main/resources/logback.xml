@@ -1,0 +1,3 @@
+<configuration>
+  <logger name="org.springframework.web.socket.server.support.DefaultHandshakeHandler" level="OFF" />
+</configuration>
