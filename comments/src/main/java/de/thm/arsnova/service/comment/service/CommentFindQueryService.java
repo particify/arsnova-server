@@ -1,6 +1,8 @@
 package de.thm.arsnova.service.comment.service;
 
 import de.thm.arsnova.service.comment.model.Comment;
+
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,8 @@ public class CommentFindQueryService {
         Set<String> commentIds = new HashSet<>();
         if (findQuery.getProperties().getRoomId() != null) {
             List<Comment> contentList = commentService.getByRoomId(findQuery.getProperties().getRoomId());
-            for (Comment c : contentList) {
+            List<Comment> comments = contentList.stream().filter(c -> c.getArchiveId() == null).collect(Collectors.toList());
+            for (Comment c : comments) {
                 if (findQuery.getProperties().isAck() == c.isAck()) {
                     commentIds.add(c.getId());
                 }

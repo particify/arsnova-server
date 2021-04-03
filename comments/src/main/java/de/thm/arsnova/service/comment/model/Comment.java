@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.comment.model;
 
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -15,6 +16,7 @@ public class Comment {
     private String id;
     private String roomId;
     private String creatorId;
+    private String archiveId;
     @Column(columnDefinition = "TEXT")
     private String body;
     private Date timestamp;
@@ -50,6 +52,14 @@ public class Comment {
 
     public void setCreatorId(String creatorId) {
         this.creatorId = creatorId;
+    }
+
+    public String getArchiveId() {
+        return archiveId;
+    }
+
+    public void setArchiveId(final String archiveId) {
+        this.archiveId = archiveId;
     }
 
     public String getBody() {
@@ -130,6 +140,7 @@ public class Comment {
                 "id='" + id + '\'' +
                 ", roomId='" + roomId + '\'' +
                 ", creatorId='" + creatorId + '\'' +
+                ", archiveId='" + archiveId + '\'' +
                 ", body='" + body + '\'' +
                 ", timestamp=" + timestamp +
                 ", read=" + read +
@@ -140,5 +151,39 @@ public class Comment {
                 ", tag=" + tag +
                 ", answer=" + answer +
                 '}';
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Comment comment = (Comment) o;
+        return read == comment.read && favorite == comment.favorite && correct == comment.correct && ack == comment.ack && score == comment.score && Objects.equals(
+                id,
+                comment.id) && Objects.equals(roomId, comment.roomId) && Objects.equals(
+                creatorId,
+                comment.creatorId) && Objects.equals(archiveId, comment.archiveId) && Objects.equals(
+                body,
+                comment.body) && Objects.equals(timestamp, comment.timestamp) && Objects.equals(
+                tag,
+                comment.tag) && Objects.equals(answer, comment.answer);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                id,
+                roomId,
+                creatorId,
+                archiveId,
+                body,
+                timestamp,
+                read,
+                favorite,
+                correct,
+                ack,
+                score,
+                tag,
+                answer);
     }
 }

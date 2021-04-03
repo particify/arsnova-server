@@ -3,6 +3,8 @@ package de.thm.arsnova.service.comment.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+
+import de.thm.arsnova.service.comment.exception.BadRequestException;
 import de.thm.arsnova.service.comment.service.persistence.CommentRepository;
 import de.thm.arsnova.service.comment.service.persistence.VoteRepository;
 import de.thm.arsnova.service.comment.model.Comment;
@@ -70,6 +72,11 @@ public class CommentService {
 
     public Comment patch(final Comment entity, final Map<String, Object> changes,
                    final Function<Comment, ? extends Object> propertyGetter) throws IOException {
+        // Archived comments should not be changed anymore
+        if (entity.getArchiveId() != null) {
+            logger.debug("Tried changing an archived comment.");
+            throw new BadRequestException("Tried changing an archived comment.");
+        }
         Object obj = propertyGetter.apply(entity);
         ObjectReader reader = objectMapper.readerForUpdating(obj);
         JsonNode tree = objectMapper.valueToTree(changes);
@@ -87,6 +94,11 @@ public class CommentService {
                              final Function<Comment, ? extends Object> propertyGetter) throws IOException {
         final JsonNode tree = objectMapper.valueToTree(changes);
         for (Comment entity : entities) {
+            // Archived comments should not be changed anymore
+            if (entity.getArchiveId() != null) {
+                logger.debug("Tried changing an archived comment.");
+                throw new BadRequestException("Tried changing an archived comment.");
+            }
             Object obj = propertyGetter.apply(entity);
             ObjectReader reader = objectMapper.readerForUpdating(obj);
             reader.readValue(tree);
@@ -98,6 +110,12 @@ public class CommentService {
     }
 
     public Comment update(final Comment c) {
+        final Optional<Comment> entity = repository.findById(c.getId());
+        // Archived comments should not be changed anymore
+        if (entity.isPresent() && entity.get().getArchiveId() != null) {
+            logger.debug("Tried changing an archived comment.");
+            throw new BadRequestException("Tried changing an archived comment.");
+        }
         final Comment updatedEntity = repository.save(c);
 
         return updatedEntity;
@@ -108,7 +126,7 @@ public class CommentService {
     }
 
     public long countByRoomIdAndAck(String roomId, Boolean ack) {
-        return repository.countByRoomIdAndAck(roomId, ack);
+        return repository.countByRoomIdAndAckAndArchiveIdNull(roomId, ack);
     }
 
     public void delete(String id) {
