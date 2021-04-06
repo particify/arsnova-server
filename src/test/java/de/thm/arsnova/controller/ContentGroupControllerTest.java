@@ -93,7 +93,7 @@ public class ContentGroupControllerTest {
 	@Test
 	@WithMockUser(value = "TestUser", userId = "1234")
 	public void shouldGetContentGroup() throws Exception {
-		final Room room = this.getRoomForUserWithDatabaseDetails(user);
+		final Room room = this.getRoomForUserWithDatabaseDetails("TestRoomID", user);
 		final ContentGroup contentGroup = new ContentGroup();
 		contentGroup.setId("Test-ID-ContentGroup");
 		contentGroup.setName("ContentGroupNameTest");
@@ -109,9 +109,9 @@ public class ContentGroupControllerTest {
 	}
 
 	@Test
-	@WithMockUser(value = "TestUser", userId = "1234")
+	@WithMockUser(value = "TestUser", userId = "1234", roles = {"USER", "OWNER__TestRoomID"})
 	public void shouldCreateContentGroupWithContentWhenNoGroupExists() throws Exception {
-		final Room room = this.getRoomForUserWithDatabaseDetails(user);
+		final Room room = this.getRoomForUserWithDatabaseDetails("TestRoomID", user);
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
 
 		final String contentId = "Test-ID-ContentGroup";
@@ -139,9 +139,9 @@ public class ContentGroupControllerTest {
 	}
 
 	@Test
-	@WithMockUser(value = "TestUser", userId = "1234")
+	@WithMockUser(value = "TestUser", userId = "1234", roles = {"USER", "OWNER__TestRoomID"})
 	public void shouldAddContentIdToGroupWhenGroupAlreadyExists() throws Exception {
-		final Room room = this.getRoomForUserWithDatabaseDetails(user);
+		final Room room = this.getRoomForUserWithDatabaseDetails("TestRoomID", user);
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
 
 		final String contentId1 = "pre-existing-content-id";
@@ -172,10 +172,10 @@ public class ContentGroupControllerTest {
 	}
 
 	@Test
-	@WithMockUser(value = "TestUser", userId = "1234")
+	@WithMockUser(value = "TestUser", userId = "1234", roles = {"USER", "OWNER__TestRoomID"})
 	public void shouldUpdateContentGroupWhenContentIdsAreNotEmpty() throws Exception {
 		final String contentId = "ID-Content-1";
-		final Room room = this.getRoomForUserWithDatabaseDetails(user);
+		final Room room = this.getRoomForUserWithDatabaseDetails("TestRoomID", user);
 		final Content content = new Content();
 		content.setId(contentId);
 		content.setRoomId(room.getId());
@@ -198,9 +198,9 @@ public class ContentGroupControllerTest {
 	}
 
 	@Test
-	@WithMockUser(value = "TestUser", userId = "1234")
+	@WithMockUser(value = "TestUser", userId = "1234", roles = {"USER", "OWNER__TestRoomID"})
 	public void shouldDeleteContentGroupWhenGroupIsEmpty() throws Exception {
-		final Room room = this.getRoomForUserWithDatabaseDetails(user);
+		final Room room = this.getRoomForUserWithDatabaseDetails("TestRoomID", user);
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
 
 		final ContentGroup contentGroup = new ContentGroup();
@@ -234,9 +234,9 @@ public class ContentGroupControllerTest {
 		return a -> a.getRoomId().equals(roomId) && a.getContentIds().containsAll(Arrays.asList(contentIds));
 	}
 
-	private Room getRoomForUserWithDatabaseDetails(final User user) {
+	private Room getRoomForUserWithDatabaseDetails(final String roomId, final User user) {
 		final Room room = getRoomForUserWithoutDatabaseDetails(user);
-		room.setId("Test-RoomID");
+		room.setId(roomId);
 		room.setRevision("Test-rev");
 		return room;
 	}

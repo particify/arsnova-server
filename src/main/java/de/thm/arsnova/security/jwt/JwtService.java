@@ -111,6 +111,8 @@ public class JwtService {
 			final String userId = decodedJwt.getSubject();
 			final Collection<GrantedAuthority> authorities =
 					decodedJwt.getClaim(ROLES_CLAIM_NAME).asList(String.class).stream()
+					.map(role -> role.replace("-", "__"))
+					.map(role -> role.replaceFirst("^CREATOR__", "OWNER__"))
 					.map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role)).collect(Collectors.toList());
 
 			return userService.loadUser(userId, authorities);
