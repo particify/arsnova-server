@@ -52,6 +52,7 @@ import org.springframework.validation.Validator;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import de.thm.arsnova.persistence.UserRepository;
+import de.thm.arsnova.security.PasswordUtils;
 import de.thm.arsnova.service.StubUserService;
 
 @ComponentScan({
@@ -105,9 +106,10 @@ public class TestAppConfig {
 			final JavaMailSender mailSender,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
-			final Validator validator) {
+			final Validator validator,
+			final PasswordUtils passwordUtils) {
 		return new StubUserService(repository, systemProperties, securityProperties, authenticationProviderProperties,
-				mailSender, jackson2HttpMessageConverter, validator);
+				mailSender, jackson2HttpMessageConverter, validator, passwordUtils);
 	}
 
 	@Bean

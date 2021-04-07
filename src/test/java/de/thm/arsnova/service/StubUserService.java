@@ -32,6 +32,7 @@ import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.persistence.UserRepository;
+import de.thm.arsnova.security.PasswordUtils;
 import de.thm.arsnova.security.User;
 
 public class StubUserService extends UserServiceImpl {
@@ -46,9 +47,10 @@ public class StubUserService extends UserServiceImpl {
 			final JavaMailSender mailSender,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
-			final Validator validator) {
+			final Validator validator,
+			final PasswordUtils passwordUtils) {
 		super(repository, systemProperties, securityProperties, authenticationProviderProperties,
-				mailSender, jackson2HttpMessageConverter, validator);
+				mailSender, jackson2HttpMessageConverter, validator, passwordUtils);
 		grantedAuthorities = new HashSet<>();
 		grantedAuthorities.add(User.ROLE_USER);
 	}
