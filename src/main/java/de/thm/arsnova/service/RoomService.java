@@ -37,4 +37,6 @@ public interface RoomService extends EntityService<Room> {
 	Room transferOwnership(Room room, String newOwnerId);
 
 	Room transferOwnershipThroughToken(Room room, String targetUserToken);
+
+	void setPassword(Room room, String password);
 }

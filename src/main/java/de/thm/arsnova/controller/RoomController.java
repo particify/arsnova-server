@@ -18,6 +18,7 @@
 
 package de.thm.arsnova.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,9 +37,11 @@ import org.springframework.web.bind.annotation.RestController;
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.RoomStatistics;
+import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.ContentGroupService;
 import de.thm.arsnova.service.RoomService;
 import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
 
 @RestController
 @RequestMapping(RoomController.REQUEST_MAPPING)
@@ -48,6 +51,7 @@ public class RoomController extends AbstractEntityController<Room> {
 	private static final String MODERATOR_MAPPING = DEFAULT_ID_MAPPING + "/moderator/{userId}";
 	private static final String STATS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
 	private static final String TRANSFER_MAPPING = DEFAULT_ID_MAPPING + "/transfer";
+	private static final String PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/password";
 
 	private RoomService roomService;
 	private ContentGroupService contentGroupService;
@@ -137,5 +141,25 @@ public class RoomController extends AbstractEntityController<Room> {
 		httpServletResponse.setHeader(ENTITY_ID_HEADER, room.getId());
 		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, room.getRevision());
 		return updatedRoom;
+	}
+
+	@PostMapping(value = PASSWORD_MAPPING)
+	public void postPassword(
+			@PathVariable final String id,
+			@RequestBody final PasswordRequestEntity passwordRequestEntity) {
+		final Room room = roomService.get(id);
+		if (room == null) {
+			throw new NotFoundException();
+		}
+		roomService.setPassword(room, passwordRequestEntity.password);
+	}
+
+	private static class PasswordRequestEntity {
+		private String password;
+
+		@JsonView(View.Public.class)
+		public void setPassword(final String password) {
+			this.password = password;
+		}
 	}
 }

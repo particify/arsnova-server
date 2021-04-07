@@ -51,4 +51,10 @@ public class SecuredRoomService extends AbstractSecuredEntityServiceImpl<Room>
 	public Room transferOwnershipThroughToken(final Room room, final String targetUserToken) {
 		return roomService.transferOwnershipThroughToken(room, targetUserToken);
 	}
+
+	@Override
+	@PreAuthorize("hasPermission(#room, 'owner')")
+	public void setPassword(final Room room, final String password) {
+		roomService.setPassword(room, password);
+	}
 }
