@@ -19,6 +19,10 @@ public class PasswordUtils {
 		return encoder.encode(password);
 	}
 
+	public boolean matches(final String rawPassword, final String encodedPassword) {
+		return encoder.matches(rawPassword, encodedPassword);
+	}
+
 	public String generateKey() {
 		return new String(Hex.encode(keygen.generateKey()));
 	}

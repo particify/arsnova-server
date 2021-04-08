@@ -1,10 +1,12 @@
 package de.thm.arsnova.service;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.RoomMembership;
 
 @Service
 public class SecuredRoomService extends AbstractSecuredEntityServiceImpl<Room>
@@ -56,5 +58,11 @@ public class SecuredRoomService extends AbstractSecuredEntityServiceImpl<Room>
 	@PreAuthorize("hasPermission(#room, 'owner')")
 	public void setPassword(final Room room, final String password) {
 		roomService.setPassword(room, password);
+	}
+
+	@Override
+	@PreAuthorize("permitAll")
+	public Optional<RoomMembership> requestMembership(final String roomId, final String password) {
+		return roomService.requestMembership(roomId, password);
 	}
 }
