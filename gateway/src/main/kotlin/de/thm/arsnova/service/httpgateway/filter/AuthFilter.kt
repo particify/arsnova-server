@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.httpgateway.filter
 
+import de.thm.arsnova.service.httpgateway.exception.ForbiddenException
 import de.thm.arsnova.service.httpgateway.exception.UnauthorizedException
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
 import de.thm.arsnova.service.httpgateway.model.RoomFeatures
@@ -62,8 +63,8 @@ class AuthFilter (
                         Mono.zip(
                                 roomAccessService.getRoomAccess(roomId, userId)
                                     .onErrorResume { exception ->
-                                        logger.trace("Auth service didn't give specific role", exception)
-                                        Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT"))
+                                        logger.warn("Auth service didn't give specific role", exception)
+                                        Mono.error(ForbiddenException())
                                     },
                                 subscriptionService.getRoomFeatures(roomId, true),
                                 Mono.just(authorities)
