@@ -653,6 +653,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		final MimeMessage msg = mailSender.createMimeMessage();
 		final MimeMessageHelper helper = new MimeMessageHelper(msg, CharEncoding.UTF_8);
 		try {
+			msg.setHeader("Auto-Submitted", "auto-generated");
 			helper.setFrom(mailSenderName + "<" + mailSenderAddress + ">");
 			helper.setTo(userProfile.getLoginId());
 			helper.setSubject(subject);
