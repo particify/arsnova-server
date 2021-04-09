@@ -260,6 +260,7 @@ class GatewayConfig (
                     "/room/{roomId}/transfer**",
                 )
                 .filters { f ->
+                    f.filter(authFilter.apply(AuthFilter.Config()))
                     f.filter(roomAuthFilter.apply(RoomAuthFilter.Config()))
                     f.requestRateLimiter { r ->
                         r.rateLimiter = requestRateLimiter
@@ -271,7 +272,20 @@ class GatewayConfig (
         routes.route("core") { p ->
             p
                 .path(
-                    "/room/**",
+                    "/room/**"
+                )
+                .filters { f ->
+                    f.filter(authFilter.apply(AuthFilter.Config()))
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
+                    }
+                }
+                .uri(httpGatewayProperties.routing.endpoints.core)
+        }
+
+        routes.route("core-without-room-auth") { p ->
+            p
+                .path(
                     "/auth/**",
                     "/user/**",
                     "/configuration/**"
