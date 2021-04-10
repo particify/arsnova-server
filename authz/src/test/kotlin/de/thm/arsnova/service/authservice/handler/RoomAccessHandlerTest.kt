@@ -145,16 +145,4 @@ class RoomAccessHandlerTest {
 
         verify(roomAccessSyncTrackerRepository, times(0)).save(trackerCaptor.capture())
     }
-
-    @Test
-    fun testGetByRoomIdAndUserId() {
-        val expectedPK = RoomAccessPK(
-                SOME_ROOM_ID,
-                SOME_USER_ID
-        )
-
-        roomAccessHandler.getByRoomIdAndUserId(SOME_ROOM_ID, SOME_USER_ID)
-
-        verify(roomAccessRepository, times(1)).findById(expectedPK)
-    }
 }
