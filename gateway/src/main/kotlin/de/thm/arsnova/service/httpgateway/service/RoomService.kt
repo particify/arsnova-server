@@ -46,4 +46,15 @@ class RoomService(
                     })
                 }
     }
+
+    fun getByShortId(shortId: String): Mono<Room> {
+        val path = "${httpGatewayProperties.httpClient.core}/room/"
+        val url = "${path}~${shortId}"
+        logger.trace("Querying core for room by shortId with url: {}", url)
+        return webClient
+            .get()
+            .uri(url)
+            .retrieve()
+            .bodyToMono(Room::class.java)
+    }
 }

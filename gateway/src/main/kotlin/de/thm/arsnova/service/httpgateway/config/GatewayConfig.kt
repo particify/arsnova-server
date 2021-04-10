@@ -5,6 +5,7 @@ import de.thm.arsnova.service.httpgateway.filter.JwtUserIdFilter
 import de.thm.arsnova.service.httpgateway.filter.RequestRateLimiter
 import de.thm.arsnova.service.httpgateway.filter.RoomAuthFilter
 import de.thm.arsnova.service.httpgateway.filter.RoomIdFilter
+import de.thm.arsnova.service.httpgateway.filter.RoomShortIdFilter
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver
@@ -45,6 +46,7 @@ class GatewayConfig (
             builder: RouteLocatorBuilder,
             authFilter: AuthFilter,
             roomIdFilter: RoomIdFilter,
+            roomShortIdFilter: RoomShortIdFilter,
             roomAuthFilter: RoomAuthFilter,
             jwtUserIdFilter: JwtUserIdFilter
     ): RouteLocator? {
@@ -251,15 +253,29 @@ class GatewayConfig (
                 .uri(httpGatewayProperties.routing.endpoints.core)
         }
 
+        routes.route("room-post") { p ->
+            p
+                .path(
+                    "/room/"
+                )
+                .filters { f ->
+                    f.filter(roomAuthFilter.apply(RoomAuthFilter.Config()))
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
+                    }
+                }
+                .uri(httpGatewayProperties.routing.endpoints.core)
+        }
+
         routes.route("room") { p ->
             p
                 .path(
-                    "/room/",
                     "/room/{roomId}",
                     "/room/{roomId}/moderator/**",
                     "/room/{roomId}/transfer**",
                 )
                 .filters { f ->
+                    f.filter(roomShortIdFilter.apply(RoomShortIdFilter.Config()))
                     f.filter(authFilter.apply(AuthFilter.Config()))
                     f.filter(roomAuthFilter.apply(RoomAuthFilter.Config()))
                     f.requestRateLimiter { r ->
@@ -272,9 +288,10 @@ class GatewayConfig (
         routes.route("core") { p ->
             p
                 .path(
-                    "/room/**"
+                    "/room/{roomId}/**"
                 )
                 .filters { f ->
+                    f.filter(roomShortIdFilter.apply(RoomShortIdFilter.Config()))
                     f.filter(authFilter.apply(AuthFilter.Config()))
                     f.requestRateLimiter { r ->
                         r.rateLimiter = requestRateLimiter
