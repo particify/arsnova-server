@@ -134,9 +134,9 @@ public class RoomControllerTest {
 	}
 
 	@Test
-	@WithMockUser(value = "TestUser", userId = "1234")
+	@WithMockUser(value = "TestUser", userId = "1234", roles = {"USER", "OWNER__TestRoomID"})
 	public void shouldDeleteRoom() throws Exception {
-		final Room room = getRoomForUserWithDatabaseDetails(user);
+		final Room room = getRoomForUserWithDatabaseDetails("TestRoomID", user);
 
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
 
@@ -149,7 +149,7 @@ public class RoomControllerTest {
 
 	@Test
 	public void shouldReturnEmptyModeratorList() throws Exception {
-		final Room room = getRoomForUserWithDatabaseDetails(user);
+		final Room room = getRoomForUserWithDatabaseDetails("TestRoomID", user);
 
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
 
@@ -160,9 +160,9 @@ public class RoomControllerTest {
 	}
 
 	@Test
-	@WithMockUser(value = "TestUser", userId = "1234")
+	@WithMockUser(value = "TestUser", userId = "1234", roles = {"USER", "OWNER__TestRoomID"})
 	public void shouldAddModeratorForRoom() throws Exception {
-		final Room room = getRoomForUserWithDatabaseDetails(user);
+		final Room room = getRoomForUserWithDatabaseDetails("TestRoomID", user);
 		final Room.Moderator moderator = createModerator();
 
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
@@ -178,9 +178,9 @@ public class RoomControllerTest {
 	}
 
 	@Test
-	@WithMockUser(value = "TestUser", userId = "1234")
+	@WithMockUser(value = "TestUser", userId = "1234", roles = {"USER", "OWNER__TestRoomID"})
 	public void shouldDeleteOneModerator() throws Exception {
-		final Room room = getRoomForUserWithDatabaseDetails(user);
+		final Room room = getRoomForUserWithDatabaseDetails("TestRoomID", user);
 		final Set<Room.Moderator> moderatorList = createModerators(2);
 		room.setModerators(moderatorList);
 		final Iterator<Room.Moderator> iterator = room.getModerators().iterator();
@@ -202,7 +202,7 @@ public class RoomControllerTest {
 	public void shouldGetStatsForRoom() throws Exception {
 		final int groupSize = 3;
 		final int contentSize = 2;
-		final Room room = this.getRoomForUserWithDatabaseDetails(user);
+		final Room room = this.getRoomForUserWithDatabaseDetails("TestRoomID", user);
 		final List<ContentGroup> listOfContentGroup = createContentGroupsWithContents(room.getId(), groupSize, contentSize);
 
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
@@ -258,9 +258,9 @@ public class RoomControllerTest {
 		return createModerators(1).iterator().next();
 	}
 
-	private Room getRoomForUserWithDatabaseDetails(final User user) {
+	private Room getRoomForUserWithDatabaseDetails(final String roomId, final User user) {
 		final Room room = getRoomForUserWithoutDatabaseDetails(user);
-		room.setId("Test-RoomID");
+		room.setId(roomId);
 		room.setRevision("Test-rev");
 		return room;
 	}
