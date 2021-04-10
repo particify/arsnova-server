@@ -19,6 +19,7 @@
 package de.thm.arsnova.service;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -653,7 +654,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		final MimeMessage msg = mailSender.createMimeMessage();
 		final MimeMessageHelper helper = new MimeMessageHelper(msg, CharEncoding.UTF_8);
 		try {
-			helper.setFrom(mailSenderName + "<" + mailSenderAddress + ">");
+			msg.setHeader("Auto-Submitted", "auto-generated");
+			helper.setFrom(mailSenderAddress, mailSenderName);
 			helper.setTo(userProfile.getLoginId());
 			helper.setSubject(subject);
 			helper.setText(body);
@@ -665,6 +667,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			throw e;
 		} catch (final MessagingException e) {
 			logger.warn("Mail \"{}\" could not be sent because of MessagingException.", subject, e);
+		} catch (final UnsupportedEncodingException e) {
+			logger.error("Mail \"{}\" could not be sent because of the use of an unsupported encoding.", subject, e);
 		}
 	}
 
