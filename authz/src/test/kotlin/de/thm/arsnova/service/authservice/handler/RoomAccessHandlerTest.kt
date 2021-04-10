@@ -86,13 +86,17 @@ class RoomAccessHandlerTest {
                 SOME_ROOM_ID,
                 SOME_USER_ID,
                 SOME_REV,
-                CREATOR_STRING
+                CREATOR_STRING,
+                null,
+                null
         )
         val expectedCreate = RoomAccess(
                 SOME_ROOM_ID,
                 SOME_OTHER_USER_ID,
                 SOME_NEWER_REV,
-                CREATOR_STRING
+                CREATOR_STRING,
+                null,
+                null
         )
         val expectedTracker = RoomAccessSyncTracker(
                 SOME_ROOM_ID,
@@ -113,7 +117,9 @@ class RoomAccessHandlerTest {
                                 SOME_ROOM_ID,
                                 SOME_MODERATOR_ID,
                                 SOME_EVEN_NEWER_REV,
-                                EXECUTIVE_MODERATOR_STRING
+                                EXECUTIVE_MODERATOR_STRING,
+                                null,
+                                null
                         ),
                         // This is old and should get deleted
                         expectedDelete
