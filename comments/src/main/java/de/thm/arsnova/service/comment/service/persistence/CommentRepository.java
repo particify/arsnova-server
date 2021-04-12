@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface CommentRepository extends CrudRepository<Comment, String> {
     List<Comment> findByRoomId(String roomId);
-    List<Comment> findByIdInAndRoomId(Set<String> ids, String roomId);
+    List<Comment> findByIdInAndRoomIdAndArchiveIdNull(Set<String> ids, String roomId);
     @Transactional
     List<Comment> deleteByRoomId(String roomId);
     long countByRoomIdAndAckAndArchiveIdNull(String roomId, Boolean ack);

@@ -85,7 +85,7 @@ public class ArchiveService {
 
         if (cmd.getCommentIds() != null && !cmd.getCommentIds().isEmpty()) {
             comments = StreamSupport.stream(
-                    commentRepository.findByIdInAndRoomId(cmd.getCommentIds(), cmd.getRoomId()).spliterator(), false
+                    commentRepository.findByIdInAndRoomIdAndArchiveIdNull(cmd.getCommentIds(), cmd.getRoomId()).spliterator(), false
             ).collect(Collectors.toSet());
 
             if (cmd.getCommentIds().size() != comments.size()) {
