@@ -30,7 +30,7 @@ public class VoteFindQueryService {
         if (findQuery.getExternalFilters().get("roomId") instanceof String && findQuery.getProperties().getUserId() != null) {
             String roomId = (String) findQuery.getExternalFilters().get("roomId");
             String userId = findQuery.getProperties().getUserId();
-            List<Comment> commentList = commentService.getByRoomId(roomId);
+            List<Comment> commentList = commentService.getByRoomIdAndArchiveIdNull(roomId);
             List<String> commentIds = commentList.stream().map(Comment::getId).collect(Collectors.toList());
             List<Vote> voteList = voteService.getForCommentsAndUser(commentIds, userId);
 
