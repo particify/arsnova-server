@@ -49,7 +49,8 @@ data class Endpoints(
 )
 
 data class Gateway(
-        val rateLimit: RateLimit
+        val rateLimit: RateLimit,
+        val requireMembership: Boolean
 )
 
 data class RateLimit(

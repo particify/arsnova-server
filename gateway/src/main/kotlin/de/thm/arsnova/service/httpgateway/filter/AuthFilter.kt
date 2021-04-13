@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.httpgateway.filter
 
+import de.thm.arsnova.service.httpgateway.config.HttpGatewayProperties
 import de.thm.arsnova.service.httpgateway.exception.ForbiddenException
 import de.thm.arsnova.service.httpgateway.exception.UnauthorizedException
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
@@ -32,6 +33,7 @@ import reactor.util.function.Tuple3
 @Component
 class AuthFilter (
         private val jwtTokenUtil: JwtTokenUtil,
+        private val httpGatewayProperties: HttpGatewayProperties,
         private val roomAccessService: RoomAccessService,
         private val subscriptionService: SubscriptionService
 ) : AbstractGatewayFilterFactory<AuthFilter.Config>(Config::class.java) {
@@ -64,7 +66,11 @@ class AuthFilter (
                                 roomAccessService.getRoomAccess(roomId, userId)
                                     .onErrorResume { exception ->
                                         logger.warn("Auth service didn't give specific role", exception)
-                                        Mono.error(ForbiddenException())
+                                        if (httpGatewayProperties.gateway.requireMembership) {
+                                            Mono.error(ForbiddenException())
+                                        } else {
+                                            Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT", null))
+                                        }
                                     },
                                 subscriptionService.getRoomFeatures(roomId, true),
                                 Mono.just(authorities)
