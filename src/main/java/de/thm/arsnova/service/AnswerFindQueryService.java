@@ -32,11 +32,10 @@ public class AnswerFindQueryService implements FindQueryService<Answer> {
 			ids.addAll(answerService.getAnswerIdsByContentId(properties.getContentId()));
 		} else if (properties.getCreatorId() != null) {
 			if (findQuery.getExternalFilters().get("contentIds") instanceof List) {
-				final int round = properties.getRound() > 0 ? properties.getRound() : 1;
 				ids.addAll(answerService.getAnswerIdsByCreatorIdContentIdsRound(
 						properties.getCreatorId(),
 						(List) findQuery.getExternalFilters().get("contentIds"),
-						round));
+						properties.getRound()));
 			} else if (properties.getRoomId() != null) {
 				ids.addAll(answerService.getAnswerIdsByCreatorIdRoomId(
 						properties.getCreatorId(),

@@ -39,6 +39,18 @@ import de.thm.arsnova.model.serialization.View;
 )
 @JsonTypeIdResolver(FormatAnswerTypeIdResolver.class)
 public class Answer extends Entity implements RoomIdAware {
+	public Answer() {
+
+	}
+
+	public Answer(final Content content, final String creatorId) {
+		this.contentId = content.getId();
+		this.roomId = content.getRoomId();
+		this.format = content.getFormat();
+		this.round = content.getState().getRound();
+		this.creatorId = creatorId;
+	}
+
 	@NotEmpty
 	private String contentId;
 

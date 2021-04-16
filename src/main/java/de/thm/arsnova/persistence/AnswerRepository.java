@@ -37,5 +37,7 @@ public interface AnswerRepository extends CrudRepository<Answer, String> {
 
 	List<String> findIdsByCreatorIdContentIdsRound(String creatorId, List<String> contentIds, int round);
 
+	List<String> findIdsByAnswerStubs(List<Answer> answerStubs);
+
 	List<MultipleTextsAnswer> findByContentIdRoundForText(String contentId, int round);
 }
