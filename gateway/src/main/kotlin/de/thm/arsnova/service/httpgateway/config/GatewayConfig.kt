@@ -3,6 +3,7 @@ package de.thm.arsnova.service.httpgateway.config
 import de.thm.arsnova.service.httpgateway.filter.AuthFilter
 import de.thm.arsnova.service.httpgateway.filter.JwtUserIdFilter
 import de.thm.arsnova.service.httpgateway.filter.AddMembershipFilter
+import de.thm.arsnova.service.httpgateway.filter.RemoveMembershipFilter
 import de.thm.arsnova.service.httpgateway.filter.RequestRateLimiter
 import de.thm.arsnova.service.httpgateway.filter.RoomAuthFilter
 import de.thm.arsnova.service.httpgateway.filter.RoomIdFilter
@@ -44,6 +45,7 @@ class GatewayConfig (
         builder: RouteLocatorBuilder,
         authFilter: AuthFilter,
         addMembershipFilter: AddMembershipFilter,
+        removeMembershipFilter: RemoveMembershipFilter,
         roomIdFilter: RoomIdFilter,
             roomShortIdFilter: RoomShortIdFilter,
         roomAuthFilter: RoomAuthFilter,
@@ -235,13 +237,29 @@ class GatewayConfig (
             }
         }
 
-        routes.route("membership") { p ->
+        routes.route("request-membership") { p ->
             p
                 .path(
                     "/room/{roomId}/request-membership"
                 )
                 .filters { f ->
                     f.filter(addMembershipFilter.apply(AddMembershipFilter.Config()))
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
+                    }
+                }
+                .uri(httpGatewayProperties.routing.endpoints.core)
+        }
+
+        routes.route("cancel-membership") { p ->
+            p
+                .path(
+                    "/room/{roomId}/cancel-membership"
+                )
+                .filters { f ->
+                    f.filter(roomShortIdFilter.apply(RoomShortIdFilter.Config()))
+                    f.filter(authFilter.apply(AuthFilter.Config()))
+                    f.filter(removeMembershipFilter.apply(RemoveMembershipFilter.Config()))
                     f.requestRateLimiter { r ->
                         r.rateLimiter = requestRateLimiter
                     }
