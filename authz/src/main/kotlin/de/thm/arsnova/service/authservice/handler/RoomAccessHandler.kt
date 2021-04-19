@@ -18,6 +18,7 @@ import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
+import java.util.Date
 import java.util.Optional
 
 @Component
@@ -80,7 +81,7 @@ class RoomAccessHandler (
             roomAccessRepository.deleteAll(toDelete)
 
             val newAccess = command.access.map { i ->
-                RoomAccess(command.roomId, i.userId, command.rev, i.role)
+                RoomAccess(command.roomId, i.userId, command.rev, i.role, null, null)
             }
 
             logger.debug("Saving new access: {}", newAccess)
@@ -97,7 +98,8 @@ class RoomAccessHandler (
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun getByRoomIdAndUserId(roomId: String, userId: String): Optional<RoomAccess> {
         logger.debug("Handling room access request with roomId: {} and userId: {}", roomId, userId)
-        return roomAccessRepository.findById(RoomAccessPK(roomId, userId))
+        val lastAccess = Date()
+        return roomAccessRepository.updateLastAccessAndGetByRoomIdAndUserId(roomId, userId, lastAccess)
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)

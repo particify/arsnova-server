@@ -6,12 +6,24 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import java.util.Date
+import java.util.Optional
 
 @Repository
 interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     fun findByRoomId(roomId: String): Iterable<RoomAccess>
     fun findByRoomIdAndRole(roomId: String, role: String): Iterable<RoomAccess>
     fun findByUserId(userId: String): Iterable<RoomAccess>
+    @Query("""
+        UPDATE room_access
+            SET last_access = :lastAccess
+            WHERE room_id = :roomId
+            AND user_id = :userId
+            RETURNING *;
+        """,
+        nativeQuery = true
+    )
+    fun updateLastAccessAndGetByRoomIdAndUserId(roomId: String, userId: String, lastAccess: Date): Optional<RoomAccess>
     // This is needed to not have hibernate check if any rows should be deleted
     @Query("DELETE FROM room_access WHERE room_id = :roomId RETURNING *;", nativeQuery = true)
     fun deleteByRoomIdWithoutChecking(@Param("roomId") roomId: String): Iterable<RoomAccess>

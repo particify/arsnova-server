@@ -21,7 +21,7 @@ class RoomAccessListener (
     @RabbitListener(queues = [RabbitConfig.roomCreatedQueueName])
     fun receiveRoomCreatedEvent(event: RoomCreatedEvent) {
         logger.debug("Got event on room created queue: {}", event)
-        handler.create(RoomAccess(event.id, event.ownerId, "1-0", "CREATOR"))
+        handler.create(RoomAccess(event.id, event.ownerId, "1-0", "CREATOR", null, null))
     }
 
     @RabbitListener(queues = [RabbitConfig.roomDeletedQueueName])
