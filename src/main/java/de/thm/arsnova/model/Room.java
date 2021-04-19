@@ -454,6 +454,7 @@ public class Room extends Entity implements RoomIdAware {
 	private String description;
 	private String renderedDescription;
 	private boolean closed;
+	private String password;
 	private Set<Moderator> moderators;
 	private boolean moderatorsInitialized;
 	private Settings settings;
@@ -545,6 +546,21 @@ public class Room extends Entity implements RoomIdAware {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setClosed(final boolean closed) {
 		this.closed = closed;
+	}
+
+	@JsonView(View.Persistence.class)
+	public String getPassword() {
+		return password;
+	}
+
+	@JsonView(View.Persistence.class)
+	public void setPassword(final String password) {
+		this.password = password == null || password.isBlank() ? null : password;
+	}
+
+	@JsonView(View.Public.class)
+	public boolean isPasswordProtected() {
+		return this.password != null;
 	}
 
 	@JsonView({View.Persistence.class, View.Admin.class})
@@ -675,6 +691,7 @@ public class Room extends Entity implements RoomIdAware {
 				.append("abbreviation", abbreviation)
 				.append("description", description)
 				.append("closed", closed)
+				.append("passwordProtected", isPasswordProtected())
 				.append("moderatorsInitialized", moderatorsInitialized)
 				.append("moderators", moderators)
 				.append("settings", settings)

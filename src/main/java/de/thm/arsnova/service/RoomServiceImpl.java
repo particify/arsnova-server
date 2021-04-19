@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
@@ -40,11 +41,14 @@ import org.springframework.validation.Validator;
 import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.event.BeforeFullUpdateEvent;
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.RoomMembership;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
+import de.thm.arsnova.security.PasswordUtils;
+import de.thm.arsnova.security.RoomRole;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.security.jwt.JwtService;
 import de.thm.arsnova.web.exceptions.BadRequestException;
@@ -75,6 +79,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	private JwtService jwtService;
 
+	private PasswordUtils passwordUtils;
+
 	@Value("${system.inactivity-thresholds.delete-inactive-guest-rooms:0}")
 	private int guestRoomInactivityThresholdDays;
 
@@ -88,12 +94,14 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
 			final Validator validator,
-			final JwtService jwtService) {
+			final JwtService jwtService,
+			final PasswordUtils passwordUtils) {
 		super(Room.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.roomRepository = repository;
 		this.dbLogger = dbLogger;
 		this.userService = userService;
 		this.jwtService = jwtService;
+		this.passwordUtils = passwordUtils;
 	}
 
 	@Autowired
@@ -256,6 +264,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		if (room.getOwnerId() == null) {
 			room.setOwnerId(existingRoom.getOwnerId());
 		}
+		room.setPassword(existingRoom.getPassword());
 		handleLogo(room);
 
 		/* TODO: only publish event when feedback has changed */
@@ -281,6 +290,26 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		final User user = jwtService.verifyToken(targetUserToken);
 		room.setOwnerId(user.getId());
 		return update(room);
+	}
+
+	@Override
+	public void setPassword(final Room room, final String password) {
+		if (password != null && !password.isBlank()) {
+			final String passwordHash = passwordUtils.encode(password);
+			room.setPassword(passwordHash);
+		} else {
+			room.setPassword(null);
+		}
+		update(room);
+	}
+
+	@Override
+	public Optional<RoomMembership> requestMembership(final String roomId, final String password) {
+		final Room room = get(roomId);
+		return room.isClosed()
+				|| room.isPasswordProtected() && !passwordUtils.matches(password, room.getPassword())
+				? Optional.empty()
+				: Optional.of(new RoomMembership(room, RoomRole.PARTICIPANT));
 	}
 
 	private void handleLogo(final Room room) {

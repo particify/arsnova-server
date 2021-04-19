@@ -16,31 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.thm.arsnova.service;
+package de.thm.arsnova.model;
 
-import java.util.List;
-import java.util.Optional;
+import com.fasterxml.jackson.annotation.JsonView;
 
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.RoomMembership;
+import de.thm.arsnova.model.serialization.View;
+import de.thm.arsnova.security.RoomRole;
 
-/**
- * The functionality the session service should provide.
- */
-public interface RoomService extends EntityService<Room> {
-	String getIdByShortId(String shortId);
+@JsonView(View.Public.class)
+public class RoomMembership {
+	private Room room;
+	private RoomRole role;
 
-	List<String> getUserRoomIds(String userId);
+	public RoomMembership(final Room room, final RoomRole role) {
+		this.room = room;
+		this.role = role;
+	}
 
-	List<String> getRoomIdsByModeratorId(String userId);
+	public Room getRoom() {
+		return room;
+	}
 
-	List<Room> getUserRoomHistory(String userId);
-
-	Room transferOwnership(Room room, String newOwnerId);
-
-	Room transferOwnershipThroughToken(Room room, String targetUserToken);
-
-	void setPassword(Room room, String password);
-
-	Optional<RoomMembership> requestMembership(String roomId, String password);
+	public RoomRole getRole() {
+		return role;
+	}
 }

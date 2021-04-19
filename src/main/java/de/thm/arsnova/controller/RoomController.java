@@ -18,7 +18,9 @@
 
 package de.thm.arsnova.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
@@ -35,10 +37,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.RoomMembership;
 import de.thm.arsnova.model.RoomStatistics;
+import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.ContentGroupService;
 import de.thm.arsnova.service.RoomService;
 import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.ForbiddenException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.web.exceptions.NotImplementedException;
 
 @RestController
 @RequestMapping(RoomController.REQUEST_MAPPING)
@@ -48,6 +55,10 @@ public class RoomController extends AbstractEntityController<Room> {
 	private static final String MODERATOR_MAPPING = DEFAULT_ID_MAPPING + "/moderator/{userId}";
 	private static final String STATS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
 	private static final String TRANSFER_MAPPING = DEFAULT_ID_MAPPING + "/transfer";
+	private static final String PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/password";
+	private static final String REQUEST_MEMBERSHIP_MAPPING = DEFAULT_ID_MAPPING + "/request-membership";
+
+	private static final String ROOM_ROLE_HEADER = "ARS-Room-Role";
 
 	private RoomService roomService;
 	private ContentGroupService contentGroupService;
@@ -137,5 +148,62 @@ public class RoomController extends AbstractEntityController<Room> {
 		httpServletResponse.setHeader(ENTITY_ID_HEADER, room.getId());
 		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, room.getRevision());
 		return updatedRoom;
+	}
+
+	@PostMapping(value = PASSWORD_MAPPING)
+	public void postPassword(
+			@PathVariable final String id,
+			@RequestBody final PasswordRequestEntity passwordRequestEntity) {
+		final Room room = roomService.get(id);
+		if (room == null) {
+			throw new NotFoundException();
+		}
+		roomService.setPassword(room, passwordRequestEntity.password);
+	}
+
+	@PostMapping(value = REQUEST_MEMBERSHIP_MAPPING)
+	public Room requestMembership(
+			@PathVariable final String id,
+			@RequestBody final RequestMembershipRequestEntity requestMembershipRequestEntity,
+			final HttpServletResponse httpServletResponse) {
+		if (requestMembershipRequestEntity.token != null) {
+			throw new NotImplementedException();
+		} else {
+			final Optional<RoomMembership> membership = roomService.requestMembership(
+					id, requestMembershipRequestEntity.password != null ? requestMembershipRequestEntity.password : "");
+			membership.ifPresent(m -> {
+				httpServletResponse.setHeader(ENTITY_ID_HEADER, m.getRoom().getId());
+				httpServletResponse.setHeader(ENTITY_REVISION_HEADER, m.getRoom().getRevision());
+				/* Sending of the role as a header is a temporary solution for
+				 * now to allow accessing it without parsing the body. */
+				httpServletResponse.setHeader(ROOM_ROLE_HEADER, m.getRole().toString());
+			});
+
+			return membership.orElseThrow(ForbiddenException::new).getRoom();
+		}
+	}
+
+	private static class PasswordRequestEntity {
+		private String password;
+
+		@JsonView(View.Public.class)
+		public void setPassword(final String password) {
+			this.password = password;
+		}
+	}
+
+	private static class RequestMembershipRequestEntity {
+		private String password;
+		private String token;
+
+		@JsonView(View.Public.class)
+		public void setPassword(final String password) {
+			this.password = password;
+		}
+
+		@JsonView(View.Public.class)
+		public void setToken(final String token) {
+			this.token = token;
+		}
 	}
 }

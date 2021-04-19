@@ -20,7 +20,6 @@ package de.thm.arsnova.service;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.security.SecureRandom;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,10 +57,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.codec.Hex;
-import org.springframework.security.crypto.keygen.BytesKeyGenerator;
-import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
@@ -74,6 +69,7 @@ import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.security.GuestUserDetailsService;
+import de.thm.arsnova.security.PasswordUtils;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.security.jwt.JwtService;
 import de.thm.arsnova.security.jwt.JwtToken;
@@ -102,9 +98,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	private static final long ACTIVATION_KEY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
 	private static final long ACTIVATION_KEY_DURABILITY_MS = 5 * 24 * 60 * 60 * 1000L;
 
-	private static final int MAX_VERIFICATION_CODE = 999999;
+	private static final int VERIFICATION_CODE_LENGTH = 6;
 	private static final int MAX_VERIFICATION_CODE_ATTEMPTS = 10;
-	private static final String VERIFICATION_CODE_FORMAT = "%06d";
 
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -113,6 +108,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	private UserRepository userRepository;
 	private JwtService jwtService;
+	private PasswordUtils passwordUtils;
 	private JavaMailSender mailSender;
 
 	private SystemProperties systemProperties;
@@ -136,9 +132,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	private String customizationPath;
 
 	private Pattern mailPattern;
-	private BytesKeyGenerator keygen;
-	private SecureRandom secureRandom;
-	private BCryptPasswordEncoder encoder;
 	private ConcurrentHashMap<String, Byte> loginTries;
 	private Set<String> loginBans;
 	private ConcurrentHashMap<String, Byte> resentMailCount;
@@ -159,16 +152,17 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			final JavaMailSender mailSender,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
-			final Validator validator) {
+			final Validator validator,
+			final PasswordUtils passwordUtils) {
 		super(UserProfile.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.userRepository = repository;
 		this.securityProperties = securityProperties;
 		this.registeredProperties = authenticationProviderProperties.getRegistered();
+		this.passwordUtils = passwordUtils;
 		this.mailSender = mailSender;
 		this.rootUrl = systemProperties.getRootUrl();
 		this.mailSenderAddress = systemProperties.getMail().getSenderAddress();
 		this.mailSenderName = systemProperties.getMail().getSenderName();
-		this.secureRandom = new SecureRandom();
 	}
 
 	@Scheduled(fixedDelay = LOGIN_TRY_RESET_DELAY_MS)
@@ -422,11 +416,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	private String encodePassword(final String password) {
-		if (null == encoder) {
-			encoder = new BCryptPasswordEncoder(12);
-		}
-
-		return encoder.encode(password);
+		return passwordUtils.encode(password);
 	}
 
 	private void sendActivationEmail(final UserProfile userProfile) {
@@ -673,16 +663,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	private String generateGuestId() {
-		if (null == keygen) {
-			keygen = KeyGenerators.secureRandom(16);
-		}
-
-		return new String(Hex.encode(keygen.generateKey()));
+		return passwordUtils.generateKey();
 	}
 
 	private String generateVerificationCode() {
-		final int code = secureRandom.nextInt(MAX_VERIFICATION_CODE);
-		return String.format(VERIFICATION_CODE_FORMAT, code);
+		return passwordUtils.generateFixedLengthNumericCode(VERIFICATION_CODE_LENGTH);
 	}
 
 	@Autowired
