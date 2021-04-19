@@ -31,51 +31,13 @@ class MembershipView(
                     authentication.principal == userId
                 }
                 .switchIfEmpty(Mono.error(ForbiddenException()))
-                .flatMap { authentication ->
-                    val jwt = authentication.credentials.toString()
-                    userService.get(userId, jwt)
+                .map {
+                    roomAccessService.getRoomAccessByUser(userId)
                 }
-                .map { user: User ->
-                    user.roomHistory
-                }
-                .map { list: List<RoomHistoryEntry> ->
-                    list.map { entry ->
-                        Membership(
-                            entry.roomId,
-                            "shortId",
-                            setOf("PARTICIPANT"),
-                            entry.lastVisit
-                        )
-                    }
-                }
-                .filter { list ->
-                    list.isNotEmpty()
-                }
-                .map { list: List<Membership> ->
-                    Flux
-                        .zip(
-                            Flux.fromIterable(list),
-                            roomService.get(list.map { entry -> entry.roomId })
-                        )
-                        .map { t2 ->
-                            t2.t2
-                                    .map { room ->
-                                        Mono.just(Membership(
-                                                t2.t1.roomId,
-                                                room.shortId,
-                                                t2.t1.roles,
-                                                t2.t1.lastVisit))
-                                    }
-                                    .orElse(Mono.empty())
-                        }
-                }
-                .flatMapMany { list: Flux<Mono<Membership>> ->
+                .flatMapMany { list: Flux<RoomAccess> ->
                     list
                 }
-                .flatMap { list: Mono<Membership> ->
-                    list
-                }
-                .concatWith(roomAccessService.getRoomAccessByUser(userId).flatMap { roomAccess ->
+                .flatMap { roomAccess: RoomAccess ->
                     Flux
                         .zip(
                             Mono.just(roomAccess),
@@ -86,12 +48,12 @@ class MembershipView(
                                 t2.t1.roomId,
                                 t2.t2.shortId,
                                 setOf(t2.t1.role),
-                                "lastVisit"
+                                t2.t1.lastAccess!!.toString()
                             )
                         }
-                })
+                }
                 .groupBy { membership ->
-                    Membership(membership.roomId, membership.roomShortId, setOf(), "")
+                    Membership(membership.roomId, membership.roomShortId, setOf(), membership.lastVisit)
                 }
                 .flatMap { groupedMemberships ->
                     groupedMemberships.reduce(groupedMemberships.key()!!.copy(), { acc: Membership, m: Membership ->

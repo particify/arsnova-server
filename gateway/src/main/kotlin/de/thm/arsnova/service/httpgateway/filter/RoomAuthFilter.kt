@@ -164,7 +164,8 @@ class RoomAuthFilter(
                                     accessChangeRequest.roomId,
                                     accessChangeRequest.userId,
                                     accessChangeRequest.revId,
-                                    accessChangeRequest.level.name
+                                    accessChangeRequest.level.name,
+                                    null
                                 )
                                 roomAccessService.postRoomAccess(roomAccess)
                             }
@@ -173,7 +174,8 @@ class RoomAuthFilter(
                                     accessChangeRequest.roomId,
                                     accessChangeRequest.userId,
                                     accessChangeRequest.revId,
-                                    accessChangeRequest.level.name
+                                    accessChangeRequest.level.name,
+                                    null
                                 )
                                 roomAccessService.deleteRoomAccess(roomAccess)
                             }

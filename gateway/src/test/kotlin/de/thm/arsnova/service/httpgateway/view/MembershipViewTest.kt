@@ -52,8 +52,8 @@ class MembershipViewTest(
                 Optional.of(Room(visitedRoomIds[1], "11112222", "name for second visited room"))
         )
         val userRoomAccess = listOf(
-                RoomAccess(ownedRoomIds[0], userId, "rev", "OWNER"),
-                RoomAccess(ownedRoomIds[1], userId, "rev", "OWNER")
+                RoomAccess(ownedRoomIds[0], userId, "rev", "OWNER", null),
+                RoomAccess(ownedRoomIds[1], userId, "rev", "OWNER", null)
         )
         val ownedRooms = listOf(
                 Room(ownedRoomIds[0], "22222222", "name for first owned room"),
@@ -144,8 +144,8 @@ class MembershipViewTest(
         val testAuthentication = UsernamePasswordAuthenticationToken(userId, jwtString, listOf())
         val testUser = User(userId, listOf())
         val userRoomAccess = listOf(
-                RoomAccess(ownedRoomIds[0], userId, "rev", "OWNER"),
-                RoomAccess(ownedRoomIds[1], userId, "rev", "OWNER")
+                RoomAccess(ownedRoomIds[0], userId, "rev", "OWNER", null),
+                RoomAccess(ownedRoomIds[1], userId, "rev", "OWNER", null)
         )
         val ownedRooms = listOf(
                 Room(ownedRoomIds[0], "22222222", "name for first owned room"),
@@ -181,8 +181,8 @@ class MembershipViewTest(
                 UUID.randomUUID().toString().replace("-", "")
         )
         val userRoomAccess = listOf(
-                RoomAccess(ownedRoomIds[0], userId, "rev", "OWNER"),
-                RoomAccess(ownedRoomIds[1], userId, "rev", "OWNER")
+                RoomAccess(ownedRoomIds[0], userId, "rev", "OWNER", null),
+                RoomAccess(ownedRoomIds[1], userId, "rev", "OWNER", null)
         )
         val notAStaleRoom = Room(ownedRoomIds[0], "22222222", "name for first owned room")
 

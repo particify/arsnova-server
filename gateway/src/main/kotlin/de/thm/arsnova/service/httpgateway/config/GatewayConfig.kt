@@ -2,19 +2,17 @@ package de.thm.arsnova.service.httpgateway.config
 
 import de.thm.arsnova.service.httpgateway.filter.AuthFilter
 import de.thm.arsnova.service.httpgateway.filter.JwtUserIdFilter
+import de.thm.arsnova.service.httpgateway.filter.AddMembershipFilter
 import de.thm.arsnova.service.httpgateway.filter.RequestRateLimiter
 import de.thm.arsnova.service.httpgateway.filter.RoomAuthFilter
 import de.thm.arsnova.service.httpgateway.filter.RoomIdFilter
 import de.thm.arsnova.service.httpgateway.filter.RoomShortIdFilter
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver
 import org.springframework.cloud.gateway.route.RouteLocator
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpStatus
-import org.springframework.web.client.HttpServerErrorException
 import reactor.core.publisher.Mono
 
 
@@ -43,12 +41,13 @@ class GatewayConfig (
 
     @Bean
     fun myRoutes(
-            builder: RouteLocatorBuilder,
-            authFilter: AuthFilter,
-            roomIdFilter: RoomIdFilter,
+        builder: RouteLocatorBuilder,
+        authFilter: AuthFilter,
+        addMembershipFilter: AddMembershipFilter,
+        roomIdFilter: RoomIdFilter,
             roomShortIdFilter: RoomShortIdFilter,
-            roomAuthFilter: RoomAuthFilter,
-            jwtUserIdFilter: JwtUserIdFilter
+        roomAuthFilter: RoomAuthFilter,
+        jwtUserIdFilter: JwtUserIdFilter
     ): RouteLocator? {
         val routes = builder.routes()
 
@@ -234,6 +233,20 @@ class GatewayConfig (
                         }
                         .uri(httpGatewayProperties.routing.endpoints.proxyMetrics)
             }
+        }
+
+        routes.route("membership") { p ->
+            p
+                .path(
+                    "/room/{roomId}/request-membership"
+                )
+                .filters { f ->
+                    f.filter(addMembershipFilter.apply(AddMembershipFilter.Config()))
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
+                    }
+                }
+                .uri(httpGatewayProperties.routing.endpoints.core)
         }
 
         routes.route("core") { p ->

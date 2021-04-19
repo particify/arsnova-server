@@ -61,3 +61,4 @@ gateway:
     command-burst-capacity: 75
     whitelisted-ips:
       - 172.18.0.18
+  require-membership: true
