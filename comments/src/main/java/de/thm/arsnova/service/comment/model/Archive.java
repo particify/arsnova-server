@@ -14,6 +14,8 @@ public class Archive {
     private String name;
     @Transient
     private Set<Comment> comments;
+    @Transient
+    private long count;
 
     public String getId() {
         return id;
@@ -47,6 +49,14 @@ public class Archive {
         this.comments = comments;
     }
 
+    public long getCount() {
+        return count;
+    }
+
+    public void setCount(final long count) {
+        this.count = count;
+    }
+
     @Override
     public String toString() {
         return "Archive{" +
@@ -54,6 +64,7 @@ public class Archive {
                 ", roomId='" + roomId + '\'' +
                 ", name='" + name + '\'' +
                 ", comments=" + comments +
+                ", count=" + count +
                 '}';
     }
 
@@ -62,7 +73,7 @@ public class Archive {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final Archive archive = (Archive) o;
-        return Objects.equals(id, archive.id) && Objects.equals(
+        return count == archive.count && Objects.equals(id, archive.id) && Objects.equals(
                 roomId,
                 archive.roomId) && Objects.equals(name, archive.name) && Objects.equals(
                 comments,
@@ -71,6 +82,6 @@ public class Archive {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, roomId, name, comments);
+        return Objects.hash(id, roomId, name, comments, count);
     }
 }

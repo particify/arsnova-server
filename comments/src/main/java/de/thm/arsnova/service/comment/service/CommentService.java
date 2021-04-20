@@ -121,8 +121,8 @@ public class CommentService {
         return updatedEntity;
     }
 
-    public List<Comment> getByRoomId(String roomId) {
-        return repository.findByRoomId(roomId);
+    public List<Comment> getByRoomIdAndArchiveIdNull(String roomId) {
+        return repository.findByRoomIdAndArchiveIdNull(roomId);
     }
 
     public long countByRoomIdAndAck(String roomId, Boolean ack) {

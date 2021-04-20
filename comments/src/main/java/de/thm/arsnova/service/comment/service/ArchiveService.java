@@ -49,7 +49,9 @@ public class ArchiveService {
         }
 
         final Optional<Archive> enrichedArchive = archive.map(a -> {
-            a.setComments(new HashSet<>(commentRepository.findByArchiveId(a.getId())));
+            final List<Comment> comments = commentRepository.findByArchiveId(a.getId());
+            a.setComments(new HashSet<>(comments));
+            a.setCount(comments.size());
             return a;
         });
         return enrichedArchive;
@@ -64,6 +66,7 @@ public class ArchiveService {
             if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(archive.getRoomId())) {
                 throw new ForbiddenException();
             }
+            archive.setCount(commentRepository.countByArchiveId(archive.getId()));
 
             return Optional.of(archive);
         }
@@ -73,7 +76,11 @@ public class ArchiveService {
         if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(roomId)) {
             throw new ForbiddenException();
         }
-        return repository.findByRoomId(roomId);
+        List<Archive> archives = repository.findByRoomId(roomId);
+        for (Archive archive : archives) {
+            archive.setCount(commentRepository.countByArchiveId(archive.getId()));
+        }
+        return archives;
     }
 
     public Archive create(final CreateArchiveCommand cmd) {
@@ -85,7 +92,7 @@ public class ArchiveService {
 
         if (cmd.getCommentIds() != null && !cmd.getCommentIds().isEmpty()) {
             comments = StreamSupport.stream(
-                    commentRepository.findByIdInAndRoomId(cmd.getCommentIds(), cmd.getRoomId()).spliterator(), false
+                    commentRepository.findByIdInAndRoomIdAndArchiveIdNull(cmd.getCommentIds(), cmd.getRoomId()).spliterator(), false
             ).collect(Collectors.toSet());
 
             if (cmd.getCommentIds().size() != comments.size()) {
@@ -93,7 +100,7 @@ public class ArchiveService {
             }
         } else {
             comments = StreamSupport.stream(
-                    commentRepository.findByRoomId(cmd.getRoomId()).spliterator(), false
+                    commentRepository.findByRoomIdAndArchiveIdNull(cmd.getRoomId()).spliterator(), false
             ).collect(Collectors.toSet());
         }
 
