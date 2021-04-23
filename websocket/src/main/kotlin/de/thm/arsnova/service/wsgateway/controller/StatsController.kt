@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.wsgateway.controller
 
+import de.thm.arsnova.service.wsgateway.event.RoomSubscriptionEventDispatcher
 import de.thm.arsnova.service.wsgateway.model.Stats
 import de.thm.arsnova.service.wsgateway.service.RoomSubscriptionService
 import org.slf4j.LoggerFactory
@@ -9,7 +10,7 @@ import reactor.core.publisher.Mono
 
 @RestController("StatsController")
 class StatsController(
-		private val roomSubscriptionService: RoomSubscriptionService
+		private val roomSubscriptionEventDispatcher: RoomSubscriptionEventDispatcher,
 ) {
 	companion object {
 		const val STATS_MAPPING = "/stats"
@@ -19,6 +20,6 @@ class StatsController(
 
 	@GetMapping(STATS_MAPPING)
 	fun getStats(): Mono<Stats> {
-		return Mono.just(Stats(roomSubscriptionService.getUserCount()))
+		return Mono.just(Stats(roomSubscriptionEventDispatcher.getWsSessionCount()))
 	}
 }

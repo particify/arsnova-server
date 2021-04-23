@@ -1,6 +1,8 @@
 package de.thm.arsnova.service.wsgateway.service
 
 import de.thm.arsnova.service.wsgateway.config.WebSocketProperties
+import de.thm.arsnova.service.wsgateway.event.RoomJoinEvent
+import de.thm.arsnova.service.wsgateway.event.RoomLeaveEvent
 import de.thm.arsnova.service.wsgateway.event.UserCountChanged
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
@@ -11,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 
 @Service
@@ -22,9 +25,6 @@ class RoomSubscriptionService(
 
 	// roomId -> Set<userIds>
 	private val roomUsers = ConcurrentHashMap<String, MutableSet<String>>()
-	// userId -> roomId
-	// used for reverse lookup when user leaves room
-	private val userInRoom = ConcurrentHashMap<String, String>()
 
 	private val threshold = webSocketProperties.gateway.eventRateLimit.threshold
 	private val duration = webSocketProperties.gateway.eventRateLimit.duration
@@ -39,34 +39,22 @@ class RoomSubscriptionService(
 			currentUsers = roomUsers.getOrDefault(roomId, mutableSetOf())
 			currentUsers.add(userId)
 			roomUsers[roomId] = currentUsers
-			userInRoom[userId] = roomId
 		}
 		sendUserCountChangedEvent(roomId, currentUsers.count())
 	}
 
-	fun removeUser(userId: String) = GlobalScope.launch {
-		var roomId: String? = null
-		var currentUsers: MutableSet<String> = mutableSetOf()
+	fun removeUser(roomId: String, userId: String) = GlobalScope.launch {
+		var currentUsers: MutableSet<String>
 		synchronized(roomUsers) {
-			roomId = userInRoom[userId]
-			if (roomId != null) {
-				currentUsers = roomUsers.getOrDefault(roomId!!, mutableSetOf())
-				currentUsers.removeIf { it == userId }
-				roomUsers[roomId!!] = currentUsers
-				userInRoom.remove(userId)
-			}
+			currentUsers = roomUsers.getOrDefault(roomId, mutableSetOf())
+			currentUsers.remove(userId)
+			roomUsers[roomId] = currentUsers
 		}
-		if (roomId != null) {
-			sendUserCountChangedEvent(roomId!!, currentUsers.count())
-		}
+		sendUserCountChangedEvent(roomId, currentUsers.count())
 	}
 
 	fun getUserCount(roomId: String): Int? {
 		return roomUsers.get(roomId)?.count()
-	}
-
-	fun getUserCount(): Int {
-		return userInRoom.size
 	}
 
 	fun sendUserCountChangedEvent(roomId: String, currentUserCount: Int) {
@@ -89,5 +77,15 @@ class RoomSubscriptionService(
 				UserCountChanged(currentUserCount)
 			)
 		}
+	}
+
+	@EventListener
+	fun handleRoomJoinEvent(event: RoomJoinEvent) {
+		addUser(event.roomId, event.userId)
+	}
+
+	@EventListener
+	fun handleRoomLeaveEvent(event: RoomLeaveEvent) {
+		removeUser(event.roomId, event.userId)
 	}
 }

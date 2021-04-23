@@ -3,7 +3,6 @@ package de.thm.arsnova.service.wsgateway.adapter
 import com.auth0.jwt.exceptions.JWTVerificationException
 import de.thm.arsnova.service.wsgateway.security.JwtTokenUtil
 import de.thm.arsnova.service.wsgateway.service.RoomAccessService
-import de.thm.arsnova.service.wsgateway.service.RoomSubscriptionService
 import org.slf4j.LoggerFactory
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
@@ -13,13 +12,11 @@ import org.springframework.messaging.support.ChannelInterceptor
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.messaging.support.MessageHeaderAccessor
 import org.springframework.stereotype.Component
-import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class AuthChannelInterceptorAdapter(
 		private val jwtTokenUtil: JwtTokenUtil,
 		private val roomAccessService: RoomAccessService,
-		private val roomSubscriptionService: RoomSubscriptionService
 ) : ChannelInterceptor {
 
 	companion object {
@@ -38,9 +35,6 @@ class AuthChannelInterceptorAdapter(
 	}
 
 	private val logger = LoggerFactory.getLogger(AuthChannelInterceptorAdapter::class.java)
-	/* userId -> subId
-	* Stores the STOMP sub id for the room subscription a user can have	*/
-	private val wsUserRoomTopicSubscription = ConcurrentHashMap<String, String>()
 
 	override fun preSend(message: Message<*>, channel: MessageChannel): Message<*>? {
 		logger.debug("Inspecting incoming message: {}", message)
@@ -98,22 +92,6 @@ class AuthChannelInterceptorAdapter(
 						return null
 					}
 					logger.debug("Got room access info: {}", userRoomAccess)
-				}
-
-				val endingOfTopic = destination.substring(topicIndexBeforeRoomId + topicRoomIdLength)
-				if (endingOfTopic == ".stream") {
-					// Basic room topic, count subscribers
-					logger.debug("User is subscribing to the basic room topic, roomId: {}, userId: {}", roomId, userId)
-					wsUserRoomTopicSubscription.put(userId, accessor.getFirstNativeHeader("id")!!)
-					roomSubscriptionService.addUser(roomId, userId)
-				}
-			} else if (accessor.command != null && accessor.command == StompCommand.DISCONNECT) {
-				logger.debug("User disconnected, removing him from subscription service, userId: {}", userId)
-				roomSubscriptionService.removeUser(userId)
-			} else if (accessor.command != null && accessor.command == StompCommand.UNSUBSCRIBE) {
-				if (wsUserRoomTopicSubscription.getOrDefault(userId, "") == accessor.getFirstNativeHeader("id")!!) {
-					logger.debug("User unsubscribed from basic room topic, userId: {}", userId)
-					roomSubscriptionService.removeUser(userId)
 				}
 			}
 		}
