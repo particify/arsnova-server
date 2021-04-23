@@ -11,6 +11,7 @@ import org.springframework.messaging.simp.stomp.StompCommand
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.messaging.support.ChannelInterceptor
 import org.springframework.messaging.support.MessageBuilder
+import org.springframework.messaging.support.MessageHeaderAccessor
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 
@@ -37,8 +38,6 @@ class AuthChannelInterceptorAdapter(
 	}
 
 	private val logger = LoggerFactory.getLogger(AuthChannelInterceptorAdapter::class.java)
-	/* for the new STOMP over ws functionality */
-	private val wsSessionIdToUserId = ConcurrentHashMap<String, String>()
 	/* userId -> subId
 	* Stores the STOMP sub id for the room subscription a user can have	*/
 	private val wsUserRoomTopicSubscription = ConcurrentHashMap<String, String>()
@@ -46,7 +45,7 @@ class AuthChannelInterceptorAdapter(
 	override fun preSend(message: Message<*>, channel: MessageChannel): Message<*>? {
 		logger.debug("Inspecting incoming message: {}", message)
 
-		val accessor = StompHeaderAccessor.wrap(message)
+		val accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor::class.java)!!
 		val wsSessionId = accessor.sessionId!!
 
 		/*
@@ -61,9 +60,9 @@ class AuthChannelInterceptorAdapter(
 			if (tokenList != null && tokenList.size > 0) {
 				val token = tokenList.first()!!
 				try {
-					val userId = jwtTokenUtil.getUserId(token)
-					logger.trace("Adding token {} to the ws session mapping", tokenList[0])
-					wsSessionIdToUserId.put(wsSessionId, userId)
+					val user = jwtTokenUtil.getUser(token)
+					// Set the user so it is available for subsequent commands
+					accessor.user = user
 				} catch (e: JWTVerificationException) {
 					return null
 				}
@@ -74,7 +73,7 @@ class AuthChannelInterceptorAdapter(
 			}
 		} else {
 			logger.trace("Incoming message is anything but a connect command")
-			val userId = wsSessionIdToUserId.getOrDefault(wsSessionId, null)
+			val userId = accessor.user?.name
 			if (userId == null) {
 				logger.debug("User didn't authenticate himself, dropping message. WebSocket session id: {}", wsSessionId);
 				return null

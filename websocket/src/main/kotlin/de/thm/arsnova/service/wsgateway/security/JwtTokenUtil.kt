@@ -17,8 +17,8 @@ class JwtTokenUtil(
 	private val verifier: JWTVerifier = JWT.require(algorithm).build()
 
 	@Throws(JWTVerificationException::class)
-	fun getUserId(token: String): String {
+	fun getUser(token: String): User {
 		val decodedJwt = verifier.verify(token)
-		return decodedJwt.subject
+		return User(decodedJwt.subject)
 	}
 }
