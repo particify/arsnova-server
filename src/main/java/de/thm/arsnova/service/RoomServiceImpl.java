@@ -293,13 +293,13 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
+	public String getPassword(final Room room) {
+		return room.getPassword();
+	}
+
+	@Override
 	public void setPassword(final Room room, final String password) {
-		if (password != null && !password.isBlank()) {
-			final String passwordHash = passwordUtils.encode(password);
-			room.setPassword(passwordHash);
-		} else {
-			room.setPassword(null);
-		}
+		room.setPassword(password != null && !password.isBlank() ? password : null);
 		update(room);
 	}
 
