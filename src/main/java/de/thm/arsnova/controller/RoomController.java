@@ -150,10 +150,19 @@ public class RoomController extends AbstractEntityController<Room> {
 		return updatedRoom;
 	}
 
+	@GetMapping(value = PASSWORD_MAPPING)
+	public PasswordEntity getPassword(@PathVariable final String id) {
+		final Room room = roomService.get(id);
+		if (room == null) {
+			throw new NotFoundException();
+		}
+		return new PasswordEntity(roomService.getPassword(room));
+	}
+
 	@PostMapping(value = PASSWORD_MAPPING)
 	public void postPassword(
 			@PathVariable final String id,
-			@RequestBody final PasswordRequestEntity passwordRequestEntity) {
+			@RequestBody final PasswordEntity passwordRequestEntity) {
 		final Room room = roomService.get(id);
 		if (room == null) {
 			throw new NotFoundException();
@@ -183,8 +192,21 @@ public class RoomController extends AbstractEntityController<Room> {
 		}
 	}
 
-	private static class PasswordRequestEntity {
+	private static class PasswordEntity {
 		private String password;
+
+		private PasswordEntity() {
+
+		}
+
+		private PasswordEntity(final String password) {
+			this.password = password;
+		}
+
+		@JsonView(View.Public.class)
+		public String getPassword() {
+			return password;
+		}
 
 		@JsonView(View.Public.class)
 		public void setPassword(final String password) {

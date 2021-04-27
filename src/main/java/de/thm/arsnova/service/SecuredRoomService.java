@@ -56,6 +56,12 @@ public class SecuredRoomService extends AbstractSecuredEntityServiceImpl<Room>
 
 	@Override
 	@PreAuthorize("hasPermission(#room, 'owner')")
+	public String getPassword(final Room room) {
+		return roomService.getPassword(room);
+	}
+
+	@Override
+	@PreAuthorize("hasPermission(#room, 'owner')")
 	public void setPassword(final Room room, final String password) {
 		roomService.setPassword(room, password);
 	}
