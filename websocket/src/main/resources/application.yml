@@ -13,6 +13,8 @@ management:
         include:
           - health
           - prometheus
+          - room-stats
+          - websocket-stats
   endpoint:
     health:
       show-details: always
