@@ -3,6 +3,7 @@ package de.thm.arsnova.service.wsgateway.service
 import de.thm.arsnova.service.wsgateway.config.WebSocketProperties
 import de.thm.arsnova.service.wsgateway.event.RoomJoinEvent
 import de.thm.arsnova.service.wsgateway.event.RoomLeaveEvent
+import de.thm.arsnova.service.wsgateway.event.RoomUserCountChangedEvent
 import de.thm.arsnova.service.wsgateway.event.UserCountChanged
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
@@ -13,13 +14,15 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 
 @Service
 class RoomSubscriptionService(
 		private val rabbitTemplate: RabbitTemplate,
-		private val webSocketProperties: WebSocketProperties
+		private val webSocketProperties: WebSocketProperties,
+		private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
 	private val logger = LoggerFactory.getLogger(RoomSubscriptionService::class.java)
 
@@ -41,6 +44,7 @@ class RoomSubscriptionService(
 			roomUsers[roomId] = currentUsers
 		}
 		sendUserCountChangedEvent(roomId, currentUsers.count())
+		applicationEventPublisher.publishEvent(RoomUserCountChangedEvent(roomId, currentUsers.count()))
 	}
 
 	fun removeUser(roomId: String, userId: String) = GlobalScope.launch {
@@ -51,10 +55,15 @@ class RoomSubscriptionService(
 			roomUsers[roomId] = currentUsers
 		}
 		sendUserCountChangedEvent(roomId, currentUsers.count())
+		applicationEventPublisher.publishEvent(RoomUserCountChangedEvent(roomId, currentUsers.count()))
 	}
 
 	fun getUserCount(roomId: String): Int? {
 		return roomUsers.get(roomId)?.count()
+	}
+
+	fun getUserCounts(): List<Int> {
+		return this.roomUsers.map { (roomId, userIds) -> userIds.size }
 	}
 
 	fun sendUserCountChangedEvent(roomId: String, currentUserCount: Int) {
