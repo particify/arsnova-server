@@ -22,11 +22,15 @@ class RoomAccessService(
 	private var roomAccessGetEndpoint = "${webSocketProperties.httpClient.authService}/$roomAccessString"
 
 	fun getRoomAccess(roomId: String, userId: String): RoomAccess {
-		val url = "$roomAccessGetEndpoint/$roomId/$userId"
+		val url = "$roomAccessGetEndpoint/{roomId}/{userId}"
 		logger.trace("Querying auth service for room access with url: {}", url)
 		try {
-			return restTemplate.getForObject(url, RoomAccess::class.java) ?:
-				RoomAccess(roomId, userId, "", AuthChannelInterceptorAdapter.participantRoleString)
+			return restTemplate.getForObject(url, RoomAccess::class.java,
+				mapOf(
+					"roomId" to roomId,
+					"userId" to userId
+				))
+				?: RoomAccess(roomId, userId, "", AuthChannelInterceptorAdapter.participantRoleString)
 		} catch (e: HttpClientErrorException.NotFound) {
 			return RoomAccess(roomId, userId, "", AuthChannelInterceptorAdapter.participantRoleString)
 		}
