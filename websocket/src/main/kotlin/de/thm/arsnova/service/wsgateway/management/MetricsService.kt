@@ -2,6 +2,7 @@ package de.thm.arsnova.service.wsgateway.management
 
 import de.thm.arsnova.service.wsgateway.event.RoomUserCountChangedEvent
 import de.thm.arsnova.service.wsgateway.service.RoomSubscriptionService
+import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.MeterRegistry
 import org.slf4j.Logger
@@ -9,6 +10,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import org.springframework.web.socket.messaging.SessionConnectEvent
+import org.springframework.web.socket.messaging.SessionDisconnectEvent
+import org.springframework.web.socket.messaging.SessionSubscribeEvent
+import org.springframework.web.socket.messaging.SessionUnsubscribeEvent
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
@@ -27,6 +32,22 @@ class MetricsService(
     }
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    val connectCounter = Counter
+            .builder("websocket.broker.events.connect")
+            .baseUnit("events")
+            .register(meterRegistry)
+    val disconnectCounter = Counter
+            .builder("websocket.broker.events.disconnect")
+            .baseUnit("events")
+            .register(meterRegistry)
+    val subscribeCounter = Counter
+            .builder("websocket.broker.events.subscribe")
+            .baseUnit("events")
+            .register(meterRegistry)
+    val unsubscribeCounter = Counter
+            .builder("websocket.broker.events.unsubscribe")
+            .baseUnit("events")
+            .register(meterRegistry)
     val roomUserDistribution = DistributionSummary
             .builder("room.users")
             .publishPercentileHistogram()
@@ -50,6 +71,26 @@ class MetricsService(
         for (count in roomSubscriptionService.getUserCounts()) {
             roomUserDistribution.record(count.toDouble())
         }
+    }
+
+    @EventListener
+    fun handleConnectEvent(sessionConnectEvent: SessionConnectEvent) {
+        connectCounter.increment()
+    }
+
+    @EventListener
+    fun handleDisconnectEvent(sessionDisconnectEvent: SessionDisconnectEvent) {
+        disconnectCounter.increment()
+    }
+
+    @EventListener
+    fun handleSubscribeEvent(sessionSubscribeEvent: SessionSubscribeEvent) {
+        subscribeCounter.increment()
+    }
+
+    @EventListener
+    fun handleCUnsubscribeEvent(sessionUnsubscribeEvent: SessionUnsubscribeEvent) {
+        unsubscribeCounter.increment()
     }
 
     @EventListener
