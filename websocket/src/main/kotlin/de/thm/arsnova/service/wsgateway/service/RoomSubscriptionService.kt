@@ -66,6 +66,10 @@ class RoomSubscriptionService(
 		return this.roomUsers.map { (roomId, userIds) -> userIds.size }
 	}
 
+	fun getUserCountsMap(): Map<String, Int> {
+		return this.roomUsers.mapValues { (roomId, userIds) -> userIds.size }
+	}
+
 	fun sendUserCountChangedEvent(roomId: String, currentUserCount: Int) {
 		var canSend = true
 		if (currentUserCount > threshold) {
