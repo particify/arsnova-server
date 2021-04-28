@@ -5,6 +5,7 @@ import de.thm.arsnova.service.wsgateway.service.RoomSubscriptionService
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.binder.BaseUnits
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
@@ -26,40 +27,41 @@ class MetricsService(
     companion object {
         const val GATHERING_INTERVAL = 60 * 1000L
         const val MIN_USERS = 5
-        const val ACTIVE_ROOM_MIN_USERS = 10
-        const val SESSION_END_USER_FACTOR = 1/3
-        const val TOLERANCE_FACTOR = 0.2
+        const val ACTIVE_ROOM_MIN_USERS = 8
+        const val ACTIVE_ROOM_MIN_USERS_TOLERANCE_FACTOR = 2.0/3
+        const val SESSION_END_USER_FACTOR = 1.0/3
+        const val SESSION_RESTART_USER_FACTOR = 1.5
     }
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
     val connectCounter = Counter
-            .builder("websocket.broker.events.connect")
-            .baseUnit("events")
+            .builder("websocket.broker.connect")
+            .baseUnit(BaseUnits.EVENTS)
             .register(meterRegistry)
     val disconnectCounter = Counter
-            .builder("websocket.broker.events.disconnect")
-            .baseUnit("events")
+            .builder("websocket.broker.disconnect")
+            .baseUnit(BaseUnits.EVENTS)
             .register(meterRegistry)
     val subscribeCounter = Counter
-            .builder("websocket.broker.events.subscribe")
-            .baseUnit("events")
+            .builder("websocket.broker.subscribe")
+            .baseUnit(BaseUnits.EVENTS)
             .register(meterRegistry)
     val unsubscribeCounter = Counter
-            .builder("websocket.broker.events.unsubscribe")
-            .baseUnit("events")
+            .builder("websocket.broker.unsubscribe")
+            .baseUnit(BaseUnits.EVENTS)
             .register(meterRegistry)
     val roomUserDistribution = DistributionSummary
-            .builder("room.users")
+            .builder("arsnova.room.users")
             .publishPercentileHistogram()
             .maximumExpectedValue(1000.0)
             .register(meterRegistry)
     val roomSessionUserDistribution = DistributionSummary
-            .builder("room.session.users")
+            .builder("arsnova.room.session.users")
             .publishPercentileHistogram()
             .maximumExpectedValue(1000.0)
             .register(meterRegistry)
     val roomSessionDurationDistribution = DistributionSummary
-            .builder("room.session.duration")
+            .builder("arsnova.room.session.duration")
             .baseUnit("minutes")
             .publishPercentileHistogram()
             .maximumExpectedValue(360.0)
@@ -113,7 +115,7 @@ class MetricsService(
                     // User count in session is rising
                     activeRooms[event.roomId] = metrics.copy(maxUserCount = event.count)
                 }
-                event.count < ACTIVE_ROOM_MIN_USERS * (1 - TOLERANCE_FACTOR) -> {
+                event.count < ACTIVE_ROOM_MIN_USERS * ACTIVE_ROOM_MIN_USERS_TOLERANCE_FACTOR -> {
                     // User count dropped below minimum -> session is ending
                     activeRooms.remove(event.roomId)
                     if (metrics.decliningMinUserCount == -1) {
@@ -128,7 +130,8 @@ class MetricsService(
                             activeRooms[event.roomId] = metrics.copy(decliningMinUserCount = event.count)
                             trackSessionEnd(metrics)
                         }
-                        event.count > metrics.decliningMinUserCount * TOLERANCE_FACTOR -> {
+                        event.count >= ACTIVE_ROOM_MIN_USERS
+                                && event.count > metrics.decliningMinUserCount * SESSION_RESTART_USER_FACTOR -> {
                             // User count increases after session has ended -> reset/new session
                             activeRooms[event.roomId] = ActiveRoomMetrics(event.count, LocalDateTime.now())
                         }
