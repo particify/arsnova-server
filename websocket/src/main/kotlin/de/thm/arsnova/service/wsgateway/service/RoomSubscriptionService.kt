@@ -52,7 +52,11 @@ class RoomSubscriptionService(
 		synchronized(roomUsers) {
 			currentUsers = roomUsers.getOrDefault(roomId, mutableSetOf())
 			currentUsers.remove(userId)
-			roomUsers[roomId] = currentUsers
+			if (currentUsers.isEmpty()) {
+				roomUsers.remove(roomId)
+			} else {
+				roomUsers[roomId] = currentUsers
+			}
 		}
 		sendUserCountChangedEvent(roomId, currentUsers.count())
 		applicationEventPublisher.publishEvent(RoomUserCountChangedEvent(roomId, currentUsers.count()))
