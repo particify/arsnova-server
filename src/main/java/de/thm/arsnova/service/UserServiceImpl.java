@@ -18,7 +18,6 @@
 
 package de.thm.arsnova.service;
 
-import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,9 +29,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import org.apache.commons.lang.CharEncoding;
 import org.apache.commons.lang.StringUtils;
 import org.ektorp.DbAccessException;
 import org.slf4j.Logger;
@@ -43,9 +39,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.mail.MailException;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -117,7 +110,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	private UserRepository userRepository;
 	private JwtService jwtService;
 	private PasswordUtils passwordUtils;
-	private JavaMailSender mailSender;
+	private EmailService emailService;
 
 	private SystemProperties systemProperties;
 	private SecurityProperties securityProperties;
@@ -133,8 +126,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	private LdapAuthenticationProvider ldapAuthenticationProvider;
 
 	private String rootUrl;
-	private String mailSenderAddress;
-	private String mailSenderName;
 
 	@Value("${customization.path}")
 	private String customizationPath;
@@ -157,7 +148,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			final SystemProperties systemProperties,
 			final SecurityProperties securityProperties,
 			final AuthenticationProviderProperties authenticationProviderProperties,
-			final JavaMailSender mailSender,
+			final EmailService emailService,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
 			final Validator validator,
@@ -167,10 +158,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		this.securityProperties = securityProperties;
 		this.registeredProperties = authenticationProviderProperties.getRegistered();
 		this.passwordUtils = passwordUtils;
-		this.mailSender = mailSender;
+		this.emailService = emailService;
 		this.rootUrl = systemProperties.getRootUrl();
-		this.mailSenderAddress = systemProperties.getMail().getSenderAddress();
-		this.mailSenderName = systemProperties.getMail().getSenderName();
 	}
 
 	@Scheduled(fixedDelay = LOGIN_TRY_RESET_DELAY_MS)
@@ -653,25 +642,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	private void sendEmail(final UserProfile userProfile, final String subject, final String body) {
-		final MimeMessage msg = mailSender.createMimeMessage();
-		final MimeMessageHelper helper = new MimeMessageHelper(msg, CharEncoding.UTF_8);
-		try {
-			msg.setHeader("Auto-Submitted", "auto-generated");
-			helper.setFrom(mailSenderAddress, mailSenderName);
-			helper.setTo(userProfile.getLoginId());
-			helper.setSubject(subject);
-			helper.setText(body);
-
-			logger.info("Sending mail \"{}\" from \"{}\" to \"{}\"", subject, msg.getFrom(), userProfile.getLoginId());
-			mailSender.send(msg);
-		} catch (final MailException e) {
-			logger.warn("Mail \"{}\" could not be sent.", subject, e);
-			throw e;
-		} catch (final MessagingException e) {
-			logger.warn("Mail \"{}\" could not be sent because of MessagingException.", subject, e);
-		} catch (final UnsupportedEncodingException e) {
-			logger.error("Mail \"{}\" could not be sent because of the use of an unsupported encoding.", subject, e);
-		}
+		emailService.sendEmail(userProfile.getLoginId(), subject, body);
 	}
 
 	private String generateGuestId() {
