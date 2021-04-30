@@ -38,5 +38,7 @@ public interface RoomService extends EntityService<Room> {
 
 	Optional<RoomMembership> requestMembership(String roomId, String password);
 
+	Optional<RoomMembership> requestMembershipByToken(String roomId, String token);
+
 	String generateShortId();
 }
