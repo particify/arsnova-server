@@ -1,11 +1,13 @@
 package de.thm.arsnova.service.httpgateway.service
 
 import de.thm.arsnova.service.httpgateway.config.HttpGatewayProperties
+import de.thm.arsnova.service.httpgateway.exception.ForbiddenException
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -30,6 +32,22 @@ class RoomAccessService(
             .body(BodyInserters.fromPublisher(Mono.just(roomAccess), RoomAccess::class.java))
             .retrieve()
             .bodyToMono(RoomAccess::class.java)
+    }
+
+    fun postRoomAccessWithLimit(roomAccess: RoomAccess, roomParticipantLimit: Int): Mono<RoomAccess> {
+        val url = "${httpGatewayProperties.httpClient.authService}/roomaccess/?roomParticipantLimit=${roomParticipantLimit}"
+        logger.trace("Posting to auth service for room access with url: {}, roomAccess: {}", url, roomAccess)
+        return webClient.post().uri(url)
+            .body(BodyInserters.fromPublisher(Mono.just(roomAccess), RoomAccess::class.java))
+            .retrieve()
+            .bodyToMono(RoomAccess::class.java)
+            .onErrorResume { e ->
+                if (e is WebClientResponseException.Forbidden) {
+                    Mono.error(ForbiddenException())
+                } else {
+                    Mono.error(e)
+                }
+            }
     }
 
     fun deleteRoomAccess(roomAccess: RoomAccess): Mono<RoomAccess> {
