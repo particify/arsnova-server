@@ -66,4 +66,15 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
         @Param("rev") rev: String,
         @Param("role") role: String
     ): RoomAccess
+
+    @Query(
+        """
+        SELECT COUNT(*)
+        FROM room_access
+        WHERE last_access > :lastAccess
+        GROUP BY room_id;
+        """,
+        nativeQuery = true
+    )
+    fun countByLastAccessAfterAndGroupByRoomId(lastAccess: Date): List<Int>
 }
