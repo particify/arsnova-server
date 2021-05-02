@@ -75,9 +75,14 @@ class RoomAccessController (
     @PostMapping(path = ["/roomaccess/"])
     @ResponseBody
     fun create(
-        @RequestBody roomAccess: RoomAccess
+        @RequestBody roomAccess: RoomAccess,
+        @RequestParam roomParticipantLimit: Int?
     ): Mono<RoomAccess> {
-        return Mono.just(handler.create(roomAccess))
+        return if (roomParticipantLimit != null && roomAccess.role == "PARTICIPANT") {
+            Mono.just(handler.createParticipantAccessWithLimit(roomAccess, roomParticipantLimit))
+        } else {
+            Mono.just(handler.create(roomAccess))
+        }
     }
 
     @DeleteMapping(path = ["/roomaccess/{roomId}/{userId}"])
