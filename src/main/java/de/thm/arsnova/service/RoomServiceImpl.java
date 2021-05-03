@@ -47,7 +47,6 @@ import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
-import de.thm.arsnova.security.PasswordUtils;
 import de.thm.arsnova.security.RoomRole;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.security.jwt.JwtService;
@@ -79,8 +78,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	private JwtService jwtService;
 
-	private PasswordUtils passwordUtils;
-
 	@Value("${system.inactivity-thresholds.delete-inactive-guest-rooms:0}")
 	private int guestRoomInactivityThresholdDays;
 
@@ -94,14 +91,12 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
 			final Validator validator,
-			final JwtService jwtService,
-			final PasswordUtils passwordUtils) {
+			final JwtService jwtService) {
 		super(Room.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.roomRepository = repository;
 		this.dbLogger = dbLogger;
 		this.userService = userService;
 		this.jwtService = jwtService;
-		this.passwordUtils = passwordUtils;
 	}
 
 	@Autowired
@@ -307,7 +302,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	public Optional<RoomMembership> requestMembership(final String roomId, final String password) {
 		final Room room = get(roomId);
 		return room.isClosed()
-				|| room.isPasswordProtected() && !passwordUtils.matches(password, room.getPassword())
+				|| room.isPasswordProtected() && !room.getPassword().equals(password)
 				? Optional.empty()
 				: Optional.of(new RoomMembership(room, RoomRole.PARTICIPANT));
 	}
