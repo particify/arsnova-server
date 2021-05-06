@@ -12,7 +12,8 @@
     "@iktakahiro/markdown-it-katex": "^4.0.1",
     "express": "^4.17.1",
     "markdown-it": "^12.0.0",
-    "markdown-it-link-attributes": "^3.0.0"
+    "markdown-it-link-attributes": "^3.0.0",
+    "markdown-it-prism": "^2.1.6"
   },
   "devDependencies": {
     "eslint": "^7.22.0",

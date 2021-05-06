@@ -4,14 +4,15 @@ const markdownIt = require('markdown-it');
 const markdownItLinkAttributes = require('markdown-it-link-attributes');
 const katex = require('katex');
 const markdownItKatex = require('@iktakahiro/markdown-it-katex');
+const markdownItPrism = require('markdown-it-prism');
 
 const app = express();
 const appName = 'Particify Formatting Service for ARSnova';
 const port = process.env.SERVER_PORT || 3020;
-const markdownOpts = { breaks: true, linkify: true };
+const defaultMdOpts = { breaks: true, linkify: true };
 const linkOpts = { attrs: { target: '_blank', rel: 'noopener' } };
-const markdown = markdownIt('zero', markdownOpts);
-const markdownLatex = markdownIt('zero', markdownOpts);
+const markdown = markdownIt('zero', defaultMdOpts);
+const markdownLatex = markdownIt('zero', defaultMdOpts);
 const defaultMdFeatureset = 'simple';
 const markdownFeaturesets = {
   minimum: [
@@ -57,10 +58,14 @@ const markdownFeaturesets = {
 
 app.use(bodyParser.json())
 markdown.use(markdownItLinkAttributes, linkOpts);
+markdown.use(markdownItPrism);
 markdownLatex.use(markdownItLinkAttributes, linkOpts);
 markdownLatex.use(markdownItKatex);
 markdown.linkify.set({ target: '_blank' });
 markdownLatex.linkify.set({ target: '_blank' });
+
+// Store reference because it will be overriden during reconfiguration
+const highlight = markdown.options.highlight;
 
 app.get('/', (req, res) => {
   res.send(appName);
@@ -77,13 +82,17 @@ app.post('/render', (req, res) => {
 
   if (options) {
     const mdFeatureset = (options.markdownFeatureset || defaultMdFeatureset).toLowerCase();
+    let mdOpts = defaultMdOpts;
     let mdFeatures = options.markdown
       ? markdownFeaturesets[mdFeatureset] || markdownFeaturesets[defaultMdFeatureset]
       : markdownFeaturesets.minimum;
     if (options.latex) {
       mdFeatures = mdFeatures.concat(markdownFeaturesets.math);
     }
-    html = configureMarkdown(markdownLatex, markdownOpts, mdFeatures).render(html);
+    if (options.syntaxHighlighting) {
+      mdOpts = Object.assign(defaultMdOpts, { highlight: highlight });
+    }
+    html = configureMarkdown(markdownLatex, mdOpts, mdFeatures).render(html);
   }
 
   res.send({ html: html });
