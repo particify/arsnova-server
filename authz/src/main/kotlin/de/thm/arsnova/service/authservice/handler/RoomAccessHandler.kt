@@ -1,6 +1,8 @@
 package de.thm.arsnova.service.authservice.handler
 
 import de.thm.arsnova.service.authservice.config.RabbitConfig
+import de.thm.arsnova.service.authservice.exception.BadRequestException
+import de.thm.arsnova.service.authservice.exception.ForbiddenException
 import de.thm.arsnova.service.authservice.model.RoomAccess
 import de.thm.arsnova.service.authservice.model.RoomAccessPK
 import de.thm.arsnova.service.authservice.model.RoomAccessSyncTracker
@@ -29,6 +31,7 @@ class RoomAccessHandler (
 ) {
     companion object {
         const val ROLE_CREATOR_STRING = "CREATOR"
+        const val ROLE_PARTICIPANT_STRING = "PARTICIPANT"
     }
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -147,6 +150,21 @@ class RoomAccessHandler (
                 roomAccess.rev,
                 roomAccess.role!!
             )
+        }
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+    fun createParticipantAccessWithLimit(roomAccess: RoomAccess, limit: Int): RoomAccess {
+        if (roomAccessRepository.countByRoomIdAndRole(roomAccess.roomId!!, ROLE_PARTICIPANT_STRING) < limit) {
+            return roomAccessRepository.createAccess(
+                roomAccess.roomId!!,
+                roomAccess.userId!!,
+                roomAccess.rev,
+                ROLE_PARTICIPANT_STRING
+            )
+        } else {
+            throw ForbiddenException("Participant limit reached")
         }
     }
 

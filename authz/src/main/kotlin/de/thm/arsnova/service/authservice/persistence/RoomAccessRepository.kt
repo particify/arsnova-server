@@ -77,4 +77,5 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
         nativeQuery = true
     )
     fun countByLastAccessAfterAndGroupByRoomId(lastAccess: Date): List<Int>
+    fun countByRoomIdAndRole(roomId: String, role: String): Long
 }
