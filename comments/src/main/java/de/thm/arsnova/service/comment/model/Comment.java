@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.comment.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,6 +16,7 @@ public class Comment {
     @Id
     private String id;
     private String roomId;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String creatorId;
     private String archiveId;
     @Column(columnDefinition = "TEXT")
