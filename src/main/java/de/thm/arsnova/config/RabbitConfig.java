@@ -34,6 +34,7 @@ import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.event.AmqpEventDispatcher;
+import de.thm.arsnova.event.AmqpMigrationEventDispatcher;
 import de.thm.arsnova.event.RoomAccessEventDispatcher;
 import de.thm.arsnova.websocket.handler.FeedbackHandler;
 
@@ -109,6 +110,18 @@ public class RabbitConfig {
 		declarables.add(new Queue(FeedbackHandler.CREATE_FEEDBACK_COMMAND_QUEUE_NAME, true));
 		declarables.add(new Queue(FeedbackHandler.CREATE_FEEDBACK_RESET_COMMAND_QUEUE_NAME, true));
 		declarables.add(new Queue(FeedbackHandler.QUERY_FEEDBACK_COMMAND_QUEUE_NAME, true));
+		declarables.add(new Queue(AmqpMigrationEventDispatcher.PARTICIPANT_ACCESS_MIGRATION_QUEUE_NAME,
+				true,
+				false,
+				false,
+				Map.of(
+						"x-dead-letter-exchange",
+						"",
+						"x-dead-letter-routing-key",
+						AmqpMigrationEventDispatcher.PARTICIPANT_ACCESS_MIGRATION_QUEUE_NAME + ".dlq"
+				)
+		));
+		declarables.add(new Queue(AmqpMigrationEventDispatcher.PARTICIPANT_ACCESS_MIGRATION_QUEUE_NAME + ".dlq"));
 
 		return new Declarables(declarables);
 	}
