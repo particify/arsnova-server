@@ -39,6 +39,7 @@ class RabbitConfig (
         const val roomDeletedExchangeName: String = "backend.event.room.afterdeletion"
         const val roomCreatedQueueName: String = "backend.event.room.aftercreation.consumer.auth-service"
         const val roomDeletedQueueName: String = "backend.event.room.afterdeletion.consumer.auth-service"
+        const val participantAccessMigrationQueueName: String = "backend.event.migration.access.participant"
     }
 
     @Bean
@@ -75,6 +76,17 @@ class RabbitConfig (
     fun declarables(): Declarables {
         val roomCreatedFanoutExchange = FanoutExchange(roomCreatedExchangeName)
         val roomDeletedFanoutExchange = FanoutExchange(roomDeletedExchangeName)
+        val participantAccessMigrationDlq = Queue("${participantAccessMigrationQueueName}.dlq")
+        val participantAccessMigrationQueue = Queue(
+            participantAccessMigrationQueueName,
+            true,
+            false,
+            false,
+            mapOf(
+                "x-dead-letter-exchange" to "",
+                "x-dead-letter-routing-key" to "${participantAccessMigrationQueueName}.dlq"
+            )
+        )
         val roomCreatedQueue = Queue(
             roomCreatedQueueName,
             true,
@@ -113,6 +125,8 @@ class RabbitConfig (
         return Declarables(listOf(
                 roomCreatedFanoutExchange,
                 roomDeletedFanoutExchange,
+                participantAccessMigrationQueue,
+                participantAccessMigrationDlq,
                 roomCreatedQueue,
                 roomCreatedDlq,
                 roomDeletedQueue,
