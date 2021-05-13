@@ -169,6 +169,20 @@ class RoomAccessHandler (
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+    fun migrateParticipantAccess(userId: String, roomIds: List<String>) {
+        val newRoomAccessList: List<RoomAccess> = roomIds.map { roomId ->
+            roomAccessRepository.createAccess(
+                roomId,
+                userId,
+                "0-0",
+                ROLE_PARTICIPANT_STRING
+            )
+        }
+        logger.debug("Migrated participant room access: {}", newRoomAccessList)
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     fun delete(roomId: String, userId: String): Unit {
         roomAccessRepository.deleteByRoomIdAndUserIdWithoutChecking(roomId, userId)
     }

@@ -4,6 +4,7 @@ import de.thm.arsnova.service.authservice.config.RabbitConfig
 import de.thm.arsnova.service.authservice.handler.RoomAccessHandler
 import de.thm.arsnova.service.authservice.model.RoomAccess
 import de.thm.arsnova.service.authservice.model.command.SyncRoomAccessCommand
+import de.thm.arsnova.service.authservice.model.event.ParticipantAccessMigrationEvent
 import de.thm.arsnova.service.authservice.model.event.RoomAccessSyncEvent
 import de.thm.arsnova.service.authservice.model.event.RoomCreatedEvent
 import de.thm.arsnova.service.authservice.model.event.RoomDeletedEvent
@@ -34,5 +35,11 @@ class RoomAccessListener (
     fun receiveRoomAccessSyncResponseEvent(event: RoomAccessSyncEvent) {
         logger.debug("Got event on room access sync response queue: {}", event)
         handler.handleSyncRoomAccessCommand(SyncRoomAccessCommand(event.rev, event.roomId, event.access))
+    }
+
+    @RabbitListener(queues = [RabbitConfig.participantAccessMigrationQueueName])
+    fun receiveParticipantAccessMigrationEvent(event: ParticipantAccessMigrationEvent) {
+        logger.debug("Got event on participant access migration queue: {}", event)
+        handler.migrateParticipantAccess(event.userId, event.roomIds)
     }
 }
