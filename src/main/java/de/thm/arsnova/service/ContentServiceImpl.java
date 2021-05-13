@@ -18,8 +18,12 @@
 
 package de.thm.arsnova.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +40,7 @@ import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.export.ContentExport;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
@@ -63,6 +68,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	private AnswerRepository answerRepository;
 
+	private CsvService csvService;
+
 	private static final Logger logger = LoggerFactory.getLogger(ContentServiceImpl.class);
 
 	public ContentServiceImpl(
@@ -71,6 +78,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			final AnswerRepository answerRepository,
 			final LogEntryRepository dbLogger,
 			final UserService userService,
+			final CsvService csvService,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
 			final Validator validator) {
@@ -80,6 +88,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		this.answerRepository = answerRepository;
 		this.dbLogger = dbLogger;
 		this.userService = userService;
+		this.csvService = csvService;
 	}
 
 	@Autowired
@@ -224,6 +233,24 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		}
 
 		throw new IllegalArgumentException("Content has no choice indexes.");
+	}
+
+	@Override
+	public byte[] exportToCsv(final List<String> contentIds, final String charset) throws JsonProcessingException {
+		final List<Content> contents = get(contentIds);
+		return csvService.toCsv(
+				contents.stream().map(c -> new ContentExport(c)).collect(Collectors.toList()),
+				ContentExport.class,
+				charset == null ? StandardCharsets.UTF_8 : Charset.forName(charset));
+	}
+
+	@Override
+	public byte[] exportToTsv(final List<String> contentIds, final String charset) throws JsonProcessingException {
+		final List<Content> contents = get(contentIds);
+		return csvService.toTsv(
+				contents.stream().map(c -> new ContentExport(c)).collect(Collectors.toList()),
+				ContentExport.class,
+				charset == null ? StandardCharsets.UTF_8 : Charset.forName(charset));
 	}
 
 	private void deleteByRoomAndGroupName(final Room room, final String groupName) {

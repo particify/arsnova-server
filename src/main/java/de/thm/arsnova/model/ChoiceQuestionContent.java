@@ -29,6 +29,14 @@ import de.thm.arsnova.model.serialization.View;
 
 public class ChoiceQuestionContent extends Content {
 	public static class AnswerOption {
+		public AnswerOption() {
+
+		}
+
+		public AnswerOption(final String label) {
+			this.label = label;
+		}
+
 		@NotBlank
 		private String label;
 
