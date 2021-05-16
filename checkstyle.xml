@@ -22,6 +22,8 @@
 
 	<property name="severity" value="warning"/>
 
+	<property name="tabWidth" value="2"/>
+
 	<module name="SeverityMatchFilter">
 		<property name="severity" value="info"/>
 		<property name="acceptOnMatch" value="false"/>
@@ -34,9 +36,13 @@
 		<property name="fileNamePattern" value="module\-info\.java$"/>
 	</module>
 
+	<module name="LineLength">
+		<property name="max" value="120"/>
+		<property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+	</module>
+
 	<module name="TreeWalker">
 		<!-- Checks for whitespace -->
-		<property name="tabWidth" value="2"/>
 		<module name="RegexpSinglelineJava">
 			<property name="format" value="^\t* "/>
 			<property name="message" value="Indent must use tab characters"/>
@@ -54,10 +60,6 @@
 			<property name="allowEscapesForControlCharacters" value="true"/>
 			<property name="allowByTailComment" value="true"/>
 			<property name="allowNonPrintableEscapes" value="true"/>
-		</module>
-		<module name="LineLength">
-			<property name="max" value="120"/>
-			<property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
 		</module>
 		<module name="AvoidStarImport"/>
 		<module name="OneTopLevelClass"/>
@@ -247,12 +249,10 @@
 					value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
 		</module>
 		<module name="JavadocMethod">
-			<property name="scope" value="public"/>
+			<property name="accessModifiers" value="public"/>
 			<property name="allowMissingParamTags" value="true"/>
-			<property name="allowMissingThrowsTags" value="true"/>
 			<property name="allowMissingReturnTag" value="true"/>
 			<property name="allowedAnnotations" value="Override, Test"/>
-			<property name="allowThrowsTagsForSubclasses" value="true"/>
 		</module>
 		<module name="MissingJavadocMethod">
 			<property name="severity" value="${checkstyle.missing-javadoc.severity}" default="warning"/>
