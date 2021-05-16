@@ -58,11 +58,11 @@ import de.thm.arsnova.model.serialization.View;
  * This Connector adds a query method which uses CouchDB's Mango API to retrieve data.
  */
 public class MangoCouchDbConnector extends StdCouchDbConnector implements ApplicationEventPublisherAware {
-	@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 	/**
 	 * Represents a <code>_find</code> query for CouchDB's Mango API.
 	 * See http://docs.couchdb.org/en/stable/api/database/find.html#db-find.
 	 */
+	@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 	public static class MangoQuery {
 		@JsonSerialize(converter = Sort.ToMapConverter.class)
 		public static class Sort {

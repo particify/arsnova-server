@@ -16,7 +16,6 @@ import de.thm.arsnova.model.Feedback;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.service.FeedbackStorageService;
 import de.thm.arsnova.service.RoomService;
-
 import de.thm.arsnova.websocket.message.CreateFeedback;
 import de.thm.arsnova.websocket.message.CreateFeedbackPayload;
 import de.thm.arsnova.websocket.message.FeedbackChanged;

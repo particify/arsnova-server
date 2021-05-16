@@ -79,7 +79,7 @@ public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> im
 
 		int count = 0;
 		final List<List<ViewResult.Row>> partitions = Lists.partition(rows, BULK_PARTITION_SIZE);
-		for (final List<ViewResult.Row> partition: partitions) {
+		for (final List<ViewResult.Row> partition : partitions) {
 			final List<BulkDeleteDocument> newDocs = new ArrayList<>();
 			for (final ViewResult.Row oldDoc : partition) {
 				final BulkDeleteDocument newDoc =
