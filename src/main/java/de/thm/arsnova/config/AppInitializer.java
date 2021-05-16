@@ -19,12 +19,18 @@
 package de.thm.arsnova.config;
 
 import javax.servlet.Filter;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletRegistration;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+	private static final int UPLOAD_MAX_FILE_SIZE = 50 * 1024;
+	private static final int UPLOAD_MAX_REQUST_SIZE = UPLOAD_MAX_FILE_SIZE;
+	private static final int UPLOAD_FILE_SIZE_THRESHOLD = UPLOAD_MAX_FILE_SIZE;
+	private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
+
 	@Override
 	protected Class<?>[] getRootConfigClasses() {
 		return new Class[] {
@@ -66,6 +72,12 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 	@Override
 	protected void customizeRegistration(final ServletRegistration.Dynamic registration) {
 		registration.setInitParameter("throwExceptionIfNoHandlerFound", "true");
+		final MultipartConfigElement multipartConfigElement = new MultipartConfigElement(
+				TMP_DIR,
+				UPLOAD_MAX_FILE_SIZE,
+				UPLOAD_MAX_REQUST_SIZE,
+				UPLOAD_FILE_SIZE_THRESHOLD);
+		registration.setMultipartConfig(multipartConfigElement);
 	}
 
 	@Override
