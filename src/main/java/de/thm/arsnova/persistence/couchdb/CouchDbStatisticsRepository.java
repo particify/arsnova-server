@@ -50,7 +50,7 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 			final ViewResult statsResult = db.queryView(createQuery("statistics").group(true));
 
 			if (!statsResult.isEmpty()) {
-				for (final ViewResult.Row row: statsResult.getRows()) {
+				for (final ViewResult.Row row : statsResult.getRows()) {
 					final JsonNode key = row.getKeyAsNode();
 					final int value = row.getValueAsInt();
 					if (!key.isArray()) {

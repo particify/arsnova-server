@@ -21,7 +21,6 @@ package de.thm.arsnova.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
