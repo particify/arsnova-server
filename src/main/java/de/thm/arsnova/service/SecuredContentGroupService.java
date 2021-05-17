@@ -57,7 +57,7 @@ public class SecuredContentGroupService extends AbstractSecuredEntityServiceImpl
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#contentGroup, 'owner')")
+	@PreAuthorize("hasPermission(#contentGroup, 'update')")
 	public void importFromCsv(final byte[] csv, final ContentGroup contentGroup) {
 		contentGroupService.importFromCsv(csv, contentGroup);
 	}
