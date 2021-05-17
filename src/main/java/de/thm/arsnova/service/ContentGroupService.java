@@ -16,4 +16,6 @@ public interface ContentGroupService extends EntityService<ContentGroup> {
 	void removeContentFromGroup(String groupId, String contentId);
 
 	ContentGroup createOrUpdateContentGroup(ContentGroup contentGroup);
+
+	void importFromCsv(byte[] csv, ContentGroup contentGroup);
 }

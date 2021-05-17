@@ -18,6 +18,7 @@
 
 package de.thm.arsnova.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 
 import de.thm.arsnova.model.Content;
@@ -35,4 +36,8 @@ public interface ContentService extends EntityService<Content> {
 	int countByRoomIdAndGroup(String roomId, String group);
 
 	List<Integer> getCorrectChoiceIndexes(String contentId);
+
+	byte[] exportToCsv(List<String> contentIds, String charset) throws JsonProcessingException;
+
+	byte[] exportToTsv(List<String> contentIds, String charset) throws JsonProcessingException;
 }

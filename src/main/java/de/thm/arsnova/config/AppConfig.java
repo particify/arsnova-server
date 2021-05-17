@@ -50,6 +50,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -57,6 +58,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -124,6 +126,8 @@ public class AppConfig implements WebMvcConfigurer {
 	public static final String API_V3_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v3+json";
 	public static final MediaType API_V3_MEDIA_TYPE = MediaType.valueOf(API_V3_MEDIA_TYPE_VALUE);
 	public static final MediaType ACTUATOR_MEDIA_TYPE = MediaType.valueOf(ActuatorMediaType.V2_JSON);
+	public static final MediaType CSV_MEDIA_TYPE = new MediaType("text", "csv");
+	public static final MediaType TSV_MEDIA_TYPE = new MediaType("text", "tab-separated-values");
 
 	@Autowired
 	private Environment env;
@@ -143,6 +147,7 @@ public class AppConfig implements WebMvcConfigurer {
 		converters.add(apiV2JsonMessageConverter());
 		converters.add(managementJsonMessageConverter());
 		converters.add(stringMessageConverter());
+		converters.add(byteArrayHttpMessageConverter());
 		//converters.add(new MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build()));
 	}
 
@@ -212,6 +217,18 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 
 	@Bean
+	public ByteArrayHttpMessageConverter byteArrayHttpMessageConverter() {
+		final ByteArrayHttpMessageConverter arrayHttpMessageConverter = new ByteArrayHttpMessageConverter();
+		arrayHttpMessageConverter.setSupportedMediaTypes(List.of(
+				MediaType.APPLICATION_OCTET_STREAM,
+				CSV_MEDIA_TYPE,
+				TSV_MEDIA_TYPE
+		));
+
+		return arrayHttpMessageConverter;
+	}
+
+	@Bean
 	public MappingJackson2HttpMessageConverter defaultJsonMessageConverter() {
 		final Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
 		builder
@@ -264,6 +281,11 @@ public class AppConfig implements WebMvcConfigurer {
 		converter.setSupportedMediaTypes(mediaTypes);
 
 		return converter;
+	}
+
+	@Bean
+	public StandardServletMultipartResolver multipartResolver() {
+		return new StandardServletMultipartResolver();
 	}
 
 	@Bean

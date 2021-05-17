@@ -18,20 +18,30 @@
 
 package de.thm.arsnova.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.AnswerService;
 import de.thm.arsnova.service.ContentService;
+import de.thm.arsnova.web.exceptions.BadRequestException;
 
 @RestController
 @RequestMapping(ContentController.REQUEST_MAPPING)
@@ -41,6 +51,7 @@ public class ContentController extends AbstractEntityController<Content> {
 	private static final String DELETE_ANSWERS_MAPPING = DEFAULT_ID_MAPPING + "/answer";
 	private static final String CORRECT_CHOICE_INDEXES_MAPPING = DEFAULT_ID_MAPPING + "/correct-choice-indexes";
 	private static final String CONTENT_COUNT_MAPPING = NO_ID_MAPPING + "/count";
+	private static final String EXPORT_MAPPING = NO_ID_MAPPING + "/export";
 
 	private ContentService contentService;
 	private AnswerService answerService;
@@ -78,5 +89,48 @@ public class ContentController extends AbstractEntityController<Content> {
 			@RequestParam final List<String> roomIds
 	) {
 		return roomIds.stream().map(roomId -> contentService.countByRoomId(roomId)).collect(Collectors.toList());
+	}
+
+	@PostMapping(value = EXPORT_MAPPING, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+	public ResponseEntity<?> export(@RequestBody final ExportRequestEntity exportRequestEntity)
+			throws JsonProcessingException {
+		final ResponseEntity.BodyBuilder builder = ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment");
+		switch (exportRequestEntity.fileType) {
+			case CSV:
+				return builder
+						.contentType(AppConfig.CSV_MEDIA_TYPE)
+						.body(contentService.exportToCsv(exportRequestEntity.contentIds, exportRequestEntity.charset));
+			case TSV:
+				return builder
+						.contentType(AppConfig.TSV_MEDIA_TYPE)
+						.body(contentService.exportToTsv(exportRequestEntity.contentIds, exportRequestEntity.charset));
+			default:
+				throw new BadRequestException("Unsupported export type.");
+		}
+	}
+
+	@JsonView(View.Public.class)
+	private static class ExportRequestEntity {
+		private FileType fileType;
+		private List<String> contentIds;
+		private String charset;
+
+		public void setFileType(final FileType fileType) {
+			this.fileType = fileType;
+		}
+
+		public void setContentIds(final List<String> contentIds) {
+			this.contentIds = contentIds;
+		}
+
+		public void setCharset(final String charset) {
+			this.charset = charset;
+		}
+
+		private enum FileType {
+			CSV,
+			TSV
+		}
 	}
 }

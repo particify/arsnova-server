@@ -1,6 +1,7 @@
 package de.thm.arsnova.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -9,7 +10,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import de.thm.arsnova.model.ContentGroup;
@@ -22,6 +25,7 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
 	protected static final String REQUEST_MAPPING = "/contentgroup";
 	private static final String ADD_CONTENT_MAPPING = "/-/content";
 	private static final String REMOVE_CONTENT_MAPPING = DEFAULT_ID_MAPPING + "/content/{contentId}";
+	private static final String IMPORT_MAPPING = DEFAULT_ID_MAPPING + "/import";
 
 	private ContentGroupService contentGroupService;
 
@@ -78,6 +82,13 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
 	@DeleteMapping(REMOVE_CONTENT_MAPPING)
 	public void removeContentFromGroup(@PathVariable final String id, @PathVariable final String contentId) {
 		contentGroupService.removeContentFromGroup(id, contentId);
+	}
+
+	@PostMapping(IMPORT_MAPPING)
+	public void importFromFile(@PathVariable final String id, @RequestParam final MultipartFile file)
+			throws IOException {
+		final ContentGroup contentGroup = get(id);
+		contentGroupService.importFromCsv(file.getBytes(), contentGroup);
 	}
 
 	static class AddContentToGroupRequestEntity {

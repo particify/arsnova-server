@@ -18,6 +18,7 @@
 
 package de.thm.arsnova.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,6 +35,7 @@ import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.export.ContentExport;
 import de.thm.arsnova.persistence.ContentGroupRepository;
 import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
@@ -44,14 +46,17 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
 		implements ContentGroupService {
 	private ContentGroupRepository contentGroupRepository;
 	private ContentService contentService;
+	private CsvService csvService;
 
 	public ContentGroupServiceImpl(
 			final ContentGroupRepository repository,
+			final CsvService csvService,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
 			final Validator validator) {
 		super(ContentGroup.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.contentGroupRepository = repository;
+		this.csvService = csvService;
 	}
 
 	@Autowired
@@ -142,6 +147,24 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
 			} else {
 				return create(contentGroup);
 			}
+		}
+	}
+
+	@Override
+	public void importFromCsv(final byte[] csv, final ContentGroup contentGroup) {
+		try {
+			final List<Content> contents = csvService.toObject(csv, ContentExport.class).stream()
+					.map(c -> c.toContent())
+					.collect(Collectors.toList());
+			for (final Content content : contents) {
+				content.setRoomId(contentGroup.getRoomId());
+				contentService.create(content);
+			}
+			contentGroup.getContentIds().addAll(
+					contents.stream().map(c -> c.getId()).collect(Collectors.toList()));
+			createOrUpdateContentGroup(contentGroup);
+		} catch (final IOException e) {
+			throw new BadRequestException("Could not import contents from CSV.", e);
 		}
 	}
 

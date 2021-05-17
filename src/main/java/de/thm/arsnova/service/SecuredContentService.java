@@ -1,7 +1,9 @@
 package de.thm.arsnova.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.model.Content;
@@ -44,5 +46,17 @@ public class SecuredContentService extends AbstractSecuredEntityServiceImpl<Cont
 	@PreAuthorize("hasPermission(#contentId, 'content', 'read-correct-options')")
 	public List<Integer> getCorrectChoiceIndexes(final String contentId) {
 		return contentService.getCorrectChoiceIndexes(contentId);
+	}
+
+	@Override
+	@PreFilter(value = "hasPermission(filterObject, 'content', 'owner')", filterTarget = "contentIds")
+	public byte[] exportToCsv(final List<String> contentIds, final String charset) throws JsonProcessingException {
+		return contentService.exportToCsv(contentIds, charset);
+	}
+
+	@Override
+	@PreFilter(value = "hasPermission(filterObject, 'content', 'owner')", filterTarget = "contentIds")
+	public byte[] exportToTsv(final List<String> contentIds, final String charset) throws JsonProcessingException {
+		return contentService.exportToTsv(contentIds, charset);
 	}
 }

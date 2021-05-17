@@ -55,4 +55,10 @@ public class SecuredContentGroupService extends AbstractSecuredEntityServiceImpl
 	public ContentGroup createOrUpdateContentGroup(final ContentGroup contentGroup) {
 		return contentGroupService.createOrUpdateContentGroup(contentGroup);
 	}
+
+	@Override
+	@PreAuthorize("hasPermission(#contentGroup, 'owner')")
+	public void importFromCsv(final byte[] csv, final ContentGroup contentGroup) {
+		contentGroupService.importFromCsv(csv, contentGroup);
+	}
 }
