@@ -169,6 +169,20 @@ public class AnswerStatistics {
 		}
 	}
 
+	public static class TextRoundStatistics extends RoundStatistics {
+		private List<String> texts;
+
+		@JsonView(View.Public.class)
+		public List<String> getTexts() {
+			return texts;
+		}
+
+		@JsonView(View.Public.class)
+		public void setTexts(final List<String> texts) {
+			this.texts = texts;
+		}
+	}
+
 	private String contentId;
 	private List<RoundStatistics> roundStatistics;
 	private List<RoundTransition> roundTransitions;

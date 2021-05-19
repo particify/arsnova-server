@@ -74,7 +74,7 @@ public class AnswerHandler {
 					.map(Answer::getId).collect(Collectors.toList());
 			final AnswerStatistics stats =
 					anyAnswer.getFormat() == Content.Format.CHOICE || anyAnswer.getFormat() == Content.Format.SCALE
-					|| anyAnswer.getFormat() == Content.Format.SORT
+					|| anyAnswer.getFormat() == Content.Format.SORT || anyAnswer.getFormat() == Content.Format.WORDCLOUD
 							? answerService.getStatistics(contentId)
 							: null;
 			final AnswersChanged stompEvent = new AnswersChanged(answerIds, stats);

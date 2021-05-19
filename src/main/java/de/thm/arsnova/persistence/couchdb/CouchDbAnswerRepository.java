@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
+import de.thm.arsnova.model.MultipleTextsAnswer;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 
@@ -137,5 +138,14 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 		stats.setRoundStatistics(roundStatisticsList);
 
 		return stats;
+	}
+
+	@Override
+	public List<MultipleTextsAnswer> findByContentIdRoundForText(final String contentId, final int round) {
+		return db.queryView(createQuery("by_contentid_round_selectedchoiceindexes")
+				.reduce(false)
+				.includeDocs(true)
+				.startKey(ComplexKey.of(contentId, round))
+				.endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())), MultipleTextsAnswer.class);
 	}
 }
