@@ -129,6 +129,9 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 										Arrays.asList(indexes), d.getValueAsInt()));
 				combinations.put(Arrays.asList(indexes), combination);
 				roundStats.setCombinatedCounts(combinations.values());
+				roundStats.setAnswerCount(combinations.values().stream()
+						.map(c -> c.getCount())
+						.reduce(0, Integer::sum));
 			}
 		}
 		roundStats.setIndependentCounts(independentCounts);

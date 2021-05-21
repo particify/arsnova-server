@@ -243,6 +243,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 								.orElse(0)));
 		roundStats.setIndependentCounts(countsBySimilarity.values().stream().collect(Collectors.toList()));
 		roundStats.setTexts(countsBySimilarity.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
+		roundStats.setAnswerCount(answers.size());
 		stats.setRoundStatistics(new ArrayList(Collections.nCopies(round, null)));
 		stats.getRoundStatistics().set(round - 1, roundStats);
 
