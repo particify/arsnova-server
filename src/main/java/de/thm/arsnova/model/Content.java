@@ -52,7 +52,8 @@ public class Content extends Entity implements RoomIdAware {
 		GRID,
 		SLIDE,
 		SORT,
-		FLASHCARD
+		FLASHCARD,
+		WORDCLOUD
 	}
 
 	public static class State {

@@ -22,6 +22,7 @@ import java.util.List;
 
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
+import de.thm.arsnova.model.MultipleTextsAnswer;
 
 public interface AnswerRepository extends CrudRepository<Answer, String> {
 	<T extends Answer> T findByContentIdUserIdPiRound(String contentId, Class<T> type, String userId, int piRound);
@@ -35,4 +36,6 @@ public interface AnswerRepository extends CrudRepository<Answer, String> {
 	List<String> findIdsByCreatorIdRoomId(String creatorId, String roomId);
 
 	List<String> findIdsByCreatorIdContentIdsRound(String creatorId, List<String> contentIds, int round);
+
+	List<MultipleTextsAnswer> findByContentIdRoundForText(String contentId, int round);
 }

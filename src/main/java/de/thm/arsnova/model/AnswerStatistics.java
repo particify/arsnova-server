@@ -57,6 +57,7 @@ public class AnswerStatistics {
 		}
 
 		private int round;
+		private int answerCount;
 		private List<Integer> independentCounts;
 		private Collection<Combination> combinatedCounts;
 		private int abstentionCount;
@@ -68,6 +69,15 @@ public class AnswerStatistics {
 
 		public void setRound(final int round) {
 			this.round = round;
+		}
+
+		@JsonView(View.Public.class)
+		public int getAnswerCount() {
+			return answerCount;
+		}
+
+		public void setAnswerCount(final int answerCount) {
+			this.answerCount = answerCount;
 		}
 
 		@JsonView(View.Public.class)
@@ -109,6 +119,7 @@ public class AnswerStatistics {
 		public String toString() {
 			return new ToStringCreator(this)
 					.append("round", round)
+					.append("answerCount", answerCount)
 					.append("independentCounts", independentCounts)
 					.append("combinatedCounts", combinatedCounts)
 					.append("abstentionCount", abstentionCount)
@@ -166,6 +177,20 @@ public class AnswerStatistics {
 					.append("selectedChoiceIndexesB", selectedChoiceIndexesB)
 					.append("count", count)
 					.toString();
+		}
+	}
+
+	public static class TextRoundStatistics extends RoundStatistics {
+		private List<String> texts;
+
+		@JsonView(View.Public.class)
+		public List<String> getTexts() {
+			return texts;
+		}
+
+		@JsonView(View.Public.class)
+		public void setTexts(final List<String> texts) {
+			this.texts = texts;
 		}
 	}
 

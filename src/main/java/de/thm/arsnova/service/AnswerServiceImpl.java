@@ -19,9 +19,15 @@
 package de.thm.arsnova.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.ektorp.DbAccessException;
@@ -46,7 +52,9 @@ import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.GridImageContent;
+import de.thm.arsnova.model.MultipleTextsAnswer;
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.WordcloudContent;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.web.exceptions.ForbiddenException;
@@ -60,6 +68,7 @@ import de.thm.arsnova.web.exceptions.UnauthorizedException;
 @Primary
 public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implements AnswerService {
 	private static final Logger logger = LoggerFactory.getLogger(AnswerServiceImpl.class);
+	private static final Pattern specialCharPattern = Pattern.compile("[^\\p{IsAlphabetic}\\p{IsDigit}]");
 
 	private final Queue<Answer> answerQueue = new ConcurrentLinkedQueue<>();
 
@@ -145,23 +154,32 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		if (content == null) {
 			throw new NotFoundException();
 		}
+		final AnswerStatistics stats;
 		final int optionCount;
 		if (content instanceof ChoiceQuestionContent) {
 			optionCount = ((ChoiceQuestionContent) content).getOptions().size();
+			stats = answerRepository.findByContentIdRound(
+					content.getId(), round, optionCount);
 		} else if (content instanceof GridImageContent) {
 			final GridImageContent.Grid grid = ((GridImageContent) content).getGrid();
 			optionCount = grid.getColumns() * grid.getRows();
+			stats = answerRepository.findByContentIdRound(
+					content.getId(), round, optionCount);
+		} else if (content instanceof WordcloudContent) {
+			/* Count is not fixed for wordcloud options */
+			optionCount = -1;
+			stats = getTextStatistics(contentId, round);
 		} else {
 			throw new IllegalStateException(
 					"Content expected to be an instance of ChoiceQuestionContent or GridImageContent");
 		}
 
-		final AnswerStatistics stats = answerRepository.findByContentIdRound(
-				content.getId(), round, optionCount);
-		/* Fill list with zeros to prevent IndexOutOfBoundsExceptions */
-		final List<Integer> independentCounts = stats.getRoundStatistics().get(round - 1).getIndependentCounts();
-		while (independentCounts.size() < optionCount) {
-			independentCounts.add(0);
+		if (!(content instanceof WordcloudContent)) {
+			/* Fill list with zeros to prevent IndexOutOfBoundsExceptions */
+			final List<Integer> independentCounts = stats.getRoundStatistics().get(round - 1).getIndependentCounts();
+			while (independentCounts.size() < optionCount) {
+				independentCounts.add(0);
+			}
 		}
 
 		return stats;
@@ -186,6 +204,50 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		final AnswerStatistics stats = getStatistics(content.getId(), 1);
 		final AnswerStatistics stats2 = getStatistics(content.getId(), 2);
 		stats.getRoundStatistics().add(stats2.getRoundStatistics().get(1));
+
+		return stats;
+	}
+
+	private AnswerStatistics getTextStatistics(final String contentId, final int round) {
+		final Content content = contentService.get(contentId);
+		if (content == null) {
+			throw new NotFoundException();
+		}
+		final List<MultipleTextsAnswer> answers = answerRepository.findByContentIdRoundForText(contentId, round);
+		/* Flatten lists of individual answers to a combined map of texts with
+		 * count */
+		final Map<String, Long> textCounts = answers.stream()
+				.flatMap(a -> a.getTexts().stream())
+				.collect(Collectors.groupingBy(
+						Function.identity(),
+						Collectors.counting()));
+		final AnswerStatistics stats = new AnswerStatistics();
+		final AnswerStatistics.TextRoundStatistics roundStats = new AnswerStatistics.TextRoundStatistics();
+		roundStats.setRound(round);
+		roundStats.setAbstentionCount((int) answers.stream().filter(a -> a.getTexts().isEmpty()).count());
+		/* Group by text similarity and then choose the most common variant as
+		 * key and calculate the new count */
+		final Map<String, Integer> countsBySimilarity = textCounts.entrySet().stream()
+				.collect(Collectors.groupingBy(e ->
+						specialCharPattern.matcher(e.getKey().toLowerCase()).replaceAll("")))
+				.entrySet().stream()
+				.collect(Collectors.toMap(
+						/* Select most common variant as key */
+						entry -> entry.getValue().stream()
+								.max(Map.Entry.comparingByValue())
+								.map(Map.Entry::getKey)
+								.orElse(""),
+						/* Calculate sum of counts of similar texts */
+						entry -> entry.getValue().stream()
+								.map(Map.Entry::getValue)
+								.reduce(Long::sum)
+								.map(Long::intValue)
+								.orElse(0)));
+		roundStats.setIndependentCounts(countsBySimilarity.values().stream().collect(Collectors.toList()));
+		roundStats.setTexts(countsBySimilarity.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
+		roundStats.setAnswerCount(answers.size());
+		stats.setRoundStatistics(new ArrayList(Collections.nCopies(round, null)));
+		stats.getRoundStatistics().set(round - 1, roundStats);
 
 		return stats;
 	}
@@ -277,6 +339,17 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			}
 			*/
 		} else {
+			if (content.getFormat() == Content.Format.WORDCLOUD) {
+				final MultipleTextsAnswer multipleTextsAnswer = (MultipleTextsAnswer) answer;
+				final Set<String> sanitizedAnswers = new HashSet<>();
+				// Remove blank and similar texts
+				multipleTextsAnswer.setTexts(
+						multipleTextsAnswer.getTexts().stream()
+								.filter(t -> !t.isBlank())
+								.filter(t -> sanitizedAnswers.add(
+										specialCharPattern.matcher(t.toLowerCase()).replaceAll("")))
+								.collect(Collectors.toList()));
+			}
 			answer.setRound(content.getState().getRound());
 		}
 	}
@@ -308,5 +381,10 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		final Iterable<Answer> answers = answerRepository.findStubsByContentId(event.getEntity().getId());
 		answers.forEach(a -> a.setRoomId(event.getEntity().getRoomId()));
 		delete(answers);
+	}
+
+	private static class TextStatEntry {
+		private List<String> variants;
+		private int count;
 	}
 }
