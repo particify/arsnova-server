@@ -20,6 +20,7 @@ const markdownFeaturesets = {
     'entity'
   ],
   simple: [
+    'escape',
     'newline',
     'entity',
     'emphasis',
@@ -27,11 +28,16 @@ const markdownFeaturesets = {
     'backticks',
     'blockquote',
     'list',
+    'table',
+    'code',
+    'fence',
+    'hr',
     'linkify',
     'link',
     'image'
   ],
   extended: [
+    'escape',
     'newline',
     'entity',
     'emphasis',
@@ -39,16 +45,15 @@ const markdownFeaturesets = {
     'backticks',
     'blockquote',
     'list',
+    'table',
+    'code',
+    'fence',
+    'hr',
     'linkify',
     'link',
     'image',
 
-    'heading',
-    'hr',
-    'table',
-    'code',
-    'fence',
-    'escape'
+    'heading'
   ],
   math: [
     'math_inline',
