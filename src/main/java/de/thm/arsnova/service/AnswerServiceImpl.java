@@ -20,9 +20,11 @@ package de.thm.arsnova.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -337,6 +339,17 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			}
 			*/
 		} else {
+			if (content.getFormat() == Content.Format.WORDCLOUD) {
+				final MultipleTextsAnswer multipleTextsAnswer = (MultipleTextsAnswer) answer;
+				final Set<String> sanitizedAnswers = new HashSet<>();
+				// Remove blank and similar texts
+				multipleTextsAnswer.setTexts(
+						multipleTextsAnswer.getTexts().stream()
+								.filter(t -> !t.isBlank())
+								.filter(t -> sanitizedAnswers.add(
+										specialCharPattern.matcher(t.toLowerCase()).replaceAll("")))
+								.collect(Collectors.toList()));
+			}
 			answer.setRound(content.getState().getRound());
 		}
 	}
