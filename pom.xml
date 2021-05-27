@@ -8,14 +8,14 @@
 
 	<properties>
 		<!-- Maven dependency/plugin versions -->
-		<spring-boot.version>2.4.4</spring-boot.version>
+		<spring-boot.version>2.4.6</spring-boot.version>
 		<commons-lang.version>2.6</commons-lang.version>
-		<guava.version>30.1-jre</guava.version>
-		<netty.version>4.1.60.Final</netty.version>
+		<guava.version>30.1.1-jre</guava.version>
+		<netty.version>4.1.65.Final</netty.version>
 		<aspectj.version>1.9.6</aspectj.version>
 		<jakarta-xml-bind.version>2.3.3</jakarta-xml-bind.version>
 		<pac4j.version>4.4.0</pac4j.version>
-		<graalvm.version>21.0.0.2</graalvm.version>
+		<graalvm.version>21.1.0</graalvm.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
@@ -292,7 +292,7 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.14.0</version>
+			<version>3.16.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.pac4j</groupId>
@@ -337,7 +337,7 @@
 		<dependency>
 			<groupId>org.checkerframework</groupId>
 			<artifactId>checker-qual</artifactId>
-			<version>3.11.0</version>
+			<version>3.13.0</version>
 		</dependency>
 
 		<!-- Provided -->
@@ -462,7 +462,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.38.v20210224</version>
+				<version>9.4.41.v20210516</version>
 				<configuration>
 					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<webApp>
@@ -560,7 +560,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.6</version>
+				<version>0.8.7</version>
 				<executions>
 					<execution>
 						<id>default-prepare-agent</id>
@@ -592,7 +592,7 @@
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
-				<version>3.8.0.2131</version>
+				<version>3.9.0.2155</version>
 			</plugin>
 		</plugins>
 
@@ -615,7 +615,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.1.2</version>
 				<configuration>
 					<dependencyDetailsEnabled>false</dependencyDetailsEnabled>
 				</configuration>
@@ -623,7 +623,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.3.0</version>
 				<configuration></configuration>
 			</plugin>
 		</plugins>
