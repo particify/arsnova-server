@@ -172,11 +172,10 @@ class RoomAccessHandler (
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun migrateParticipantAccess(userId: String, roomIds: List<String>) {
         val newRoomAccessList: List<RoomAccess> = roomIds.map { roomId ->
-            roomAccessRepository.createAccess(
+            roomAccessRepository.createParticipantAccess(
                 roomId,
                 userId,
-                "0-0",
-                ROLE_PARTICIPANT_STRING
+                "0-0"
             )
         }
         logger.debug("Migrated participant room access: {}", newRoomAccessList)

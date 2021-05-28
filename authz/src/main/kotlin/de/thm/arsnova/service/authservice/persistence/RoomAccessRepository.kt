@@ -67,6 +67,22 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
         @Param("role") role: String
     ): RoomAccess
 
+    // This query is for migration participants and checks for duplicate key, does nothing to prevent exceptions
+    @Query("""
+        INSERT INTO room_access
+            (room_id, user_id, rev, role)
+            VALUES (:roomId, :userId, :rev, 'PARTICIPANT')
+            ON CONFLICT (room_id, user_id) DO UPDATE SET room_id = :roomId
+            RETURNING *;
+        """,
+        nativeQuery = true
+    )
+    fun createParticipantAccess(
+        @Param("roomId") roomId: String,
+        @Param("userId") userId: String,
+        @Param("rev") rev: String
+    ): RoomAccess
+
     @Query(
         """
         SELECT COUNT(*)
