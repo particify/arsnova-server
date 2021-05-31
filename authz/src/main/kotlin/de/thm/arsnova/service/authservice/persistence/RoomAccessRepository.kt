@@ -33,13 +33,14 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
         @Param("roomId") roomId: String,
         @Param("userId") userId: String
     ): Iterable<RoomAccess>
-    // This always sets the role to owner even if the entry was already present
+    // This sets the role to owner even if the entry was already present
+    // It also checks to not override a creator role that's maybe present
     // The two role params are needed because otherwise Hibernate can't find the second usage
     @Query("""
         INSERT INTO room_access 
             (room_id, user_id, rev, role) 
             VALUES (:roomId, :userId, :rev, :role)
-            ON CONFLICT ON CONSTRAINT room_access_pkey DO UPDATE SET role = :updateRole
+            ON CONFLICT ON CONSTRAINT room_access_pkey DO UPDATE SET role = :updateRole WHERE room_access.role != 'CREATOR'
             RETURNING *;
         """,
         nativeQuery = true
@@ -67,7 +68,7 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
         @Param("role") role: String
     ): RoomAccess
 
-    // This query is for migration participants and checks for duplicate key,
+    // This query is for creating participants and checks for duplicate key,
     // does a fake update to prevent exceptions but still returns the row
     @Query("""
         INSERT INTO room_access

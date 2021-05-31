@@ -135,33 +135,23 @@ class RoomAccessHandler (
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun create(roomAccess: RoomAccess): RoomAccess {
-        if (roomAccess.role == ROLE_CREATOR_STRING) {
-            return roomAccessRepository.createOrUpdateAccess(
-                roomAccess.roomId!!,
-                roomAccess.userId!!,
-                roomAccess.rev,
-                roomAccess.role!!,
-                roomAccess.role!!
-            )
-        } else {
-            return roomAccessRepository.createAccess(
-                roomAccess.roomId!!,
-                roomAccess.userId!!,
-                roomAccess.rev,
-                roomAccess.role!!
-            )
-        }
+        return roomAccessRepository.createOrUpdateAccess(
+            roomAccess.roomId!!,
+            roomAccess.userId!!,
+            roomAccess.rev,
+            roomAccess.role!!,
+            roomAccess.role!!
+        )
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun createParticipantAccessWithLimit(roomAccess: RoomAccess, limit: Int): RoomAccess {
         if (roomAccessRepository.countByRoomIdAndRole(roomAccess.roomId!!, ROLE_PARTICIPANT_STRING) < limit) {
-            return roomAccessRepository.createAccess(
+            return roomAccessRepository.createParticipantAccess(
                 roomAccess.roomId!!,
                 roomAccess.userId!!,
-                roomAccess.rev,
-                ROLE_PARTICIPANT_STRING
+                roomAccess.rev
             )
         } else {
             throw ForbiddenException("Participant limit reached")
