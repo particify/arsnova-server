@@ -17,6 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.test.StepVerifier
+import java.util.Date
 import java.util.Optional
 import java.util.UUID
 
@@ -32,175 +34,42 @@ class MembershipViewTest(
     @Test
     fun testShouldGetByUser() {
         val userId = UUID.randomUUID().toString().replace("-", "")
-        val visitedRoomIds: List<String> = listOf(
-                UUID.randomUUID().toString().replace("-", ""),
-                UUID.randomUUID().toString().replace("-", "")
+        val testAuthentication = UsernamePasswordAuthenticationToken(userId, "jwtString", listOf())
+        val ownedRoomId = UUID.randomUUID().toString().replace("-", "")
+        val visitedRoomId = UUID.randomUUID().toString().replace("-", "")
+        val roomAccessList = listOf(
+            RoomAccess(ownedRoomId, "22222222", "0-0", "CREATOR", Date()),
+            RoomAccess(visitedRoomId, "22223333", "0-0", "PARTICIPANT", Date())
         )
-        val ownedRoomIds: List<String> = listOf(
-                UUID.randomUUID().toString().replace("-", ""),
-                UUID.randomUUID().toString().replace("-", "")
-        )
-        val jwtString = ""
-        val testAuthentication = UsernamePasswordAuthenticationToken(userId, jwtString, listOf())
-        val userRoomHistories = listOf(
-                RoomHistoryEntry(visitedRoomIds[0], "last visit"),
-                RoomHistoryEntry(visitedRoomIds[1], "last visit")
-        )
-        val testUser = User(userId, userRoomHistories)
-        val visitedRooms = listOf(
-                Optional.of(Room(visitedRoomIds[0], "12312312", "name for first visited room")),
-                Optional.of(Room(visitedRoomIds[1], "11112222", "name for second visited room"))
-        )
-        val userRoomAccess = listOf(
-                RoomAccess(ownedRoomIds[0], userId, "rev", "OWNER", null),
-                RoomAccess(ownedRoomIds[1], userId, "rev", "OWNER", null)
-        )
-        val ownedRooms = listOf(
-                Room(ownedRoomIds[0], "22222222", "name for first owned room"),
-                Room(ownedRoomIds[1], "22223333", "name for second owned room")
-        )
+        val ownedRoom = Room(ownedRoomId, "22222222", "A name")
+        val visitedRoom = Room(visitedRoomId, "22223333", "A second room")
 
         given(authProcessor.getAuthentication()).willReturn(Mono.just(testAuthentication))
-        given(userService.get(userId, jwtString)).willReturn(Mono.just(testUser))
-        given(roomService.get(visitedRoomIds)).willReturn(Flux.fromIterable(visitedRooms))
-        given(roomAccessService.getRoomAccessByUser(userId)).willReturn(Flux.fromIterable(userRoomAccess))
-        given(roomService.get(ownedRoomIds[0])).willReturn(Mono.just(ownedRooms[0]))
-        given(roomService.get(ownedRoomIds[1])).willReturn(Mono.just(ownedRooms[1]))
+        given(roomAccessService.getRoomAccessByUser(userId)).willReturn(Flux.fromIterable(roomAccessList))
+        given(roomService.get(ownedRoomId)).willReturn(Mono.just(ownedRoom))
+        given(roomService.get(visitedRoomId)).willReturn(Mono.just(visitedRoom))
 
-        membershipView.getByUser(userId)
-                .onErrorResume {
-                    // There should not be an error
-                    assert(false)
-                    Flux.empty()
-                }
-                .collectList()
-                .subscribe { membershipList ->
-                    assert(membershipList.size == visitedRoomIds.size + ownedRoomIds.size )
-                }
+        StepVerifier
+            .create(membershipView.getByUser(userId))
+            .expectNextCount(2)
+            .verifyComplete()
     }
 
     @Test
     fun testShouldForbidForAnotherUserId() {
         val userId = UUID.randomUUID().toString().replace("-", "")
+        val jwtUserId = UUID.randomUUID().toString().replace("-", "")
         val otherUserId = UUID.randomUUID().toString().replace("-", "")
-        val jwtString = ""
-        val testAuthentication = UsernamePasswordAuthenticationToken(userId, jwtString, listOf())
+        val testAuthentication = UsernamePasswordAuthenticationToken(jwtUserId, "jwtString", listOf())
 
         given(authProcessor.getAuthentication()).willReturn(Mono.just(testAuthentication))
         given(roomAccessService.getRoomAccessByUser(otherUserId)).willReturn(Flux.empty())
 
-        membershipView.getByUser(otherUserId)
-                .onErrorResume { error ->
-                    assert(error is ForbiddenException)
-                    Flux.empty()
-                }
-                .subscribe()
-    }
-
-    @Test
-    fun testShouldHandleUserWithOnlyVisitedRooms() {
-        val userId = UUID.randomUUID().toString().replace("-", "")
-        val visitedRoomIds: List<String> = listOf(
-                UUID.randomUUID().toString().replace("-", ""),
-                UUID.randomUUID().toString().replace("-", "")
-        )
-        val jwtString = ""
-        val testAuthentication = UsernamePasswordAuthenticationToken(userId, jwtString, listOf())
-        val userRoomHistories = listOf(
-                RoomHistoryEntry(visitedRoomIds[0], "last visit"),
-                RoomHistoryEntry(visitedRoomIds[1], "last visit")
-        )
-        val testUser = User(userId, userRoomHistories)
-        val visitedRooms = listOf(
-                Optional.of(Room(visitedRoomIds[0], "12312312", "name for first visited room")),
-                Optional.of(Room(visitedRoomIds[1], "11112222", "name for second visited room"))
-        )
-
-        given(authProcessor.getAuthentication()).willReturn(Mono.just(testAuthentication))
-        given(userService.get(userId, jwtString)).willReturn(Mono.just(testUser))
-        given(roomService.get(visitedRoomIds)).willReturn(Flux.fromIterable(visitedRooms))
-        given(roomAccessService.getRoomAccessByUser(userId)).willReturn(Flux.empty())
-
-        membershipView.getByUser(userId)
-                .onErrorResume {
-                    // There should not be an error
-                    assert(false)
-                    Flux.empty()
-                }
-                .collectList()
-                .subscribe { membershipList ->
-                    assert(membershipList.size == visitedRoomIds.size)
-                }
-    }
-
-    @Test
-    fun testShouldHandleUserWithOnlyOwnedRooms() {
-        val userId = UUID.randomUUID().toString().replace("-", "")
-        val ownedRoomIds: List<String> = listOf(
-                UUID.randomUUID().toString().replace("-", ""),
-                UUID.randomUUID().toString().replace("-", "")
-        )
-        val jwtString = ""
-        val testAuthentication = UsernamePasswordAuthenticationToken(userId, jwtString, listOf())
-        val testUser = User(userId, listOf())
-        val userRoomAccess = listOf(
-                RoomAccess(ownedRoomIds[0], userId, "rev", "OWNER", null),
-                RoomAccess(ownedRoomIds[1], userId, "rev", "OWNER", null)
-        )
-        val ownedRooms = listOf(
-                Room(ownedRoomIds[0], "22222222", "name for first owned room"),
-                Room(ownedRoomIds[1], "22223333", "name for second owned room")
-        )
-
-        given(authProcessor.getAuthentication()).willReturn(Mono.just(testAuthentication))
-        given(userService.get(userId, jwtString)).willReturn(Mono.just(testUser))
-        given(roomAccessService.getRoomAccessByUser(userId)).willReturn(Flux.fromIterable(userRoomAccess))
-        given(roomService.get(ownedRoomIds[0])).willReturn(Mono.just(ownedRooms[0]))
-        given(roomService.get(ownedRoomIds[1])).willReturn(Mono.just(ownedRooms[1]))
-
-        membershipView.getByUser(userId)
-                .onErrorResume {
-                    // There should not be an error
-                    assert(false)
-                    Flux.empty()
-                }
-                .collectList()
-                .subscribe { membershipList ->
-                    assert(membershipList.size == ownedRoomIds.size)
-                }
-    }
-
-    @Test
-    fun testShouldHandleStaleRoomInUserRoomAccess() {
-        val userId = UUID.randomUUID().toString().replace("-", "")
-        val jwtString = ""
-        val testAuthentication = UsernamePasswordAuthenticationToken(userId, jwtString, listOf())
-        val testUser = User(userId, listOf())
-        val ownedRoomIds: List<String> = listOf(
-                UUID.randomUUID().toString().replace("-", ""),
-                UUID.randomUUID().toString().replace("-", "")
-        )
-        val userRoomAccess = listOf(
-                RoomAccess(ownedRoomIds[0], userId, "rev", "OWNER", null),
-                RoomAccess(ownedRoomIds[1], userId, "rev", "OWNER", null)
-        )
-        val notAStaleRoom = Room(ownedRoomIds[0], "22222222", "name for first owned room")
-
-        given(authProcessor.getAuthentication()).willReturn(Mono.just(testAuthentication))
-        given(userService.get(userId, jwtString)).willReturn(Mono.just(testUser))
-        given(roomAccessService.getRoomAccessByUser(userId)).willReturn(Flux.fromIterable(userRoomAccess))
-        given(roomService.get(ownedRoomIds[0])).willReturn(Mono.just(notAStaleRoom))
-        given(roomService.get(ownedRoomIds[1])).willReturn(Mono.empty())
-
-        membershipView.getByUser(userId)
-                .onErrorResume {
-                    // There should not be an error
-                    Flux.empty()
-                }
-                .collectList()
-                .switchIfEmpty(Mono.just(listOf()))
-                .subscribe { membershipList ->
-                    assert(membershipList.size == ownedRoomIds.size - 1)
-                }
+        StepVerifier
+            .create(membershipView.getByUser(userId))
+            .expectErrorMatches { e ->
+                e is ForbiddenException
+            }
+            .verify()
     }
 }
