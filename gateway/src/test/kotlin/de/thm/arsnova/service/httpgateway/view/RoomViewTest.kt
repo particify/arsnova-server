@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.test.StepVerifier
 import java.util.Optional
 import java.util.UUID
 
@@ -61,19 +62,15 @@ class RoomViewTest(
         given(wsGatewayService.getUsercount(roomIds)).willReturn(Flux.fromIterable(userCount))
         given(roomService.get(roomIds)).willReturn(Flux.fromIterable(rooms))
 
-        roomView.getSummaries(roomIds)
-                .onErrorResume {
-                    // There should not be an error
-                    assert(false)
-                    Flux.empty()
-                }
-                .collectList()
-                .subscribe { optionalRoomSummaries: List<Optional<RoomSummary>> ->
-                    assert(optionalRoomSummaries.size == roomIds.size)
-                    optionalRoomSummaries.map { optionalRoomSummary ->
-                        assert(optionalRoomSummary.isPresent)
-                    }
-                }
+        StepVerifier
+            .create(roomView.getSummaries(roomIds))
+            .expectNextMatches { optionalRoomSummary ->
+                optionalRoomSummary.isPresent
+            }
+            .expectNextMatches { optionalRoomSummary ->
+                optionalRoomSummary.isPresent
+            }
+            .verifyComplete()
     }
 
     @Test
@@ -108,18 +105,15 @@ class RoomViewTest(
         given(wsGatewayService.getUsercount(roomIds)).willReturn(Flux.fromIterable(userCount))
         given(roomService.get(roomIds)).willReturn(Flux.fromIterable(rooms))
 
-        roomView.getSummaries(roomIds)
-                .onErrorResume {
-                    // There should not be an error
-                    assert(false)
-                    Flux.empty()
-                }
-                .collectList()
-                .subscribe { optionalRoomSummaries: List<Optional<RoomSummary>> ->
-                    assert(optionalRoomSummaries.size == roomIds.size)
-                    assert(optionalRoomSummaries.get(0).isPresent)
-                    assert(optionalRoomSummaries.get(1).isEmpty)
-                }
+        StepVerifier
+            .create(roomView.getSummaries(roomIds))
+            .expectNextMatches { optionalRoomSummary ->
+                optionalRoomSummary.isPresent
+            }
+            .expectNextMatches { optionalRoomSummary ->
+                optionalRoomSummary.isEmpty
+            }
+            .verifyComplete()
     }
 
     @Test
@@ -154,21 +148,18 @@ class RoomViewTest(
         given(wsGatewayService.getUsercount(roomIds)).willReturn(Flux.fromIterable(userCount))
         given(roomService.get(roomIds)).willReturn(Flux.fromIterable(rooms))
 
-        roomView.getSummaries(roomIds)
-                .onErrorResume {
-                    // There should not be an error
-                    assert(false)
-                    Flux.empty()
-                }
-                .collectList()
-                .subscribe { optionalRoomSummaries: List<Optional<RoomSummary>> ->
-                    assert(optionalRoomSummaries.size == roomIds.size)
-                    optionalRoomSummaries.map { optionalRoomSummary ->
-                        assert(optionalRoomSummary.isPresent)
-                        optionalRoomSummary.map { roomSummary ->
-                            assert(roomSummary.stats.roomUserCount == null)
-                        }
-                    }
-                }
+        StepVerifier
+            .create(roomView.getSummaries(roomIds))
+            .expectNextMatches { optionalRoomSummary ->
+                optionalRoomSummary
+                    .map { roomSummery -> roomSummery.stats.roomUserCount == null }
+                    .orElse(true)
+            }
+            .expectNextMatches { optionalRoomSummary ->
+                optionalRoomSummary
+                    .map { roomSummery -> roomSummery.stats.roomUserCount == null }
+                    .orElse(true)
+            }
+            .verifyComplete()
     }
 }
