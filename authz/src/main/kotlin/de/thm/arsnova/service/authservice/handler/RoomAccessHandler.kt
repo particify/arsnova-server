@@ -157,11 +157,10 @@ class RoomAccessHandler (
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun createParticipantAccessWithLimit(roomAccess: RoomAccess, limit: Int): RoomAccess {
         if (roomAccessRepository.countByRoomIdAndRole(roomAccess.roomId!!, ROLE_PARTICIPANT_STRING) < limit) {
-            return roomAccessRepository.createAccess(
+            return roomAccessRepository.createParticipantAccess(
                 roomAccess.roomId!!,
                 roomAccess.userId!!,
-                roomAccess.rev,
-                ROLE_PARTICIPANT_STRING
+                roomAccess.rev
             )
         } else {
             throw ForbiddenException("Participant limit reached")

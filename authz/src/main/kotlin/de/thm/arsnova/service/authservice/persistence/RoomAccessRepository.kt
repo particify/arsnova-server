@@ -67,7 +67,7 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
         @Param("role") role: String
     ): RoomAccess
 
-    // This query is for migration participants and checks for duplicate key,
+    // This query is for creating participants and checks for duplicate key,
     // does a fake update to prevent exceptions but still returns the row
     @Query("""
         INSERT INTO room_access
