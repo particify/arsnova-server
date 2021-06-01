@@ -3,6 +3,7 @@ package de.thm.arsnova.service.authservice.handler
 import de.thm.arsnova.service.authservice.config.RabbitConfig
 import de.thm.arsnova.service.authservice.exception.BadRequestException
 import de.thm.arsnova.service.authservice.exception.ForbiddenException
+import de.thm.arsnova.service.authservice.exception.InternalServerErrorException
 import de.thm.arsnova.service.authservice.model.RoomAccess
 import de.thm.arsnova.service.authservice.model.RoomAccessPK
 import de.thm.arsnova.service.authservice.model.RoomAccessSyncTracker
@@ -15,6 +16,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.dao.CannotAcquireLockException
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -135,13 +137,25 @@ class RoomAccessHandler (
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun create(roomAccess: RoomAccess): RoomAccess {
-        return roomAccessRepository.createOrUpdateAccess(
-            roomAccess.roomId!!,
-            roomAccess.userId!!,
-            roomAccess.rev,
-            roomAccess.role!!,
-            roomAccess.role!!
-        )
+        return try {
+            roomAccessRepository.createOrUpdateAccess(
+                roomAccess.roomId!!,
+                roomAccess.userId!!,
+                roomAccess.rev,
+                roomAccess.role!!,
+                roomAccess.role!!
+            )
+        } catch (ex: EmptyResultDataAccessException) {
+            logger.info("Could not extract result set, most likely due to an already existing creator room access")
+            // Updating lastAccess and returning the existing creator room access
+            // I don't know of any scenario where there would not be an existing creator role
+            val lastAccess = Date()
+            roomAccessRepository
+                .updateLastAccessAndGetByRoomIdAndUserId(roomAccess.roomId!!, roomAccess.userId!!, lastAccess)
+                .orElseThrow {
+                    InternalServerErrorException("Tried fetching the room access but could not obtain any")
+                }
+        }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
