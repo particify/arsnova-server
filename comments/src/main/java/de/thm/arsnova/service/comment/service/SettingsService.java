@@ -37,4 +37,8 @@ public class SettingsService {
     public Settings update(final Settings s) {
         return repository.save(s);
     }
+
+    public void delete(final String roomId) {
+        repository.deleteById(roomId);
+    }
 }
