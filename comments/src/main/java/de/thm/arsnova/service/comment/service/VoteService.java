@@ -35,16 +35,7 @@ public class VoteService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public Vote create(Vote v) {
-        Vote oldVote = repository.findById(new VotePK(v.getCommentId(), v.getUserId())).orElse(null);
-
-        if (repository.existsById(new VotePK(v.getCommentId(), v.getUserId()))) {
-            oldVote.setVote(v.getVote());
-            repository.save(oldVote);
-            return oldVote;
-        } else {
-            repository.save(v);
-            return v;
-        }
+        return repository.createOrUpdate(v.getCommentId(), v.getUserId(), v.getVote(), v.getVote());
     }
 
     public void delete(Vote v) {
