@@ -13,7 +13,9 @@ import de.thm.arsnova.service.httpgateway.service.WsGatewayService
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
-import reactor.util.function.Tuple3
+import reactor.kotlin.core.util.function.component1
+import reactor.kotlin.core.util.function.component2
+import reactor.kotlin.core.util.function.component3
 
 @Component
 class SystemView(
@@ -38,8 +40,8 @@ class SystemView(
                     coreStatsService.getServiceStats(jwt),
                     commentService.getServiceStats()
                 )
-                    .map { tuple3: Tuple3<WsGatewayStats, Map<String, Any>, CommentServiceStats> ->
-                        Stats(tuple3.t1, tuple3.t2, tuple3.t3)
+                    .map { (wsGatewayStats: WsGatewayStats, coreServiceStats: Map<String, Any>, commentServiceStats: CommentServiceStats) ->
+                        Stats(wsGatewayStats, coreServiceStats, commentServiceStats)
                     }
             }
     }
@@ -60,15 +62,15 @@ class SystemView(
                             coreStatsService.getSummarizedStats(jwt),
                             commentService.getServiceStats()
                     )
-                            .map { tuple3: Tuple3<WsGatewayStats, CoreStats, CommentServiceStats> ->
+                            .map { (wsGatewayStats: WsGatewayStats, coreStats: CoreStats, commentServiceStats: CommentServiceStats) ->
                                 SummarizedStats(
-                                        connectedUsers = tuple3.t1.webSocketUserCount,
-                                        users = tuple3.t2.userProfile.accountCount,
-                                        activationsPending = tuple3.t2.userProfile.activationsPending,
-                                        rooms = tuple3.t2.room.totalCount,
-                                        contents = tuple3.t2.content.totalCount,
-                                        answers = tuple3.t2.answer.totalCount,
-                                        comments = tuple3.t3.commentCount.toInt()
+                                        connectedUsers = wsGatewayStats.webSocketUserCount,
+                                        users = coreStats.userProfile.accountCount,
+                                        activationsPending = coreStats.userProfile.activationsPending,
+                                        rooms = coreStats.room.totalCount,
+                                        contents = coreStats.content.totalCount,
+                                        answers = coreStats.answer.totalCount,
+                                        comments = commentServiceStats.commentCount.toInt()
                                 )
                             }
                 }

@@ -10,7 +10,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
-import reactor.util.function.Tuple2
+import reactor.kotlin.core.util.function.component1
+import reactor.kotlin.core.util.function.component2
 
 @Component
 class RemoveMembershipFilter(
@@ -33,11 +34,11 @@ class RemoveMembershipFilter(
                         jwtTokenUtil.getUserIdFromPublicToken(token)
                     }
             )
-                .map { t2: Tuple2<String, String> ->
+                .map { (token: String, userId: String) ->
                     // Can be mostly a dummy object as room access service only needs both the IDs
                     RoomAccess(
-                        t2.t1,
-                        t2.t2,
+                        token,
+                        userId,
                         "",
                         "",
                         null

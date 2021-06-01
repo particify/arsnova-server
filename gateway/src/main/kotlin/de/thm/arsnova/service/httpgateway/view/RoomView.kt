@@ -12,8 +12,10 @@ import de.thm.arsnova.service.httpgateway.service.WsGatewayService
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.util.function.Tuple3
 import java.util.Optional
+import reactor.kotlin.core.util.function.component1
+import reactor.kotlin.core.util.function.component2
+import reactor.kotlin.core.util.function.component3
 
 @Component
 class RoomView(
@@ -35,31 +37,31 @@ class RoomView(
                             contentService.getStats(roomIds, jwt),
                             wsGatewayService.getUsercount(roomIds)
                     )
-                            .map { tuple3: Tuple3<CommentStats, Int, Optional<Int>> ->
-                                tuple3.t3.map { userCount ->
+                            .map { (commentStats: CommentStats, contentCount: Int, wsUserCount: Optional<Int>) ->
+                                wsUserCount.map { userCount ->
                                     RoomStats(
-                                            tuple3.t2,
-                                            tuple3.t1.ackCommentCount,
+                                            contentCount,
+                                            commentStats.ackCommentCount,
                                             userCount
                                     )
                                 }.orElse(
                                         RoomStats(
-                                                tuple3.t2,
-                                                tuple3.t1.ackCommentCount,
+                                                contentCount,
+                                                commentStats.ackCommentCount,
                                                 null
                                         )
                                 )
                             }
                 }
                 .zipWith(roomService.get(roomIds))
-                .map { tuple2 ->
-                    tuple2.t2
+                .map { (roomStats: RoomStats, optionalRoom: Optional<Room>) ->
+                    optionalRoom
                             .map { room ->
                                 Optional.of(RoomSummary(
                                         room.id,
                                         room.shortId,
                                         room.name,
-                                        tuple2.t1
+                                        roomStats
                                 ))
                             }
                             .orElse(Optional.empty())

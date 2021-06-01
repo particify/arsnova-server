@@ -15,7 +15,8 @@ import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
-import reactor.util.function.Tuple2
+import reactor.kotlin.core.util.function.component1
+import reactor.kotlin.core.util.function.component2
 
 @Component
 class AddMembershipFilter (
@@ -71,9 +72,9 @@ class AddMembershipFilter (
                             }
                     )
                 }
-                .flatMap { tuple2: Tuple2<RoomAccess, Int> ->
+                .flatMap { (roomAccess: RoomAccess, limit: Int) ->
                     roomAccessService
-                        .postRoomAccessWithLimit(tuple2.t1, tuple2.t2)
+                        .postRoomAccessWithLimit(roomAccess, limit)
                 }
                 .then()
         }
