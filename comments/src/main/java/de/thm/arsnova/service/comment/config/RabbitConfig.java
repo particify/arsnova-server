@@ -21,6 +21,9 @@ public class RabbitConfig implements RabbitListenerConfigurer {
     public static final String BACKEND_COMMENT_FANOUT_NAME = "backend.event.comment.beforecreation";
     public static final String BACKEND_COMMENT_QUEUE_NAME = BACKEND_COMMENT_FANOUT_NAME + ".consumer.comment-service";
     public static final String COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME = "commentservice.event.comment.deleted";
+    public static final String ROOM_DELETED_FANOUT_NAME = "backend.event.room.afterdeletion";
+    public static final String ROOM_DELETED_QUEUE_NAME = ROOM_DELETED_FANOUT_NAME + ".consumer.comment-service";
+    public static final String ROOM_DELETED_DLQ_NAME = ROOM_DELETED_QUEUE_NAME + ".dlq";
 
     @Value("${spring.rabbitmq.host}") private String rabbitmqHost;
     @Value("${spring.rabbitmq.port}") private int rabbitmqPort;
@@ -70,13 +73,31 @@ public class RabbitConfig implements RabbitListenerConfigurer {
     @Bean
     @Autowired
     public Declarables rabbitDeclarables() {
-        final FanoutExchange fanoutExchange = new FanoutExchange(BACKEND_COMMENT_FANOUT_NAME);
-        final Queue queue = new Queue(BACKEND_COMMENT_QUEUE_NAME, true, false, false);
-        final Binding binding = BindingBuilder.bind(queue).to(fanoutExchange);
+        final FanoutExchange commentFanoutExchange = new FanoutExchange(BACKEND_COMMENT_FANOUT_NAME);
+        final Queue commentQueue = new Queue(BACKEND_COMMENT_QUEUE_NAME, true, false, false);
+        final Binding commentBinding = BindingBuilder.bind(commentQueue).to(commentFanoutExchange);
+
+        final FanoutExchange roomDeletedFanoutExchange = new FanoutExchange(ROOM_DELETED_FANOUT_NAME);
+        final Queue roomDeletedDlq = new Queue(ROOM_DELETED_DLQ_NAME, true, false, false);
+        final Queue roomDeletedQueue = QueueBuilder
+                .durable(ROOM_DELETED_QUEUE_NAME)
+                .withArgument("x-dead-letter-exchange", "")
+                .withArgument("x-dead-letter-routing-key", ROOM_DELETED_DLQ_NAME)
+                .build();
+        final Binding roomDeletedBinding = BindingBuilder.bind(roomDeletedQueue).to(roomDeletedFanoutExchange);
 
         final FanoutExchange deleteFanoutExchange = new FanoutExchange(COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME);
 
-        return new Declarables(fanoutExchange, queue, binding, deleteFanoutExchange);
+        return new Declarables(
+                commentFanoutExchange,
+                commentQueue,
+                commentBinding,
+                deleteFanoutExchange,
+                roomDeletedFanoutExchange,
+                roomDeletedDlq,
+                roomDeletedQueue,
+                roomDeletedBinding
+        );
     }
 
     @Override
