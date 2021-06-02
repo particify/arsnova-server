@@ -2,6 +2,8 @@ package de.thm.arsnova.service.comment.service;
 
 import de.thm.arsnova.service.comment.model.Settings;
 import de.thm.arsnova.service.comment.service.persistence.SettingsRepository;
+
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,7 @@ public class SettingsService {
     }
 
     public void delete(final String roomId) {
-        repository.deleteById(roomId);
+        Optional<Settings> maybeSettings = repository.findById(roomId);
+        maybeSettings.ifPresent(repository::delete);
     }
 }
