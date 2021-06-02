@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.Optional
+import reactor.kotlin.core.util.function.component1
+import reactor.kotlin.core.util.function.component2
 
 @Component
 class MembershipView(
@@ -43,12 +45,12 @@ class MembershipView(
                             Mono.just(roomAccess),
                             roomService.get(roomAccess.roomId)
                         )
-                        .map { t2 ->
+                        .map { (roomAccess: RoomAccess, room: Room) ->
                             Membership(
-                                t2.t1.roomId,
-                                t2.t2.shortId,
-                                setOf(t2.t1.role),
-                                t2.t1.lastAccess!!
+                                roomAccess.roomId,
+                                room.shortId,
+                                setOf(roomAccess.role),
+                                roomAccess.lastAccess!!
                             )
                         }
                 }

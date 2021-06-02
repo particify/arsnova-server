@@ -23,7 +23,9 @@ import org.springframework.stereotype.Component
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
-import reactor.util.function.Tuple3
+import reactor.kotlin.core.util.function.component1
+import reactor.kotlin.core.util.function.component2
+import reactor.kotlin.core.util.function.component3
 
 /**
  * This filter is responsible for replacing the JWT from the user with an inter service JWT.
@@ -76,9 +78,9 @@ class AuthFilter (
                                 Mono.just(authorities)
                         )
                     }
-                    .map { tuple3: Tuple3<RoomAccess, RoomFeatures, List<String>> ->
-                        logger.trace("Working with user information: {}", tuple3)
-                        jwtTokenUtil.createSignedInternalToken(tuple3.t1, tuple3.t2, tuple3.t3)
+                    .map { (roomAccess: RoomAccess, roomFeatures: RoomFeatures, authorityList: List<String>) ->
+                        logger.trace("Working with roomAccess: {}, roomFeatures: {}, authorityList: {}", roomAccess, roomFeatures, authorityList)
+                        jwtTokenUtil.createSignedInternalToken(roomAccess, roomFeatures, authorityList)
                     }
                     .map { token ->
                         logger.trace("new token: {}", token)
