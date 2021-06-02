@@ -81,8 +81,8 @@ public class RabbitConfig implements RabbitListenerConfigurer {
         final Queue roomDeletedDlq = new Queue(ROOM_DELETED_DLQ_NAME, true, false, false);
         final Queue roomDeletedQueue = QueueBuilder
                 .durable(ROOM_DELETED_QUEUE_NAME)
-                .withArgument("x-dead-letter-exchange", "")
-                .withArgument("x-dead-letter-routing-key", ROOM_DELETED_DLQ_NAME)
+                .deadLetterExchange("")
+                .deadLetterRoutingKey(ROOM_DELETED_DLQ_NAME)
                 .build();
         final Binding roomDeletedBinding = BindingBuilder.bind(roomDeletedQueue).to(roomDeletedFanoutExchange);
 
