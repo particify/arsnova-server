@@ -48,7 +48,8 @@ public class MigrationExecutor {
 		logger.debug("Initialized {} migration(s).", this.migrations.size());
 	}
 
-	public void runMigrations(@NonNull final MigrationState migrationState, final Runnable stateUpdateHandler) {
+	public void runMigrations(@NonNull final MigrationState migrationState, final Runnable stateUpdateHandler)
+			throws MigrationException {
 		final Thread shutdownHook = new Thread(stateUpdateHandler);
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		final List<Migration> pendingMigrations = migrations.stream()
