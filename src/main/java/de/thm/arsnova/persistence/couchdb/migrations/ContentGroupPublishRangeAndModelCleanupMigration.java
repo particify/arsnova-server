@@ -21,22 +21,18 @@ package de.thm.arsnova.persistence.couchdb.migrations;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.ektorp.DbAccessException;
+import javax.annotation.PostConstruct;
 import org.ektorp.ViewQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.stereotype.Service;
 
-import de.thm.arsnova.model.MigrationState;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
-import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
 
 /**
  * This migration moves some state information previously stored for individual
@@ -57,174 +53,83 @@ import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
  * @author Daniel Gerhardt
  */
 @Service
-public class ContentGroupPublishRangeAndModelCleanupMigration implements Migration {
+public class ContentGroupPublishRangeAndModelCleanupMigration extends AbstractMigration {
 	private static final String ID = "20210216102500";
-	private static final int LIMIT = 200;
-	private static final String CONTENT_GROUP_INDEX = "migration-20210216102500-contentgroup-index";
-	private static final String CONTENT_INDEX = "migration-20210216102500-content-index";
+	private static final String CONTENT_GROUP_INDEX = "contentgroup-index";
+	private static final String CONTENT_INDEX = "content-index";
 	private static final String CONTENT_DESIGN_DOC = "_design/Content";
 	private static final String CONTENT_BY_ID_VIEW = "by_id";
 	private static final Map<String, Boolean> existsSelector = Map.of("$exists", true);
 	private static final Map<String, Boolean> notExistsSelector = Map.of("$exists", false);
 	private static final Logger logger = LoggerFactory.getLogger(ContentGroupPublishRangeAndModelCleanupMigration.class);
 
-	private MangoCouchDbConnector connector;
-
 	public ContentGroupPublishRangeAndModelCleanupMigration(
 			final MangoCouchDbConnector connector) {
-		this.connector = connector;
+		super(ID, connector);
 	}
 
-	@Override
-	public String getId() {
-		return ID;
-	}
+	@PostConstruct
+	public void initMigration() {
+		addEntityMigrationStepHandler(
+				ContentGroupMigrationEntity.class,
+				CONTENT_GROUP_INDEX,
+				Map.of(
+						"type", "ContentGroup",
+						"published", notExistsSelector
+				),
+				contentGroup -> {
+					final List<MigrationEntity> entitiesForUpdate = new ArrayList<>();
+					final List<ContentMigrationEntity> contentMigrationEntities = connector.queryView(new ViewQuery()
+									.designDocId(CONTENT_DESIGN_DOC)
+									.viewName(CONTENT_BY_ID_VIEW)
+									.keys(contentGroup.getContentIds())
+									.reduce(false)
+									.includeDocs(true),
+							ContentMigrationEntity.class);
+					logger.debug("contentMigrationEntities: {}", contentMigrationEntities);
+					final List<String> contentIds = contentMigrationEntities.stream()
+							.filter(c -> c.getState().isVisible())
+							.map(c -> c.getId())
+							.collect(Collectors.toList());
 
-	@Override
-	public int getStepCount() {
-		return 2;
-	}
+					/* Migrate publishing state to use ranges. */
+					logger.debug("Creating content group state data for {}, visible contents {}",
+							contentGroup, contentIds);
+					if (contentIds.size() == 0) {
+						logger.debug("No contents published for {}.", contentGroup.getId());
+						contentGroup.setPublished(false);
+						contentGroup.setFirstPublishedIndex(-1);
+						contentGroup.setLastPublishedIndex(-1);
+					} else if (contentGroup.getContentIds().size() == contentIds.size()) {
+						logger.debug("All contents published for {}.", contentGroup.getId());
+						contentGroup.setPublished(true);
+						contentGroup.setFirstPublishedIndex(0);
+						contentGroup.setLastPublishedIndex(-1);
+					} else {
+						logger.debug("Some contents published for {}.", contentGroup.getId());
+						contentGroup.setPublished(true);
+						final List<Boolean> publishedFlags = contentGroup.getContentIds().stream()
+								.map(id -> contentIds.contains(id)).collect(Collectors.toList());
+						updateIndexRange(contentGroup, publishedFlags);
+					}
+					entitiesForUpdate.add(contentGroup);
 
-	@Override
-	public void migrate(final MigrationState.Migration state) {
-		try {
-			switch (state.getStep()) {
-				case 0:
-					migrateContentState(state);
-					break;
-				case 1:
-					migrateContentWithoutGroupState(state);
-					break;
-				default:
-					throw new IllegalStateException("Invalid migration step:" + state.getStep() + ".");
-			}
-		} catch (final InterruptedException e) {
-			throw new DbAccessException(e);
-		}
-	}
+					/* Update Contents to adjust their models. */
+					entitiesForUpdate.addAll(contentMigrationEntities);
 
-	private void createContentGroupIndex() {
-		final Map<String, Object> filterSelector = new HashMap<>();
-		filterSelector.put("type", "ContentGroup");
-		filterSelector.put("published", notExistsSelector);
-		connector.createPartialJsonIndex(CONTENT_GROUP_INDEX, Collections.emptyList(), filterSelector);
-	}
-
-	private void createContentIndex() {
-		final Map<String, Object> filterSelector = new HashMap<>();
-		filterSelector.put("type", "Content");
-		filterSelector.put("state.visible", existsSelector);
-		connector.createPartialJsonIndex(CONTENT_INDEX, Collections.emptyList(), filterSelector);
-	}
-
-	private void waitForIndex(final String name) throws InterruptedException {
-		for (int i = 0; i < 10; i++) {
-			if (connector.initializeIndex(name)) {
-				return;
-			}
-			Thread.sleep(10000 * Math.round(1.0 + 0.5 * i));
-		}
-	}
-
-	public void migrateContentState(final MigrationState.Migration state) throws InterruptedException {
-		createContentGroupIndex();
-		waitForIndex(CONTENT_GROUP_INDEX);
-
-		final Map<String, Object> queryOptions = new HashMap<>();
-		queryOptions.put("type", "ContentGroup");
-		queryOptions.put("published", notExistsSelector);
-		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
-		query.setLimit(LIMIT);
-		String bookmark = (String) state.getState();
-		final List<MigrationEntity> entitiesForUpdate = new ArrayList<>();
-
-		for (int skip = 0;; skip += LIMIT) {
-			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
-			query.setBookmark(bookmark);
-			final PagedMangoResponse<ContentGroupMigrationEntity> response =
-					connector.queryForPage(query, ContentGroupMigrationEntity.class);
-			final List<ContentGroupMigrationEntity> contentGroups = response.getEntities();
-			bookmark = response.getBookmark();
-			if (contentGroups.size() == 0) {
-				break;
-			}
-
-			for (final ContentGroupMigrationEntity contentGroup : contentGroups) {
-				final List<ContentMigrationEntity> contentMigrationEntities = connector.queryView(new ViewQuery()
-						.designDocId(CONTENT_DESIGN_DOC)
-						.viewName(CONTENT_BY_ID_VIEW)
-						.keys(contentGroup.getContentIds())
-						.reduce(false)
-						.includeDocs(true),
-						ContentMigrationEntity.class);
-				logger.debug("contentMigrationEntities: {}", contentMigrationEntities);
-				final List<String> contentIds = contentMigrationEntities.stream()
-						.filter(c -> c.getState().isVisible())
-						.map(c -> c.getId())
-						.collect(Collectors.toList());
-
-				/* Migrate publishing state to use ranges. */
-				logger.debug("Creating content group state data for {}, visible contents {}",
-						contentGroup, contentIds);
-				if (contentIds.size() == 0) {
-					logger.debug("No contents published for {}.", contentGroup.getId());
-					contentGroup.setPublished(false);
-					contentGroup.setFirstPublishedIndex(-1);
-					contentGroup.setLastPublishedIndex(-1);
-				} else if (contentGroup.getContentIds().size() == contentIds.size()) {
-					logger.debug("All contents published for {}.", contentGroup.getId());
-					contentGroup.setPublished(true);
-					contentGroup.setFirstPublishedIndex(0);
-					contentGroup.setLastPublishedIndex(-1);
-				} else {
-					logger.debug("Some contents published for {}.", contentGroup.getId());
-					contentGroup.setPublished(true);
-					final List<Boolean> publishedFlags = contentGroup.getContentIds().stream()
-							.map(id -> contentIds.contains(id)).collect(Collectors.toList());
-					updateIndexRange(contentGroup, publishedFlags);
+					return entitiesForUpdate;
 				}
-				entitiesForUpdate.add(contentGroup);
-
+		);
+		addEntityMigrationStepHandler(
+				ContentMigrationEntity.class,
+				CONTENT_INDEX,
+				Map.of(
+						"type", "Content",
+						"state.visible", existsSelector
+				),
 				/* Update Contents to adjust their models. */
-				entitiesForUpdate.addAll(contentMigrationEntities);
-
-				connector.executeBulk(entitiesForUpdate);
-				entitiesForUpdate.clear();
-			}
-
-			state.setState(bookmark);
-		}
-		state.setState(null);
-	}
-
-	public void migrateContentWithoutGroupState(final MigrationState.Migration state) throws InterruptedException {
-		createContentIndex();
-		waitForIndex(CONTENT_INDEX);
-
-		final Map<String, Object> queryOptions = new HashMap<>();
-		queryOptions.put("type", "Content");
-		queryOptions.put("state.visible", existsSelector);
-		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
-		query.setLimit(LIMIT);
-		String bookmark = (String) state.getState();
-
-		for (int skip = 0;; skip += LIMIT) {
-			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
-			query.setBookmark(bookmark);
-			final PagedMangoResponse<ContentMigrationEntity> response =
-					connector.queryForPage(query, ContentMigrationEntity.class);
-			final List<ContentMigrationEntity> contents = response.getEntities();
-			bookmark = response.getBookmark();
-			if (contents.size() == 0) {
-				break;
-			}
-
-			/* Update Contents to adjust their models. */
-			connector.executeBulk(contents);
-
-			state.setState(bookmark);
-		}
-		state.setState(null);
+				content -> List.of(content)
+		);
 	}
 
 	private void updateIndexRange(final ContentGroupMigrationEntity contentGroup, final List<Boolean> publishedFlags) {
