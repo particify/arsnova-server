@@ -44,13 +44,14 @@ public class SettingsController extends AbstractEntityController {
     @PostMapping(POST_MAPPING)
     @ResponseStatus(HttpStatus.CREATED)
     public Settings post(
+            @PathVariable final String roomId,
             @RequestBody final Settings settings,
             final HttpServletResponse httpServletResponse
     ) {
         final CreateSettingsPayload payload  = new CreateSettingsPayload(settings);
         final CreateSettings command = new CreateSettings(payload);
 
-        Settings s = commandHandler.handle(command);
+        Settings s = commandHandler.handle(roomId, command);
 
         final String uri = UriComponentsBuilder.fromPath(REQUEST_MAPPING).path(GET_MAPPING)
                 .buildAndExpand(s.getRoomId()).toUriString();
@@ -61,11 +62,15 @@ public class SettingsController extends AbstractEntityController {
     }
 
     @PutMapping(PUT_MAPPING)
-    public Settings put(@RequestBody final Settings entity, final HttpServletResponse httpServletResponse) {
+    public Settings put(
+            @PathVariable final String roomId,
+            @RequestBody final Settings entity,
+            final HttpServletResponse httpServletResponse
+    ) {
         UpdateSettingsPayload p = new UpdateSettingsPayload(entity);
         UpdateSettings command = new UpdateSettings(p);
 
-        Settings s = this.commandHandler.handle(command);
+        Settings s = this.commandHandler.handle(roomId, command);
 
         httpServletResponse.setHeader(ENTITY_ID_HEADER, s.getRoomId());
 

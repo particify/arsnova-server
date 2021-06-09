@@ -29,7 +29,10 @@ public class SettingsCommandHandler {
         this.permissionEvaluator = permissionEvaluator;
     }
 
-    public Settings handle(CreateSettings command) {
+    public Settings handle(
+            final String roomId,
+            CreateSettings command
+    ) {
         logger.debug("Got new command: {}", command);
 
         CreateSettingsPayload payload = command.getPayload();
@@ -39,7 +42,7 @@ public class SettingsCommandHandler {
         }
 
         Settings newSettings = new Settings();
-        newSettings.setRoomId(payload.getRoomId());
+        newSettings.setRoomId(roomId);
         newSettings.setDirectSend(payload.getDirectSend());
 
         Settings saved = service.create(newSettings);
@@ -47,7 +50,10 @@ public class SettingsCommandHandler {
         return saved;
     }
 
-    public Settings handle(UpdateSettings command) {
+    public Settings handle(
+            final String roomId,
+            UpdateSettings command
+    ) {
         logger.debug("Got new command: {}", command);
 
         UpdateSettingsPayload payload = command.getPayload();
@@ -56,8 +62,8 @@ public class SettingsCommandHandler {
             throw new ForbiddenException();
         }
 
-        Settings settings = service.get(payload.getRoomId());
-        settings.setRoomId(payload.getRoomId());
+        Settings settings = service.get(roomId);
+        settings.setRoomId(roomId);
         settings.setDirectSend(payload.getDirectSend());
 
         Settings updated = service.update(settings);
