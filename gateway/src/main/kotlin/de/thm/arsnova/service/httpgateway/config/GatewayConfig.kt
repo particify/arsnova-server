@@ -64,26 +64,11 @@ class GatewayConfig (
                 .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
         }
 
-        routes.route("comment-service-archive") { p ->
-            p
-                .path(
-                    "/room/{roomId}/comment/-/archive/**"
-                )
-                .filters { f ->
-                    f.filter(authFilter.apply(AuthFilter.Config()))
-                    f.requestRateLimiter { r ->
-                        r.rateLimiter = requestRateLimiter
-                    }
-                }
-                .uri(httpGatewayProperties.routing.endpoints.commentService)
-        }
-
         routes.route("comment-service") { p ->
             p
                 .path("/room/{roomId}/comment/**", "/room/{roomId}/settings/**")
                 .filters { f ->
                     f.filter(authFilter.apply(AuthFilter.Config()))
-                    f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
                     f.requestRateLimiter { r ->
                         r.rateLimiter = requestRateLimiter
                     }
@@ -100,7 +85,6 @@ class GatewayConfig (
                 )
                 .filters { f ->
                     f.filter(authFilter.apply(AuthFilter.Config()))
-                    f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
                     f.requestRateLimiter { r ->
                         r.rateLimiter = requestRateLimiter
                     }
