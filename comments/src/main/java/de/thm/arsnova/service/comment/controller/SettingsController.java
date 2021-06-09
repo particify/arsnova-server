@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 public class SettingsController extends AbstractEntityController {
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
 
-    protected static final String REQUEST_MAPPING = "/settings";
+    protected static final String REQUEST_MAPPING = "/room/{roomId}/settings";
 
     private final SettingsService service;
     private final SettingsCommandHandler commandHandler;

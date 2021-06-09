@@ -27,7 +27,7 @@ import java.util.Set;
 public class CommentController extends AbstractEntityController {
     private static final Logger logger = LoggerFactory.getLogger(CommentController.class);
 
-    protected static final String REQUEST_MAPPING = "/comment";
+    protected static final String REQUEST_MAPPING = "/room/{roomId}/comment";
     private static final String BULK_DELETE_MAPPING = POST_MAPPING + "bulkdelete";
     private static final String DELETE_BY_ROOM_MAPPING = POST_MAPPING + "byRoom";
     private static final String STATS_BY_ROOMS_MAPPING = "/stats";
@@ -68,7 +68,7 @@ public class CommentController extends AbstractEntityController {
         Comment c = commandHandler.handle(command);
 
         final String uri = UriComponentsBuilder.fromPath(REQUEST_MAPPING).path(GET_MAPPING)
-                .buildAndExpand(c.getId()).toUriString();
+                .buildAndExpand(c.getRoomId(), c.getId()).toUriString();
         httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
         httpServletResponse.setHeader(ENTITY_ID_HEADER, c.getId());
 

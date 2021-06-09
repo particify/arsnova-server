@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController("BonusTokenController")
-@RequestMapping("/bonustoken")
+@RequestMapping("/room/{roomId}/bonustoken")
 public class BonusTokenController extends AbstractEntityController {
     private static final Logger logger = LoggerFactory.getLogger(BonusTokenController.class);
 
