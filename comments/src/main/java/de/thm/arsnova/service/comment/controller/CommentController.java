@@ -30,7 +30,6 @@ public class CommentController extends AbstractEntityController {
     protected static final String REQUEST_MAPPING = "/room/{roomId}/comment";
     private static final String BULK_DELETE_MAPPING = POST_MAPPING + "bulkdelete";
     private static final String DELETE_BY_ROOM_MAPPING = POST_MAPPING + "byRoom";
-    private static final String STATS_BY_ROOMS_MAPPING = "/stats";
     private static final String COMMAND_MAPPING = DEFAULT_ID_MAPPING + "/_command";
     private static final String HIGHLIGHT_COMMAND_MAPPING = COMMAND_MAPPING + "/highlight";
     private static final String LOWLIGHT_COMMAND_MAPPING = COMMAND_MAPPING + "/lowlight";
@@ -150,16 +149,6 @@ public class CommentController extends AbstractEntityController {
         DeleteCommentsByRoom command = new DeleteCommentsByRoom(p);
 
         commandHandler.handle(command);
-    }
-
-    @GetMapping(STATS_BY_ROOMS_MAPPING)
-    public List<CommentStats> statsByRoom(
-            @RequestParam final List<String> roomIds
-    ) {
-        CalculateStatsPayload p = new CalculateStatsPayload(roomIds);
-        CalculateStats command = new CalculateStats(p);
-
-        return commandHandler.handle(command);
     }
 
     @PostMapping(HIGHLIGHT_COMMAND_MAPPING)

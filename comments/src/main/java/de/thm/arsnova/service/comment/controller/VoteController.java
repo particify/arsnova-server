@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController("VoteController")
-@RequestMapping("/vote")
+@RequestMapping(VoteController.REQUEST_MAPPING)
 public class VoteController extends AbstractEntityController {
     private static final Logger logger = LoggerFactory.getLogger(VoteController.class);
 
