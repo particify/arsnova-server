@@ -17,7 +17,7 @@ class CommentService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun getStats(roomIds: List<String>, jwt: String): Flux<CommentStats> {
-        val url = "${httpGatewayProperties.httpClient.commentService}/comment/stats?roomIds=${roomIds.joinToString(",")}"
+        val url = "${httpGatewayProperties.httpClient.commentService}/stats/comment-stats-by-rooms?roomIds=${roomIds.joinToString(",")}"
         logger.trace("Querying comment service for comment stats with url: {}", url)
         return webClient.get()
                 .uri(url)
