@@ -27,10 +27,9 @@ import java.util.Set;
 public class CommentController extends AbstractEntityController {
     private static final Logger logger = LoggerFactory.getLogger(CommentController.class);
 
-    protected static final String REQUEST_MAPPING = "/comment";
+    protected static final String REQUEST_MAPPING = "/room/{roomId}/comment";
     private static final String BULK_DELETE_MAPPING = POST_MAPPING + "bulkdelete";
     private static final String DELETE_BY_ROOM_MAPPING = POST_MAPPING + "byRoom";
-    private static final String STATS_BY_ROOMS_MAPPING = "/stats";
     private static final String COMMAND_MAPPING = DEFAULT_ID_MAPPING + "/_command";
     private static final String HIGHLIGHT_COMMAND_MAPPING = COMMAND_MAPPING + "/highlight";
     private static final String LOWLIGHT_COMMAND_MAPPING = COMMAND_MAPPING + "/lowlight";
@@ -68,7 +67,7 @@ public class CommentController extends AbstractEntityController {
         Comment c = commandHandler.handle(command);
 
         final String uri = UriComponentsBuilder.fromPath(REQUEST_MAPPING).path(GET_MAPPING)
-                .buildAndExpand(c.getId()).toUriString();
+                .buildAndExpand(c.getRoomId(), c.getId()).toUriString();
         httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
         httpServletResponse.setHeader(ENTITY_ID_HEADER, c.getId());
 
@@ -150,16 +149,6 @@ public class CommentController extends AbstractEntityController {
         DeleteCommentsByRoom command = new DeleteCommentsByRoom(p);
 
         commandHandler.handle(command);
-    }
-
-    @GetMapping(STATS_BY_ROOMS_MAPPING)
-    public List<CommentStats> statsByRoom(
-            @RequestParam final List<String> roomIds
-    ) {
-        CalculateStatsPayload p = new CalculateStatsPayload(roomIds);
-        CalculateStats command = new CalculateStats(p);
-
-        return commandHandler.handle(command);
     }
 
     @PostMapping(HIGHLIGHT_COMMAND_MAPPING)

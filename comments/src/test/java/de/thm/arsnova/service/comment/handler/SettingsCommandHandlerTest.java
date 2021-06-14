@@ -48,7 +48,7 @@ public class SettingsCommandHandlerTest {
         when(settingsService.create(any())).thenReturn(expectedSettings);
         when(permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(any())).thenReturn(true);
 
-        Settings savedSettings = commandHandler.handle(command);
+        Settings savedSettings = commandHandler.handle(roomId, command);
 
         assertThat(savedSettings).isEqualTo(expectedSettings);
     }
@@ -69,7 +69,7 @@ public class SettingsCommandHandlerTest {
         when(settingsService.update(any())).thenReturn(expectedSettings);
         when(permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(any())).thenReturn(true);
 
-        Settings savedSettings = commandHandler.handle(command);
+        Settings savedSettings = commandHandler.handle(roomId, command);
 
         assertThat(savedSettings).isEqualTo(expectedSettings);
     }
