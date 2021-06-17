@@ -9,17 +9,17 @@
     "start": "node lib/index.js"
   },
   "dependencies": {
-    "@iktakahiro/markdown-it-katex": "^4.0.1",
-    "express": "^4.17.1",
-    "markdown-it": "^12.0.0",
-    "markdown-it-link-attributes": "^3.0.0",
-    "markdown-it-prism": "^2.1.6"
+    "@iktakahiro/markdown-it-katex": "4.0.1",
+    "express": "4.17.1",
+    "markdown-it": "12.0.6",
+    "markdown-it-link-attributes": "3.0.0",
+    "markdown-it-prism": "2.1.6"
   },
   "devDependencies": {
-    "eslint": "^7.27.0",
-    "eslint-plugin-import": "^2.23.3",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.1.0"
+    "eslint": "7.27.0",
+    "eslint-plugin-import": "2.23.3",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-promise": "5.1.0"
   },
   "resolutions": {
     "katex": "^0.13.0"
