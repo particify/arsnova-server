@@ -56,6 +56,7 @@ import org.springframework.util.FileCopyUtils;
 
 import de.thm.arsnova.event.DatabaseInitializedEvent;
 import de.thm.arsnova.model.MigrationState;
+import de.thm.arsnova.persistence.couchdb.migrations.MigrationException;
 import de.thm.arsnova.persistence.couchdb.migrations.MigrationExecutor;
 import de.thm.arsnova.service.StatusService;
 
@@ -146,7 +147,11 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware, Resou
 
 	protected void migrate(final MigrationState state) {
 		if (migrationExecutor != null) {
-			migrationExecutor.runMigrations(state, () -> connector.update(state));
+			try {
+				migrationExecutor.runMigrations(state, () -> connector.update(state));
+			} catch (final MigrationException e) {
+				logger.error("Migration failed.", e);
+			}
 		}
 	}
 

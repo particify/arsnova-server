@@ -19,19 +19,13 @@
 package de.thm.arsnova.persistence.couchdb.migrations;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.ektorp.DbAccessException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
-import de.thm.arsnova.model.MigrationState;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
-import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
 
 /**
  * This migration sets the closed flag to false for Rooms that have been
@@ -40,94 +34,30 @@ import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
  * @author Daniel Gerhardt
  */
 @Service
-public class ImportedRoomUnsetClosedFlagMigration implements Migration {
+public class ImportedRoomUnsetClosedFlagMigration extends AbstractMigration {
 	private static final String ID = "20210319160400";
-	private static final int LIMIT = 200;
-	private static final String ROOM_INDEX = "migration-20210319160400-room-imported-closed-index";
-	private static final Logger logger = LoggerFactory.getLogger(ImportedRoomUnsetClosedFlagMigration.class);
-
-	private MangoCouchDbConnector connector;
+	private static final String ROOM_INDEX = "room-imported-closed-index";
 
 	public ImportedRoomUnsetClosedFlagMigration(
 			final MangoCouchDbConnector connector) {
-		this.connector = connector;
+		super(ID, connector);
 	}
 
-	@Override
-	public String getId() {
-		return ID;
-	}
-
-	@Override
-	public int getStepCount() {
-		return 1;
-	}
-
-	@Override
-	public void migrate(final MigrationState.Migration state) {
-		try {
-			switch (state.getStep()) {
-				case 0:
-					migrateImportedRoom(state);
-					break;
-				default:
-					throw new IllegalStateException("Invalid migration step:" + state.getStep() + ".");
-			}
-		} catch (final InterruptedException e) {
-			throw new DbAccessException(e);
-		}
-	}
-
-	private void createRoomIndex() {
-		final Map<String, Object> filterSelector = new HashMap<>();
-		filterSelector.put("type", "Room");
-		filterSelector.put("closed", true);
-		filterSelector.put("importMetadata", Map.of("source", "V2_IMPORT"));
-		connector.createPartialJsonIndex(ROOM_INDEX, Collections.emptyList(), filterSelector);
-	}
-
-	private void waitForIndex(final String name) throws InterruptedException {
-		for (int i = 0; i < 10; i++) {
-			if (connector.initializeIndex(name)) {
-				return;
-			}
-			Thread.sleep(10000 * Math.round(1.0 + 0.5 * i));
-		}
-	}
-
-	public void migrateImportedRoom(final MigrationState.Migration state) throws InterruptedException {
-		createRoomIndex();
-		waitForIndex(ROOM_INDEX);
-
-		final Map<String, Object> queryOptions = new HashMap<>();
-		queryOptions.put("type", "Room");
-		queryOptions.put("closed", true);
-		queryOptions.put("importMetadata", Map.of("source", "V2_IMPORT"));
-		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
-		query.setLimit(LIMIT);
-		String bookmark = (String) state.getState();
-
-		for (int skip = 0; ; skip += LIMIT) {
-			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
-			query.setBookmark(bookmark);
-			final PagedMangoResponse<RoomMigrationEntity> response =
-					connector.queryForPage(
-							query,
-							RoomMigrationEntity.class);
-			final List<RoomMigrationEntity> rooms = response.getEntities();
-			bookmark = response.getBookmark();
-			if (rooms.size() == 0) {
-				break;
-			}
-
-			for (final RoomMigrationEntity room : rooms) {
-				room.setClosed(false);
-			}
-
-			connector.executeBulk(rooms);
-			state.setState(bookmark);
-		}
-		state.setState(null);
+	@PostConstruct
+	public void initMigration() {
+		addEntityMigrationStepHandler(
+				RoomMigrationEntity.class,
+				ROOM_INDEX,
+				Map.of(
+						"type", "Room",
+						"closed", true,
+						"importMetadata", Map.of("source", "V2_IMPORT")
+				),
+				room -> {
+					room.setClosed(false);
+					return List.of(room);
+				}
+		);
 	}
 
 	private static class RoomMigrationEntity extends MigrationEntity {

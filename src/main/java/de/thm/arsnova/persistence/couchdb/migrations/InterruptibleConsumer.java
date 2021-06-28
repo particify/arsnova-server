@@ -18,12 +18,7 @@
 
 package de.thm.arsnova.persistence.couchdb.migrations;
 
-import de.thm.arsnova.model.MigrationState;
-
-public interface Migration {
-	String getId();
-
-	int getStepCount();
-
-	void migrate(MigrationState.Migration state) throws MigrationException;
+@FunctionalInterface
+public interface InterruptibleConsumer<T> {
+	void accept(T t) throws InterruptedException;
 }

@@ -18,12 +18,16 @@
 
 package de.thm.arsnova.persistence.couchdb.migrations;
 
-import de.thm.arsnova.model.MigrationState;
+public class MigrationException extends Exception {
+	public MigrationException(final String message) {
+		super(message);
+	}
 
-public interface Migration {
-	String getId();
+	public MigrationException(final Throwable cause) {
+		super(cause);
+	}
 
-	int getStepCount();
-
-	void migrate(MigrationState.Migration state) throws MigrationException;
+	public MigrationException(final String message, final Throwable cause) {
+		super(message, cause);
+	}
 }

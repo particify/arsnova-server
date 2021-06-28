@@ -20,21 +20,16 @@ package de.thm.arsnova.persistence.couchdb.migrations;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.ektorp.DbAccessException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.annotation.PostConstruct;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.event.RoomHistoryMigrationEvent;
-import de.thm.arsnova.model.MigrationState;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
-import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
 
 /**
  * This migration only creates events for {@link de.thm.arsnova.model.UserProfile.RoomHistoryEntry}s
@@ -44,94 +39,37 @@ import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
  * @author Daniel Gerhardt
  */
 @Service
-public class UserProfileRoomHistoryMigration implements Migration {
+public class UserProfileRoomHistoryMigration extends AbstractMigration {
 	private static final String ID = "20210511192000";
-	private static final int LIMIT = 200;
-	private static final String USER_PROFILE_INDEX = "migration-20210511192000-userprofile-index";
+	private static final String USER_PROFILE_INDEX = "userprofile-index";
 	private static final Map<String, Map<String, Integer>> arrayNotEmptySelector =
 			Map.of("$not", Map.of("$size", 0));
-	private static final Logger logger = LoggerFactory.getLogger(UserProfileRoomHistoryMigration.class);
 
-	private final MangoCouchDbConnector connector;
 	private final ApplicationEventPublisher applicationEventPublisher;
 
 	public UserProfileRoomHistoryMigration(
 			final MangoCouchDbConnector connector, final ApplicationEventPublisher applicationEventPublisher) {
-		this.connector = connector;
+		super(ID, connector);
 		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
-	@Override
-	public String getId() {
-		return ID;
-	}
-
-	@Override
-	public int getStepCount() {
-		return 1;
-	}
-
-	@Override
-	public void migrate(final MigrationState.Migration state) {
-		try {
-			switch (state.getStep()) {
-				case 0:
-					migrateRoomHistories(state);
-					break;
-				default:
-					throw new IllegalStateException("Invalid migration step:" + state.getStep() + ".");
-			}
-		} catch (final InterruptedException e) {
-			throw new DbAccessException(e);
-		}
-	}
-
-	private void createIndex() {
-		final Map<String, Object> filterSelector = new HashMap<>();
-		filterSelector.put("type", "UserProfile");
-		filterSelector.put("roomHistory", arrayNotEmptySelector);
-		connector.createPartialJsonIndex(USER_PROFILE_INDEX, Collections.emptyList(), filterSelector);
-	}
-
-	private void waitForIndex(final String name) throws InterruptedException {
-		for (int i = 0; i < 10; i++) {
-			if (connector.initializeIndex(name)) {
-				return;
-			}
-			Thread.sleep(10000 * Math.round(1.0 + 0.5 * i));
-		}
-	}
-
-	private void migrateRoomHistories(final MigrationState.Migration state) throws InterruptedException {
-		createIndex();
-		waitForIndex(USER_PROFILE_INDEX);
-
-		final Map<String, Object> queryOptions = new HashMap<>();
-		queryOptions.put("type", "UserProfile");
-		queryOptions.put("roomHistory", arrayNotEmptySelector);
-		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
-		query.setIndexDocument(USER_PROFILE_INDEX);
-		query.setLimit(LIMIT);
-		String bookmark = (String) state.getState();
-
-		for (int skip = 0;; skip += LIMIT) {
-			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
-			query.setBookmark(bookmark);
-			final PagedMangoResponse<UserProfileMigrationEntity> response =
-					connector.queryForPage(query, UserProfileMigrationEntity.class);
-			final List<UserProfileMigrationEntity> userProfiles = response.getEntities();
-			bookmark = response.getBookmark();
-			if (userProfiles.size() == 0) {
-				break;
-			}
-
-			for (final UserProfileMigrationEntity userProfile : userProfiles) {
-				this.applicationEventPublisher.publishEvent(new RoomHistoryMigrationEvent(
-						this,
-						userProfile.getId(),
-						userProfile.getRoomHistory().stream().map(rh -> rh.roomId).collect(Collectors.toList())));
-			}
-		}
+	@PostConstruct
+	public void initMigration() {
+		addEntityMigrationStepHandler(
+				UserProfileMigrationEntity.class,
+				USER_PROFILE_INDEX,
+				Map.of(
+						"type", "UserProfile",
+						"roomHistory", arrayNotEmptySelector
+				),
+				userProfile -> {
+					this.applicationEventPublisher.publishEvent(new RoomHistoryMigrationEvent(
+							this,
+							userProfile.getId(),
+							userProfile.getRoomHistory().stream().map(rh -> rh.roomId).collect(Collectors.toList())));
+					return Collections.emptyList();
+				}
+		);
 	}
 
 	@JsonView(View.Persistence.class)

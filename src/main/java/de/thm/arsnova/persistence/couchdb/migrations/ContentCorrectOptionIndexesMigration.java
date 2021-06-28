@@ -20,22 +20,16 @@ package de.thm.arsnova.persistence.couchdb.migrations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.ektorp.DbAccessException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.annotation.PostConstruct;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.stereotype.Service;
 
-import de.thm.arsnova.model.MigrationState;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
-import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
 
 /**
  * This migration fixes correctOptionIndexes of Contents which have been set
@@ -51,100 +45,39 @@ import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
  * @author Daniel Gerhardt
  */
 @Service
-public class ContentCorrectOptionIndexesMigration implements Migration {
+public class ContentCorrectOptionIndexesMigration extends AbstractMigration {
 	private static final String ID = "20210325161700";
-	private static final int LIMIT = 200;
-	private static final String CONTENT_INDEX = "migration-20210325161700-content-index";
+	private static final String CONTENT_INDEX = "content-index";
 	private static final Map<String, Boolean> existsSelector = Map.of("$exists", true);
-	private static final Logger logger = LoggerFactory.getLogger(ContentCorrectOptionIndexesMigration.class);
-
-	private MangoCouchDbConnector connector;
 
 	public ContentCorrectOptionIndexesMigration(
 			final MangoCouchDbConnector connector) {
-		this.connector = connector;
+		super(ID, connector);
 	}
 
-	@Override
-	public String getId() {
-		return ID;
-	}
-
-	@Override
-	public int getStepCount() {
-		return 1;
-	}
-
-	@Override
-	public void migrate(final MigrationState.Migration state) {
-		try {
-			switch (state.getStep()) {
-				case 0:
-					migrateContentCorrectOptionIndexes(state);
-					break;
-				default:
-					throw new IllegalStateException("Invalid migration step:" + state.getStep() + ".");
-			}
-		} catch (final InterruptedException e) {
-			throw new DbAccessException(e);
-		}
-	}
-
-	private void createContentIndex() {
-		final Map<String, Object> filterSelector = new HashMap<>();
-		filterSelector.put("type", "Content");
-		/* Filter by options array which needs to contain at least one element with a points property */
-		filterSelector.put("options", Map.of("$elemMatch", Map.of("points", existsSelector)));
-		connector.createPartialJsonIndex(CONTENT_INDEX, Collections.emptyList(), filterSelector);
-	}
-
-	private void waitForIndex(final String name) throws InterruptedException {
-		for (int i = 0; i < 10; i++) {
-			if (connector.initializeIndex(name)) {
-				return;
-			}
-			Thread.sleep(10000 * Math.round(1.0 + 0.5 * i));
-		}
-	}
-
-	public void migrateContentCorrectOptionIndexes(final MigrationState.Migration state) throws InterruptedException {
-		createContentIndex();
-		waitForIndex(CONTENT_INDEX);
-
-		final Map<String, Object> queryOptions = new HashMap<>();
-		queryOptions.put("type", "Content");
-		queryOptions.put("options", Map.of("$elemMatch", Map.of("points", existsSelector)));
-		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
-		query.setLimit(LIMIT);
-		String bookmark = (String) state.getState();
-
-		for (int skip = 0;; skip += LIMIT) {
-			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
-			query.setBookmark(bookmark);
-			final PagedMangoResponse<ContentMigrationEntity> response =
-					connector.queryForPage(query, ContentMigrationEntity.class);
-			final List<ContentMigrationEntity> contents = response.getEntities();
-			bookmark = response.getBookmark();
-			if (contents.size() == 0) {
-				break;
-			}
-
-			for (final ContentMigrationEntity content : contents) {
-				if (content.getCorrectOptionIndexes().isEmpty()) {
-					content.setCorrectOptionIndexes(
-							IntStream.range(0, content.getOptions().size())
-									.filter(i -> content.getOptions().get(i).getPoints() > 0)
-									.boxed()
-									.collect(Collectors.toList()));
+	@PostConstruct
+	public void initMigration() {
+		addEntityMigrationStepHandler(
+				ContentMigrationEntity.class,
+				CONTENT_INDEX,
+				Map.of(
+						"type", "Content",
+						/* Filter by options array which needs to contain at least one element with a points property */
+						"options", Map.of("$elemMatch", Map.of("points", existsSelector))
+				),
+				content -> {
+					if (content.getCorrectOptionIndexes().isEmpty()) {
+						content.setCorrectOptionIndexes(
+								IntStream.range(0, content.getOptions().size())
+										.filter(i -> content.getOptions().get(i).getPoints() > 0)
+										.boxed()
+										.collect(Collectors.toList()));
+					}
+					// Return the content for updating in any case so points are
+					// removed from the options.
+					return List.of(content);
 				}
-			}
-
-			/* Update Contents to adjust their models. */
-			connector.executeBulk(contents);
-
-			state.setState(bookmark);
-		}
-		state.setState(null);
+		);
 	}
 
 	/**
