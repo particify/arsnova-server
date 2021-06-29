@@ -265,15 +265,20 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@Override
 	public List<String> getAnswerIdsByCreatorIdContentIdsRound(
 			final String creatorId, final List<String> contentIds, final int round) {
-		final List<String> ids = new ArrayList<>();
-		return Stream.concat(
-				/* TODO:
-				 *   Currently round 0 is always added because of text answers.
-				 *   It might be better to always use round 1 for text or allow multiple rounds.
-				 *   This would require refactoring in other parts of the application. */
-				answerRepository.findIdsByCreatorIdContentIdsRound(creatorId, contentIds, 0).stream(),
-				answerRepository.findIdsByCreatorIdContentIdsRound(creatorId, contentIds, round).stream()
-		).collect(Collectors.toList());
+		if (round > 0) {
+			return Stream.concat(
+					/* TODO:
+					 *   Currently round 0 is always added because of text answers.
+					 *   It might be better to always use round 1 for text or allow multiple rounds.
+					 *   This would require refactoring in other parts of the application. */
+					answerRepository.findIdsByCreatorIdContentIdsRound(creatorId, contentIds, 0).stream(),
+					answerRepository.findIdsByCreatorIdContentIdsRound(creatorId, contentIds, round).stream()
+			).collect(Collectors.toList());
+		} else {
+			final List<Answer> answerStubs = contentService.get(contentIds).stream()
+					.map(content -> new Answer(content, creatorId)).collect(Collectors.toList());
+			return answerRepository.findIdsByAnswerStubs(answerStubs);
+		}
 	}
 
 	@Override

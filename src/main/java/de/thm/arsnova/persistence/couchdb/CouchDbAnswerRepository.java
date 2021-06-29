@@ -88,6 +88,17 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 	}
 
 	@Override
+	public List<String> findIdsByAnswerStubs(final List<Answer> answerStubs) {
+		final ViewResult result = db.queryView(
+				createQuery("by_contentid_creatorid_round")
+						.keys(answerStubs.stream()
+								.map(a -> ComplexKey.of(a.getContentId(), a.getCreatorId(), a.getRound()))
+								.collect(Collectors.toList())));
+
+		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
+	}
+
+	@Override
 	public <T extends Answer> T findByContentIdUserIdPiRound(
 			final String contentId, final Class<T> type, final String userId, final int piRound) {
 		final List<T> answerList = db.queryView(createQuery("by_contentid_creatorid_round")
