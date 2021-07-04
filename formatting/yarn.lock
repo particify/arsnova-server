@@ -1139,12 +1139,12 @@ markdown-it-link-attributes@3.0.0:
   resolved "https://registry.yarnpkg.com/markdown-it-link-attributes/-/markdown-it-link-attributes-3.0.0.tgz#12d6f403102ac22695ee2617bec109ee79426e45"
   integrity sha512-B34ySxVeo6MuEGSPCWyIYryuXINOvngNZL87Mp7YYfKIf6DcD837+lXA8mo6EBbauKsnGz22ZH0zsbOiQRWTNg==
 
-markdown-it-prism@2.1.7:
-  version "2.1.7"
-  resolved "https://registry.yarnpkg.com/markdown-it-prism/-/markdown-it-prism-2.1.7.tgz#907ab817ac22c5bdef009c193df7bc0971287d1b"
-  integrity sha512-ohc9di/Akoe/UwHeVY0BftX2oxIn5XQdsjM3DME/j7aFHVPpoWltJvT2D86uoGiUVo6SBH8cuNBcUG8gacW0LQ==
+markdown-it-prism@2.1.8:
+  version "2.1.8"
+  resolved "https://registry.yarnpkg.com/markdown-it-prism/-/markdown-it-prism-2.1.8.tgz#1e640e6934cd0da326deb770043df4ed3e2d9acc"
+  integrity sha512-PBiqlX3zGPQnOk7q7TkeveQfXlqzhjfHg2zSwntDNauYY7KFhg2FzO6O+1boillQptEBcIaEAO9gwKq/tXGHUQ==
   dependencies:
-    prismjs "1.24.0"
+    prismjs "1.24.1"
 
 markdown-it@12.0.6:
   version "12.0.6"
@@ -1401,10 +1401,10 @@ prelude-ls@^1.2.1:
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.2.1.tgz#debc6489d7a6e6b0e7611888cec880337d316396"
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
 
-prismjs@1.24.0:
-  version "1.24.0"
-  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.24.0.tgz#0409c30068a6c52c89ef7f1089b3ca4de56be2ac"
-  integrity sha512-SqV5GRsNqnzCL8k5dfAjCNhUrF3pR0A9lTDSCUZeh/LIshheXJEaP0hwLz2t4XHivd2J/v2HR+gRnigzeKe3cQ==
+prismjs@1.24.1:
+  version "1.24.1"
+  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.24.1.tgz#c4d7895c4d6500289482fa8936d9cdd192684036"
+  integrity sha512-mNPsedLuk90RVJioIky8ANZEwYm5w9LcvCXrxHlwf4fNVSn8jEipMybMkWUyyF0JhnC+C4VcOVSBuHRKs1L5Ow==
 
 progress@^2.0.0:
   version "2.0.3"
