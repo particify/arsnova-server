@@ -82,10 +82,10 @@ public abstract class AbstractMigration implements Migration {
 
 	protected <E extends MigrationEntity, R extends List<? extends MigrationEntity>> void addEntityMigrationStepHandler(
 			final Class<E> type,
-			final String indexName,
+			final String migrationIndexName,
 			final Map<String, Object> querySelector,
 			final InterruptibleFunction<E, R> migrationStepHandler) {
-		final String fullIndexName = "migration-" + id + '-' + indexName;
+		final String fullIndexName = buildFullIndexName(migrationIndexName);
 		migrationStepHandlers.add(state ->
 				performEntityMigrationStep(type, fullIndexName, querySelector, state, migrationStepHandler));
 	}
@@ -137,6 +137,7 @@ public abstract class AbstractMigration implements Migration {
 			connector.executeBulk(entitiesForUpdate);
 			state.setState(bookmark);
 		}
+		deleteIndex(indexName);
 		state.setState(null);
 	}
 
@@ -147,5 +148,15 @@ public abstract class AbstractMigration implements Migration {
 			}
 			Thread.sleep(10000 * Math.round(1.0 + 0.5 * i));
 		}
+	}
+
+	private void deleteIndex(final String name) {
+		final String designDocName = "_design/" + name;
+		final String rev = connector.getCurrentRevision(designDocName);
+		connector.delete(designDocName, rev);
+	}
+
+	private String buildFullIndexName(final String migrationIndexName) {
+		return "migration-" + id + '-' + migrationIndexName;
 	}
 }
