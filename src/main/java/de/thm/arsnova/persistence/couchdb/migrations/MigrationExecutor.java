@@ -56,7 +56,7 @@ public class MigrationExecutor {
 				.filter(m -> !migrationState.getCompleted().contains(m.getId())).collect(Collectors.toList());
 		logger.info("Pending migrations: " + (!pendingMigrations.isEmpty()
 				? pendingMigrations.stream()
-				.map(Migration::getId).collect(Collectors.joining())
+				.map(Migration::getId).collect(Collectors.joining(", "))
 				: "(none)"));
 		for (final Migration migration : pendingMigrations) {
 			if (migrationState.getActive() != null) {
