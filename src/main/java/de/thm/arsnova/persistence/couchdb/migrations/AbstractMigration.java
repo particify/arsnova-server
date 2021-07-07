@@ -110,6 +110,10 @@ public abstract class AbstractMigration implements Migration {
 		query.setLimit(LIMIT);
 		String bookmark = (String) state.getState();
 
+		query.setBookmark(bookmark);
+		PagedMangoResponse<E> response =
+				connector.queryForPage(query, type);
+
 		// CouchDB bookmarks are used to iterate through all documents. The
 		// total number of items is not known upfront. Up to LIMIT documents are
 		// retrieved at a time. Termination of the loop is guaranteed under the
@@ -119,9 +123,6 @@ public abstract class AbstractMigration implements Migration {
 		// condition in the middle of the loop.
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
-			query.setBookmark(bookmark);
-			final PagedMangoResponse<E> response =
-					connector.queryForPage(query, type);
 			final List<E> entities = response.getEntities();
 			bookmark = response.getBookmark();
 			if (entities.size() == 0) {
@@ -133,6 +134,11 @@ public abstract class AbstractMigration implements Migration {
 				// Perform the domain-specific migration logic
 				entitiesForUpdate.addAll(migrationStepHandler.apply(entity));
 			}
+
+			// Request next page before updating to avoid skipping documents
+			// https://github.com/apache/couchdb/issues/3657
+			query.setBookmark(bookmark);
+			response = connector.queryForPage(query, type);
 
 			connector.executeBulk(entitiesForUpdate);
 			state.setState(bookmark);
