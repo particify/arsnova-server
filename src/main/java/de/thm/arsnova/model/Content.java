@@ -18,6 +18,7 @@
 
 package de.thm.arsnova.model;
 
+import com.fasterxml.jackson.annotation.JsonMerge;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
@@ -143,7 +144,10 @@ public class Content extends Entity implements RoomIdAware {
 
 	private Set<String> groups;
 	private boolean abstentionsAllowed;
+
+	@JsonMerge
 	private State state;
+
 	private Date timestamp;
 	private String additionalText;
 	private String renderedAdditionalText;

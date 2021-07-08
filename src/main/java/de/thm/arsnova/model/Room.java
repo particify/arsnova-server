@@ -18,6 +18,7 @@
 
 package de.thm.arsnova.model;
 
+import com.fasterxml.jackson.annotation.JsonMerge;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.Date;
 import java.util.HashSet;
@@ -457,7 +458,10 @@ public class Room extends Entity implements RoomIdAware {
 	private String password;
 	private Set<Moderator> moderators;
 	private boolean moderatorsInitialized;
+
+	@JsonMerge
 	private Settings settings;
+
 	private Author author;
 	private PoolProperties poolProperties;
 	private ImportMetadata importMetadata;
