@@ -363,7 +363,7 @@ public class DefaultEntityServiceImplTest {
 				"settings", Map.of("quickSurveyEnabled", room2.getSettings().isQuickSurveyEnabled())
 		);
 
-		entityService.update(room1, room2);
+		entityService.update(room1, room2, View.Public.class);
 		Map<String, Object> changes = eventListenerConfig.getRoomAfterUpdateEvents().get(0).getChanges();
 		assertEquals(expectedChanges, changes);
 	}
