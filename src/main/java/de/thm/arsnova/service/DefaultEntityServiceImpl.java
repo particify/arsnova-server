@@ -366,10 +366,14 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		}
 	}
 
-	private T cloneEntity(final T entity) throws JsonProcessingException {
-		return objectMapper.readerFor(entity.getClass()).withView(View.Persistence.class).readValue(
-				objectMapper.writerWithView(View.Persistence.class)
-				.writeValueAsString(entity));
+	private T cloneEntity(final T entity) {
+		try {
+			return objectMapper.readerFor(entity.getClass()).withView(View.Persistence.class).readValue(
+					objectMapper.writerWithView(View.Persistence.class)
+					.writeValueAsString(entity));
+		} catch (final JsonProcessingException e) {
+			throw new RuntimeException("JSON (de-)serialization should never fail here.", e);
+		}
 	}
 
 	private Map<String, Object> getChanges(final T oldEntity, final T newEntity) {
