@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,6 +96,33 @@ public class DefaultEntityServiceImplTest {
 	@BeforeEach
 	public void prepare() {
 		eventListenerConfig.resetEvents();
+	}
+
+	@Test
+	@WithMockUser("TestUser")
+	public void testUpdateRetainsInternalProperties() {
+		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
+		final DefaultEntityServiceImpl<Room> entityService =
+				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
+		entityService.setApplicationEventPublisher(eventPublisher);
+
+		when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
+
+		final String originalName = "Test Room 1";
+		final String originalOwnerId = "TestUser";
+		final String newOwnerId = "ShouldNotReplaceOwnerId";
+		final Room room = new Room();
+		prefillRoomFields(room);
+		room.setName(originalName);
+		room.setOwnerId(originalOwnerId);
+		final Room persistedRoom = entityService.create(room);
+		assertNotNull(persistedRoom.getCreationTimestamp());
+		final Room roomUpdate = new Room();
+		roomUpdate.setOwnerId(newOwnerId);
+		prefillRoomFields(roomUpdate);
+		final Room updatedRoom = entityService.update(persistedRoom, roomUpdate, View.Public.class);
+		assertNotNull(updatedRoom.getCreationTimestamp());
+		assertEquals(originalOwnerId, updatedRoom.getOwnerId());
 	}
 
 	@Test
