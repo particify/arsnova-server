@@ -117,11 +117,7 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
 				cg -> {
 					cg.setContentIds(cg.getContentIds().stream()
 							.filter(id -> !id.equals(contentId)).collect(Collectors.toList()));
-					if (!cg.getContentIds().isEmpty()) {
-						update(cg);
-					} else {
-						delete(cg);
-					}
+					update(cg);
 				}, () -> {
 					throw new NotFoundException("ContentGroup does not exist.");
 				});
@@ -129,24 +125,16 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
 
 	@Override
 	public ContentGroup createOrUpdateContentGroup(final ContentGroup contentGroup) {
-		if (contentGroup.getContentIds().isEmpty()) {
-			if (contentGroup.getId() != null) {
-				delete(contentGroup);
-			}
-
-			return new ContentGroup();
+		final List<String> contentIds = contentService.get(contentGroup.getContentIds()).stream()
+				.filter(c -> c.getRoomId().equals(contentGroup.getRoomId()))
+				.map(Content::getId)
+				.distinct()
+				.collect(Collectors.toList());
+		contentGroup.setContentIds(contentIds);
+		if (contentGroup.getId() != null) {
+			return update(contentGroup);
 		} else {
-			final List<String> contentIds = contentService.get(contentGroup.getContentIds()).stream()
-					.filter(c -> c.getRoomId().equals(contentGroup.getRoomId()))
-					.map(Content::getId)
-					.distinct()
-					.collect(Collectors.toList());
-			contentGroup.setContentIds(contentIds);
-			if (contentGroup.getId() != null) {
-				return update(contentGroup);
-			} else {
-				return create(contentGroup);
-			}
+			return create(contentGroup);
 		}
 	}
 

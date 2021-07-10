@@ -215,11 +215,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			final List<String> ids = contentGroup.getContentIds();
 			if (ids.contains(content.getId())) {
 				ids.remove(content.getId());
-				if (!ids.isEmpty()) {
-					contentGroupService.update(contentGroup);
-				} else {
-					contentGroupService.delete(contentGroup);
-				}
+				contentGroupService.update(contentGroup);
 			}
 		}
 	}
