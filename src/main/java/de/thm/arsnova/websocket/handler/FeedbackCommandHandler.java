@@ -49,6 +49,7 @@ public class FeedbackCommandHandler {
 		this.roomService = roomService;
 	}
 
+	/* ToDo: Listen to a more specific event */
 	@EventListener
 	public void handleLockFeedback(final AfterPatchEvent<Room> event) {
 		if (event.getRequestedChanges().containsKey("settings")) {
@@ -74,30 +75,6 @@ public class FeedbackCommandHandler {
 			}
 		}
 	}
-
-	/*
-	ToDo: Listen to a more specific event
-	If feedback is getting locked for a room via HTTP PATCH, the specific event is currently not fired
-
-	@EventListener(condition = "#event.stateName == 'settings'")
-	public void handleLockFeedback(final StateChangeEvent<Room, Room.Settings> event) {
-		final String roomId = event.getEntity().getId();
-		if (event.getEntity().getSettings().isFeedbackLocked()) {
-			final FeedbackStopped stompEvent = new FeedbackStopped();
-
-			messagingTemplate.convertAndSend(
-					"/topic/" + roomId + ".feedback.stream",
-					stompEvent
-			);
-		} else {
-			final FeedbackStarted stompEvent = new FeedbackStarted();
-
-			messagingTemplate.convertAndSend(
-					"/topic/" + roomId + ".feedback.stream",
-					stompEvent
-			);
-		}
-	}*/
 
 	public void handle(final CreateFeedback command) {
 		final String roomId = command.getPayload().getRoomId();
