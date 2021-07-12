@@ -19,10 +19,8 @@
 package de.thm.arsnova.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.RoomMembership;
 import de.thm.arsnova.model.RoomStatistics;
@@ -119,9 +116,12 @@ public class RoomController extends AbstractEntityController<Room> {
 	}
 
 	@GetMapping(STATS_MAPPING)
-	public RoomStatistics getStats(@PathVariable final String id) {
-		final List<ContentGroup> contentGroups = contentGroupService.getByRoomId(id);
-		final RoomStatistics roomStatistics = roomStatisticsService.getRoomStatistics(id);
+	public RoomStatistics getStats(
+			@PathVariable final String id,
+			@RequestParam(required = false) final String view) {
+		final RoomStatistics roomStatistics = "read-extended".equals(view)
+				? roomStatisticsService.getAllRoomStatistics(id)
+				: roomStatisticsService.getPublicRoomStatistics(id);
 
 		return roomStatistics;
 	}

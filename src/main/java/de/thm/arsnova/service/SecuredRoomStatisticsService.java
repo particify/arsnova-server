@@ -14,8 +14,14 @@ public class SecuredRoomStatisticsService implements RoomStatisticsService {
 	}
 
 	@Override
+	@PreAuthorize("hasPermission(#roomId, 'room', 'read-extended')")
+	public RoomStatistics getAllRoomStatistics(final String roomId) {
+		return roomStatisticsService.getAllRoomStatistics(roomId);
+	}
+
+	@Override
 	@PreAuthorize("hasPermission(#roomId, 'room', 'read')")
-	public RoomStatistics getRoomStatistics(final String roomId) {
-		return roomStatisticsService.getRoomStatistics(roomId);
+	public RoomStatistics getPublicRoomStatistics(final String roomId) {
+		return roomStatisticsService.getPublicRoomStatistics(roomId);
 	}
 }

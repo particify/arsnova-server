@@ -1,6 +1,7 @@
 package de.thm.arsnova.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +18,18 @@ public class RoomStatisticsServiceImpl implements RoomStatisticsService {
 	}
 
 	@Override
-	public RoomStatistics getRoomStatistics(final String roomId) {
+	public RoomStatistics getAllRoomStatistics(final String roomId) {
 		final RoomStatistics roomStatistics = new RoomStatistics();
 		final List<ContentGroup> contentGroups = contentGroupService.getByRoomId(roomId);
+		roomStatistics.updateFromContentGroups(contentGroups);
+		return roomStatistics;
+	}
+
+	@Override
+	public RoomStatistics getPublicRoomStatistics(final String roomId) {
+		final RoomStatistics roomStatistics = new RoomStatistics();
+		final List<ContentGroup> contentGroups = contentGroupService.getByRoomId(roomId).stream()
+				.filter(cg -> cg.isPublished()).collect(Collectors.toList());;
 		roomStatistics.updateFromContentGroups(contentGroups);
 		return roomStatistics;
 	}
