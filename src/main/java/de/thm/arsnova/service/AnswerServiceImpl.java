@@ -54,6 +54,7 @@ import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.GridImageContent;
 import de.thm.arsnova.model.MultipleTextsAnswer;
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.ScaleChoiceContent;
 import de.thm.arsnova.model.WordcloudContent;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.security.User;
@@ -157,7 +158,11 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		final AnswerStatistics stats;
 		final int optionCount;
 		if (content instanceof ChoiceQuestionContent) {
-			optionCount = ((ChoiceQuestionContent) content).getOptions().size();
+			if (content instanceof ScaleChoiceContent) {
+				optionCount = ((ScaleChoiceContent) content).getOptionCount();
+			} else {
+				optionCount = ((ChoiceQuestionContent) content).getOptions().size();
+			}
 			stats = answerRepository.findByContentIdRound(
 					content.getId(), round, optionCount);
 		} else if (content instanceof GridImageContent) {

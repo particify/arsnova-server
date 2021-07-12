@@ -28,6 +28,7 @@ import java.io.IOException;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.GridImageContent;
+import de.thm.arsnova.model.ScaleChoiceContent;
 import de.thm.arsnova.model.WordcloudContent;
 
 public class FormatContentTypeIdResolver extends TypeIdResolverBase {
@@ -57,7 +58,7 @@ public class FormatContentTypeIdResolver extends TypeIdResolverBase {
 			case NUMBER:
 				return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
 			case SCALE:
-				return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
+				return TypeFactory.defaultInstance().constructType(ScaleChoiceContent.class);
 			case SORT:
 				return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
 			case TEXT:
