@@ -187,19 +187,33 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		/* Implementation provided by subclasses. */
 	}
 
+	@Override
 	public T update(final T entity) {
-		return update(repository.findOne(entity.getId()), entity);
+		return update(entity, View.Persistence.class);
 	}
 
 	@Override
-	public T update(final T oldEntity, final T newEntity) {
-		newEntity.setId(oldEntity.getId());
-		newEntity.setUpdateTimestamp(new Date());
+	public T update(final T entity, final Class<?> view) {
+		return update(repository.findOne(entity.getId()), entity, view);
+	}
 
-		prepareUpdate(newEntity);
-		eventPublisher.publishEvent(new BeforeFullUpdateEvent<>(this, newEntity, oldEntity));
-		validate(newEntity);
-		final T updatedEntity = repository.save(newEntity);
+	@Override
+	public T update(final T oldEntity, final T newEntity, final Class<?> view) {
+		final T entityForUpdate = cloneEntity(oldEntity);
+		final ObjectReader reader = objectMapper.readerForUpdating(entityForUpdate).withView(view);
+		final JsonNode tree = objectMapperForPatchTree.valueToTree(newEntity);
+		try {
+			reader.readValue(tree);
+		} catch (final IOException e) {
+			throw new RuntimeException("JSON (de-)serialization should never fail here.", e);
+		}
+		entityForUpdate.setId(oldEntity.getId());
+		entityForUpdate.setUpdateTimestamp(new Date());
+
+		prepareUpdate(entityForUpdate);
+		eventPublisher.publishEvent(new BeforeFullUpdateEvent<>(this, entityForUpdate, oldEntity));
+		validate(entityForUpdate);
+		final T updatedEntity = repository.save(entityForUpdate);
 		eventPublisher.publishEvent(new AfterFullUpdateEvent<>(
 				this, updatedEntity, oldEntity, getChanges(oldEntity, updatedEntity)));
 		finalizeUpdate(updatedEntity);
@@ -366,10 +380,14 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		}
 	}
 
-	private T cloneEntity(final T entity) throws JsonProcessingException {
-		return objectMapper.readerFor(entity.getClass()).withView(View.Persistence.class).readValue(
-				objectMapper.writerWithView(View.Persistence.class)
-				.writeValueAsString(entity));
+	private T cloneEntity(final T entity) {
+		try {
+			return objectMapper.readerFor(entity.getClass()).withView(View.Persistence.class).readValue(
+					objectMapper.writerWithView(View.Persistence.class)
+					.writeValueAsString(entity));
+		} catch (final JsonProcessingException e) {
+			throw new RuntimeException("JSON (de-)serialization should never fail here.", e);
+		}
 	}
 
 	private Map<String, Object> getChanges(final T oldEntity, final T newEntity) {

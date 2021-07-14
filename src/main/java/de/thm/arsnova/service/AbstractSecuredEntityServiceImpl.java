@@ -49,9 +49,15 @@ public abstract class AbstractSecuredEntityServiceImpl<E extends Entity> impleme
 	}
 
 	@Override
+	@PreAuthorize("hasPermission(#entity, 'update')")
+	public E update(final E entity, final Class<?> view) {
+		return entityService.update(entity, view);
+	}
+
+	@Override
 	@PreAuthorize("hasPermission(#oldEntity, 'update')")
-	public E update(final E oldEntity, final E newEntity) {
-		return entityService.update(oldEntity, newEntity);
+	public E update(final E oldEntity, final E newEntity, final Class<?> view) {
+		return entityService.update(oldEntity, newEntity, view);
 	}
 
 	@Override

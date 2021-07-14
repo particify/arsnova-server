@@ -47,8 +47,10 @@ public interface EntityService<T extends Entity> {
 
 	T update(T entity);
 
+	T update(T entity, Class<?> view);
+
 	@PreAuthorize("hasPermission(#oldEntity, 'update')")
-	T update(T oldEntity, T newEntity);
+	T update(T oldEntity, T newEntity, Class<?> view);
 
 	T patch(T entity, Map<String, Object> changes) throws IOException;
 

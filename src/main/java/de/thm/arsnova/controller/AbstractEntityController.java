@@ -129,11 +129,11 @@ public abstract class AbstractEntityController<E extends Entity> {
 	@PutMapping(PUT_MAPPING)
 	public E put(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
 		final E oldEntity = entityService.get(entity.getId());
-		entityService.update(oldEntity, entity);
-		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
-		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
+		final E updatedEntity = entityService.update(oldEntity, entity, View.Public.class);
+		httpServletResponse.setHeader(ENTITY_ID_HEADER, updatedEntity.getId());
+		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, updatedEntity.getRevision());
 
-		return entity;
+		return updatedEntity;
 	}
 
 	@PostMapping(value = POST_MAPPING, produces = MEDIATYPE_EMPTY)
