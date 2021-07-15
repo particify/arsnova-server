@@ -42,6 +42,7 @@ import de.thm.arsnova.model.RoomStatistics;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.ContentGroupService;
 import de.thm.arsnova.service.RoomService;
+import de.thm.arsnova.service.RoomStatisticsService;
 import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
@@ -62,13 +63,16 @@ public class RoomController extends AbstractEntityController<Room> {
 
 	private RoomService roomService;
 	private ContentGroupService contentGroupService;
+	private RoomStatisticsService roomStatisticsService;
 
 	public RoomController(
 			@Qualifier("securedRoomService") final RoomService roomService,
-			@Qualifier("securedContentGroupService") final ContentGroupService contentGroupService) {
+			@Qualifier("securedContentGroupService") final ContentGroupService contentGroupService,
+			@Qualifier("securedRoomStatisticsService") final RoomStatisticsService roomStatisticsService) {
 		super(roomService);
 		this.roomService = roomService;
 		this.contentGroupService = contentGroupService;
+		this.roomStatisticsService = roomStatisticsService;
 	}
 
 	@Override
@@ -116,12 +120,8 @@ public class RoomController extends AbstractEntityController<Room> {
 
 	@GetMapping(STATS_MAPPING)
 	public RoomStatistics getStats(@PathVariable final String id) {
-		final RoomStatistics roomStatistics = new RoomStatistics();
 		final List<ContentGroup> contentGroups = contentGroupService.getByRoomId(id);
-		roomStatistics.setGroupStats(contentGroups.stream()
-				.map(cg ->  new RoomStatistics.ContentGroupStatistics(cg)).collect(Collectors.toList()));
-		roomStatistics.setContentCount(contentGroups.stream()
-				.mapToInt(cg -> cg.getContentIds().size()).reduce((a, b) -> a + b).orElse(0));
+		final RoomStatistics roomStatistics = roomStatisticsService.getRoomStatistics(id);
 
 		return roomStatistics;
 	}

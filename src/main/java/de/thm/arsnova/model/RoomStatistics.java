@@ -20,7 +20,9 @@ package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
@@ -106,6 +108,15 @@ public class RoomStatistics {
 
 	public void setGroupStats(final List<ContentGroupStatistics> groupStats) {
 		this.groupStats = groupStats;
+	}
+
+	public RoomStatistics updateFromContentGroups(final Collection<ContentGroup> contentGroups) {
+		setGroupStats(contentGroups.stream()
+				.map(cg ->  new RoomStatistics.ContentGroupStatistics(cg)).collect(Collectors.toList()));
+		setContentCount(contentGroups.stream()
+				.mapToInt(cg -> cg.getContentIds().size()).reduce((a, b) -> a + b).orElse(0));
+
+		return this;
 	}
 
 	@Override
