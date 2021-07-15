@@ -29,8 +29,10 @@ import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.AfterDeletionEvent;
 import de.thm.arsnova.event.AfterUpdateEvent;
 import de.thm.arsnova.event.CrudEvent;
+import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.RoomIdAware;
+import de.thm.arsnova.service.RoomStatisticsService;
 
 /**
  * WebsocketEventDispatcher publishes events for changes of an entity to a
@@ -44,9 +46,14 @@ import de.thm.arsnova.model.RoomIdAware;
 public class WebsocketEventDispatcher {
 	private static final Logger logger = LoggerFactory.getLogger(WebsocketEventDispatcher.class);
 	private final RabbitTemplate messagingTemplate;
+	private final RoomStatisticsService roomStatisticsService;
 
-	public WebsocketEventDispatcher(final RabbitTemplate messagingTemplate) {
+	public WebsocketEventDispatcher(
+			final RabbitTemplate messagingTemplate,
+			final RoomStatisticsService roomStatisticsService) {
 		this.messagingTemplate = messagingTemplate;
+		this.roomStatisticsService = roomStatisticsService;
+
 	}
 
 	@EventListener
@@ -88,6 +95,26 @@ public class WebsocketEventDispatcher {
 				event.getEntity().getId());
 		final String topic = String.format("%s.changes-meta.stream", roomId);
 		messagingTemplate.convertAndSend("amq.topic", topic, changeEvent);
+	}
+
+	@EventListener
+	public <T extends Entity> void handleContentGroupCrudEvent(final CrudEvent<ContentGroup> event) {
+		if (event instanceof AfterCreationEvent
+				|| event instanceof AfterUpdateEvent
+				|| event instanceof AfterDeletionEvent) {
+			dispatchRoomStatsEvent(event);
+		}
+	}
+
+	public <T extends Entity> void dispatchRoomStatsEvent(final CrudEvent<ContentGroup> event) {
+		logger.debug("Dispatching room stats event for {}: {}", event.getEntity().getType().getSimpleName(), event);
+		final String roomId = extractRoomId(event.getEntity());
+		final String publicTopic = String.format("%s.changes.stream", roomId);
+		final String moderatorTopic = String.format("%s.moderator.changes.stream", roomId);
+		messagingTemplate.convertAndSend("amq.topic", publicTopic,
+				roomStatisticsService.getPublicRoomStatistics(roomId));
+		messagingTemplate.convertAndSend("amq.topic", moderatorTopic,
+				roomStatisticsService.getAllRoomStatistics(roomId));
 	}
 
 	private String extractRoomId(final Entity entity) {
