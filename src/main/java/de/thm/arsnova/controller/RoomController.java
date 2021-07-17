@@ -19,10 +19,8 @@
 package de.thm.arsnova.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,13 +33,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.RoomMembership;
 import de.thm.arsnova.model.RoomStatistics;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.ContentGroupService;
 import de.thm.arsnova.service.RoomService;
+import de.thm.arsnova.service.RoomStatisticsService;
 import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
@@ -62,13 +60,16 @@ public class RoomController extends AbstractEntityController<Room> {
 
 	private RoomService roomService;
 	private ContentGroupService contentGroupService;
+	private RoomStatisticsService roomStatisticsService;
 
 	public RoomController(
 			@Qualifier("securedRoomService") final RoomService roomService,
-			@Qualifier("securedContentGroupService") final ContentGroupService contentGroupService) {
+			@Qualifier("securedContentGroupService") final ContentGroupService contentGroupService,
+			@Qualifier("securedRoomStatisticsService") final RoomStatisticsService roomStatisticsService) {
 		super(roomService);
 		this.roomService = roomService;
 		this.contentGroupService = contentGroupService;
+		this.roomStatisticsService = roomStatisticsService;
 	}
 
 	@Override
@@ -115,13 +116,12 @@ public class RoomController extends AbstractEntityController<Room> {
 	}
 
 	@GetMapping(STATS_MAPPING)
-	public RoomStatistics getStats(@PathVariable final String id) {
-		final RoomStatistics roomStatistics = new RoomStatistics();
-		final List<ContentGroup> contentGroups = contentGroupService.getByRoomId(id);
-		roomStatistics.setGroupStats(contentGroups.stream()
-				.map(cg ->  new RoomStatistics.ContentGroupStatistics(cg)).collect(Collectors.toList()));
-		roomStatistics.setContentCount(contentGroups.stream()
-				.mapToInt(cg -> cg.getContentIds().size()).reduce((a, b) -> a + b).orElse(0));
+	public RoomStatistics getStats(
+			@PathVariable final String id,
+			@RequestParam(required = false) final String view) {
+		final RoomStatistics roomStatistics = "read-extended".equals(view)
+				? roomStatisticsService.getAllRoomStatistics(id)
+				: roomStatisticsService.getPublicRoomStatistics(id);
 
 		return roomStatistics;
 	}
