@@ -169,6 +169,24 @@ public class Content extends Entity implements RoomIdAware {
 				this.bodyRenderingOptions);
 	}
 
+	public Content() {
+
+	}
+
+	/**
+	 * Copying constructor which adopts most of the original content's
+	 * properties which are not used to store relations to other data.
+	 */
+	public Content(final Content content) {
+		this.body = content.body;
+		this.format = content.format;
+		this.abstentionsAllowed = content.abstentionsAllowed;
+		this.state = content.state;
+		this.timestamp = content.timestamp;
+		this.additionalText = content.additionalText;
+		this.additionalTextTitle = content.additionalTextTitle;
+	}
+
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getRoomId() {
 		return roomId;

@@ -38,6 +38,7 @@ import de.thm.arsnova.model.RoomMembership;
 import de.thm.arsnova.model.RoomStatistics;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.ContentGroupService;
+import de.thm.arsnova.service.DuplicationService;
 import de.thm.arsnova.service.RoomService;
 import de.thm.arsnova.service.RoomStatisticsService;
 import de.thm.arsnova.web.exceptions.BadRequestException;
@@ -55,21 +56,25 @@ public class RoomController extends AbstractEntityController<Room> {
 	private static final String TRANSFER_MAPPING = DEFAULT_ID_MAPPING + "/transfer";
 	private static final String PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/password";
 	private static final String REQUEST_MEMBERSHIP_MAPPING = DEFAULT_ID_MAPPING + "/request-membership";
+	private static final String DUPLICATE_MAPPING = DEFAULT_ID_MAPPING + "/duplicate";
 
 	private static final String ROOM_ROLE_HEADER = "ARS-Room-Role";
 
 	private RoomService roomService;
 	private ContentGroupService contentGroupService;
 	private RoomStatisticsService roomStatisticsService;
+	private DuplicationService duplicationService;
 
 	public RoomController(
 			@Qualifier("securedRoomService") final RoomService roomService,
 			@Qualifier("securedContentGroupService") final ContentGroupService contentGroupService,
-			@Qualifier("securedRoomStatisticsService") final RoomStatisticsService roomStatisticsService) {
+			@Qualifier("securedRoomStatisticsService") final RoomStatisticsService roomStatisticsService,
+			@Qualifier("securedDuplicationService") final DuplicationService duplicationService) {
 		super(roomService);
 		this.roomService = roomService;
 		this.contentGroupService = contentGroupService;
 		this.roomStatisticsService = roomStatisticsService;
+		this.duplicationService = duplicationService;
 	}
 
 	@Override
@@ -190,6 +195,15 @@ public class RoomController extends AbstractEntityController<Room> {
 
 			return membership.orElseThrow(ForbiddenException::new).getRoom();
 		}
+	}
+
+	@PostMapping(DUPLICATE_MAPPING)
+	public Room duplicateRoom(@PathVariable final String id) {
+		final Room room = roomService.get(id);
+		if (room == null) {
+			throw new NotFoundException();
+		}
+		return duplicationService.duplicateRoomCascading(room);
 	}
 
 	private static class PasswordEntity {

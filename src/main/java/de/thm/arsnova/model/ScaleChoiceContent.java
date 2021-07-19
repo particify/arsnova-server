@@ -35,6 +35,12 @@ public class ScaleChoiceContent extends ChoiceQuestionContent {
 		super.setFormat(Format.SCALE);
 	}
 
+	public ScaleChoiceContent(final ScaleChoiceContent content) {
+		super(content);
+		this.optionTemplate = content.optionTemplate;
+		this.optionCount = content.optionCount;
+	}
+
 	@JsonView({View.Persistence.class, View.Public.class})
 	public ScaleOptionTemplate getOptionTemplate() {
 		return optionTemplate;

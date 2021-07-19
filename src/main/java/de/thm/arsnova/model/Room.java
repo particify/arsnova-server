@@ -478,6 +478,21 @@ public class Room extends Entity implements RoomIdAware {
 				options);
 	}
 
+	public Room() {
+
+	}
+
+	/**
+	 * Copying constructor which adopts most of the original room's properties
+	 * which are not used to store relations to other data.
+	 */
+	public Room(final Room room) {
+		this.name = room.name;
+		this.description = room.description;
+		this.closed = room.closed;
+		this.settings = room.settings;
+	}
+
 	@Override
 	public String getRoomId() {
 		return id;

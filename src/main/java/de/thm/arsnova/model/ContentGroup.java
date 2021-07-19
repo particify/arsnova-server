@@ -58,6 +58,20 @@ public class ContentGroup extends Entity implements RoomIdAware {
 		this.name = name;
 	}
 
+	/**
+	 * Copying constructor which adopts most of the original content group's
+	 * properties which are not used to store relations to other data.
+	 */
+	public ContentGroup(final ContentGroup contentGroup) {
+		this.name = contentGroup.name;
+		this.contentIds = contentGroup.contentIds;
+		this.published = contentGroup.published;
+		this.firstPublishedIndex = contentGroup.firstPublishedIndex;
+		this.lastPublishedIndex = contentGroup.lastPublishedIndex;
+		this.statisticsPublished = contentGroup.statisticsPublished;
+		this.correctOptionsPublished = contentGroup.correctOptionsPublished;
+	}
+
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getRoomId() {
 		return roomId;
