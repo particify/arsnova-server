@@ -3,9 +3,12 @@ package de.thm.arsnova.service;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import de.thm.arsnova.event.RoomDuplicationEvent;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.ContentGroup;
@@ -17,10 +20,11 @@ import de.thm.arsnova.web.exceptions.NotFoundException;
 
 @Service
 @Primary
-public class DuplicationServiceImpl implements DuplicationService {
+public class DuplicationServiceImpl implements ApplicationEventPublisherAware, DuplicationService {
 	private RoomService roomService;
 	private ContentGroupService contentGroupService;
 	private ContentService contentService;
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	public DuplicationServiceImpl(
 			final RoomService roomService,
@@ -32,9 +36,15 @@ public class DuplicationServiceImpl implements DuplicationService {
 	}
 
 	@Override
+	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+		this.applicationEventPublisher = applicationEventPublisher;
+	}
+
+	@Override
 	public Room duplicateRoomCascading(final Room room) {
 		final Room roomCopy = duplicateRoom(room);
 		contentGroupService.getByRoomId(room.getRoomId()).forEach(cg -> duplicateContentGroup(cg, roomCopy));
+		applicationEventPublisher.publishEvent(new RoomDuplicationEvent(this, room, roomCopy));
 		return roomCopy;
 	}
 

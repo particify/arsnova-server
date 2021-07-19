@@ -36,6 +36,8 @@ public class AmqpEventDispatcher {
 	public static class AmqpPropertyFilter {
 	}
 
+	public static final String ROOM_DUPLICATION_EVENT_QUEUE_NAME = "backend.event.room.duplicated";
+
 	private static final String PREFIX = "backend.event.";
 	private static final Logger logger = LoggerFactory.getLogger(AmqpEventDispatcher.class);
 
@@ -85,6 +87,14 @@ public class AmqpEventDispatcher {
 		}
 	}
 
+	@EventListener
+	public void dispatchRoomDuplicationEvent(final RoomDuplicationEvent event) {
+		messagingTemplate.convertAndSend(
+				ROOM_DUPLICATION_EVENT_QUEUE_NAME,
+				"",
+				new RoomDuplicationMessage(event.getOriginalRoom().getId(), event.getDuplicateRoom().getId()));
+	}
+
 	private ObjectMapper createOrGetObjectMapper(final String exchangeName, final Set<String> properties) {
 		if (objectMappers.keySet().contains(exchangeName)) {
 			return objectMappers.get(exchangeName);
@@ -98,5 +108,23 @@ public class AmqpEventDispatcher {
 		objectMappers.put(exchangeName, mapper);
 
 		return mapper;
+	}
+
+	private class RoomDuplicationMessage {
+		private String originalRoomId;
+		private String duplicatedRoomId;
+
+		private RoomDuplicationMessage(final String originalRoomId, final String duplicatedRoomId) {
+			this.originalRoomId = originalRoomId;
+			this.duplicatedRoomId = duplicatedRoomId;
+		}
+
+		public String getOriginalRoomId() {
+			return originalRoomId;
+		}
+
+		public String getDuplicatedRoomId() {
+			return duplicatedRoomId;
+		}
 	}
 }
