@@ -449,12 +449,11 @@ public class Room extends Entity implements RoomIdAware {
 	@NotBlank
 	private String name;
 
-	@NotBlank
 	private String abbreviation;
-
 	private String description;
 	private String renderedDescription;
 	private boolean closed;
+	private boolean template;
 	private String password;
 	private Set<Moderator> moderators;
 	private boolean moderatorsInitialized;
@@ -565,6 +564,16 @@ public class Room extends Entity implements RoomIdAware {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setClosed(final boolean closed) {
 		this.closed = closed;
+	}
+
+	@JsonView(View.Persistence.class)
+	public boolean isTemplate() {
+		return template;
+	}
+
+	@JsonView(View.Persistence.class)
+	public void setTemplate(final boolean template) {
+		this.template = template;
 	}
 
 	@JsonView(View.Persistence.class)

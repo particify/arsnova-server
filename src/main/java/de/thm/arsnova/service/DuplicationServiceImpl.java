@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.ContentGroup;
+import de.thm.arsnova.model.GridImageContent;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.ScaleChoiceContent;
+import de.thm.arsnova.model.WordcloudContent;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 
 @Service
@@ -47,8 +49,12 @@ public class DuplicationServiceImpl implements DuplicationService {
 			contentCopy = new ChoiceQuestionContent((ChoiceQuestionContent) content);
 		} else if (content instanceof ScaleChoiceContent) {
 			contentCopy = new ScaleChoiceContent((ScaleChoiceContent) content);
+		} else if (content instanceof WordcloudContent) {
+			contentCopy = new WordcloudContent((WordcloudContent) content);
+		} else if (content instanceof GridImageContent) {
+			contentCopy = new GridImageContent((GridImageContent) content);
 		} else {
-			throw new IllegalArgumentException("Unsupported subtype.");
+			throw new IllegalArgumentException("Unsupported subtype: " + content.getClass().getSimpleName());
 		}
 		contentCopy.setRoomId(contentGroup.getRoomId());
 		contentService.create(contentCopy);
@@ -77,8 +83,12 @@ public class DuplicationServiceImpl implements DuplicationService {
 				contentCopy = new ChoiceQuestionContent((ChoiceQuestionContent) content);
 			} else if (content instanceof ScaleChoiceContent) {
 				contentCopy = new ScaleChoiceContent((ScaleChoiceContent) content);
+			} else if (content instanceof WordcloudContent) {
+				contentCopy = new WordcloudContent((WordcloudContent) content);
+			} else if (content instanceof GridImageContent) {
+				contentCopy = new GridImageContent((GridImageContent) content);
 			} else {
-				throw new IllegalArgumentException("Unsupported subtype.");
+				throw new IllegalArgumentException("Unsupported subtype: " + content.getClass().getSimpleName());
 			}
 			contentCopy.setRoomId(room.getRoomId());
 			return contentCopy;

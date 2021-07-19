@@ -11,6 +11,15 @@ public class WordcloudContent extends Content {
 	@Max(10)
 	private int maxAnswers = 1;
 
+	public WordcloudContent() {
+
+	}
+
+	public WordcloudContent(final WordcloudContent content) {
+		super(content);
+		this.maxAnswers = content.maxAnswers;
+	}
+
 	@JsonView({View.Persistence.class, View.Public.class})
 	public int getMaxAnswers() {
 		return maxAnswers;

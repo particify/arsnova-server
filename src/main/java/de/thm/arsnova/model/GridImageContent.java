@@ -165,6 +165,17 @@ public class GridImageContent extends Content {
 	private Image image;
 	private List<Integer> correctOptionIndexes = new ArrayList<>();
 
+	public GridImageContent() {
+
+	}
+
+	public GridImageContent(final GridImageContent content) {
+		super(content);
+		this.grid = content.grid;
+		this.image = content.image;
+		this.correctOptionIndexes = content.correctOptionIndexes;
+	}
+
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Grid getGrid() {
 		if (grid == null) {

@@ -54,6 +54,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	public static final String UPDATE_PERMISSION = "update";
 	public static final String DELETE_PERMISSION = "delete";
 	public static final String OWNER_PERMISSION = "owner";
+	public static final String DUPLICATE_PERMISSION = "duplicate";
 
 	/* specialized permissions */
 	public static final String READ_CORRECT_OPTIONS_PERMISSION = "read-correct-options";
@@ -200,6 +201,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			case OWNER_PERMISSION:
 			case DELETE_PERMISSION:
 				return hasAuthenticationRoomRole(auth, targetRoom, RoomRole.OWNER);
+			case DUPLICATE_PERMISSION:
+				return hasAuthenticationRoomRole(auth, targetRoom, RoomRole.OWNER)
+						|| targetRoom.isTemplate();
 			default:
 				return false;
 		}
@@ -235,6 +239,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			case UPDATE_PERMISSION:
 			case DELETE_PERMISSION:
 			case OWNER_PERMISSION:
+			case DUPLICATE_PERMISSION:
 				/* TODO: Remove owner permission for content. Use create/update/delete instead. */
 				return hasAuthenticationRoomRole(auth, room, RoomRole.EDITING_MODERATOR);
 			default:
