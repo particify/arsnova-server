@@ -19,7 +19,7 @@ class RemoveMembershipFilter(
     private val roomAccessService: RoomAccessService
 ) : AbstractGatewayFilterFactory<RemoveMembershipFilter.Config>(Config::class.java) {
     override fun apply(config: Config): GatewayFilter {
-        return GatewayFilter { exchange, chain ->
+        return GatewayFilter { exchange, _ ->
             // Both tuple elements are ensured to be there because of previous filters
             Mono.zip(
                 Mono.just(ServerWebExchangeUtils.getUriTemplateVariables(exchange))

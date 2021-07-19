@@ -52,23 +52,23 @@ class RoomAuthFilter(
         return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
             chain.filter(exchange)
                 .then(Mono.just(exchange)
-                    .filter { exchange ->
-                        exchange.response.statusCode != null &&
-                                exchange.response.statusCode!!.is2xxSuccessful &&
-                                exchange.request.method != null
+                    .filter { e: ServerWebExchange ->
+                        e.response.statusCode != null &&
+                                e.response.statusCode!!.is2xxSuccessful &&
+                                e.request.method != null
                     }
-                    .filter { exchange ->
-                        exchange.request.method == HttpMethod.POST ||
-                                exchange.request.method == HttpMethod.PUT ||
-                                exchange.request.method == HttpMethod.PATCH ||
-                                exchange.request.method == HttpMethod.DELETE
+                    .filter { e: ServerWebExchange ->
+                        e.request.method == HttpMethod.POST ||
+                                e.request.method == HttpMethod.PUT ||
+                                e.request.method == HttpMethod.PATCH ||
+                                e.request.method == HttpMethod.DELETE
                     }
-                    .map { exchange ->
-                        val path = exchange.request.path.toString()
-                        val method = exchange.request.method!!
-                        val roomId = exchange.response.headers.getFirst(ENTITY_ID_HEADER)!!
-                        val revId = exchange.response.headers.getFirst(ENTITY_REVISION_HEADER)!!
-                        val token = exchange.request.headers.getFirst(HttpHeaders.AUTHORIZATION)!!.removePrefix(BEARER_HEADER)
+                    .map { e: ServerWebExchange ->
+                        val path = e.request.path.toString()
+                        val method = e.request.method!!
+                        val roomId = e.response.headers.getFirst(ENTITY_ID_HEADER)!!
+                        val revId = e.response.headers.getFirst(ENTITY_REVISION_HEADER)!!
+                        val token = e.request.headers.getFirst(HttpHeaders.AUTHORIZATION)!!.removePrefix(BEARER_HEADER)
                         val userId = jwtTokenUtil.getUserIdFromPublicToken(token)
 
                         if (path == ROOM_POST_PATH && method == HttpMethod.POST) {
@@ -107,10 +107,10 @@ class RoomAuthFilter(
                             ))
                         } else if (
                                 path.matches(ROOM_TRANSFER_REGEX) &&
-                                exchange.request.queryParams.containsKey(ROOM_TRANSFER_BY_ID_QUERY_PARAMETER) &&
+                                e.request.queryParams.containsKey(ROOM_TRANSFER_BY_ID_QUERY_PARAMETER) &&
                                 method == HttpMethod.POST
                         ) {
-                            val newOwnerId = exchange.request.queryParams[ROOM_TRANSFER_BY_ID_QUERY_PARAMETER]!!.first()
+                            val newOwnerId = e.request.queryParams[ROOM_TRANSFER_BY_ID_QUERY_PARAMETER]!!.first()
                             listOf(
                                 AccessChangeRequest(
                                     AccessChangeRequestType.CREATE,
@@ -129,10 +129,10 @@ class RoomAuthFilter(
                             )
                         } else if (
                                 path.matches(ROOM_TRANSFER_REGEX) &&
-                                exchange.request.queryParams.containsKey(ROOM_TRANSFER_BY_TOKEN_QUERY_PARAMETER) &&
+                                e.request.queryParams.containsKey(ROOM_TRANSFER_BY_TOKEN_QUERY_PARAMETER) &&
                                 method == HttpMethod.POST
                         ) {
-                            val newOwnerToken = exchange.request.queryParams[ROOM_TRANSFER_BY_TOKEN_QUERY_PARAMETER]!!.first()
+                            val newOwnerToken = e.request.queryParams[ROOM_TRANSFER_BY_TOKEN_QUERY_PARAMETER]!!.first()
                             val newOwnerId = jwtTokenUtil.getUserIdFromPublicToken(newOwnerToken)
                             listOf(
                                 AccessChangeRequest(
@@ -182,7 +182,6 @@ class RoomAuthFilter(
                             AccessChangeRequestType.DELETE_ALL -> {
                                 roomAccessService.deleteRoomAccessByRoomId(accessChangeRequest.roomId)
                             }
-                            else -> Mono.error(BadRequestException())
                         }
                     }
                     .then()

@@ -23,9 +23,9 @@ class WebSecurityConfig(
     fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain? {
         return http
             .exceptionHandling()
-            .authenticationEntryPoint { swe: ServerWebExchange, e: AuthenticationException? ->
+            .authenticationEntryPoint { swe: ServerWebExchange, _: AuthenticationException? ->
                 Mono.fromRunnable { swe.response.statusCode = HttpStatus.UNAUTHORIZED }
-            }.accessDeniedHandler { swe: ServerWebExchange, e: AccessDeniedException? ->
+            }.accessDeniedHandler { swe: ServerWebExchange, _: AccessDeniedException? ->
                 Mono.fromRunnable { swe.response.statusCode = HttpStatus.FORBIDDEN }
             }.and()
             .csrf().disable()
