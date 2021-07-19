@@ -58,7 +58,7 @@ class MembershipView(
                     Membership(membership.roomId, membership.roomShortId, setOf(), membership.lastVisit)
                 }
                 .flatMap { groupedMemberships ->
-                    groupedMemberships.reduce(groupedMemberships.key()!!.copy(), { acc: Membership, m: Membership ->
+                    groupedMemberships.reduce(groupedMemberships.key().copy(), { acc: Membership, m: Membership ->
                         acc.roles = acc.roles.union(m.roles)
                         if (acc.lastVisit.before(m.lastVisit)) {
                             acc.lastVisit = m.lastVisit
