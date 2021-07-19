@@ -169,6 +169,30 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		return createdEntity;
 	}
 
+	@Override
+	public List<T> create(final List<T> entities) {
+		if (entities.stream().anyMatch(e -> e.getId() != null || e.getRevision() != null)) {
+			throw new IllegalArgumentException("At least one of the entities is not new.");
+		}
+
+		for (final T entity : entities) {
+			entity.setCreationTimestamp(new Date());
+			prepareCreate(entity);
+			eventPublisher.publishEvent(new BeforeCreationEvent<>(this, entity));
+			validate(entity);
+		}
+
+		repository.saveAll(entities);
+
+		for (final T entity : entities) {
+			eventPublisher.publishEvent(new AfterCreationEvent<>(this, entity));
+			finalizeCreate(entity);
+			modifyRetrieved(entity);
+		}
+
+		return entities;
+	}
+
 	/**
 	 * This method can be overridden by subclasses to modify the entity before creation.
 	 *

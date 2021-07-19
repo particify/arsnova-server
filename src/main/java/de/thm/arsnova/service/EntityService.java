@@ -45,6 +45,9 @@ public interface EntityService<T extends Entity> {
 	@PreAuthorize("hasPermission(#entity, 'create')")
 	T create(T entity);
 
+	@PreFilter(value = "hasPermission(filterObject, 'create')", filterTarget = "entities")
+	List<T> create(List<T> entities);
+
 	T update(T entity);
 
 	T update(T entity, Class<?> view);

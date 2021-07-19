@@ -43,6 +43,12 @@ public abstract class AbstractSecuredEntityServiceImpl<E extends Entity> impleme
 	}
 
 	@Override
+	@PreFilter(value = "hasPermission(filterObject, 'create')", filterTarget = "entities")
+	public List<E> create(final List<E> entities) {
+		return entityService.create(entities);
+	}
+
+	@Override
 	@PreAuthorize("hasPermission(#entity, 'update')")
 	public E update(final E entity) {
 		return entityService.update(entity);
