@@ -29,6 +29,7 @@ import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.AfterDeletionEvent;
 import de.thm.arsnova.event.AfterUpdateEvent;
 import de.thm.arsnova.event.CrudEvent;
+import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.RoomIdAware;
@@ -73,6 +74,13 @@ public class WebsocketEventDispatcher {
 
 	@EventListener
 	public <T extends Entity> void handleCrudEvent(final CrudEvent<T> event) {
+		if (event.getResolvableType().isAssignableFrom(Answer.class)) {
+			// Answer events are skipped here for multiple reasons:
+			// * Events for individual answer changes are not relevant.
+			// * Answers are stored in bulk which would lead to spikes of events.
+			// * AnswersChanged events are sent instead.
+			return;
+		}
 		if (event instanceof AfterCreationEvent) {
 			dispatchCrudEvent(event, ChangeEvent.ChangeType.CREATE);
 		} else if (event instanceof AfterUpdateEvent) {
