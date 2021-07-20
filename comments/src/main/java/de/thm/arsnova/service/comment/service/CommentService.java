@@ -58,12 +58,18 @@ public class CommentService {
     }
 
     public Comment create(Comment c) {
-        String newId = UUID.randomUUID().toString().replace("-", "");
-        c.setId(newId);
+        c.setId(generateUuidStringForDb());
         logger.trace("Creating new comment: " + c.toString());
         repository.save(c);
 
         return c;
+    }
+
+    public Iterable<Comment> create(final Iterable<Comment> comments) {
+        for (final Comment comment : comments) {
+            comment.setId(generateUuidStringForDb());
+        }
+        return repository.saveAll(comments);
     }
 
     public Comment patch(final Comment entity, final Map<String, Object> changes) throws IOException {
@@ -137,6 +143,10 @@ public class CommentService {
 
     public List<Comment> deleteByRoomId(String roomId) {
         return repository.deleteByRoomId(roomId);
+    }
+
+    private String generateUuidStringForDb() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
 }
