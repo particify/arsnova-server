@@ -32,6 +32,23 @@ public class Comment {
     @Column(columnDefinition = "TEXT")
     private String answer;
 
+    public Comment() {
+
+    }
+
+    /**
+     * Copying constructor which adopts most of the original comments'
+     * properties which are not used to store relations to other data.
+     */
+    public Comment(final Comment comment) {
+        this.body = comment.body;
+        this.timestamp = comment.timestamp;
+        this.read = comment.read;
+        this.favorite = comment.favorite;
+        this.correct = comment.correct;
+        this.ack = comment.ack;
+    }
+
     public String getId() {
         return id;
     }

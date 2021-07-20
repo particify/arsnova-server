@@ -20,6 +20,8 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 public class RabbitConfig implements RabbitListenerConfigurer {
     public static final String BACKEND_COMMENT_FANOUT_NAME = "backend.event.comment.beforecreation";
     public static final String BACKEND_COMMENT_QUEUE_NAME = BACKEND_COMMENT_FANOUT_NAME + ".consumer.comment-service";
+    public static final String BACKEND_ROOM_DUPLICATED_FANOUT_NAME = "backend.event.room.duplicated";
+    public static final String BACKEND_ROOM_DUPLICATED_QUEUE_NAME = "backend.event.room.duplicated.consumer.comment-service";
     public static final String COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME = "commentservice.event.comment.deleted";
     public static final String ROOM_DELETED_FANOUT_NAME = "backend.event.room.afterdeletion";
     public static final String ROOM_DELETED_QUEUE_NAME = ROOM_DELETED_FANOUT_NAME + ".consumer.comment-service";
@@ -76,6 +78,9 @@ public class RabbitConfig implements RabbitListenerConfigurer {
         final FanoutExchange commentFanoutExchange = new FanoutExchange(BACKEND_COMMENT_FANOUT_NAME);
         final Queue commentQueue = new Queue(BACKEND_COMMENT_QUEUE_NAME, true, false, false);
         final Binding commentBinding = BindingBuilder.bind(commentQueue).to(commentFanoutExchange);
+        final FanoutExchange roomDuplicatedFanoutExchange =  new FanoutExchange(BACKEND_ROOM_DUPLICATED_FANOUT_NAME);
+        final Queue roomDuplicatedQueue =  new Queue(BACKEND_ROOM_DUPLICATED_QUEUE_NAME, true, false, false);
+        final Binding roomDuplicatedBinding = BindingBuilder.bind(roomDuplicatedQueue).to(roomDuplicatedFanoutExchange);
 
         final FanoutExchange roomDeletedFanoutExchange = new FanoutExchange(ROOM_DELETED_FANOUT_NAME);
         final Queue roomDeletedDlq = new Queue(ROOM_DELETED_DLQ_NAME, true, false, false);
@@ -96,7 +101,10 @@ public class RabbitConfig implements RabbitListenerConfigurer {
                 roomDeletedFanoutExchange,
                 roomDeletedDlq,
                 roomDeletedQueue,
-                roomDeletedBinding
+                roomDeletedBinding,
+                roomDuplicatedFanoutExchange,
+                roomDuplicatedQueue,
+                roomDuplicatedBinding
         );
     }
 
