@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.comment.service;
 
+import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.VotePK;
 import de.thm.arsnova.service.comment.service.persistence.VoteRepository;
 import de.thm.arsnova.service.comment.model.Vote;
@@ -16,6 +17,8 @@ import java.util.List;
 
 @Service
 public class VoteService {
+    private static final String NIL_UUID = "00000000-0000-0000-0000-000000000000";
+
     final VoteRepository repository;
 
     @Autowired
@@ -99,5 +102,19 @@ public class VoteService {
         }
 
         return v;
+    }
+
+    public void duplicateVotes(final String originalRoomId, Map<String, Comment> commentMapping) {
+        final Map<String, Integer> voteSums = getSumByCommentForRoom(originalRoomId);
+        for (final Map.Entry<String, Integer> voteSum : voteSums.entrySet()) {
+            if (!commentMapping.containsKey(voteSum.getKey())) {
+                continue;
+            }
+            final Vote vote = new Vote();
+            vote.setUserId(NIL_UUID);
+            vote.setCommentId(commentMapping.get(voteSum.getKey()).getId());
+            vote.setVote(voteSum.getValue());
+            create(vote);
+        }
     }
 }
