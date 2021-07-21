@@ -91,7 +91,7 @@ public class CommentCommandHandlerTest {
         settings.setDirectSend(true);
 
         when(settingsService.get(roomId)).thenReturn(settings);
-        when(commentService.create(any())).thenReturn(newComment);
+        when(commentService.create(any(Comment.class))).thenReturn(newComment);
         when(permissionEvaluator.checkCommentOwnerPermission(any())).thenReturn(true);
 
         // Act
@@ -127,7 +127,7 @@ public class CommentCommandHandlerTest {
         settings.setDirectSend(false);
 
         when(settingsService.get(roomId)).thenReturn(settings);
-        when(commentService.create(any())).thenReturn(newComment);
+        when(commentService.create(any(Comment.class))).thenReturn(newComment);
         when(permissionEvaluator.checkCommentOwnerPermission(any())).thenReturn(true);
 
         // Act

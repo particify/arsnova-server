@@ -9,6 +9,8 @@ import de.thm.arsnova.service.comment.service.persistence.CommentRepository;
 import de.thm.arsnova.service.comment.service.persistence.VoteRepository;
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.Vote;
+
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import java.util.function.Function;
 
 @Service
 public class CommentService {
+    private static final String NIL_UUID = "00000000-0000-0000-0000-000000000000";
     private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
 
     final CommentRepository repository;
@@ -58,12 +61,18 @@ public class CommentService {
     }
 
     public Comment create(Comment c) {
-        String newId = UUID.randomUUID().toString().replace("-", "");
-        c.setId(newId);
+        c.setId(generateUuidStringForDb());
         logger.trace("Creating new comment: " + c.toString());
         repository.save(c);
 
         return c;
+    }
+
+    public Iterable<Comment> create(final Iterable<Comment> comments) {
+        for (final Comment comment : comments) {
+            comment.setId(generateUuidStringForDb());
+        }
+        return repository.saveAll(comments);
     }
 
     public Comment patch(final Comment entity, final Map<String, Object> changes) throws IOException {
@@ -137,6 +146,25 @@ public class CommentService {
 
     public List<Comment> deleteByRoomId(String roomId) {
         return repository.deleteByRoomId(roomId);
+    }
+
+    public Map<String, Comment> duplicateComments(final String originalRoomId, final String duplicatedRoomId) {
+        final Map<String, Comment> commentMapping = new HashMap<>();
+        final List<Comment> comments = getByRoomIdAndArchiveIdNull(originalRoomId);
+        final List<Comment> commentCopies = comments.stream().map(c -> {
+            final Comment commentCopy = new Comment(c);
+            commentMapping.put(c.getId(), commentCopy);
+            commentCopy.setCreatorId(NIL_UUID);
+            commentCopy.setRoomId(duplicatedRoomId);
+            return commentCopy;
+        }).collect(Collectors.toList());
+        create(commentCopies);
+
+        return commentMapping;
+    }
+
+    private String generateUuidStringForDb() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
 }
