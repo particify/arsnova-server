@@ -449,12 +449,11 @@ public class Room extends Entity implements RoomIdAware {
 	@NotBlank
 	private String name;
 
-	@NotBlank
 	private String abbreviation;
-
 	private String description;
 	private String renderedDescription;
 	private boolean closed;
+	private boolean template;
 	private String password;
 	private Set<Moderator> moderators;
 	private boolean moderatorsInitialized;
@@ -476,6 +475,21 @@ public class Room extends Entity implements RoomIdAware {
 				this::getDescription,
 				this::setRenderedDescription,
 				options);
+	}
+
+	public Room() {
+
+	}
+
+	/**
+	 * Copying constructor which adopts most of the original room's properties
+	 * which are not used to store relations to other data.
+	 */
+	public Room(final Room room) {
+		this.name = room.name;
+		this.description = room.description;
+		this.closed = room.closed;
+		this.settings = room.settings;
 	}
 
 	@Override
@@ -550,6 +564,16 @@ public class Room extends Entity implements RoomIdAware {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setClosed(final boolean closed) {
 		this.closed = closed;
+	}
+
+	@JsonView(View.Persistence.class)
+	public boolean isTemplate() {
+		return template;
+	}
+
+	@JsonView(View.Persistence.class)
+	public void setTemplate(final boolean template) {
+		this.template = template;
 	}
 
 	@JsonView(View.Persistence.class)

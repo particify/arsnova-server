@@ -41,7 +41,9 @@ import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.AnswerService;
 import de.thm.arsnova.service.ContentService;
+import de.thm.arsnova.service.DuplicationService;
 import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
 
 @RestController
 @RequestMapping(ContentController.REQUEST_MAPPING)
@@ -50,18 +52,22 @@ public class ContentController extends AbstractEntityController<Content> {
 	private static final String GET_ANSWER_STATISTICS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
 	private static final String DELETE_ANSWERS_MAPPING = DEFAULT_ID_MAPPING + "/answer";
 	private static final String CORRECT_CHOICE_INDEXES_MAPPING = DEFAULT_ID_MAPPING + "/correct-choice-indexes";
+	private static final String DUPLICATE_MAPPING = DEFAULT_ID_MAPPING + "/duplicate";
 	private static final String CONTENT_COUNT_MAPPING = NO_ID_MAPPING + "/count";
 	private static final String EXPORT_MAPPING = NO_ID_MAPPING + "/export";
 
 	private ContentService contentService;
 	private AnswerService answerService;
+	private DuplicationService duplicationService;
 
 	public ContentController(
 			@Qualifier("securedContentService") final ContentService contentService,
-			@Qualifier("securedAnswerService") final AnswerService answerService) {
+			@Qualifier("securedAnswerService") final AnswerService answerService,
+			@Qualifier("securedDuplicationService") final DuplicationService duplicationService) {
 		super(contentService);
 		this.contentService = contentService;
 		this.answerService = answerService;
+		this.duplicationService = duplicationService;
 	}
 
 	@Override
@@ -82,6 +88,17 @@ public class ContentController extends AbstractEntityController<Content> {
 	@GetMapping(CORRECT_CHOICE_INDEXES_MAPPING)
 	public List<Integer> getCorrectOptionIndexes(@PathVariable final String id) {
 		return contentService.getCorrectChoiceIndexes(id);
+	}
+
+	@PostMapping(DUPLICATE_MAPPING)
+	public Content duplicate(
+			@PathVariable final String id,
+			@RequestBody final DuplicateRequestEntity duplicateRequestEntity) {
+		final Content content = contentService.get(id);
+		if (content == null) {
+			throw new NotFoundException();
+		}
+		return duplicationService.duplicateContent(content, duplicateRequestEntity.contentGroupId);
 	}
 
 	@GetMapping(CONTENT_COUNT_MAPPING)
@@ -131,6 +148,14 @@ public class ContentController extends AbstractEntityController<Content> {
 		private enum FileType {
 			CSV,
 			TSV
+		}
+	}
+
+	private static class DuplicateRequestEntity {
+		private String contentGroupId;
+
+		public void setContentGroupId(final String contentGroupId) {
+			this.contentGroupId = contentGroupId;
 		}
 	}
 }

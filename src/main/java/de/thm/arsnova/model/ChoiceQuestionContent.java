@@ -92,6 +92,17 @@ public class ChoiceQuestionContent extends Content {
 	private List<Integer> correctOptionIndexes = new ArrayList<>();
 	private boolean multiple;
 
+	public ChoiceQuestionContent() {
+
+	}
+
+	public ChoiceQuestionContent(final ChoiceQuestionContent content) {
+		super(content);
+		this.options = content.options;
+		this.correctOptionIndexes = content.correctOptionIndexes;
+		this.multiple = content.multiple;
+	}
+
 	@JsonView({View.Persistence.class, View.Public.class})
 	public List<AnswerOption> getOptions() {
 		return options;

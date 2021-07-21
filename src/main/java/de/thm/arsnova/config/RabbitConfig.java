@@ -84,6 +84,7 @@ public class RabbitConfig {
 		final List<Declarable> declarables = eventExchanges.stream()
 				.map(FanoutExchange::new).collect(Collectors.toList());
 
+		declarables.add(new FanoutExchange(AmqpEventDispatcher.ROOM_DUPLICATION_EVENT_QUEUE_NAME));
 		declarables.add(new Queue(
 				RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME,
 				true,
