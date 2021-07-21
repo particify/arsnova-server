@@ -197,27 +197,6 @@ public class ContentGroupControllerTest {
 		verify(contentGroupRepository).save(argThat(containsContentGroupWithRoomIdAndContentIds(room.getId(), contentId)));
 	}
 
-	@Test
-	@WithMockUser(value = "TestUser", userId = "1234", roles = {"USER", "OWNER__TestRoomID"})
-	public void shouldDeleteContentGroupWhenGroupIsEmpty() throws Exception {
-		final Room room = this.getRoomForUserWithDatabaseDetails("TestRoomID", user);
-		when(roomRepository.findOne(room.getId())).thenReturn(room);
-
-		final ContentGroup contentGroup = new ContentGroup();
-		contentGroup.setId("SOME_ID");
-		contentGroup.setName("Test-ContentGroupName");
-		contentGroup.setRoomId(room.getId());
-		contentGroup.setContentIds(new ArrayList<>()); // empty list of contents
-
-		mockMvc.perform(put("/contentgroup/" + contentGroup.getId())
-				.with(csrf())
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(contentGroup))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-		verify(contentGroupRepository).delete(contentGroup);
-	}
-
 	private ContentGroup createContentGroupWithRoomIdAndContentIds(final String roomId, final String... contentIds) {
 		final ContentGroup contentGroup = new ContentGroup();
 		contentGroup.setId("Test-ContentGroupId");
