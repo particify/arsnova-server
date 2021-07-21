@@ -3,6 +3,9 @@ package de.thm.arsnova.service.comment.service;
 import de.thm.arsnova.service.comment.model.VotePK;
 import de.thm.arsnova.service.comment.service.persistence.VoteRepository;
 import de.thm.arsnova.service.comment.model.Vote;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -78,6 +81,13 @@ public class VoteService {
 
     public Vote getForCommentAndUser(String commentId, String userId) {
         return repository.findById(new VotePK(commentId, userId)).orElse(null);
+    }
+
+    public Map<String, Integer> getSumByCommentForRoom(final String roomId) {
+        return repository.sumByCommentIdFindByRoomIdAndArchiveIdNull(roomId).stream().collect(Collectors.toMap(
+                voteSum -> voteSum.getCommentId(),
+                voteSum -> voteSum.getSum()
+        ));
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)

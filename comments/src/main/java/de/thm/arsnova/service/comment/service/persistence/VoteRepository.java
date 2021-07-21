@@ -2,6 +2,7 @@ package de.thm.arsnova.service.comment.service.persistence;
 
 import de.thm.arsnova.service.comment.model.Vote;
 import de.thm.arsnova.service.comment.model.VotePK;
+import de.thm.arsnova.service.comment.model.VoteSum;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -22,5 +23,14 @@ public interface VoteRepository extends CrudRepository<Vote, VotePK> {
             @Param("userId") String userId,
             @Param("vote") int vote,
             @Param("updateVote") int updateVote
+    );
+
+    @Query("SELECT new de.thm.arsnova.service.comment.model.VoteSum(v.commentId AS key, SUM(v.vote) AS sum) " +
+            "FROM Vote AS v JOIN Comment AS c ON v.commentId = c.id " +
+            "WHERE c.roomId = :roomId " +
+            "AND c.archiveId IS NULL " +
+            "GROUP BY v.commentId")
+    List<VoteSum> sumByCommentIdFindByRoomIdAndArchiveIdNull(
+            @Param("roomId") String roomId
     );
 }
