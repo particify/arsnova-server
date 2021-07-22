@@ -490,6 +490,7 @@ public class Room extends Entity implements RoomIdAware {
 		this.description = room.description;
 		this.closed = room.closed;
 		this.settings = room.settings;
+		this.extensions = room.extensions;
 	}
 
 	@Override
