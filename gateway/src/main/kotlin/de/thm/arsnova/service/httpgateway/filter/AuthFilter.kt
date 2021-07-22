@@ -68,7 +68,9 @@ class AuthFilter (
                                 roomAccessService.getRoomAccess(roomId, userId)
                                     .onErrorResume { exception ->
                                         logger.warn("Auth service didn't give specific role", exception)
-                                        if (httpGatewayProperties.gateway.requireMembership) {
+                                        if (!config.requireAuthentication) {
+                                            Mono.just(RoomAccess(roomId, userId, "", "NONE", null))
+                                        } else if (httpGatewayProperties.gateway.requireMembership) {
                                             Mono.error(ForbiddenException())
                                         } else {
                                             Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT", null))
@@ -97,7 +99,7 @@ class AuthFilter (
         }
     }
 
-    class Config {
+    class Config(val requireAuthentication: Boolean = true) {
         var name: String = "AuthFilter"
     }
 }

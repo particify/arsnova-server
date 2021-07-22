@@ -268,6 +268,21 @@ class GatewayConfig (
                 .uri(httpGatewayProperties.routing.endpoints.core)
         }
 
+        routes.route("room-duplicate") { p ->
+            p
+                .path(
+                    "/room/{roomId}/duplicate"
+                )
+                .filters { f ->
+                    f.filter(roomShortIdFilter.apply(RoomShortIdFilter.Config()))
+                    f.filter(authFilter.apply(AuthFilter.Config(false)))
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
+                    }
+                }
+                .uri(httpGatewayProperties.routing.endpoints.core)
+        }
+
         routes.route("room-post") { p ->
             p
                 .path(
