@@ -57,7 +57,7 @@ server {
   }
 
   # Include legacy config if it exists
-  include conf.d/legacy_${LEGACY_INCLUDE}.conf.include*;
+  include conf.d/legacy_redirect.conf.include*;
 }
 
 # Set server's scheme as fallback if request was not already forwarded.

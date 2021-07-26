@@ -118,8 +118,6 @@ services:
     command: /jetty/start.jar --module=http-forwarded
   arsnova-web:
     image: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEB_TAG
-  arsnova-web-legacy:
-    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/arsnova-mobile:$WEB_LEGACY_TAG
   arsnova-formatting-service:
     image: registry.gitlab.com/particify/dev/foss/formatting-service:$FORMATTING_TAG
     environment:
@@ -135,7 +133,6 @@ services:
       - arsnova-web
     environment:
       ARSNOVA_HOSTNAME: $ARSNOVA_HOSTNAME
-      LEGACY_INCLUDE: redirect
 volumes:
   couchdb_data:
   postgresql_data_auth:

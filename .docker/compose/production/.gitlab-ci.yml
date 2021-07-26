@@ -17,10 +17,7 @@ build_docker_images:
     IMAGE4_NAME: couchdb
     IMAGE4_BASETAG: "3.1"
     IMAGE4_VERSION: "3.1"
-    IMAGE5_NAME: arsnova-mobile
-    IMAGE5_BASETAG: stable-alpine
-    IMAGE5_VERSION: 2.7.1
-  parallel: 5
+  parallel: 4
   script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - eval export IMAGE_NAME=\$IMAGE${CI_NODE_INDEX}_NAME
