@@ -1,3 +1,5 @@
+DELETE FROM vote WHERE comment_id NOT IN (SELECT id FROM comment);
+
 ALTER TABLE vote
     ADD CONSTRAINT fk_vote_comment
     FOREIGN KEY (comment_id)
