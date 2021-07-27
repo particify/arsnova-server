@@ -34,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import de.thm.arsnova.model.ChoiceAnswer;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.GridImageContent;
+import de.thm.arsnova.model.ScaleChoiceContent;
 import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.v2.Answer;
@@ -72,6 +73,9 @@ public class FromV2Migrator {
 	static final int V2_GRID_CONTAINER_SIZE = 400;
 	static final int V2_GRID_FIELD_COUNT = 16;
 	static final double V2_GRID_SCALE_FACTOR = 1.05;
+	private static final Pattern SCALE_AGREEMENT_OPTION_PATTERN = Pattern.compile(
+			"strongly.* agree|(stimme|trifft)( (voll(kommen| und ganz)?|völlig|komplett))? zu");
+	private static final int SCALE_OPTION_COUNT = 5;
 	private static final Map<String, de.thm.arsnova.model.Content.Format> formatMapping;
 	private static final Pattern prefixedLabelPattern = Pattern.compile("^[A-Z]: .+");
 	private static final Pattern labelPattern = Pattern.compile("^([A-Z]: )?(.+)");
@@ -85,8 +89,8 @@ public class FromV2Migrator {
 		formatMapping.put(V2_TYPE_ABCD, de.thm.arsnova.model.Content.Format.CHOICE);
 		formatMapping.put(V2_TYPE_SC, de.thm.arsnova.model.Content.Format.CHOICE);
 		formatMapping.put(V2_TYPE_MC, de.thm.arsnova.model.Content.Format.CHOICE);
-		formatMapping.put(V2_TYPE_VOTE, de.thm.arsnova.model.Content.Format.SCALE);
-		formatMapping.put(V2_TYPE_SCHOOL, de.thm.arsnova.model.Content.Format.SCALE);
+		formatMapping.put(V2_TYPE_VOTE, de.thm.arsnova.model.Content.Format.CHOICE);
+		formatMapping.put(V2_TYPE_SCHOOL, de.thm.arsnova.model.Content.Format.CHOICE);
 		formatMapping.put(V2_TYPE_YESNO, de.thm.arsnova.model.Content.Format.BINARY);
 		formatMapping.put(V2_TYPE_FREETEXT, de.thm.arsnova.model.Content.Format.TEXT);
 		formatMapping.put(V2_TYPE_SLIDE, de.thm.arsnova.model.Content.Format.SLIDE);
@@ -238,23 +242,24 @@ public class FromV2Migrator {
 			case V2_TYPE_ABCD:
 			case V2_TYPE_SC:
 			case V2_TYPE_MC:
-			case V2_TYPE_VOTE:
 			case V2_TYPE_SCHOOL:
 			case V2_TYPE_YESNO:
-				final ChoiceQuestionContent choiceQuestionContent = new ChoiceQuestionContent();
+				final ChoiceQuestionContent choiceQuestionContent = migrateChoiceQuestion(from);
 				to = choiceQuestionContent;
-				to.setFormat(formatMapping.get(from.getQuestionType()));
-				choiceQuestionContent.setMultiple(V2_TYPE_MC.equals(from.getQuestionType()));
-				final boolean prefixedLabels = from.getPossibleAnswers().stream()
-						.allMatch(a -> prefixedLabelPattern.matcher(a.getText()).matches());
-				for (int i = 0; i < from.getPossibleAnswers().size(); i++) {
-					final de.thm.arsnova.model.migration.v2.AnswerOption fromOption = from.getPossibleAnswers().get(i);
-					final ChoiceQuestionContent.AnswerOption toOption = new ChoiceQuestionContent.AnswerOption();
-					toOption.setLabel(prefixedLabels ? fromOption.getText().substring(3) : fromOption.getText());
-					choiceQuestionContent.getOptions().add(toOption);
-					if (fromOption.isCorrect()) {
-						choiceQuestionContent.getCorrectOptionIndexes().add(i);
-					}
+
+				break;
+			case V2_TYPE_VOTE:
+				final ChoiceQuestionContent choiceQuestionOrScaleContent = migrateChoiceQuestion(from);
+				if (choiceQuestionOrScaleContent.getOptions().size() == SCALE_OPTION_COUNT
+						&& SCALE_AGREEMENT_OPTION_PATTERN.matcher(choiceQuestionOrScaleContent.getOptions().get(0).getLabel())
+						.matches()) {
+					final ScaleChoiceContent scaleChoiceContent = new ScaleChoiceContent();
+					to = scaleChoiceContent;
+					to.setFormat(de.thm.arsnova.model.Content.Format.SCALE);
+					scaleChoiceContent.setOptionTemplate(ScaleChoiceContent.ScaleOptionTemplate.AGREEMENT);
+					scaleChoiceContent.setOptionCount(SCALE_OPTION_COUNT);
+				} else {
+					to = choiceQuestionOrScaleContent;
 				}
 
 				break;
@@ -436,6 +441,25 @@ public class FromV2Migrator {
 		to.setRoomId(from.getSessionId());
 
 		return to;
+	}
+
+	private ChoiceQuestionContent migrateChoiceQuestion(final Content from) {
+		final ChoiceQuestionContent choiceQuestionContent = new ChoiceQuestionContent();
+		choiceQuestionContent.setFormat(formatMapping.get(from.getQuestionType()));
+		choiceQuestionContent.setMultiple(V2_TYPE_MC.equals(from.getQuestionType()));
+		final boolean prefixedLabels = from.getPossibleAnswers().stream()
+				.allMatch(a -> prefixedLabelPattern.matcher(a.getText()).matches());
+		for (int i = 0; i < from.getPossibleAnswers().size(); i++) {
+			final de.thm.arsnova.model.migration.v2.AnswerOption fromOption = from.getPossibleAnswers().get(i);
+			final ChoiceQuestionContent.AnswerOption toOption = new ChoiceQuestionContent.AnswerOption();
+			toOption.setLabel(prefixedLabels ? fromOption.getText().substring(3) : fromOption.getText());
+			choiceQuestionContent.getOptions().add(toOption);
+			if (fromOption.isCorrect()) {
+				choiceQuestionContent.getCorrectOptionIndexes().add(i);
+			}
+		}
+
+		return choiceQuestionContent;
 	}
 
 	private ChoiceAnswer migrateChoice(final Answer from, final de.thm.arsnova.model.Content content) {

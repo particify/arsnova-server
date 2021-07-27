@@ -31,7 +31,7 @@ public class ScaleChoiceContent extends ChoiceQuestionContent {
 	@Max(11)
 	private int optionCount;
 
-	ScaleChoiceContent() {
+	public ScaleChoiceContent() {
 		super.setFormat(Format.SCALE);
 	}
 
