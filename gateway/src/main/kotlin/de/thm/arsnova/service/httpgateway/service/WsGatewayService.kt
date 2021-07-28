@@ -12,8 +12,8 @@ import java.util.Optional
 
 @Service
 class WsGatewayService(
-        private val webClient: WebClient,
-        private val httpGatewayProperties: HttpGatewayProperties
+    private val webClient: WebClient,
+    private val httpGatewayProperties: HttpGatewayProperties
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -21,25 +21,29 @@ class WsGatewayService(
         val url = "${httpGatewayProperties.httpClient.wsGateway}/roomsubscription/usercount?ids=${roomIds.joinToString(",")}"
         val typeRef: ParameterizedTypeReference<List<Int?>> = object : ParameterizedTypeReference<List<Int?>>() {}
         return webClient.get()
-                .uri(url)
-                .retrieve().bodyToMono(typeRef)
-                .flatMapMany { userCounts: List<Int?> ->
-                    Flux.fromIterable(userCounts.map { entry ->
+            .uri(url)
+            .retrieve().bodyToMono(typeRef)
+            .flatMapMany { userCounts: List<Int?> ->
+                Flux.fromIterable(
+                    userCounts.map { entry ->
                         if (entry != null) {
                             Optional.of(entry)
                         } else {
                             Optional.empty()
                         }
-                    })
-                }
-                .onErrorResume { exception ->
-                    logger.debug("Exception on getting room subscription user count from ws gw", exception)
-                    Flux.fromIterable(roomIds.map {
+                    }
+                )
+            }
+            .onErrorResume { exception ->
+                logger.debug("Exception on getting room subscription user count from ws gw", exception)
+                Flux.fromIterable(
+                    roomIds.map {
                         // using a local var for this is needed because otherwise type can't be interfered
                         val h: Optional<Int> = Optional.empty()
                         h
-                    })
-                }
+                    }
+                )
+            }
     }
 
     fun getGatewayStats(): Mono<WsGatewayStats> {

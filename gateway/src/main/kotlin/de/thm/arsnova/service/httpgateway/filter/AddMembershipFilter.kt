@@ -2,7 +2,6 @@ package de.thm.arsnova.service.httpgateway.filter
 
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
 import de.thm.arsnova.service.httpgateway.model.RoomSubscription
-import de.thm.arsnova.service.httpgateway.model.UserSubscription
 import de.thm.arsnova.service.httpgateway.security.JwtTokenUtil
 import de.thm.arsnova.service.httpgateway.service.RoomAccessService
 import de.thm.arsnova.service.httpgateway.service.SubscriptionService
@@ -19,7 +18,7 @@ import reactor.kotlin.core.util.function.component1
 import reactor.kotlin.core.util.function.component2
 
 @Component
-class AddMembershipFilter (
+class AddMembershipFilter(
     private val jwtTokenUtil: JwtTokenUtil,
     private val roomAccessService: RoomAccessService,
     private val subscriptionService: SubscriptionService
@@ -53,13 +52,15 @@ class AddMembershipFilter (
                     val token = e.request.headers.getFirst(HttpHeaders.AUTHORIZATION)!!.removePrefix(RoomAuthFilter.BEARER_HEADER)
                     val userId = jwtTokenUtil.getUserIdFromPublicToken(token)
                     Mono.zip(
-                        Mono.just(RoomAccess(
-                            roomId,
-                            userId,
-                            revId,
-                            role,
-                            null
-                        )),
+                        Mono.just(
+                            RoomAccess(
+                                roomId,
+                                userId,
+                                revId,
+                                role,
+                                null
+                            )
+                        ),
                         subscriptionService
                             .getRoomSubscription(roomId, true)
                             .flatMap { roomSubscription: RoomSubscription ->

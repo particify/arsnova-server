@@ -31,7 +31,7 @@ class RoomIdFilter : AbstractGatewayFilterFactory<RoomIdFilter.Config>(Config::c
 
     override fun apply(config: Config): GatewayFilter {
         return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
-            val request: ServerHttpRequest = exchange.request;
+            val request: ServerHttpRequest = exchange.request
             val uriVariables = ServerWebExchangeUtils.getUriTemplateVariables(exchange)
             val roomId = uriVariables["roomId"]
             if (!roomId!!.matches(roomIdRegex)) {
@@ -42,9 +42,9 @@ class RoomIdFilter : AbstractGatewayFilterFactory<RoomIdFilter.Config>(Config::c
             // The +1 is for the extra '/' that needs to be cut
             val strippedPath = request.path.value().substring(topicRoomIdLength + 1 + roomPrefix.length)
             var modifiedRequest: ServerHttpRequest = exchange.request
-                    .mutate().path(strippedPath)
-                    .header(roomIdHeaderName, roomId)
-                    .build()
+                .mutate().path(strippedPath)
+                .header(roomIdHeaderName, roomId)
+                .build()
 
             chain.filter(exchange.mutate().request(modifiedRequest).build())
         }

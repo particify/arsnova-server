@@ -5,8 +5,6 @@ import de.thm.arsnova.service.httpgateway.exception.ForbiddenException
 import de.thm.arsnova.service.httpgateway.exception.UnauthorizedException
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
 import de.thm.arsnova.service.httpgateway.model.RoomFeatures
-import de.thm.arsnova.service.httpgateway.model.RoomSubscription
-import de.thm.arsnova.service.httpgateway.model.UserSubscription
 import de.thm.arsnova.service.httpgateway.security.JwtTokenUtil
 import de.thm.arsnova.service.httpgateway.service.RoomAccessService
 import de.thm.arsnova.service.httpgateway.service.SubscriptionService
@@ -18,7 +16,6 @@ import org.springframework.cloud.gateway.support.ServerWebExchangeUtils
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpRequest
-import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
@@ -33,20 +30,20 @@ import reactor.kotlin.core.util.function.component3
  * UserId combined with roomId (as a URI variable) are used to query the Auth Service for Room Access.
  */
 @Component
-class AuthFilter (
-        private val jwtTokenUtil: JwtTokenUtil,
-        private val httpGatewayProperties: HttpGatewayProperties,
-        private val roomAccessService: RoomAccessService,
-        private val subscriptionService: SubscriptionService
+class AuthFilter(
+    private val jwtTokenUtil: JwtTokenUtil,
+    private val httpGatewayProperties: HttpGatewayProperties,
+    private val roomAccessService: RoomAccessService,
+    private val subscriptionService: SubscriptionService
 ) : AbstractGatewayFilterFactory<AuthFilter.Config>(Config::class.java) {
 
     private val logger = LoggerFactory.getLogger(AuthFilter::class.java)
 
     override fun apply(config: Config): GatewayFilter {
         return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
-            var request: ServerHttpRequest = exchange.request;
-            val headers: HttpHeaders = request.headers;
-            val bearer = headers.get(HttpHeaders.AUTHORIZATION)
+            var request: ServerHttpRequest = exchange.request
+            val headers: HttpHeaders = request.headers
+            val bearer = headers[HttpHeaders.AUTHORIZATION]
 
             if (bearer != null) {
                 val jwt = bearer[0].removePrefix("Bearer ")
@@ -65,19 +62,19 @@ class AuthFilter (
                         val userId = pair.first
                         val authorities = pair.second
                         Mono.zip(
-                                roomAccessService.getRoomAccess(roomId, userId)
-                                    .onErrorResume { exception ->
-                                        logger.warn("Auth service didn't give specific role", exception)
-                                        if (!config.requireAuthentication) {
-                                            Mono.just(RoomAccess(roomId, userId, "", "NONE", null))
-                                        } else if (httpGatewayProperties.gateway.requireMembership) {
-                                            Mono.error(ForbiddenException())
-                                        } else {
-                                            Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT", null))
-                                        }
-                                    },
-                                subscriptionService.getRoomFeatures(roomId, true),
-                                Mono.just(authorities)
+                            roomAccessService.getRoomAccess(roomId, userId)
+                                .onErrorResume { exception ->
+                                    logger.warn("Auth service didn't give specific role", exception)
+                                    if (!config.requireAuthentication) {
+                                        Mono.just(RoomAccess(roomId, userId, "", "NONE", null))
+                                    } else if (httpGatewayProperties.gateway.requireMembership) {
+                                        Mono.error(ForbiddenException())
+                                    } else {
+                                        Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT", null))
+                                    }
+                                },
+                            subscriptionService.getRoomFeatures(roomId, true),
+                            Mono.just(authorities)
                         )
                     }
                     .map { (roomAccess: RoomAccess, roomFeatures: RoomFeatures, authorityList: List<String>) ->

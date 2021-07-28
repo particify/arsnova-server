@@ -48,31 +48,31 @@ class SystemView(
 
     fun getSummarizedStats(): Mono<SummarizedStats> {
         return authProcessor.getAuthentication()
-                .filter { authentication: Authentication ->
-                    authProcessor.isAdminOrMonitoring(authentication)
-                }
-                .switchIfEmpty(Mono.error(ForbiddenException()))
-                .map { authentication ->
-                    authentication.credentials
-                }
-                .cast(String::class.java)
-                .flatMap { jwt ->
-                    Mono.zip(
-                            wsGatewayService.getGatewayStats(),
-                            coreStatsService.getSummarizedStats(jwt),
-                            commentService.getServiceStats()
-                    )
-                            .map { (wsGatewayStats: WsGatewayStats, coreStats: CoreStats, commentServiceStats: CommentServiceStats) ->
-                                SummarizedStats(
-                                        connectedUsers = wsGatewayStats.webSocketUserCount,
-                                        users = coreStats.userProfile.accountCount,
-                                        activationsPending = coreStats.userProfile.activationsPending,
-                                        rooms = coreStats.room.totalCount,
-                                        contents = coreStats.content.totalCount,
-                                        answers = coreStats.answer.totalCount,
-                                        comments = commentServiceStats.commentCount.toInt()
-                                )
-                            }
-                }
+            .filter { authentication: Authentication ->
+                authProcessor.isAdminOrMonitoring(authentication)
+            }
+            .switchIfEmpty(Mono.error(ForbiddenException()))
+            .map { authentication ->
+                authentication.credentials
+            }
+            .cast(String::class.java)
+            .flatMap { jwt ->
+                Mono.zip(
+                    wsGatewayService.getGatewayStats(),
+                    coreStatsService.getSummarizedStats(jwt),
+                    commentService.getServiceStats()
+                )
+                    .map { (wsGatewayStats: WsGatewayStats, coreStats: CoreStats, commentServiceStats: CommentServiceStats) ->
+                        SummarizedStats(
+                            connectedUsers = wsGatewayStats.webSocketUserCount,
+                            users = coreStats.userProfile.accountCount,
+                            activationsPending = coreStats.userProfile.activationsPending,
+                            rooms = coreStats.room.totalCount,
+                            contents = coreStats.content.totalCount,
+                            answers = coreStats.answer.totalCount,
+                            comments = commentServiceStats.commentCount.toInt()
+                        )
+                    }
+            }
     }
 }

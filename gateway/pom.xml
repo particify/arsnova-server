@@ -209,6 +209,35 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<id>ktlint</id>
+						<phase>verify</phase>
+						<configuration>
+							<target name="ktlint">
+								<java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
+									  classname="com.pinterest.ktlint.Main" classpathref="maven.plugin.classpath">
+									<arg value="src/**/*.kt"/>
+								</java>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>com.pinterest</groupId>
+						<artifactId>ktlint</artifactId>
+						<version>0.41.0</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.2</version>
 				<configuration>

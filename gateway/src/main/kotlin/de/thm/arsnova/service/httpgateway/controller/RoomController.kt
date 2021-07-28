@@ -26,7 +26,7 @@ class RoomController(
     @ResponseBody
     fun getRoomSummaries(
         @RequestParam ids: List<String>
-    ) : Flux<Optional<RoomSummary>> {
+    ): Flux<Optional<RoomSummary>> {
         logger.trace("Getting room summaries by ids: {}", ids)
         return roomView.getSummaries(ids)
     }

@@ -16,16 +16,16 @@ class AuthProcessor {
 
     fun getAuthentication(): Mono<Authentication> {
         return ReactiveSecurityContextHolder.getContext()
-                .map { securityContext ->
-                    securityContext.authentication
-                }
-                .switchIfEmpty(Mono.error(UnauthorizedException()))
+            .map { securityContext ->
+                securityContext.authentication
+            }
+            .switchIfEmpty(Mono.error(UnauthorizedException()))
     }
 
     fun isAdminOrMonitoring(authentication: Authentication): Boolean {
         return authentication.authorities.toList().any { ga ->
-            ga == (SimpleGrantedAuthority(JWT_MONITORING_AUTHORITY_STRING))
-                    || ga == (SimpleGrantedAuthority(JWT_ADMIN_AUTHORITY_STRING))
+            ga == (SimpleGrantedAuthority(JWT_MONITORING_AUTHORITY_STRING)) ||
+                ga == (SimpleGrantedAuthority(JWT_ADMIN_AUTHORITY_STRING))
         }
     }
 }
