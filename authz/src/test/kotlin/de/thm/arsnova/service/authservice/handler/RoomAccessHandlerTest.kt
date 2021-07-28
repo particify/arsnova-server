@@ -2,10 +2,7 @@ package de.thm.arsnova.service.authservice.handler
 
 import de.thm.arsnova.service.authservice.model.RoomAccess
 import de.thm.arsnova.service.authservice.model.RoomAccessEntry
-import de.thm.arsnova.service.authservice.model.RoomAccessPK
 import de.thm.arsnova.service.authservice.model.RoomAccessSyncTracker
-import de.thm.arsnova.service.authservice.model.command.CreateRoomAccessCommand
-import de.thm.arsnova.service.authservice.model.command.DeleteRoomAccessCommand
 import de.thm.arsnova.service.authservice.model.command.RequestRoomAccessSyncCommand
 import de.thm.arsnova.service.authservice.model.command.SyncRoomAccessCommand
 import de.thm.arsnova.service.authservice.model.event.RoomAccessSyncRequest
@@ -44,31 +41,35 @@ class RoomAccessHandlerTest {
     @BeforeEach
     fun setUp() {
         roomAccessHandler =
-                RoomAccessHandler(rabbitTemplate, roomAccessRepository, roomAccessSyncTrackerRepository)
+            RoomAccessHandler(rabbitTemplate, roomAccessRepository, roomAccessSyncTrackerRepository)
     }
 
     @Test
     fun testStartSyncOnCommand() {
         val command = RequestRoomAccessSyncCommand(
-                SOME_ROOM_ID,
-                2
+            SOME_ROOM_ID,
+            2
         )
         val expected = RoomAccessSyncRequest(
-                SOME_ROOM_ID
+            SOME_ROOM_ID
         )
 
         Mockito.`when`(roomAccessSyncTrackerRepository.findById(command.roomId))
-                .thenReturn(Optional.of(RoomAccessSyncTracker(
+            .thenReturn(
+                Optional.of(
+                    RoomAccessSyncTracker(
                         SOME_ROOM_ID,
                         SOME_REV
-                )))
+                    )
+                )
+            )
         val keyCaptor = ArgumentCaptor.forClass(String::class.java)
         val eventCaptor = ArgumentCaptor.forClass(RoomAccessSyncRequest::class.java)
 
         roomAccessHandler.handleRequestRoomAccessSyncCommand(command)
 
         verify(rabbitTemplate, times(1))
-                .convertAndSend(keyCaptor.capture(), eventCaptor.capture())
+            .convertAndSend(keyCaptor.capture(), eventCaptor.capture())
         assertEquals(keyCaptor.value, "backend.event.room.access.sync.request")
         assertEquals(eventCaptor.value, expected)
     }
@@ -76,54 +77,60 @@ class RoomAccessHandlerTest {
     @Test
     fun testHandleSyncRoomAccessCommand() {
         val command = SyncRoomAccessCommand(
-                SOME_NEWER_REV,
-                SOME_ROOM_ID,
-                listOf(
-                        RoomAccessEntry(SOME_OTHER_USER_ID, CREATOR_STRING)
-                )
+            SOME_NEWER_REV,
+            SOME_ROOM_ID,
+            listOf(
+                RoomAccessEntry(SOME_OTHER_USER_ID, CREATOR_STRING)
+            )
         )
         val expectedDelete = RoomAccess(
-                SOME_ROOM_ID,
-                SOME_USER_ID,
-                SOME_REV,
-                CREATOR_STRING,
-                null,
-                null
+            SOME_ROOM_ID,
+            SOME_USER_ID,
+            SOME_REV,
+            CREATOR_STRING,
+            null,
+            null
         )
         val expectedCreate = RoomAccess(
-                SOME_ROOM_ID,
-                SOME_OTHER_USER_ID,
-                SOME_NEWER_REV,
-                CREATOR_STRING,
-                null,
-                null
+            SOME_ROOM_ID,
+            SOME_OTHER_USER_ID,
+            SOME_NEWER_REV,
+            CREATOR_STRING,
+            null,
+            null
         )
         val expectedTracker = RoomAccessSyncTracker(
-                SOME_ROOM_ID,
-                SOME_NEWER_REV
+            SOME_ROOM_ID,
+            SOME_NEWER_REV
         )
 
         Mockito.`when`(roomAccessSyncTrackerRepository.findById(command.roomId))
-                .thenReturn(Optional.of(RoomAccessSyncTracker(
+            .thenReturn(
+                Optional.of(
+                    RoomAccessSyncTracker(
                         SOME_ROOM_ID,
                         SOME_REV
-                )))
+                    )
+                )
+            )
         Mockito.`when`(roomAccessSyncTrackerRepository.save(expectedTracker))
-                .thenReturn(expectedTracker)
+            .thenReturn(expectedTracker)
         Mockito.`when`(roomAccessRepository.findByRoomId(command.roomId))
-                .thenReturn(listOf(
-                        // Do not delete this one
-                        RoomAccess(
-                                SOME_ROOM_ID,
-                                SOME_MODERATOR_ID,
-                                SOME_EVEN_NEWER_REV,
-                                EXECUTIVE_MODERATOR_STRING,
-                                null,
-                                null
-                        ),
-                        // This is old and should get deleted
-                        expectedDelete
-                ))
+            .thenReturn(
+                listOf(
+                    // Do not delete this one
+                    RoomAccess(
+                        SOME_ROOM_ID,
+                        SOME_MODERATOR_ID,
+                        SOME_EVEN_NEWER_REV,
+                        EXECUTIVE_MODERATOR_STRING,
+                        null,
+                        null
+                    ),
+                    // This is old and should get deleted
+                    expectedDelete
+                )
+            )
 
         roomAccessHandler.handleSyncRoomAccessCommand(command)
 
@@ -135,11 +142,11 @@ class RoomAccessHandlerTest {
     @Test
     fun testDoNotUpdateOnOldInfo() {
         val command = SyncRoomAccessCommand(
-                SOME_REV,
-                SOME_ROOM_ID,
-                listOf(
-                        RoomAccessEntry(SOME_USER_ID, CREATOR_STRING)
-                )
+            SOME_REV,
+            SOME_ROOM_ID,
+            listOf(
+                RoomAccessEntry(SOME_USER_ID, CREATOR_STRING)
+            )
         )
         val trackerCaptor = ArgumentCaptor.forClass(RoomAccessSyncTracker::class.java)
 

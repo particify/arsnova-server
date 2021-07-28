@@ -14,7 +14,8 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     fun findByRoomId(roomId: String): Iterable<RoomAccess>
     fun findByRoomIdAndRole(roomId: String, role: String): Iterable<RoomAccess>
     fun findByUserId(userId: String): Iterable<RoomAccess>
-    @Query("""
+    @Query(
+        """
         UPDATE room_access
             SET last_access = :lastAccess
             WHERE room_id = :roomId
@@ -36,7 +37,8 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     // This sets the role to owner even if the entry was already present
     // It also checks to not override a creator role that's maybe present
     // The two role params are needed because otherwise Hibernate can't find the second usage
-    @Query("""
+    @Query(
+        """
         INSERT INTO room_access 
             (room_id, user_id, rev, role) 
             VALUES (:roomId, :userId, :rev, :role)
@@ -53,7 +55,8 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
         @Param("updateRole") updateRole: String
     ): RoomAccess
     // This query should not be needed, but since the PK is composed, hibernate tries to update instead of inserting
-    @Query("""
+    @Query(
+        """
         INSERT INTO room_access
             (room_id, user_id, rev, role)
             VALUES (:roomId, :userId, :rev, :role)
@@ -70,7 +73,8 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
 
     // This query is for creating participants and checks for duplicate key,
     // does a fake update to prevent exceptions but still returns the row
-    @Query("""
+    @Query(
+        """
         INSERT INTO room_access
             (room_id, user_id, rev, role)
             VALUES (:roomId, :userId, :rev, 'PARTICIPANT')

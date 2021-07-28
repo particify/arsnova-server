@@ -14,8 +14,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Service
 
 @Service
-class RoomAccessListener (
-        private val handler: RoomAccessHandler
+class RoomAccessListener(
+    private val handler: RoomAccessHandler
 ) {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 

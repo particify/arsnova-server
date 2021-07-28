@@ -27,6 +27,14 @@ compile:
   script:
     - mvn $MAVEN_CLI_OPTS test-compile
 
+ktlint:
+  extends: .maven
+  stage: test
+  needs:
+    - compile
+  script:
+    - mvn $MAVEN_CLI_OPTS antrun:run@ktlint
+
 unit_test:
   extends: .maven
   stage: test

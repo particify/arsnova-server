@@ -28,8 +28,8 @@ import java.util.HashMap
 
 @Configuration
 @EnableConfigurationProperties(AuthServiceProperties::class)
-class RabbitConfig (
-        private var authServiceProperties: AuthServiceProperties
+class RabbitConfig(
+    private var authServiceProperties: AuthServiceProperties
 ) : RabbitListenerConfigurer {
 
     companion object {
@@ -45,11 +45,11 @@ class RabbitConfig (
     @Bean
     @Autowired
     fun connectionFactory(
-            @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor?
+        @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor?
     ): ConnectionFactory? {
         val connectionFactory = CachingConnectionFactory(
-                authServiceProperties.rabbitmq.host,
-                authServiceProperties.rabbitmq.port
+            authServiceProperties.rabbitmq.host,
+            authServiceProperties.rabbitmq.port
         )
         connectionFactory.username = authServiceProperties.rabbitmq.username
         connectionFactory.setPassword(authServiceProperties.rabbitmq.password)
@@ -76,7 +76,7 @@ class RabbitConfig (
     fun declarables(): Declarables {
         val roomCreatedFanoutExchange = FanoutExchange(roomCreatedExchangeName)
         val roomDeletedFanoutExchange = FanoutExchange(roomDeletedExchangeName)
-        val participantAccessMigrationDlq = Queue("${participantAccessMigrationQueueName}.dlq")
+        val participantAccessMigrationDlq = Queue("$participantAccessMigrationQueueName.dlq")
         val participantAccessMigrationQueue = Queue(
             participantAccessMigrationQueueName,
             true,
@@ -84,7 +84,7 @@ class RabbitConfig (
             false,
             mapOf(
                 "x-dead-letter-exchange" to "",
-                "x-dead-letter-routing-key" to "${participantAccessMigrationQueueName}.dlq"
+                "x-dead-letter-routing-key" to "$participantAccessMigrationQueueName.dlq"
             )
         )
         val roomCreatedQueue = Queue(
@@ -94,7 +94,7 @@ class RabbitConfig (
             false,
             mapOf(
                 "x-dead-letter-exchange" to "",
-                "x-dead-letter-routing-key" to "${roomCreatedQueueName}.dlq"
+                "x-dead-letter-routing-key" to "$roomCreatedQueueName.dlq"
             )
         )
         val roomDeletedQueue = Queue(
@@ -104,11 +104,11 @@ class RabbitConfig (
             false,
             mapOf(
                 "x-dead-letter-exchange" to "",
-                "x-dead-letter-routing-key" to "${roomDeletedQueueName}.dlq"
+                "x-dead-letter-routing-key" to "$roomDeletedQueueName.dlq"
             )
         )
-        val roomCreatedDlq = Queue("${roomCreatedQueueName}.dlq")
-        val roomDeletedDlq = Queue("${roomDeletedQueueName}.dlq")
+        val roomCreatedDlq = Queue("$roomCreatedQueueName.dlq")
+        val roomDeletedDlq = Queue("$roomDeletedQueueName.dlq")
         val roomAccessSyncResponseQueue = Queue(
             roomAccessSyncResponseQueueName,
             true,
@@ -116,13 +116,14 @@ class RabbitConfig (
             false,
             mapOf(
                 "x-dead-letter-exchange" to "",
-                "x-dead-letter-routing-key" to "${roomAccessSyncResponseQueueName}.dlq"
+                "x-dead-letter-routing-key" to "$roomAccessSyncResponseQueueName.dlq"
             )
         )
-        val roomAccessSyncResponseDlq = Queue("${roomAccessSyncResponseQueueName}.dlq")
+        val roomAccessSyncResponseDlq = Queue("$roomAccessSyncResponseQueueName.dlq")
         val roomAccessSyncRequestExchange = DirectExchange(roomAccessSyncRequestQueueName)
 
-        return Declarables(listOf(
+        return Declarables(
+            listOf(
                 roomCreatedFanoutExchange,
                 roomDeletedFanoutExchange,
                 participantAccessMigrationQueue,
@@ -136,7 +137,8 @@ class RabbitConfig (
                 roomAccessSyncResponseQueue,
                 roomAccessSyncResponseDlq,
                 roomAccessSyncRequestExchange
-        ))
+            )
+        )
     }
 
     @Bean
