@@ -23,14 +23,14 @@ class SystemController(
 
     @GetMapping(path = [serviceStatsMapping])
     @ResponseBody
-    fun getServiceStats() : Mono<Stats> {
+    fun getServiceStats(): Mono<Stats> {
         logger.trace("Getting stats")
         return systemView.getServiceStats()
     }
 
     @GetMapping(path = [summarizedStatsMapping])
     @ResponseBody
-    fun getSummarizedStats() : Mono<SummarizedStats> {
+    fun getSummarizedStats(): Mono<SummarizedStats> {
         logger.trace("Getting summarized stats")
         return systemView.getSummarizedStats()
     }

@@ -13,8 +13,8 @@ import reactor.core.publisher.Mono
 
 @Service
 class RoomAccessService(
-        private val webClient: WebClient,
-        private val httpGatewayProperties: HttpGatewayProperties
+    private val webClient: WebClient,
+    private val httpGatewayProperties: HttpGatewayProperties
 ) {
     private val logger = LoggerFactory.getLogger(RoomAccessService::class.java)
 
@@ -22,7 +22,7 @@ class RoomAccessService(
         val url = "${httpGatewayProperties.httpClient.authService}/roomaccess/$roomId/$userId"
         logger.trace("Querying auth service for room access with url: {}", url)
         return webClient.get().uri(url)
-                .retrieve().bodyToMono(RoomAccess::class.java).cache()
+            .retrieve().bodyToMono(RoomAccess::class.java).cache()
     }
 
     fun postRoomAccess(roomAccess: RoomAccess): Mono<RoomAccess> {
@@ -35,7 +35,7 @@ class RoomAccessService(
     }
 
     fun postRoomAccessWithLimit(roomAccess: RoomAccess, roomParticipantLimit: Int): Mono<RoomAccess> {
-        val url = "${httpGatewayProperties.httpClient.authService}/roomaccess/?roomParticipantLimit=${roomParticipantLimit}"
+        val url = "${httpGatewayProperties.httpClient.authService}/roomaccess/?roomParticipantLimit=$roomParticipantLimit"
         logger.trace("Posting to auth service for room access with url: {}, roomAccess: {}", url, roomAccess)
         return webClient.post().uri(url)
             .body(BodyInserters.fromPublisher(Mono.just(roomAccess), RoomAccess::class.java))
@@ -59,7 +59,7 @@ class RoomAccessService(
     }
 
     fun deleteRoomAccessByRoomId(roomId: String): Flux<RoomAccess> {
-        val url = "${httpGatewayProperties.httpClient.authService}/roomaccess/${roomId}"
+        val url = "${httpGatewayProperties.httpClient.authService}/roomaccess/$roomId"
         logger.trace("Deleting to auth service for room access with url: {}", url)
         return webClient.delete().uri(url)
             .retrieve()
@@ -70,6 +70,6 @@ class RoomAccessService(
         val url = "${httpGatewayProperties.httpClient.authService}/roomaccess/by-user/$userId"
         logger.trace("Querying auth service for room access with url: {}", url)
         return webClient.get().uri(url)
-                .retrieve().bodyToFlux(RoomAccess::class.java).cache()
+            .retrieve().bodyToFlux(RoomAccess::class.java).cache()
     }
 }

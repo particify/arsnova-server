@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono
 
 @Component
 class SecurityContextRepository(
-        private val jwtTokenUtil: JwtTokenUtil
+    private val jwtTokenUtil: JwtTokenUtil
 ) : ServerSecurityContextRepository {
     companion object {
         val TOKEN_PREFIX = "Bearer "
@@ -31,31 +31,31 @@ class SecurityContextRepository(
         val authHeader = serverWebExchange.request.headers.getFirst("Authorization")
 
         return Mono.justOrEmpty(authHeader)
-                .filter { potentialHeader: String ->
-                    potentialHeader.startsWith(TOKEN_PREFIX)
-                }
-                .map { authenticationHeader ->
-                    authenticationHeader.removePrefix(TOKEN_PREFIX)
-                }
-                .map { token ->
-                    Pair(jwtTokenUtil.getUserIdFromPublicToken(token), token)
-                }
-                .onErrorResume { exception ->
-                    logger.debug("Exception on getting user id from public jwt", exception)
-                    Mono.empty()
-                }
-                .map { authPair ->
-                    val authorities = jwtTokenUtil.getAuthoritiesFromPublicToken(authPair.second)
-                    logger.trace("User's granted authorities: {}", authorities)
-                    UsernamePasswordAuthenticationToken(
-                            authPair.first,
-                            TOKEN_PREFIX + authPair.second,
-                            authorities
-                    )
-                }
-                .map { authentication ->
-                    logger.trace("User's authentication: {}", authentication)
-                    SecurityContextImpl(authentication)
-                }
+            .filter { potentialHeader: String ->
+                potentialHeader.startsWith(TOKEN_PREFIX)
+            }
+            .map { authenticationHeader ->
+                authenticationHeader.removePrefix(TOKEN_PREFIX)
+            }
+            .map { token ->
+                Pair(jwtTokenUtil.getUserIdFromPublicToken(token), token)
+            }
+            .onErrorResume { exception ->
+                logger.debug("Exception on getting user id from public jwt", exception)
+                Mono.empty()
+            }
+            .map { authPair ->
+                val authorities = jwtTokenUtil.getAuthoritiesFromPublicToken(authPair.second)
+                logger.trace("User's granted authorities: {}", authorities)
+                UsernamePasswordAuthenticationToken(
+                    authPair.first,
+                    TOKEN_PREFIX + authPair.second,
+                    authorities
+                )
+            }
+            .map { authentication ->
+                logger.trace("User's authentication: {}", authentication)
+                SecurityContextImpl(authentication)
+            }
     }
 }

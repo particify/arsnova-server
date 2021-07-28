@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ResponseBody
 import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 
 @Controller
 class MembershipController(
@@ -27,7 +26,7 @@ class MembershipController(
     @ResponseBody
     fun getMembershipByUser(
         @PathVariable userId: String
-    ) : Flux<Membership> {
+    ): Flux<Membership> {
         logger.trace("Getting membership by user: {}", userId)
         return membershipView.getByUser(userId)
     }

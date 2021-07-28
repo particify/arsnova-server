@@ -4,17 +4,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class CoreStats(
-        val userProfile: CoreUserProfileStats,
-        val room: CoreEntityStats,
-        val content: CoreEntityStats,
-        val answer: CoreEntityStats
+    val userProfile: CoreUserProfileStats,
+    val room: CoreEntityStats,
+    val content: CoreEntityStats,
+    val answer: CoreEntityStats
 )
 
 data class CoreEntityStats(
-        val totalCount: Int
+    val totalCount: Int
 )
 
 data class CoreUserProfileStats(
-        val accountCount: Int,
-        val activationsPending: Int
+    val accountCount: Int,
+    val activationsPending: Int
 )

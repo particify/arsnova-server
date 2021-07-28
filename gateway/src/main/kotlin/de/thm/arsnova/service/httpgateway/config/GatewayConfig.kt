@@ -1,8 +1,8 @@
 package de.thm.arsnova.service.httpgateway.config
 
+import de.thm.arsnova.service.httpgateway.filter.AddMembershipFilter
 import de.thm.arsnova.service.httpgateway.filter.AuthFilter
 import de.thm.arsnova.service.httpgateway.filter.JwtUserIdFilter
-import de.thm.arsnova.service.httpgateway.filter.AddMembershipFilter
 import de.thm.arsnova.service.httpgateway.filter.RemoveMembershipFilter
 import de.thm.arsnova.service.httpgateway.filter.RequestRateLimiter
 import de.thm.arsnova.service.httpgateway.filter.RoomAuthFilter
@@ -16,12 +16,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import reactor.core.publisher.Mono
 
-
 @Configuration
 @EnableConfigurationProperties(HttpGatewayProperties::class)
-class GatewayConfig (
-        private val httpGatewayProperties: HttpGatewayProperties,
-        private val requestRateLimiter: RequestRateLimiter
+class GatewayConfig(
+    private val httpGatewayProperties: HttpGatewayProperties,
+    private val requestRateLimiter: RequestRateLimiter
 ) {
     companion object {
         const val UTIL_PREFIX = "/_util"
@@ -31,11 +30,11 @@ class GatewayConfig (
     fun ipKeyResolver(): KeyResolver {
         return KeyResolver { exchange ->
             Mono.just(
-                    listOf(
-                            exchange.request.method.toString(),
-                            exchange.request.remoteAddress!!.address.toString()
-                    )
-                            .joinToString(",")
+                listOf(
+                    exchange.request.method.toString(),
+                    exchange.request.remoteAddress!!.address.toString()
+                )
+                    .joinToString(",")
             )
         }
     }
@@ -47,13 +46,13 @@ class GatewayConfig (
         addMembershipFilter: AddMembershipFilter,
         removeMembershipFilter: RemoveMembershipFilter,
         roomIdFilter: RoomIdFilter,
-            roomShortIdFilter: RoomShortIdFilter,
+        roomShortIdFilter: RoomShortIdFilter,
         roomAuthFilter: RoomAuthFilter,
         jwtUserIdFilter: JwtUserIdFilter
     ): RouteLocator? {
         val routes = builder.routes()
 
-        routes.route("roomaccess") {p ->
+        routes.route("roomaccess") { p ->
             p
                 .path("/roomaccess/**")
                 .filters { f ->
@@ -95,22 +94,22 @@ class GatewayConfig (
         if (httpGatewayProperties.routing.endpoints.importService != null) {
             routes.route("import-service") { p ->
                 p
-                        .path("/import/**")
-                        .filters { f ->
-                            f.filter(jwtUserIdFilter.apply(JwtUserIdFilter.Config()))
-                            f.requestRateLimiter { r ->
-                                r.rateLimiter = requestRateLimiter
-                            }
+                    .path("/import/**")
+                    .filters { f ->
+                        f.filter(jwtUserIdFilter.apply(JwtUserIdFilter.Config()))
+                        f.requestRateLimiter { r ->
+                            r.rateLimiter = requestRateLimiter
                         }
-                        .uri(httpGatewayProperties.routing.endpoints.importService)
+                    }
+                    .uri(httpGatewayProperties.routing.endpoints.importService)
             }
         }
 
         routes.route("formatting-service") { p ->
             p
-                .path("${UTIL_PREFIX}/formatting/render")
+                .path("$UTIL_PREFIX/formatting/render")
                 .filters { f ->
-                    f.rewritePath("^${UTIL_PREFIX}/formatting", "")
+                    f.rewritePath("^$UTIL_PREFIX/formatting", "")
                     f.requestRateLimiter { r ->
                         r.rateLimiter = requestRateLimiter
                     }
@@ -198,26 +197,26 @@ class GatewayConfig (
         if (httpGatewayProperties.routing.endpoints.importService != null) {
             routes.route("management-import-service") { p ->
                 p
-                        .path(
-                                "/management/import-service/**"
-                        )
-                        .filters { f ->
-                            f.rewritePath("^/management/import-service", "/management")
-                        }
-                        .uri(httpGatewayProperties.routing.endpoints.importService)
+                    .path(
+                        "/management/import-service/**"
+                    )
+                    .filters { f ->
+                        f.rewritePath("^/management/import-service", "/management")
+                    }
+                    .uri(httpGatewayProperties.routing.endpoints.importService)
             }
         }
 
         if (httpGatewayProperties.routing.endpoints.proxyMetrics != null) {
             routes.route("metrics-proxy") { p ->
                 p
-                        .path(
-                                "/management/proxy/prometheus"
-                        )
-                        .filters { f ->
-                            f.rewritePath("^/management/proxy", "")
-                        }
-                        .uri(httpGatewayProperties.routing.endpoints.proxyMetrics)
+                    .path(
+                        "/management/proxy/prometheus"
+                    )
+                    .filters { f ->
+                        f.rewritePath("^/management/proxy", "")
+                    }
+                    .uri(httpGatewayProperties.routing.endpoints.proxyMetrics)
             }
         }
 

@@ -18,8 +18,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class RequestRateLimiter(
-        private val httpGatewayProperties: HttpGatewayProperties,
-        private val configurationService: ConfigurationService
+    private val httpGatewayProperties: HttpGatewayProperties,
+    private val configurationService: ConfigurationService
 ) : AbstractRateLimiter<RequestRateLimiter.Config>(Config::class.java, CONFIGURATION_PROPERTY_NAME, configurationService) {
 
     companion object {
@@ -84,7 +84,7 @@ class RequestRateLimiter(
     }
 
     class Config(
-            private val httpGatewayProperties: HttpGatewayProperties
+        private val httpGatewayProperties: HttpGatewayProperties
     ) {
         val queryTokensPerTimeframe: Long = httpGatewayProperties.gateway.rateLimit.queryTokensPerTimeframe
         val queryBurstCapacity: Long = httpGatewayProperties.gateway.rateLimit.queryBurstCapacity

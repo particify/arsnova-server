@@ -18,7 +18,7 @@ import java.util.Date
 
 @Component
 class JwtTokenUtil(
-        private val httpGatewayProperties: HttpGatewayProperties
+    private val httpGatewayProperties: HttpGatewayProperties
 ) {
     companion object {
         const val ROLE_AUTHORITY_PREFIX = "ROLE_"
@@ -71,9 +71,9 @@ class JwtTokenUtil(
     }
 
     fun createSignedInternalToken(
-            roomAccess: RoomAccess,
-            roomFeatures: RoomFeatures,
-            clientAuthorities: List<String>
+        roomAccess: RoomAccess,
+        roomFeatures: RoomFeatures,
+        clientAuthorities: List<String>
     ): String {
         val roomRole = "${roomAccess.role}-${roomAccess.roomId}"
         val generatedRoles = arrayOf(roomRole)

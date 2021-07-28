@@ -3,8 +3,6 @@ package de.thm.arsnova.service.httpgateway.view
 import de.thm.arsnova.service.httpgateway.exception.ForbiddenException
 import de.thm.arsnova.service.httpgateway.model.Room
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
-import de.thm.arsnova.service.httpgateway.model.RoomHistoryEntry
-import de.thm.arsnova.service.httpgateway.model.User
 import de.thm.arsnova.service.httpgateway.security.AuthProcessor
 import de.thm.arsnova.service.httpgateway.service.RoomAccessService
 import de.thm.arsnova.service.httpgateway.service.RoomService
@@ -19,15 +17,14 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.util.Date
-import java.util.Optional
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class MembershipViewTest(
-        @Mock private val authProcessor: AuthProcessor,
-        @Mock private val roomAccessService: RoomAccessService,
-        @Mock private val roomService: RoomService,
-        @Mock private val userService: UserService
+    @Mock private val authProcessor: AuthProcessor,
+    @Mock private val roomAccessService: RoomAccessService,
+    @Mock private val roomService: RoomService,
+    @Mock private val userService: UserService
 ) {
     private val membershipView = MembershipView(authProcessor, roomAccessService, roomService, userService)
 

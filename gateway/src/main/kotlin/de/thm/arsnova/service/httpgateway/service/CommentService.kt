@@ -20,18 +20,20 @@ class CommentService(
         val url = "${httpGatewayProperties.httpClient.commentService}/stats/comment-stats-by-rooms?roomIds=${roomIds.joinToString(",")}"
         logger.trace("Querying comment service for comment stats with url: {}", url)
         return webClient.get()
-                .uri(url)
-                .header("Authorization", jwt)
-                .retrieve().bodyToFlux(CommentStats::class.java).cache()
-                .onErrorResume { exception ->
-                    logger.debug("Error on getting stats from comment service", exception)
-                    Flux.fromIterable(roomIds.map { roomId ->
+            .uri(url)
+            .header("Authorization", jwt)
+            .retrieve().bodyToFlux(CommentStats::class.java).cache()
+            .onErrorResume { exception ->
+                logger.debug("Error on getting stats from comment service", exception)
+                Flux.fromIterable(
+                    roomIds.map { roomId ->
                         CommentStats(
-                                roomId,
-                                null
+                            roomId,
+                            null
                         )
-                    })
-                }
+                    }
+                )
+            }
     }
 
     fun getServiceStats(): Mono<CommentServiceStats> {

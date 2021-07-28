@@ -10,7 +10,6 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.Optional
 
-
 @Service
 class RoomService(
     private val webClient: WebClient,
@@ -23,33 +22,35 @@ class RoomService(
         logger.trace("Querying core for room with url: {}", url)
         return webClient.get().uri(url)
             .retrieve().bodyToMono(Room::class.java).cache()
-                .onErrorResume { exception ->
-                    logger.debug("Error on getting room with id: {}", roomId, exception)
-                    Mono.empty()
-                }
+            .onErrorResume { exception ->
+                logger.debug("Error on getting room with id: {}", roomId, exception)
+                Mono.empty()
+            }
     }
 
     fun get(roomIds: List<String>): Flux<Optional<Room>> {
         val path = "${httpGatewayProperties.httpClient.core}/room/"
-        val url = "${path}?ids=${roomIds.joinToString(",")}&skipMissing=false"
+        val url = "$path?ids=${roomIds.joinToString(",")}&skipMissing=false"
         logger.trace("Querying core for room with url: {}", url)
         val typeRef: ParameterizedTypeReference<List<Room?>> = object : ParameterizedTypeReference<List<Room?>>() {}
         return webClient.get().uri(url)
             .retrieve().bodyToMono(typeRef).cache()
-                .flatMapMany { roomList: List<Room?> ->
-                    Flux.fromIterable(roomList.map { entry ->
+            .flatMapMany { roomList: List<Room?> ->
+                Flux.fromIterable(
+                    roomList.map { entry ->
                         if (entry != null) {
                             Optional.of(Room(entry.id, entry.shortId, entry.name))
                         } else {
                             Optional.empty()
                         }
-                    })
-                }
+                    }
+                )
+            }
     }
 
     fun getByShortId(shortId: String): Mono<Room> {
         val path = "${httpGatewayProperties.httpClient.core}/room/"
-        val url = "${path}~${shortId}"
+        val url = "$path~$shortId"
         logger.trace("Querying core for room by shortId with url: {}", url)
         return webClient
             .get()

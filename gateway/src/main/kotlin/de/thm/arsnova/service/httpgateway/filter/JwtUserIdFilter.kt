@@ -23,8 +23,8 @@ import reactor.core.publisher.Mono
  * room-specific.
  */
 @Component
-class JwtUserIdFilter (
-        private val jwtTokenUtil: JwtTokenUtil
+class JwtUserIdFilter(
+    private val jwtTokenUtil: JwtTokenUtil
 ) : AbstractGatewayFilterFactory<JwtUserIdFilter.Config>(Config::class.java) {
     companion object {
         private const val USER_ID_HEADER = "Arsnova-User-Id"
@@ -34,27 +34,27 @@ class JwtUserIdFilter (
 
     override fun apply(config: Config): GatewayFilter {
         return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
-            var request: ServerHttpRequest = exchange.request;
-            val headers: HttpHeaders = request.headers;
+            var request: ServerHttpRequest = exchange.request
+            val headers: HttpHeaders = request.headers
             val bearer = headers[HttpHeaders.AUTHORIZATION]
 
             if (bearer != null) {
                 val jwt = bearer[0].removePrefix("Bearer ")
                 Mono.just(jwtTokenUtil.getUserIdFromPublicToken(jwt))
-                        .onErrorResume { exception ->
-                            logger.debug("Exception on verifying JWT and obtaining userId", exception)
-                            Mono.error(UnauthorizedException())
-                        }
-                        .map { userId: String ->
-                            logger.trace("Working with userId: {}", userId)
-                            exchange.mutate().request { r ->
-                                r.headers { headers ->
-                                    headers.set(USER_ID_HEADER, userId)
-                                    headers.remove(HttpHeaders.AUTHORIZATION)
-                                }
-                            }.build()
-                        }
-                        .defaultIfEmpty(exchange).flatMap(chain::filter)
+                    .onErrorResume { exception ->
+                        logger.debug("Exception on verifying JWT and obtaining userId", exception)
+                        Mono.error(UnauthorizedException())
+                    }
+                    .map { userId: String ->
+                        logger.trace("Working with userId: {}", userId)
+                        exchange.mutate().request { r ->
+                            r.headers { headers ->
+                                headers.set(USER_ID_HEADER, userId)
+                                headers.remove(HttpHeaders.AUTHORIZATION)
+                            }
+                        }.build()
+                    }
+                    .defaultIfEmpty(exchange).flatMap(chain::filter)
             } else {
                 throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
             }

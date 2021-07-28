@@ -12,8 +12,8 @@ import reactor.core.publisher.Mono
 
 @Service
 class SubscriptionService(
-        private val webClient: WebClient,
-        private val httpGatewayProperties: HttpGatewayProperties
+    private val webClient: WebClient,
+    private val httpGatewayProperties: HttpGatewayProperties
 ) {
     companion object {
         const val FREE_TIER_STRING = "free"
@@ -26,7 +26,7 @@ class SubscriptionService(
 
     fun getUserSubscription(userId: String, withTierId: Boolean): Mono<UserSubscription> {
         return if (httpGatewayProperties.httpClient.subscriptionService != null) {
-            val url = "${httpGatewayProperties.httpClient.subscriptionService}/subscription/by-user?ids=${userId}&withTierId=${withTierId}"
+            val url = "${httpGatewayProperties.httpClient.subscriptionService}/subscription/by-user?ids=$userId&withTierId=$withTierId"
             logger.trace("Querying subscription service for subscription by user with url: {}", url)
             webClient.get().uri(url)
                 .retrieve().bodyToFlux(UserSubscription::class.java).next()
@@ -41,14 +41,14 @@ class SubscriptionService(
 
     fun getRoomSubscription(roomId: String, withTierId: Boolean): Mono<RoomSubscription> {
         return if (httpGatewayProperties.httpClient.subscriptionService != null) {
-            val url = "${httpGatewayProperties.httpClient.subscriptionService}/subscription/by-room?ids=${roomId}&withTierId=${withTierId}"
+            val url = "${httpGatewayProperties.httpClient.subscriptionService}/subscription/by-room?ids=$roomId&withTierId=$withTierId"
             logger.trace("Querying subscription service for subscription by user with url: {}", url)
             webClient.get().uri(url)
-                    .retrieve().bodyToFlux(RoomSubscription::class.java).next()
-                    .onErrorResume { error ->
-                        logger.warn("Error from querying subscription service: {}", error)
-                        Mono.just(RoomSubscription(roomId, FREE_TIER_STRING))
-                    }
+                .retrieve().bodyToFlux(RoomSubscription::class.java).next()
+                .onErrorResume { error ->
+                    logger.warn("Error from querying subscription service: {}", error)
+                    Mono.just(RoomSubscription(roomId, FREE_TIER_STRING))
+                }
         } else {
             Mono.just(RoomSubscription(roomId, FREE_TIER_STRING))
         }
@@ -56,14 +56,14 @@ class SubscriptionService(
 
     fun getRoomFeatures(roomId: String, withTierId: Boolean): Mono<RoomFeatures> {
         return if (httpGatewayProperties.httpClient.subscriptionService != null) {
-            val url = "${httpGatewayProperties.httpClient.subscriptionService}/feature/by-room?ids=${roomId}&withTierId=${withTierId}"
+            val url = "${httpGatewayProperties.httpClient.subscriptionService}/feature/by-room?ids=$roomId&withTierId=$withTierId"
             logger.trace("Querying subscription service for features by room with url: {}", url)
             webClient.get().uri(url)
-                    .retrieve().bodyToFlux(RoomFeatures::class.java).next()
-                    .onErrorResume { error ->
-                        logger.warn("Error from querying subscription service: {}", error)
-                        Mono.just(RoomFeatures(roomId, emptyList(), null))
-                    }
+                .retrieve().bodyToFlux(RoomFeatures::class.java).next()
+                .onErrorResume { error ->
+                    logger.warn("Error from querying subscription service: {}", error)
+                    Mono.just(RoomFeatures(roomId, emptyList(), null))
+                }
         } else {
             Mono.just(RoomFeatures(roomId, emptyList(), null))
         }
@@ -71,7 +71,7 @@ class SubscriptionService(
 
     fun getRoomParticipantLimit(tierId: String): Mono<Int> {
         return if (httpGatewayProperties.httpClient.subscriptionService != null) {
-            val url = "${httpGatewayProperties.httpClient.subscriptionService}/featuresettings/by-name-and-tierid-and-keys?name=${ROOM_FEATURE_STRING}&tierId=${tierId}&keys=${ROOM_PARTICIPANT_LIMIT_KEY_STRING}"
+            val url = "${httpGatewayProperties.httpClient.subscriptionService}/featuresettings/by-name-and-tierid-and-keys?name=$ROOM_FEATURE_STRING&tierId=$tierId&keys=$ROOM_PARTICIPANT_LIMIT_KEY_STRING"
             logger.trace("Querying subscription service for feature settingswith url: {}", url)
             webClient.get().uri(url)
                 .retrieve().bodyToFlux(FeatureSetting::class.java).next()
