@@ -10,12 +10,11 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @EnableScheduling
 class ArsnovaAuthServiceApplication : SpringBootServletInitializer() {
 
-	override fun configure(application: SpringApplicationBuilder): SpringApplicationBuilder {
-		return application.sources(ArsnovaAuthServiceApplication::class.java!!)
-	}
-
+    override fun configure(application: SpringApplicationBuilder): SpringApplicationBuilder {
+        return application.sources(ArsnovaAuthServiceApplication::class.java)
+    }
 }
 
 fun main(args: Array<String>) {
-	SpringApplication.run(ArsnovaAuthServiceApplication::class.java, *args)
+    SpringApplication.run(ArsnovaAuthServiceApplication::class.java, *args)
 }

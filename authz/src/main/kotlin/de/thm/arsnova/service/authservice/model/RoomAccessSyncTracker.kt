@@ -4,7 +4,7 @@ import javax.persistence.Entity
 import javax.persistence.Id
 
 @Entity
-class RoomAccessSyncTracker (
+class RoomAccessSyncTracker(
     @Id
     var roomId: String = "",
     var rev: String = ""

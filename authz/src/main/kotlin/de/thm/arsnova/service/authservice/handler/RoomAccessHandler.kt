@@ -1,7 +1,6 @@
 package de.thm.arsnova.service.authservice.handler
 
 import de.thm.arsnova.service.authservice.config.RabbitConfig
-import de.thm.arsnova.service.authservice.exception.BadRequestException
 import de.thm.arsnova.service.authservice.exception.ForbiddenException
 import de.thm.arsnova.service.authservice.exception.InternalServerErrorException
 import de.thm.arsnova.service.authservice.model.RoomAccess
@@ -26,10 +25,10 @@ import java.util.Date
 import java.util.Optional
 
 @Component
-class RoomAccessHandler (
-        private val rabbitTemplate: RabbitTemplate,
-        private val roomAccessRepository: RoomAccessRepository,
-        private val roomAccessSyncTrackerRepository: RoomAccessSyncTrackerRepository
+class RoomAccessHandler(
+    private val rabbitTemplate: RabbitTemplate,
+    private val roomAccessRepository: RoomAccessRepository,
+    private val roomAccessSyncTrackerRepository: RoomAccessSyncTrackerRepository
 ) {
     companion object {
         const val ROLE_CREATOR_STRING = "CREATOR"
@@ -43,17 +42,17 @@ class RoomAccessHandler (
     fun handleRequestRoomAccessSyncCommand(command: RequestRoomAccessSyncCommand): RoomAccessSyncTracker {
         logger.debug("Handling request: {}", command)
         val syncTracker = roomAccessSyncTrackerRepository.findById(command.roomId)
-                .orElse(RoomAccessSyncTracker(command.roomId, "0"))
+            .orElse(RoomAccessSyncTracker(command.roomId, "0"))
         if (syncTracker.rev.substringBefore("-").toInt() < command.revNumber) {
             // if either no sync has happened or the sync is older than the rev the request aims for
-            val newTracker = RoomAccessSyncTracker(command.roomId, "0");
+            val newTracker = RoomAccessSyncTracker(command.roomId, "0")
             logger.debug("Saving tracker to indicate sync process: {}", newTracker)
             roomAccessSyncTrackerRepository.save(newTracker)
             val event = RoomAccessSyncRequest(command.roomId)
             logger.debug("Sending room access sync request: {}", event)
             rabbitTemplate.convertAndSend(
-                    RabbitConfig.roomAccessSyncRequestQueueName,
-                    event
+                RabbitConfig.roomAccessSyncRequestQueueName,
+                event
             )
             return newTracker
         } else {
@@ -67,7 +66,7 @@ class RoomAccessHandler (
     fun handleSyncRoomAccessCommand(command: SyncRoomAccessCommand) {
         logger.debug("Handling event: {}", command)
         val syncTracker = roomAccessSyncTrackerRepository.findById(command.roomId)
-                .orElse(RoomAccessSyncTracker(command.roomId, "0"))
+            .orElse(RoomAccessSyncTracker(command.roomId, "0"))
         // Check if event has newer information based on the revision
         if (syncTracker.rev.substringBefore("-").toInt() > command.rev.substringBefore("-").toInt()) {
             // This should not happen but may be because of asynchronicity, especially with multiple instances
@@ -186,7 +185,7 @@ class RoomAccessHandler (
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    fun delete(roomId: String, userId: String): Unit {
+    fun delete(roomId: String, userId: String) {
         roomAccessRepository.deleteByRoomIdAndUserIdWithoutChecking(roomId, userId)
     }
 

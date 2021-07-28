@@ -4,8 +4,6 @@ import de.thm.arsnova.service.authservice.persistence.RoomAccessRepository
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -16,8 +14,8 @@ import java.util.Date
 
 @Service
 class MetricsService(
-        meterRegistry: MeterRegistry,
-        private val roomAccessRepository: RoomAccessRepository
+    meterRegistry: MeterRegistry,
+    private val roomAccessRepository: RoomAccessRepository
 ) {
     companion object {
         const val GATHERING_INTERVAL_DAILY = 10 * 60 * 1000L
@@ -27,20 +25,20 @@ class MetricsService(
     }
 
     val roomMembershipsDailyDistribution = DistributionSummary
-            .builder("arsnova.room.memberships.daily")
-            .publishPercentileHistogram()
-            .maximumExpectedValue(1000.0)
-            .register(meterRegistry)
+        .builder("arsnova.room.memberships.daily")
+        .publishPercentileHistogram()
+        .maximumExpectedValue(1000.0)
+        .register(meterRegistry)
     val roomMembershipsWeeklyDistribution = DistributionSummary
-            .builder("arsnova.room.memberships.weekly")
-            .publishPercentileHistogram()
-            .maximumExpectedValue(1000.0)
-            .register(meterRegistry)
+        .builder("arsnova.room.memberships.weekly")
+        .publishPercentileHistogram()
+        .maximumExpectedValue(1000.0)
+        .register(meterRegistry)
     val roomMembershipsMonthlyDistribution = DistributionSummary
-            .builder("arsnova.room.memberships.monthly")
-            .publishPercentileHistogram()
-            .maximumExpectedValue(1000.0)
-            .register(meterRegistry)
+        .builder("arsnova.room.memberships.monthly")
+        .publishPercentileHistogram()
+        .maximumExpectedValue(1000.0)
+        .register(meterRegistry)
 
     var dailyUserCount = 0L
     var dailyOwnerCount = 0L
@@ -96,10 +94,12 @@ class MetricsService(
 
     private fun updateUserCountMetrics(interval: Long, unit: TemporalUnit) {
         val userCount = roomAccessRepository.countDistinctUserIdByLastAccessAfter(
-            Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC)))
+            Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC))
+        )
         val ownerCount = roomAccessRepository.countDistinctUserIdByRoleAndLastAccessAfter(
             "CREATOR",
-            Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC)))
+            Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC))
+        )
         when (unit) {
             ChronoUnit.DAYS -> {
                 this.dailyUserCount = userCount
@@ -119,7 +119,8 @@ class MetricsService(
 
     private fun updateRoomMembershipsMetrics(interval: Long, unit: TemporalUnit, distributionSummary: DistributionSummary) {
         val membershipCounts = roomAccessRepository.countByLastAccessAfterAndGroupByRoomId(
-            Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC)))
+            Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC))
+        )
         for (count in membershipCounts) {
             distributionSummary.record(count.toDouble())
         }
