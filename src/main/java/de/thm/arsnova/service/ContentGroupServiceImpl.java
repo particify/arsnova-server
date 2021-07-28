@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
@@ -157,7 +156,6 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
 	}
 
 	@EventListener
-	@Secured({"ROLE_USER", "RUN_AS_SYSTEM"})
 	public void handleRoomDeletion(final BeforeDeletionEvent<Room> event) {
 		final Iterable<ContentGroup> contentGroups = contentGroupRepository.findByRoomId(event.getEntity().getId());
 		delete(contentGroups);

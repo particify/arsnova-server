@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.access.prepost.PreFilter;
 
 import de.thm.arsnova.model.Entity;
 
@@ -34,25 +32,20 @@ import de.thm.arsnova.model.Entity;
  * @author Daniel Gerhardt
  */
 public interface EntityService<T extends Entity> {
-	@PreAuthorize("hasPermission(#id, #this.this.getTypeName(), 'read')")
 	T get(String id);
 
 	T get(String id, boolean internal);
 
-	@PreFilter(value = "hasPermission(filterObject, #this.this.getTypeName(), 'read')", filterTarget = "ids")
 	List<T> get(Iterable<String> ids);
 
-	@PreAuthorize("hasPermission(#entity, 'create')")
 	T create(T entity);
 
-	@PreFilter(value = "hasPermission(filterObject, 'create')", filterTarget = "entities")
 	List<T> create(List<T> entities);
 
 	T update(T entity);
 
 	T update(T entity, Class<?> view);
 
-	@PreAuthorize("hasPermission(#oldEntity, 'update')")
 	T update(T oldEntity, T newEntity, Class<?> view);
 
 	T patch(T entity, Map<String, Object> changes) throws IOException;
@@ -61,7 +54,6 @@ public interface EntityService<T extends Entity> {
 
 	T patch(T entity, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter) throws IOException;
 
-	@PreAuthorize("hasPermission(#entity, 'update')")
 	T patch(T entity, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter, Class<?> view)
 			throws IOException;
 
@@ -74,16 +66,13 @@ public interface EntityService<T extends Entity> {
 			Map<String, Object> changes,
 			Function<T, ? extends Object> propertyGetter) throws IOException;
 
-	@PreFilter(value = "hasPermission(filterObject, 'update')", filterTarget = "entities")
 	List<T> patch(
 			Iterable<T> entities,
 			Map<String, Object> changes,
 			Function<T, ? extends Object> propertyGetter,
 			Class<?> view) throws IOException;
 
-	@PreAuthorize("hasPermission(#entity, 'delete')")
 	void delete(T entity);
 
-	@PreFilter(value = "hasPermission(filterObject, 'delete')", filterTarget = "entities")
 	void delete(Iterable<T> entities);
 }

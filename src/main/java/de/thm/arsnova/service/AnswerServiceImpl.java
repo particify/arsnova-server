@@ -39,7 +39,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
@@ -386,7 +385,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	}
 
 	@EventListener
-	@Secured({"ROLE_USER", "RUN_AS_SYSTEM"})
 	public void handleContentDeletion(final BeforeDeletionEvent<Content> event) {
 		final Iterable<Answer> answers = answerRepository.findStubsByContentId(event.getEntity().getId());
 		answers.forEach(a -> a.setRoomId(event.getEntity().getRoomId()));
