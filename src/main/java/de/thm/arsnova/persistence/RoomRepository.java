@@ -18,6 +18,7 @@
 
 package de.thm.arsnova.persistence;
 
+import java.util.Date;
 import java.util.List;
 
 import de.thm.arsnova.model.Room;
@@ -28,6 +29,8 @@ public interface RoomRepository extends CrudRepository<Room, String> {
 	List<Room> findByOwnerId(String ownerId, int start, int limit);
 
 	List<String> findIdsByOwnerId(String ownerId);
+
+	List<Room> findStubsByScheduledDeletionAfter(Date scheduledDeletion);
 
 	List<String> findIdsByModeratorId(String moderatorId);
 }
