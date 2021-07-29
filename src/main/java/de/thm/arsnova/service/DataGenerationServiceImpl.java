@@ -32,6 +32,7 @@ public class DataGenerationServiceImpl implements DataGenerationService {
 	private static final double MULTIPLE_CORRECT_CHOICE_BIAS = 5;
 	private static final int AVG_ANSWER_COUNT = 25;
 	private static final double ANSWER_COUNT_RANDOM_FACTOR = 0.2;
+	private static final double MIN_RANDOM = 0.1;
 
 	private final ContentService contentService;
 	private final AnswerService answerService;
@@ -135,7 +136,7 @@ public class DataGenerationServiceImpl implements DataGenerationService {
 			for (int i = 0; i < count; i++) {
 				final double localBias = biasedIndexes.contains(i) ? bias : 1;
 				final double prev = i == 0 ? 0 : thresholds[i - 1];
-				thresholds[i] = prev + random.nextDouble() * localBias;
+				thresholds[i] = prev + (MIN_RANDOM + random.nextDouble() * (1 - MIN_RANDOM)) * localBias;
 			}
 		}
 	}
