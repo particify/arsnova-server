@@ -1,6 +1,7 @@
 package de.thm.arsnova.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -31,6 +32,7 @@ public class DataGenerationServiceImpl implements DataGenerationService {
 	private static final double CORRECT_CHOICE_BIAS = 3;
 	private static final double MULTIPLE_CORRECT_CHOICE_BIAS = 5;
 	private static final int AVG_ANSWER_COUNT = 25;
+	private static final int SORT_PERMUTATION_COUNT = 5;
 	private static final double ANSWER_COUNT_RANDOM_FACTOR = 0.2;
 	private static final double MIN_RANDOM = 0.1;
 
@@ -62,8 +64,16 @@ public class DataGenerationServiceImpl implements DataGenerationService {
 		if (content instanceof ChoiceQuestionContent) {
 			final int count = avgCount + (int) Math.round(
 					avgCount * (Math.random() * 2 * ANSWER_COUNT_RANDOM_FACTOR - ANSWER_COUNT_RANDOM_FACTOR));
-			for (int i = 0; i < count; i++) {
-				answers.add(generateRandomizedAnswer((ChoiceQuestionContent) content));
+			if (content.getFormat() == Content.Format.SORT) {
+				final List<List<Integer>> permutations =
+						generateSortChoicePermutations((ChoiceQuestionContent) content);
+				for (int i = 0; i < count; i++) {
+					answers.add(generateRandomizedSortAnswer((ChoiceQuestionContent) content, permutations));
+				}
+			} else {
+				for (int i = 0; i < count; i++) {
+					answers.add(generateRandomizedAnswer((ChoiceQuestionContent) content));
+				}
 			}
 		}
 
@@ -90,6 +100,34 @@ public class DataGenerationServiceImpl implements DataGenerationService {
 		logger.debug("Generated answer {}.", answer);
 
 		return answer;
+	}
+
+	private Answer generateRandomizedSortAnswer(
+			final ChoiceQuestionContent content,
+			final List<List<Integer>> permutations) {
+		logger.debug("Generating answers for content {}.", content);
+		final ChoiceAnswer answer = new ChoiceAnswer(content, NIL_UUID);
+		final BiasedRandom biasedRandom = new BiasedRandom(
+				random,
+				permutations.size(),
+				CORRECT_CHOICE_BIAS,
+				List.of(0));
+		answer.setSelectedChoiceIndexes(permutations.get(biasedRandom.generateIndex()));
+		logger.debug("Generated answer {}.", answer);
+
+		return answer;
+	}
+
+	private List<List<Integer>> generateSortChoicePermutations(final ChoiceQuestionContent content) {
+		final List<List<Integer>> permutations = new ArrayList<>();
+		permutations.add(new ArrayList<>(content.getCorrectOptionIndexes()));
+		for (int i = 0; i < SORT_PERMUTATION_COUNT; i++) {
+			final List<Integer> permutation = new ArrayList<>(content.getCorrectOptionIndexes());
+			Collections.shuffle(permutation);
+			permutations.add(permutation);
+		}
+
+		return permutations;
 	}
 
 	private static class BiasedRandom {
