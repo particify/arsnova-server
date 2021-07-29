@@ -38,6 +38,7 @@ import de.thm.arsnova.model.RoomMembership;
 import de.thm.arsnova.model.RoomStatistics;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.ContentGroupService;
+import de.thm.arsnova.service.DataGenerationService;
 import de.thm.arsnova.service.DuplicationService;
 import de.thm.arsnova.service.RoomService;
 import de.thm.arsnova.service.RoomStatisticsService;
@@ -57,6 +58,7 @@ public class RoomController extends AbstractEntityController<Room> {
 	private static final String PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/password";
 	private static final String REQUEST_MEMBERSHIP_MAPPING = DEFAULT_ID_MAPPING + "/request-membership";
 	private static final String DUPLICATE_MAPPING = DEFAULT_ID_MAPPING + "/duplicate";
+	private static final String GENERATE_RANDOM_DATA_MAPPING = DEFAULT_ID_MAPPING + "/generate-random-data";
 
 	private static final String ROOM_ROLE_HEADER = "ARS-Room-Role";
 
@@ -64,17 +66,20 @@ public class RoomController extends AbstractEntityController<Room> {
 	private ContentGroupService contentGroupService;
 	private RoomStatisticsService roomStatisticsService;
 	private DuplicationService duplicationService;
+	private DataGenerationService dataGenerationService;
 
 	public RoomController(
 			@Qualifier("securedRoomService") final RoomService roomService,
 			@Qualifier("securedContentGroupService") final ContentGroupService contentGroupService,
 			@Qualifier("securedRoomStatisticsService") final RoomStatisticsService roomStatisticsService,
-			@Qualifier("securedDuplicationService") final DuplicationService duplicationService) {
+			@Qualifier("securedDuplicationService") final DuplicationService duplicationService,
+			@Qualifier("securedDataGenerationService") final DataGenerationService dataGenerationService) {
 		super(roomService);
 		this.roomService = roomService;
 		this.contentGroupService = contentGroupService;
 		this.roomStatisticsService = roomStatisticsService;
 		this.duplicationService = duplicationService;
+		this.dataGenerationService = dataGenerationService;
 	}
 
 	@Override
@@ -204,6 +209,15 @@ public class RoomController extends AbstractEntityController<Room> {
 			throw new NotFoundException();
 		}
 		return duplicationService.duplicateRoomCascading(room);
+	}
+
+	@PostMapping(GENERATE_RANDOM_DATA_MAPPING)
+	public void generateRandomData(@PathVariable final String id) {
+		final Room room = roomService.get(id);
+		if (room == null) {
+			throw new NotFoundException();
+		}
+		dataGenerationService.generateRandomChoiceAnswers(room);
 	}
 
 	private static class PasswordEntity {
