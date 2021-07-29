@@ -54,18 +54,7 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
 		if (contentGroup == null) {
 			throw new NotFoundException("Content group does not exist.");
 		}
-		final Content contentCopy;
-		if (content instanceof ChoiceQuestionContent) {
-			contentCopy = new ChoiceQuestionContent((ChoiceQuestionContent) content);
-		} else if (content instanceof ScaleChoiceContent) {
-			contentCopy = new ScaleChoiceContent((ScaleChoiceContent) content);
-		} else if (content instanceof WordcloudContent) {
-			contentCopy = new WordcloudContent((WordcloudContent) content);
-		} else if (content instanceof GridImageContent) {
-			contentCopy = new GridImageContent((GridImageContent) content);
-		} else {
-			throw new IllegalArgumentException("Unsupported subtype: " + content.getClass().getSimpleName());
-		}
+		final Content contentCopy = duplicateContentInstance(content);
 		contentCopy.setRoomId(contentGroup.getRoomId());
 		contentService.create(contentCopy);
 		contentGroup.getContentIds().add(contentCopy.getId());
@@ -88,18 +77,7 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
 	private ContentGroup duplicateContentGroup(final ContentGroup contentGroup, final Room room) {
 		final List<Content> contents = contentService.get(contentGroup.getContentIds());
 		final List<Content> contentCopies = contents.stream().map(content -> {
-			final Content contentCopy;
-			if (content instanceof ChoiceQuestionContent) {
-				contentCopy = new ChoiceQuestionContent((ChoiceQuestionContent) content);
-			} else if (content instanceof ScaleChoiceContent) {
-				contentCopy = new ScaleChoiceContent((ScaleChoiceContent) content);
-			} else if (content instanceof WordcloudContent) {
-				contentCopy = new WordcloudContent((WordcloudContent) content);
-			} else if (content instanceof GridImageContent) {
-				contentCopy = new GridImageContent((GridImageContent) content);
-			} else {
-				throw new IllegalArgumentException("Unsupported subtype: " + content.getClass().getSimpleName());
-			}
+			final Content contentCopy = duplicateContentInstance(content);
 			contentCopy.setRoomId(room.getRoomId());
 			return contentCopy;
 		}).collect(Collectors.toList());
@@ -112,5 +90,22 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
 		contentGroupService.create(contentGroupCopy);
 
 		return contentGroupCopy;
+	}
+
+	private Content duplicateContentInstance(final Content content) {
+		if (content instanceof ChoiceQuestionContent) {
+			return new ChoiceQuestionContent((ChoiceQuestionContent) content);
+		} else if (content instanceof ScaleChoiceContent) {
+			return new ScaleChoiceContent((ScaleChoiceContent) content);
+		} else if (content instanceof WordcloudContent) {
+			return new WordcloudContent((WordcloudContent) content);
+		} else if (content instanceof GridImageContent) {
+			return new GridImageContent((GridImageContent) content);
+		} else if (content.getClass() == Content.class) {
+			// Not using instanceof here so it does not apply to subclasses
+			return new Content(content);
+		} else {
+			throw new IllegalArgumentException("Unsupported subtype: " + content.getClass().getSimpleName());
+		}
 	}
 }
