@@ -28,6 +28,14 @@ import de.thm.arsnova.model.serialization.View;
 public class ChoiceAnswer extends Answer {
 	private List<@PositiveOrZero Integer> selectedChoiceIndexes;
 
+	public ChoiceAnswer() {
+
+	}
+
+	public ChoiceAnswer(final ChoiceQuestionContent content, final String creatorId) {
+		super(content, creatorId);
+	}
+
 	@JsonView({View.Persistence.class, View.Public.class})
 	public List<Integer> getSelectedChoiceIndexes() {
 		return selectedChoiceIndexes;
