@@ -457,6 +457,7 @@ public class Room extends Entity implements RoomIdAware {
 	private String password;
 	private Set<Moderator> moderators;
 	private boolean moderatorsInitialized;
+	private Date scheduledDeletion;
 
 	@JsonMerge
 	private Settings settings;
@@ -609,6 +610,16 @@ public class Room extends Entity implements RoomIdAware {
 
 	public boolean isModeratorsInitialized() {
 		return moderatorsInitialized;
+	}
+
+	@JsonView(View.Persistence.class)
+	public Date getScheduledDeletion() {
+		return scheduledDeletion;
+	}
+
+	@JsonView(View.Persistence.class)
+	public void setScheduledDeletion(final Date scheduledDeletion) {
+		this.scheduledDeletion = scheduledDeletion;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})

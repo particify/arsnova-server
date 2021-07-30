@@ -21,6 +21,7 @@ package de.thm.arsnova.service;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,6 +35,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
@@ -60,6 +62,7 @@ import net.particify.arsnova.connector.client.ConnectorClient;
 @Primary
 public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements RoomService {
 	private static final long ROOM_INACTIVITY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
+	private static final long DELETE_SCHEDULED_ROOMS_INTERVAL_MS = 30 * 60 * 1000L;
 
 	private static final Logger logger = LoggerFactory.getLogger(RoomServiceImpl.class);
 
@@ -144,6 +147,16 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	public void handleUserDeletion(final BeforeDeletionEvent<UserProfile> event) {
 		final Iterable<Room> rooms = roomRepository.findByOwnerId(event.getEntity().getId(), -1, -1);
 		delete(rooms);
+	}
+
+	@Scheduled(fixedRate = DELETE_SCHEDULED_ROOMS_INTERVAL_MS)
+	private void deleteScheduledRooms() {
+		logger.trace("Checking for rooms scheduled for deletion.");
+		final List<Room> rooms = roomRepository.findStubsByScheduledDeletionAfter(new Date());
+		if (!rooms.isEmpty()) {
+			delete(rooms);
+			logger.info("Deleted {} scheduled rooms.", rooms.size());
+		}
 	}
 
 	@Override

@@ -18,6 +18,7 @@
 
 package de.thm.arsnova.persistence.couchdb;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.ektorp.ComplexKey;
@@ -74,6 +75,14 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 				.includeDocs(false));
 
 		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<Room> findStubsByScheduledDeletionAfter(final Date scheduledDeletion) {
+		final ViewResult result = db.queryView(createQuery("by_scheduleddeletion")
+				.startKey(scheduledDeletion.getTime())
+				.includeDocs(false));
+		return createEntityStubs(result, (r, k) -> {});
 	}
 
 	@Override
