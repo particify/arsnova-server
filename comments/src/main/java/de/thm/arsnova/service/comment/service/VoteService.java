@@ -59,16 +59,6 @@ public class VoteService {
         return v;
     }
 
-    public int scoreForComment(String commentId) {
-        List<Vote> l = repository.findByCommentId(commentId);
-        int score = 0;
-        for (Vote v : l) {
-            score = score + v.getVote();
-        }
-
-        return score;
-    }
-
     public List<Vote> getForCommentsAndUser(List<String> commentIds, String userId) {
         List<Vote> voteList = new ArrayList<>();
 
@@ -84,6 +74,17 @@ public class VoteService {
 
     public Vote getForCommentAndUser(String commentId, String userId) {
         return repository.findById(new VotePK(commentId, userId)).orElse(null);
+    }
+
+    public int getSumByCommentId(final String commentId) {
+        return repository.sumByCommentId(commentId);
+    }
+
+    public Map<String, Integer> getSumsByCommentIds(final List<String> commentIds) {
+        return repository.sumByCommentIdFindByCommentIdAndArchiveIdNull(commentIds).stream().collect(Collectors.toMap(
+                voteSum -> voteSum.getCommentId(),
+                voteSum -> voteSum.getSum()
+        ));
     }
 
     public Map<String, Integer> getSumByCommentForRoom(final String roomId) {

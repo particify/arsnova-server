@@ -25,6 +25,17 @@ public interface VoteRepository extends CrudRepository<Vote, VotePK> {
             @Param("updateVote") int updateVote
     );
 
+    @Query("SELECT COALESCE(SUM(vote), 0) AS sum " +
+            "FROM Vote " +
+            "WHERE commentId = :commentId")
+    int sumByCommentId(@Param("commentId") String commentId);
+
+    @Query("SELECT new de.thm.arsnova.service.comment.model.VoteSum(commentId AS key, SUM(vote) AS sum) " +
+            "FROM Vote " +
+            "WHERE commentId IN (:commentIds) " +
+            "GROUP BY commentId")
+    List<VoteSum> sumByCommentIdFindByCommentIdAndArchiveIdNull(@Param("commentIds") List<String> commentIds);
+
     @Query("SELECT new de.thm.arsnova.service.comment.model.VoteSum(v.commentId AS key, SUM(v.vote) AS sum) " +
             "FROM Vote AS v JOIN Comment AS c ON v.commentId = c.id " +
             "WHERE c.roomId = :roomId " +

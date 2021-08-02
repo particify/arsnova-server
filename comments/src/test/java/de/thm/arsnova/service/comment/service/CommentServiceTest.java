@@ -33,13 +33,16 @@ public class CommentServiceTest {
     VoteRepository voteRepository;
 
     @Mock
+    VoteService voteService;
+
+    @Mock
     MappingJackson2MessageConverter converter;
 
     private CommentService service;
 
     @BeforeEach
     public void setup() {
-        service = new CommentService(repository, voteRepository, converter);
+        service = new CommentService(repository, voteRepository, voteService, converter);
     }
 
     @Test
