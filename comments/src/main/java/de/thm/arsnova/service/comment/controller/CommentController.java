@@ -105,7 +105,7 @@ public class CommentController extends AbstractEntityController {
 
         logger.debug("Resolved find query to IDs: {}", ids);
 
-        return service.get(new ArrayList<>(ids)).size();
+        return ids.size();
     }
 
     @PatchMapping(PATCH_MAPPING)
