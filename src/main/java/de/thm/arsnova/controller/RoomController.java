@@ -219,7 +219,7 @@ public class RoomController extends AbstractEntityController<Room> {
 		if (room == null) {
 			throw new NotFoundException();
 		}
-		dataGenerationService.generateRandomChoiceAnswers(room);
+		dataGenerationService.generateRandomAnswers(room);
 	}
 
 	private static class PasswordEntity {

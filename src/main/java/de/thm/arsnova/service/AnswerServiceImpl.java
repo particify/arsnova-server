@@ -67,6 +67,7 @@ import de.thm.arsnova.web.exceptions.UnauthorizedException;
 @Service
 @Primary
 public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implements AnswerService {
+	private static final String NIL_UUID = "00000000000000000000000000000000";
 	private static final Logger logger = LoggerFactory.getLogger(AnswerServiceImpl.class);
 	private static final Pattern specialCharPattern = Pattern.compile("[^\\p{IsAlphabetic}\\p{IsDigit}]");
 
@@ -314,14 +315,16 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			throw new NotFoundException();
 		}
 
-		final Answer maybeExistingAnswer = answerRepository.findByContentIdUserIdPiRound(
-				content.getId(),
-				Answer.class,
-				user.getId(),
-				content.getState().getRound());
+		if (!NIL_UUID.equals(answer.getCreatorId())) {
+			final Answer maybeExistingAnswer = answerRepository.findByContentIdUserIdPiRound(
+					content.getId(),
+					Answer.class,
+					user.getId(),
+					content.getState().getRound());
 
-		if (maybeExistingAnswer != null) {
-			throw new ForbiddenException();
+			if (maybeExistingAnswer != null) {
+				throw new ForbiddenException();
+			}
 		}
 
 		if (answer.getCreatorId() == null) {
