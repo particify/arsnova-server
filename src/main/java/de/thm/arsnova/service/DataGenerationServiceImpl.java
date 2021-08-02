@@ -65,24 +65,18 @@ public class DataGenerationServiceImpl implements DataGenerationService {
 	}
 
 	private List<Answer> generateRandomAnswersForContent(final Content content, final int avgCount) {
-		final List<Answer> answers = new ArrayList<>();
+		final List<Answer> answers;
 		final int count = randomizeAnswerCount(avgCount);
 		if (content instanceof ChoiceQuestionContent) {
 			if (content.getFormat() == Content.Format.SORT) {
-				final List<List<Integer>> permutations =
-						generateSortChoicePermutations((ChoiceQuestionContent) content);
-				for (int i = 0; i < count; i++) {
-					answers.add(generateRandomizedSortAnswer((ChoiceQuestionContent) content, permutations));
-				}
+				answers = generateRandomizedSortAnswers((ChoiceQuestionContent) content, count);
 			} else {
-				for (int i = 0; i < count; i++) {
-					answers.add(generateRandomizedChoiceAnswer((ChoiceQuestionContent) content));
-				}
+				answers = generateRandomizedChoiceAnswers((ChoiceQuestionContent) content, count);
 			}
 		} else if (content instanceof WordcloudContent) {
-			for (int i = 0; i < count; i++) {
-				answers.add(generateRandomizedWordcloudAnswer((WordcloudContent) content));
-			}
+			answers = generateRandomizedWordcloudAnswers((WordcloudContent) content, count);
+		} else {
+			answers = Collections.emptyList();
 		}
 
 		return answers;
@@ -93,9 +87,10 @@ public class DataGenerationServiceImpl implements DataGenerationService {
 				avgCount * (Math.random() * 2 * ANSWER_COUNT_RANDOM_FACTOR - ANSWER_COUNT_RANDOM_FACTOR));
 	}
 
-	private Answer generateRandomizedChoiceAnswer(final ChoiceQuestionContent content) {
-		logger.debug("Generating answers for content {}.", content);
-		final ChoiceAnswer answer = new ChoiceAnswer(content, NIL_UUID);
+	private List<Answer> generateRandomizedChoiceAnswers(
+			final ChoiceQuestionContent content,
+			final int count) {
+		final List<Answer> answers = new ArrayList<>();
 		final int optionCount;
 		if (content instanceof ScaleChoiceContent) {
 			optionCount = ((ScaleChoiceContent) content).getOptionCount();
@@ -107,6 +102,18 @@ public class DataGenerationServiceImpl implements DataGenerationService {
 				optionCount,
 				content.isMultiple() ? MULTIPLE_CORRECT_CHOICE_BIAS : CORRECT_CHOICE_BIAS,
 				content.getCorrectOptionIndexes());
+		for (int i = 0; i < count; i++) {
+			answers.add(generateRandomizedChoiceAnswer(content, biasedRandom));
+		}
+
+		return answers;
+	}
+
+	private Answer generateRandomizedChoiceAnswer(
+			final ChoiceQuestionContent content,
+			final BiasedRandom biasedRandom) {
+		logger.debug("Generating answers for content {}.", content);
+		final ChoiceAnswer answer = new ChoiceAnswer(content, NIL_UUID);
 		answer.setSelectedChoiceIndexes(content.isMultiple()
 				? new ArrayList<>(biasedRandom.generateIndexes())
 				: List.of(biasedRandom.generateIndex()));
@@ -115,16 +122,30 @@ public class DataGenerationServiceImpl implements DataGenerationService {
 		return answer;
 	}
 
-	private Answer generateRandomizedSortAnswer(
+	private List<Answer> generateRandomizedSortAnswers(
 			final ChoiceQuestionContent content,
-			final List<List<Integer>> permutations) {
-		logger.debug("Generating answers for content {}.", content);
-		final ChoiceAnswer answer = new ChoiceAnswer(content, NIL_UUID);
+			final int count) {
+		final List<Answer> answers = new ArrayList<>();
+		final List<List<Integer>> permutations =
+				generateSortChoicePermutations(content);
 		final BiasedRandom biasedRandom = new BiasedRandom(
 				random,
 				permutations.size(),
 				CORRECT_CHOICE_BIAS,
 				List.of(0));
+		for (int i = 0; i < count; i++) {
+			answers.add(generateRandomizedSortAnswer(content, permutations, biasedRandom));
+		}
+
+		return  answers;
+	}
+
+	private Answer generateRandomizedSortAnswer(
+			final ChoiceQuestionContent content,
+			final List<List<Integer>> permutations,
+			final BiasedRandom biasedRandom) {
+		logger.debug("Generating answers for content {}.", content);
+		final ChoiceAnswer answer = new ChoiceAnswer(content, NIL_UUID);
 		answer.setSelectedChoiceIndexes(permutations.get(biasedRandom.generateIndex()));
 		logger.debug("Generated answer {}.", answer);
 
@@ -143,13 +164,30 @@ public class DataGenerationServiceImpl implements DataGenerationService {
 		return permutations;
 	}
 
-	private Answer generateRandomizedWordcloudAnswer(final WordcloudContent content) {
+	private List<Answer> generateRandomizedWordcloudAnswers(
+			final WordcloudContent content,
+			final int count) {
+		final List<Answer> answers = new ArrayList<>();
 		final List<String> keywords = retreiveWordcloudKeywords(content);
+		if (keywords.isEmpty()) {
+			return Collections.emptyList();
+		}
 		final BiasedRandom biasedRandom = new BiasedRandom(
 				random,
 				keywords.size(),
 				CORRECT_CHOICE_BIAS,
 				List.of(0));
+		for (int i = 0; i < count; i++) {
+			answers.add(generateRandomizedWordcloudAnswer(content, keywords, biasedRandom));
+		}
+
+		return answers;
+	}
+
+	private Answer generateRandomizedWordcloudAnswer(
+			final WordcloudContent content,
+			final List<String> keywords,
+			final BiasedRandom biasedRandom) {
 		final MultipleTextsAnswer answer = new MultipleTextsAnswer(content, NIL_UUID);
 		answer.setTexts(biasedRandom.generateIndexes().stream()
 				.map(i -> keywords.get(i)).collect(Collectors.toList()));
