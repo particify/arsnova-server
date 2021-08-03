@@ -45,13 +45,18 @@ public class CommentService {
 
     public Comment get(String id) {
         // ToDo: error handling
+        return repository.findById(id).orElse(new Comment());
+    }
+
+    public Comment getWithScore(String id) {
+        // ToDo: error handling
         Comment c = repository.findById(id).orElse(new Comment());
         c.setScore(voteService.getSumByCommentId(id));
 
         return c;
     }
 
-    public List<Comment> get(final List<String> ids) {
+    public List<Comment> getWithScore(final List<String> ids) {
         final List<Comment> list = new ArrayList<>();
         final Map<String, Integer> voteSums = voteService.getSumsByCommentIds(ids);
         repository.findAllById(ids).forEach(c -> {

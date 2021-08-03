@@ -72,7 +72,7 @@ public class CommentServiceTest {
 
         when(repository.findById(id)).thenReturn(Optional.of(c));
 
-        Comment comment = service.get(id);
+        Comment comment = service.getWithScore(id);
 
         assertEquals(roomId, comment.getRoomId());
         assertEquals(creatorId, comment.getCreatorId());

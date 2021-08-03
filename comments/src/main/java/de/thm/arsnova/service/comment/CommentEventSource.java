@@ -34,7 +34,7 @@ public class CommentEventSource {
     }
 
     public void ScoreChanged(String id) {
-        Comment c = service.get(id);
+        Comment c = service.getWithScore(id);
         int score = c.getScore();
 
         Map<String, Object> changeMap = new HashMap<>();
