@@ -21,6 +21,7 @@ package de.thm.arsnova.config;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
@@ -606,11 +607,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			havingValue = "true")
 	public SAML2Client saml2Client() {
 		final AuthenticationProviderProperties.Saml samlProperties = providerProperties.getSaml();
+		final Pattern pathPattern = Pattern.compile("[a-z]+:.*");
+		final String idpMetadataPath = pathPattern.matcher(samlProperties.getIdp().getMetaFile()).matches()
+				? samlProperties.getIdp().getMetaFile()
+				: "file:" + samlProperties.getIdp().getMetaFile();
 		final SAML2Configuration config = new SAML2Configuration(
 				"file:" + samlProperties.getKeystore().getFile(),
 				samlProperties.getKeystore().getStorePassword(),
 				samlProperties.getKeystore().getKeyPassword(),
-				"file:" + samlProperties.getIdp().getMetaFile());
+				idpMetadataPath);
 		config.setKeystoreAlias(samlProperties.getKeystore().getKeyAlias());
 		if (!samlProperties.getSp().getMetaFile().isEmpty()) {
 			config.setServiceProviderMetadataPath("file:" + samlProperties.getSp().getMetaFile());
