@@ -33,6 +33,14 @@ public class TextAnswer extends Answer {
 
 	private boolean read;
 
+	public TextAnswer() {
+
+	}
+
+	public TextAnswer(final Content content, final String creatorId) {
+		super(content, creatorId);
+	}
+
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSubject() {
 		return null;

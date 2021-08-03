@@ -15,7 +15,7 @@ public class SecuredDataGenerationService implements DataGenerationService {
 
 	@Override
 	@PreAuthorize("hasPermission(#room, 'update')")
-	public void generateRandomChoiceAnswers(final Room room) {
-		dataGenerationService.generateRandomChoiceAnswers(room);
+	public void generateRandomAnswers(final Room room) {
+		dataGenerationService.generateRandomAnswers(room);
 	}
 }
