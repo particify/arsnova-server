@@ -24,10 +24,8 @@ services:
     volumes:
       - postgresql_data_comment:/var/lib/postgresql/data
   rabbitmq:
-    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/rabbitmq-stomp:3.8-alpine
+    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/rabbitmq-stomp:3.9-alpine
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
       RABBITMQ_NODENAME: rabbit@localhost
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
