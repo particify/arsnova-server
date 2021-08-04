@@ -175,6 +175,11 @@ abstract class CouchDbCrudRepository<T extends Entity>
 		throw new UnsupportedOperationException("Deletion of all entities is not supported for security reasons.");
 	}
 
+	@Override
+	public void deleteAllById(final Iterable<? extends String> iterable) {
+		throw new UnsupportedOperationException("Not yet implemented.");
+	}
+
 	/**
 	 * Creates stub entities from a ViewResult. Stub entities only have meta data (id, revision, reference id) set.
 	 *
