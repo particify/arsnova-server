@@ -56,7 +56,7 @@ public class ScaleContentTemplateMigration extends AbstractMigration {
 
 	@PostConstruct
 	public void initMigration() {
-		final Pattern optionPattern = Pattern.compile(AGREEMENT_OPTION_PATTERN);
+		final Pattern optionPattern = Pattern.compile(AGREEMENT_OPTION_PATTERN, Pattern.CASE_INSENSITIVE);
 		addEntityMigrationStepHandler(
 				ContentMigrationEntity.class,
 				CONTENT_INDEX,
@@ -67,7 +67,7 @@ public class ScaleContentTemplateMigration extends AbstractMigration {
 				),
 				content -> {
 					if (content.getOptions().size() == DEFAULT_OPTION_COUNT
-							&& optionPattern.matcher(content.getOptions().get(0).label).matches()) {
+							&& optionPattern.matcher(content.getOptions().get(0).label).find()) {
 						content.setOptionTemplate(ContentMigrationEntity.ScaleOptionTemplate.AGREEMENT);
 						content.setOptionCount(DEFAULT_OPTION_COUNT);
 						content.setOptions(null);
