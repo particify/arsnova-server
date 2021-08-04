@@ -1,7 +1,6 @@
 package de.thm.arsnova.service.comment.controller;
 
 import de.thm.arsnova.service.comment.handler.CommentCommandHandler;
-import de.thm.arsnova.service.comment.model.CommentStats;
 import de.thm.arsnova.service.comment.service.CommentFindQueryService;
 import de.thm.arsnova.service.comment.service.CommentService;
 import de.thm.arsnova.service.comment.service.FindQuery;
@@ -51,7 +50,7 @@ public class CommentController extends AbstractEntityController {
 
     @GetMapping(GET_MAPPING)
     public Comment get(@PathVariable String id) {
-        return service.get(id);
+        return service.getWithScore(id);
     }
 
     @PostMapping(POST_MAPPING)
@@ -94,7 +93,7 @@ public class CommentController extends AbstractEntityController {
 
         logger.debug("Resolved find query to IDs: {}", ids);
 
-        return service.get(new ArrayList<>(ids));
+        return service.getWithScore(new ArrayList<>(ids));
     }
 
     @PostMapping(FIND_MAPPING + COUNT_MAPPING)
@@ -105,7 +104,7 @@ public class CommentController extends AbstractEntityController {
 
         logger.debug("Resolved find query to IDs: {}", ids);
 
-        return service.get(new ArrayList<>(ids)).size();
+        return ids.size();
     }
 
     @PatchMapping(PATCH_MAPPING)

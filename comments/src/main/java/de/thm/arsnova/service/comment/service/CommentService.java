@@ -28,34 +28,41 @@ public class CommentService {
 
     final CommentRepository repository;
     final VoteRepository voteRepository;
+    final VoteService voteService;
     private ObjectMapper objectMapper;
 
     @Autowired
     public CommentService(
             CommentRepository repository,
             VoteRepository voteRepository,
+            VoteService voteService,
             MappingJackson2MessageConverter jackson2Converter) {
         this.repository = repository;
         this.voteRepository = voteRepository;
+        this.voteService = voteService;
         this.objectMapper = jackson2Converter.getObjectMapper();
     }
 
     public Comment get(String id) {
         // ToDo: error handling
+        return repository.findById(id).orElse(new Comment());
+    }
+
+    public Comment getWithScore(String id) {
+        // ToDo: error handling
         Comment c = repository.findById(id).orElse(new Comment());
-        List<Vote> voteList = voteRepository.findByCommentId(c.getId());
-        int voteSum = 0;
-        for (Vote v : voteList) {
-            voteSum = voteSum + v.getVote();
-        }
-        c.setScore(voteSum);
+        c.setScore(voteService.getSumByCommentId(id));
 
         return c;
     }
 
-    public List<Comment> get(List<String> ids) {
-        List<Comment> list = new ArrayList<Comment>();
-        ids.forEach((c) -> list.add(get(c)));
+    public List<Comment> getWithScore(final List<String> ids) {
+        final List<Comment> list = new ArrayList<>();
+        final Map<String, Integer> voteSums = voteService.getSumsByCommentIds(ids);
+        repository.findAllById(ids).forEach(c -> {
+            c.setScore(voteSums.getOrDefault(c.getId(), 0));
+            list.add(c);
+        });
 
         return list;
     }

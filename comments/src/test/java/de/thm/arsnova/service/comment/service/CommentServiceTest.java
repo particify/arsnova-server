@@ -33,13 +33,16 @@ public class CommentServiceTest {
     VoteRepository voteRepository;
 
     @Mock
+    VoteService voteService;
+
+    @Mock
     MappingJackson2MessageConverter converter;
 
     private CommentService service;
 
     @BeforeEach
     public void setup() {
-        service = new CommentService(repository, voteRepository, converter);
+        service = new CommentService(repository, voteRepository, voteService, converter);
     }
 
     @Test
@@ -69,7 +72,7 @@ public class CommentServiceTest {
 
         when(repository.findById(id)).thenReturn(Optional.of(c));
 
-        Comment comment = service.get(id);
+        Comment comment = service.getWithScore(id);
 
         assertEquals(roomId, comment.getRoomId());
         assertEquals(creatorId, comment.getCreatorId());
