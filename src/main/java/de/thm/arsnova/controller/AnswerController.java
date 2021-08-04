@@ -19,14 +19,13 @@
 package de.thm.arsnova.controller;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.service.AnswerService;
 
 @RestController
-@RequestMapping(AnswerController.REQUEST_MAPPING)
+@EntityRequestMapping(AnswerController.REQUEST_MAPPING)
 public class AnswerController extends AbstractEntityController<Answer> {
 	protected static final String REQUEST_MAPPING = "/answer";
 

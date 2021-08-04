@@ -62,7 +62,6 @@ public class PathBasedContentNegotiationStrategy implements ContentNegotiationSt
 			mediaTypes.add(AppConfig.ACTUATOR_MEDIA_TYPE);
 			mediaTypes.add(MediaType.TEXT_PLAIN);
 		} else {
-			logger.trace("Content negotiation falling back to {}", fallback);
 			if (servletRequest.getHeader(HttpHeaders.ACCEPT) == null
 					&& Arrays.asList("POST", "PUT", "PATCH").contains(servletRequest.getMethod())) {
 				/* This allows AbstractEntityController to send an empty response if no Accept header is set */
@@ -70,6 +69,7 @@ public class PathBasedContentNegotiationStrategy implements ContentNegotiationSt
 						servletRequest.getMethod());
 				mediaTypes.add(empty);
 			} else {
+				logger.trace("Content negotiation falling back to {}", fallback);
 				mediaTypes.add(fallback);
 			}
 		}
