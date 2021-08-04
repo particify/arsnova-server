@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.config.SecurityConfig;
@@ -35,7 +34,7 @@ import de.thm.arsnova.model.AuthenticationProvider;
 import de.thm.arsnova.model.Configuration;
 
 @RestController
-@RequestMapping(ConfigurationController.REQUEST_MAPPING)
+@EntityRequestMapping(ConfigurationController.REQUEST_MAPPING)
 @EnableConfigurationProperties(UiProperties.class)
 public class ConfigurationController {
 	protected static final String REQUEST_MAPPING = "/configuration";

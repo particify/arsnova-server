@@ -6,7 +6,6 @@ import static de.thm.arsnova.controller.AbstractEntityController.ENTITY_REVISION
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.model.Room;
@@ -14,7 +13,7 @@ import de.thm.arsnova.model.transport.ImportExportContainer;
 import de.thm.arsnova.service.ImportService;
 
 @RestController
-@RequestMapping(ImportController.REQUEST_MAPPING)
+@EntityRequestMapping(ImportController.REQUEST_MAPPING)
 public class ImportController {
 	protected static final String REQUEST_MAPPING = "/import";
 	private static final String IMPORT_V2_ROOM_MAPPING = "/v2/room";

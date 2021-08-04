@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,7 +47,7 @@ import de.thm.arsnova.web.exceptions.NotFoundException;
 import de.thm.arsnova.web.exceptions.NotImplementedException;
 
 @RestController
-@RequestMapping(RoomController.REQUEST_MAPPING)
+@EntityRequestMapping(RoomController.REQUEST_MAPPING)
 public class RoomController extends AbstractEntityController<Room> {
 	protected static final String REQUEST_MAPPING = "/room";
 	private static final String GET_MODERATORS_MAPPING = DEFAULT_ID_MAPPING + "/moderator";
