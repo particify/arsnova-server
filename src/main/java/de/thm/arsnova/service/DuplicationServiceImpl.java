@@ -103,10 +103,10 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
 	}
 
 	private Content duplicateContentInstance(final Content content) {
-		if (content instanceof ChoiceQuestionContent) {
-			return new ChoiceQuestionContent((ChoiceQuestionContent) content);
-		} else if (content instanceof ScaleChoiceContent) {
+		if (content instanceof ScaleChoiceContent) {
 			return new ScaleChoiceContent((ScaleChoiceContent) content);
+		} else if (content instanceof ChoiceQuestionContent) {
+			return new ChoiceQuestionContent((ChoiceQuestionContent) content);
 		} else if (content instanceof WordcloudContent) {
 			return new WordcloudContent((WordcloudContent) content);
 		} else if (content instanceof GridImageContent) {
