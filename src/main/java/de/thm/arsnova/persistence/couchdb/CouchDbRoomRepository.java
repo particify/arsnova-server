@@ -80,7 +80,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	@Override
 	public List<Room> findStubsByScheduledDeletionAfter(final Date scheduledDeletion) {
 		final ViewResult result = db.queryView(createQuery("by_scheduleddeletion")
-				.startKey(scheduledDeletion.getTime())
+				.endKey(scheduledDeletion.getTime())
 				.includeDocs(false));
 		return createEntityStubs(result, (r, k) -> {});
 	}
