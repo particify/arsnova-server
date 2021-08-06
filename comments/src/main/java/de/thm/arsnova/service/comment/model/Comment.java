@@ -26,11 +26,12 @@ public class Comment {
     private boolean favorite;
     private int correct;
     private boolean ack;
-    @Transient
-    private int score;
     private String tag;
     @Column(columnDefinition = "TEXT")
     private String answer;
+
+    @Transient
+    private int score;
 
     public Comment() {
 
@@ -47,6 +48,8 @@ public class Comment {
         this.favorite = comment.favorite;
         this.correct = comment.correct;
         this.ack = comment.ack;
+        this.tag = comment.tag;
+        this.answer = comment.answer;
     }
 
     public String getId() {
