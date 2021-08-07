@@ -191,7 +191,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String permission) {
 		switch (permission) {
 			case READ_PERMISSION:
-				return !targetRoom.isClosed() || hasAuthenticationRoomModeratingRole(auth, targetRoom);
+				return !targetRoom.isClosed() || targetRoom.isTemplate()
+						|| hasAuthenticationRoomModeratingRole(auth, targetRoom);
 			case READ_EXTENDED_PERMISSION:
 				return hasAuthenticationRoomModeratingRole(auth, targetRoom);
 			case CREATE_PERMISSION:
