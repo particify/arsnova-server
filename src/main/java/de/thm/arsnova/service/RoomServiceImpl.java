@@ -121,15 +121,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		}
 	}
 
-	public static class RoomShortNameComparator implements Comparator<Room>, Serializable {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public int compare(final Room room1, final Room room2) {
-			return room1.getAbbreviation().compareToIgnoreCase(room2.getAbbreviation());
-		}
-	}
-
 	@Autowired(required = false)
 	public void setConnectorClient(final ConnectorClient connectorClient) {
 		this.connectorClient = connectorClient;
@@ -228,8 +219,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		}
 		*/
 
-		handleLogo(room);
-
 		final Room.Settings sf = new Room.Settings();
 		room.setSettings(sf);
 
@@ -272,7 +261,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			room.setOwnerId(existingRoom.getOwnerId());
 		}
 		room.setPassword(existingRoom.getPassword());
-		handleLogo(room);
 
 		/* TODO: only publish event when feedback has changed */
 		/* FIXME: event */
@@ -337,13 +325,5 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		return lmsMembership.isMember()
 				? Optional.of(new RoomMembership(room, RoomRole.PARTICIPANT))
 				: Optional.empty();
-	}
-
-	private void handleLogo(final Room room) {
-		if (room.getAuthor() != null && room.getAuthor().getOrganizationLogo() != null) {
-			if (!room.getAuthor().getOrganizationLogo().startsWith("http")) {
-				throw new IllegalArgumentException("Invalid logo URL.");
-			}
-		}
 	}
 }

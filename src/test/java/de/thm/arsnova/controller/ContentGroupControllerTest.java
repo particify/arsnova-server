@@ -223,7 +223,6 @@ public class ContentGroupControllerTest {
 		final Room room = new Room();
 		room.setOwnerId(user.getId());
 		room.setName("TestRoom");
-		room.setAbbreviation("TR");
 		room.setShortId("12345678");
 		room.setExtensions(new HashMap<String, Map<String, Object>>() {
 			{

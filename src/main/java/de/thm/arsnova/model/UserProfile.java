@@ -21,7 +21,6 @@ package de.thm.arsnova.model;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.validation.constraints.NotEmpty;
@@ -267,7 +266,6 @@ public class UserProfile extends Entity {
 	 * -> Map but custom serialization to array? */
 	private Set<RoomHistoryEntry> roomHistory = new HashSet<>();
 	private Set<String> acknowledgedMotds = new HashSet<>();
-	private Map<String, Map<String, Object>> extensions;
 
 	public UserProfile() {
 
@@ -351,22 +349,12 @@ public class UserProfile extends Entity {
 		this.acknowledgedMotds = acknowledgedMotds;
 	}
 
-	@JsonView({View.Persistence.class, View.Owner.class})
-	public Map<String, Map<String, Object>> getExtensions() {
-		return extensions;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(final Map<String, Map<String, Object>> extensions) {
-		this.extensions = extensions;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>
 	 * The following fields of <tt>UserProfile</tt> are excluded from equality checks:
-	 * {@link #account}, {@link #roomHistory}, {@link #acknowledgedMotds}, {@link #extensions}.
+	 * {@link #account}, {@link #roomHistory}, {@link #acknowledgedMotds}.
 	 * </p>
 	 */
 	@Override

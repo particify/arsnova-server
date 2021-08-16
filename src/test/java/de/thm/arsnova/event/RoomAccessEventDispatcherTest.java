@@ -38,7 +38,6 @@ public class RoomAccessEventDispatcherTest {
 	private Room getTestRoom() {
 		final Room room = new Room();
 		room.setName(SOME_TEXT);
-		room.setAbbreviation(SOME_TEXT);
 		room.setId(SOME_ROOM_ID);
 		room.setRevision(SOME_ROOM_REV);
 		room.setShortId(SOME_ROOM_SHORT_ID);

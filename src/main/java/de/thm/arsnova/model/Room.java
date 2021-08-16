@@ -95,106 +95,7 @@ public class Room extends Entity implements RoomIdAware {
 	}
 
 	public static class Settings {
-		private boolean questionsEnabled = true;
-		private boolean slidesEnabled = true;
-		private boolean commentsEnabled = true;
-		private boolean flashcardsEnabled = true;
-		private boolean quickSurveyEnabled = true;
-		private boolean quickFeedbackEnabled = true;
-		private boolean scoreEnabled = true;
-		private boolean multipleRoundsEnabled = true;
-		private boolean timerEnabled = true;
 		private boolean feedbackLocked = true;
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isQuestionsEnabled() {
-			return questionsEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setQuestionsEnabled(final boolean questionsEnabled) {
-			this.questionsEnabled = questionsEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isSlidesEnabled() {
-			return slidesEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setSlidesEnabled(final boolean slidesEnabled) {
-			this.slidesEnabled = slidesEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isCommentsEnabled() {
-			return commentsEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setCommentsEnabled(final boolean commentsEnabled) {
-			this.commentsEnabled = commentsEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isFlashcardsEnabled() {
-			return flashcardsEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setFlashcardsEnabled(final boolean flashcardsEnabled) {
-			this.flashcardsEnabled = flashcardsEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isQuickSurveyEnabled() {
-			return quickSurveyEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setQuickSurveyEnabled(final boolean quickSurveyEnabled) {
-			this.quickSurveyEnabled = quickSurveyEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isQuickFeedbackEnabled() {
-			return quickFeedbackEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setQuickFeedbackEnabled(final boolean quickFeedbackEnabled) {
-			this.quickFeedbackEnabled = quickFeedbackEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isScoreEnabled() {
-			return scoreEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setScoreEnabled(final boolean scoreEnabled) {
-			this.scoreEnabled = scoreEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isMultipleRoundsEnabled() {
-			return multipleRoundsEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setMultipleRoundsEnabled(final boolean multipleRoundsEnabled) {
-			this.multipleRoundsEnabled = multipleRoundsEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isTimerEnabled() {
-			return timerEnabled;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setTimerEnabled(final boolean timerEnabled) {
-			this.timerEnabled = timerEnabled;
-		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
 		public boolean isFeedbackLocked() {
@@ -208,10 +109,7 @@ public class Room extends Entity implements RoomIdAware {
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(
-					questionsEnabled, slidesEnabled, commentsEnabled, flashcardsEnabled,
-					quickSurveyEnabled, quickFeedbackEnabled, scoreEnabled, multipleRoundsEnabled,
-					timerEnabled, feedbackLocked);
+			return Objects.hash(feedbackLocked);
 		}
 
 		@Override
@@ -224,187 +122,13 @@ public class Room extends Entity implements RoomIdAware {
 			}
 			final Settings settings = (Settings) o;
 
-			return questionsEnabled == settings.questionsEnabled
-					&& slidesEnabled == settings.slidesEnabled
-					&& commentsEnabled == settings.commentsEnabled
-					&& flashcardsEnabled == settings.flashcardsEnabled
-					&& quickSurveyEnabled == settings.quickSurveyEnabled
-					&& quickFeedbackEnabled == settings.quickFeedbackEnabled
-					&& scoreEnabled == settings.scoreEnabled
-					&& multipleRoundsEnabled == settings.multipleRoundsEnabled
-					&& timerEnabled == settings.timerEnabled
-					&& feedbackLocked == settings.feedbackLocked;
+			return feedbackLocked == settings.feedbackLocked;
 		}
 
 		@Override
 		public String toString() {
 			return new ToStringCreator(this)
-					.append("questionsEnabled", questionsEnabled)
-					.append("slidesEnabled", slidesEnabled)
-					.append("commentsEnabled", commentsEnabled)
-					.append("flashcardsEnabled", flashcardsEnabled)
-					.append("quickSurveyEnabled", quickSurveyEnabled)
-					.append("quickFeedbackEnabled", quickFeedbackEnabled)
-					.append("scoreEnabled", scoreEnabled)
-					.append("multipleRoundsEnabled", multipleRoundsEnabled)
-					.append("timerEnabled", timerEnabled)
 					.append("feedbackLocked", feedbackLocked)
-					.toString();
-		}
-	}
-
-	public static class Author {
-		private String name;
-		private String mail;
-		private String organizationName;
-		private String organizationLogo;
-		private String organizationUnit;
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public String getName() {
-			return name;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setName(final String name) {
-			this.name = name;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public String getMail() {
-			return mail;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setMail(final String mail) {
-			this.mail = mail;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public String getOrganizationName() {
-			return organizationName;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setOrganizationName(final String organizationName) {
-			this.organizationName = organizationName;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public String getOrganizationLogo() {
-			return organizationLogo;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setOrganizationLogo(final String organizationLogo) {
-			this.organizationLogo = organizationLogo;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public String getOrganizationUnit() {
-			return organizationUnit;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setOrganizationUnit(final String organizationUnit) {
-			this.organizationUnit = organizationUnit;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(name, mail, organizationName, organizationLogo, organizationUnit);
-		}
-
-		@Override
-		public boolean equals(final Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-			final Author author = (Author) o;
-
-			return Objects.equals(name, author.name)
-					&& Objects.equals(mail, author.mail)
-					&& Objects.equals(organizationName, author.organizationName)
-					&& Objects.equals(organizationLogo, author.organizationLogo)
-					&& Objects.equals(organizationUnit, author.organizationUnit);
-		}
-
-		@Override
-		public String toString() {
-			return new ToStringCreator(this)
-					.append("name", name)
-					.append("mail", mail)
-					.append("organizationName", organizationName)
-					.append("organizationLogo", organizationLogo)
-					.append("organizationUnit", organizationUnit)
-					.toString();
-		}
-	}
-
-	public static class PoolProperties {
-		private String category;
-		private String level;
-		private String license;
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public String getCategory() {
-			return category;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setCategory(final String category) {
-			this.category = category;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public String getLevel() {
-			return level;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setLevel(final String level) {
-			this.level = level;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public String getLicense() {
-			return license;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setLicense(final String license) {
-			this.license = license;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(category, level, license);
-		}
-
-		@Override
-		public boolean equals(final Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-			final PoolProperties that = (PoolProperties) o;
-
-			return Objects.equals(category, that.category)
-					&& Objects.equals(level, that.level)
-					&& Objects.equals(license, that.license);
-		}
-
-		@Override
-		public String toString() {
-			return new ToStringCreator(this)
-					.append("category", category)
-					.append("level", level)
-					.append("license", license)
 					.toString();
 		}
 	}
@@ -449,7 +173,6 @@ public class Room extends Entity implements RoomIdAware {
 	@NotBlank
 	private String name;
 
-	private String abbreviation;
 	private String description;
 	private String renderedDescription;
 	private boolean closed;
@@ -463,11 +186,8 @@ public class Room extends Entity implements RoomIdAware {
 	@JsonMerge
 	private Settings settings;
 
-	private Author author;
-	private PoolProperties poolProperties;
 	private ImportMetadata importMetadata;
 	private Map<String, Map<String, Object>> extensions;
-	private Map<String, String> attachments;
 	private RoomStatistics statistics;
 
 	{
@@ -528,16 +248,6 @@ public class Room extends Entity implements RoomIdAware {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setName(final String name) {
 		this.name = name;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getAbbreviation() {
-		return abbreviation;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAbbreviation(final String abbreviation) {
-		this.abbreviation = abbreviation;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -647,26 +357,6 @@ public class Room extends Entity implements RoomIdAware {
 		this.settings = settings;
 	}
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Author getAuthor() {
-		return author;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAuthor(final Author author) {
-		this.author = author;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public PoolProperties getPoolProperties() {
-		return poolProperties;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setPoolProperties(final PoolProperties poolProperties) {
-		this.poolProperties = poolProperties;
-	}
-
 	@JsonView(View.Persistence.class)
 	public ImportMetadata getImportMetadata() {
 		return importMetadata;
@@ -687,16 +377,6 @@ public class Room extends Entity implements RoomIdAware {
 		this.extensions = extensions;
 	}
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Map<String, String> getAttachments() {
-		return attachments;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAttachments(final Map<String, String> attachments) {
-		this.attachments = attachments;
-	}
-
 	@JsonView(View.Public.class)
 	public RoomStatistics getStatistics() {
 		return statistics;
@@ -711,8 +391,7 @@ public class Room extends Entity implements RoomIdAware {
 	 *
 	 * <p>
 	 * The following fields of <tt>Room</tt> are excluded from equality checks:
-	 * {@link #settings}, {@link #author}, {@link #poolProperties}, {@link #extensions}, {@link #attachments},
-	 * {@link #statistics}.
+	 * {@link #settings}, {@link #extensions}, {@link #statistics}.
 	 * </p>
 	 */
 	@Override
@@ -729,7 +408,6 @@ public class Room extends Entity implements RoomIdAware {
 				&& Objects.equals(shortId, room.shortId)
 				&& Objects.equals(ownerId, room.ownerId)
 				&& Objects.equals(name, room.name)
-				&& Objects.equals(abbreviation, room.abbreviation)
 				&& Objects.equals(description, room.description);
 	}
 
@@ -739,16 +417,12 @@ public class Room extends Entity implements RoomIdAware {
 				.append("shortId", shortId)
 				.append("ownerId", ownerId)
 				.append("name", name)
-				.append("abbreviation", abbreviation)
 				.append("description", description)
 				.append("closed", closed)
 				.append("passwordProtected", isPasswordProtected())
 				.append("moderatorsInitialized", moderatorsInitialized)
 				.append("moderators", moderators)
 				.append("settings", settings)
-				.append("author", author)
-				.append("poolProperties", poolProperties)
-				.append("attachments", attachments)
 				.append("statistics", statistics);
 	}
 }

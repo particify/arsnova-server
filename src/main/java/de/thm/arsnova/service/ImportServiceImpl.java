@@ -72,7 +72,6 @@ public class ImportServiceImpl implements ImportService {
 
 		room.setOwnerId(user.getId());
 		room.setName(toImport.getName());
-		room.setAbbreviation(toImport.getShortName());
 
 		logger.trace("Import room: {}", room);
 
