@@ -27,7 +27,7 @@ var designDoc = {
 		"by_scheduleddeletion": {
 			"map": function (doc) {
 				if (doc.type === "Room" && doc.scheduledDeletion) {
-					emit(doc.scheduledDeletion, {_rev: doc._rev});
+					emit(new Date(doc.scheduledDeletion).getTime(), {_rev: doc._rev});
 				}
 			}
 		},
