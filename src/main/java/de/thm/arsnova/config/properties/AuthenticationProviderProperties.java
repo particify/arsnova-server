@@ -232,6 +232,7 @@ public class AuthenticationProviderProperties {
 	public static class Saml extends Provider {
 		public static class Idp {
 			private String metaFile;
+			private String entityId;
 
 			public String getMetaFile() {
 				return metaFile;
@@ -239,6 +240,14 @@ public class AuthenticationProviderProperties {
 
 			public void setMetaFile(final String metaFile) {
 				this.metaFile = metaFile;
+			}
+
+			public String getEntityId() {
+				return entityId;
+			}
+
+			public void setEntityId(final String entityId) {
+				this.entityId = entityId;
 			}
 		}
 
