@@ -229,6 +229,7 @@ arsnova:
         order: 0
         idp:
           meta-file: saml-idp.xml
+          entity-id: ""
         sp:
           meta-file: ""
           entity-id: ""

@@ -623,6 +623,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		if (!samlProperties.getSp().getEntityId().isEmpty()) {
 			config.setServiceProviderEntityId(samlProperties.getSp().getEntityId());
 		}
+		if (!samlProperties.getIdp().getEntityId().isEmpty()) {
+			config.setIdentityProviderEntityId(samlProperties.getIdp().getEntityId());
+		}
 		config.setAssertionConsumerServiceIndex(samlProperties.getAssertionConsumerServiceIndex());
 		config.setMaximumAuthenticationLifetime(samlProperties.getMaxAuthenticationLifetime());
 		config.setAuthnRequestBindingType(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
