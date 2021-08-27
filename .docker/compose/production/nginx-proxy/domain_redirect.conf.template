@@ -1,6 +1,8 @@
 server {
   listen 80;
   listen [::]:80;
+  listen 443;
+  listen [::]:443;
 
   server_name $ALIAS_HOSTNAMES;
   include conf.d/${TARGET_HOSTNAME}_tls.conf.include*;
