@@ -3,6 +3,7 @@ server {
   listen [::]:80;
 
   server_name $ALIAS_HOSTNAMES;
+  include conf.d/${TARGET_HOSTNAME}_tls.conf.include*;
 
   return 301 https://$TARGET_HOSTNAME$request_uri;
 }
