@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.mail.MessagingException;
@@ -100,6 +101,15 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	private static final int VERIFICATION_CODE_LENGTH = 6;
 	private static final int MAX_VERIFICATION_CODE_ATTEMPTS = 10;
+
+	/* Password constraint statics */
+	private static final int PASSWORD_CONSTRAINT_MIN_LENGTH = 8;
+	// When a password is extra long, it contributes to the security level
+	private static final int PASSWORD_CONSTRAINT_EXTRA_LENGTH = 20;
+	private static final Pattern PASSWORD_CONSTRAINT_NUMBERS_PATTERN = Pattern.compile("\\d");
+	private static final Pattern PASSWORD_CONSTRAINT_LOWER_CASE_PATTERN = Pattern.compile("[\\p{Ll}]");
+	private static final Pattern PASSWORD_CONSTRAINT_UPPER_CASE_PATTERN = Pattern.compile("[\\p{Lu}]");
+	private static final Pattern PASSWORD_CONSTRAINT_SPECIAL_CHAR_PATTERN = Pattern.compile("[\\p{P}\\p{S}\\p{Z}]");
 
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -380,6 +390,18 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			return null;
 		}
 
+		if (password.length() < PASSWORD_CONSTRAINT_MIN_LENGTH) {
+			logger.debug("User registration failed. Password is shorter than 8 characters.");
+
+			return null;
+		}
+
+		if (getPasswordStrength(password) < securityProperties.getPasswordStrictnessLevel()) {
+			logger.debug("User registration failed. Password is not strong enough.");
+
+			return null;
+		}
+
 		if (null != userRepository.findByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA, lcUsername)) {
 			logger.info("User registration failed. {} already exists.", lcUsername);
 
@@ -413,6 +435,36 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		final UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.ANONYMIZED, generateGuestId());
 		create(userProfile);
 		return userProfile;
+	}
+
+	private int getPasswordStrength(final String password) {
+		int passwordStrength = 0;
+
+		if (password.length() >= PASSWORD_CONSTRAINT_EXTRA_LENGTH) {
+			passwordStrength++;
+		}
+
+		final Matcher numbersMatcher = PASSWORD_CONSTRAINT_NUMBERS_PATTERN.matcher(password);
+		if (numbersMatcher.find()) {
+			passwordStrength++;
+		}
+
+		final Matcher lowerCaseMatcher = PASSWORD_CONSTRAINT_LOWER_CASE_PATTERN.matcher(password);
+		if (lowerCaseMatcher.find()) {
+			passwordStrength++;
+		}
+
+		final Matcher upperCaseMatcher = PASSWORD_CONSTRAINT_UPPER_CASE_PATTERN.matcher(password);
+		if (upperCaseMatcher.find()) {
+			passwordStrength++;
+		}
+
+		final Matcher specialCharMatcher = PASSWORD_CONSTRAINT_SPECIAL_CHAR_PATTERN.matcher(password);
+		if (specialCharMatcher.find()) {
+			passwordStrength++;
+		}
+
+		return passwordStrength;
 	}
 
 	private String encodePassword(final String password) {
