@@ -124,6 +124,7 @@ public class SecurityProperties {
 	private List<AdminAccount> adminAccounts;
 	private int loginTryLimit;
 	private int resendMailLimit;
+	private int passwordStrictnessLevel;
 	private List<String> corsOrigins;
 
 	public Jwt getJwt() {
@@ -156,6 +157,14 @@ public class SecurityProperties {
 
 	public void setResendMailLimit(final int resendMailLimit) {
 		this.resendMailLimit = resendMailLimit;
+	}
+
+	public int getPasswordStrictnessLevel() {
+		return passwordStrictnessLevel;
+	}
+
+	public void setPasswordStrictnessLevel(final int passwordStrictnessLevel) {
+		this.passwordStrictnessLevel = passwordStrictnessLevel;
 	}
 
 	public List<String> getCorsOrigins() {
