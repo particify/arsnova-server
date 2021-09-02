@@ -27,9 +27,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.validation.Validator;
 
-import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
+import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.security.PasswordUtils;

@@ -18,10 +18,6 @@
 
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.config.properties.MessageBrokerProperties;
-import de.thm.arsnova.config.properties.SystemProperties;
-import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
-import de.thm.arsnova.config.properties.SecurityProperties;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -51,6 +47,10 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.validation.Validator;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
+import de.thm.arsnova.config.properties.MessageBrokerProperties;
+import de.thm.arsnova.config.properties.SecurityProperties;
+import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.security.PasswordUtils;
 import de.thm.arsnova.service.StubUserService;

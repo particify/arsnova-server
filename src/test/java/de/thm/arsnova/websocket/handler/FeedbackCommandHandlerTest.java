@@ -4,11 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
-import de.thm.arsnova.model.Feedback;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.service.FeedbackStorageService;
-import de.thm.arsnova.service.RoomService;
-import de.thm.arsnova.websocket.message.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +12,14 @@ import org.mockito.Mockito;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import de.thm.arsnova.model.Feedback;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.service.FeedbackStorageService;
+import de.thm.arsnova.service.RoomService;
+import de.thm.arsnova.websocket.message.CreateFeedback;
+import de.thm.arsnova.websocket.message.CreateFeedbackPayload;
+import de.thm.arsnova.websocket.message.FeedbackChanged;
 
 @ExtendWith(SpringExtension.class)
 public class FeedbackCommandHandlerTest {

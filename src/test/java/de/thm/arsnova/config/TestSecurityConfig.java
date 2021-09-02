@@ -37,8 +37,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 
-import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
+import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.security.CasUserDetailsService;
 
 @Configuration
