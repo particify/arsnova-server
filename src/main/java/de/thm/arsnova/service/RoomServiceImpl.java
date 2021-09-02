@@ -19,12 +19,10 @@
 package de.thm.arsnova.service;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,17 +176,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	public List<String> getUserRoomIds(final String userId) {
 		return roomRepository.findIdsByOwnerId(userId);
-	}
-
-	@Override
-	public List<Room> getUserRoomHistory(final String userId) {
-		final UserProfile profile = userService.get(userId);
-		final List<String> roomIds = profile.getRoomHistory().stream()
-				.map(entry -> entry.getRoomId()).collect(Collectors.toList());
-		final List<Room> rooms = new ArrayList<>();
-		roomRepository.findAllById(roomIds).forEach(rooms::add);
-
-		return rooms;
 	}
 
 	@Override

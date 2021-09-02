@@ -18,7 +18,6 @@
 
 package de.thm.arsnova.service;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -27,12 +26,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang.CharEncoding;
@@ -67,7 +64,6 @@ import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.model.ClientAuthentication;
-import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.security.GuestUserDetailsService;
@@ -509,50 +505,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			mailPattern = Pattern.compile("[a-z0-9._-]+?@(" + StringUtils.join(patterns, "|") + ")",
 					Pattern.CASE_INSENSITIVE);
 			logger.info("Allowed e-mail addresses (pattern) for registration: '{}'.", mailPattern.pattern());
-		}
-	}
-
-	@Override
-	public Set<UserProfile.RoomHistoryEntry> getRoomHistory(final UserProfile userProfile) {
-		final Set<UserProfile.RoomHistoryEntry> roomHistory = userProfile.getRoomHistory();
-
-		return roomHistory;
-	}
-
-	@Override
-	public void addRoomToHistory(final UserProfile userProfile, final Room room) {
-		if (userProfile.getId().equals(room.getOwnerId())) {
-			return;
-		}
-		final Set<UserProfile.RoomHistoryEntry> roomHistory = userProfile.getRoomHistory();
-		final UserProfile.RoomHistoryEntry entry = new UserProfile.RoomHistoryEntry(room.getId(), new Date());
-		/* TODO: lastVisit in roomHistory is currently not updated by subsequent method invocations */
-		if (!roomHistory.contains(entry)) {
-			roomHistory.add(entry);
-			final Map<String, Object> changes = Collections.singletonMap("roomHistory", roomHistory);
-			try {
-				super.patch(userProfile, changes);
-			} catch (final IOException e) {
-				logger.error("Could not patch RoomHistory");
-			}
-		}
-	}
-
-	@Override
-	public void deleteRoomFromHistory(final UserProfile userProfile, final Room room) {
-		final Set<UserProfile.RoomHistoryEntry> roomHistory = userProfile.getRoomHistory();
-
-		final Set<UserProfile.RoomHistoryEntry> filteredRoomHistory = roomHistory.stream()
-				.filter(r -> !r.getRoomId().equals(room.getId()))
-				.collect(Collectors.toSet());
-
-		if (filteredRoomHistory.size() < roomHistory.size()) {
-			final Map<String, Object> changes = Collections.singletonMap("roomHistory", filteredRoomHistory);
-			try {
-				super.patch(userProfile, changes);
-			} catch (final IOException e) {
-				logger.error("Could not patch RoomHistory");
-			}
 		}
 	}
 

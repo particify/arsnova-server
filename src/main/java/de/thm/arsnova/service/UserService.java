@@ -20,12 +20,10 @@ package de.thm.arsnova.service;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.security.User;
 
@@ -56,12 +54,6 @@ public interface UserService extends EntityService<UserProfile> {
 	UserProfile create(String username, String password);
 
 	UserProfile createAnonymizedGuestUser();
-
-	Set<UserProfile.RoomHistoryEntry> getRoomHistory(UserProfile userProfile);
-
-	void addRoomToHistory(UserProfile userProfile, Room room);
-
-	void deleteRoomFromHistory(UserProfile userProfile, Room room);
 
 	boolean activateAccount(String id, String key, String clientAddress);
 

@@ -2,7 +2,6 @@ package de.thm.arsnova.service;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,7 +10,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.model.ClientAuthentication;
-import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.security.User;
 
@@ -97,24 +95,6 @@ public class SecuredUserService extends AbstractSecuredEntityServiceImpl<UserPro
 	@PreAuthorize("denyAll")
 	public UserProfile createAnonymizedGuestUser() {
 		return userService.createAnonymizedGuestUser();
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#userProfile, 'read')")
-	public Set<UserProfile.RoomHistoryEntry> getRoomHistory(final UserProfile userProfile) {
-		return userService.getRoomHistory(userProfile);
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#userProfile, 'update')")
-	public void addRoomToHistory(final UserProfile userProfile, final Room room) {
-		userService.addRoomToHistory(userProfile, room);
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#userProfile, 'update')")
-	public void deleteRoomFromHistory(final UserProfile userProfile, final Room room) {
-		userService.deleteRoomFromHistory(userProfile, room);
 	}
 
 	@Override

@@ -31,12 +31,6 @@ public class SecuredRoomService extends AbstractSecuredEntityServiceImpl<Room>
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#userId, 'userprofile', 'read')")
-	public List<Room> getUserRoomHistory(final String userId) {
-		return roomService.getUserRoomHistory(userId);
-	}
-
-	@Override
 	@PreAuthorize("hasRole('ADMIN')")
 	public Room transferOwnership(final Room room, final String newOwnerId) {
 		return roomService.transferOwnership(room, newOwnerId);

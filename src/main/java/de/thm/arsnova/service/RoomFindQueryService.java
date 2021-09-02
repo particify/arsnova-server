@@ -26,27 +26,18 @@ import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.model.FindQuery;
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.UserProfile;
 
 @Service
 public class RoomFindQueryService implements FindQueryService<Room> {
 	private RoomService roomService;
-	private UserService userService;
 
-	public RoomFindQueryService(final RoomService roomService, final UserService userService) {
+	public RoomFindQueryService(final RoomService roomService) {
 		this.roomService = roomService;
-		this.userService = userService;
 	}
 
 	@Override
 	public Set<String> resolveQuery(final FindQuery<Room> findQuery) {
 		final List<List<String>> ids = new ArrayList<>();
-		if (findQuery.getExternalFilters().get("inHistoryOfUserId") instanceof String) {
-			final UserProfile inHistoryOfUser = userService.get(
-					(String) findQuery.getExternalFilters().get("inHistoryOfUserId"));
-			ids.add(inHistoryOfUser.getRoomHistory().stream()
-					.map(UserProfile.RoomHistoryEntry::getRoomId).collect(Collectors.toList()));
-		}
 		if (findQuery.getProperties().getOwnerId() != null) {
 			ids.add(roomService.getUserRoomIds(findQuery.getProperties().getOwnerId()));
 		}

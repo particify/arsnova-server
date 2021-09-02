@@ -146,10 +146,6 @@ public class FromV2Migrator {
 				profile.setCreationTimestamp(new Date());
 			}
 			profile.setLastLoginTimestamp(new Date(loggedIn.getTimestamp()));
-			final Set<UserProfile.RoomHistoryEntry> sessionHistory = loggedIn.getVisitedSessions().stream()
-					.map(entry -> new UserProfile.RoomHistoryEntry(entry.getId(), new Date(0)))
-					.collect(Collectors.toSet());
-			profile.setRoomHistory(sessionHistory);
 		}
 		if (motdList != null && motdList.getMotdkeys() != null) {
 			profile.setAcknowledgedMotds(migrate(motdList));

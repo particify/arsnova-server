@@ -142,66 +142,6 @@ public class UserProfile extends Entity {
 		}
 	}
 
-	public static class RoomHistoryEntry {
-		private String roomId;
-		private Date lastVisit;
-
-		public RoomHistoryEntry() {
-
-		}
-
-		public RoomHistoryEntry(final String roomId, final Date lastVisit) {
-			this.roomId = roomId;
-			this.lastVisit = lastVisit;
-		}
-
-		@JsonView({View.Persistence.class, View.Owner.class})
-		public String getRoomId() {
-			return roomId;
-		}
-
-		@JsonView(View.Persistence.class)
-		public void setRoomId(final String roomId) {
-			this.roomId = roomId;
-		}
-
-		@JsonView({View.Persistence.class, View.Owner.class})
-		public Date getLastVisit() {
-			return lastVisit;
-		}
-
-		@JsonView(View.Persistence.class)
-		public void setLastVisit(final Date lastVisit) {
-			this.lastVisit = lastVisit;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(roomId);
-		}
-
-		@Override
-		public boolean equals(final Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-			final RoomHistoryEntry that = (RoomHistoryEntry) o;
-
-			return Objects.equals(roomId, that.roomId);
-		}
-
-		@Override
-		public String toString() {
-			return new ToStringCreator(this)
-					.append("roomId", roomId)
-					.append("lastVisit", lastVisit)
-					.toString();
-		}
-	}
-
 	@JsonView({View.Persistence.class, View.Public.class})
 	public static class Person {
 		private String displayName;
@@ -260,11 +200,6 @@ public class UserProfile extends Entity {
 	private Date lastLoginTimestamp;
 	private Account account;
 	private Person person;
-	/* TODO: Review - is a Map more appropriate?
-	 * pro List: can be ordered by date
-	 * pro Map (roomId -> RoomHistoryEntry): easier to access for updating lastVisit
-	 * -> Map but custom serialization to array? */
-	private Set<RoomHistoryEntry> roomHistory = new HashSet<>();
 	private Set<String> acknowledgedMotds = new HashSet<>();
 
 	public UserProfile() {
@@ -330,16 +265,6 @@ public class UserProfile extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Owner.class})
-	public Set<RoomHistoryEntry> getRoomHistory() {
-		return roomHistory;
-	}
-
-	@JsonView(View.Persistence.class)
-	public void setRoomHistory(final Set<RoomHistoryEntry> roomHistory) {
-		this.roomHistory = roomHistory;
-	}
-
-	@JsonView({View.Persistence.class, View.Owner.class})
 	public Set<String> getAcknowledgedMotds() {
 		return acknowledgedMotds;
 	}
@@ -354,7 +279,7 @@ public class UserProfile extends Entity {
 	 *
 	 * <p>
 	 * The following fields of <tt>UserProfile</tt> are excluded from equality checks:
-	 * {@link #account}, {@link #roomHistory}, {@link #acknowledgedMotds}.
+	 * {@link #account}, {@link #acknowledgedMotds}.
 	 * </p>
 	 */
 	@Override
@@ -379,7 +304,6 @@ public class UserProfile extends Entity {
 				.append("loginId", loginId)
 				.append("lastLoginTimestamp", lastLoginTimestamp)
 				.append("account", account)
-				.append("roomHistory", roomHistory)
 				.append("acknowledgedMotds", acknowledgedMotds);
 	}
 }
