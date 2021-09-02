@@ -21,10 +21,8 @@ package de.thm.arsnova.model;
 import com.fasterxml.jackson.annotation.JsonMerge;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import org.springframework.core.style.ToStringCreator;
@@ -32,68 +30,6 @@ import org.springframework.core.style.ToStringCreator;
 import de.thm.arsnova.model.serialization.View;
 
 public class Room extends Entity implements RoomIdAware {
-	public static class Moderator {
-		public enum Role {
-			EDITING_MODERATOR,
-			EXECUTIVE_MODERATOR
-		}
-
-		@NotEmpty
-		private String userId;
-
-		private Set<Role> roles;
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public String getUserId() {
-			return userId;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setUserId(final String userId) {
-			this.userId = userId;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public Set<Role> getRoles() {
-			if (roles == null) {
-				roles = new HashSet<>();
-			}
-
-			return roles;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setRoles(final Set<Role> roles) {
-			this.roles = roles;
-		}
-
-		@Override
-		public String toString() {
-			return new ToStringCreator(this)
-					.append("userId", userId)
-					.append("roles", roles)
-					.toString();
-		}
-
-		@Override
-		public boolean equals(final Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-			final Moderator moderator = (Moderator) o;
-			return Objects.equals(userId, moderator.userId)
-					&& Objects.equals(roles, moderator.roles);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(userId, roles);
-		}
-	}
-
 	public static class Settings {
 		private boolean feedbackLocked = true;
 
@@ -179,8 +115,6 @@ public class Room extends Entity implements RoomIdAware {
 	private boolean template;
 	private String password;
 	private String lmsCourseId;
-	private Set<Moderator> moderators;
-	private boolean moderatorsInitialized;
 	private Date scheduledDeletion;
 
 	@JsonMerge
@@ -314,25 +248,6 @@ public class Room extends Entity implements RoomIdAware {
 		this.lmsCourseId = lmsCourseId;
 	}
 
-	@JsonView({View.Persistence.class, View.Admin.class})
-	public Set<Moderator> getModerators() {
-		if (moderators == null) {
-			moderators = new HashSet<>();
-		}
-
-		return moderators;
-	}
-
-	@JsonView(View.Persistence.class)
-	public void setModerators(final Set<Moderator> moderators) {
-		this.moderators = moderators;
-		moderatorsInitialized = true;
-	}
-
-	public boolean isModeratorsInitialized() {
-		return moderatorsInitialized;
-	}
-
 	@JsonView(View.Persistence.class)
 	public Date getScheduledDeletion() {
 		return scheduledDeletion;
@@ -420,8 +335,6 @@ public class Room extends Entity implements RoomIdAware {
 				.append("description", description)
 				.append("closed", closed)
 				.append("passwordProtected", isPasswordProtected())
-				.append("moderatorsInitialized", moderatorsInitialized)
-				.append("moderators", moderators)
 				.append("settings", settings)
 				.append("statistics", statistics);
 	}

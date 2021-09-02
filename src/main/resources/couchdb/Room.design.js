@@ -38,15 +38,6 @@ var designDoc = {
 				}
 			}
 		},
-		"by_moderators_containing_userid": {
-			"map": function (doc) {
-				if (doc.type === "Room" && doc.moderators) {
-					doc.moderators.forEach(function (moderator) {
-						emit(moderator.userId, {_rev: doc._rev});
-					});
-				}
-			}
-		},
 		"partial_by_pool_ownerid_name": {
 			"map": function (doc) {
 				if (doc.type === "Room") {

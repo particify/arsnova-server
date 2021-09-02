@@ -32,8 +32,6 @@ public interface RoomService extends EntityService<Room> {
 
 	List<String> getUserRoomIds(String userId);
 
-	List<String> getRoomIdsByModeratorId(String userId);
-
 	List<Room> getUserRoomHistory(String userId);
 
 	Room transferOwnership(Room room, String newOwnerId);

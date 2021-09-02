@@ -30,18 +30,14 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -142,56 +138,6 @@ public class RoomControllerTest {
 	}
 
 	@Test
-	public void shouldReturnEmptyModeratorList() throws Exception {
-		final Room room = getRoomForUserWithDatabaseDetails("TestRoomID", user);
-
-		when(roomRepository.findOne(room.getId())).thenReturn(room);
-
-		mockMvc.perform(get("/room/" + room.getId() + "/moderator")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().string("[]"));
-	}
-
-	@Test
-	@WithMockUser(value = "TestUser", userId = "1234", roles = {"USER", "OWNER__TestRoomID"})
-	public void shouldAddModeratorForRoom() throws Exception {
-		final Room room = getRoomForUserWithDatabaseDetails("TestRoomID", user);
-		final Room.Moderator moderator = createModerator();
-
-		when(roomRepository.findOne(room.getId())).thenReturn(room);
-		when(roomRepository.save(any(Room.class))).thenAnswer(i -> i.getArgument(0));
-
-		mockMvc.perform(put("/room/" + room.getId() + "/moderator/" + moderator.getUserId())
-				.with(csrf())
-				.content(new ObjectMapper().writeValueAsString(moderator))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-		verify(roomRepository).save(argThat(r -> r.getModerators().size() == 1));
-	}
-
-	@Test
-	@WithMockUser(value = "TestUser", userId = "1234", roles = {"USER", "OWNER__TestRoomID"})
-	public void shouldDeleteOneModerator() throws Exception {
-		final Room room = getRoomForUserWithDatabaseDetails("TestRoomID", user);
-		final Set<Room.Moderator> moderatorList = createModerators(2);
-		room.setModerators(moderatorList);
-		final Iterator<Room.Moderator> iterator = room.getModerators().iterator();
-		final Room.Moderator moderatorToDelete = iterator.next();
-
-		when(roomRepository.findOne(room.getId())).thenReturn(room);
-		when(roomRepository.save(any(Room.class))).thenAnswer(i -> i.getArgument(0));
-
-		mockMvc.perform(delete("/room/" + room.getId() + "/moderator/" + moderatorToDelete.getUserId())
-				.with(csrf())
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().string(emptyString()));
-		verify(roomRepository).save(argThat(r -> r.getModerators().size() == 1));
-	}
-
-	@Test
 	@WithMockUser(value = "TestUser")
 	public void shouldGetStatsForRoom() throws Exception {
 		final int groupSize = 3;
@@ -235,23 +181,6 @@ public class RoomControllerTest {
 		return listOfGroups;
 	}
 
-	private Set<Room.Moderator> createModerators(final int nb) {
-		final Set<Room.Moderator> moderatorsList = new HashSet<>();
-		for (int i = 0; i < nb; i++) {
-			final Room.Moderator moderator = new Room.Moderator();
-			moderator.setUserId("TestModerator-" + UUID.randomUUID().toString());
-			final Set<Room.Moderator.Role> roles = new HashSet<>();
-			roles.add(Room.Moderator.Role.EXECUTIVE_MODERATOR);
-			moderator.setRoles(roles);
-			moderatorsList.add(moderator);
-		}
-		return moderatorsList;
-	}
-
-	private Room.Moderator createModerator() {
-		return createModerators(1).iterator().next();
-	}
-
 	private Room getRoomForUserWithDatabaseDetails(final String roomId, final User user) {
 		final Room room = getRoomForUserWithoutDatabaseDetails(user);
 		room.setId(roomId);
@@ -273,7 +202,6 @@ public class RoomControllerTest {
 				});
 			}
 		});
-		room.setModerators(new HashSet<>()); // needed for moderatorsInitialized flag
 		return room;
 	}
 

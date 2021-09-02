@@ -70,8 +70,6 @@ public class Statistics {
 	public static class RoomStats {
 		private int totalCount;
 		private int closed;
-		private int moderated;
-		private int moderators;
 
 		public int getTotalCount() {
 			return totalCount;
@@ -87,22 +85,6 @@ public class Statistics {
 
 		public void setClosed(final int closed) {
 			this.closed = closed;
-		}
-
-		public int getModerated() {
-			return moderated;
-		}
-
-		public void setModerated(final int moderated) {
-			this.moderated = moderated;
-		}
-
-		public int getModerators() {
-			return moderators;
-		}
-
-		public void setModerators(final int moderators) {
-			this.moderators = moderators;
 		}
 	}
 

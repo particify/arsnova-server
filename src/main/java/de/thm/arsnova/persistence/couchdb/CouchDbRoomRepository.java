@@ -93,13 +93,4 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 				.includeDocs(false));
 		return createEntityStubs(result, (r, k) -> {});
 	}
-
-	@Override
-	public List<String> findIdsByModeratorId(final String moderatorId) {
-		final ViewResult result = db.queryView(createQuery("by_moderators_containing_userid")
-				.key(moderatorId)
-				.includeDocs(false));
-
-		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
-	}
 }

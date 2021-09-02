@@ -233,7 +233,6 @@ public class ContentGroupControllerTest {
 				});
 			}
 		});
-		room.setModerators(new HashSet<>()); // needed for moderatorsInitialized flag
 		return room;
 	}
 }

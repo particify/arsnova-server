@@ -47,11 +47,6 @@ public class RoomFindQueryService implements FindQueryService<Room> {
 			ids.add(inHistoryOfUser.getRoomHistory().stream()
 					.map(UserProfile.RoomHistoryEntry::getRoomId).collect(Collectors.toList()));
 		}
-		if (findQuery.getExternalFilters().get("moderatedByUserId") instanceof String) {
-			final List<String> moderatedRoomIds = roomService.getRoomIdsByModeratorId(
-					(String) findQuery.getExternalFilters().get("moderatedByUserId"));
-			ids.add(moderatedRoomIds);
-		}
 		if (findQuery.getProperties().getOwnerId() != null) {
 			ids.add(roomService.getUserRoomIds(findQuery.getProperties().getOwnerId()));
 		}

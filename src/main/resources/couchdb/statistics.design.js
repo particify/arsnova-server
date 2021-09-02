@@ -16,10 +16,6 @@ var designDoc = {
 					if (doc.closed) {
 						emit([doc.type, "closed"], 1);
 					}
-					if (doc.moderators && doc.moderators.length > 0) {
-						emit([doc.type, "moderated"], 1);
-						emit([doc.type, "moderators"], doc.moderators.length);
-					}
 					break;
 				case "Content":
 					emit([doc.type, "format", doc.format], 1);
