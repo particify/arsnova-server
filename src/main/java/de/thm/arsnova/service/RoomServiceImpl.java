@@ -54,6 +54,7 @@ import de.thm.arsnova.security.jwt.JwtService;
 import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import net.particify.arsnova.connector.client.ConnectorClient;
+import net.particify.arsnova.connector.model.Membership;
 
 /**
  * Performs all room related operations.
@@ -312,10 +313,30 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	public Optional<RoomMembership> requestMembership(final String roomId, final String password) {
 		final Room room = get(roomId);
-		return room.isClosed()
-				|| room.isPasswordProtected() && !room.getPassword().equals(password)
+		if (room.isClosed()) {
+			return Optional.empty();
+		}
+		if (room.getLmsCourseId() != null) {
+			return determineMembershipFromLms(room);
+		}
+		return room.isPasswordProtected() && !room.getPassword().equals(password)
 				? Optional.empty()
 				: Optional.of(new RoomMembership(room, RoomRole.PARTICIPANT));
+	}
+
+	public Optional<RoomMembership> determineMembershipFromLms(final Room room) {
+		logger.trace("Determining user role via LMS membership.");
+		if (connectorClient == null) {
+			logger.warn("Room {} is connected to LMS course {} but LMS connector client is disabled.",
+					room.getId(),
+					room.getLmsCourseId());
+			return Optional.empty();
+		}
+		final String loginId = userService.getCurrentUser().getUsername();
+		final Membership lmsMembership = connectorClient.getMembership(loginId, room.getLmsCourseId());
+		return lmsMembership.isMember()
+				? Optional.of(new RoomMembership(room, RoomRole.PARTICIPANT))
+				: Optional.empty();
 	}
 
 	private void handleLogo(final Room room) {

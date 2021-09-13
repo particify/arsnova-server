@@ -455,6 +455,7 @@ public class Room extends Entity implements RoomIdAware {
 	private boolean closed;
 	private boolean template;
 	private String password;
+	private String lmsCourseId;
 	private Set<Moderator> moderators;
 	private boolean moderatorsInitialized;
 	private Date scheduledDeletion;
@@ -591,6 +592,16 @@ public class Room extends Entity implements RoomIdAware {
 	@JsonView(View.Public.class)
 	public boolean isPasswordProtected() {
 		return this.password != null;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public String getLmsCourseId() {
+		return lmsCourseId;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setLmsCourseId(final String lmsCourseId) {
+		this.lmsCourseId = lmsCourseId;
 	}
 
 	@JsonView({View.Persistence.class, View.Admin.class})

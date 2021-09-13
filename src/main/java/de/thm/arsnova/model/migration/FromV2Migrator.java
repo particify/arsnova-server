@@ -191,6 +191,9 @@ public class FromV2Migrator {
 		to.setAbbreviation(from.getShortName());
 		to.setDescription(from.getPpDescription());
 		to.setClosed(!from.isActive());
+		if (from.getCourseId() != null && !from.getCourseId().isEmpty()) {
+			to.setLmsCourseId(from.getCourseId());
+		}
 		if (from.hasAuthorDetails()) {
 			final de.thm.arsnova.model.Room.Author author = new de.thm.arsnova.model.Room.Author();
 			to.setAuthor(author);
