@@ -1,4 +1,4 @@
-FROM node:14.17-alpine
+FROM node:14.18-alpine
 
 ENV BUILD_DIR=lib
 ENV NODE_ENV=production
