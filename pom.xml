@@ -11,7 +11,7 @@
 		<spring-boot.version>2.5.5</spring-boot.version>
 		<commons-lang.version>2.6</commons-lang.version>
 		<guava.version>31.0.1-jre</guava.version>
-		<netty.version>4.1.68.Final</netty.version>
+		<netty.version>4.1.69.Final</netty.version>
 		<aspectj.version>1.9.7</aspectj.version>
 		<jakarta-xml-bind.version>2.3.3</jakarta-xml-bind.version>
 		<pac4j.version>4.5.2</pac4j.version>
