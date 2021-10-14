@@ -78,6 +78,15 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	@Override
+	public List<String> findIdsByLmsCourseIds(final List<String> lmsCourseIds) {
+		final ViewResult result = db.queryView(createQuery("by_lmscourseid")
+				.keys(lmsCourseIds)
+				.includeDocs(false));
+
+		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
+	}
+
+	@Override
 	public List<Room> findStubsByScheduledDeletionAfter(final Date scheduledDeletion) {
 		final ViewResult result = db.queryView(createQuery("by_scheduleddeletion")
 				.endKey(scheduledDeletion.getTime())

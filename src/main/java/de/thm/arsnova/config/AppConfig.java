@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.CharEncoding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
@@ -36,6 +38,7 @@ import org.springframework.boot.actuate.endpoint.http.ActuatorMediaType;
 import org.springframework.boot.actuate.metrics.web.servlet.WebMvcMetricsFilter;
 import org.springframework.boot.actuate.metrics.web.servlet.WebMvcTagsProvider;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -128,6 +131,9 @@ public class AppConfig implements WebMvcConfigurer {
 	public static final MediaType ACTUATOR_MEDIA_TYPE = MediaType.valueOf(ActuatorMediaType.V2_JSON);
 	public static final MediaType CSV_MEDIA_TYPE = new MediaType("text", "csv");
 	public static final MediaType TSV_MEDIA_TYPE = new MediaType("text", "tab-separated-values");
+	public static final String LMS_CONNECTOR_BEAN_NAME = "lmsConnectorClient";
+
+	private static final Logger logger = LoggerFactory.getLogger(AppConfig.class);
 
 	@Autowired
 	private Environment env;
@@ -309,12 +315,13 @@ public class AppConfig implements WebMvcConfigurer {
 		return new CorsFilter(securityProperties.getCorsOrigins());
 	}
 
-	@Bean(name = "connectorClient")
+	@Bean(name = LMS_CONNECTOR_BEAN_NAME)
+	@ConditionalOnProperty(
+			name =  "enabled",
+			prefix = SystemProperties.PREFIX + ".lms-connector"
+	)
 	public ConnectorClient connectorClient() {
-		if (!systemProperties.getLmsConnector().isEnabled()) {
-			return null;
-		}
-
+		logger.info("LMS connector is enabled.");
 		final ConnectorClientImpl connectorClient = new ConnectorClientImpl();
 		connectorClient.setServiceLocation(systemProperties.getLmsConnector().getHostUrl());
 		connectorClient.setUsername(systemProperties.getLmsConnector().getUsername());

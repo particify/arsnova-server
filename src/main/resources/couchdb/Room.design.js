@@ -24,6 +24,13 @@ var designDoc = {
 				}
 			}
 		},
+		"by_lmscourseid": {
+			"map": function (doc) {
+				if (doc.type === "Room" && doc.lmsCourseId) {
+					emit(doc.lmsCourseId, {_rev: doc._rev});
+				}
+			}
+		},
 		"by_scheduleddeletion": {
 			"map": function (doc) {
 				if (doc.type === "Room" && doc.scheduledDeletion) {
