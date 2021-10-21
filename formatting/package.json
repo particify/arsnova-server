@@ -19,7 +19,7 @@
     "eslint": "7.32.0",
     "eslint-plugin-import": "2.24.2",
     "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-promise": "5.1.0"
+    "eslint-plugin-promise": "5.1.1"
   },
   "resolutions": {
     "katex": "^0.13.0"
