@@ -139,7 +139,10 @@ class GatewayConfig(
             routes.route("subscription-service") { p ->
                 p
                     .path(
-                        "/feature/**"
+                        "/feature/**",
+                        "/featuresettings/**",
+                        "/subscription/**",
+                        "/tier/**"
                     )
                     .filters { f ->
                         f.requestRateLimiter { r ->
