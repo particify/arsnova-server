@@ -8,6 +8,7 @@ import java.util.Objects;
 public class UpdateSettingsPayload implements WebSocketPayload {
     private String roomId;
     private Boolean directSend;
+    private Boolean fileUploadEnabled;
 
     public UpdateSettingsPayload() {
     }
@@ -15,6 +16,7 @@ public class UpdateSettingsPayload implements WebSocketPayload {
     public UpdateSettingsPayload(Settings settings) {
         roomId = settings.getRoomId();
         directSend = settings.getDirectSend();
+        fileUploadEnabled = settings.isFileUploadEnabled();
     }
 
     public UpdateSettingsPayload(String roomId, Boolean directSend) {
@@ -38,25 +40,35 @@ public class UpdateSettingsPayload implements WebSocketPayload {
         this.directSend = directSend;
     }
 
+    public Boolean isFileUploadEnabled() {
+        return fileUploadEnabled;
+    }
+
+    public void setFileUploadEnabled(final Boolean fileUploadEnabled) {
+        this.fileUploadEnabled = fileUploadEnabled;
+    }
+
     @Override
     public String toString() {
         return "UpdateSettingsPayload{" +
                 "roomId='" + roomId + '\'' +
-                ", directSend='" + directSend + '\'' +
+                ", directSend=" + directSend +
+                ", fileUploadEnabled=" + fileUploadEnabled +
                 '}';
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UpdateSettingsPayload that = (UpdateSettingsPayload) o;
-        return Objects.equals(roomId, that.roomId) &&
-                Objects.equals(directSend, that.directSend);
+        final UpdateSettingsPayload that = (UpdateSettingsPayload) o;
+        return Objects.equals(roomId, that.roomId) && Objects.equals(
+                directSend,
+                that.directSend) && Objects.equals(fileUploadEnabled, that.fileUploadEnabled);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(roomId, directSend);
+        return Objects.hash(roomId, directSend, fileUploadEnabled);
     }
 }

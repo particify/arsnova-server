@@ -9,6 +9,7 @@ public class Settings {
     @Id
     private String roomId;
     private Boolean directSend;
+    private Boolean fileUploadEnabled;
 
     public Settings() {
     }
@@ -29,24 +30,35 @@ public class Settings {
         this.roomId = roomId;
     }
 
+    public Boolean isFileUploadEnabled() {
+        return fileUploadEnabled;
+    }
+
+    public void setFileUploadEnabled(final Boolean fileUploadEnabled) {
+        this.fileUploadEnabled = fileUploadEnabled;
+    }
+
     @Override
     public String toString() {
         return "Settings{" +
                 "roomId='" + roomId + '\'' +
                 ", directSend=" + directSend +
+                ", fileUploadEnabled=" + fileUploadEnabled +
                 '}';
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Settings settings = (Settings) o;
-        return Objects.equals(directSend, settings.directSend);
+        final Settings settings = (Settings) o;
+        return Objects.equals(roomId, settings.roomId) && Objects.equals(
+                directSend,
+                settings.directSend) && Objects.equals(fileUploadEnabled, settings.fileUploadEnabled);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(directSend);
+        return Objects.hash(roomId, directSend, fileUploadEnabled);
     }
 }
