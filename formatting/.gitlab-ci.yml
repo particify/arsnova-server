@@ -9,7 +9,7 @@ stages:
   - deploy
 
 default:
-  image: node:14.18-alpine
+  image: node:16.13-alpine
   before_script:
     - export PATH="`pwd`/node_modules/.bin:$PATH"
     - date
