@@ -22,6 +22,6 @@
     "eslint-plugin-promise": "5.1.1"
   },
   "resolutions": {
-    "katex": "^0.13.0"
+    "katex": "^0.15.0"
   }
 }
