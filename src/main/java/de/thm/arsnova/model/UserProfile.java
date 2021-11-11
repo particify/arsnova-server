@@ -201,60 +201,10 @@ public class UserProfile extends Entity {
 		}
 	}
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public static class Person {
-		private String displayName;
-		private String firstName;
-		private String lastName;
-		private String organization;
-		private String department;
-
-		public String getDisplayName() {
-			return displayName;
-		}
-
-		public void setDisplayName(final String displayName) {
-			this.displayName = displayName;
-		}
-
-		public String getFirstName() {
-			return firstName;
-		}
-
-		public void setFirstName(final String firstName) {
-			this.firstName = firstName;
-		}
-
-		public String getLastName() {
-			return lastName;
-		}
-
-		public void setLastName(final String lastName) {
-			this.lastName = lastName;
-		}
-
-		public String getOrganization() {
-			return organization;
-		}
-
-		public void setOrganization(final String organization) {
-			this.organization = organization;
-		}
-
-		public String getDepartment() {
-			return department;
-		}
-
-		public void setDepartment(final String department) {
-			this.department = department;
-		}
-	}
-
 	private AuthProvider authProvider;
 	private String loginId;
 	private Date lastLoginTimestamp;
 	private Account account;
-	private Person person;
 	/* TODO: Review - is a Map more appropriate?
 	 * pro List: can be ordered by date
 	 * pro Map (roomId -> RoomHistoryEntry): easier to access for updating lastVisit
@@ -310,16 +260,6 @@ public class UserProfile extends Entity {
 	@JsonView(View.Persistence.class)
 	public void setAccount(final Account account) {
 		this.account = account;
-	}
-
-	@JsonView({View.Persistence.class, View.Owner.class})
-	public Person getPerson() {
-		return person;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setPerson(final Person person) {
-		this.person = person;
 	}
 
 	@JsonView({View.Persistence.class, View.Owner.class})
