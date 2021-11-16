@@ -173,6 +173,9 @@
 				<artifactId>jib-maven-plugin</artifactId>
 				<version>3.1.4</version>
 				<configuration>
+					<from>
+						 <image>gcr.io/distroless/java:8</image>
+					</from>
 					<to>
 						<image>${docker.registry}/${docker.image}:${docker.tag}</image>
 					</to>
