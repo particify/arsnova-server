@@ -497,6 +497,7 @@
 						<image>${docker.registry}/${docker.image}:${docker.tag}</image>
 					</to>
 					<container>
+						<appRoot>/jetty/webapps/ROOT</appRoot>
 						<creationTime>${docker.time}</creationTime>
 						<ports>8080</ports>
 					</container>
