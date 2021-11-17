@@ -419,7 +419,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
-					<release>11</release>
+					<release>17</release>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -491,13 +491,14 @@
 				<version>3.1.4</version>
 				<configuration>
 					<from>
-						<image>gcr.io/distroless/java-debian10/jetty:java11</image>
+						<image>jetty:9-jdk17-slim</image>
 					</from>
 					<to>
 						<image>${docker.registry}/${docker.image}:${docker.tag}</image>
 					</to>
 					<container>
-						<appRoot>/jetty/webapps/ROOT</appRoot>
+						<appRoot>/var/lib/jetty/webapps/ROOT</appRoot>
+						<entrypoint>java,-jar,/usr/local/jetty/start.jar</entrypoint>
 						<creationTime>${docker.time}</creationTime>
 						<ports>8080</ports>
 					</container>

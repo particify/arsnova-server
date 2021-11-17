@@ -11,9 +11,7 @@ If you are viewing this file from the repository, please make sure you are on th
 While ARSnova should be able to run on any Linux distribution, we officially only support Debian and Ubuntu systems on which we test the installation procedure regularly.
 We recommend to use the latest (LTS) versions of the distributions.
 
-For Debian 9 you can enable the backports repository to install Tomcat 9:
-
-	# grep -q '^deb .*stretch-backports' /etc/apt/sources.list || echo "deb http://deb.debian.org/debian stretch-backports main" >> /etc/apt/sources.list
+For older Debian or Ubuntu releases you might need to enable a backports repository or PPA to install OpenJDK 17 and Tomcat 9.
 
 
 ### Hardware
@@ -64,7 +62,7 @@ for example, via the directive `-D arsnova.config-dir=/etc/arsnova`.
 
 In order to build up a full featured server installation you have to install at least the following software:
 
-* Oracle Java SE 11 or OpenJDK 11
+* Oracle Java SE 17 or OpenJDK 17
 * Apache Tomcat 8 (or newer)
 * Apache CouchDB 1.x (1.2 or newer recommended)
 * One of the following webservers acting as a reverse proxy:
@@ -75,7 +73,7 @@ Additionally, you need Python 2.7 (3.0 or newer will not work) to run the "Setup
 We further recommend installing the "Apache Portable Runtime (APR) based Native library for Tomcat" (libapr and libtcnative) for improved performance.
 
 Most of this software can easily be installed on Linux systems using the distribution's package manager:
-* Debian/Ubuntu: `# apt-get install libtcnative-1 nginx openjdk-8-jre tomcat9`
+* Debian/Ubuntu: `# apt-get install libtcnative-1 nginx openjdk-17-jre tomcat9`
 
 While running ARSnova without a reverse proxy is possible, we do not recommend to do so.
 A reverse proxy significantly simplifies the setup of HTTPS and allows running Websocket connections over the default HTTP(S) port.
