@@ -8,18 +8,16 @@
 	<version>0.1.0</version>
 	<packaging>jar</packaging>
 
-    <properties>
-        <spring-boot-version>2.5.6</spring-boot-version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<properties>
+		<maven.compiler.release>17</maven.compiler.release>
+		<spring-boot-version>2.5.6</spring-boot-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<io.netty-version>4.1.70.Final</io.netty-version>
-		<java.version>1.8</java.version>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
 		<docker.registry>local-dev</docker.registry>
 		<docker.image>arsnova/${project.artifactId}</docker.image>
 		<docker.tag>latest</docker.tag>
 		<docker.time>EPOCH</docker.time>
-    </properties>
+	</properties>
 
 	<dependencyManagement>
 		<dependencies>
@@ -146,6 +144,11 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+                        </plugin>
+			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
 				<version>3.3.2</version>
 				<configuration>
@@ -174,7 +177,7 @@
 				<version>3.1.4</version>
 				<configuration>
 					<from>
-						 <image>gcr.io/distroless/java:8</image>
+						 <image>eclipse-temurin:17-alpine</image>
 					</from>
 					<to>
 						<image>${docker.registry}/${docker.image}:${docker.tag}</image>
