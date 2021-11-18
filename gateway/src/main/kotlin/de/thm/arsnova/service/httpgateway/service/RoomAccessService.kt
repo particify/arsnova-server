@@ -25,6 +25,13 @@ class RoomAccessService(
             .retrieve().bodyToMono(RoomAccess::class.java).cache()
     }
 
+    fun getRoomAccess(roomId: String): Flux<RoomAccess> {
+        val url = "${httpGatewayProperties.httpClient.authService}/roomaccess/by-room/$roomId"
+        logger.trace("Querying auth service for room access with url: {}", url)
+        return webClient.get().uri(url)
+            .retrieve().bodyToFlux(RoomAccess::class.java).cache()
+    }
+
     fun postRoomAccess(roomAccess: RoomAccess): Mono<RoomAccess> {
         val url = "${httpGatewayProperties.httpClient.authService}/roomaccess/"
         logger.trace("Posting to auth service for room access with url: {}, roomAccess: {}", url, roomAccess)

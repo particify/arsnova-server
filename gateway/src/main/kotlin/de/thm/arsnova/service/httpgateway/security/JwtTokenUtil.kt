@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.exceptions.TokenExpiredException
 import de.thm.arsnova.service.httpgateway.config.HttpGatewayProperties
 import de.thm.arsnova.service.httpgateway.exception.UnauthorizedException
+import de.thm.arsnova.service.httpgateway.model.AccessLevel
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
 import de.thm.arsnova.service.httpgateway.model.RoomFeatures
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -55,6 +56,16 @@ class JwtTokenUtil(
             throw UnauthorizedException()
         } catch (e: TokenExpiredException) {
             throw UnauthorizedException()
+        }
+    }
+
+    fun getAccessLevelsFromInternalTokenForRoom(token: String, roomId: String): List<AccessLevel> {
+        val decodedJwt = internalVerifier.verify(token)
+        return decodedJwt.getClaim("roles").asList(String::class.java).filter { role ->
+            role.endsWith("-$roomId")
+        }.map { role ->
+            val roleString = role.replace(Regex("-$roomId\$"), "")
+            AccessLevel.valueOf(roleString)
         }
     }
 

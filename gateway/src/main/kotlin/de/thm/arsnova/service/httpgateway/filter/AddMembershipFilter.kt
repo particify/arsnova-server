@@ -25,6 +25,8 @@ class AddMembershipFilter(
 ) : AbstractGatewayFilterFactory<AddMembershipFilter.Config>(Config::class.java) {
 
     companion object {
+        const val ENTITY_ID_HEADER = "Arsnova-Entity-Id"
+        const val ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision"
         const val ARS_ROLE_HEADER = "ARS-Room-Role"
     }
 
@@ -44,12 +46,12 @@ class AddMembershipFilter(
                     e.request.method == HttpMethod.POST
                 }
                 .flatMap { e ->
-                    val roomId = e.response.headers.getFirst(RoomAuthFilter.ENTITY_ID_HEADER)!!
-                    val revId = e.response.headers.getFirst(RoomAuthFilter.ENTITY_REVISION_HEADER)!!
+                    val roomId = e.response.headers.getFirst(ENTITY_ID_HEADER)!!
+                    val revId = e.response.headers.getFirst(ENTITY_REVISION_HEADER)!!
                     /* Sending of the role as a header is a temporary solution for
                      * now to allow accessing it without parsing the body. */
                     val role = e.response.headers.getFirst(ARS_ROLE_HEADER)!!
-                    val token = e.request.headers.getFirst(HttpHeaders.AUTHORIZATION)!!.removePrefix(RoomAuthFilter.BEARER_HEADER)
+                    val token = e.request.headers.getFirst(HttpHeaders.AUTHORIZATION)!!.removePrefix(UpdateRoomAccessFilter.BEARER_HEADER)
                     val userId = jwtTokenUtil.getUserIdFromPublicToken(token)
                     Mono.zip(
                         Mono.just(

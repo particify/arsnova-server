@@ -1,13 +1,14 @@
 package de.thm.arsnova.service.httpgateway.config
 
 import de.thm.arsnova.service.httpgateway.filter.AddMembershipFilter
+import de.thm.arsnova.service.httpgateway.filter.AddRoomCreatorAccessFilter
 import de.thm.arsnova.service.httpgateway.filter.AuthFilter
 import de.thm.arsnova.service.httpgateway.filter.JwtUserIdFilter
 import de.thm.arsnova.service.httpgateway.filter.RemoveMembershipFilter
 import de.thm.arsnova.service.httpgateway.filter.RequestRateLimiter
-import de.thm.arsnova.service.httpgateway.filter.RoomAuthFilter
 import de.thm.arsnova.service.httpgateway.filter.RoomIdFilter
 import de.thm.arsnova.service.httpgateway.filter.RoomShortIdFilter
+import de.thm.arsnova.service.httpgateway.filter.UpdateRoomAccessFilter
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver
 import org.springframework.cloud.gateway.route.RouteLocator
@@ -47,7 +48,8 @@ class GatewayConfig(
         removeMembershipFilter: RemoveMembershipFilter,
         roomIdFilter: RoomIdFilter,
         roomShortIdFilter: RoomShortIdFilter,
-        roomAuthFilter: RoomAuthFilter,
+        roomAuthFilter: UpdateRoomAccessFilter,
+        roomCreationAuthFilter: AddRoomCreatorAccessFilter,
         jwtUserIdFilter: JwtUserIdFilter
     ): RouteLocator? {
         val routes = builder.routes()
@@ -291,7 +293,7 @@ class GatewayConfig(
                     "/room/"
                 )
                 .filters { f ->
-                    f.filter(roomAuthFilter.apply(RoomAuthFilter.Config()))
+                    f.filter(roomCreationAuthFilter.apply(AddRoomCreatorAccessFilter.Config()))
                     f.requestRateLimiter { r ->
                         r.rateLimiter = requestRateLimiter
                     }
@@ -302,14 +304,13 @@ class GatewayConfig(
         routes.route("room") { p ->
             p
                 .path(
-                    "/room/{roomId}",
                     "/room/{roomId}/moderator/**",
                     "/room/{roomId}/transfer**",
                 )
                 .filters { f ->
                     f.filter(roomShortIdFilter.apply(RoomShortIdFilter.Config()))
                     f.filter(authFilter.apply(AuthFilter.Config()))
-                    f.filter(roomAuthFilter.apply(RoomAuthFilter.Config()))
+                    f.filter(roomAuthFilter.apply(UpdateRoomAccessFilter.Config()))
                     f.requestRateLimiter { r ->
                         r.rateLimiter = requestRateLimiter
                     }
