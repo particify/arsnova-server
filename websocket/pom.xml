@@ -22,7 +22,7 @@
 		<docker.image>arsnova/${project.artifactId}</docker.image>
 		<docker.tag>latest</docker.tag>
 		<docker.time>EPOCH</docker.time>
-		<kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
+		<kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
 	</properties>
 
 	<dependencyManagement>
@@ -215,7 +215,7 @@
 				<version>3.1.4</version>
 				<configuration>
 					<from>
-						<image>gcr.io/distroless/java:8</image>
+						<image>eclipse-temurin:17-alpine</image>
 					</from>
 					<to>
 						<image>${docker.registry}/${docker.image}:${docker.tag}</image>
