@@ -12,7 +12,7 @@
 		<maven.compiler.release>17</maven.compiler.release>
 		<spring-boot-version>2.5.7</spring-boot-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<io.netty-version>4.1.70.Final</io.netty-version>
+		<io.netty-version>4.1.71.Final</io.netty-version>
 		<docker.registry>local-dev</docker.registry>
 		<docker.image>arsnova/${project.artifactId}</docker.image>
 		<docker.tag>latest</docker.tag>
