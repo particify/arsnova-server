@@ -2,6 +2,9 @@ server:
   port: 8099
   use-forward-headers: true
   forward-headers-strategy: NATIVE
+spring:
+  main:
+    allow-circular-references: true
 logging:
   level:
     org.springframework.web.socket.server.support.DefaultHandshakeHandler: OFF
