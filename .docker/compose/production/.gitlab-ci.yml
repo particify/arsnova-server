@@ -15,8 +15,8 @@ build_docker_images:
     IMAGE3_BASETAG: "3.9-management-alpine"
     IMAGE3_VERSION: $IMAGE3_BASETAG
     IMAGE4_NAME: couchdb
-    IMAGE4_BASETAG: "3.1"
-    IMAGE4_VERSION: "3.1"
+    IMAGE4_BASETAG: "3.2"
+    IMAGE4_VERSION: "3.2"
   parallel: 4
   script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
