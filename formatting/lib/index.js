@@ -12,7 +12,6 @@ const port = process.env.SERVER_PORT || 3020;
 const defaultMdOpts = { breaks: true, linkify: true };
 const linkOpts = { attrs: { target: '_blank', rel: 'noopener' } };
 const markdown = markdownIt('zero', defaultMdOpts);
-const markdownLatex = markdownIt('zero', defaultMdOpts);
 const defaultMdFeatureset = 'simple';
 const markdownFeaturesets = {
   minimum: [
@@ -64,10 +63,8 @@ const markdownFeaturesets = {
 app.use(bodyParser.json())
 markdown.use(markdownItLinkAttributes, linkOpts);
 markdown.use(markdownItPrism);
-markdownLatex.use(markdownItLinkAttributes, linkOpts);
-markdownLatex.use(markdownItKatex);
+markdown.use(markdownItKatex);
 markdown.linkify.set({ target: '_blank' });
-markdownLatex.linkify.set({ target: '_blank' });
 
 // Store reference because it will be overriden during reconfiguration
 const highlight = markdown.options.highlight;
@@ -94,10 +91,10 @@ app.post('/render', (req, res) => {
     if (options.latex) {
       mdFeatures = mdFeatures.concat(markdownFeaturesets.math);
     }
-    if (options.syntaxHighlighting) {
-      mdOpts = Object.assign(defaultMdOpts, { highlight: highlight });
-    }
-    html = configureMarkdown(markdownLatex, mdOpts, mdFeatures).render(html);
+    mdOpts = Object.assign(
+      defaultMdOpts,
+      { highlight: (options.syntaxHighlighting ?? true) ? highlight : () => '' });
+    html = configureMarkdown(markdown, mdOpts, mdFeatures).render(html);
   }
 
   res.send({ html: html });
