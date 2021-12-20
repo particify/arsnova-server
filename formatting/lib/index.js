@@ -10,7 +10,7 @@ const app = express();
 const appName = 'Particify Formatting Service for ARSnova';
 const port = process.env.SERVER_PORT || 3020;
 const defaultMdOpts = { breaks: true, linkify: true };
-const linkOpts = { attrs: { target: '_blank', rel: 'noopener' } };
+const linkOpts = { attrs: { target: '_blank', rel: 'nofollow noreferrer' } };
 const markdown = markdownIt('zero', defaultMdOpts);
 const defaultMdFeatureset = 'simple';
 const markdownFeaturesets = {
@@ -64,7 +64,6 @@ app.use(bodyParser.json())
 markdown.use(markdownItLinkAttributes, linkOpts);
 markdown.use(markdownItPrism);
 markdown.use(markdownItKatex);
-markdown.linkify.set({ target: '_blank' });
 
 // Store reference because it will be overriden during reconfiguration
 const highlight = markdown.options.highlight;
