@@ -8,7 +8,7 @@
 
 	<properties>
 		<!-- Maven dependency/plugin versions -->
-		<spring-boot.version>2.6.2</spring-boot.version>
+		<spring-boot.version>2.6.3</spring-boot.version>
 		<commons-lang.version>2.6</commons-lang.version>
 		<guava.version>31.0.1-jre</guava.version>
 		<netty.version>4.1.73.Final</netty.version>
