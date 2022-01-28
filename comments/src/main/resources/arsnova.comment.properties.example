@@ -32,9 +32,6 @@ spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL9Dialect
 
 security.jwt.secret=secret
 
-flyway.url=${spring.r2dbc.url}
-flyway.user=${spring.r2dbc.username}
-flyway.password=${spring.r2dbc.password}
 spring.flyway.baselineOnMigrate=true
 
 # RabbitMQ DLQ config
