@@ -28,9 +28,6 @@ spring:
     platform: postgres
     username: arsnovaauth
     password: arsnovaauth
-  flyway:
-    user: arsnovaauth
-    password: arsnovaauth
   jpa:
     hibernate:
       ddl-auto: validate
