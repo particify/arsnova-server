@@ -47,7 +47,8 @@ public class UserProfile extends Entity {
 	}
 
 	public static class Account {
-		@NotEmpty
+		// An empty value is fine because an encrypted value is expected, so an
+		// empty value will fail verification.
 		private String password;
 
 		private String activationKey;
@@ -309,6 +310,9 @@ public class UserProfile extends Entity {
 
 	@JsonView({View.Persistence.class, View.Admin.class})
 	public Account getAccount() {
+		if (account == null) {
+			account = new Account();
+		}
 		return account;
 	}
 
