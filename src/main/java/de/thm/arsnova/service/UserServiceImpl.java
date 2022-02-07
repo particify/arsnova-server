@@ -74,6 +74,7 @@ import de.thm.arsnova.security.PasswordUtils;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.security.jwt.JwtService;
 import de.thm.arsnova.security.jwt.JwtToken;
+import de.thm.arsnova.service.exceptions.UserAlreadyExistsException;
 import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 
@@ -213,6 +214,18 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		final long unixTime = System.currentTimeMillis();
 		final long lastActivityBefore = unixTime - ACTIVATION_KEY_DURABILITY_MS;
 		userRepository.deleteInactiveUsers(lastActivityBefore);
+	}
+
+	@Override
+	protected void prepareCreate(final UserProfile userProfile) {
+		if (userProfile.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA) {
+			userProfile.setLoginId(userProfile.getLoginId().toLowerCase());
+		}
+		if (null != userRepository.findByAuthProviderAndLoginId(
+				userProfile.getAuthProvider(), userProfile.getLoginId())) {
+			logger.info("User registration failed. {} already exists.", userProfile.getLoginId());
+			throw new UserAlreadyExistsException();
+		}
 	}
 
 	@Override
@@ -398,12 +411,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 		if (getPasswordStrength(password) < securityProperties.getPasswordStrictnessLevel()) {
 			logger.debug("User registration failed. Password is not strong enough.");
-
-			return null;
-		}
-
-		if (null != userRepository.findByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA, lcUsername)) {
-			logger.info("User registration failed. {} already exists.", lcUsername);
 
 			return null;
 		}

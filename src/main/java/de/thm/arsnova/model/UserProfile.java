@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
@@ -250,8 +251,12 @@ public class UserProfile extends Entity {
 		}
 	}
 
+	@NotNull
 	private AuthProvider authProvider;
+
+	@NotEmpty
 	private String loginId;
+
 	private Date lastLoginTimestamp;
 	private Account account;
 	private Person person;

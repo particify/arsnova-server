@@ -40,6 +40,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import de.thm.arsnova.model.EntityValidationException;
+import de.thm.arsnova.service.exceptions.UserAlreadyExistsException;
 import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.web.exceptions.NoContentException;
@@ -126,6 +127,14 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public Map<String, Object> handleEntityValidationException(
 			final EntityValidationException e, final HttpServletRequest request) {
+		return helper.handleException(e, Level.DEBUG);
+	}
+
+	@ExceptionHandler(UserAlreadyExistsException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public Map<String, Object> handleUserAlreadyExistsException(
+			final UserAlreadyExistsException e, final HttpServletRequest request) {
 		return helper.handleException(e, Level.DEBUG);
 	}
 
