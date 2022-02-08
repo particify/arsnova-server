@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
@@ -46,7 +47,8 @@ public class UserProfile extends Entity {
 	}
 
 	public static class Account {
-		@NotEmpty
+		// An empty value is fine because an encrypted value is expected, so an
+		// empty value will fail verification.
 		private String password;
 
 		private String activationKey;
@@ -250,8 +252,12 @@ public class UserProfile extends Entity {
 		}
 	}
 
+	@NotNull
 	private AuthProvider authProvider;
+
+	@NotEmpty
 	private String loginId;
+
 	private Date lastLoginTimestamp;
 	private Account account;
 	private Person person;
@@ -304,6 +310,9 @@ public class UserProfile extends Entity {
 
 	@JsonView({View.Persistence.class, View.Admin.class})
 	public Account getAccount() {
+		if (account == null) {
+			account = new Account();
+		}
 		return account;
 	}
 

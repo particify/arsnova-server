@@ -174,8 +174,6 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				 * only contains a limited amount of properties for the default
 				 * view. */
 				return true;
-			case CREATE_PERMISSION:
-				return true;
 			case OWNER_PERMISSION:
 			case UPDATE_PERMISSION:
 			case DELETE_PERMISSION:
