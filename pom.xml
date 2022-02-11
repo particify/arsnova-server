@@ -4,7 +4,6 @@
 	<groupId>de.thm.arsnova</groupId>
 	<artifactId>arsnova-backend</artifactId>
 	<version>3.0.0-SNAPSHOT</version>
-	<packaging>war</packaging>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -320,11 +319,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>3.3.2</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.2</version>
 			</plugin>
@@ -366,14 +360,12 @@
 				<version>3.2.0</version>
 				<configuration>
 					<from>
-						<image>jetty:9-jdk17-slim</image>
+						<image>eclipse-temurin:17-alpine</image>
 					</from>
 					<to>
 						<image>${docker.registry}/${docker.image}:${docker.tag}</image>
 					</to>
 					<container>
-						<appRoot>/var/lib/jetty/webapps/ROOT</appRoot>
-						<entrypoint>java,-jar,/usr/local/jetty/start.jar</entrypoint>
 						<creationTime>${docker.time}</creationTime>
 						<ports>8080</ports>
 					</container>

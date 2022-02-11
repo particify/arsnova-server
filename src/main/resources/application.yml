@@ -1,3 +1,5 @@
 spring:
   main:
     allow-circular-references: true
+server:
+  forward-headers-strategy: NATIVE
