@@ -26,14 +26,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 
 import de.thm.arsnova.config.properties.SecurityProperties;
 import net.particify.arsnova.connector.client.ConnectorClient;
 
-@SpringJUnitWebConfig({
-		AppConfig.class,
+@SpringBootTest
+@Import({
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
 		TestSecurityConfig.class})

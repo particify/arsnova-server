@@ -23,10 +23,12 @@ import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.TwitterClient;
 import org.pac4j.oidc.client.GoogleOidcClient;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
@@ -41,7 +43,7 @@ import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
 import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.security.CasUserDetailsService;
 
-@Configuration
+@TestConfiguration
 @EnableGlobalMethodSecurity(mode = AdviceMode.ASPECTJ, prePostEnabled = true)
 @EnableWebSecurity
 @Profile("test")
@@ -65,48 +67,33 @@ public class TestSecurityConfig extends SecurityConfig {
 
 	/* Override for test unnecessary Beans with null */
 
-	@Override
-	public CasAuthenticationProvider casAuthenticationProvider() {
-		return null;
-	}
+	@MockBean
+	public DaoAuthenticationProvider daoAuthenticationProvider;
 
-	@Override
-	public CasUserDetailsService casUserDetailsService() {
-		return null;
-	}
+	@MockBean
+	public CasAuthenticationProvider casAuthenticationProvider;
 
-	@Override
-	public ServiceProperties casServiceProperties() {
-		return null;
-	}
+	@MockBean
+	public CasUserDetailsService casUserDetailsService;
 
-	@Override
-	public Cas20ProxyTicketValidator casTicketValidator() {
-		return null;
-	}
+	@MockBean
+	public ServiceProperties casServiceProperties;
 
-	@Override
-	public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
-		return null;
-	}
+	@MockBean
+	public Cas20ProxyTicketValidator casTicketValidator;
 
-	@Override
-	public CasAuthenticationFilter casAuthenticationFilter() {
-		return null;
-	}
+	@MockBean
+	public CasAuthenticationEntryPoint casAuthenticationEntryPoint;
 
-	@Override
-	public FacebookClient facebookClient() {
-		return null;
-	}
+	@MockBean
+	public CasAuthenticationFilter casAuthenticationFilter;
 
-	@Override
-	public GoogleOidcClient googleClient() {
-		return null;
-	}
+	@MockBean
+	public FacebookClient facebookClient;
 
-	@Override
-	public TwitterClient twitterClient() {
-		return null;
-	}
+	@MockBean
+	public GoogleOidcClient googleClient;
+
+	@MockBean
+	public TwitterClient twitterClient;
 }
