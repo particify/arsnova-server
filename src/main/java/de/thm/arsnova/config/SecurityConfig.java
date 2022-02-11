@@ -40,6 +40,7 @@ import org.pac4j.saml.config.SAML2Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -138,6 +139,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private AuthenticationProviderProperties providerProperties;
 	private String rootUrl;
 	private String apiPath;
+	private JwtTokenFilter jwtTokenFilter;
+	private JwtAuthenticationProvider jwtAuthenticationProvider;
+	private RegisteredUserDetailsService registeredUserDetailsService;
+	private SsoAuthenticationProvider ssoAuthenticationProvider;
 
 	public SecurityConfig(
 			final SystemProperties systemProperties,
@@ -155,6 +160,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		if (apiPath == null || "".equals(apiPath)) {
 			apiPath = servletContext.getContextPath();
 		}
+	}
+
+	@Autowired
+	public void setJwtTokenFilter(final JwtTokenFilter jwtTokenFilter) {
+		this.jwtTokenFilter = jwtTokenFilter;
+	}
+
+	@Autowired
+	public void setJwtAuthenticationProvider(final JwtAuthenticationProvider jwtAuthenticationProvider) {
+		this.jwtAuthenticationProvider = jwtAuthenticationProvider;
+	}
+
+	@Autowired
+	public void setRegisteredUserDetailsService(final RegisteredUserDetailsService registeredUserDetailsService) {
+		this.registeredUserDetailsService = registeredUserDetailsService;
+	}
+
+	@Autowired
+	public void setSsoAuthenticationProvider(final SsoAuthenticationProvider ssoAuthenticationProvider) {
+		this.ssoAuthenticationProvider = ssoAuthenticationProvider;
 	}
 
 	public class HttpSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -175,7 +200,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			http.csrf().disable();
 			http.headers().addHeaderWriter(new HstsHeaderWriter(false));
 
-			http.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+			http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 			if (providerProperties.getCas().isEnabled()) {
 				http.addFilter(casAuthenticationFilter());
 				http.addFilter(casLogoutFilter());
@@ -257,7 +282,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
 		final List<String> providers = new ArrayList<>();
-		auth.authenticationProvider(jwtAuthenticationProvider());
+		auth.authenticationProvider(jwtAuthenticationProvider);
 		logger.info("oauthProps: {}", providerProperties.getOauth());
 		if (providerProperties.getLdap().stream().anyMatch(p -> p.isEnabled())) {
 			providers.add(LDAP_PROVIDER_ID);
@@ -296,7 +321,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			}
 		}
 		if (ssoProvider) {
-			auth.authenticationProvider(ssoAuthenticationProvider());
+			auth.authenticationProvider(ssoAuthenticationProvider);
 		}
 		logger.info("Enabled authentication providers: {}", providers);
 	}
@@ -333,17 +358,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public JwtAuthenticationProvider jwtAuthenticationProvider() {
-		return new JwtAuthenticationProvider();
-	}
-
-	@Bean
-	public JwtTokenFilter jwtTokenFilter() throws Exception {
-		final JwtTokenFilter jwtTokenFilter = new JwtTokenFilter();
-		return jwtTokenFilter;
-	}
-
-	@Bean
 	LoginAuthenticationSucessHandler successHandler() {
 		final LoginAuthenticationSucessHandler successHandler =
 				new LoginAuthenticationSucessHandler(systemProperties, servletContext);
@@ -365,7 +379,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public DaoAuthenticationProvider daoAuthenticationProvider() {
 		final DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-		authProvider.setUserDetailsService(registeredUserDetailsService());
+		authProvider.setUserDetailsService(registeredUserDetailsService);
 		authProvider.setPasswordEncoder(passwordEncoder());
 
 		return authProvider;
@@ -374,11 +388,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
-	}
-
-	@Bean
-	public RegisteredUserDetailsService registeredUserDetailsService() {
-		return new RegisteredUserDetailsService();
 	}
 
 	@Bean
@@ -674,11 +683,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		callbackFilter.setAuthenticationFailureHandler(failureHandler());
 
 		return callbackFilter;
-	}
-
-	@Bean
-	public SsoAuthenticationProvider ssoAuthenticationProvider() {
-		return new SsoAuthenticationProvider();
 	}
 
 	@Bean
