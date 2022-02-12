@@ -13,7 +13,7 @@ And additionally if you want to run ARSnova locally:
 * Python 2.7
 
 Next, you need to setup an ARSnova configuration file.
-Create a copy of [defaults.yml](../../main/resources/config/defaults.yml) in a directory like `/etc/arsnova`, then rename
+Create a copy of [defaults.yml](../../main/resources/config/defaults.yml) in a directory like `/opt/arsnova/config`, then rename
 the copied file to `application.yml`. The directory is defined by the property `arsnova.config-dir` and needs to be
 supplied to ARSnova during startup, see section "Running" below.
 
@@ -22,22 +22,22 @@ supplied to ARSnova during startup, see section "Running" below.
 ARSnova Backend uses Maven for builds and dependency management.
 You do not need to download any framework or library dependencies - Maven handles this for you.
 
-You can create a web archive (`.war` file) by running a single command:
+You can create a Docker image by running a single command:
 
-	$ mvn package
+	$ mvn jib:build
 
 
 ## Running
 
-ARSnova builds are setup up to automatically download the Java Servlet container Jetty for development.
-Run the following command to download the dependencies, and startup the backend with Jetty:
+ARSnova builds are setup up to automatically download the Java Servlet container for development.
+Run the following command to download the dependencies, and startup the backend:
 
-	$ mvn jetty:run -D arsnova.config-dir=/etc/arsnova
+	$ mvn spring-boot:run -Dspring-boot.run.arguments="--arsnova.config-dir=/opt/arsnova/config"
 
 After a few seconds the ARSnova API will be accessible at <http://localhost:8080/>.
 
-You can adjust the amount of debug logging by changing the log levels in [log4j-dev.properties](../../main/resources/log4j-dev.properties).
-Additionally, you can enable exception messages in API responses by setting the boolean property `api.expose-error-messages` in `arsnova.properties`.
+You can adjust the amount of debug logging by appending `--debug` or `--trace` to `spring-boot.run.arguments`.
+Additionally, you can enable exception messages in API responses by appending `--system.api.expose-error-messages=true`.
 
 
 ## Continuous Integration
