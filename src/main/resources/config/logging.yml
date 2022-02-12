@@ -1,0 +1,16 @@
+logging:
+  exception-conversion-word: "%wEx{${logging.exception-depth:short}}"
+  level:
+    org:
+      pac4j:
+        oauth:
+          profile: WARN
+      springframework:
+        web:
+          servlet:
+            mvc:
+              annotation:
+                DefaultAnnotationHandlerMapping: WARN
+              method:
+                annotation:
+                  RequestMappingHandlerMapping: WARN

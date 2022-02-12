@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: config/logging.yml
   main:
     allow-circular-references: true
 server:
