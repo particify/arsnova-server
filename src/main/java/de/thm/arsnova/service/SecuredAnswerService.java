@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
+import de.thm.arsnova.model.AnswerStatisticsUserSummary;
 
 @Service
 public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answer>
@@ -39,6 +40,13 @@ public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answe
 	@PreAuthorize("hasPermission(#contentId, 'content', 'read')")
 	public AnswerStatistics getAllStatistics(final String contentId) {
 		return answerService.getAllStatistics(contentId);
+	}
+
+	@Override
+	@PreAuthorize("hasPermission(#userId, 'userprofile', 'owner')")
+	public AnswerStatisticsUserSummary getStatisticsByUserIdAndContentIds(
+			final String userId, final List<String> contentIds) {
+		return answerService.getStatisticsByUserIdAndContentIds(userId, contentIds);
 	}
 
 	@Override

@@ -22,6 +22,7 @@ import java.util.List;
 
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
+import de.thm.arsnova.model.AnswerStatisticsUserSummary;
 
 public interface AnswerService extends EntityService<Answer> {
 	Answer getMyAnswer(String contentId);
@@ -31,6 +32,8 @@ public interface AnswerService extends EntityService<Answer> {
 	AnswerStatistics getStatistics(String contentId);
 
 	AnswerStatistics getAllStatistics(String contentId);
+
+	AnswerStatisticsUserSummary getStatisticsByUserIdAndContentIds(String userId, List<String> contentIds);
 
 	List<String> getAnswerIdsByContentId(String contentId);
 
