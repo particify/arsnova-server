@@ -26,4 +26,9 @@ public class MultipleTextsAnswer extends Answer {
 	public void setTexts(final List<String> texts) {
 		this.texts = texts;
 	}
+
+	@Override
+	public boolean isAbstention() {
+		return texts.isEmpty();
+	}
 }

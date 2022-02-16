@@ -47,6 +47,11 @@ public class ChoiceAnswer extends Answer {
 	}
 
 	@Override
+	public boolean isAbstention() {
+		return selectedChoiceIndexes.isEmpty();
+	}
+
+	@Override
 	protected ToStringCreator buildToString() {
 		return super.buildToString()
 				.append("selectedChoiceIndexes", selectedChoiceIndexes);
