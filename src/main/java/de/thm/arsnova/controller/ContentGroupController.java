@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,8 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import de.thm.arsnova.model.AnswerStatisticsUserSummary;
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.serialization.View;
+import de.thm.arsnova.service.AnswerService;
 import de.thm.arsnova.service.ContentGroupService;
 
 @RestController
@@ -25,13 +28,17 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
 	private static final String ADD_CONTENT_MAPPING = "/-/content";
 	private static final String REMOVE_CONTENT_MAPPING = DEFAULT_ID_MAPPING + "/content/{contentId}";
 	private static final String IMPORT_MAPPING = DEFAULT_ID_MAPPING + "/import";
+	private static final String ANSWER_STATISTICS_USER_SUMMARY_MAPPING = DEFAULT_ID_MAPPING + "/stats/user/{userId}";
 
 	private ContentGroupService contentGroupService;
+	private AnswerService answerService;
 
 	public ContentGroupController(
-			@Qualifier("securedContentGroupService") final ContentGroupService contentGroupService) {
+			@Qualifier("securedContentGroupService") final ContentGroupService contentGroupService,
+			@Qualifier("securedAnswerService") final AnswerService answerService) {
 		super(contentGroupService);
 		this.contentGroupService = contentGroupService;
+		this.answerService = answerService;
 	}
 
 	@Override
@@ -88,6 +95,13 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
 			throws IOException {
 		final ContentGroup contentGroup = get(id);
 		contentGroupService.importFromCsv(file.getBytes(), contentGroup);
+	}
+
+	@GetMapping(ANSWER_STATISTICS_USER_SUMMARY_MAPPING)
+	public AnswerStatisticsUserSummary getAnswerStatisticsUserSummary(
+			@PathVariable final String id, @PathVariable final String userId) {
+		return answerService.getStatisticsByUserIdAndContentIds(
+				userId, contentGroupService.get(id).getContentIds());
 	}
 
 	static class AddContentToGroupRequestEntity {

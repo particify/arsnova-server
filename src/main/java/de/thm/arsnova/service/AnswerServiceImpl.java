@@ -47,7 +47,9 @@ import de.thm.arsnova.event.BeforeCreationEvent;
 import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.event.BulkChangeEvent;
 import de.thm.arsnova.model.Answer;
+import de.thm.arsnova.model.AnswerResult;
 import de.thm.arsnova.model.AnswerStatistics;
+import de.thm.arsnova.model.AnswerStatisticsUserSummary;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.GridImageContent;
@@ -211,6 +213,31 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		stats.getRoundStatistics().add(stats2.getRoundStatistics().get(1));
 
 		return stats;
+	}
+
+	public AnswerStatisticsUserSummary getStatisticsByUserIdAndContentIds(
+			final String userId, final List<String> contentIds) {
+		final List<Content> contents = contentService.get(contentIds);
+		final List<String> answerIds = answerRepository.findIdsByAnswerStubs(contents.stream()
+				.map(c -> new Answer(c, userId)).collect(Collectors.toList()));
+		final List<Answer> answers = get(answerIds);
+		// Results for answered contents
+		final Map<String, AnswerResult> answerResults = answers.stream()
+				.map(a -> contents.get(contentIds.indexOf(a.getContentId())).determineAnswerResult(a))
+				.collect(Collectors.toMap(AnswerResult::getContentId, Function.identity()));
+		// Add results for unanswered contents
+		final List<AnswerResult> answerResultList = contents.stream()
+				.map(c -> answerResults.containsKey(c.getId())
+						? answerResults.get(c.getId())
+						: new AnswerResult(c.getId(), 0, c.getPoints(), AnswerResult.AnswerResultState.UNANSWERED))
+				.collect(Collectors.toList());
+
+		return new AnswerStatisticsUserSummary(
+				(int) answerResultList.stream().filter(r -> r.getState() == AnswerResult.AnswerResultState.CORRECT).count(),
+				(int) contents.stream().filter(c -> c.isScorable()).count(),
+				answerResultList.stream().mapToDouble(r -> r.getAchievedPoints()).sum(),
+				contents.stream().mapToInt(c -> c.getPoints()).sum(),
+				answerResultList);
 	}
 
 	private AnswerStatistics getTextStatistics(final String contentId, final int round) {

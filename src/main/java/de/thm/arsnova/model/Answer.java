@@ -127,6 +127,10 @@ public class Answer extends Entity implements RoomIdAware {
 		this.extensions = extensions;
 	}
 
+	public boolean isAbstention() {
+		return false;
+	}
+
 	@JsonView(View.Persistence.class)
 	@Override
 	public Class<? extends Entity> getType() {

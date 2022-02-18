@@ -82,6 +82,11 @@ public class TextAnswer extends Answer {
 	}
 
 	@Override
+	public boolean isAbstention() {
+		return body == null;
+	}
+
+	@Override
 	protected ToStringCreator buildToString() {
 		return super.buildToString()
 				.append("subject", subject)

@@ -340,6 +340,23 @@ public class Content extends Entity implements RoomIdAware {
 		this.abstentionsAllowed = abstentionsAllowed;
 	}
 
+	@JsonView(View.Public.class)
+	public int getPoints() {
+		return 0;
+	}
+
+	@JsonView(View.Public.class)
+	public boolean isScorable() {
+		return false;
+	}
+
+	public AnswerResult determineAnswerResult(final Answer answer) {
+		final AnswerResult.AnswerResultState state = answer.isAbstention()
+				? AnswerResult.AnswerResultState.ABSTAINED
+				: AnswerResult.AnswerResultState.NEUTRAL;
+		return new AnswerResult(this.id, 0, this.getPoints(), state);
+	}
+
 	@JsonView(View.Persistence.class)
 	@Override
 	public Class<? extends Entity> getType() {

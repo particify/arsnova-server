@@ -134,6 +134,66 @@ public class ChoiceQuestionContent extends Content {
 	}
 
 	@Override
+	@JsonView(View.Public.class)
+	public int getPoints() {
+		return isScorable() ? 10 : 0;
+	}
+
+	@Override
+	@JsonView(View.Public.class)
+	public boolean isScorable() {
+		return correctOptionIndexes.size() > 0;
+	}
+
+	@Override
+	public AnswerResult determineAnswerResult(final Answer answer) {
+		if (answer instanceof ChoiceAnswer) {
+			return determineAnswerResult((ChoiceAnswer) answer);
+		}
+
+		return super.determineAnswerResult(answer);
+	}
+
+	public AnswerResult determineAnswerResult(final ChoiceAnswer answer) {
+		if (answer.isAbstention()) {
+			return new AnswerResult(
+					this.id,
+					0,
+					this.getPoints(),
+					AnswerResult.AnswerResultState.ABSTAINED);
+		}
+
+		if (!isScorable()) {
+			return new AnswerResult(
+					this.id,
+					0,
+					this.getPoints(),
+					AnswerResult.AnswerResultState.NEUTRAL);
+		}
+
+		final double achievedPoints = calculateAchievedPoints(answer.getSelectedChoiceIndexes());
+		final AnswerResult.AnswerResultState state = achievedPoints > getPoints() * 0.999
+				? AnswerResult.AnswerResultState.CORRECT : AnswerResult.AnswerResultState.WRONG;
+
+		return new AnswerResult(
+				this.id,
+				achievedPoints,
+				this.getPoints(),
+				state);
+	}
+
+	public double calculateAchievedPoints(final List<Integer> selectedChoiceIndexes) {
+		if (getFormat() == Format.SORT) {
+			return selectedChoiceIndexes.equals(correctOptionIndexes) ? getPoints() : 0;
+		}
+
+		final double pointsPerOption = 1.0 * getPoints() / correctOptionIndexes.size();
+		return Math.max(0, selectedChoiceIndexes.stream()
+				.mapToDouble(i -> (correctOptionIndexes.contains(i) ? pointsPerOption : -pointsPerOption))
+				.sum());
+	}
+
+	@Override
 	protected ToStringCreator buildToString() {
 		return super.buildToString()
 				.append("options", options)
