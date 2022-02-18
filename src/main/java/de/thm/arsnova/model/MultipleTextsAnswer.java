@@ -1,13 +1,14 @@
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
 
 import de.thm.arsnova.model.serialization.View;
 
 public class MultipleTextsAnswer extends Answer {
-	private @NotEmpty List<String> texts;
+	private @NotEmpty List<String> texts = new ArrayList<>();
 
 	public MultipleTextsAnswer() {
 
