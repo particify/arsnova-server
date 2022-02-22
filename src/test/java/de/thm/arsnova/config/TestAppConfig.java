@@ -26,27 +26,22 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.AdviceMode;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
 import org.springframework.context.support.SimpleThreadScope;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.validation.Validator;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import de.thm.arsnova.ArsnovaApplication;
 import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
 import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
@@ -55,27 +50,24 @@ import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.security.PasswordUtils;
 import de.thm.arsnova.service.StubUserService;
 
+@TestConfiguration
 @ComponentScan({
-		"de.thm.arsnova.aop",
-		"de.thm.arsnova.cache",
 		"de.thm.arsnova.controller",
-		"de.thm.arsnova.dao",
-		"de.thm.arsnova.events",
 		"de.thm.arsnova.security",
-		"de.thm.arsnova.services",
+		"de.thm.arsnova.service",
 		"de.thm.arsnova.web",
 		"de.thm.arsnova.websocket.handler"})
-@Configuration
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class)
-@EnableCaching(mode = AdviceMode.ASPECTJ)
-@EnableSpringConfigured
-@EnableWebMvc
-@EnableConfigurationProperties(MessageBrokerProperties.class)
 @PropertySource(
-	value = "classpath:config/test.yml",
-	encoding = "UTF-8",
-	factory = YamlPropertySourceFactory.class
-)
+		value = {
+				"classpath:config/defaults.yml",
+				"classpath:config/actuator.yml",
+				"classpath:config/test.yml"
+		},
+		encoding = "UTF-8",
+		factory = YamlPropertySourceFactory.class)
+@Import({
+		ArsnovaApplication.class,
+		AppConfig.class})
 @Profile("test")
 public class TestAppConfig {
 	private static int testPortOffset = 0;

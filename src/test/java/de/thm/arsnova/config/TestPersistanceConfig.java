@@ -18,10 +18,9 @@
 
 package de.thm.arsnova.config;
 
-import org.mockito.Mockito;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Profile;
 
 import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
@@ -32,43 +31,33 @@ import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.persistence.StatisticsRepository;
 import de.thm.arsnova.persistence.UserRepository;
+import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
 
-@Profile("test")
-@Configuration
+@TestConfiguration
 @EnableConfigurationProperties(CouchDbMigrationProperties.class)
+@Profile("test")
 public class TestPersistanceConfig {
-	@Bean
-	public LogEntryRepository logEntryRepository() {
-		return Mockito.mock(LogEntryRepository.class);
-	}
+	@MockBean
+	private MangoCouchDbConnector mangoCouchDbConnector;
 
-	@Bean
-	public UserRepository userRepository() {
-		return Mockito.mock(UserRepository.class);
-	}
+	@MockBean
+	private LogEntryRepository logEntryRepository;
 
-	@Bean
-	public RoomRepository sessionRepository() {
-		return Mockito.mock(RoomRepository.class);
-	}
+	@MockBean
+	private UserRepository userRepository;
 
-	@Bean
-	public ContentRepository contentRepository() {
-		return Mockito.mock(ContentRepository.class);
-	}
+	@MockBean
+	private RoomRepository sessionRepository;
 
-	@Bean
-	public ContentGroupRepository contentGroupRepository() {
-		return Mockito.mock(ContentGroupRepository.class);
-	}
+	@MockBean
+	private ContentRepository contentRepository;
 
-	@Bean
-	public AnswerRepository answerRepository() {
-		return Mockito.mock(AnswerRepository.class);
-	}
+	@MockBean
+	private ContentGroupRepository contentGroupRepository;
 
-	@Bean
-	public StatisticsRepository statisticsRepository() {
-		return Mockito.mock(StatisticsRepository.class);
-	}
+	@MockBean
+	private AnswerRepository answerRepository;
+
+	@MockBean
+	private StatisticsRepository statisticsRepository;
 }

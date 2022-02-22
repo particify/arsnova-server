@@ -1,6 +1,5 @@
 variables:
   OUTPUT_DIR: target
-  WAR_FILE: $OUTPUT_DIR/arsnova-backend-*.war
 
 stages:
   - build
@@ -57,21 +56,13 @@ unit_test:
     - mvn $MAVEN_CLI_OPTS jacoco:prepare-agent surefire:test jacoco:report
     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' "$OUTPUT_DIR/site/jacoco/jacoco.csv"
 
-package:
-  extends: .maven
-  stage: package
-  needs:
-    - compile
-  artifacts:
-    name: package
-    paths:
-      - $WAR_FILE
-  script:
-    - mvn $MAVEN_CLI_OPTS war:war
-
 docker_image:
   extends: .maven
   stage: deploy
+  needs:
+    - compile
+    - job: unit_test
+      artifacts: false
   rules:
     - if: $CI_MERGE_REQUEST_ID
       when: never
@@ -82,8 +73,6 @@ docker_image:
     - when: manual
   variables:
     DOCKER_IMAGE_NAME: $CI_PROJECT_PATH
-  dependencies:
-    - package
   allow_failure: true
   script:
     - "echo Creation time for image: `git log -1 --format=%cI`"
@@ -94,4 +83,3 @@ docker_image:
       -Ddocker.image="$DOCKER_IMAGE_NAME"
       -Ddocker.tag="$CI_COMMIT_REF_SLUG"
       -Ddocker.time="`git log -1 --format=%cI`"
-

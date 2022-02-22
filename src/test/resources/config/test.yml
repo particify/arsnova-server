@@ -4,3 +4,6 @@ arsnova:
     admin-accounts:
       - login-id: TestAdmin
         auth-provider: ARSNOVA
+    authentication-providers:
+      registered:
+        enabled: false

@@ -22,33 +22,22 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import io.micrometer.core.instrument.MeterRegistry;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang.CharEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
-import org.springframework.boot.actuate.autoconfigure.metrics.MetricsProperties;
 import org.springframework.boot.actuate.endpoint.http.ActuatorMediaType;
-import org.springframework.boot.actuate.metrics.web.servlet.WebMvcMetricsFilter;
-import org.springframework.boot.actuate.metrics.web.servlet.WebMvcTagsProvider;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
-import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
@@ -59,12 +48,8 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
@@ -79,10 +64,8 @@ import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.FromV2Migrator;
 import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
 import de.thm.arsnova.model.serialization.View;
-import de.thm.arsnova.web.CacheControlInterceptorHandler;
 import de.thm.arsnova.web.CorsFilter;
 import de.thm.arsnova.web.PathBasedContentNegotiationStrategy;
-import de.thm.arsnova.web.ResponseInterceptorHandler;
 import net.particify.arsnova.connector.client.ConnectorClient;
 import net.particify.arsnova.connector.client.ConnectorClientImpl;
 
@@ -95,33 +78,7 @@ import net.particify.arsnova.connector.client.ConnectorClientImpl;
  * AspectJ's weaving).
  * </p>
  */
-@ComponentScan({
-		"de.thm.arsnova.cache",
-		"de.thm.arsnova.controller",
-		"de.thm.arsnova.event",
-		"de.thm.arsnova.management",
-		"de.thm.arsnova.security",
-		"de.thm.arsnova.service",
-		"de.thm.arsnova.web",
-		"de.thm.arsnova.websocket"})
 @Configuration
-@EnableAsync(mode = AdviceMode.ASPECTJ)
-@EnableAutoConfiguration
-@EnableCaching(mode = AdviceMode.ASPECTJ)
-@EnableScheduling
-@EnableSpringConfigured
-@EnableWebMvc
-@PropertySource(
-		value = {
-			"classpath:config/defaults.yml",
-			"classpath:config/actuator.yml",
-			"file:${arsnova.config-dir:.}/application.yml",
-			"file:${arsnova.config-dir:.}/secrets.yml",
-			"file:${arsnova.config-dir:.}/ui.yml"},
-		ignoreResourceNotFound = true,
-		encoding = CharEncoding.UTF_8,
-		factory = YamlPropertySourceFactory.class
-)
 @EnableConfigurationProperties({
 		FeatureProperties.class,
 		SystemProperties.class})
@@ -151,7 +108,6 @@ public class AppConfig implements WebMvcConfigurer {
 	public void configureMessageConverters(final List<HttpMessageConverter<?>> converters) {
 		converters.add(defaultJsonMessageConverter());
 		converters.add(apiV2JsonMessageConverter());
-		converters.add(managementJsonMessageConverter());
 		converters.add(stringMessageConverter());
 		converters.add(byteArrayHttpMessageConverter());
 		//converters.add(new MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build()));
@@ -180,33 +136,8 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 
 	@Override
-	public void addInterceptors(final InterceptorRegistry registry) {
-		registry.addInterceptor(cacheControlInterceptorHandler());
-		registry.addInterceptor(responseInterceptorHandler());
-	}
-
-	@Override
 	public void addResourceHandlers(final ResourceHandlerRegistry registry) {
 		registry.addResourceHandler("swagger.json").addResourceLocations("classpath:/");
-	}
-
-	/* Provides a Spring Framework (non-Boot) compatible Filter. */
-	@Bean
-	public WebMvcMetricsFilter webMvcMetricsFilterOverride(
-			final MeterRegistry registry, final WebMvcTagsProvider tagsProvider) {
-		final MetricsProperties.Web.Server serverProperties = new MetricsProperties.Web.Server();
-		return new WebMvcMetricsFilter(registry, tagsProvider,
-				serverProperties.getRequest().getMetricName(), serverProperties.getRequest().getAutotime());
-	}
-
-	@Bean
-	public CacheControlInterceptorHandler cacheControlInterceptorHandler() {
-		return new CacheControlInterceptorHandler();
-	}
-
-	@Bean
-	public ResponseInterceptorHandler responseInterceptorHandler() {
-		return new ResponseInterceptorHandler();
 	}
 
 	@Bean
@@ -267,22 +198,6 @@ public class AppConfig implements WebMvcConfigurer {
 		mapper.setConfig(mapper.getSerializationConfig().withView(View.Public.class));
 		final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
 		final List<MediaType> mediaTypes = new ArrayList<>();
-		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
-		converter.setSupportedMediaTypes(mediaTypes);
-
-		return converter;
-	}
-
-	@Bean
-	public MappingJackson2HttpMessageConverter managementJsonMessageConverter() {
-		final Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
-		builder
-				.indentOutput(systemProperties.getApi().isIndentResponseBody())
-				.simpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-		final ObjectMapper mapper = builder.build();
-		final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
-		final List<MediaType> mediaTypes = new ArrayList<>();
-		mediaTypes.add(ACTUATOR_MEDIA_TYPE);
 		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
 		converter.setSupportedMediaTypes(mediaTypes);
 

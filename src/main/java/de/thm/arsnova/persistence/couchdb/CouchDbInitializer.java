@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
@@ -61,6 +62,7 @@ import de.thm.arsnova.persistence.couchdb.migrations.MigrationExecutor;
 import de.thm.arsnova.service.StatusService;
 
 @Component
+@Profile("!test")
 public class CouchDbInitializer implements ApplicationEventPublisherAware, ResourceLoaderAware {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbInitializer.class);
 	private final List<Map<String, Object>> docs = new ArrayList<>();
