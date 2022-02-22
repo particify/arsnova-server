@@ -50,7 +50,6 @@ services:
       SECURITY_JWT_SECRET: $JWT_SECRET
       SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
       UI_SLOGAN: powered by particify.de
-    command: --module=http-forwarded
   arsnova-http-gateway:
     image: registry.gitlab.com/particify/dev/foss/arsnova-http-gateway:$HTTPGW_TAG
     depends_on:
