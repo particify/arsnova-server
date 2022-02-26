@@ -32,6 +32,24 @@
 		<docker.time>EPOCH</docker.time>
 	</properties>
 
+	<profiles>
+		<profile>
+			<id>development</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<spring-boot-devtools.scope>compile</spring-boot-devtools.scope>
+			</properties>
+		</profile>
+		<profile>
+			<id>production</id>
+			<properties>
+				<spring-boot-devtools.scope>provided</spring-boot-devtools.scope>
+			</properties>
+		</profile>
+	</profiles>
+
 	<name>ARSnova Backend</name>
 	<description>
 		ARSnova is a modern approach to Audience Response Systems (ARS).
@@ -144,7 +162,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
+			<scope>${spring-boot-devtools.scope}</scope>
 			<optional>true</optional>
 		</dependency>
 
