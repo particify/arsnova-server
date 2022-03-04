@@ -15,7 +15,7 @@
 	<properties>
 		<!-- Maven dependency/plugin versions -->
 		<commons-lang.version>2.6</commons-lang.version>
-		<guava.version>31.0.1-jre</guava.version>
+		<guava.version>31.1-jre</guava.version>
 		<aspectj.version>1.9.8</aspectj.version>
 		<jakarta-xml-bind.version>2.3.3</jakarta-xml-bind.version>
 		<pac4j.version>4.5.5</pac4j.version>
