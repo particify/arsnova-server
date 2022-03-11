@@ -639,7 +639,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		config.setMaximumAuthenticationLifetime(samlProperties.getMaxAuthenticationLifetime());
 		config.setAuthnRequestBindingType(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
 		config.setAuthnRequestSigned(true);
-		config.setWantsAssertionsSigned(true);
 		final SAML2Client client = new SAML2Client(config);
 		client.setName(SAML_PROVIDER_ID);
 		client.setCallbackUrl(rootUrl + apiPath + AUTH_CALLBACK_PATH);
