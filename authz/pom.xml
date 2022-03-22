@@ -242,7 +242,7 @@
 					<dependency>
 						<groupId>com.pinterest</groupId>
 						<artifactId>ktlint</artifactId>
-						<version>0.45.0</version>
+						<version>0.45.1</version>
 					</dependency>
 				</dependencies>
 			</plugin>
