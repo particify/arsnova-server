@@ -11,7 +11,13 @@ else
   NGINX_TLS_INCLUDE="#include"
 fi
 
-export NGINX_LISTEN NGINX_TLS_INCLUDE
+if [ -n "$CSP_FRAME_ANCESTORS" ]; then
+  NGINX_CSP_FRAME_ANCESTORS="add_header Content-Security-Policy \"frame-ancestors $CSP_FRAME_ANCESTORS\";"
+else
+  NGINX_CSP_FRAME_ANCESTORS="#add_header Content-Security-Policy;"
+fi
+
+export NGINX_LISTEN NGINX_TLS_INCLUDE NGINX_CSP_FRAME_ANCESTORS
 
 # The entrypoint files need to be sourced so env vars can be shared
 echo $0: Launching $BASE_SCRIPT

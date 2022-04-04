@@ -23,6 +23,7 @@ server {
   listen [::]:$NGINX_LISTEN default_server;
   server_name $ARSNOVA_HOSTNAME _;
   $NGINX_TLS_INCLUDE conf.d/${ARSNOVA_HOSTNAME}_tls.conf.include;
+  $NGINX_CSP_FRAME_ANCESTORS
 
   # Modern client
   location / {
@@ -31,7 +32,6 @@ server {
     gzip on;
     gzip_types application/javascript text/css image/svg+xml;
     gzip_vary on;
-    add_header X-Frame-Options sameorigin always;
   }
 
   # Public REST API

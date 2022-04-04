@@ -130,6 +130,7 @@ services:
       - arsnova-web
     environment:
       ARSNOVA_HOSTNAME: $ARSNOVA_HOSTNAME
+      CSP_FRAME_ANCESTORS: $CSP_FRAME_ANCESTORS
 volumes:
   couchdb_data:
   postgresql_data_auth:
