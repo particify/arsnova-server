@@ -50,6 +50,7 @@ services:
     environment:
       NGINX_LISTEN: "80"
       NGINX_TLS_INCLUDE: "#include"
+      NGINX_CSP_FRAME_ANCESTORS: "#add_header Content-Security-Policy;"
       ARSNOVA_HOSTNAME: localhost
     volumes:
       - ./nginx-proxy/templates:/etc/nginx/templates
