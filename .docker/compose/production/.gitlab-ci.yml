@@ -2,8 +2,11 @@ build_docker_images:
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
-  only:
-    - master
+  rules:
+    - if: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME != $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+      variables:
+        IMAGE_VARIANT_SUFFIX: -$CI_COMMIT_REF_NAME
   variables:
     IMAGE1_NAME: nginx-proxy
     IMAGE1_BASETAG: stable-alpine
@@ -25,6 +28,6 @@ build_docker_images:
     - eval export VERSION=\$IMAGE${CI_NODE_INDEX}_VERSION
     - export KANIKO_CONTEXT=$CI_PROJECT_DIR/$IMAGE_NAME
     - export KANIKO_DOCKERFILE=$KANIKO_CONTEXT/Dockerfile
-    - export KANIKO_DESTINATION=$CI_REGISTRY/$CI_PROJECT_PATH/$IMAGE_NAME:$VERSION
+    - export KANIKO_DESTINATION=$CI_REGISTRY/$CI_PROJECT_PATH/$IMAGE_NAME:$VERSION$IMAGE_VARIANT_SUFFIX
     - env | grep -E 'IMAGE|KANIKO'
     - /kaniko/executor --context "$KANIKO_CONTEXT" --dockerfile "$KANIKO_DOCKERFILE" --destination "$KANIKO_DESTINATION" --build-arg "IMAGE_BASETAG=$IMAGE_BASETAG" --build-arg "VERSION=$VERSION"
