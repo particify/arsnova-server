@@ -135,6 +135,18 @@ class GatewayConfig(
                     }
                     .uri(httpGatewayProperties.routing.endpoints.attachmentService)
             }
+            routes.route("attachment-service") { p ->
+                p
+                    .path(
+                        "/quota/**"
+                    )
+                    .filters { f ->
+                        f.requestRateLimiter { r ->
+                            r.rateLimiter = requestRateLimiter
+                        }
+                    }
+                    .uri(httpGatewayProperties.routing.endpoints.attachmentService)
+            }
         }
 
         if (httpGatewayProperties.routing.endpoints.subscriptionService != null) {
