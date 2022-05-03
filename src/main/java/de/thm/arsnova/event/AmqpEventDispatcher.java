@@ -61,11 +61,11 @@ public class AmqpEventDispatcher {
 
 	@EventListener
 	public <T extends CrudEvent, E extends Entity> void dispatchEntityCrudEvent(final T event) {
-		logger.trace("Dispatching event ({}) for AMQP.", event.getClass().getSimpleName());
 		String eventType = event.getClass().getSimpleName();
 		eventType = eventType.substring(0, eventType.length() - 5);
-		final String entityType = event.getEntity().getClass().getSimpleName();
+		final String entityType = event.getEntity().getSupertype().getSimpleName();
 		final String key = entityType + "-" + eventType;
+		logger.trace("Dispatching event ({}, {}) for AMQP.", eventType, entityType);
 		final Set<String> properties = eventConfig.getOrDefault(key, Collections.emptySet());
 
 		if (!properties.isEmpty()) {
