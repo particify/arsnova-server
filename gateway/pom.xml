@@ -10,7 +10,7 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<spring-boot-version>2.6.7</spring-boot-version>
+		<spring-boot-version>2.6.8</spring-boot-version>
 		<spring-cloud.version>2021.0.2</spring-cloud.version>
 		<io.netty-version>4.1.77.Final</io.netty-version>
 		<kotlin.version>1.6.21</kotlin.version>
