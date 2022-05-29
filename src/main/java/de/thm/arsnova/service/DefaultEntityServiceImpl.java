@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
@@ -92,6 +93,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		this.objectMapper = objectMapper;
 		this.validator = validator;
 		objectMapperForPatchTree = new ObjectMapper();
+		objectMapperForPatchTree.registerModule(new JavaTimeModule());
 	}
 
 	@Override
