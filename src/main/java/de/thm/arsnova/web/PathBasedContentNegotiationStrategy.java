@@ -30,7 +30,6 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.context.request.NativeWebRequest;
 
-import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.controller.AbstractEntityController;
 
 /**
@@ -40,6 +39,8 @@ import de.thm.arsnova.controller.AbstractEntityController;
  * @author Daniel Gerhardt
  */
 public class PathBasedContentNegotiationStrategy implements ContentNegotiationStrategy {
+	private static final MediaType ACTUATOR_MEDIA_TYPE =
+			new MediaType("application", "vnd.spring-boot.actuator.v2+json");
 	private static final Logger logger = LoggerFactory.getLogger(PathBasedContentNegotiationStrategy.class);
 
 	private final String managementPath;
@@ -59,7 +60,7 @@ public class PathBasedContentNegotiationStrategy implements ContentNegotiationSt
 		final List<MediaType> mediaTypes = new ArrayList<>();
 		if (servletRequest.getServletPath().startsWith(managementPath)) {
 			logger.trace("Negotiating content based on path for management API");
-			mediaTypes.add(AppConfig.ACTUATOR_MEDIA_TYPE);
+			mediaTypes.add(ACTUATOR_MEDIA_TYPE);
 			mediaTypes.add(MediaType.TEXT_PLAIN);
 		} else {
 			if (servletRequest.getHeader(HttpHeaders.ACCEPT) == null

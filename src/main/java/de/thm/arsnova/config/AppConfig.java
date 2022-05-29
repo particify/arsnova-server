@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
-import org.springframework.boot.actuate.endpoint.http.ActuatorMediaType;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
@@ -85,7 +84,6 @@ import net.particify.arsnova.connector.client.ConnectorClientImpl;
 public class AppConfig implements WebMvcConfigurer {
 	public static final String API_V3_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v3+json";
 	public static final MediaType API_V3_MEDIA_TYPE = MediaType.valueOf(API_V3_MEDIA_TYPE_VALUE);
-	public static final MediaType ACTUATOR_MEDIA_TYPE = MediaType.valueOf(ActuatorMediaType.V2_JSON);
 	public static final MediaType CSV_MEDIA_TYPE = new MediaType("text", "csv");
 	public static final MediaType TSV_MEDIA_TYPE = new MediaType("text", "tab-separated-values");
 	public static final String LMS_CONNECTOR_BEAN_NAME = "lmsConnectorClient";
