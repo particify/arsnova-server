@@ -108,8 +108,14 @@ class RoomAccessHandler(
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-    fun getByRoomId(roomId: String): List<RoomAccess> {
+    fun getByRoomIdAndRole(roomId: String, roleParam: String?): List<RoomAccess> {
         logger.debug("Handling room access request with roomId: {}", roomId)
+        if (roleParam != null) {
+            if (roleParam.startsWith("!")) {
+                return roomAccessRepository.findByRoomIdAndRoleNot(roomId, roleParam.drop(1)).toList()
+            }
+            return roomAccessRepository.findByRoomIdAndRole(roomId, roleParam).toList()
+        }
         return roomAccessRepository.findByRoomId(roomId).toList()
     }
 

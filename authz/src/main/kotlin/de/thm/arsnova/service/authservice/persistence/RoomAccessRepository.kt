@@ -13,6 +13,7 @@ import java.util.Optional
 interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     fun findByRoomId(roomId: String): Iterable<RoomAccess>
     fun findByRoomIdAndRole(roomId: String, role: String): Iterable<RoomAccess>
+    fun findByRoomIdAndRoleNot(roomId: String, role: String): Iterable<RoomAccess>
     fun findByUserId(userId: String): Iterable<RoomAccess>
     @Query(
         """
