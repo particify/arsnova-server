@@ -74,6 +74,9 @@ class UpdateRoomAccessFilter(
                 .map { roomAccess: RoomAccess ->
                     if (path.matches(ROOM_MODERATOR_REGEX) && method == HttpMethod.PUT) {
                         val moderatorId = path.substringAfter("/moderator/")
+                        if (moderatorId == userId) {
+                            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot change own access level")
+                        }
                         listOf(
                             AccessChangeRequest(
                                 AccessChangeRequestType.CREATE,
@@ -85,6 +88,9 @@ class UpdateRoomAccessFilter(
                         )
                     } else if (path.matches(ROOM_MODERATOR_REGEX) && method == HttpMethod.DELETE) {
                         val moderatorId = path.substringAfter("/moderator/")
+                        if (moderatorId == userId) {
+                            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot change own access level")
+                        }
                         listOf(
                             AccessChangeRequest(
                                 AccessChangeRequestType.DELETE,
