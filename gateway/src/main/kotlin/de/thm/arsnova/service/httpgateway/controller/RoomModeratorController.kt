@@ -1,6 +1,5 @@
 package de.thm.arsnova.service.httpgateway.controller
 
-import de.thm.arsnova.service.httpgateway.model.AccessLevel
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
 import de.thm.arsnova.service.httpgateway.service.RoomAccessService
 import org.slf4j.LoggerFactory
@@ -27,8 +26,6 @@ class RoomModeratorController(
         @PathVariable roomId: String
     ): Flux<RoomAccess> {
         logger.trace("Getting moderators for room: {}", roomId)
-        return roomAccessService.getRoomAccess(roomId).filter { ra ->
-            ra.role != AccessLevel.PARTICIPANT.name
-        }
+        return roomAccessService.getRoomModerators(roomId)
     }
 }

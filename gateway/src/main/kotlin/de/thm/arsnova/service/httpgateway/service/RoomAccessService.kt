@@ -2,6 +2,7 @@ package de.thm.arsnova.service.httpgateway.service
 
 import de.thm.arsnova.service.httpgateway.config.HttpGatewayProperties
 import de.thm.arsnova.service.httpgateway.exception.ForbiddenException
+import de.thm.arsnova.service.httpgateway.model.AccessLevel
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -25,8 +26,9 @@ class RoomAccessService(
             .retrieve().bodyToMono(RoomAccess::class.java).cache()
     }
 
-    fun getRoomAccess(roomId: String): Flux<RoomAccess> {
-        val url = "${httpGatewayProperties.httpClient.authService}/roomaccess/by-room/$roomId"
+    fun getRoomModerators(roomId: String): Flux<RoomAccess> {
+        val url = "${httpGatewayProperties.httpClient.authService}/roomaccess/by-room/$roomId" +
+            "?role=!${AccessLevel.PARTICIPANT.name}"
         logger.trace("Querying auth service for room access with url: {}", url)
         return webClient.get().uri(url)
             .retrieve().bodyToFlux(RoomAccess::class.java).cache()
