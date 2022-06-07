@@ -23,7 +23,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +45,7 @@ import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.security.RoomRole;
-import de.thm.arsnova.security.User;
 import de.thm.arsnova.security.jwt.JwtService;
-import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import net.particify.arsnova.connector.client.ConnectorClient;
 import net.particify.arsnova.connector.model.Membership;
@@ -237,26 +234,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		/* TODO: only publish event when feedback has changed */
 		/* FIXME: event */
 		// this.publisher.publishEvent(new FeatureChangeEvent(this, room));
-	}
-
-	@Override
-	public Room transferOwnership(final Room room, final String newOwnerId) {
-		final UserProfile newOwner;
-		try {
-			newOwner = userService.get(newOwnerId);
-		} catch (final DocumentNotFoundException e) {
-			throw new BadRequestException("Invalid user ID.", e);
-		}
-		room.setOwnerId(newOwner.getId());
-
-		return update(room);
-	}
-
-	@Override
-	public Room transferOwnershipThroughToken(final Room room, final String targetUserToken) {
-		final User user = jwtService.verifyToken(targetUserToken);
-		room.setOwnerId(user.getId());
-		return update(room);
 	}
 
 	@Override

@@ -47,7 +47,6 @@ import de.thm.arsnova.web.exceptions.NotImplementedException;
 public class RoomController extends AbstractEntityController<Room> {
 	protected static final String REQUEST_MAPPING = "/room";
 	private static final String STATS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
-	private static final String TRANSFER_MAPPING = DEFAULT_ID_MAPPING + "/transfer";
 	private static final String PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/password";
 	private static final String REQUEST_MEMBERSHIP_MAPPING = DEFAULT_ID_MAPPING + "/request-membership";
 	private static final String DUPLICATE_MAPPING = DEFAULT_ID_MAPPING + "/duplicate";
@@ -94,30 +93,6 @@ public class RoomController extends AbstractEntityController<Room> {
 				: roomStatisticsService.getPublicRoomStatistics(id);
 
 		return roomStatistics;
-	}
-
-	@PostMapping(value = TRANSFER_MAPPING, params = "newOwnerId")
-	public Room transferOwnership(
-			@PathVariable final String id,
-			@RequestParam final String newOwnerId,
-			final HttpServletResponse httpServletResponse) {
-		final Room room = roomService.get(id);
-		final Room updatedRoom = roomService.transferOwnership(room, newOwnerId);
-		httpServletResponse.setHeader(ENTITY_ID_HEADER, room.getId());
-		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, room.getRevision());
-		return updatedRoom;
-	}
-
-	@PostMapping(value = TRANSFER_MAPPING, params = "newOwnerToken")
-	public Room transferOwnershipThroughToken(
-			@PathVariable final String id,
-			@RequestParam final String newOwnerToken,
-			final HttpServletResponse httpServletResponse) {
-		final Room room = roomService.get(id);
-		final Room updatedRoom =  roomService.transferOwnershipThroughToken(room, newOwnerToken);
-		httpServletResponse.setHeader(ENTITY_ID_HEADER, room.getId());
-		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, room.getRevision());
-		return updatedRoom;
 	}
 
 	@GetMapping(value = PASSWORD_MAPPING)
