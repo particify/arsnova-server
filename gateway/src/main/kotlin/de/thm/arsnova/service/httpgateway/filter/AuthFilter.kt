@@ -67,7 +67,7 @@ class AuthFilter(
                                     logger.warn("Auth service didn't give specific role", exception)
                                     if (!config.requireAuthentication) {
                                         Mono.just(RoomAccess(roomId, userId, "", "NONE", null))
-                                    } else if (httpGatewayProperties.gateway.requireMembership) {
+                                    } else if (httpGatewayProperties.gateway.requireMembership && !authorities.contains("ADMIN")) {
                                         Mono.error(ForbiddenException())
                                     } else {
                                         Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT", null))

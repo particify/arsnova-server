@@ -81,6 +81,11 @@ class JwtTokenUtil(
         }
     }
 
+    fun isAdmin(token: String): Boolean {
+        val decodedJwt = internalVerifier.verify(token)
+        return decodedJwt.getClaim("roles").asList(String::class.java).contains("ADMIN")
+    }
+
     fun createSignedInternalToken(
         roomAccess: RoomAccess,
         roomFeatures: RoomFeatures,

@@ -53,7 +53,7 @@ class UpdateRoomAccessFilter(
             val roomId = uriVariables["roomId"]!!
 
             val accessLevels = jwtTokenUtil.getAccessLevelsFromInternalTokenForRoom(token, roomId)
-            if (!accessLevels.contains(AccessLevel.CREATOR)) {
+            if (!accessLevels.contains(AccessLevel.CREATOR) && !jwtTokenUtil.isAdmin(token)) {
                 logger.trace("User's access levels for room {}: {}", roomId, accessLevels)
                 throw ResponseStatusException(
                     HttpStatus.FORBIDDEN,
@@ -68,10 +68,7 @@ class UpdateRoomAccessFilter(
                         r.method == HttpMethod.PATCH ||
                         r.method == HttpMethod.DELETE
                 }
-                .flatMap {
-                    roomAccessService.getRoomAccess(roomId, userId)
-                }
-                .map { roomAccess: RoomAccess ->
+                .map {
                     if (path.matches(ROOM_MODERATOR_REGEX) && method == HttpMethod.PUT) {
                         val moderatorId = path.substringAfter("/moderator/")
                         if (moderatorId == userId) {
@@ -80,7 +77,7 @@ class UpdateRoomAccessFilter(
                         listOf(
                             AccessChangeRequest(
                                 AccessChangeRequestType.CREATE,
-                                roomAccess.roomId,
+                                roomId,
                                 REV_ID_FALLBACK,
                                 moderatorId,
                                 AccessLevel.EXECUTIVE_MODERATOR
