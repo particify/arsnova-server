@@ -112,13 +112,6 @@ class UpdateRoomAccessFilter(
                                 REV_ID_FALLBACK,
                                 newOwnerId,
                                 AccessLevel.CREATOR
-                            ),
-                            AccessChangeRequest(
-                                AccessChangeRequestType.DELETE,
-                                roomId,
-                                REV_ID_FALLBACK,
-                                userId,
-                                AccessLevel.CREATOR
                             )
                         )
                     } else if (
@@ -134,13 +127,6 @@ class UpdateRoomAccessFilter(
                                 roomId,
                                 REV_ID_FALLBACK,
                                 newOwnerId,
-                                AccessLevel.CREATOR
-                            ),
-                            AccessChangeRequest(
-                                AccessChangeRequestType.DELETE,
-                                roomId,
-                                REV_ID_FALLBACK,
-                                userId,
                                 AccessLevel.CREATOR
                             )
                         )
