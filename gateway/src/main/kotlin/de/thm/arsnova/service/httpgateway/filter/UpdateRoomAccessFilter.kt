@@ -6,6 +6,7 @@ import de.thm.arsnova.service.httpgateway.model.AccessLevel
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
 import de.thm.arsnova.service.httpgateway.security.JwtTokenUtil
 import de.thm.arsnova.service.httpgateway.service.RoomAccessService
+import de.thm.arsnova.service.httpgateway.service.UserService
 import org.slf4j.LoggerFactory
 import org.springframework.cloud.gateway.filter.GatewayFilter
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory
@@ -28,7 +29,8 @@ import reactor.core.publisher.Mono
 @Component
 class UpdateRoomAccessFilter(
     private val jwtTokenUtil: JwtTokenUtil,
-    private val roomAccessService: RoomAccessService
+    private val roomAccessService: RoomAccessService,
+    private val userService: UserService
 ) : AbstractGatewayFilterFactory<UpdateRoomAccessFilter.Config>(Config::class.java) {
 
     companion object {
@@ -148,6 +150,15 @@ class UpdateRoomAccessFilter(
                 }
                 .flatMapMany { list: List<AccessChangeRequest> ->
                     Flux.fromIterable(list)
+                }
+                .flatMap { accessChangeRequest: AccessChangeRequest ->
+                    userService.exists(accessChangeRequest.userId, token)
+                        .map { exists ->
+                            if (!exists) {
+                                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID does not exist.")
+                            }
+                            accessChangeRequest
+                        }
                 }
                 .flatMap { accessChangeRequest: AccessChangeRequest ->
                     when (accessChangeRequest.type) {
