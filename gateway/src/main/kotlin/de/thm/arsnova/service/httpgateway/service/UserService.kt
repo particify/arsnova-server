@@ -24,6 +24,7 @@ class UserService(
             .uri(url)
             .header("Authorization", jwt)
             .retrieve().bodyToMono(User::class.java).cache()
+            .checkpoint("Request failed in ${this::class.simpleName}::${::get.name}.")
     }
 
     fun exists(userId: String, jwt: String): Mono<Boolean> {
@@ -49,5 +50,6 @@ class UserService(
             .uri(url)
             .header("Authorization", jwt)
             .retrieve().bodyToFlux(RoomHistoryEntry::class.java).cache()
+            .checkpoint("Request failed in ${this::class.simpleName}::${::getRoomHistory.name}.")
     }
 }

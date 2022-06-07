@@ -24,6 +24,7 @@ class RoomAccessService(
         logger.trace("Querying auth service for room access with url: {}", url)
         return webClient.get().uri(url)
             .retrieve().bodyToMono(RoomAccess::class.java).cache()
+            .checkpoint("Request failed in ${this::class.simpleName}::${::getRoomAccess.name}.")
     }
 
     fun getRoomModerators(roomId: String): Flux<RoomAccess> {
@@ -32,6 +33,7 @@ class RoomAccessService(
         logger.trace("Querying auth service for room access with url: {}", url)
         return webClient.get().uri(url)
             .retrieve().bodyToFlux(RoomAccess::class.java).cache()
+            .checkpoint("Request failed in ${this::class.simpleName}::${::getRoomModerators.name}.")
     }
 
     fun postRoomAccess(roomAccess: RoomAccess): Mono<RoomAccess> {
@@ -41,6 +43,7 @@ class RoomAccessService(
             .body(BodyInserters.fromPublisher(Mono.just(roomAccess), RoomAccess::class.java))
             .retrieve()
             .bodyToMono(RoomAccess::class.java)
+            .checkpoint("Request failed in ${this::class.simpleName}::${::postRoomAccess.name}.")
     }
 
     fun postRoomAccessWithLimit(roomAccess: RoomAccess, roomParticipantLimit: Int): Mono<RoomAccess> {
@@ -50,6 +53,7 @@ class RoomAccessService(
             .body(BodyInserters.fromPublisher(Mono.just(roomAccess), RoomAccess::class.java))
             .retrieve()
             .bodyToMono(RoomAccess::class.java)
+            .checkpoint("Request failed in ${this::class.simpleName}::${::postRoomAccessWithLimit.name}.")
             .onErrorResume { e ->
                 if (e is WebClientResponseException.Forbidden) {
                     Mono.error(ForbiddenException())
@@ -65,6 +69,7 @@ class RoomAccessService(
         return webClient.delete().uri(url)
             .retrieve()
             .bodyToMono(RoomAccess::class.java)
+            .checkpoint("Request failed in ${this::class.simpleName}::${::deleteRoomAccess.name}.")
     }
 
     fun deleteRoomAccessByRoomId(roomId: String): Flux<RoomAccess> {
@@ -73,6 +78,7 @@ class RoomAccessService(
         return webClient.delete().uri(url)
             .retrieve()
             .bodyToFlux(RoomAccess::class.java)
+            .checkpoint("Request failed in ${this::class.simpleName}::${::deleteRoomAccessByRoomId.name}.")
     }
 
     fun getRoomAccessByUser(userId: String): Flux<RoomAccess> {
@@ -80,5 +86,6 @@ class RoomAccessService(
         logger.trace("Querying auth service for room access with url: {}", url)
         return webClient.get().uri(url)
             .retrieve().bodyToFlux(RoomAccess::class.java).cache()
+            .checkpoint("Request failed in ${this::class.simpleName}::${::getRoomAccessByUser.name}.")
     }
 }

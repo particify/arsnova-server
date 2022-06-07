@@ -24,6 +24,7 @@ class CoreStatsService(
             .retrieve()
             .bodyToMono(object : ParameterizedTypeReference<Map<String, Any>>() {})
             .cache()
+            .checkpoint("Request failed in ${this::class.simpleName}::${::getServiceStats.name}.")
     }
 
     fun getSummarizedStats(jwt: String): Mono<CoreStats> {
@@ -35,5 +36,6 @@ class CoreStatsService(
             .retrieve()
             .bodyToMono(CoreStats::class.java)
             .cache()
+            .checkpoint("Request failed in ${this::class.simpleName}::${::getSummarizedStats.name}.")
     }
 }

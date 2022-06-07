@@ -23,6 +23,7 @@ class WsGatewayService(
         return webClient.get()
             .uri(url)
             .retrieve().bodyToMono(typeRef)
+            .checkpoint("Request failed in ${this::class.simpleName}::${::getUsercount.name}.")
             .flatMapMany { userCounts: List<Int?> ->
                 Flux.fromIterable(
                     userCounts.map { entry ->
@@ -52,5 +53,6 @@ class WsGatewayService(
         return webClient.get()
             .uri(url)
             .retrieve().bodyToMono(WsGatewayStats::class.java)
+            .checkpoint("Request failed in ${this::class.simpleName}::${::getGatewayStats.name}.")
     }
 }
