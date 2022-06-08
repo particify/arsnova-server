@@ -21,7 +21,6 @@ package de.thm.arsnova.model;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
-import java.util.Map;
 import java.util.Objects;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -65,8 +64,6 @@ public class Answer extends Entity implements RoomIdAware {
 
 	@Positive
 	private int round = 1;
-
-	private Map<String, Map<String, Object>> extensions;
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getContentId() {
@@ -117,16 +114,6 @@ public class Answer extends Entity implements RoomIdAware {
 		this.round = round;
 	}
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Map<String, Map<String, Object>> getExtensions() {
-		return extensions;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(final Map<String, Map<String, Object>> extensions) {
-		this.extensions = extensions;
-	}
-
 	public boolean isAbstention() {
 		return false;
 	}
@@ -142,7 +129,7 @@ public class Answer extends Entity implements RoomIdAware {
 	 *
 	 * <p>
 	 * The following fields of <tt>Answer</tt> are excluded from equality checks:
-	 * {@link #extensions}.
+	 * none.
 	 * </p>
 	 */
 	@Override

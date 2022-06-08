@@ -24,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.validation.constraints.NotBlank;
@@ -152,8 +151,6 @@ public class Content extends Entity implements RoomIdAware {
 	private String additionalText;
 	private String renderedAdditionalText;
 	private String additionalTextTitle;
-	private Map<String, Map<String, Object>> extensions;
-	private Map<String, String> attachments;
 
 	private TextRenderingOptions bodyRenderingOptions;
 
@@ -311,26 +308,6 @@ public class Content extends Entity implements RoomIdAware {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public Map<String, Map<String, Object>> getExtensions() {
-		return extensions;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(final Map<String, Map<String, Object>> extensions) {
-		this.extensions = extensions;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Map<String, String> getAttachments() {
-		return attachments;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAttachments(final Map<String, String> attachments) {
-		this.attachments = attachments;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isAbstentionsAllowed() {
 		return abstentionsAllowed;
 	}
@@ -368,7 +345,7 @@ public class Content extends Entity implements RoomIdAware {
 	 *
 	 * <p>
 	 * The following fields of <tt>LogEntry</tt> are excluded from equality checks:
-	 * {@link #state}, {@link #extensions}, {@link #attachments}.
+	 * {@link #state}.
 	 * </p>
 	 */
 	@Override
@@ -401,7 +378,6 @@ public class Content extends Entity implements RoomIdAware {
 				.append("state", state)
 				.append("additionalText", additionalText)
 				.append("additionalTextTitle", additionalTextTitle)
-				.append("timestamp", timestamp)
-				.append("attachments", attachments);
+				.append("timestamp", timestamp);
 	}
 }

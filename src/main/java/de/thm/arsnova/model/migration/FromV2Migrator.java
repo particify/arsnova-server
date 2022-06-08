@@ -46,7 +46,6 @@ import de.thm.arsnova.model.migration.v2.LoggedIn;
 import de.thm.arsnova.model.migration.v2.Motd;
 import de.thm.arsnova.model.migration.v2.MotdList;
 import de.thm.arsnova.model.migration.v2.Room;
-import de.thm.arsnova.model.migration.v2.RoomFeature;
 
 /**
  * Converts legacy entities from version 2 to current model version.
@@ -54,7 +53,6 @@ import de.thm.arsnova.model.migration.v2.RoomFeature;
  * @author Daniel Gerhardt
  */
 public class FromV2Migrator {
-	static final String V2 = "v2";
 	static final String V2_TYPE_ABCD = "abcd";
 	static final String V2_TYPE_SC = "sc";
 	static final String V2_TYPE_MC = "mc";
@@ -65,14 +63,7 @@ public class FromV2Migrator {
 	static final String V2_TYPE_SLIDE = "slide";
 	static final String V2_TYPE_FLASHCARD = "flashcard";
 	static final String V2_TYPE_GRID = "grid";
-	static final String V2_GRID_DEFAULT_TYPE = "image";
-	static final String V2_GRID_TYPE = "gridType";
-	static final String V2_GRID_IMAGE_ABSOLUTE_X = "gridImageAbsoluteX";
-	static final String V2_GRID_IMAGE_ABSOLUTE_Y = "gridImageAbsoluteY";
-	static final String V2_GRID_MODERATION_DOT_LIMIT = "gridModerationDotLimit";
 	static final int V2_GRID_CONTAINER_SIZE = 400;
-	static final int V2_GRID_FIELD_COUNT = 16;
-	static final double V2_GRID_SCALE_FACTOR = 1.05;
 	private static final Pattern SCALE_AGREEMENT_OPTION_PATTERN = Pattern.compile(
 			"strongly.* agree|(stimme|trifft)( (voll(kommen| und ganz)?|völlig|komplett))? zu");
 	private static final int SCALE_OPTION_COUNT = 5;
@@ -155,10 +146,6 @@ public class FromV2Migrator {
 				profile.setCreationTimestamp(new Date());
 			}
 			profile.setLastLoginTimestamp(new Date(loggedIn.getTimestamp()));
-			final Set<UserProfile.RoomHistoryEntry> sessionHistory = loggedIn.getVisitedSessions().stream()
-					.map(entry -> new UserProfile.RoomHistoryEntry(entry.getId(), new Date(0)))
-					.collect(Collectors.toSet());
-			profile.setRoomHistory(sessionHistory);
 		}
 		if (motdList != null && motdList.getMotdkeys() != null) {
 			profile.setAcknowledgedMotds(migrate(motdList));
@@ -188,29 +175,11 @@ public class FromV2Migrator {
 			to.setOwnerId(owner.get().getId());
 		}
 		to.setName(from.getName());
-		to.setAbbreviation(from.getShortName());
 		to.setDescription(from.getPpDescription());
 		to.setClosed(!from.isActive());
 		if (from.getCourseId() != null && !from.getCourseId().isEmpty()) {
 			to.setLmsCourseId(from.getCourseId());
 		}
-		if (from.hasAuthorDetails()) {
-			final de.thm.arsnova.model.Room.Author author = new de.thm.arsnova.model.Room.Author();
-			to.setAuthor(author);
-			author.setName(from.getPpAuthorName());
-			author.setMail(from.getPpAuthorMail());
-			author.setOrganizationName(from.getPpUniversity());
-			author.setOrganizationUnit(from.getPpFaculty());
-			author.setOrganizationLogo(from.getPpLogo());
-		}
-		if ("public_pool".equals(from.getSessionType())) {
-			final de.thm.arsnova.model.Room.PoolProperties poolProperties = new de.thm.arsnova.model.Room.PoolProperties();
-			to.setPoolProperties(poolProperties);
-			poolProperties.setLevel(from.getPpLevel());
-			poolProperties.setCategory(from.getPpSubject());
-			poolProperties.setLicense(from.getPpLicense());
-		}
-		to.setSettings(migrate(from.getFeatures()));
 
 		return to;
 	}
@@ -219,28 +188,8 @@ public class FromV2Migrator {
 		return migrate(from, Optional.empty(), false);
 	}
 
-	public de.thm.arsnova.model.Room.Settings migrate(final RoomFeature feature) {
-		final de.thm.arsnova.model.Room.Settings settings = new de.thm.arsnova.model.Room.Settings();
-		if (feature != null) {
-			settings.setCommentsEnabled(feature.isInterposed() || feature.isInterposedFeedback()
-					|| feature.isTwitterWall() || feature.isTotal());
-			settings.setQuestionsEnabled(feature.isLecture() || feature.isJitt() || feature.isClicker() || feature.isTotal());
-			settings.setSlidesEnabled(feature.isSlides() || feature.isTotal());
-			settings.setFlashcardsEnabled(feature.isFlashcardFeature() || feature.isFlashcard() || feature.isTotal());
-			settings.setQuickSurveyEnabled(feature.isLiveClicker());
-			settings.setQuickFeedbackEnabled(feature.isFeedback() || feature.isLiveFeedback() || feature.isTotal());
-			settings.setMultipleRoundsEnabled(feature.isPi() || feature.isClicker() || feature.isTotal());
-			settings.setTimerEnabled(feature.isPi() || feature.isClicker() || feature.isTotal());
-			settings.setScoreEnabled(feature.isLearningProgress() || feature.isTotal());
-		}
-
-		return settings;
-	}
-
 	public de.thm.arsnova.model.Content migrate(final Content from) {
 		final de.thm.arsnova.model.Content to;
-		final Map<String, Map<String, Object>> extensions;
-		final Map<String, Object> v2;
 		switch (from.getQuestionType()) {
 			case V2_TYPE_ABCD:
 			case V2_TYPE_SC:
@@ -285,6 +234,8 @@ public class FromV2Migrator {
 
 				break;
 			case V2_TYPE_GRID:
+				/* Grid type 'moderation' and image offsets are not supported
+				 * and ignored by this migration. */
 				final GridImageContent gridImageContent = new GridImageContent();
 				to = gridImageContent;
 				to.setFormat(de.thm.arsnova.model.Content.Format.GRID);
@@ -315,21 +266,6 @@ public class FromV2Migrator {
 						})
 						.filter(i -> i >= 0 && i < grid.getColumns() * grid.getRows())
 						.collect(Collectors.toList()));
-				extensions = new HashMap<>();
-				to.setExtensions(extensions);
-				v2 = new HashMap<>();
-				extensions.put(V2, v2);
-				v2.put(V2_GRID_TYPE, from.getGridType());
-				/* It is not possible to migrate legacy image offsets to normalized values. */
-				if (from.getOffsetX() != 0) {
-					v2.put(V2_GRID_IMAGE_ABSOLUTE_X, from.getOffsetX());
-				}
-				if (from.getOffsetY() != 0) {
-					v2.put(V2_GRID_IMAGE_ABSOLUTE_Y, from.getOffsetY());
-				}
-				if (from.getNumberOfDots() != 0) {
-					v2.put(V2_GRID_MODERATION_DOT_LIMIT, from.getNumberOfDots());
-				}
 
 				break;
 			default:

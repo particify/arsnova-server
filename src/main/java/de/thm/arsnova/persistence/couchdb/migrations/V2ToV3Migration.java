@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.BeforeCreationEvent;
+import de.thm.arsnova.event.RoomHistoryMigrationEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Content;
@@ -321,6 +322,9 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 				final UserProfile profileV3 = migrator.migrate(userV2, loggedIn, loadMotdList(userV2.getUsername()));
 				profileV3.setAcknowledgedMotds(migrateMotdIds(profileV3.getAcknowledgedMotds()));
 				profilesV3.add(profileV3);
+				if (loggedIn != null) {
+					migrateVisitedRooms(profileV3.getId(), loggedIn);
+				}
 			}
 
 			toConnector.executeBulk(profilesV3);
@@ -375,6 +379,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 				final UserProfile profileV3 = migrator.migrate(null, loggedInV2, loadMotdList(loggedInV2.getUser()));
 				profileV3.setAcknowledgedMotds(migrateMotdIds(profileV3.getAcknowledgedMotds()));
 				profilesV3.add(profileV3);
+				migrateVisitedRooms(profileV3.getId(), loggedInV2);
 			}
 			toConnector.executeBulk(profilesV3);
 			state.setState(bookmark);
@@ -682,6 +687,13 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		}
 		createContentGroups(prevRoomId, groups);
 		state.setState(null);
+	}
+
+	private void migrateVisitedRooms(final String userId, final LoggedIn loggedIn) {
+		this.applicationEventPublisher.publishEvent(new RoomHistoryMigrationEvent(
+				this,
+				userId,
+				loggedIn.getVisitedSessions().stream().map(vr -> vr.getId()).collect(Collectors.toList())));
 	}
 
 	private void createContentGroups(final String roomId, final Map<String, List<String>> groups) {

@@ -81,12 +81,6 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 									case "closed":
 										roomStats.setClosed(value);
 										break;
-									case "moderated":
-										roomStats.setModerated(value);
-										break;
-									case "moderators":
-										roomStats.setModerators(value);
-										break;
 									default:
 										break;
 								}

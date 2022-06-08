@@ -33,6 +33,4 @@ public interface RoomRepository extends CrudRepository<Room, String> {
 	List<String> findIdsByLmsCourseIds(List<String> lmsCourseIds);
 
 	List<Room> findStubsByScheduledDeletionAfter(Date scheduledDeletion);
-
-	List<String> findIdsByModeratorId(String moderatorId);
 }

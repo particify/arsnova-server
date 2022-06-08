@@ -19,13 +19,10 @@
 package de.thm.arsnova.service;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +37,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
 import de.thm.arsnova.event.BeforeDeletionEvent;
-import de.thm.arsnova.event.BeforeFullUpdateEvent;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.RoomMembership;
 import de.thm.arsnova.model.UserProfile;
@@ -49,9 +45,7 @@ import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.security.RoomRole;
-import de.thm.arsnova.security.User;
 import de.thm.arsnova.security.jwt.JwtService;
-import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import net.particify.arsnova.connector.client.ConnectorClient;
 import net.particify.arsnova.connector.model.Membership;
@@ -121,27 +115,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		}
 	}
 
-	public static class RoomShortNameComparator implements Comparator<Room>, Serializable {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public int compare(final Room room1, final Room room2) {
-			return room1.getAbbreviation().compareToIgnoreCase(room2.getAbbreviation());
-		}
-	}
-
 	@Autowired(required = false)
 	public void setConnectorClient(final ConnectorClient connectorClient) {
 		this.connectorClient = connectorClient;
-	}
-
-	@EventListener
-	public void handleRoomUpdate(final BeforeFullUpdateEvent<Room> event) {
-		// Check if event is result of a full update from API or from adding/removing a moderator
-		if (!event.getEntity().isModeratorsInitialized() && event.getEntity().getModerators().isEmpty()) {
-			// When it's a result from a full update from the API, the moderators need to be loaded from the old entity
-			event.getEntity().setModerators(event.getOldEntity().getModerators());
-		}
 	}
 
 	@EventListener
@@ -200,22 +176,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	public List<String> getRoomIdsByModeratorId(final String userId) {
-		return roomRepository.findIdsByModeratorId(userId);
-	}
-
-	@Override
-	public List<Room> getUserRoomHistory(final String userId) {
-		final UserProfile profile = userService.get(userId);
-		final List<String> roomIds = profile.getRoomHistory().stream()
-				.map(entry -> entry.getRoomId()).collect(Collectors.toList());
-		final List<Room> rooms = new ArrayList<>();
-		roomRepository.findAllById(roomIds).forEach(rooms::add);
-
-		return rooms;
-	}
-
-	@Override
 	/* TODO: move caching to DefaultEntityServiceImpl */
 	//@Caching(evict = @CacheEvict(cacheNames = "rooms", key = "#result.id"))
 	public void prepareCreate(final Room room) {
@@ -227,8 +187,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			}
 		}
 		*/
-
-		handleLogo(room);
 
 		final Room.Settings sf = new Room.Settings();
 		room.setSettings(sf);
@@ -272,31 +230,10 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			room.setOwnerId(existingRoom.getOwnerId());
 		}
 		room.setPassword(existingRoom.getPassword());
-		handleLogo(room);
 
 		/* TODO: only publish event when feedback has changed */
 		/* FIXME: event */
 		// this.publisher.publishEvent(new FeatureChangeEvent(this, room));
-	}
-
-	@Override
-	public Room transferOwnership(final Room room, final String newOwnerId) {
-		final UserProfile newOwner;
-		try {
-			newOwner = userService.get(newOwnerId);
-		} catch (final DocumentNotFoundException e) {
-			throw new BadRequestException("Invalid user ID.", e);
-		}
-		room.setOwnerId(newOwner.getId());
-
-		return update(room);
-	}
-
-	@Override
-	public Room transferOwnershipThroughToken(final Room room, final String targetUserToken) {
-		final User user = jwtService.verifyToken(targetUserToken);
-		room.setOwnerId(user.getId());
-		return update(room);
 	}
 
 	@Override
@@ -337,13 +274,5 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		return lmsMembership.isMember()
 				? Optional.of(new RoomMembership(room, RoomRole.PARTICIPANT))
 				: Optional.empty();
-	}
-
-	private void handleLogo(final Room room) {
-		if (room.getAuthor() != null && room.getAuthor().getOrganizationLogo() != null) {
-			if (!room.getAuthor().getOrganizationLogo().startsWith("http")) {
-				throw new IllegalArgumentException("Invalid logo URL.");
-			}
-		}
 	}
 }

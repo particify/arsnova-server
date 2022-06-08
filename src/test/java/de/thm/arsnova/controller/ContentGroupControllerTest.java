@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -223,7 +222,6 @@ public class ContentGroupControllerTest {
 		final Room room = new Room();
 		room.setOwnerId(user.getId());
 		room.setName("TestRoom");
-		room.setAbbreviation("TR");
 		room.setShortId("12345678");
 		room.setExtensions(new HashMap<String, Map<String, Object>>() {
 			{
@@ -234,7 +232,6 @@ public class ContentGroupControllerTest {
 				});
 			}
 		});
-		room.setModerators(new HashSet<>()); // needed for moderatorsInitialized flag
 		return room;
 	}
 }
