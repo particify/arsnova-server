@@ -1,6 +1,6 @@
 package de.thm.arsnova.service.httpgateway.controller
 
-import de.thm.arsnova.service.httpgateway.model.RoomAccess
+import de.thm.arsnova.service.httpgateway.model.RoomRole
 import de.thm.arsnova.service.httpgateway.service.RoomAccessService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Controller
@@ -24,8 +24,10 @@ class RoomModeratorController(
     @ResponseBody
     fun getRoomModerators(
         @PathVariable roomId: String
-    ): Flux<RoomAccess> {
+    ): Flux<RoomRole> {
         logger.trace("Getting moderators for room: {}", roomId)
-        return roomAccessService.getRoomModerators(roomId)
+        return roomAccessService.getRoomModerators(roomId).map { roomAccess ->
+            RoomRole(roomAccess.userId, roomAccess.role)
+        }
     }
 }
