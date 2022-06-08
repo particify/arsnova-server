@@ -23,6 +23,7 @@ class CommentService(
             .uri(url)
             .header("Authorization", jwt)
             .retrieve().bodyToFlux(CommentStats::class.java).cache()
+            .checkpoint("Request failed in ${this::class.simpleName}::${::getStats.name}.")
             .onErrorResume { exception ->
                 logger.debug("Error on getting stats from comment service", exception)
                 Flux.fromIterable(
@@ -42,6 +43,7 @@ class CommentService(
         return webClient.get()
             .uri(url)
             .retrieve().bodyToMono(CommentServiceStats::class.java)
+            .checkpoint("Request failed in ${this::class.simpleName}::${::getServiceStats.name}.")
     }
 
     fun getAckCount(roomId: String): Mono<Int> {

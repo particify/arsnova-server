@@ -30,6 +30,7 @@ class SubscriptionService(
             logger.trace("Querying subscription service for subscription by user with url: {}", url)
             webClient.get().uri(url)
                 .retrieve().bodyToFlux(UserSubscription::class.java).next()
+                .checkpoint("Request failed in ${this::class.simpleName}::${::getUserSubscription.name}.")
                 .onErrorResume { error ->
                     logger.warn("Error from querying subscription service: {}", error)
                     Mono.just(UserSubscription(userId, FREE_TIER_STRING))
@@ -45,6 +46,7 @@ class SubscriptionService(
             logger.trace("Querying subscription service for subscription by user with url: {}", url)
             webClient.get().uri(url)
                 .retrieve().bodyToFlux(RoomSubscription::class.java).next()
+                .checkpoint("Request failed in ${this::class.simpleName}::${::getRoomSubscription.name}.")
                 .onErrorResume { error ->
                     logger.warn("Error from querying subscription service: {}", error)
                     Mono.just(RoomSubscription(roomId, FREE_TIER_STRING))
@@ -60,6 +62,7 @@ class SubscriptionService(
             logger.trace("Querying subscription service for features by room with url: {}", url)
             webClient.get().uri(url)
                 .retrieve().bodyToFlux(RoomFeatures::class.java).next()
+                .checkpoint("Request failed in ${this::class.simpleName}::${::getRoomFeatures.name}.")
                 .onErrorResume { error ->
                     logger.warn("Error from querying subscription service: {}", error)
                     Mono.just(RoomFeatures(roomId, emptyList(), null))
@@ -75,6 +78,7 @@ class SubscriptionService(
             logger.trace("Querying subscription service for feature settingswith url: {}", url)
             webClient.get().uri(url)
                 .retrieve().bodyToFlux(FeatureSetting::class.java).next()
+                .checkpoint("Request failed in ${this::class.simpleName}::${::getRoomParticipantLimit.name}.")
                 .switchIfEmpty(Mono.just(FeatureSetting(tierId, ROOM_FEATURE_STRING, DEFAULT_ROOM_PARTICIPANT_LIMIT.toString())))
                 .map { featureSetting ->
                     featureSetting.value.toInt()
