@@ -50,6 +50,16 @@ class RoomAccessController(
         )
     }
 
+    @GetMapping(path = ["/roomaccess/by-room/{roomId}"])
+    @ResponseBody
+    fun getByRoomId(
+        @PathVariable roomId: String,
+        @RequestParam role: String?
+    ): Flux<RoomAccess> {
+        val roomAccess = handler.getByRoomIdAndRole(roomId, role)
+        return Flux.fromIterable(roomAccess)
+    }
+
     @GetMapping(path = ["/roomaccess/{roomId}/{userId}"])
     @ResponseBody
     fun getRoomAccess(
