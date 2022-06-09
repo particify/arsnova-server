@@ -33,6 +33,7 @@ import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.RoomMembership;
 import de.thm.arsnova.model.RoomStatistics;
 import de.thm.arsnova.model.serialization.View;
+import de.thm.arsnova.service.AccessTokenService;
 import de.thm.arsnova.service.ContentGroupService;
 import de.thm.arsnova.service.DataGenerationService;
 import de.thm.arsnova.service.DuplicationService;
@@ -40,7 +41,6 @@ import de.thm.arsnova.service.RoomService;
 import de.thm.arsnova.service.RoomStatisticsService;
 import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
-import de.thm.arsnova.web.exceptions.NotImplementedException;
 
 @RestController
 @EntityRequestMapping(RoomController.REQUEST_MAPPING)
@@ -59,19 +59,22 @@ public class RoomController extends AbstractEntityController<Room> {
 	private RoomStatisticsService roomStatisticsService;
 	private DuplicationService duplicationService;
 	private DataGenerationService dataGenerationService;
+	private AccessTokenService accessTokenService;
 
 	public RoomController(
 			@Qualifier("securedRoomService") final RoomService roomService,
 			@Qualifier("securedContentGroupService") final ContentGroupService contentGroupService,
 			@Qualifier("securedRoomStatisticsService") final RoomStatisticsService roomStatisticsService,
 			@Qualifier("securedDuplicationService") final DuplicationService duplicationService,
-			@Qualifier("securedDataGenerationService") final DataGenerationService dataGenerationService) {
+			@Qualifier("securedDataGenerationService") final DataGenerationService dataGenerationService,
+			@Qualifier("securedAccessTokenService") final AccessTokenService accessTokenService) {
 		super(roomService);
 		this.roomService = roomService;
 		this.contentGroupService = contentGroupService;
 		this.roomStatisticsService = roomStatisticsService;
 		this.duplicationService = duplicationService;
 		this.dataGenerationService = dataGenerationService;
+		this.accessTokenService = accessTokenService;
 	}
 
 	@Override
@@ -120,21 +123,22 @@ public class RoomController extends AbstractEntityController<Room> {
 			@PathVariable final String id,
 			@RequestBody final RequestMembershipRequestEntity requestMembershipRequestEntity,
 			final HttpServletResponse httpServletResponse) {
+		final Optional<RoomMembership> membership;
 		if (requestMembershipRequestEntity.token != null) {
-			throw new NotImplementedException();
+			membership = roomService.requestMembershipByToken(id, requestMembershipRequestEntity.token);
 		} else {
-			final Optional<RoomMembership> membership = roomService.requestMembership(
+			membership = roomService.requestMembership(
 					id, requestMembershipRequestEntity.password != null ? requestMembershipRequestEntity.password : "");
-			membership.ifPresent(m -> {
-				httpServletResponse.setHeader(ENTITY_ID_HEADER, m.getRoom().getId());
-				httpServletResponse.setHeader(ENTITY_REVISION_HEADER, m.getRoom().getRevision());
-				/* Sending of the role as a header is a temporary solution for
-				 * now to allow accessing it without parsing the body. */
-				httpServletResponse.setHeader(ROOM_ROLE_HEADER, m.getRole().toString());
-			});
-
-			return membership.orElseThrow(ForbiddenException::new).getRoom();
 		}
+		membership.ifPresent(m -> {
+			httpServletResponse.setHeader(ENTITY_ID_HEADER, m.getRoom().getId());
+			httpServletResponse.setHeader(ENTITY_REVISION_HEADER, m.getRoom().getRevision());
+			/* Sending of the role as a header is a temporary solution for
+			 * now to allow accessing it without parsing the body. */
+			httpServletResponse.setHeader(ROOM_ROLE_HEADER, m.getRole().toString());
+		});
+
+		return membership.orElseThrow(ForbiddenException::new).getRoom();
 	}
 
 	@PostMapping(DUPLICATE_MAPPING)

@@ -332,6 +332,24 @@ arsnova:
         en: General Education,Highschool,Bachelor,Master,Who Wants to Be a Millionaire,Miscellaneous
 
   ##############################################################################
+  # Templates
+  ##############################################################################
+  templates:
+    # Placeholders for room invitation:
+    # {0}: room short ID, {1}: token, {2}: root URL, {3}: room invitation URL,
+    # {4}: room name
+    room-invitation-url: "{2}/redeem-token/{0}/token/{1}"
+    room-invitation-mail-subject: "Access to room {4} granted"
+    room-invitation-mail-body: |-
+      Hello!
+
+      You have been invited to the ARSnova room "{4}". Please use the following link so the access permissions can be assigned to your account:
+
+          {3}
+
+      {2}
+
+  ##############################################################################
   # User interface
   ##############################################################################
   ui:

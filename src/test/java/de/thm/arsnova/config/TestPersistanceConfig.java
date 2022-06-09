@@ -24,6 +24,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Profile;
 
 import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
+import de.thm.arsnova.persistence.AccessTokenRepository;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentGroupRepository;
 import de.thm.arsnova.persistence.ContentRepository;
@@ -60,4 +61,7 @@ public class TestPersistanceConfig {
 
 	@MockBean
 	private StatisticsRepository statisticsRepository;
+
+	@MockBean
+	public AccessTokenRepository accessTokenRepository;
 }

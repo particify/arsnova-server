@@ -71,6 +71,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	private UserService userService;
 
+	private AccessTokenService accessTokenService;
+
 	private ConnectorClient connectorClient;
 
 	private JwtService jwtService;
@@ -85,6 +87,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			final RoomRepository repository,
 			final LogEntryRepository dbLogger,
 			final UserService userService,
+			final AccessTokenService accessTokenService,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
 			final Validator validator,
@@ -93,6 +96,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		this.roomRepository = repository;
 		this.dbLogger = dbLogger;
 		this.userService = userService;
+		this.accessTokenService = accessTokenService;
 		this.jwtService = jwtService;
 	}
 
@@ -261,7 +265,14 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 				: Optional.of(new RoomMembership(room, RoomRole.PARTICIPANT));
 	}
 
-	public Optional<RoomMembership> determineMembershipFromLms(final Room room) {
+	@Override
+	public Optional<RoomMembership> requestMembershipByToken(final String roomId, final String token) {
+		final Room room = get(roomId);
+		final Optional<RoomRole> accessToken = accessTokenService.redeemToken(roomId, token);
+		return accessToken.map(role -> new RoomMembership(room, role));
+	}
+
+	private Optional<RoomMembership> determineMembershipFromLms(final Room room) {
 		logger.trace("Determining user role via LMS membership.");
 		if (connectorClient == null) {
 			logger.warn("Room {} is connected to LMS course {} but LMS connector client is disabled.",

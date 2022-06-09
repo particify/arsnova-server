@@ -44,13 +44,13 @@ public class StubUserService extends UserServiceImpl {
 			final SystemProperties systemProperties,
 			final SecurityProperties securityProperties,
 			final AuthenticationProviderProperties authenticationProviderProperties,
-			final JavaMailSender mailSender,
+			final EmailService emailService,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
 			final Validator validator,
 			final PasswordUtils passwordUtils) {
 		super(repository, systemProperties, securityProperties, authenticationProviderProperties,
-				mailSender, jackson2HttpMessageConverter, validator, passwordUtils);
+				emailService, jackson2HttpMessageConverter, validator, passwordUtils);
 		grantedAuthorities = new HashSet<>();
 		grantedAuthorities.add(User.ROLE_USER);
 	}
