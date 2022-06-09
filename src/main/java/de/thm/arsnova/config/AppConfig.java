@@ -59,6 +59,7 @@ import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
 import de.thm.arsnova.config.properties.FeatureProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.config.properties.SystemProperties;
+import de.thm.arsnova.config.properties.TemplateProperties;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.FromV2Migrator;
 import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
@@ -80,7 +81,8 @@ import net.particify.arsnova.connector.client.ConnectorClientImpl;
 @Configuration
 @EnableConfigurationProperties({
 		FeatureProperties.class,
-		SystemProperties.class})
+		SystemProperties.class,
+		TemplateProperties.class})
 public class AppConfig implements WebMvcConfigurer {
 	public static final String API_V3_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v3+json";
 	public static final MediaType API_V3_MEDIA_TYPE = MediaType.valueOf(API_V3_MEDIA_TYPE_VALUE);

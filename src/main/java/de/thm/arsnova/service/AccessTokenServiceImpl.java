@@ -1,17 +1,22 @@
 package de.thm.arsnova.service;
 
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
+import de.thm.arsnova.config.properties.SystemProperties;
+import de.thm.arsnova.config.properties.TemplateProperties;
 import de.thm.arsnova.model.AccessToken;
+import de.thm.arsnova.model.Room;
 import de.thm.arsnova.persistence.AccessTokenRepository;
 import de.thm.arsnova.security.PasswordUtils;
 import de.thm.arsnova.security.RoomRole;
@@ -26,6 +31,10 @@ public class AccessTokenServiceImpl extends DefaultEntityServiceImpl<AccessToken
 	private final PasswordUtils passwordUtils;
 	private final EmailService emailService;
 	private final UserService userService;
+	private final TemplateProperties templateProperties;
+	private final SystemProperties systemProperties;
+
+	private RoomService roomService;
 
 	public AccessTokenServiceImpl(
 			final AccessTokenRepository repository,
@@ -34,12 +43,21 @@ public class AccessTokenServiceImpl extends DefaultEntityServiceImpl<AccessToken
 			final Validator validator,
 			final PasswordUtils passwordUtils,
 			final EmailService emailService,
-			final UserService userService) {
+			final UserService userService,
+			final TemplateProperties templateProperties,
+			final SystemProperties systemProperties) {
 		super(AccessToken.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.accessTokenRepository = repository;
 		this.passwordUtils = passwordUtils;
 		this.emailService = emailService;
 		this.userService = userService;
+		this.templateProperties = templateProperties;
+		this.systemProperties = systemProperties;
+	}
+
+	@Autowired
+	public void setRoomService(final RoomService roomService) {
+		this.roomService = roomService;
 	}
 
 	public AccessToken generate(final String roomId, final RoomRole roomRole) {
@@ -74,6 +92,13 @@ public class AccessTokenServiceImpl extends DefaultEntityServiceImpl<AccessToken
 
 	private void sendInvite(final AccessToken accessToken, final String emailAddress) {
 		logger.debug("Sending invitation with token to {}: {}", emailAddress, accessToken);
-		emailService.sendEmail(emailAddress, "INVITE PLACEHOLDER", accessToken.getToken());
+		final Room room = roomService.get(accessToken.getRoomId());
+		final String url = MessageFormat.format(templateProperties.getRoomInvitationUrl(),
+				room.getShortId(), accessToken.getToken(), systemProperties.getRootUrl());
+		final String subject = MessageFormat.format(templateProperties.getRoomInvitationMailSubject(),
+				room.getShortId(), accessToken.getToken(), systemProperties.getRootUrl(), url, room.getName());
+		final String body = MessageFormat.format(templateProperties.getRoomInvitationMailBody(),
+				room.getShortId(), accessToken.getToken(), systemProperties.getRootUrl(), url, room.getName());
+		emailService.sendEmail(emailAddress, subject, body);
 	}
 }
