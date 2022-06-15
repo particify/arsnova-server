@@ -12,7 +12,7 @@
 
 	<properties>
 		<spring-boot-version>2.7.0</spring-boot-version>
-		<io.netty-version>4.1.77.Final</io.netty-version>
+		<io.netty-version>4.1.78.Final</io.netty-version>
 		<kotlin.version>1.6.21</kotlin.version>
 		<kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
