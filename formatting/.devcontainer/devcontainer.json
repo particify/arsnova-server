@@ -1,0 +1,21 @@
+{
+  "name": "Formatting Service",
+  "service": "arsnova-formatting-service",
+  "dockerComposeFile": [
+    "../../.compose.yaml"
+  ],
+  "workspaceFolder": "/workspace/arsnova-formatting-service",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "asciidoctor.asciidoctor-vscode",
+        "dbaeumer.vscode-eslint",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig"
+      ]
+    }
+  },
+  "shutdownAction": "none",
+  "remoteUser": "dev",
+  "postAttachCommand": "/post-attach.sh"
+}
