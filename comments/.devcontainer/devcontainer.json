@@ -1,0 +1,22 @@
+{
+  "name": "Comment Service",
+  "service": "arsnova-comment-service",
+  "dockerComposeFile": [
+    "../../.compose.yaml"
+  ],
+  "workspaceFolder": "/workspace/arsnova-comment-service",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "asciidoctor.asciidoctor-vscode",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig",
+        "pivotal.vscode-spring-boot",
+        "vscjava.vscode-java-pack"
+      ]
+    }
+  },
+  "shutdownAction": "none",
+  "remoteUser": "dev",
+  "postAttachCommand": "/post-attach.sh"
+}
