@@ -1,0 +1,120 @@
+#!/bin/bash
+PATH=/home/dgerhardt/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin/:$PATH
+COMMAND=$1
+PROJECT=$2
+
+if ! command -v git &> /dev/null; then
+  echo ERROR: Git is not installed.
+  exit 1
+fi
+
+if ! command -v docker &> /dev/null; then
+  echo ERROR: Docker Engine is not installed.
+  echo
+  echo https://docs.docker.com/engine/install/
+  exit 1
+fi
+
+if ! docker compose &> /dev/null; then
+  echo ERROR: Docker Compose v2 is not installed.
+  echo
+  echo https://docs.docker.com/compose/install/compose-plugin/
+  echo
+  echo On Debian-based systems:
+  echo apt install docker-compose-plugin
+  exit 1
+fi
+
+if command docker-compose &> /dev/null && docker-compose --version | grep "docker-compose version" &> /dev/null; then
+  echo ERROR: Legacy Docker Compose v1 is installed.
+  echo
+  echo Please remove this version to avoid issues.
+  exit 1
+fi
+
+if ! command -v code &> /dev/null; then
+  echo ERROR: Visual Studio Code is not installed.
+  echo
+  echo https://code.visualstudio.com
+  exit 1
+fi
+
+if ! code --list-extensions | grep ms-vscode-remote.remote-containers &> /dev/null; then
+  code --install-extension ms-vscode-remote.remote-containers
+fi
+
+case $COMMAND in
+  update|u)
+    echo Updating Git repository...
+    git submodule update --init --recursive
+    $0 update-config
+    echo Updating base images for Devcontainers...
+    docker compose --project-directory `dirname $0` \
+      -f docker-orchestration/base.compose.yaml \
+      -f docker-orchestration/saas.compose.yaml \
+      -f docker-orchestration/minio.compose.yaml \
+      pull
+    $0 build
+    ;;
+  update-config)
+    echo Updating configuration for Docker Compose...
+    echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .env
+    cat docker-orchestration/.env devcontainer.env | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
+    echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .compose.yaml
+    docker compose --project-directory `dirname $0` \
+      -f docker-orchestration/base.compose.yaml \
+      -f docker-orchestration/saas.compose.yaml \
+      -f docker-orchestration/minio.compose.yaml \
+      -f devcontainer.base.compose.yaml \
+      -f devcontainer.saas.compose.yaml \
+      -f devcontainer.minio.compose.yaml \
+      config >> .compose.yaml
+    ;;
+  open|o)
+    if [ -d "$PROJECT" ]; then
+      devcontainer open "$PROJECT"
+    else
+      echo ERROR: Invalid project
+      exit 1
+    fi
+    ;;
+  run|r)
+    if [ ! -f .compose.yaml ]; then
+      $0 update-config
+    fi
+    echo Starting Devcontainers...
+    shift 1
+    docker compose -f .compose.yaml up $@
+    ;;
+  build|b)
+    if [ ! -f .compose.yaml ]; then
+      $0 update-config
+    fi
+    echo Building Devcontainers...
+    docker compose -f .compose.yaml build
+    ;;
+  logs|l)
+    if [ ! -f .compose.yaml ]; then
+      $0 update-config
+    fi
+    shift 1
+    docker compose -f .compose.yaml logs $@
+    ;;
+  compose|c)
+    if [ ! -f .compose.yaml ]; then
+      $0 update-config
+    fi
+    shift 1
+    docker compose -f .compose.yaml $@
+    ;;
+  *)
+    echo Usage:
+    echo "    $0 update           Update Git repositories, Docker Compose configuration and Devcontainers"
+    echo "    $0 update-config    Update the configuration for Docker Compose"
+    echo "    $0 open <project>   Open project in Devcontainer with Visual Studio Code"
+    echo "    $0 run              Start Devcontainers for all services"
+    echo "    $0 build            (Re-)build Devcontainers"
+    echo "    $0 logs             Show logs or the log for a specific service"
+    echo "    $0 compose          Execute a Docker Compose command"
+    ;;
+esac

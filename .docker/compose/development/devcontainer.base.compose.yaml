@@ -1,0 +1,104 @@
+services:
+  arsnova-proxy:
+    ports:
+      - 127.0.0.1:${PORT:-8080}:80
+  arsnova-web:
+    image: devcontainer-arsnova-webclient
+    build:
+      context: arsnova-webclient/.devcontainer
+      args:
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-webclient:master
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    volumes:
+      - ./arsnova-webclient:/workspace/arsnova-webclient
+  arsnova-backend-core:
+    image: devcontainer-arsnova-backend-core
+    build:
+      context: arsnova-backend/.devcontainer
+      args:
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-backend:master
+        INSTALL_MAVEN: "true"
+        MAVEN_VERSION: $MAVEN_VERSION
+    environment:
+      SERVER_PORT: ""
+      SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
+    volumes:
+      - ./arsnova-backend:/workspace/arsnova-backend
+      - maven-cache:/home/dev/.m2
+  arsnova-http-gateway:
+    image: devcontainer-arsnova-http-gateway
+    build:
+      context: arsnova-http-gateway/.devcontainer
+      args:
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-http-gateway:master
+        INSTALL_MAVEN: "true"
+        MAVEN_VERSION: $MAVEN_VERSION
+    environment:
+      SERVER_PORT: ""
+      SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
+    volumes:
+      - ./arsnova-http-gateway:/workspace/arsnova-http-gateway
+      - maven-cache:/home/dev/.m2
+  arsnova-ws-gateway:
+    image: devcontainer-arsnova-ws-gateway
+    build:
+      context: arsnova-ws-gateway/.devcontainer
+      args:
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-ws-gateway:master
+        INSTALL_MAVEN: "true"
+        MAVEN_VERSION: $MAVEN_VERSION
+    environment:
+      SERVER_PORT: ""
+      SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
+    volumes:
+      - ./arsnova-ws-gateway:/workspace/arsnova-ws-gateway
+      - maven-cache:/home/dev/.m2
+  arsnova-auth-service:
+    image: devcontainer-arsnova-auth-service
+    build:
+      context: arsnova-auth-service/.devcontainer
+      args:
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-auth-service:master
+        INSTALL_MAVEN: "true"
+        MAVEN_VERSION: $MAVEN_VERSION
+    environment:
+      SERVER_PORT: ""
+      SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
+      PGHOST: postgresql_auth
+      PGDATABASE: arsnovaauth
+      PGUSER: arsnovaauth
+      PGPASSWORD: arsnovaauth
+    volumes:
+      - ./arsnova-auth-service:/workspace/arsnova-auth-service
+      - maven-cache:/home/dev/.m2
+  arsnova-comment-service:
+    image: devcontainer-arsnova-comment-service
+    build:
+      context: arsnova-comment-service/.devcontainer
+      args:
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-comment-service:master
+        INSTALL_MAVEN: "true"
+        MAVEN_VERSION: $MAVEN_VERSION
+    environment:
+      SERVER_PORT: ""
+      SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
+      PGHOST: postgresql_comment
+      PGDATABASE: arsnovacomment
+      PGUSER: arsnovacomment
+      PGPASSWORD: arsnovacomment
+    volumes:
+      - ./arsnova-comment-service:/workspace/arsnova-comment-service
+      - maven-cache:/home/dev/.m2
+  arsnova-formatting-service:
+    image: devcontainer-arsnova-formatting-service
+    build:
+      context: arsnova-formatting-service/.devcontainer
+      args:
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/formatting-service:master
+    environment:
+      PORT: 3000
+    volumes:
+      - ./arsnova-formatting-service:/workspace/arsnova-formatting-service
+
+volumes:
+  maven-cache:
