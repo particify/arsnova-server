@@ -10,6 +10,7 @@ services:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-webclient:master
     command: /bin/sh -c "while sleep 1000; do :; done"
     volumes:
+      - ./.git:/workspace/.git
       - ./arsnova-webclient:/workspace/arsnova-webclient
   arsnova-backend-core:
     image: devcontainer-arsnova-backend-core
@@ -23,6 +24,7 @@ services:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
     volumes:
+      - ./.git:/workspace/.git
       - ./arsnova-backend:/workspace/arsnova-backend
       - maven-cache:/home/dev/.m2
   arsnova-http-gateway:
@@ -37,6 +39,7 @@ services:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
     volumes:
+      - ./.git:/workspace/.git
       - ./arsnova-http-gateway:/workspace/arsnova-http-gateway
       - maven-cache:/home/dev/.m2
   arsnova-ws-gateway:
@@ -51,6 +54,7 @@ services:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
     volumes:
+      - ./.git:/workspace/.git
       - ./arsnova-ws-gateway:/workspace/arsnova-ws-gateway
       - maven-cache:/home/dev/.m2
   arsnova-auth-service:
@@ -69,6 +73,7 @@ services:
       PGUSER: arsnovaauth
       PGPASSWORD: arsnovaauth
     volumes:
+      - ./.git:/workspace/.git
       - ./arsnova-auth-service:/workspace/arsnova-auth-service
       - maven-cache:/home/dev/.m2
   arsnova-comment-service:
@@ -87,6 +92,7 @@ services:
       PGUSER: arsnovacomment
       PGPASSWORD: arsnovacomment
     volumes:
+      - ./.git:/workspace/.git
       - ./arsnova-comment-service:/workspace/arsnova-comment-service
       - maven-cache:/home/dev/.m2
   arsnova-formatting-service:
@@ -98,6 +104,7 @@ services:
     environment:
       PORT: 3000
     volumes:
+      - ./.git:/workspace/.git
       - ./arsnova-formatting-service:/workspace/arsnova-formatting-service
 
 volumes:
