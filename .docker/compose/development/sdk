@@ -43,6 +43,22 @@ if ! code --list-extensions | grep ms-vscode-remote.remote-containers &> /dev/nu
   code --install-extension ms-vscode-remote.remote-containers
 fi
 
+ENV_FILES=""
+BASE_COMPOSE_FILE_ARGS=""
+while read config_name; do
+  if [ -f "docker-orchestration/$config_name.env" ]; then
+    ENV_FILES="$ENV_FILES docker-orchestration/$config_name.env"
+  fi
+  BASE_COMPOSE_FILE_ARGS="$BASE_COMPOSE_FILE_ARGS -f docker-orchestration/$config_name.compose.yaml"
+done <config-list
+COMPOSE_FILE_ARGS=$BASE_COMPOSE_FILE_ARGS
+while read config_name; do
+  if [ -f "$config_name.env" ]; then
+    ENV_FILES="$ENV_FILES $config_name.env"
+  fi
+  COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f devcontainer.$config_name.compose.yaml"
+done <config-list
+
 case $COMMAND in
   update|u)
     echo Updating Git repository...
@@ -50,24 +66,24 @@ case $COMMAND in
     $0 update-config
     echo Updating base images for Devcontainers...
     docker compose --project-directory `dirname $0` \
-      -f docker-orchestration/base.compose.yaml \
-      -f docker-orchestration/saas.compose.yaml \
-      -f docker-orchestration/minio.compose.yaml \
+      $BASE_COMPOSE_FILE_ARGS \
       pull
     $0 build
     ;;
   update-config)
     echo Updating configuration for Docker Compose...
+    if [ ! -f local.env ]; then
+      echo "# Custom environment configuration overrides" > local.env
+    fi
+    if [ ! -f local.compose.yaml ]; then
+      echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > local.compose.yaml
+    fi
     echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .env
-    cat docker-orchestration/.env devcontainer.env | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
+    cat $ENV_FILES devcontainer.env | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
     echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .compose.yaml
     docker compose --project-directory `dirname $0` \
-      -f docker-orchestration/base.compose.yaml \
-      -f docker-orchestration/saas.compose.yaml \
-      -f docker-orchestration/minio.compose.yaml \
-      -f devcontainer.base.compose.yaml \
-      -f devcontainer.saas.compose.yaml \
-      -f devcontainer.minio.compose.yaml \
+      $COMPOSE_FILE_ARGS \
+      -f local.compose.yaml \
       config >> .compose.yaml
     ;;
   open|o)
