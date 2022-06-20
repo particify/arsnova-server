@@ -1,5 +1,5 @@
 #!/bin/bash
-PATH=/home/dgerhardt/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin/:$PATH
+PATH=$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin/:$PATH
 COMMAND=$1
 PROJECT=$2
 
