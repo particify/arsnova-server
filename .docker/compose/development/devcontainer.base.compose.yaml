@@ -68,7 +68,7 @@ services:
     environment:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
-      PGHOST: postgresql_auth
+      PGHOST: postgresql-auth
       PGDATABASE: arsnovaauth
       PGUSER: arsnovaauth
       PGPASSWORD: arsnovaauth
@@ -87,7 +87,7 @@ services:
     environment:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
-      PGHOST: postgresql_comment
+      PGHOST: postgresql-comment
       PGDATABASE: arsnovacomment
       PGUSER: arsnovacomment
       PGPASSWORD: arsnovacomment
