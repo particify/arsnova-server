@@ -7,6 +7,8 @@ build_docker_images:
       when: manual
       variables:
         IMAGE_VARIANT_SUFFIX: -$CI_COMMIT_REF_NAME
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      when: always
   variables:
     IMAGE1_NAME: nginx-proxy
     IMAGE1_BASETAG: stable-alpine
