@@ -25,5 +25,7 @@ HELP.md
 /.nb-gradle/
 /build/
 
-### VS Code ###
-.vscode/
+### Visual Studio Code ###
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json

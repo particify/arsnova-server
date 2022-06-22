@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "mainClass": "de.thm.arsnova.service.httpgateway.ArsnovaHttpGatewayServiceApplicationKt",
+      "name": "Run HTTP Gateway",
+      "projectRoot": "${workspaceFolder}",
+      "request": "launch",
+      "type": "kotlin"
+    }
+  ]
+}
