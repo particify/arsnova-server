@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "mainClass": "de.thm.arsnova.ArsnovaApplication",
+      "name": "Run Backend Core",
+      "projectName": "arsnova-backend",
+      "request": "launch",
+      "type": "java"
+    }
+  ]
+}

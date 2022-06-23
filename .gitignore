@@ -2,6 +2,11 @@
 .checkstyle
 /target/
 
+# Visual Studio Code
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+
 # Environment specific files
 *~
 *.bak
