@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "mainClass": "de.thm.arsnova.service.comment.CommentWebService",
+      "name": "Run Comment Service",
+      "projectName": "arsnova-comment-service",
+      "request": "launch",
+      "type": "java"
+    }
+  ]
+}
