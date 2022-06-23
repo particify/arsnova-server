@@ -17,20 +17,21 @@ This repository contains files to integrate all of the Particify services and se
 
 * Linux is the recommended OS, but basically any OS that is supported by Docker Engine and runs shell scripts should work.
 * https://docs.docker.com/engine/install/[Docker Engine] >= 20.10 (older versions might work but are not tested for compatibility)
-* https://docs.docker.com/compose/install/[Docker Compose]
+* https://docs.docker.com/compose/install/compose-plugin/[Docker Compose] >= 2.0
 
 == Usage
 
 === Preparations
 
 . Clone this repository.
-. Inside the repositories root directory run `./set-env.sh <env>`. env can be `prod` or `dev`.
+. Switch to the repository's root directory and run `./particifyctl update`.
+. Run `./particifyctl` to list all available commands.
 
 === Running
 
-. Run `PORT=<port> docker-compose up`. Append `-d` to run in detached mode for production.
-. Run `docker-compose down` stop and remove the containers.
-. Run `docker-compose pull` to update the images.
+. Run `PORT=<port> ./particifyctl run`. Append `-d` to run in detached mode for production.
+. Run `./particifyctl compose down` stop and remove the containers.
+. Run `./particifyctl update` to update the Git repository and Docker images.
 
 === Configuration
 
@@ -68,7 +69,9 @@ The default configuration can be adjusted via environment variables:
 |FORMATTING_TAG| master |Docker tag (repository branch) for Formatting Service
 |=======
 
-Example: `PORT=8100 WEB_TAG=my-dev-branch docker-compose up`
+Example: `PORT=8100 WEB_TAG=my-dev-branch ./particifyctl run`
+
+To persist the configuration, add those variable assignments to `local.env` (one assignment per line).
 
 NOTE: Docker images are not automatically created for development branches.
 Make sure to trigger the `docker_image_dev` job in GitLab's pipeline view and delete the image from the registry once it is no longer needed.

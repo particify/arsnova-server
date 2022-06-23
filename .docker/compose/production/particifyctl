@@ -1,0 +1,111 @@
+#!/bin/bash
+COMMAND=$1
+
+if ! command -v git &> /dev/null; then
+  echo ERROR: Git is not installed.
+  exit 1
+fi
+
+if ! command -v docker &> /dev/null; then
+  echo ERROR: Docker Engine is not installed.
+  echo
+  echo https://docs.docker.com/engine/install/
+  exit 1
+fi
+
+if ! docker compose &> /dev/null; then
+  echo ERROR: Docker Compose v2 is not installed.
+  echo
+  echo https://docs.docker.com/compose/install/compose-plugin/
+  echo
+  echo On Debian-based systems:
+  echo apt install docker-compose-plugin
+  exit 1
+fi
+
+if [ ! -f .version ] || ! read CONFIG_VERSION <.version; then
+  CONFIG_VERSION=1
+fi
+if [ "$CONFIG_VERSION" -gt 2 ]; then
+  echo ERROR: Configuration was created by a newer version.
+  exit 1
+fi
+
+ENV_FILES=""
+COMPOSE_FILE_ARGS=""
+while read config_name; do
+  if [ -f "$config_name.env" ]; then
+    ENV_FILES="$ENV_FILES $config_name.env"
+  fi
+  COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f $config_name.compose.yaml"
+done <config-list
+POSTGRESQL_TAG=`docker compose $COMPOSE_FILE_ARGS config --images 2> /dev/null \
+  | grep -m 1 postgres: | cut -d : -f 2`
+while read config_name; do
+  COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f production.$config_name.compose.yaml"
+done <config-list
+
+case $COMMAND in
+  update|u)
+    echo Updating Git repository...
+    git pull
+    $0 update-config
+    echo Updating Docker images...
+    docker compose --project-directory `dirname $0` \
+      $COMPOSE_FILE_ARGS \
+      -f local.compose.yaml \
+      pull
+    ;;
+  update-config)
+    echo Updating configuration for Docker Compose...
+    if [ ! -f local.env ]; then
+      echo "# Custom environment configuration overrides" > local.env
+      echo "POSTGRESQL_TAG=$POSTGRESQL_TAG" >> local.env
+      if [ -L .env ]; then
+        cat .env >> local.env
+        rm .env
+      fi
+    fi
+    if [ ! -f local.compose.yaml ]; then
+      echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > local.compose.yaml
+    fi
+    echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .env
+    cat $ENV_FILES production.env local.env | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
+    echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .compose.yaml
+    docker compose \
+      $COMPOSE_FILE_ARGS \
+      -f local.compose.yaml \
+      config >> .compose.yaml
+    if [ ! -f .version ]; then
+      echo "$CONFIG_VERSION" > .version
+    fi
+    ;;
+  run|r)
+    $0 update-config
+    echo Starting Containers...
+    shift 1
+    docker compose -f .compose.yaml up $@
+    ;;
+  logs|l)
+    if [ ! -f .compose.yaml ]; then
+      $0 update-config
+    fi
+    shift 1
+    docker compose -f .compose.yaml logs $@
+    ;;
+  compose|c)
+    if [ ! -f .compose.yaml ]; then
+      $0 update-config
+    fi
+    shift 1
+    docker compose -f .compose.yaml $@
+    ;;
+  *)
+    echo Usage:
+    echo "    $0 update           Update Git repositories, Docker Compose configuration and Docker images"
+    echo "    $0 update-config    Update the configuration for Docker Compose"
+    echo "    $0 run              Start Containers for all services"
+    echo "    $0 logs             Show logs or the log for a specific service"
+    echo "    $0 compose          Execute a Docker Compose command"
+    ;;
+esac
