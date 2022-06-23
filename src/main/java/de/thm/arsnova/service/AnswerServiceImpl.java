@@ -20,11 +20,13 @@ package de.thm.arsnova.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -73,8 +75,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	private static final Logger logger = LoggerFactory.getLogger(AnswerServiceImpl.class);
 	private static final Pattern specialCharPattern = Pattern.compile("[^\\p{IsAlphabetic}\\p{IsDigit}]");
 
-	private final Queue<Answer> answerQueue = new ConcurrentLinkedQueue<>();
-
+	private final Queue<AnswerUniqueKey> answerQueue = new ConcurrentLinkedQueue<>();
+	private final Map<AnswerUniqueKey, Answer> queuedAnswers = new ConcurrentHashMap<>();
 	private RoomService roomService;
 	private ContentService contentService;
 	private ContentGroupService contentGroupService;
@@ -111,22 +113,30 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			return;
 		}
 
-		final List<Answer> answers = new ArrayList<>();
-		Answer entry;
-		while ((entry = this.answerQueue.poll()) != null) {
-			answers.add(entry);
+		final Map<AnswerUniqueKey, Answer> answers = new HashMap<>();
+		AnswerUniqueKey key;
+		while ((key = this.answerQueue.poll()) != null) {
+			final Answer answer = queuedAnswers.remove(key);
+			// answer could be null in rare cases where a duplicate key is added
+			// to the queue by another thread between queue polling and the
+			// removal from the map.
+			if (answer != null) {
+				answers.putIfAbsent(key, answer);
+			}
 		}
 		try {
-			for (final Answer e : answers) {
+			for (final Answer e : answers.values()) {
 				this.eventPublisher.publishEvent(new BeforeCreationEvent<>(this, e));
 			}
-			answerRepository.saveAll(answers);
-			for (final Answer e : answers) {
+			answerRepository.saveAll(new ArrayList<>(answers.values()));
+			for (final Answer e : answers.values()) {
 				this.eventPublisher.publishEvent(new AfterCreationEvent<>(this, e));
 			}
-			this.eventPublisher.publishEvent(new BulkChangeEvent<>(this, Answer.class, answers));
+			this.eventPublisher.publishEvent(new BulkChangeEvent<>(this, Answer.class, answers.values()));
 		} catch (final DbAccessException e) {
 			logger.error("Could not bulk save answers from queue.", e);
+		} finally {
+			queuedAnswers.keySet().removeAll(answers.keySet());
 		}
 	}
 
@@ -328,7 +338,10 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@Override
 	public Answer create(final Answer answer) {
 		prepareCreate(answer);
-		answerQueue.offer(answer);
+		final AnswerUniqueKey key = new AnswerUniqueKey(answer.getCreatorId(), answer.getContentId());
+		if (answerQueue.add(key)) {
+			queuedAnswers.put(key, answer);
+		}
 		finalizeCreate(answer);
 
 		return answer;
@@ -425,4 +438,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		private List<String> variants;
 		private int count;
 	}
+
+	private record AnswerUniqueKey(String userId, String contentId) { }
 }
