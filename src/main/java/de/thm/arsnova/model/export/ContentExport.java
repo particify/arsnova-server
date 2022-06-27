@@ -12,6 +12,7 @@ import java.util.stream.IntStream;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.ScaleChoiceContent;
+import de.thm.arsnova.model.WordcloudContent;
 import de.thm.arsnova.model.serialization.View;
 
 @JsonView(View.Public.class)
@@ -61,6 +62,9 @@ public class ContentExport {
 					.mapToObj(i -> this.options.get(i))
 					.collect(Collectors.toList());
 			this.multiple = choiceQuestionContent.isMultiple();
+		} else if (content instanceof WordcloudContent) {
+			final WordcloudContent wordcloudContent = (WordcloudContent) content;
+			this.options = List.of(String.valueOf(wordcloudContent.getMaxAnswers()));
 		}
 	}
 
@@ -78,6 +82,8 @@ public class ContentExport {
 				content = toChoiceContent();
 				format = Content.Format.CHOICE;
 			}
+		} else if (format == Content.Format.WORDCLOUD) {
+			content = toWordcloudContent();
 		} else {
 			content = new Content();
 		}
@@ -150,5 +156,21 @@ public class ContentExport {
 		scaleChoiceContent.setOptionCount(optionCount);
 
 		return scaleChoiceContent;
+	}
+
+	private WordcloudContent toWordcloudContent() {
+		final WordcloudContent wordcloudContent = new WordcloudContent();
+		final int maxAnswers;
+		if (this.getOptions().size() != 1) {
+			throw new InputMismatchException();
+		}
+		try {
+			maxAnswers = Integer.valueOf(this.getOptions().get(0));
+		} catch (final NumberFormatException e) {
+			throw new InputMismatchException();
+		}
+		wordcloudContent.setMaxAnswers(maxAnswers);
+
+		return wordcloudContent;
 	}
 }
