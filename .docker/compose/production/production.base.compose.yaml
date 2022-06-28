@@ -15,3 +15,8 @@ services:
     ports:
       - $PORT:80
       - $HTTPS_PORT:443
+    volumes:
+      - tls_certs:/mnt/tls-certs:ro
+
+volumes:
+  tls_certs:
