@@ -44,8 +44,8 @@ import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.security.User;
+import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
-import de.thm.arsnova.web.exceptions.UnauthorizedException;
 
 /**
  * Performs all content related operations.
@@ -173,15 +173,13 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	protected void prepareUpdate(final Content content) {
-		final User user = userService.getCurrentUser();
 		final Content oldContent = get(content.getId());
 		if (null == oldContent) {
 			throw new NotFoundException();
 		}
 
-		final Room room = roomService.get(content.getRoomId());
-		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
-			throw new UnauthorizedException();
+		if (!content.getRoomId().equals(oldContent.getRoomId())) {
+			throw new BadRequestException();
 		}
 
 		if (content.getFormat() == Content.Format.TEXT) {
