@@ -26,6 +26,8 @@ services:
     environment:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
+      SECURITY_CORSORIGINS_0: http://localhost
+      SECURITY_CORSORIGINS_1: http://localhost:4200
     volumes:
       - ./.git:/workspace/.git
       - ./arsnova-backend:/workspace/arsnova-backend
