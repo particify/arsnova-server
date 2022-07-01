@@ -62,7 +62,9 @@ done <config-list
 case $COMMAND in
   update|u)
     echo Updating Git repository...
-    git submodule update --init --recursive
+    git pull
+    git submodule init
+    git submodule update docker-orchestration
     $0 update-config
     echo Updating base images for Devcontainers...
     docker compose --project-directory `dirname $0` \
