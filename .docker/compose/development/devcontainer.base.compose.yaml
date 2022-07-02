@@ -10,7 +10,7 @@ services:
     build:
       context: arsnova-webclient/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-webclient:master
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEB_TAG
     command: /bin/sh -c "while sleep 1000; do :; done"
     volumes:
       - ./.git:/workspace/.git
@@ -20,7 +20,7 @@ services:
     build:
       context: arsnova-backend/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-backend:master
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-backend:$CORE_TAG
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
@@ -37,7 +37,7 @@ services:
     build:
       context: arsnova-http-gateway/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-http-gateway:master
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-http-gateway:$HTTPGW_TAG
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
@@ -52,7 +52,7 @@ services:
     build:
       context: arsnova-ws-gateway/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-ws-gateway:master
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-ws-gateway:$WSGW_TAG
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
@@ -67,7 +67,7 @@ services:
     build:
       context: arsnova-auth-service/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-auth-service:master
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-auth-service:$AUTH_TAG
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
@@ -86,7 +86,7 @@ services:
     build:
       context: arsnova-comment-service/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-comment-service:master
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-comment-service:$COMMENT_TAG
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
@@ -105,7 +105,7 @@ services:
     build:
       context: arsnova-formatting-service/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/formatting-service:master
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/formatting-service:$FORMATTING_TAG
     environment:
       PORT: 3000
     volumes:
