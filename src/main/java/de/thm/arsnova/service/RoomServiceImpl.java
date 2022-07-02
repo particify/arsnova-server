@@ -226,21 +226,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	/* TODO: move caching to DefaultEntityServiceImpl */
-	//@CachePut(value = "rooms", key = "#room")
-	protected void prepareUpdate(final Room room) {
-		final Room existingRoom = get(room.getId());
-		if (room.getOwnerId() == null) {
-			room.setOwnerId(existingRoom.getOwnerId());
-		}
-		room.setPassword(existingRoom.getPassword());
-
-		/* TODO: only publish event when feedback has changed */
-		/* FIXME: event */
-		// this.publisher.publishEvent(new FeatureChangeEvent(this, room));
-	}
-
-	@Override
 	public String getPassword(final Room room) {
 		return room.getPassword();
 	}
