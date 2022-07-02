@@ -79,7 +79,7 @@ case $COMMAND in
       echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > local.compose.yaml
     fi
     echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .env
-    cat $ENV_FILES devcontainer.env | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
+    cat $ENV_FILES devcontainer.env local.env | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
     echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .compose.yaml
     docker compose --project-directory `dirname $0` \
       $COMPOSE_FILE_ARGS \
