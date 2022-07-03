@@ -317,7 +317,7 @@ class GatewayConfig(
             p
                 .path(
                     "/room/{roomId}/moderator/**",
-                    "/room/{roomId}/transfer**",
+                    "/room/{roomId}/transfer**"
                 )
                 .filters { f ->
                     f.filter(roomShortIdFilter.apply(RoomShortIdFilter.Config()))

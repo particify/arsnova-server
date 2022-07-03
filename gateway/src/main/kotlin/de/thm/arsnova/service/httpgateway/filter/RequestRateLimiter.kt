@@ -90,6 +90,7 @@ class RequestRateLimiter(
         val queryBurstCapacity: Long = httpGatewayProperties.gateway.rateLimit.queryBurstCapacity
         val commandTokensPerTimeframe: Long = httpGatewayProperties.gateway.rateLimit.commandTokensPerTimeframe
         val commandBurstCapacity: Long = httpGatewayProperties.gateway.rateLimit.commandBurstCapacity
+
         // the time window
         val duration: Duration = httpGatewayProperties.gateway.rateLimit.duration
     }
