@@ -12,9 +12,13 @@ import java.util.Optional
 @Repository
 interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     fun findByRoomId(roomId: String): Iterable<RoomAccess>
+
     fun findByRoomIdAndRole(roomId: String, role: String): Iterable<RoomAccess>
+
     fun findByRoomIdAndRoleNot(roomId: String, role: String): Iterable<RoomAccess>
+
     fun findByUserId(userId: String): Iterable<RoomAccess>
+
     @Query(
         """
         UPDATE room_access
@@ -26,15 +30,18 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
         nativeQuery = true
     )
     fun updateLastAccessAndGetByRoomIdAndUserId(roomId: String, userId: String, lastAccess: Date): Optional<RoomAccess>
+
     // This is needed to not have hibernate check if any rows should be deleted
     @Query("DELETE FROM room_access WHERE room_id = :roomId RETURNING *;", nativeQuery = true)
     fun deleteByRoomIdWithoutChecking(@Param("roomId") roomId: String): Iterable<RoomAccess>
+
     // This is needed to not have hibernate check if any rows should be deleted
     @Query("DELETE FROM room_access WHERE room_id = :roomId and user_id = :userId RETURNING *;", nativeQuery = true)
     fun deleteByRoomIdAndUserIdWithoutChecking(
         @Param("roomId") roomId: String,
         @Param("userId") userId: String
     ): Iterable<RoomAccess>
+
     // This sets the role to owner even if the entry was already present
     // It also checks to not override a creator role that's maybe present
     // The two role params are needed because otherwise Hibernate can't find the second usage
@@ -55,6 +62,7 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
         @Param("role") role: String,
         @Param("updateRole") updateRole: String
     ): RoomAccess
+
     // This query should not be needed, but since the PK is composed, hibernate tries to update instead of inserting
     @Query(
         """
@@ -100,6 +108,7 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
         nativeQuery = true
     )
     fun countByLastAccessAfterAndGroupByRoomId(lastAccess: Date): List<Int>
+
     fun countByRoomIdAndRole(roomId: String, role: String): Long
 
     fun countDistinctUserIdByLastAccessAfter(lastAccess: Date): Long
