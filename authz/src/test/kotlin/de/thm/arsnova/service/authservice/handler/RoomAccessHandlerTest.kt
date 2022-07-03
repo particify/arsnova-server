@@ -23,9 +23,15 @@ import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
 class RoomAccessHandlerTest {
-    @Mock private lateinit var rabbitTemplate: RabbitTemplate
-    @Mock private lateinit var roomAccessRepository: RoomAccessRepository
-    @Mock private lateinit var roomAccessSyncTrackerRepository: RoomAccessSyncTrackerRepository
+    @Mock
+    private lateinit var rabbitTemplate: RabbitTemplate
+
+    @Mock
+    private lateinit var roomAccessRepository: RoomAccessRepository
+
+    @Mock
+    private lateinit var roomAccessSyncTrackerRepository: RoomAccessSyncTrackerRepository
+
     private lateinit var roomAccessHandler: RoomAccessHandler
 
     val SOME_ROOM_ID = "23e7c082c533e49963b96d7a0500105f"
