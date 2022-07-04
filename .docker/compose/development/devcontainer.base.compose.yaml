@@ -6,7 +6,7 @@ services:
     ports:
       - 127.0.0.1:${PORT:-8080}:80
   arsnova-web:
-    image: devcontainer-arsnova-webclient
+    image: devcontainer-arsnova-webclient:$WEB_TAG
     build:
       context: arsnova-webclient/.devcontainer
       args:
@@ -16,7 +16,7 @@ services:
       - ./.git:/workspace/.git
       - ./arsnova-webclient:/workspace/arsnova-webclient
   arsnova-backend-core:
-    image: devcontainer-arsnova-backend-core
+    image: devcontainer-arsnova-backend-core:$CORE_TAG
     build:
       context: arsnova-backend/.devcontainer
       args:
@@ -33,7 +33,7 @@ services:
       - ./arsnova-backend:/workspace/arsnova-backend
       - maven-cache:/home/dev/.m2
   arsnova-http-gateway:
-    image: devcontainer-arsnova-http-gateway
+    image: devcontainer-arsnova-http-gateway:$HTTPGW_TAG
     build:
       context: arsnova-http-gateway/.devcontainer
       args:
@@ -48,7 +48,7 @@ services:
       - ./arsnova-http-gateway:/workspace/arsnova-http-gateway
       - maven-cache:/home/dev/.m2
   arsnova-ws-gateway:
-    image: devcontainer-arsnova-ws-gateway
+    image: devcontainer-arsnova-ws-gateway:$WSGW_TAG
     build:
       context: arsnova-ws-gateway/.devcontainer
       args:
@@ -63,7 +63,7 @@ services:
       - ./arsnova-ws-gateway:/workspace/arsnova-ws-gateway
       - maven-cache:/home/dev/.m2
   arsnova-auth-service:
-    image: devcontainer-arsnova-auth-service
+    image: devcontainer-arsnova-auth-service:$AUTH_TAG
     build:
       context: arsnova-auth-service/.devcontainer
       args:
@@ -82,7 +82,7 @@ services:
       - ./arsnova-auth-service:/workspace/arsnova-auth-service
       - maven-cache:/home/dev/.m2
   arsnova-comment-service:
-    image: devcontainer-arsnova-comment-service
+    image: devcontainer-arsnova-comment-service:$COMMENT_TAG
     build:
       context: arsnova-comment-service/.devcontainer
       args:
@@ -101,7 +101,7 @@ services:
       - ./arsnova-comment-service:/workspace/arsnova-comment-service
       - maven-cache:/home/dev/.m2
   arsnova-formatting-service:
-    image: devcontainer-arsnova-formatting-service
+    image: devcontainer-arsnova-formatting-service:$FORMATTING_TAG
     build:
       context: arsnova-formatting-service/.devcontainer
       args:
