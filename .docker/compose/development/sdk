@@ -3,6 +3,49 @@ PATH=$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/cl
 COMMAND=$1
 PROJECT=$2
 
+cd `dirname $0`
+
+source project-mapping-vars.sh
+
+# Load environment variables from file without replacing existing values.
+merge_env() {
+  VAR_FILTER=`cat .env | grep -v ^# | sed -E 's/=.*$//g' | sed -E -z -e "s/\n*$//g" -e "s/\n+/|/g"`
+  CURRENT_ENV=`env | grep -E "$VAR_FILTER"`
+  set -a
+  . ./.env
+  set +a
+  # Restore env (priortize passed env vars over loaded env vars)
+  export $CURRENT_ENV >/dev/null
+}
+
+# Determine the image tags using the following priority:
+# 1. *_TAG environment variables (shell env -> local.env -> *.env)
+# 2. Checked out repository branch name
+# 3. master
+determine_image_tags() {
+  echo Image tags:
+  for project in "${!TAG_VARS[@]}"; do
+    if [ -z "${!TAG_VARS[$project]}" ]; then
+      project_dir=$project
+      if [ -v 'PROJECT_DIRS[$project]' ]; then
+        project_dir=${PROJECT_DIRS[$project]}
+      fi
+      cd "$project_dir"
+      branch=`git rev-parse --abbrev-ref HEAD`
+      if [ "$branch" = HEAD ]; then
+        branch=
+      fi
+      img_tag=`echo $branch | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' -`
+      if [ -z "$img_tag" ]; then
+        img_tag=master
+      fi
+      export ${TAG_VARS[$project]}=$img_tag
+      cd ..
+    fi
+    echo "$project -> ${!TAG_VARS[$project]}"
+  done
+}
+
 if ! command -v git &> /dev/null; then
   echo ERROR: Git is not installed.
   exit 1
@@ -85,6 +128,8 @@ case $COMMAND in
     fi
     echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .env
     cat $ENV_FILES devcontainer.env local.env | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
+    merge_env
+    determine_image_tags
     echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .compose.yaml
     docker compose --project-directory `dirname $0` \
       $COMPOSE_FILE_ARGS \
