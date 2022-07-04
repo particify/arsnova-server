@@ -31,7 +31,11 @@ determine_image_tags() {
         project_dir=${PROJECT_DIRS[$project]}
       fi
       cd "$project_dir"
-      img_tag=`git branch --show-current | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' -`
+      branch=`git rev-parse --abbrev-ref HEAD`
+      if [ "$branch" = HEAD ]; then
+        branch=
+      fi
+      img_tag=`echo $branch | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' -`
       if [ -z "$img_tag" ]; then
         img_tag=master
       fi
