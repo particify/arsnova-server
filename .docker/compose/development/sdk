@@ -46,6 +46,34 @@ determine_image_tags() {
   done
 }
 
+update_config() {
+  echo Updating configuration for Docker Compose...
+  if [ ! -f local.env ]; then
+    echo "# Custom environment configuration overrides" > local.env
+  fi
+  if [ ! -f local.compose.yaml ]; then
+    echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > local.compose.yaml
+  fi
+  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .env
+  cat $ENV_FILES devcontainer.env local.env | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
+  merge_env
+  determine_image_tags
+  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .compose.yaml
+  docker compose --project-directory `dirname $0` \
+    $COMPOSE_FILE_ARGS \
+    -f local.compose.yaml \
+    config >> .compose.yaml
+}
+
+build() {
+  if [ ! -f .compose.yaml ]; then
+    update_config
+  fi
+  echo Building Devcontainers...
+  shift 1
+  docker compose -f .compose.yaml build $@
+}
+
 if ! command -v git &> /dev/null; then
   echo ERROR: Git is not installed.
   exit 1
@@ -111,30 +139,15 @@ case $COMMAND in
       git submodule init
       git submodule update docker-orchestration
     fi
-    $0 update-config
+    update_config
     echo Updating base images for Devcontainers...
     docker compose --project-directory `dirname $0` \
       $BASE_COMPOSE_FILE_ARGS \
       pull $@
-    $0 build $@
+    build $@
     ;;
   update-config)
-    echo Updating configuration for Docker Compose...
-    if [ ! -f local.env ]; then
-      echo "# Custom environment configuration overrides" > local.env
-    fi
-    if [ ! -f local.compose.yaml ]; then
-      echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > local.compose.yaml
-    fi
-    echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .env
-    cat $ENV_FILES devcontainer.env local.env | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
-    merge_env
-    determine_image_tags
-    echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .compose.yaml
-    docker compose --project-directory `dirname $0` \
-      $COMPOSE_FILE_ARGS \
-      -f local.compose.yaml \
-      config >> .compose.yaml
+    update_config
     ;;
   open|o)
     if [ -d "$PROJECT" ]; then
@@ -146,30 +159,25 @@ case $COMMAND in
     ;;
   run|r)
     if [ ! -f .compose.yaml ]; then
-      $0 update-config
+      update_config
     fi
     echo Starting Devcontainers...
     shift 1
     docker compose -f .compose.yaml up $@
     ;;
   build|b)
-    if [ ! -f .compose.yaml ]; then
-      $0 update-config
-    fi
-    echo Building Devcontainers...
-    shift 1
-    docker compose -f .compose.yaml build $@
+    build
     ;;
   logs|l)
     if [ ! -f .compose.yaml ]; then
-      $0 update-config
+      update_config
     fi
     shift 1
     docker compose -f .compose.yaml logs $@
     ;;
   compose|c)
     if [ ! -f .compose.yaml ]; then
-      $0 update-config
+      update_config
     fi
     shift 1
     docker compose -f .compose.yaml $@
