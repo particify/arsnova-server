@@ -17,9 +17,11 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.stereotype.Component
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.onErrorResume
 import reactor.kotlin.core.util.function.component1
 import reactor.kotlin.core.util.function.component2
 import reactor.kotlin.core.util.function.component3
@@ -63,8 +65,12 @@ class AuthFilter(
                         val authorities = pair.second
                         Mono.zip(
                             roomAccessService.getRoomAccess(roomId, userId)
-                                .onErrorResume { exception ->
-                                    logger.warn("Auth service didn't give specific role", exception)
+                                .onErrorResume(WebClientResponseException::class) { e ->
+                                    if (e.statusCode != HttpStatus.NOT_FOUND) {
+                                        logger.error("Unexpected response from auth service")
+                                        throw e
+                                    }
+                                    logger.debug("Auth service did not return a role (user ID: {}, room ID: {})", userId, roomId)
                                     if (!config.requireAuthentication) {
                                         Mono.just(RoomAccess(roomId, userId, "", "NONE", null))
                                     } else if (httpGatewayProperties.gateway.requireMembership && !authorities.contains("ADMIN")) {
