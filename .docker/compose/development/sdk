@@ -158,14 +158,13 @@ case $COMMAND in
     fi
     ;;
   run|r)
-    if [ ! -f .compose.yaml ]; then
-      update_config
-    fi
+    update_config
     echo Starting Devcontainers...
     shift 1
     docker compose -f .compose.yaml up $@
     ;;
   build|b)
+    update_config
     build
     ;;
   logs|l)
