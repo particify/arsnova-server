@@ -101,7 +101,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 		return entityService.get(id);
 	}
 
-	@GetMapping(GET_MULTIPLE_MAPPING)
+	@GetMapping(value = GET_MULTIPLE_MAPPING, params = "ids")
 	public List<E> getMultiple(
 			@RequestParam final Collection<String> ids,
 			@RequestParam(defaultValue = "true") final boolean skipMissing

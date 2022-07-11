@@ -45,12 +45,12 @@ import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.BeforeCreationEvent;
 import de.thm.arsnova.event.RoomHistoryMigrationEvent;
+import de.thm.arsnova.model.Announcement;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.MigrationState;
-import de.thm.arsnova.model.Motd;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.FromV2Migrator;
@@ -481,7 +481,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
 			query.setBookmark(bookmark);
-			final List<Motd> motdsV3 = new ArrayList<>();
+			final List<Announcement> announcementsV3 = new ArrayList<>();
 			final PagedMangoResponse<de.thm.arsnova.model.migration.v2.Motd> response =
 					fromConnector.queryForPage(query, de.thm.arsnova.model.migration.v2.Motd.class);
 			final List<de.thm.arsnova.model.migration.v2.Motd> motdsV2 = response.getEntities();
@@ -503,10 +503,10 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 					}
 					motdV2.setSessionId(room.getId());
 				}
-				motdsV3.add(migrator.migrate(motdV2));
+				announcementsV3.add(migrator.migrate(motdV2));
 			}
 
-			toConnector.executeBulk(motdsV3);
+			toConnector.executeBulk(announcementsV3);
 			state.setState(bookmark);
 		}
 		state.setState(null);

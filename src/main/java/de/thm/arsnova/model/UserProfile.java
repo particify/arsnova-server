@@ -200,6 +200,7 @@ public class UserProfile extends Entity {
 	private Date lastLoginTimestamp;
 	private Account account;
 	private Person person;
+	private Date announcementReadTimestamp;
 	private Set<String> acknowledgedMotds = new HashSet<>();
 
 	public UserProfile() {
@@ -262,6 +263,16 @@ public class UserProfile extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setPerson(final Person person) {
 		this.person = person;
+	}
+
+	@JsonView({View.Persistence.class, View.Owner.class})
+	public Date getAnnouncementReadTimestamp() {
+		return announcementReadTimestamp;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setAnnouncementReadTimestamp(final Date announcementReadTimestamp) {
+		this.announcementReadTimestamp = announcementReadTimestamp;
 	}
 
 	@JsonView({View.Persistence.class, View.Owner.class})

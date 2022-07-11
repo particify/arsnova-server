@@ -351,30 +351,11 @@ public class FromV2Migrator {
 		return migrate(from, null);
 	}
 
-	public de.thm.arsnova.model.Motd migrate(final Motd from) {
-		final de.thm.arsnova.model.Motd to = new de.thm.arsnova.model.Motd();
+	public de.thm.arsnova.model.Announcement migrate(final Motd from) {
+		final de.thm.arsnova.model.Announcement to = new de.thm.arsnova.model.Announcement();
 		copyCommonProperties(from, to);
 		to.setCreationTimestamp(from.getStartdate());
 		to.setUpdateTimestamp(new Date());
-		to.setStartDate(from.getStartdate());
-		to.setEndDate(from.getEnddate());
-		switch (from.getAudience()) {
-			case "all":
-				to.setAudience(de.thm.arsnova.model.Motd.Audience.ALL);
-				break;
-			case "tutors":
-				to.setAudience(de.thm.arsnova.model.Motd.Audience.AUTHORS);
-				break;
-			case "students":
-				to.setAudience(de.thm.arsnova.model.Motd.Audience.PARTICIPANTS);
-				break;
-			case "session":
-				to.setAudience(de.thm.arsnova.model.Motd.Audience.ROOM);
-				break;
-			default:
-				/* TODO: Add log message. */
-				break;
-		}
 		to.setTitle(from.getTitle());
 		to.setBody(from.getText());
 		to.setRoomId(from.getSessionId());
