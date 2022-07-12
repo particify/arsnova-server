@@ -7,6 +7,7 @@ data class Announcement(
     val creationTimestamp: Date,
     val updateTimestamp: Date?,
     val roomId: String,
+    val roomName: String?,
     val creatorId: String,
     val title: String,
     val body: String,

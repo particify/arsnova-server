@@ -24,6 +24,6 @@ class UserController(
     @ResponseBody
     fun getAnnouncements(@PathVariable userId: String): Flux<Announcement> {
         logger.trace("Getting announcements")
-        return announcementService.getByUserId(userId)
+        return announcementService.getByUserIdWithRoomName(userId)
     }
 }
