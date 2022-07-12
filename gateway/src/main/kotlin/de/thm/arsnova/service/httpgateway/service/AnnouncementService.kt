@@ -3,15 +3,15 @@ package de.thm.arsnova.service.httpgateway.service
 import de.thm.arsnova.service.httpgateway.config.HttpGatewayProperties
 import de.thm.arsnova.service.httpgateway.exception.ForbiddenException
 import de.thm.arsnova.service.httpgateway.model.Announcement
+import de.thm.arsnova.service.httpgateway.model.AnnouncementState
 import de.thm.arsnova.service.httpgateway.model.Room
+import de.thm.arsnova.service.httpgateway.model.User
 import de.thm.arsnova.service.httpgateway.security.AuthProcessor
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.util.function.component1
-import reactor.kotlin.core.util.function.component2
 import java.util.Optional
 
 @Service
@@ -61,6 +61,21 @@ class AnnouncementService(
                         it.copy(roomName = rooms[it.roomId]?.name)
                     }
                 }
+        }
+    }
+
+    fun getStateByUser(user: User): Mono<AnnouncementState> {
+        return getByUserId(user.id).collectList().map { announcements ->
+            AnnouncementState(
+                announcements.count(),
+                announcements
+                    .filter { it.creatorId != user.id }
+                    .count { a ->
+                        user.announcementReadTimestamp == null ||
+                            (a.updateTimestamp ?: a.creationTimestamp) > user.announcementReadTimestamp
+                    },
+                user.announcementReadTimestamp
+            )
         }
     }
 }
