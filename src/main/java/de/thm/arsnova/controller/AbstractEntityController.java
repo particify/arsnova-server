@@ -21,6 +21,7 @@ package de.thm.arsnova.controller;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,6 +52,7 @@ import org.springframework.web.util.UriUtils;
 
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.FindQuery;
+import de.thm.arsnova.model.RoomIdAware;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.EntityService;
 import de.thm.arsnova.service.FindQueryService;
@@ -146,8 +148,13 @@ public abstract class AbstractEntityController<E extends Entity> {
 	@ResponseStatus(HttpStatus.CREATED)
 	public E post(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
 		entityService.create(entity);
+		final Map<String, String> params = new HashMap<>();
+		params.put("id", entity.getId());
+		if (entity instanceof RoomIdAware) {
+			params.put("roomId", ((RoomIdAware) entity).getRoomId());
+		}
 		final String uri = UriComponentsBuilder.fromPath(getMapping()).path(GET_MAPPING)
-				.buildAndExpand(entity.getId()).toUriString();
+				.buildAndExpand(params).toUriString();
 		httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
 		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
 		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
