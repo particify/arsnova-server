@@ -78,9 +78,37 @@ app.post('/render', (req, res) => {
 
     return;
   }
-  let html = req.body.text;
+  let text = req.body.text;
   const options = req.body.options;
 
+  text = render(text, options);
+
+  res.send({ html: text });
+});
+
+app.post('/render-multiple', (req, res) => {
+  if (!req.body || !(req.body instanceof Array)) {
+    res.status(400).send({ error: 'Value of type Array expected.' });
+
+    return;
+  }
+  let error;
+  const texts = req.body.map(item => {
+    if (!item.text) {
+      error = true;
+      return { error: 'Value for \'text\' is missing.' };
+    }
+    return { html: render(item.text, item.options) };
+  });
+
+  res.status(error ? 400 : 200).send(texts);
+});
+
+app.listen(port, () => {
+  console.log(`${appName} listening at port ${port}.`);
+});
+
+function render(text, options) {
   if (options) {
     const mdFeatureset = (options.markdownFeatureset || defaultMdFeatureset).toLowerCase();
     let mdOpts = defaultMdOpts;
@@ -93,15 +121,11 @@ app.post('/render', (req, res) => {
     mdOpts = Object.assign(
       defaultMdOpts,
       { highlight: (options.syntaxHighlighting ?? true) ? highlight : () => '' });
-    html = configureMarkdown(markdown, mdOpts, mdFeatures).render(html);
+    text = configureMarkdown(markdown, mdOpts, mdFeatures).render(text);
   }
 
-  res.send({ html: html });
-});
-
-app.listen(port, () => {
-  console.log(`${appName} listening at port ${port}.`);
-});
+  return text;
+}
 
 function configureMarkdown(renderer, options, features) {
   return renderer.configure('zero').set(options).enable(features);
