@@ -23,25 +23,16 @@ import java.util.Date;
 import java.util.Objects;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
 
-public class Motd extends Entity implements RoomIdAware {
-	public enum Audience {
-		ALL,
-		AUTHENTICATED,
-		AUTHORS,
-		PARTICIPANTS,
-		ROOM
-	}
-
+public class Announcement extends Entity implements RoomIdAware {
 	@NotEmpty
 	private String roomId;
 
-	private Date startDate;
-	private Date endDate;
+	@NotEmpty
+	private String creatorId;
 
 	@NotBlank
 	private String title;
@@ -50,9 +41,6 @@ public class Motd extends Entity implements RoomIdAware {
 	private String body;
 
 	private String renderedBody;
-
-	@NotNull
-	private Audience audience;
 
 	{
 		final TextRenderingOptions options = new TextRenderingOptions();
@@ -64,15 +52,15 @@ public class Motd extends Entity implements RoomIdAware {
 	}
 
 	@Override
-	@JsonView(View.Persistence.class)
-	public Date getUpdateTimestamp() {
-		return updateTimestamp;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public Date getCreationTimestamp() {
+		return creationTimestamp;
 	}
 
 	@Override
-	@JsonView(View.Persistence.class)
-	public void setUpdateTimestamp(final Date updateTimestamp) {
-		this.updateTimestamp = updateTimestamp;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public Date getUpdateTimestamp() {
+		return updateTimestamp;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -86,23 +74,13 @@ public class Motd extends Entity implements RoomIdAware {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public Date getStartDate() {
-		return startDate;
+	public String getCreatorId() {
+		return creatorId;
 	}
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setStartDate(final Date startDate) {
-		this.startDate = startDate;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Date getEndDate() {
-		return endDate;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setEndDate(final Date endDate) {
-		this.endDate = endDate;
+	@JsonView(View.Persistence.class)
+	public void setCreatorId(final String creatorId) {
+		this.creatorId = creatorId;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -134,21 +112,11 @@ public class Motd extends Entity implements RoomIdAware {
 		this.renderedBody = renderedBody;
 	}
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Audience getAudience() {
-		return audience;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAudience(final Audience audience) {
-		this.audience = audience;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>
-	 * All fields of <tt>Motd</tt> are included in equality checks.
+	 * All fields of <tt>Announcement</tt> are included in equality checks.
 	 * </p>
 	 */
 	@Override
@@ -159,24 +127,18 @@ public class Motd extends Entity implements RoomIdAware {
 		if (!super.equals(o)) {
 			return false;
 		}
-		final Motd motd = (Motd) o;
+		final Announcement announcement = (Announcement) o;
 
-		return Objects.equals(roomId, motd.roomId)
-				&& Objects.equals(startDate, motd.startDate)
-				&& Objects.equals(endDate, motd.endDate)
-				&& Objects.equals(title, motd.title)
-				&& Objects.equals(body, motd.body)
-				&& audience == motd.audience;
+		return Objects.equals(roomId, announcement.roomId)
+				&& Objects.equals(title, announcement.title)
+				&& Objects.equals(body, announcement.body);
 	}
 
 	@Override
 	protected ToStringCreator buildToString() {
 		return super.buildToString()
 				.append("roomId", roomId)
-				.append("startDate", startDate)
-				.append("endDate", endDate)
 				.append("title", title)
-				.append("body", body)
-				.append("audience", audience);
+				.append("body", body);
 	}
 }

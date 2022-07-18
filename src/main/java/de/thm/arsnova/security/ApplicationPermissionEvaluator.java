@@ -31,10 +31,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import de.thm.arsnova.model.Announcement;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.ContentGroup;
-import de.thm.arsnova.model.Motd;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.service.AnswerService;
@@ -111,9 +111,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				|| (targetDomainObject instanceof Answer
 				&& hasAnswerPermission(authentication,
 				((Answer) targetDomainObject), permission.toString()))
-				|| (targetDomainObject instanceof Motd
-				&& hasMotdPermission(authentication,
-				((Motd) targetDomainObject), permission.toString()));
+				|| (targetDomainObject instanceof Announcement
+				&& hasAnnouncementPermission(authentication,
+				((Announcement) targetDomainObject), permission.toString()));
 	}
 
 	@Override
@@ -299,30 +299,26 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		}
 	}
 
-	private boolean hasMotdPermission(
+	private boolean hasAnnouncementPermission(
 			final Authentication auth,
-			final Motd targetMotd,
+			final Announcement targetAnnouncement,
 			final String permission) {
 		final Room room;
 		switch (permission) {
 			case CREATE_PERMISSION:
 			case UPDATE_PERMISSION:
 			case DELETE_PERMISSION:
-				if (getUserId(auth).isEmpty() || targetMotd.getRoomId() == null
-						|| targetMotd.getAudience() != Motd.Audience.ROOM) {
+				if (getUserId(auth).isEmpty() || targetAnnouncement.getRoomId() == null) {
 					return false;
 				}
-				room = roomService.get(targetMotd.getRoomId());
+				room = roomService.get(targetAnnouncement.getRoomId());
 				if (room == null) {
 					return false;
 				}
 
 				return hasAuthenticationRoomRole(auth, room, RoomRole.EDITING_MODERATOR);
 			case READ_PERMISSION:
-				if (targetMotd.getAudience() != Motd.Audience.ROOM) {
-					return true;
-				}
-				room = roomService.get(targetMotd.getRoomId());
+				room = roomService.get(targetAnnouncement.getRoomId());
 
 				return room != null && (!room.isClosed() || hasAuthenticationRoomModeratingRole(auth, room));
 			default:
