@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 import javax.validation.constraints.NotBlank;
 import org.springframework.core.style.ToStringCreator;
 
@@ -91,6 +92,19 @@ public class ChoiceQuestionContent extends Content {
 	private List<AnswerOption> options = new ArrayList<>();
 	private List<Integer> correctOptionIndexes = new ArrayList<>();
 	private boolean multiple;
+
+	{
+		final TextRenderingOptions optionRenderingOptions = new TextRenderingOptions();
+		optionRenderingOptions.setMarkdownEnabled(false);
+		this.addListRenderingMapping(
+				() -> options.stream().map(o -> o.label).toList(),
+				renderedLabels -> {
+					IntStream.range(0, options.size()).forEach(i -> {
+						options.get(i).renderedLabel = renderedLabels.get(i);
+					});
+				},
+				optionRenderingOptions);
+	}
 
 	public ChoiceQuestionContent() {
 

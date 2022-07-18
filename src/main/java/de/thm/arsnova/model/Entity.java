@@ -41,7 +41,7 @@ public abstract class Entity {
 	protected Date creationTimestamp;
 	protected Date updateTimestamp;
 	private boolean internal;
-	private List<EntityRenderingMapping> renderingMapping;
+	private List<EntityRenderingMapping<?>> renderingMapping;
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getId() {
@@ -98,7 +98,7 @@ public abstract class Entity {
 	}
 
 	@JsonIgnore
-	public List<EntityRenderingMapping> getRenderingMapping() {
+	public List<EntityRenderingMapping<?>> getRenderingMapping() {
 		if (this.renderingMapping == null) {
 			this.renderingMapping = new ArrayList<>();
 		}
@@ -110,7 +110,19 @@ public abstract class Entity {
 			final Supplier<String> rawValueSupplier,
 			final Consumer<String> renderedValueConsumer,
 			final TextRenderingOptions textRenderingOptions) {
-		final EntityRenderingMapping mapping = new EntityRenderingMapping(
+		final StringEntityRenderingMapping mapping = new StringEntityRenderingMapping(
+				rawValueSupplier,
+				renderedValueConsumer,
+				textRenderingOptions
+		);
+		this.getRenderingMapping().add(mapping);
+	}
+
+	public void addListRenderingMapping(
+			final Supplier<List<String>> rawValueSupplier,
+			final Consumer<List<String>> renderedValueConsumer,
+			final TextRenderingOptions textRenderingOptions) {
+		final ListEntityRenderingMapping mapping = new ListEntityRenderingMapping(
 				rawValueSupplier,
 				renderedValueConsumer,
 				textRenderingOptions

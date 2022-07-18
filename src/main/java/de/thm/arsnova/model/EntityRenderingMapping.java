@@ -4,35 +4,35 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.springframework.core.style.ToStringCreator;
 
-public class EntityRenderingMapping {
-	private Supplier<String> rawValueSupplier;
-	private Consumer<String> renderedValueConsumer;
+public abstract class EntityRenderingMapping<T> {
+	private Supplier<T> rawValueSupplier;
+	private Consumer<T> renderedValueConsumer;
 	private TextRenderingOptions options;
 
 	public EntityRenderingMapping() {
 	}
 
 	public EntityRenderingMapping(
-			final Supplier<String> rawValueSupplier,
-			final Consumer<String> renderedValueConsumer, final TextRenderingOptions options) {
+			final Supplier<T> rawValueSupplier,
+			final Consumer<T> renderedValueConsumer, final TextRenderingOptions options) {
 		this.rawValueSupplier = rawValueSupplier;
 		this.renderedValueConsumer = renderedValueConsumer;
 		this.options = options;
 	}
 
-	public Supplier<String> getRawValueSupplier() {
+	public Supplier<T> getRawValueSupplier() {
 		return rawValueSupplier;
 	}
 
-	public void setRawValueSupplier(final Supplier<String> rawValueSupplier) {
+	public void setRawValueSupplier(final Supplier<T> rawValueSupplier) {
 		this.rawValueSupplier = rawValueSupplier;
 	}
 
-	public Consumer<String> getRenderedValueConsumer() {
+	public Consumer<T> getRenderedValueConsumer() {
 		return renderedValueConsumer;
 	}
 
-	public void setRenderedValueConsumer(final Consumer<String> renderedValueConsumer) {
+	public void setRenderedValueConsumer(final Consumer<T> renderedValueConsumer) {
 		this.renderedValueConsumer = renderedValueConsumer;
 	}
 
