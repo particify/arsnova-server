@@ -109,7 +109,7 @@ class GatewayConfig(
 
         routes.route("formatting-service") { p ->
             p
-                .path("$UTIL_PREFIX/formatting/render")
+                .path("$UTIL_PREFIX/formatting/render*")
                 .filters { f ->
                     f.rewritePath("^$UTIL_PREFIX/formatting", "")
                     f.requestRateLimiter { r ->
