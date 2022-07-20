@@ -10,9 +10,9 @@ var designDoc = {
 			},
 			"reduce": "_count"
 		},
-		"by_contentid": {
+		"by_contentid_nothidden": {
 			"map": function (doc) {
-				if (doc.type === "Answer") {
+				if (doc.type === "Answer" && !doc.hidden) {
 					emit(doc.contentId, {_rev: doc._rev});
 				}
 			},

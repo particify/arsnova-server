@@ -32,6 +32,7 @@ public class TextAnswer extends Answer {
 	private String body;
 
 	private boolean read;
+	private boolean hidden;
 
 	public TextAnswer() {
 
@@ -75,6 +76,17 @@ public class TextAnswer extends Answer {
 		this.read = read;
 	}
 
+
+	@JsonView(View.Persistence.class)
+	public boolean isHidden() {
+		return hidden;
+	}
+
+	@JsonView(View.Persistence.class)
+	public void setHidden(final boolean hidden) {
+		this.hidden = hidden;
+	}
+
 	@Override
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Date getCreationTimestamp() {
@@ -91,6 +103,7 @@ public class TextAnswer extends Answer {
 		return super.buildToString()
 				.append("subject", subject)
 				.append("body", body)
-				.append("read", read);
+				.append("read", read)
+				.append("hidden", hidden);
 	}
 }

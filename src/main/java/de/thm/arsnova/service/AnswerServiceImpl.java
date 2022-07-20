@@ -58,6 +58,7 @@ import de.thm.arsnova.model.GridImageContent;
 import de.thm.arsnova.model.MultipleTextsAnswer;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.ScaleChoiceContent;
+import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.model.WordcloudContent;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.security.User;
@@ -295,7 +296,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	}
 
 	@Override
-	public List<String> getAnswerIdsByContentId(final String contentId) {
+	public List<String> getAnswerIdsByContentIdNotHidden(final String contentId) {
 		return answerRepository.findIdsByContentId(contentId);
 	}
 
@@ -432,6 +433,12 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		final Iterable<Answer> answers = answerRepository.findStubsByContentId(event.getEntity().getId());
 		answers.forEach(a -> a.setRoomId(event.getEntity().getRoomId()));
 		delete(answers);
+	}
+
+	@Override
+	public void hideTextAnswer(final TextAnswer answer, final boolean hidden) {
+		answer.setHidden(hidden);
+		update(answer);
 	}
 
 	private static class TextStatEntry {

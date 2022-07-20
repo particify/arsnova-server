@@ -23,6 +23,7 @@ import java.util.List;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.AnswerStatisticsUserSummary;
+import de.thm.arsnova.model.TextAnswer;
 
 public interface AnswerService extends EntityService<Answer> {
 	Answer getMyAnswer(String contentId);
@@ -35,7 +36,7 @@ public interface AnswerService extends EntityService<Answer> {
 
 	AnswerStatisticsUserSummary getStatisticsByUserIdAndContentIds(String userId, List<String> contentIds);
 
-	List<String> getAnswerIdsByContentId(String contentId);
+	List<String> getAnswerIdsByContentIdNotHidden(String contentId);
 
 	List<String> getAnswerIdsByCreatorIdRoomId(String creatorId, String roomId);
 
@@ -46,4 +47,6 @@ public interface AnswerService extends EntityService<Answer> {
 	void deleteAnswers(String contentId);
 
 	Answer create(Answer answer);
+
+	void hideTextAnswer(TextAnswer answer, boolean hidden);
 }

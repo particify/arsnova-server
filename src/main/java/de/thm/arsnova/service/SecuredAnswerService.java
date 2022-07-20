@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.AnswerStatisticsUserSummary;
+import de.thm.arsnova.model.TextAnswer;
 
 @Service
 public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answer>
@@ -51,8 +52,8 @@ public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answe
 
 	@Override
 	@PreAuthorize("hasPermission(#contentId, 'content', 'read')")
-	public List<String> getAnswerIdsByContentId(final String contentId) {
-		return answerService.getAnswerIdsByContentId(contentId);
+	public List<String> getAnswerIdsByContentIdNotHidden(final String contentId) {
+		return answerService.getAnswerIdsByContentIdNotHidden(contentId);
 	}
 
 	@Override
@@ -87,5 +88,11 @@ public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answe
 	@PreAuthorize("hasPermission(#answer, 'create')")
 	public Answer create(final Answer answer) {
 		return answerService.create(answer);
+	}
+
+	@Override
+	@PreAuthorize("hasPermission(#answer.roomId, 'room', 'owner')")
+	public void hideTextAnswer(final TextAnswer answer, final boolean hidden) {
+		answerService.hideTextAnswer(answer, hidden);
 	}
 }
