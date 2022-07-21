@@ -19,15 +19,20 @@
 package de.thm.arsnova.controller;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.model.Answer;
+import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.service.AnswerService;
+import de.thm.arsnova.web.exceptions.BadRequestException;
 
 @RestController
 @EntityRequestMapping(AnswerController.REQUEST_MAPPING)
 public class AnswerController extends AbstractEntityController<Answer> {
 	protected static final String REQUEST_MAPPING = "/answer";
+	private static final String HIDE_MAPPING = DEFAULT_ID_MAPPING + "/hide";
 
 	private AnswerService answerService;
 
@@ -40,5 +45,15 @@ public class AnswerController extends AbstractEntityController<Answer> {
 	@Override
 	protected String getMapping() {
 		return REQUEST_MAPPING;
+	}
+
+	@PostMapping(HIDE_MAPPING)
+	public void hide(@PathVariable final String id) {
+		final Answer answer = answerService.get(id);
+		if (!(answer instanceof TextAnswer)) {
+			throw new BadRequestException("Only text answers can be hidden.");
+		}
+		final TextAnswer textAnswer = (TextAnswer) answer;
+		answerService.hideTextAnswer(textAnswer, true);
 	}
 }

@@ -29,7 +29,7 @@ public class AnswerFindQueryService implements FindQueryService<Answer> {
 				ids.add(answer.getId());
 			}
 		} else if (properties.getContentId() != null) {
-			ids.addAll(answerService.getAnswerIdsByContentId(properties.getContentId()));
+			ids.addAll(answerService.getAnswerIdsByContentIdNotHidden(properties.getContentId()));
 		} else if (properties.getCreatorId() != null) {
 			if (findQuery.getExternalFilters().get("contentIds") instanceof List) {
 				ids.addAll(answerService.getAnswerIdsByCreatorIdContentIdsRound(

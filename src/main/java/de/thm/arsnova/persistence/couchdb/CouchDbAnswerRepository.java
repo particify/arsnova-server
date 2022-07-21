@@ -56,12 +56,12 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 
 	@Override
 	public Iterable<Answer> findStubsByContentId(final String contentId) {
-		return createEntityStubs(db.queryView(createQuery("by_contentid").reduce(false).key(contentId)));
+		return createEntityStubs(db.queryView(createQuery("by_contentid_nothidden").reduce(false).key(contentId)));
 	}
 
 	@Override
 	public List<String> findIdsByContentId(final String contentId) {
-		final ViewResult result = db.queryView(createQuery("by_contentid").reduce(false).key(contentId));
+		final ViewResult result = db.queryView(createQuery("by_contentid_nothidden").reduce(false).key(contentId));
 
 		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
 	}

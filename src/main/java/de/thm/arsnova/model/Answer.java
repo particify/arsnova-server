@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 import java.util.Objects;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.FormatAnswerTypeIdResolver;
@@ -62,7 +62,7 @@ public class Answer extends Entity implements RoomIdAware {
 	@NotNull
 	private Content.Format format;
 
-	@Positive
+	@PositiveOrZero
 	private int round = 1;
 
 	@JsonView({View.Persistence.class, View.Public.class})
