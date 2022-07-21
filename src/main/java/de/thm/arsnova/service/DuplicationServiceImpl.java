@@ -45,8 +45,8 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
 	}
 
 	@Override
-	public Room duplicateRoomCascading(final Room room, final boolean temporary) {
-		final Room roomCopy = duplicateRoom(room, temporary);
+	public Room duplicateRoomCascading(final Room room, final boolean temporary, final String newName) {
+		final Room roomCopy = duplicateRoom(room, temporary, newName);
 		contentGroupService.getByRoomId(room.getRoomId()).forEach(cg -> duplicateContentGroup(cg, roomCopy));
 		applicationEventPublisher.publishEvent(new RoomDuplicationEvent(this, room, roomCopy));
 		return roomCopy;
@@ -67,7 +67,7 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
 		return contentCopy;
 	}
 
-	private Room duplicateRoom(final Room room, final boolean temporary) {
+	private Room duplicateRoom(final Room room, final boolean temporary, final String newName) {
 		final Room.ImportMetadata importMetadata = new Room.ImportMetadata();
 		importMetadata.setSource("DUPLICATION");
 		importMetadata.setTimestamp(new Date());
@@ -79,6 +79,9 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
 					LocalDateTime.now().plus(TEMPORARY_DURATION)
 							.atZone(ZoneId.systemDefault()).toInstant());
 			roomCopy.setScheduledDeletion(scheduledDate);
+		}
+		if (!newName.isEmpty()) {
+			roomCopy.setName(newName);
 		}
 
 		return roomService.create(roomCopy);

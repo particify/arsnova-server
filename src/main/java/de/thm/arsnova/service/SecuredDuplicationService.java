@@ -16,8 +16,8 @@ public class SecuredDuplicationService implements DuplicationService {
 
 	@Override
 	@PreAuthorize("hasPermission(#room, 'duplicate')")
-	public Room duplicateRoomCascading(final Room room, final boolean temporary) {
-		return duplicationService.duplicateRoomCascading(room, temporary);
+	public Room duplicateRoomCascading(final Room room, final boolean temporary, final String newName) {
+		return duplicationService.duplicateRoomCascading(room, temporary, newName);
 	}
 
 	@Override
