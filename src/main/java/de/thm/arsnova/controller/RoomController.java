@@ -144,12 +144,13 @@ public class RoomController extends AbstractEntityController<Room> {
 	@PostMapping(DUPLICATE_MAPPING)
 	public Room duplicateRoom(
 			@PathVariable final String id,
-			@RequestParam(defaultValue = "false") final boolean temporary) {
+			@RequestParam(defaultValue = "false") final boolean temporary,
+			@RequestParam(defaultValue = "") final String name) {
 		final Room room = roomService.get(id);
 		if (room == null) {
 			throw new NotFoundException();
 		}
-		return duplicationService.duplicateRoomCascading(room, temporary);
+		return duplicationService.duplicateRoomCascading(room, temporary, name);
 	}
 
 	@PostMapping(GENERATE_RANDOM_DATA_MAPPING)
