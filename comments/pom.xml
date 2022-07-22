@@ -10,7 +10,7 @@
 
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>
-		<spring-boot-version>2.7.1</spring-boot-version>
+		<spring-boot-version>2.7.2</spring-boot-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<io.netty-version>4.1.79.Final</io.netty-version>
 		<docker.registry>local-dev</docker.registry>
