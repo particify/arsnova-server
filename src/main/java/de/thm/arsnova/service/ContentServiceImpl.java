@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
+import de.thm.arsnova.event.AfterDeletionEvent;
 import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
@@ -261,5 +263,16 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public void handleRoomDeletion(final BeforeDeletionEvent<Room> event) {
 		final Iterable<Content> contents = contentRepository.findStubsByRoomId(event.getEntity().getId());
 		delete(contents);
+	}
+
+	@EventListener
+	public void handleContentGroupDeletion(final AfterDeletionEvent<ContentGroup> event) {
+		// Delete contents which were part of the deleted group and are not in
+		// any other group
+		final Set<String> idsWithGroup = contentGroupService.getByRoomId(event.getEntity().getRoomId()).stream()
+				.flatMap(cg -> cg.getContentIds().stream()).collect(Collectors.toSet());
+		final List<String> idsForDeletion = event.getEntity().getContentIds().stream()
+				.filter(id -> !idsWithGroup.contains(id)).toList();
+		delete(get(idsForDeletion));
 	}
 }
