@@ -256,6 +256,12 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		if (content == null) {
 			throw new NotFoundException();
 		}
+		final Set<String> bannedKeywords;
+		if (content instanceof WordcloudContent) {
+			bannedKeywords = ((WordcloudContent) content).getBannedKeywords();
+		} else {
+			bannedKeywords = Collections.emptySet();
+		}
 		final List<MultipleTextsAnswer> answers = answerRepository.findByContentIdRoundForText(contentId, round);
 		/* Flatten lists of individual answers to a combined map of texts with
 		 * count */
@@ -271,9 +277,9 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		/* Group by text similarity and then choose the most common variant as
 		 * key and calculate the new count */
 		final Map<String, Integer> countsBySimilarity = textCounts.entrySet().stream()
-				.collect(Collectors.groupingBy(e ->
-						specialCharPattern.matcher(e.getKey().toLowerCase()).replaceAll("")))
+				.collect(Collectors.groupingBy(e -> WordcloudContent.normalizeText(e.getKey())))
 				.entrySet().stream()
+				.filter(entry -> !bannedKeywords.contains(entry.getKey()))
 				.collect(Collectors.toMap(
 						/* Select most common variant as key */
 						entry -> entry.getValue().stream()

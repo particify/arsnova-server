@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.WordcloudContent;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.AnswerService;
 import de.thm.arsnova.service.ContentService;
@@ -54,6 +55,7 @@ public class ContentController extends AbstractEntityController<Content> {
 	private static final String DUPLICATE_MAPPING = DEFAULT_ID_MAPPING + "/duplicate";
 	private static final String CONTENT_COUNT_MAPPING = NO_ID_MAPPING + "/count";
 	private static final String EXPORT_MAPPING = NO_ID_MAPPING + "/export";
+	private static final String BANNED_KEYWORDS_MAPPING = DEFAULT_ID_MAPPING + "/banned-keywords";
 
 	private ContentService contentService;
 	private AnswerService answerService;
@@ -126,6 +128,30 @@ public class ContentController extends AbstractEntityController<Content> {
 		}
 	}
 
+	@PostMapping(BANNED_KEYWORDS_MAPPING)
+	public void addToBannedKeywords(
+			@PathVariable final String id,
+			@RequestBody final BannedKeywordRequestEntity bannedKeywordEntity) {
+		final Content content = contentService.get(id);
+		if (!(content instanceof WordcloudContent)) {
+			throw new BadRequestException("Only wordcloud contents are supported.");
+		}
+		final WordcloudContent wordcloudContent = (WordcloudContent) content;
+		wordcloudContent.addBannedKeyword(bannedKeywordEntity.keyword);
+		contentService.update(wordcloudContent);
+	}
+
+	@DeleteMapping(BANNED_KEYWORDS_MAPPING)
+	public void clearBannedKeywords(@PathVariable final String id) {
+		final Content content = contentService.get(id);
+		if (!(content instanceof WordcloudContent)) {
+			throw new BadRequestException("Only wordcloud contents are supported.");
+		}
+		final WordcloudContent wordcloudContent = (WordcloudContent) content;
+		wordcloudContent.getBannedKeywords().clear();
+		contentService.update(wordcloudContent);
+	}
+
 	@JsonView(View.Public.class)
 	private static class ExportRequestEntity {
 		private FileType fileType;
@@ -157,4 +183,6 @@ public class ContentController extends AbstractEntityController<Content> {
 			this.contentGroupId = contentGroupId;
 		}
 	}
+
+	private record BannedKeywordRequestEntity(String keyword) { }
 }
