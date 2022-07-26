@@ -29,23 +29,14 @@ import java.util.stream.Collectors;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.MultipleTextsAnswer;
 import de.thm.arsnova.persistence.AnswerRepository;
-import de.thm.arsnova.persistence.LogEntryRepository;
 
 public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 		implements AnswerRepository {
-	private static final Logger logger = LoggerFactory.getLogger(CouchDbAnswerRepository.class);
-
-	@Autowired
-	private LogEntryRepository dbLogger;
-
 	public CouchDbAnswerRepository(final CouchDbConnector db, final boolean createIfNotExists) {
 		super(Answer.class, db, "by_id", createIfNotExists);
 	}

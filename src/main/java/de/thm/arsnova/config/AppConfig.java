@@ -38,7 +38,6 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -91,9 +90,6 @@ public class AppConfig implements WebMvcConfigurer {
 	public static final String LMS_CONNECTOR_BEAN_NAME = "lmsConnectorClient";
 
 	private static final Logger logger = LoggerFactory.getLogger(AppConfig.class);
-
-	@Autowired
-	private Environment env;
 
 	@Autowired
 	private SystemProperties systemProperties;

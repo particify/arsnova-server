@@ -44,13 +44,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
@@ -63,12 +61,11 @@ import de.thm.arsnova.service.StatusService;
 
 @Component
 @Profile("!test")
-public class CouchDbInitializer implements ApplicationEventPublisherAware, ResourceLoaderAware {
+public class CouchDbInitializer implements ApplicationEventPublisherAware {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbInitializer.class);
 	private final List<Map<String, Object>> docs = new ArrayList<>();
 
 	private ApplicationEventPublisher applicationEventPublisher;
-	private ResourceLoader resourceLoader;
 	private MigrationExecutor migrationExecutor;
 	private CouchDbConnector connector;
 	private ObjectMapper objectMapper;
@@ -215,11 +212,6 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware, Resou
 			logger.error("Database initialization failed.", e);
 			statusService.putMaintenanceReason(this.getClass(), "Invalid database state");
 		}
-	}
-
-	@Override
-	public void setResourceLoader(final ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
 	}
 
 	@Autowired

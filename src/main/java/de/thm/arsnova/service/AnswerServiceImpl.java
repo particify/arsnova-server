@@ -80,7 +80,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	private final Map<AnswerUniqueKey, Answer> queuedAnswers = new ConcurrentHashMap<>();
 	private RoomService roomService;
 	private ContentService contentService;
-	private ContentGroupService contentGroupService;
 	private AnswerRepository answerRepository;
 	private UserService userService;
 
@@ -100,11 +99,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@Autowired
 	public void setContentService(final ContentService contentService) {
 		this.contentService = contentService;
-	}
-
-	@Autowired
-	public void setContentGroupService(final ContentGroupService contentGroupService) {
-		this.contentGroupService = contentGroupService;
 	}
 
 	@Scheduled(fixedDelay = 5000)
@@ -145,7 +139,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	public void deleteAnswers(final String contentId) {
 		final Content content = contentService.get(contentId);
 		content.resetState();
-		/* FIXME: cancel timer */
 		contentService.update(content);
 		final Iterable<Answer> answers = answerRepository.findStubsByContentId(content.getId());
 		answers.forEach(a -> a.setRoomId(content.getRoomId()));
@@ -379,24 +372,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		}
 		answer.setRoomId(content.getRoomId());
 
-		/* FIXME: migrate
-		answer.setQuestionValue(content.calculateValue(answer));
-		*/
-
 		if (content.getFormat() == Content.Format.TEXT) {
 			answer.setRound(0);
-			/* FIXME: migrate
-			imageUtils.generateThumbnailImage(answer);
-			if (content.isFixedAnswer() && content.getBody() != null) {
-				answer.setAnswerTextRaw(answer.getAnswerText());
-
-				if (content.isStrictMode()) {
-					content.checkTextStrictOptions(answer);
-				}
-				answer.setQuestionValue(content.evaluateCorrectAnswerFixedText(answer.getAnswerTextRaw()));
-				answer.setSuccessfulFreeTextAnswer(content.isSuccessfulFreeTextAnswer(answer.getAnswerTextRaw()));
-			}
-			*/
 		} else {
 			if (content.getFormat() == Content.Format.WORDCLOUD) {
 				final MultipleTextsAnswer multipleTextsAnswer = (MultipleTextsAnswer) answer;
@@ -422,12 +399,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		}
 
 		final Content content = contentService.get(answer.getContentId());
-		/* FIXME: migrate
-		if (content.getFormat() == Content.Format.TEXT) {
-			imageUtils.generateThumbnailImage(realAnswer);
-			content.checkTextStrictOptions(realAnswer);
-		}
-		*/
 		final Room room = roomService.get(content.getRoomId());
 		answer.setCreatorId(user.getId());
 		answer.setContentId(content.getId());

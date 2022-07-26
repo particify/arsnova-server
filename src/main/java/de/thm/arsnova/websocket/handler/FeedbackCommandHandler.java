@@ -1,9 +1,6 @@
 package de.thm.arsnova.websocket.handler;
 
-import net.spy.memcached.compat.log.Logger;
-import net.spy.memcached.compat.log.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.event.EventListener;
@@ -32,13 +29,10 @@ import de.thm.arsnova.websocket.message.ResetFeedback;
 		prefix = MessageBrokerProperties.PREFIX,
 		havingValue = "true")
 public class FeedbackCommandHandler {
-	private static final Logger logger = LoggerFactory.getLogger(FeedbackCommandHandler.class);
-
 	private final RabbitTemplate messagingTemplate;
 	private final FeedbackStorageService feedbackStorage;
 	private final RoomService roomService;
 
-	@Autowired
 	public FeedbackCommandHandler(
 			final RabbitTemplate messagingTemplate,
 			final FeedbackStorageService feedbackStorage,

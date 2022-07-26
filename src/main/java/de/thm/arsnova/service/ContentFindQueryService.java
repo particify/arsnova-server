@@ -29,13 +29,11 @@ import de.thm.arsnova.model.FindQuery;
 
 @Service
 public class ContentFindQueryService implements FindQueryService<Content> {
-	private RoomService roomService;
 	private ContentService contentService;
 	private ContentGroupService contentGroupService;
 
-	public ContentFindQueryService(final RoomService roomService, final ContentService contentService,
+	public ContentFindQueryService(final ContentService contentService,
 			final ContentGroupService contentGroupService) {
-		this.roomService = roomService;
 		this.contentService = contentService;
 		this.contentGroupService = contentGroupService;
 	}

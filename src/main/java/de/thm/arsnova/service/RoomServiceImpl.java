@@ -40,12 +40,8 @@ import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.RoomMembership;
 import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.persistence.AnswerRepository;
-import de.thm.arsnova.persistence.ContentRepository;
-import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.security.RoomRole;
-import de.thm.arsnova.security.jwt.JwtService;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import net.particify.arsnova.connector.client.ConnectorClient;
 import net.particify.arsnova.connector.model.Membership;
@@ -56,18 +52,11 @@ import net.particify.arsnova.connector.model.Membership;
 @Service
 @Primary
 public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements RoomService {
-	private static final long ROOM_INACTIVITY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
 	private static final long DELETE_SCHEDULED_ROOMS_INTERVAL_MS = 30 * 60 * 1000L;
 
 	private static final Logger logger = LoggerFactory.getLogger(RoomServiceImpl.class);
 
-	private LogEntryRepository dbLogger;
-
 	private RoomRepository roomRepository;
-
-	private ContentRepository contentRepository;
-
-	private AnswerRepository answerRepository;
 
 	private UserService userService;
 
@@ -75,39 +64,20 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	private ConnectorClient connectorClient;
 
-	private JwtService jwtService;
-
 	@Value("${system.inactivity-thresholds.delete-inactive-guest-rooms:0}")
 	private int guestRoomInactivityThresholdDays;
 
-	@Value("${features.content-pool.logo-max-filesize}")
-	private int uploadFileSizeByte;
-
 	public RoomServiceImpl(
 			final RoomRepository repository,
-			final LogEntryRepository dbLogger,
 			final UserService userService,
 			final AccessTokenService accessTokenService,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
-			final Validator validator,
-			final JwtService jwtService) {
+			final Validator validator) {
 		super(Room.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.roomRepository = repository;
-		this.dbLogger = dbLogger;
 		this.userService = userService;
 		this.accessTokenService = accessTokenService;
-		this.jwtService = jwtService;
-	}
-
-	@Autowired
-	public void setContentRepository(final ContentRepository contentRepository) {
-		this.contentRepository = contentRepository;
-	}
-
-	@Autowired
-	public void setAnswerRepository(final AnswerRepository answerRepository) {
-		this.answerRepository = answerRepository;
 	}
 
 	public static class RoomNameComparator implements Comparator<Room>, Serializable {
@@ -159,39 +129,12 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	public Room get(final String id) {
-		final Room room = super.get(id);
-
-		/* FIXME: migrate LMS course support
-		if (connectorClient != null && room.isCourseSession()) {
-			final String courseid = room.getCourseId();
-			if (!connectorClient.getMembership(user.getUsername(), courseid).isMember()) {
-				throw new ForbiddenException("User is no course member.");
-			}
-		}
-		*/
-
-		return room;
-	}
-
-	@Override
 	public List<String> getUserRoomIds(final String userId) {
 		return roomRepository.findIdsByOwnerId(userId);
 	}
 
 	@Override
-	/* TODO: move caching to DefaultEntityServiceImpl */
-	//@Caching(evict = @CacheEvict(cacheNames = "rooms", key = "#result.id"))
 	public void prepareCreate(final Room room) {
-		/* FIXME: migrate LMS course support
-		if (connectorClient != null && room.getCourseId() != null) {
-			if (!connectorClient.getMembership(
-					userService.getCurrentUser().getUsername(), room.getCourseId()).isMember()) {
-				throw new ForbiddenException();
-			}
-		}
-		*/
-
 		final Room.Settings sf = new Room.Settings();
 		room.setSettings(sf);
 
@@ -200,9 +143,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			room.setOwnerId(userService.getCurrentUser().getId());
 		}
 		room.setClosed(false);
-
-		/* FIXME: event */
-		// this.publisher.publishEvent(new NewRoomEvent(this, result));
 	}
 
 	public boolean isShortIdAvailable(final String shortId) {

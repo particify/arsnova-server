@@ -33,8 +33,6 @@ import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.RoomMembership;
 import de.thm.arsnova.model.RoomStatistics;
 import de.thm.arsnova.model.serialization.View;
-import de.thm.arsnova.service.AccessTokenService;
-import de.thm.arsnova.service.ContentGroupService;
 import de.thm.arsnova.service.DataGenerationService;
 import de.thm.arsnova.service.DuplicationService;
 import de.thm.arsnova.service.RoomService;
@@ -55,26 +53,20 @@ public class RoomController extends AbstractEntityController<Room> {
 	private static final String ROOM_ROLE_HEADER = "ARS-Room-Role";
 
 	private RoomService roomService;
-	private ContentGroupService contentGroupService;
 	private RoomStatisticsService roomStatisticsService;
 	private DuplicationService duplicationService;
 	private DataGenerationService dataGenerationService;
-	private AccessTokenService accessTokenService;
 
 	public RoomController(
 			@Qualifier("securedRoomService") final RoomService roomService,
-			@Qualifier("securedContentGroupService") final ContentGroupService contentGroupService,
 			@Qualifier("securedRoomStatisticsService") final RoomStatisticsService roomStatisticsService,
 			@Qualifier("securedDuplicationService") final DuplicationService duplicationService,
-			@Qualifier("securedDataGenerationService") final DataGenerationService dataGenerationService,
-			@Qualifier("securedAccessTokenService") final AccessTokenService accessTokenService) {
+			@Qualifier("securedDataGenerationService") final DataGenerationService dataGenerationService) {
 		super(roomService);
 		this.roomService = roomService;
-		this.contentGroupService = contentGroupService;
 		this.roomStatisticsService = roomStatisticsService;
 		this.duplicationService = duplicationService;
 		this.dataGenerationService = dataGenerationService;
-		this.accessTokenService = accessTokenService;
 	}
 
 	@Override

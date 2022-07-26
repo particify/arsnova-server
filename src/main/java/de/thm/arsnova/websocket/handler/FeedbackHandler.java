@@ -1,7 +1,6 @@
 package de.thm.arsnova.websocket.handler;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,6 @@ public class FeedbackHandler {
 
 	private final FeedbackCommandHandler commandHandler;
 
-	@Autowired
 	public FeedbackHandler(final FeedbackCommandHandler commandHandler) {
 		this.commandHandler = commandHandler;
 	}
