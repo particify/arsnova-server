@@ -25,8 +25,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
@@ -44,7 +42,6 @@ import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.export.ContentExport;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentRepository;
-import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
@@ -59,25 +56,16 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	private RoomService roomService;
 
-	private LogEntryRepository dbLogger;
-
 	private ContentRepository contentRepository;
 
 	private ContentGroupServiceImpl contentGroupService;
 
-	private AnswerService answerService;
-
-	private AnswerRepository answerRepository;
-
 	private CsvService csvService;
-
-	private static final Logger logger = LoggerFactory.getLogger(ContentServiceImpl.class);
 
 	public ContentServiceImpl(
 			final ContentRepository repository,
 			final RoomService roomService,
 			final AnswerRepository answerRepository,
-			final LogEntryRepository dbLogger,
 			final UserService userService,
 			final CsvService csvService,
 			@Qualifier("defaultJsonMessageConverter")
@@ -86,15 +74,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		super(Content.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.contentRepository = repository;
 		this.roomService = roomService;
-		this.answerRepository = answerRepository;
-		this.dbLogger = dbLogger;
 		this.userService = userService;
 		this.csvService = csvService;
-	}
-
-	@Autowired
-	public void setAnswerService(final AnswerService answerService) {
-		this.answerService = answerService;
 	}
 
 	@Autowired
@@ -110,9 +91,11 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		}
 	}
 
-	/* FIXME: caching */
+	/**
+	  * Retrieves all contents of a room. Caching is currently not applied here
+	  * so avoid using this method for core functionality.
+	  */
 	@Override
-	//@Cacheable("contentlists")
 	public List<Content> getByRoomId(final String roomId) {
 		final Room room = roomService.get(roomId);
 		final User user = userService.getCurrentUser();
@@ -159,18 +142,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		} else if (content.getState().getRound() < 1 || content.getState().getRound() > 2) {
 			content.getState().setRound(1);
 		}
-
-		/* FIXME: migrate
-		// convert imageurl to base64 if neccessary
-		if ("grid".equals(content.getFormat()) && !content.getImage().startsWith("http")) {
-			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
-			final int fileSize = (int) ((content.getImage().length() - 814) / 1.37);
-			if (fileSize > uploadFileSizeByte) {
-				logger.error("Could not save file. File is too large with {} Byte.", fileSize);
-				throw new BadRequestException();
-			}
-		}
-		*/
 	}
 
 	@Override
@@ -192,19 +163,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 		content.setId(oldContent.getId());
 		content.setRevision(oldContent.getRevision());
-	}
-
-	@Override
-	protected void finalizeUpdate(final Content content) {
-		/* TODO: not sure yet how to refactor this code - we need access to the old and new entity
-		if (!oldContent.getState().isVisible() && content.getState().isVisible()) {
-			final UnlockQuestionEvent event = new UnlockQuestionEvent(this, room, content);
-			this.publisher.publishEvent(event);
-		} else if (oldContent.getState().isVisible() && !content.getState().isVisible()) {
-			final LockQuestionEvent event = new LockQuestionEvent(this, room, content);
-			this.publisher.publishEvent(event);
-		}
-		*/
 	}
 
 	@Override

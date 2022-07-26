@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -112,7 +111,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	private PasswordUtils passwordUtils;
 	private EmailService emailService;
 
-	private SystemProperties systemProperties;
 	private SecurityProperties securityProperties;
 	private AuthenticationProviderProperties.Registered registeredProperties;
 
@@ -126,9 +124,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	private LdapAuthenticationProvider ldapAuthenticationProvider;
 
 	private String rootUrl;
-
-	@Value("${customization.path}")
-	private String customizationPath;
 
 	private Pattern mailPattern;
 	private ConcurrentHashMap<String, Byte> loginTries;

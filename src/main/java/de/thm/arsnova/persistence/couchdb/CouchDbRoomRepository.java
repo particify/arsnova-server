@@ -24,20 +24,11 @@ import java.util.stream.Collectors;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
 
 public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implements RoomRepository {
-	private static final Logger logger = LoggerFactory.getLogger(CouchDbRoomRepository.class);
-
-	@Autowired
-	private LogEntryRepository dbLogger;
-
 	public CouchDbRoomRepository(final CouchDbConnector db, final boolean createIfNotExists) {
 		super(Room.class, db, "by_id", createIfNotExists);
 	}

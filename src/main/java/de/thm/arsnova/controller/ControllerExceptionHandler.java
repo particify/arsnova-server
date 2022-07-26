@@ -159,7 +159,6 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 		return helper.handleException(e, Level.DEBUG);
 	}
 
-	/* FIXME: Wrap persistance Exceptions - do not handle persistance Exceptions at the controller layer */
 	@ExceptionHandler(DocumentNotFoundException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.NOT_FOUND)
