@@ -12,7 +12,7 @@ arsnova:
     # the backend behind a proxy server, you might need to set this path
     # manually.
     api:
-      proxy-path: ~
+      proxy-path: ""
 
     # Database
     couchdb:
@@ -45,7 +45,7 @@ arsnova:
     # Message broker for internal service communication
     message-broker:
       rabbitmq:
-        enabled: false
+        enabled: true
         host: localhost
         port: 5672
         username: arsnova
@@ -106,47 +106,38 @@ arsnova:
       password: test
 
     inactivity-thresholds:
-      # Anonymize user content for users with X days of inactivity
+      # Anonymize user content for users with X days of inactivity.
       anonymize-users: 180
 
       # Delete guest sessions automatically after X days of owner inactivity.
       delete-guest-rooms: 180
 
-    uploads:
-      # Maximal filesize in bytes
-      max-filesize: 4194304
-      thumbnail:
-        # Maximal thumbnail size in pixels
-        width: 400
-        height: 400
-
   ##############################################################################
   # Authentication
   ##############################################################################
   security:
-    # Admin accounts
-    # Usernames of the accounts which are allowed to manage global messages of
-    # the day. Multiple accounts are separated by commas.
-    admin-accounts: ""
+    # User accounts with administrative privileges (loginId, authProvider)
+    admin-accounts: []
     # After the specified number of login tries the client IP will be banned for
-    # several minutes
+    # several minutes.
     login-try-limit: 50
-    # After the specific number of resent emails the client IP will be banned for several minutes from resending
+    # After the specified number of resent emails the client IP will be banned
+    # for several minutes from resending.
     resend-mail-limit: 5
-    # How many of the constraints (like "Has to has a number") have to be met
+    # The number of constraints (like "Has to contain a number") which have to
+    # be met.
     password-strictness-level: 2
 
     # JSON Web Tokens
     jwt:
-      server-id: arsnova.backend.v3:com.example
+      server-id: arsnova.backend.v3:example.com
       secret: ""
       validity-period: 6H
 
     # CORS grants full API access to client-side (browser) applications from
-    # other domains. Multiple entries are separated by commas. Untrusted and
-    # vulnerable applications running on these domains pose a security risk to
-    # ARSnova users.
-    cors-origins: https://
+    # other domains. Untrusted and vulnerable applications running on these
+    # domains pose a security risk to ARSnova users.
+    cors-origins: []
 
     authentication-providers:
       # Guest authentication
@@ -175,7 +166,7 @@ arsnova:
         title: ARSnova
         order: 0
         allowed-email-domains:
-          - '*'
+          - "*"
         registration-mail-subject: "{0} is your ARSnova verification code"
         registration-mail-body: |-
           Welcome to ARSnova!
@@ -214,7 +205,7 @@ arsnova:
           # Set the following properties if you want to use LDAP search instead
           # of binding with a DN pattern
           user-search-filter: (uid={0})
-          user-search-base: '"ou=people"'
+          user-search-base: ou=people
           # Configure the LDAP manager user if anonymous binding is not allowed
           manager-user-dn: cn=arsnova-manager,dc=example,dc=com
           manager-password: arsnova
@@ -236,7 +227,7 @@ arsnova:
           meta-file: ""
           entity-id: ""
         keystore:
-          file: arsnova.jks
+          file: arsnova.p12
           store-password: arsnova
           key-alias: saml
           key-password: arsnova
@@ -297,41 +288,6 @@ arsnova:
           secret: ""
 
   ##############################################################################
-  # Features
-  ##############################################################################
-  features:
-    contents:
-      enabled: true
-      formats:
-        grid-square:
-          enabled: false
-        freetext:
-          imageanswer:
-            enabled: false
-      # Maximal number of answer options allowed for a skill question
-      answer-option-limit: 8
-
-    comments:
-      enabled: true
-
-    live-feedback:
-      enabled: true
-      # Minutes, after which the feedback is deleted
-      reset-interval: 10
-
-    content-pool:
-      enabled: false
-      subjects: Allgemeines,Anglistik,Architektur,Bauingenieurwesen,Betriebswirtschaftslehre,Biologie,Chemie,Elektrotechnik,Geographie,Geowissenschaften,Germanistik,Geschichtswissenschaft,Informatik,Kunst,Kunstpädagogik,Maschinenbau,Mathematik,Medienwissenschaften,Medizin,Musik,Pharmazie,Physik,Psychologie,Rechtswissenschaften,Stadtplanung,Theaterwissenschaften,Theologie,Vermessungswesen,Volkswirtschaftslehre
-      licenses: CC by - Attribution,CC nc - Non-Commercial,CC nd - No Derivatives,CC sa - Share Alike,CCO - Public Domain,CC by-nd -  Attribution-No Derivatives,CC by-c - Attribution-Non-Commercial,CC by-nc-sa - Attribution-Non-Derivatives-Share Alike,CC by-nc-nd Attribution-Non-Commercial- No Derivatives,GNU GPL - GNU General Public License
-      # Logo file size in bytes
-      logo-max-filesize: 102400
-      # Do not reorder levels. Append new levels to the end of the list. Otherwise,
-      # references in existing public sessions could be mixed up.
-      session-levels:
-        de: Allgemeinbildung,Abitur,Bachelor,Master,Wer wird Millionär,Sonstiges
-        en: General Education,Highschool,Bachelor,Master,Who Wants to Be a Millionaire,Miscellaneous
-
-  ##############################################################################
   # Templates
   ##############################################################################
   templates:
@@ -353,72 +309,18 @@ arsnova:
   # User interface
   ##############################################################################
   ui:
-    # Label underneath ARSnova logo
-    slogan: Audience Response System
-
-    # Demo room short id to show above room login button
-    # You can freely use the demo room of https://arsnova.eu/mobile which can
-    # be imported from the repo:
-    # https://github.com/thm-projects/arsnova-mobile/tree/master/demo-sessions
-    demo-room-id: ""
-
-    # Splashscreen configuration
-    # Best results are achieved with logos that have the same width and height.
-    splashscreen:
-      logo-path: resources/images/arsnova-logo.png
-      slogan: Audience Response System
-      min-delay: 3000
-
-      # Splash screen colors
-      # These settings override the default colors of the frontend theme.
-      slogan-color: ""
-      background-color: ""
-      loading-ind-color: ""
-
-    # Enable Markdown and MathJax parsing in answer options. Formatting in
-    # answer options should be used cautiously since it could lead to display
-    # errors. Answer options will still not be parsed in diagrams. This setting
-    # has no effect if neither MathJax nor Markdown are enabled.
-    parse-answer-option-formatting: false
-
-    mathjax:
-      # Enable MathJax to allow the use of Math formulas written in TeX syntax
-      # in text fields.
-      enabled: true
-      src: //cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js
-
-    # Number of "you've lost me"/"abgehängt" votes, starting to show warning
-    # sign
-    feedback-warning: 15
-
-    # Links which are displayed in the frontend applications
+    # Links which are displayed by the client
     links:
-      blog:
-        url: https://arsnova.eu/blog/
-      documentation:
-        url: https://arsnova.eu/manual/
-      presenter-documentation:
-        url: ""
-      overlay:
-        url: https://arsnova.eu/overlay/
-      organization:
-        url: ""
+      help:
+        url: https://particify.de/manual/
       imprint:
         url: ""
-      privacy-policy:
+      privacy:
         url: ""
 
-    # It is possible to use an external tracking software with ARSnova. Currently
-    # Matomo is the only supported tracking provider.
+    # It is possible to use an external tracking software with ARSnova.
+    # Currently Matomo is the only supported tracking provider.
     tracking:
       provider: matomo
       tracker-url: ""
       site-id: ""
-
-  # The context paths where the ARSnova modules have been deployed
-  customization:
-    path: /customization
-  mobile:
-    path: /mobile
-  presenter:
-    path: /presenter
