@@ -37,8 +37,10 @@ import de.thm.arsnova.event.BulkChangeEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.service.AnswerService;
 import de.thm.arsnova.websocket.message.AnswersChanged;
+import de.thm.arsnova.websocket.message.TextAnswerCreated;
 
 @Component
 @EnableConfigurationProperties(MessageBrokerProperties.class)
@@ -75,11 +77,26 @@ public class AnswerHandler {
 					|| anyAnswer.getFormat() == Content.Format.SORT || anyAnswer.getFormat() == Content.Format.WORDCLOUD
 							? answerService.getStatistics(contentId)
 							: null;
-			final AnswersChanged stompEvent = new AnswersChanged(answerIds, stats);
+			final AnswersChanged changedMessage = new AnswersChanged(answerIds, stats);
 			messagingTemplate.convertAndSend(
 					"amq.topic",
 					roomId + ".content-" + contentId + ".answers-changed.stream",
-					stompEvent
+					changedMessage
+			);
+		}
+	}
+
+	@EventListener
+	public void handleTextAnswersChanged(final BulkChangeEvent<Answer> event) {
+		for (final Answer answer : event.getEntities()) {
+			if (!(answer instanceof TextAnswer)) {
+				continue;
+			}
+			final TextAnswerCreated createdMessage = new TextAnswerCreated((TextAnswer) answer);
+			messagingTemplate.convertAndSend(
+					"amq.topic",
+					answer.getRoomId() + ".content-" + answer.getContentId() + ".text-answer-created.stream",
+					createdMessage
 			);
 		}
 	}
