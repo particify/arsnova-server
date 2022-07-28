@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 
 import de.thm.arsnova.model.Answer;
@@ -46,15 +47,24 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 	}
 
 	@Override
-	public Iterable<Answer> findStubsByContentId(final String contentId) {
-		return createEntityStubs(db.queryView(createQuery("by_contentid_nothidden").reduce(false).key(contentId)));
+	public Iterable<Answer> findStubsByContentIdAndHidden(final String contentId, final boolean excludeHidden) {
+		return createEntityStubs(queryByContentIdAndHidden(contentId, excludeHidden));
 	}
 
 	@Override
-	public List<String> findIdsByContentId(final String contentId) {
-		final ViewResult result = db.queryView(createQuery("by_contentid_nothidden").reduce(false).key(contentId));
+	public List<String> findIdsByContentIdAndHidden(final String contentId, final boolean excludeHidden) {
+		final ViewResult result = queryByContentIdAndHidden(contentId, excludeHidden);
 
 		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
+	}
+
+	private ViewResult queryByContentIdAndHidden(final String contentId, final boolean excludeHidden) {
+		ViewQuery query = createQuery("by_contentid_hidden").reduce(false);
+		query = excludeHidden
+				? query.key(ComplexKey.of(contentId, false))
+				: query.startKey(ComplexKey.of(contentId)).endKey(ComplexKey.of(contentId, ComplexKey.emptyObject()));
+
+		return db.queryView(query);
 	}
 
 	@Override

@@ -29,9 +29,9 @@ public interface AnswerRepository extends CrudRepository<Answer, String> {
 
 	AnswerStatistics findByContentIdRound(String contentId, int round, int optionCount);
 
-	Iterable<Answer> findStubsByContentId(String contentId);
+	Iterable<Answer> findStubsByContentIdAndHidden(String contentId, boolean excludeHidden);
 
-	List<String> findIdsByContentId(String contentId);
+	List<String> findIdsByContentIdAndHidden(String contentId, boolean excludeHidden);
 
 	List<String> findIdsByCreatorIdRoomId(String creatorId, String roomId);
 

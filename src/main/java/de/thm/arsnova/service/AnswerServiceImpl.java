@@ -139,7 +139,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		final Content content = contentService.get(contentId);
 		content.resetState();
 		contentService.update(content);
-		final Iterable<Answer> answers = answerRepository.findStubsByContentId(content.getId());
+		final Iterable<Answer> answers = answerRepository.findStubsByContentIdAndHidden(content.getId(), false);
 		answers.forEach(a -> a.setRoomId(content.getRoomId()));
 		delete(answers);
 	}
@@ -295,7 +295,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
 	@Override
 	public List<String> getAnswerIdsByContentIdNotHidden(final String contentId) {
-		return answerRepository.findIdsByContentId(contentId);
+		return answerRepository.findIdsByContentIdAndHidden(contentId, true);
 	}
 
 	@Override
@@ -401,7 +401,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
 	@EventListener
 	public void handleContentDeletion(final BeforeDeletionEvent<Content> event) {
-		final Iterable<Answer> answers = answerRepository.findStubsByContentId(event.getEntity().getId());
+		final Iterable<Answer> answers = answerRepository.findStubsByContentIdAndHidden(event.getEntity().getId(), false);
 		answers.forEach(a -> a.setRoomId(event.getEntity().getRoomId()));
 		delete(answers);
 	}
