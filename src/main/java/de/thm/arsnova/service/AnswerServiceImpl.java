@@ -64,7 +64,6 @@ import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
-import de.thm.arsnova.web.exceptions.UnauthorizedException;
 
 /**
  * Performs all answer related operations.
@@ -393,11 +392,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@Override
 	protected void prepareUpdate(final Answer answer) {
 		final User user = userService.getCurrentUser();
-		final Answer realAnswer = this.getMyAnswer(answer.getContentId());
-		if (user == null || realAnswer == null || !user.getId().equals(realAnswer.getCreatorId())) {
-			throw new UnauthorizedException();
-		}
-
 		final Content content = contentService.get(answer.getContentId());
 		final Room room = roomService.get(content.getRoomId());
 		answer.setCreatorId(user.getId());
