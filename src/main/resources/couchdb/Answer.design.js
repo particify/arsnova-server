@@ -10,10 +10,10 @@ var designDoc = {
 			},
 			"reduce": "_count"
 		},
-		"by_contentid_nothidden": {
+		"by_contentid_hidden": {
 			"map": function (doc) {
-				if (doc.type === "Answer" && !doc.hidden) {
-					emit(doc.contentId, {_rev: doc._rev});
+				if (doc.type === "Answer") {
+					emit([doc.contentId, doc.hidden], {_rev: doc._rev});
 				}
 			},
             "reduce": "_count"
