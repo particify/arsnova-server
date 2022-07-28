@@ -391,10 +391,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
 	@Override
 	protected void prepareUpdate(final Answer answer) {
-		final User user = userService.getCurrentUser();
 		final Content content = contentService.get(answer.getContentId());
 		final Room room = roomService.get(content.getRoomId());
-		answer.setCreatorId(user.getId());
 		answer.setContentId(content.getId());
 		answer.setRoomId(room.getId());
 	}
