@@ -8,7 +8,7 @@ services:
     volumes:
       - couchdb_data:/opt/couchdb/data
   postgresql-auth:
-    image: postgres:13.3-alpine
+    image: postgres:14.4-alpine
     restart: $RESTART_MODE
     environment:
       POSTGRES_DB: arsnovaauth
@@ -17,7 +17,7 @@ services:
     volumes:
       - postgresql_data_auth:/var/lib/postgresql/data
   postgresql-comment:
-    image: postgres:13.3-alpine
+    image: postgres:14.4-alpine
     restart: $RESTART_MODE
     environment:
       POSTGRES_DB: arsnovacomment
@@ -26,7 +26,7 @@ services:
     volumes:
       - postgresql_data_comment:/var/lib/postgresql/data
   rabbitmq:
-    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/rabbitmq-stomp:3.9-alpine
+    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/rabbitmq-stomp:3.10-alpine
     restart: $RESTART_MODE
     environment:
       RABBITMQ_NODENAME: rabbit@localhost

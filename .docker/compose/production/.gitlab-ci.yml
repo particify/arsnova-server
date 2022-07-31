@@ -14,10 +14,10 @@ build_docker_images:
     IMAGE1_BASETAG: stable-alpine
     IMAGE1_VERSION: $IMAGE1_BASETAG
     IMAGE2_NAME: rabbitmq-stomp
-    IMAGE2_BASETAG: "3.9-alpine"
+    IMAGE2_BASETAG: "3.10-alpine"
     IMAGE2_VERSION: $IMAGE2_BASETAG
     IMAGE3_NAME: rabbitmq-stomp
-    IMAGE3_BASETAG: "3.9-management-alpine"
+    IMAGE3_BASETAG: "3.10-management-alpine"
     IMAGE3_VERSION: $IMAGE3_BASETAG
     IMAGE4_NAME: couchdb
     IMAGE4_BASETAG: "3.2"
