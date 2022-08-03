@@ -13,7 +13,7 @@ var designDoc = {
 		"by_contentid_hidden": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
-					emit([doc.contentId, doc.hidden], {_rev: doc._rev});
+					emit([doc.contentId, !!doc.hidden], {_rev: doc._rev});
 				}
 			},
             "reduce": "_count"
