@@ -338,7 +338,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			final ControllerExceptionHelper controllerExceptionHelper) {
 		return (request, response, accessDeniedException) -> {
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-			response.setContentType(MediaType.APPLICATION_JSON_UTF8.toString());
+			response.setContentType(MediaType.APPLICATION_JSON.toString());
 			response.getWriter().write(jackson2HttpMessageConverter.getObjectMapper().writeValueAsString(
 					controllerExceptionHelper.handleException(accessDeniedException, Level.DEBUG)));
 		};
@@ -351,7 +351,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			final ControllerExceptionHelper controllerExceptionHelper) {
 		return (request, response, accessDeniedException) -> {
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-			response.setContentType(MediaType.APPLICATION_JSON_UTF8.toString());
+			response.setContentType(MediaType.APPLICATION_JSON.toString());
 			response.getWriter().write(jackson2HttpMessageConverter.getObjectMapper().writeValueAsString(
 					controllerExceptionHelper.handleException(accessDeniedException, Level.DEBUG)));
 		};
