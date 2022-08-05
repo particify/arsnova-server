@@ -48,7 +48,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -106,24 +105,15 @@ public class AppConfig implements WebMvcConfigurer {
 		converters.add(apiV2JsonMessageConverter());
 		converters.add(stringMessageConverter());
 		converters.add(byteArrayHttpMessageConverter());
-		//converters.add(new MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build()));
 	}
 
 	@Override
 	public void configureContentNegotiation(final ContentNegotiationConfigurer configurer) {
 		final PathBasedContentNegotiationStrategy strategy =
 				new PathBasedContentNegotiationStrategy(API_V3_MEDIA_TYPE, webEndpointProperties.getBasePath());
-		configurer.mediaType("json", MediaType.APPLICATION_JSON_UTF8);
+		configurer.mediaType("json", MediaType.APPLICATION_JSON);
 		configurer.mediaType("xml", MediaType.APPLICATION_XML);
-		configurer.favorParameter(false);
-		configurer.favorPathExtension(false);
-		//configurer.defaultContentType(API_V3_MEDIA_TYPE);
 		configurer.defaultContentTypeStrategy(strategy);
-	}
-
-	@Override
-	public void configurePathMatch(final PathMatchConfigurer configurer) {
-		configurer.setUseSuffixPatternMatch(false);
 	}
 
 	@Override
@@ -174,7 +164,7 @@ public class AppConfig implements WebMvcConfigurer {
 		final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
 		final List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(API_V3_MEDIA_TYPE);
-		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
+		mediaTypes.add(MediaType.APPLICATION_JSON);
 		converter.setSupportedMediaTypes(mediaTypes);
 
 		return converter;
@@ -194,7 +184,7 @@ public class AppConfig implements WebMvcConfigurer {
 		mapper.setConfig(mapper.getSerializationConfig().withView(View.Public.class));
 		final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
 		final List<MediaType> mediaTypes = new ArrayList<>();
-		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
+		mediaTypes.add(MediaType.APPLICATION_JSON);
 		converter.setSupportedMediaTypes(mediaTypes);
 
 		return converter;
