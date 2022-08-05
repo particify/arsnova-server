@@ -45,11 +45,11 @@ public class PathBasedContentNegotiationStrategy implements ContentNegotiationSt
 
 	private final String managementPath;
 
-	private MediaType fallback;
+	private List<MediaType> fallbacks;
 	private MediaType empty = MediaType.valueOf(AbstractEntityController.MEDIATYPE_EMPTY);
 
-	public PathBasedContentNegotiationStrategy(final MediaType fallback, final String managementPath) {
-		this.fallback = fallback;
+	public PathBasedContentNegotiationStrategy(final List<MediaType> fallbacks, final String managementPath) {
+		this.fallbacks = fallbacks;
 		this.managementPath = managementPath + "/";
 	}
 
@@ -70,8 +70,8 @@ public class PathBasedContentNegotiationStrategy implements ContentNegotiationSt
 						servletRequest.getMethod());
 				mediaTypes.add(empty);
 			} else {
-				logger.trace("Content negotiation falling back to {}", fallback);
-				mediaTypes.add(fallback);
+				logger.trace("Content negotiation falling back to {}", fallbacks);
+				mediaTypes.addAll(fallbacks);
 			}
 		}
 

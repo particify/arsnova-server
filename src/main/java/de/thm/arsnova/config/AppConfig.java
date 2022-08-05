@@ -109,8 +109,12 @@ public class AppConfig implements WebMvcConfigurer {
 
 	@Override
 	public void configureContentNegotiation(final ContentNegotiationConfigurer configurer) {
+		final List<MediaType> fallbacks = List.of(
+				API_V3_MEDIA_TYPE,
+				MediaType.APPLICATION_JSON,
+				MediaType.APPLICATION_XML);
 		final PathBasedContentNegotiationStrategy strategy =
-				new PathBasedContentNegotiationStrategy(API_V3_MEDIA_TYPE, webEndpointProperties.getBasePath());
+				new PathBasedContentNegotiationStrategy(fallbacks, webEndpointProperties.getBasePath());
 		configurer.mediaType("json", MediaType.APPLICATION_JSON);
 		configurer.mediaType("xml", MediaType.APPLICATION_XML);
 		configurer.defaultContentTypeStrategy(strategy);
