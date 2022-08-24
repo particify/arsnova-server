@@ -13,7 +13,7 @@
     "express": "4.18.1",
     "markdown-it": "13.0.1",
     "markdown-it-link-attributes": "4.0.1",
-    "markdown-it-prism": "2.2.4"
+    "markdown-it-prism": "2.2.5"
   },
   "devDependencies": {
     "eslint": "8.22.0",
