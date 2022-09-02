@@ -39,6 +39,7 @@ import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.WordcloudContent;
 import de.thm.arsnova.model.export.ContentExport;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentRepository;
@@ -232,5 +233,17 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		final List<String> idsForDeletion = event.getEntity().getContentIds().stream()
 				.filter(id -> !idsWithGroup.contains(id)).toList();
 		delete(get(idsForDeletion));
+	}
+
+	@Override
+	public void addToBannedKeywords(final WordcloudContent wordcloudContent, final String keyword) {
+		wordcloudContent.addBannedKeyword(keyword);
+		update(wordcloudContent);
+	}
+
+	@Override
+	public void clearBannedKeywords(final WordcloudContent wordcloudContent) {
+		wordcloudContent.getBannedKeywords().clear();
+		update(wordcloudContent);
 	}
 }

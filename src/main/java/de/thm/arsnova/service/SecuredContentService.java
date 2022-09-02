@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.WordcloudContent;
 
 @Service
 public class SecuredContentService extends AbstractSecuredEntityServiceImpl<Content>
@@ -58,5 +59,17 @@ public class SecuredContentService extends AbstractSecuredEntityServiceImpl<Cont
 	@PreFilter(value = "hasPermission(filterObject, 'content', 'owner')", filterTarget = "contentIds")
 	public byte[] exportToTsv(final List<String> contentIds, final String charset) throws JsonProcessingException {
 		return contentService.exportToTsv(contentIds, charset);
+	}
+
+	@Override
+	@PreAuthorize("hasPermission(#wordcloudContent, 'moderate')")
+	public void addToBannedKeywords(final WordcloudContent wordcloudContent, final String keyword) {
+		contentService.addToBannedKeywords(wordcloudContent, keyword);
+	}
+
+	@Override
+	@PreAuthorize("hasPermission(#wordcloudContent, 'moderate')")
+	public void clearBannedKeywords(final WordcloudContent wordcloudContent) {
+		contentService.clearBannedKeywords(wordcloudContent);
 	}
 }

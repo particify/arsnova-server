@@ -54,6 +54,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	public static final String UPDATE_PERMISSION = "update";
 	public static final String DELETE_PERMISSION = "delete";
 	public static final String OWNER_PERMISSION = "owner";
+	public static final String MODERATE_PERMISSION = "moderate";
 	public static final String DUPLICATE_PERMISSION = "duplicate";
 
 	/* specialized permissions */
@@ -234,6 +235,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				return !room.isClosed() && contentGroupService.getByRoomIdAndContainingContentId(
 						targetContent.getRoomId(), targetContent.getId()).stream()
 						.anyMatch(cg -> cg.isContentPublished(targetContent.getId()) && cg.isCorrectOptionsPublished());
+			case MODERATE_PERMISSION:
+				return hasAuthenticationRoomModeratingRole(auth, room);
 			case CREATE_PERMISSION:
 			case UPDATE_PERMISSION:
 			case DELETE_PERMISSION:
@@ -291,9 +294,12 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			case UPDATE_PERMISSION:
 				/* TODO */
 				return false;
-			case DELETE_PERMISSION:
+			case MODERATE_PERMISSION:
 				room = roomService.get(targetAnswer.getRoomId());
 				return room != null && hasAuthenticationRoomModeratingRole(auth, room);
+			case DELETE_PERMISSION:
+				room = roomService.get(targetAnswer.getRoomId());
+				return room != null && hasAuthenticationRoomRole(auth, room, RoomRole.EDITING_MODERATOR);
 			default:
 				return false;
 		}
