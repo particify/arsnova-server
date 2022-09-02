@@ -137,8 +137,7 @@ public class ContentController extends AbstractEntityController<Content> {
 			throw new BadRequestException("Only wordcloud contents are supported.");
 		}
 		final WordcloudContent wordcloudContent = (WordcloudContent) content;
-		wordcloudContent.addBannedKeyword(bannedKeywordEntity.keyword);
-		contentService.update(wordcloudContent);
+		contentService.addToBannedKeywords(wordcloudContent, bannedKeywordEntity.keyword);
 	}
 
 	@DeleteMapping(BANNED_KEYWORDS_MAPPING)
@@ -148,8 +147,7 @@ public class ContentController extends AbstractEntityController<Content> {
 			throw new BadRequestException("Only wordcloud contents are supported.");
 		}
 		final WordcloudContent wordcloudContent = (WordcloudContent) content;
-		wordcloudContent.getBannedKeywords().clear();
-		contentService.update(wordcloudContent);
+		contentService.clearBannedKeywords(wordcloudContent);
 	}
 
 	@JsonView(View.Public.class)

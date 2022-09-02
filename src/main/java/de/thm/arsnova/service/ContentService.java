@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 
 import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.WordcloudContent;
 
 /**
  * The functionality the question service should provide.
@@ -40,4 +41,8 @@ public interface ContentService extends EntityService<Content> {
 	byte[] exportToCsv(List<String> contentIds, String charset) throws JsonProcessingException;
 
 	byte[] exportToTsv(List<String> contentIds, String charset) throws JsonProcessingException;
+
+	void addToBannedKeywords(WordcloudContent wordcloudContent, String keyword);
+
+	void clearBannedKeywords(WordcloudContent wordcloudContent);
 }

@@ -91,7 +91,7 @@ public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answe
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#answer.roomId, 'room', 'owner')")
+	@PreAuthorize("hasPermission(#answer, 'moderate')")
 	public void hideTextAnswer(final TextAnswer answer, final boolean hidden) {
 		answerService.hideTextAnswer(answer, hidden);
 	}
