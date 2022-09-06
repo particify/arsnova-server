@@ -18,7 +18,9 @@
 
 package de.thm.arsnova.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +28,6 @@ import de.thm.arsnova.model.serialization.View;
 
 public class Configuration {
 	private List<AuthenticationProvider> authenticationProviders;
-	private Map<String, Object> features;
 	private Map<String, Object> ui;
 
 	@JsonView(View.Public.class)
@@ -39,12 +40,9 @@ public class Configuration {
 	}
 
 	@JsonView(View.Public.class)
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	public Map<String, Object> getFeatures() {
-		return features;
-	}
-
-	public void setFeatures(final Map<String, Object> features) {
-		this.features = features;
+		return Collections.emptyMap();
 	}
 
 	@JsonView(View.Public.class)

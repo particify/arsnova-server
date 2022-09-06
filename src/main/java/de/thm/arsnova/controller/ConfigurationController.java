@@ -19,16 +19,13 @@
 package de.thm.arsnova.controller;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.config.SecurityConfig;
 import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
-import de.thm.arsnova.config.properties.FeatureProperties;
 import de.thm.arsnova.config.properties.UiProperties;
 import de.thm.arsnova.model.AuthenticationProvider;
 import de.thm.arsnova.model.Configuration;
@@ -41,19 +38,14 @@ public class ConfigurationController {
 
 	private AuthenticationProviderProperties providerProperties;
 	private UiProperties uiProperties;
-	private FeatureProperties featureProperties;
 	private List<AuthenticationProvider> authenticationProviders;
-	private Map<String, Object> featureConfig;
 
 	public ConfigurationController(
 			final AuthenticationProviderProperties authenticationProviderProperties,
-			final UiProperties uiProperties,
-			final FeatureProperties featureProperties) {
+			final UiProperties uiProperties) {
 		this.providerProperties = authenticationProviderProperties;
 		this.uiProperties = uiProperties;
-		this.featureProperties = featureProperties;
 		buildAuthenticationProviderConfig();
-		buildFeatureConfig();
 	}
 
 	@GetMapping
@@ -61,7 +53,6 @@ public class ConfigurationController {
 		final Configuration configuration = new Configuration();
 		configuration.setAuthenticationProviders(authenticationProviders);
 		configuration.setUi(uiProperties.getUi());
-		configuration.setFeatures(featureConfig);
 
 		return configuration;
 	}
@@ -91,13 +82,5 @@ public class ConfigurationController {
 			authenticationProviders.add(new AuthenticationProvider(
 					SecurityConfig.CAS_PROVIDER_ID, providerProperties.getCas()));
 		}
-	}
-
-	private void buildFeatureConfig() {
-		this.featureConfig = new HashMap<>();
-		featureConfig.put("contents", featureProperties.getContents());
-		featureConfig.put("comments", featureProperties.getComments());
-		featureConfig.put("liveFeedback", featureProperties.getLiveFeedback());
-		featureConfig.put("contentPool", featureProperties.getContentPool());
 	}
 }
