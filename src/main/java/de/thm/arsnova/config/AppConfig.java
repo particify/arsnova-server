@@ -54,7 +54,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
-import de.thm.arsnova.config.properties.FeatureProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.config.properties.TemplateProperties;
@@ -78,7 +77,6 @@ import net.particify.arsnova.connector.client.ConnectorClientImpl;
  */
 @Configuration
 @EnableConfigurationProperties({
-		FeatureProperties.class,
 		SystemProperties.class,
 		TemplateProperties.class})
 public class AppConfig implements WebMvcConfigurer {
