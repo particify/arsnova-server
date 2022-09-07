@@ -191,6 +191,37 @@ public class UserProfile extends Entity {
 		}
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
+	public static class Settings {
+		private boolean contentAnswersDirectlyBelowChart;
+		private boolean contentVisualizationUnitPercent;
+		private boolean showContentResultsDirectly;
+
+		public boolean isContentAnswersDirectlyBelowChart() {
+			return contentAnswersDirectlyBelowChart;
+		}
+
+		public void setContentAnswersDirectlyBelowChart(final boolean contentAnswersDirectlyBelowChart) {
+			this.contentAnswersDirectlyBelowChart = contentAnswersDirectlyBelowChart;
+		}
+
+		public boolean isContentVisualizationUnitPercent() {
+			return contentVisualizationUnitPercent;
+		}
+
+		public void setContentVisualizationUnitPercent(final boolean contentVisualizationUnitPercent) {
+			this.contentVisualizationUnitPercent = contentVisualizationUnitPercent;
+		}
+
+		public boolean isShowContentResultsDirectly() {
+			return showContentResultsDirectly;
+		}
+
+		public void setShowContentResultsDirectly(final boolean showContentResultsDirectly) {
+			this.showContentResultsDirectly = showContentResultsDirectly;
+		}
+	}
+
 	@NotNull
 	private AuthProvider authProvider;
 
@@ -200,6 +231,7 @@ public class UserProfile extends Entity {
 	private Date lastLoginTimestamp;
 	private Account account;
 	private Person person;
+	private Settings settings;
 	private Date announcementReadTimestamp;
 	private Set<String> acknowledgedMotds = new HashSet<>();
 
@@ -263,6 +295,16 @@ public class UserProfile extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setPerson(final Person person) {
 		this.person = person;
+	}
+
+	@JsonView({View.Persistence.class, View.Owner.class})
+	public Settings getSettings() {
+		return settings;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setSettings(final Settings settings) {
+		this.settings = settings;
 	}
 
 	@JsonView({View.Persistence.class, View.Owner.class})
