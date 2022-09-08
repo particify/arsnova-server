@@ -22,6 +22,7 @@ compile:
   extends: .maven
   stage: build
   artifacts:
+    expire_in: 2 days
     paths:
       - $OUTPUT_DIR
   script:
@@ -33,8 +34,10 @@ unit_test:
   needs:
     - compile
   artifacts:
+    expire_in: 1 month
     paths:
-      - $OUTPUT_DIR
+      - $OUTPUT_DIR/jacoco.exec
+      - $OUTPUT_DIR/surefire-reports
     reports:
       junit: $OUTPUT_DIR/surefire-reports/TEST-*.xml
   coverage: '/Code coverage: \d+\.\d+/'
@@ -48,6 +51,7 @@ package:
   needs:
     - compile
   artifacts:
+    expire_in: 2 days
     name: package
     paths:
       - $WAR_FILE
