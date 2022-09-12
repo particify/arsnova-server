@@ -42,6 +42,13 @@ The default configuration can be adjusted via environment variables:
 |JWT_SECRET |secret |Encryption token for authentication (MUST be changed for production)
 |JWT_DOMAIN |example.com |A domain usable as server ID (used for the JWT issuer/audience claim)
 |ARSNOVA_HOSTNAME |app.particify.de |Hostname for the application
+|MAIL_HOST | |Hostname of the mail server
+|MAIL_PORT |25 |Port of the mail server
+|MAIL_USERNAME | |Username for SMTP authentication
+|MAIL_PASSWORD | |Password for SMTP authentication
+|MAIL_SENDERNAME |ARSnova |Sender name for mails
+|MAIL_SENDERADDRESS | |Sender address for mails
+|MAIL_IMPLICITTLS |`false` |Enable implicit TLS (instead of `STARTSSL`) for SMTP
 |CORE_TAG |master |Docker tag (repository branch) for Core Backend
 |WSGW_TAG |master |Docker tag (repository branch) for WebSocket Gateway
 |HTTPGW_TAG |master |Docker tag (repository branch) for HTTP Gateway
