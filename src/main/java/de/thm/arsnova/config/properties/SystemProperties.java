@@ -62,6 +62,7 @@ public class SystemProperties {
 		private String senderAddress;
 		private String host;
 		private int port;
+		private boolean implicitTls;
 		private String username;
 		private String password;
 
@@ -95,6 +96,14 @@ public class SystemProperties {
 
 		public void setPort(final int port) {
 			this.port = port;
+		}
+
+		public boolean getImplicitTls() {
+			return implicitTls;
+		}
+
+		public void setImplicitTls(final boolean implicitTls) {
+			this.implicitTls = implicitTls;
 		}
 
 		public String getUsername() {

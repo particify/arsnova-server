@@ -259,6 +259,9 @@ public class AppConfig implements WebMvcConfigurer {
 	public JavaMailSenderImpl mailSender() {
 		final JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 		final Mail mailProperties = systemProperties.getMail();
+		if (mailProperties.getImplicitTls()) {
+			mailSender.getJavaMailProperties().setProperty("mail.transport.protocol", "smtps");
+		}
 		mailSender.setHost(mailProperties.getHost());
 		if (mailProperties.getPort() > 0) {
 			mailSender.setPort(mailProperties.getPort());
@@ -270,6 +273,7 @@ public class AppConfig implements WebMvcConfigurer {
 			mailSender.getJavaMailProperties().setProperty("mail.smtp.auth", "true");
 			mailSender.getJavaMailProperties().setProperty("mail.smtps.auth", "true");
 		}
+		mailSender.getJavaMailProperties().setProperty("mail.smtp.starttls.enable", "true");
 
 		return mailSender;
 	}
