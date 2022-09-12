@@ -49,6 +49,15 @@ The default configuration can be adjusted via environment variables:
 |MAIL_SENDERNAME |ARSnova |Sender name for mails
 |MAIL_SENDERADDRESS | |Sender address for mails
 |MAIL_IMPLICITTLS |`false` |Enable implicit TLS (instead of `STARTSSL`) for SMTP
+|LDAP_ENABLED |`false` |Enable LDAP authentication
+|LDAP_TITLE |LDAP |Title for LDAP authentication shown in the webclient
+|LDAP_HOSTURL |ldaps://example.com:636/dc=example,dc=com |LDAP connection URL
+|LDAP_USERDNPATTERN |uid={0},ou=arsnova |LDAP user DN pattern
+|LDAP_USERIDATTRIBUTE |uid |Name of the LDAP attribute which contains the user ID
+|LDAP_USERSEARCHFILTER |(uid={0}) |LDAP user search filter
+|LDAP_USERSEARCHBASE |ou=people |LDAP user search base
+|LDAP_MANAGERUSERDN| cn=arsnova-manager,dc=example,dc=com |LDAP DN of manager user
+|LDAP_MANAGERPASSWORD| |LDAP password of manager user
 |CORE_TAG |master |Docker tag (repository branch) for Core Backend
 |WSGW_TAG |master |Docker tag (repository branch) for WebSocket Gateway
 |HTTPGW_TAG |master |Docker tag (repository branch) for HTTP Gateway
