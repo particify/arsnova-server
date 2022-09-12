@@ -56,6 +56,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.config.properties.SystemProperties;
+import de.thm.arsnova.config.properties.SystemProperties.Mail;
 import de.thm.arsnova.config.properties.TemplateProperties;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.FromV2Migrator;
@@ -257,7 +258,18 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean
 	public JavaMailSenderImpl mailSender() {
 		final JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-		mailSender.setHost(systemProperties.getMail().getHost());
+		final Mail mailProperties = systemProperties.getMail();
+		mailSender.setHost(mailProperties.getHost());
+		if (mailProperties.getPort() > 0) {
+			mailSender.setPort(mailProperties.getPort());
+		}
+		if (mailProperties.getUsername() != null && !mailProperties.getUsername().isEmpty()
+				&& mailProperties.getPassword() != null && !mailProperties.getPassword().isEmpty()) {
+			mailSender.setUsername(mailProperties.getUsername());
+			mailSender.setPassword(mailProperties.getPassword());
+			mailSender.getJavaMailProperties().setProperty("mail.smtp.auth", "true");
+			mailSender.getJavaMailProperties().setProperty("mail.smtps.auth", "true");
+		}
 
 		return mailSender;
 	}
