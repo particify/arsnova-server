@@ -8,6 +8,7 @@ import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.AnswerStatisticsUserSummary;
 import de.thm.arsnova.model.ChoiceAnswerStatistics;
+import de.thm.arsnova.model.PriorizationAnswerStatistics;
 import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.model.TextAnswerStatistics;
 
@@ -49,6 +50,12 @@ public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answe
 	@PreAuthorize("hasPermission(#contentId, 'content', 'read')")
 	public TextAnswerStatistics getTextStatistics(final String contentId) {
 		return answerService.getTextStatistics(contentId);
+	}
+
+	@Override
+	@PreAuthorize("hasPermission(#contentId, 'content', 'read')")
+	public PriorizationAnswerStatistics getPriorizationStatistics(final String contentId) {
+		return answerService.getPriorizationStatistics(contentId);
 	}
 
 	@Override

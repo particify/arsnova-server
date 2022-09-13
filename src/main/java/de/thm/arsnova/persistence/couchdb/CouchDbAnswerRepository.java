@@ -35,6 +35,9 @@ import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.ChoiceAnswerStatistics;
 import de.thm.arsnova.model.ChoiceAnswerStatistics.ChoiceRoundStatistics;
 import de.thm.arsnova.model.MultipleTextsAnswer;
+import de.thm.arsnova.model.PriorizationAnswer;
+import de.thm.arsnova.model.PriorizationAnswerStatistics;
+import de.thm.arsnova.model.PriorizationAnswerStatistics.PriorizationRoundStatistics;
 import de.thm.arsnova.persistence.AnswerRepository;
 
 public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
@@ -151,6 +154,39 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 		/* TODO: Review - might lead easily to IndexOutOfBoundsExceptions - use a Map instead? */
 		final List<ChoiceRoundStatistics> roundStatisticsList = new ArrayList(Collections.nCopies(round, null));
 		roundStatisticsList.set(round - 1, roundStats);
+		stats.setRoundStatistics(roundStatisticsList);
+
+		return stats;
+	}
+
+	@Override
+	public PriorizationAnswerStatistics findByContentIdRoundForPriorization(
+			final String contentId, final int optionCount) {
+		final List<PriorizationAnswer> answers = db.queryView(createQuery("by_contentid_hidden")
+						.reduce(false)
+						.includeDocs(true)
+						.startKey(ComplexKey.of(contentId, false))
+						.endKey(ComplexKey.of(contentId, false, ComplexKey.emptyObject())), PriorizationAnswer.class);
+		final PriorizationAnswerStatistics stats = new PriorizationAnswerStatistics();
+		stats.setContentId(contentId);
+		final PriorizationRoundStatistics roundStats = new PriorizationRoundStatistics();
+		roundStats.setRound(1);
+		roundStats.setAbstentionCount(0);
+		final List<Integer> assignedPoints = new ArrayList<>(Collections.nCopies(optionCount, 0));
+		for (final PriorizationAnswer answer : answers) {
+			final List<Integer> points = answer.getAssignedPoints();
+			if (points.size() == 0) {
+				roundStats.setAbstentionCount(roundStats.getAbstentionCount() + 1);
+			} else {
+				for (int i = 0; i < points.size(); i++) {
+					assignedPoints.set(i, assignedPoints.get(i) + points.get(i));
+				}
+			}
+		}
+		roundStats.setAnswerCount(answers.size());
+		roundStats.setAssignedPoints(assignedPoints);
+		final List<PriorizationRoundStatistics> roundStatisticsList = new ArrayList<>(Collections.nCopies(1, null));
+		roundStatisticsList.set(0, roundStats);
 		stats.setRoundStatistics(roundStatisticsList);
 
 		return stats;

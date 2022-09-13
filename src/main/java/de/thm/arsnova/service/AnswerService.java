@@ -24,6 +24,7 @@ import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.AnswerStatisticsUserSummary;
 import de.thm.arsnova.model.ChoiceAnswerStatistics;
+import de.thm.arsnova.model.PriorizationAnswerStatistics;
 import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.model.TextAnswerStatistics;
 
@@ -39,6 +40,8 @@ public interface AnswerService extends EntityService<Answer> {
 	TextAnswerStatistics getTextStatistics(String contentId, int round);
 
 	TextAnswerStatistics getTextStatistics(String contentId);
+
+	PriorizationAnswerStatistics getPriorizationStatistics(String contentId);
 
 	AnswerStatisticsUserSummary getStatisticsByUserIdAndContentIds(String userId, List<String> contentIds);
 
