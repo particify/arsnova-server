@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.AnswerStatisticsUserSummary;
+import de.thm.arsnova.model.ChoiceAnswerStatistics;
 import de.thm.arsnova.model.TextAnswer;
+import de.thm.arsnova.model.TextAnswerStatistics;
 
 @Service
 public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answer>
@@ -27,14 +29,26 @@ public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answe
 
 	@Override
 	@PreAuthorize("hasPermission(#contentId, 'content', 'read')")
-	public AnswerStatistics getStatistics(final String contentId, final int round) {
-		return answerService.getStatistics(contentId, round);
+	public ChoiceAnswerStatistics getChoiceStatistics(final String contentId, final int round) {
+		return answerService.getChoiceStatistics(contentId, round);
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#contentId, 'content', 'read')")
-	public AnswerStatistics getStatistics(final String contentId) {
-		return answerService.getStatistics(contentId);
+	public ChoiceAnswerStatistics getChoiceStatistics(final String contentId) {
+		return answerService.getChoiceStatistics(contentId);
+	}
+
+	@Override
+	@PreAuthorize("hasPermission(#contentId, 'content', 'read')")
+	public TextAnswerStatistics getTextStatistics(final String contentId, final int round) {
+		return answerService.getTextStatistics(contentId, round);
+	}
+
+	@Override
+	@PreAuthorize("hasPermission(#contentId, 'content', 'read')")
+	public TextAnswerStatistics getTextStatistics(final String contentId) {
+		return answerService.getTextStatistics(contentId);
 	}
 
 	@Override

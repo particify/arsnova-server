@@ -52,6 +52,7 @@ import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerResult;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.AnswerStatisticsUserSummary;
+import de.thm.arsnova.model.ChoiceAnswerStatistics;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.GridImageContent;
@@ -59,6 +60,8 @@ import de.thm.arsnova.model.MultipleTextsAnswer;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.ScaleChoiceContent;
 import de.thm.arsnova.model.TextAnswer;
+import de.thm.arsnova.model.TextAnswerStatistics;
+import de.thm.arsnova.model.TextAnswerStatistics.TextRoundStatistics;
 import de.thm.arsnova.model.WordcloudContent;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.security.User;
@@ -155,12 +158,12 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	}
 
 	@Override
-	public AnswerStatistics getStatistics(final String contentId, final int round) {
+	public ChoiceAnswerStatistics getChoiceStatistics(final String contentId, final int round) {
 		final Content content = contentService.get(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		final AnswerStatistics stats;
+		final ChoiceAnswerStatistics stats;
 		final int optionCount;
 		if (content instanceof ChoiceQuestionContent) {
 			if (content instanceof ScaleChoiceContent) {
@@ -175,34 +178,27 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			optionCount = grid.getColumns() * grid.getRows();
 			stats = answerRepository.findByContentIdRound(
 					content.getId(), round, optionCount);
-		} else if (content instanceof WordcloudContent) {
-			/* Count is not fixed for wordcloud options */
-			optionCount = -1;
-			stats = getTextStatistics(contentId, round);
 		} else {
 			throw new IllegalStateException(
 					"Content expected to be an instance of ChoiceQuestionContent or GridImageContent");
 		}
-
-		if (!(content instanceof WordcloudContent)) {
-			/* Fill list with zeros to prevent IndexOutOfBoundsExceptions */
-			final List<Integer> independentCounts = stats.getRoundStatistics().get(round - 1).getIndependentCounts();
-			while (independentCounts.size() < optionCount) {
-				independentCounts.add(0);
-			}
+		/* Fill list with zeros to prevent IndexOutOfBoundsExceptions */
+		final List<Integer> independentCounts = stats.getRoundStatistics().get(round - 1).getIndependentCounts();
+		while (independentCounts.size() < optionCount) {
+			independentCounts.add(0);
 		}
 
 		return stats;
 	}
 
 	@Override
-	public AnswerStatistics getStatistics(final String contentId) {
+	public ChoiceAnswerStatistics getChoiceStatistics(final String contentId) {
 		final Content content = contentService.get(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
 
-		return getStatistics(content.getId(), content.getState().getRound());
+		return getChoiceStatistics(content.getId(), content.getState().getRound());
 	}
 
 	@Override
@@ -211,10 +207,18 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		final AnswerStatistics stats = getStatistics(content.getId(), 1);
-		final AnswerStatistics stats2 = getStatistics(content.getId(), 2);
-		stats.getRoundStatistics().add(stats2.getRoundStatistics().get(1));
-
+		final AnswerStatistics stats;
+		if (content.getFormat() == Content.Format.WORDCLOUD) {
+			final TextAnswerStatistics textStats = getTextStatistics(content.getId(), 1);
+			final TextAnswerStatistics textStats2 = getTextStatistics(content.getId(), 2);
+			textStats.getRoundStatistics().add(textStats2.getRoundStatistics().get(1));
+			stats = textStats;
+		} else {
+			final ChoiceAnswerStatistics choiceStats = getChoiceStatistics(content.getId(), 1);
+			final ChoiceAnswerStatistics choiceStats2 = getChoiceStatistics(content.getId(), 2);
+			choiceStats.getRoundStatistics().add(choiceStats2.getRoundStatistics().get(1));
+			stats = choiceStats;
+		}
 		return stats;
 	}
 
@@ -243,7 +247,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 				answerResultList);
 	}
 
-	private AnswerStatistics getTextStatistics(final String contentId, final int round) {
+	public TextAnswerStatistics getTextStatistics(final String contentId, final int round) {
 		final Content content = contentService.get(contentId);
 		if (content == null) {
 			throw new NotFoundException();
@@ -262,8 +266,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 				.collect(Collectors.groupingBy(
 						Function.identity(),
 						Collectors.counting()));
-		final AnswerStatistics stats = new AnswerStatistics();
-		final AnswerStatistics.TextRoundStatistics roundStats = new AnswerStatistics.TextRoundStatistics();
+		final TextAnswerStatistics stats = new TextAnswerStatistics();
+		final TextRoundStatistics roundStats = new TextRoundStatistics();
 		roundStats.setRound(round);
 		roundStats.setAbstentionCount((int) answers.stream().filter(a -> a.getTexts().isEmpty()).count());
 		/* Group by text similarity and then choose the most common variant as
@@ -284,13 +288,23 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 								.reduce(Long::sum)
 								.map(Long::intValue)
 								.orElse(0)));
-		roundStats.setIndependentCounts(countsBySimilarity.values().stream().collect(Collectors.toList()));
 		roundStats.setTexts(countsBySimilarity.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
 		roundStats.setAnswerCount(answers.size());
+		roundStats.setIndependentCounts(countsBySimilarity.values().stream().collect(Collectors.toList()));
 		stats.setRoundStatistics(new ArrayList(Collections.nCopies(round, null)));
 		stats.getRoundStatistics().set(round - 1, roundStats);
 
 		return stats;
+	}
+
+	@Override
+	public TextAnswerStatistics getTextStatistics(final String contentId) {
+		final Content content = contentService.get(contentId);
+		if (content == null) {
+			throw new NotFoundException();
+		}
+
+		return getTextStatistics(content.getId(), content.getState().getRound());
 	}
 
 	@Override

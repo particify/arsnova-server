@@ -21,13 +21,13 @@ package de.thm.arsnova.persistence;
 import java.util.List;
 
 import de.thm.arsnova.model.Answer;
-import de.thm.arsnova.model.AnswerStatistics;
+import de.thm.arsnova.model.ChoiceAnswerStatistics;
 import de.thm.arsnova.model.MultipleTextsAnswer;
 
 public interface AnswerRepository extends CrudRepository<Answer, String> {
 	<T extends Answer> T findByContentIdUserIdPiRound(String contentId, Class<T> type, String userId, int piRound);
 
-	AnswerStatistics findByContentIdRound(String contentId, int round, int optionCount);
+	ChoiceAnswerStatistics findByContentIdRound(String contentId, int round, int optionCount);
 
 	Iterable<Answer> findStubsByContentIdAndHidden(String contentId, boolean excludeHidden);
 

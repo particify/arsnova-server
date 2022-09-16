@@ -23,16 +23,22 @@ import java.util.List;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.AnswerStatisticsUserSummary;
+import de.thm.arsnova.model.ChoiceAnswerStatistics;
 import de.thm.arsnova.model.TextAnswer;
+import de.thm.arsnova.model.TextAnswerStatistics;
 
 public interface AnswerService extends EntityService<Answer> {
 	Answer getMyAnswer(String contentId);
 
-	AnswerStatistics getStatistics(String contentId, int piRound);
+	ChoiceAnswerStatistics getChoiceStatistics(String contentId, int piRound);
 
-	AnswerStatistics getStatistics(String contentId);
+	ChoiceAnswerStatistics getChoiceStatistics(String contentId);
 
 	AnswerStatistics getAllStatistics(String contentId);
+
+	TextAnswerStatistics getTextStatistics(String contentId, int round);
+
+	TextAnswerStatistics getTextStatistics(String contentId);
 
 	AnswerStatisticsUserSummary getStatisticsByUserIdAndContentIds(String userId, List<String> contentIds);
 

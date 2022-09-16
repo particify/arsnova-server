@@ -15,13 +15,14 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.model.Answer;
-import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.ChoiceAnswer;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.MultipleTextsAnswer;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.ScaleChoiceContent;
+import de.thm.arsnova.model.TextAnswerStatistics;
+import de.thm.arsnova.model.TextAnswerStatistics.TextRoundStatistics;
 import de.thm.arsnova.model.WordcloudContent;
 
 /**
@@ -196,11 +197,11 @@ public class DataGenerationServiceImpl implements DataGenerationService {
 	}
 
 	private List<String> retreiveWordcloudKeywords(final WordcloudContent content) {
-		final AnswerStatistics stats = answerService.getStatistics(content.getId());
-		final Optional<AnswerStatistics.RoundStatistics> wordcloudStats =
+		final TextAnswerStatistics stats = answerService.getTextStatistics(content.getId());
+		final Optional<TextRoundStatistics> wordcloudStats =
 				stats.getRoundStatistics().stream()
 						.filter(s -> s.getRound() == content.getState().getRound()).findFirst();
-		return wordcloudStats.map(s -> ((AnswerStatistics.TextRoundStatistics) s).getTexts())
+		return wordcloudStats.map(s -> ((TextRoundStatistics) s).getTexts())
 				.orElse(Collections.emptyList());
 	}
 
