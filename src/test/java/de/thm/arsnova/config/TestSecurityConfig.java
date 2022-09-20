@@ -20,9 +20,11 @@ package de.thm.arsnova.config;
 
 import javax.servlet.ServletContext;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
+import org.pac4j.core.config.Config;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.TwitterClient;
 import org.pac4j.oidc.client.GoogleOidcClient;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.AdviceMode;
@@ -96,4 +98,12 @@ public class TestSecurityConfig extends SecurityConfig {
 
 	@MockBean
 	public TwitterClient twitterClient;
+
+	@MockBean
+	@Qualifier("oauthConfig")
+	public Config oauthConfig;
+
+	@MockBean
+	@Qualifier("samlConfig")
+	public Config samlConfig;
 }

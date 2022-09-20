@@ -26,8 +26,12 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.pac4j.core.client.IndirectClient;
-import org.pac4j.core.context.JEEContext;
+import org.pac4j.core.config.Config;
+import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.exception.http.WithLocationAction;
+import org.pac4j.core.util.FindBest;
+import org.pac4j.jee.context.JEEContext;
+import org.pac4j.jee.context.session.JEESessionStoreFactory;
 import org.pac4j.oidc.client.OidcClient;
 import org.pac4j.saml.client.SAML2Client;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,13 +64,19 @@ public class AuthenticationController {
 	private OidcClient oidcClient;
 	private SAML2Client saml2Client;
 	private CasAuthenticationEntryPoint casEntryPoint;
+	private Config oauthConfig;
+	private Config samlConfig;
 	private String apiPath;
 
 	public AuthenticationController(
 			@Qualifier("securedUserService") final UserService userService,
 			final SystemProperties systemProperties,
-			final ServletContext servletContext) {
+			final ServletContext servletContext,
+			@Qualifier("oauthConfig") final Config oauthConfig,
+			@Qualifier("samlConfig") final Config samlConfig) {
 		this.userService = userService;
+		this.oauthConfig = oauthConfig;
+		this.samlConfig = samlConfig;
 		final String proxyPath = systemProperties.getApi().getProxyPath();
 		this.apiPath = proxyPath != null && !proxyPath.isEmpty() ? proxyPath : servletContext.getContextPath();
 	}
@@ -156,12 +166,12 @@ public class AuthenticationController {
 				if (oidcClient == null) {
 					throw new IllegalArgumentException("Invalid provider ID.");
 				}
-				return buildSsoRedirectView(oidcClient, request, response);
+				return buildSsoRedirectView(oidcClient, oauthConfig, request, response);
 			case SecurityConfig.SAML_PROVIDER_ID:
 				if (saml2Client == null) {
 					throw new IllegalArgumentException("Invalid provider ID.");
 				}
-				return buildSsoRedirectView(saml2Client, request, response);
+				return buildSsoRedirectView(saml2Client, samlConfig, request, response);
 			case SecurityConfig.CAS_PROVIDER_ID:
 				if (casEntryPoint == null) {
 					throw new IllegalArgumentException("Invalid provider ID.");
@@ -175,10 +185,13 @@ public class AuthenticationController {
 
 	private RedirectView buildSsoRedirectView(
 			final IndirectClient client,
+			final Config config,
 			final HttpServletRequest request,
 			final HttpServletResponse response) {
 		final JEEContext context = new JEEContext(request, response);
-		final Optional<RedirectView> view = client.getRedirectionAction(context).map(action -> {
+		final SessionStore sessionStore = FindBest.sessionStoreFactory(
+				null, config, JEESessionStoreFactory.INSTANCE).newSessionStore();
+		final Optional<RedirectView> view = client.getRedirectionAction(context, sessionStore).map(action -> {
 			if (action instanceof WithLocationAction) {
 				return new RedirectView(((WithLocationAction) action).getLocation());
 			}

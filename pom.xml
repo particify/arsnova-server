@@ -18,7 +18,7 @@
 		<guava.version>31.1-jre</guava.version>
 		<aspectj.version>1.9.9.1</aspectj.version>
 		<jakarta-xml-bind.version>2.3.3</jakarta-xml-bind.version>
-		<pac4j.version>4.5.6</pac4j.version>
+		<pac4j.version>5.5.0</pac4j.version>
 		<graalvm.version>22.2.0</graalvm.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -229,6 +229,11 @@
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
 			<version>4.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.pac4j</groupId>
+			<artifactId>pac4j-javaee</artifactId>
+			<version>${pac4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.pac4j</groupId>
