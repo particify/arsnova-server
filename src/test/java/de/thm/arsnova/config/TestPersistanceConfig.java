@@ -29,7 +29,6 @@ import de.thm.arsnova.persistence.AnnouncementRepository;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentGroupRepository;
 import de.thm.arsnova.persistence.ContentRepository;
-import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.persistence.StatisticsRepository;
 import de.thm.arsnova.persistence.UserRepository;
@@ -41,9 +40,6 @@ import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
 public class TestPersistanceConfig {
 	@MockBean
 	private MangoCouchDbConnector mangoCouchDbConnector;
-
-	@MockBean
-	private LogEntryRepository logEntryRepository;
 
 	@MockBean
 	private UserRepository userRepository;

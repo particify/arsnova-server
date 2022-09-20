@@ -53,13 +53,10 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.config.properties.SystemProperties.Mail;
 import de.thm.arsnova.config.properties.TemplateProperties;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.migration.FromV2Migrator;
 import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.web.CorsFilter;
@@ -276,13 +273,5 @@ public class AppConfig implements WebMvcConfigurer {
 		mailSender.getJavaMailProperties().setProperty("mail.smtp.starttls.enable", "true");
 
 		return mailSender;
-	}
-
-	@Bean
-	public FromV2Migrator fromV2Migrator(final CouchDbMigrationProperties couchDbMigrationProperties) {
-		final UserProfile.AuthProvider authProviderFallback = couchDbMigrationProperties.isEnabled()
-				? couchDbMigrationProperties.getAuthenticationProviderFallback()
-				: UserProfile.AuthProvider.UNKNOWN;
-		return new FromV2Migrator(authProviderFallback, couchDbMigrationProperties.getContentGroupNames());
 	}
 }

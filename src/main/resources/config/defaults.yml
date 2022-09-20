@@ -23,19 +23,6 @@ arsnova:
       username: admin
       password: ""
 
-      migration:
-        enabled: false
-        host: localhost
-        port: 5984
-        db-name: arsnova2
-        username: admin
-        password: ""
-        authentication-provider-fallback: UNKNOWN
-        content-group-names:
-          lecture: Lecture
-          preparation: Preparation
-          flashcard: Flashcards
-
     # Mail server
     mail:
       host: ""
