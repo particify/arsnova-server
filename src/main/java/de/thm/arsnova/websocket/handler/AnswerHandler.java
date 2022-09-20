@@ -37,6 +37,7 @@ import de.thm.arsnova.event.BulkChangeEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.Content.Format;
 import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.service.AnswerService;
 import de.thm.arsnova.websocket.message.AnswersChanged;
@@ -72,11 +73,13 @@ public class AnswerHandler {
 			final String roomId = anyAnswer.getRoomId();
 			final List<String> answerIds = groupedAnswers.get(contentId).stream()
 					.map(Answer::getId).collect(Collectors.toList());
-			final AnswerStatistics stats =
-					anyAnswer.getFormat() == Content.Format.CHOICE || anyAnswer.getFormat() == Content.Format.SCALE
-					|| anyAnswer.getFormat() == Content.Format.SORT || anyAnswer.getFormat() == Content.Format.WORDCLOUD
-							? answerService.getStatistics(contentId)
-							: null;
+			AnswerStatistics stats = null;
+			final Format format = anyAnswer.getFormat();
+			if (format == Content.Format.CHOICE || format == Content.Format.SCALE || format == Content.Format.SORT) {
+				stats = answerService.getChoiceStatistics(contentId);
+			} else if (format == Content.Format.WORDCLOUD) {
+				stats = answerService.getTextStatistics(contentId);
+			}
 			final AnswersChanged changedMessage = new AnswersChanged(answerIds, stats);
 			messagingTemplate.convertAndSend(
 					"amq.topic",

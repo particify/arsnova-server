@@ -32,7 +32,8 @@ import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 
 import de.thm.arsnova.model.Answer;
-import de.thm.arsnova.model.AnswerStatistics;
+import de.thm.arsnova.model.ChoiceAnswerStatistics;
+import de.thm.arsnova.model.ChoiceAnswerStatistics.ChoiceRoundStatistics;
 import de.thm.arsnova.model.MultipleTextsAnswer;
 import de.thm.arsnova.persistence.AnswerRepository;
 
@@ -108,18 +109,18 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 	}
 
 	@Override
-	public AnswerStatistics findByContentIdRound(final String contentId, final int round, final int optionCount) {
+	public ChoiceAnswerStatistics findByContentIdRound(final String contentId, final int round, final int optionCount) {
 		final ViewResult result = db.queryView(createQuery("by_contentid_round_selectedchoiceindexes")
 						.group(true)
 						.startKey(ComplexKey.of(contentId, round))
 						.endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())));
-		final AnswerStatistics stats = new AnswerStatistics();
+		final ChoiceAnswerStatistics stats = new ChoiceAnswerStatistics();
 		stats.setContentId(contentId);
-		final AnswerStatistics.RoundStatistics roundStats = new AnswerStatistics.RoundStatistics();
+		final ChoiceAnswerStatistics.ChoiceRoundStatistics roundStats = new ChoiceAnswerStatistics.ChoiceRoundStatistics();
 		roundStats.setRound(round);
 		roundStats.setAbstentionCount(0);
 		final List<Integer> independentCounts = new ArrayList(Collections.nCopies(optionCount, 0));
-		final Map<List<Integer>, AnswerStatistics.RoundStatistics.Combination> combinations = new HashMap();
+		final Map<List<Integer>, ChoiceAnswerStatistics.ChoiceRoundStatistics.Combination> combinations = new HashMap();
 		for (final ViewResult.Row d : result) {
 			if (d.getKeyAsNode().get(2).size() == 0) {
 				/* Abstentions */
@@ -135,9 +136,9 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 					independentCounts.set(indexes[i], independentCounts.get(indexes[i]) + d.getValueAsInt());
 				}
 				/* Count option combinations */
-				final AnswerStatistics.RoundStatistics.Combination combination =
+				final ChoiceAnswerStatistics.ChoiceRoundStatistics.Combination combination =
 						combinations.getOrDefault(Arrays.asList(indexes),
-								new AnswerStatistics.RoundStatistics.Combination(
+								new ChoiceAnswerStatistics.ChoiceRoundStatistics.Combination(
 										Arrays.asList(indexes), d.getValueAsInt()));
 				combinations.put(Arrays.asList(indexes), combination);
 				roundStats.setCombinatedCounts(combinations.values());
@@ -148,7 +149,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 		}
 		roundStats.setIndependentCounts(independentCounts);
 		/* TODO: Review - might lead easily to IndexOutOfBoundsExceptions - use a Map instead? */
-		final List<AnswerStatistics.RoundStatistics> roundStatisticsList = new ArrayList(Collections.nCopies(round, null));
+		final List<ChoiceRoundStatistics> roundStatisticsList = new ArrayList(Collections.nCopies(round, null));
 		roundStatisticsList.set(round - 1, roundStats);
 		stats.setRoundStatistics(roundStatisticsList);
 
