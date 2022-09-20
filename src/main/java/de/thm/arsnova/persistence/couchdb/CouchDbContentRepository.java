@@ -18,10 +18,7 @@
 
 package de.thm.arsnova.persistence.couchdb;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewResult;
 
@@ -35,27 +32,18 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Override
 	public List<Content> findByRoomIdForUsers(final String roomId) {
-		final List<Content> contents = new ArrayList<>();
-		final List<Content> questions1 = findByRoomIdAndVariantAndActive(roomId, "lecture", true);
-		final List<Content> questions2 = findByRoomIdAndVariantAndActive(roomId, "preparation", true);
-		final List<Content> questions3 = findByRoomIdAndVariantAndActive(roomId, "flashcard", true);
-		contents.addAll(questions1);
-		contents.addAll(questions2);
-		contents.addAll(questions3);
-
-		return contents;
+		return findByRoomId(roomId);
 	}
 
 	@Override
 	public List<Content> findByRoomIdForSpeaker(final String roomId) {
-		return findByRoomIdAndVariantAndActive(roomId);
+		return findByRoomId(roomId);
 	}
 
 	@Override
 	public int countByRoomId(final String roomId) {
-		final ViewResult result = db.queryView(createQuery("by_roomid_locked")
-				.startKey(ComplexKey.of(roomId))
-				.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))
+		final ViewResult result = db.queryView(createQuery("by_roomid")
+				.key(roomId)
 				.reduce(true));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
@@ -70,9 +58,8 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Override
 	public Iterable<Content> findStubsByRoomId(final String roomId) {
-		return createEntityStubs(db.queryView(createQuery("by_roomid_locked")
-				.startKey(ComplexKey.of(roomId))
-				.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))
+		return createEntityStubs(db.queryView(createQuery("by_roomid")
+				.key(roomId)
 				.reduce(false)));
 	}
 
@@ -82,19 +69,10 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Override
 	public List<Content> findByRoomId(final String roomId) {
-		return findByRoomIdAndVariantAndActive(roomId);
-	}
-
-	@Override
-	public List<Content> findByRoomIdAndVariantAndActive(final Object... keys) {
-		final Object[] endKeys = Arrays.copyOf(keys, keys.length + 1);
-		endKeys[keys.length] = ComplexKey.emptyObject();
-
-		return db.queryView(createQuery("by_roomid_locked")
+		return db.queryView(createQuery("by_roomid")
 						.includeDocs(true)
 						.reduce(false)
-						.startKey(ComplexKey.of(keys))
-						.endKey(ComplexKey.of(endKeys)),
+						.key(roomId),
 				Content.class);
 	}
 }

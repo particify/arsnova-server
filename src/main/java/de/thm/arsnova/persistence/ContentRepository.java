@@ -5,8 +5,6 @@ import java.util.List;
 import de.thm.arsnova.model.Content;
 
 public interface ContentRepository extends CrudRepository<Content, String> {
-	List<Content> findByRoomIdAndVariantAndActive(Object... keys);
-
 	List<Content> findByRoomIdForUsers(String roomId);
 
 	List<Content> findByRoomIdForSpeaker(String roomId);

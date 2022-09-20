@@ -10,10 +10,10 @@ var designDoc = {
 			},
 			"reduce": "_count"
 		},
-		"by_roomid_locked": {
+		"by_roomid": {
 			"map": function (doc) {
 				if (doc.type === "Content") {
-					emit([doc.roomId, doc.locked, doc.subject, doc.body.substr(0, 16)], {_rev: doc._rev});
+					emit(doc.roomId, {_rev: doc._rev});
 				}
 			},
 			"reduce": "_count"
