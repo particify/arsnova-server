@@ -73,7 +73,7 @@ public class AuthenticationController {
 			final SystemProperties systemProperties,
 			final ServletContext servletContext,
 			@Qualifier("oauthConfig") final Config oauthConfig,
-			@Qualifier("samlConfig") final Config samlConfig) {
+			@Autowired(required = false) @Qualifier("samlConfig") final Config samlConfig) {
 		this.userService = userService;
 		this.oauthConfig = oauthConfig;
 		this.samlConfig = samlConfig;
