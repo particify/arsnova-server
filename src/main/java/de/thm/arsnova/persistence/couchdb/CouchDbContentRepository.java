@@ -19,6 +19,7 @@
 package de.thm.arsnova.persistence.couchdb;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewResult;
 
@@ -31,22 +32,19 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<Content> findByRoomIdForUsers(final String roomId) {
-		return findByRoomId(roomId);
-	}
-
-	@Override
-	public List<Content> findByRoomIdForSpeaker(final String roomId) {
-		return findByRoomId(roomId);
-	}
-
-	@Override
 	public int countByRoomId(final String roomId) {
 		final ViewResult result = db.queryView(createQuery("by_roomid")
 				.key(roomId)
 				.reduce(true));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
+	}
+
+	@Override
+	public List<String> findIdsByRoomId(final String roomId) {
+		final ViewResult result = db.queryView(createQuery("by_roomid").reduce(false).key(roomId));
+
+		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
 	}
 
 	@Override

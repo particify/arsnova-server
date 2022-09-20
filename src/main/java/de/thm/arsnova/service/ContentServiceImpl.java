@@ -43,7 +43,6 @@ import de.thm.arsnova.model.WordcloudContent;
 import de.thm.arsnova.model.export.ContentExport;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentRepository;
-import de.thm.arsnova.security.User;
 import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 
@@ -53,10 +52,6 @@ import de.thm.arsnova.web.exceptions.NotFoundException;
 @Service
 @Primary
 public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implements ContentService {
-	private UserService userService;
-
-	private RoomService roomService;
-
 	private ContentRepository contentRepository;
 
 	private ContentGroupServiceImpl contentGroupService;
@@ -65,17 +60,13 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	public ContentServiceImpl(
 			final ContentRepository repository,
-			final RoomService roomService,
 			final AnswerRepository answerRepository,
-			final UserService userService,
 			final CsvService csvService,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
 			final Validator validator) {
 		super(Content.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.contentRepository = repository;
-		this.roomService = roomService;
-		this.userService = userService;
 		this.csvService = csvService;
 	}
 
@@ -93,45 +84,16 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	/**
-	  * Retrieves all contents of a room. Caching is currently not applied here
-	  * so avoid using this method for core functionality.
+	  * Retrieves all contents of a room.
 	  */
 	@Override
 	public List<Content> getByRoomId(final String roomId) {
-		final Room room = roomService.get(roomId);
-		final User user = userService.getCurrentUser();
-		if (room.getOwnerId().equals(user.getId())) {
-			return contentRepository.findByRoomIdForSpeaker(roomId);
-		} else {
-			return contentRepository.findByRoomIdForUsers(roomId);
-		}
-	}
-
-	@Override
-	public Iterable<Content> getByRoomIdAndGroup(final String roomId, final String group) {
-		final ContentGroup contentGroup = contentGroupService.getByRoomIdAndName(roomId, group);
-
-		if (contentGroup == null) {
-			throw new NotFoundException("Content group does not exist.");
-		}
-
-		return get(contentGroup.getContentIds());
+		return get(contentRepository.findIdsByRoomId(roomId));
 	}
 
 	@Override
 	public int countByRoomId(final String roomId) {
 		return contentRepository.countByRoomId(roomId);
-	}
-
-	@Override
-	public int countByRoomIdAndGroup(final String roomId, final String group) {
-		final ContentGroup contentGroup = contentGroupService.getByRoomIdAndName(roomId, group);
-
-		if (contentGroup == null) {
-			throw new NotFoundException("Content group does not exist.");
-		}
-
-		return contentGroup.getContentIds().size();
 	}
 
 	@Override
@@ -205,17 +167,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 				contents.stream().map(c -> new ContentExport(c)).collect(Collectors.toList()),
 				ContentExport.class,
 				charset == null ? StandardCharsets.UTF_8 : Charset.forName(charset));
-	}
-
-	private void deleteByRoomAndGroupName(final Room room, final String groupName) {
-		if ("all".equals(groupName)) {
-			delete(contentRepository.findStubsByRoomId(room.getId()));
-		} else {
-			final List<String> ids = contentGroupService.getByRoomIdAndName(room.getId(), groupName).getContentIds();
-			final Iterable<Content> contents = contentRepository.findStubsByIds(ids);
-			contents.forEach(c -> c.setRoomId(room.getId()));
-			delete(contents);
-		}
 	}
 
 	@EventListener
