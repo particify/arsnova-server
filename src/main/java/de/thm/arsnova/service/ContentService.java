@@ -30,11 +30,7 @@ import de.thm.arsnova.model.WordcloudContent;
 public interface ContentService extends EntityService<Content> {
 	List<Content> getByRoomId(String roomId);
 
-	Iterable<Content> getByRoomIdAndGroup(String roomId, String group);
-
 	int countByRoomId(String roomId);
-
-	int countByRoomIdAndGroup(String roomId, String group);
 
 	List<Integer> getCorrectChoiceIndexes(String contentId);
 

@@ -2,6 +2,7 @@ package de.thm.arsnova.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.stereotype.Service;
@@ -21,26 +22,15 @@ public class SecuredContentService extends AbstractSecuredEntityServiceImpl<Cont
 
 	@Override
 	@PreAuthorize("hasPermission(#roomId, 'room', 'read')")
+	@PostFilter(value = "hasPermission(filterObject, 'content', 'read')")
 	public List<Content> getByRoomId(final String roomId) {
 		return contentService.getByRoomId(roomId);
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#roomId, 'room', 'read')")
-	public Iterable<Content> getByRoomIdAndGroup(final String roomId, final String group) {
-		return contentService.getByRoomIdAndGroup(roomId, group);
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#roomId, 'room', 'read')")
 	public int countByRoomId(final String roomId) {
 		return contentService.countByRoomId(roomId);
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#roomId, 'room', 'read')")
-	public int countByRoomIdAndGroup(final String roomId, final String group) {
-		return contentService.countByRoomIdAndGroup(roomId, group);
 	}
 
 	@Override
