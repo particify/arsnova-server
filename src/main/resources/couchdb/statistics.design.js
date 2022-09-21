@@ -17,6 +17,14 @@ var designDoc = {
 						emit([doc.type, "closed"], 1);
 					}
 					break;
+				case "ContentGroup":
+					if (doc.published) {
+						emit([doc.type, "published"], 1);
+					}
+					if (doc.lastPublishedIndex !== -1) {
+						emit([doc.type, "usingPublishingRange"], 1);
+					}
+					break;
 				case "Content":
 					emit([doc.type, "format", doc.format], 1);
 					break;

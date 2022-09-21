@@ -89,6 +89,37 @@ public class Statistics {
 	}
 
 	@JsonView(View.Admin.class)
+	public static class ContentGroupStats {
+		private int totalCount;
+		private int published;
+		private int usingPublishingRange;
+
+		public int getTotalCount() {
+			return totalCount;
+		}
+
+		public void setTotalCount(final int totalCount) {
+			this.totalCount = totalCount;
+		}
+
+		public int getPublished() {
+			return published;
+		}
+
+		public void setPublished(final int published) {
+			this.published = published;
+		}
+
+		public int getUsingPublishingRange() {
+			return usingPublishingRange;
+		}
+
+		public void setUsingPublishingRange(final int usingPublishingRange) {
+			this.usingPublishingRange = usingPublishingRange;
+		}
+	}
+
+	@JsonView(View.Admin.class)
 	public static class ContentStats {
 		private int totalCount;
 		private Map<String, Integer> countByFormat = new HashMap<>();
@@ -133,7 +164,7 @@ public class Statistics {
 	}
 
 	@JsonView(View.Admin.class)
-	public static class CommentStats {
+	public static class AnnouncementStats {
 		private int totalCount;
 
 		public int getTotalCount() {
@@ -147,28 +178,33 @@ public class Statistics {
 
 	private UserProfileStats userProfile;
 	private RoomStats room;
+	private ContentGroupStats contentGroup;
 	private ContentStats content;
 	private AnswerStats answer;
-	private CommentStats comment;
+	private AnnouncementStats announcement;
 
 	public Statistics() {
 		this.userProfile = new UserProfileStats();
 		this.room = new RoomStats();
+		this.contentGroup = new ContentGroupStats();
 		this.content = new ContentStats();
 		this.answer = new AnswerStats();
-		this.comment = new CommentStats();
+		this.announcement = new AnnouncementStats();
 	}
 
 	public Statistics(
 			final UserProfileStats userProfile,
 			final RoomStats room,
+			final ContentGroupStats contentGroup,
 			final ContentStats content,
-			final AnswerStats answer, final CommentStats comment) {
+			final AnswerStats answer,
+			final AnnouncementStats announcement) {
 		this.userProfile = userProfile;
 		this.room = room;
+		this.contentGroup = contentGroup;
 		this.content = content;
 		this.answer = answer;
-		this.comment = comment;
+		this.announcement = announcement;
 	}
 
 	public UserProfileStats getUserProfile() {
@@ -187,6 +223,14 @@ public class Statistics {
 		this.room = room;
 	}
 
+	public ContentGroupStats getContentGroup() {
+		return contentGroup;
+	}
+
+	public void setContentGroup(final ContentGroupStats contentGroup) {
+		this.contentGroup = contentGroup;
+	}
+
 	public ContentStats getContent() {
 		return content;
 	}
@@ -203,11 +247,11 @@ public class Statistics {
 		this.answer = answer;
 	}
 
-	public CommentStats getComment() {
-		return comment;
+	public AnnouncementStats getAnnouncement() {
+		return announcement;
 	}
 
-	public void setComment(final CommentStats comment) {
-		this.comment = comment;
+	public void setAnnouncement(final AnnouncementStats announcement) {
+		this.announcement = announcement;
 	}
 }

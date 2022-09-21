@@ -42,9 +42,10 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 		final Statistics stats = new Statistics();
 		final Statistics.UserProfileStats userProfileStats = stats.getUserProfile();
 		final Statistics.RoomStats roomStats = stats.getRoom();
+		final Statistics.ContentGroupStats contentGroupStats = stats.getContentGroup();
 		final Statistics.ContentStats contentStats = stats.getContent();
 		final Statistics.AnswerStats answerStats = stats.getAnswer();
-		final Statistics.CommentStats commentStats = stats.getComment();
+		final Statistics.AnnouncementStats announcementStats = stats.getAnnouncement();
 
 		try {
 			final ViewResult statsResult = db.queryView(createQuery("statistics").group(true));
@@ -86,6 +87,22 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 								}
 							}
 							break;
+						case "ContentGroup":
+							if (key.size() == 1) {
+								contentGroupStats.setTotalCount(value);
+							} else if (key.size() > 1) {
+								switch (key.get(1).asText()) {
+									case "published":
+										contentGroupStats.setPublished(value);
+										break;
+									case "usingPublishingRange":
+										contentGroupStats.setUsingPublishingRange(value);
+										break;
+									default:
+										break;
+								}
+							}
+							break;
 						case "Content":
 							if (key.size() == 1) {
 								contentStats.setTotalCount(value);
@@ -112,9 +129,9 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 								}
 							}
 							break;
-						case "Comment":
+						case "Announcement":
 							if (key.size() == 1) {
-								commentStats.setTotalCount(value);
+								announcementStats.setTotalCount(value);
 							}
 							break;
 						default:
