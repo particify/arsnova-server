@@ -20,7 +20,6 @@ package de.thm.arsnova.config;
 
 import org.ektorp.impl.StdCouchDbInstance;
 import org.ektorp.spring.HttpClientFactoryBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -36,7 +35,6 @@ import de.thm.arsnova.persistence.AnnouncementRepository;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentGroupRepository;
 import de.thm.arsnova.persistence.ContentRepository;
-import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.persistence.StatisticsRepository;
 import de.thm.arsnova.persistence.UserRepository;
@@ -45,7 +43,6 @@ import de.thm.arsnova.persistence.couchdb.CouchDbAnnouncementRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbAnswerRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbContentGroupRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbContentRepository;
-import de.thm.arsnova.persistence.couchdb.CouchDbLogEntryRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbRoomRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbStatisticsRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbUserRepository;
@@ -62,16 +59,11 @@ import de.thm.arsnova.persistence.couchdb.support.http.PatchedHttpClientFactoryB
 })
 @Profile("!test")
 public class PersistenceConfig {
-	private static final int MIGRATION_SOCKET_TIMEOUT = 30000;
-
 	private CouchDbMainProperties properties;
-	private CouchDbMigrationProperties migrationProperties;
 
 	public PersistenceConfig(
-			final CouchDbMainProperties couchDbProperties,
-			final CouchDbMigrationProperties migrationProperties) {
+			final CouchDbMainProperties couchDbProperties) {
 		this.properties = couchDbProperties;
-		this.migrationProperties = migrationProperties;
 	}
 
 	@Bean
@@ -87,27 +79,8 @@ public class PersistenceConfig {
 	}
 
 	@Bean
-	@ConditionalOnProperty(
-			name = "enabled",
-			prefix = CouchDbMigrationProperties.PREFIX)
-	public MangoCouchDbConnector couchDbMigrationConnector() throws Exception {
-		return new MangoCouchDbConnector(
-				migrationProperties.getDbName(),
-				couchDbMigrationInstance(),
-				couchDbObjectMapperFactory());
-	}
-
-	@Bean
 	public StdCouchDbInstance couchDbInstance() throws Exception {
 		return new StdCouchDbInstance(couchDbHttpClientFactory().getObject());
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "enabled",
-			prefix = CouchDbMigrationProperties.PREFIX)
-	public StdCouchDbInstance couchDbMigrationInstance() throws Exception {
-		return new StdCouchDbInstance(couchDbMigrationHttpClientFactory().getObject());
 	}
 
 	@Bean
@@ -124,30 +97,8 @@ public class PersistenceConfig {
 	}
 
 	@Bean
-	@ConditionalOnProperty(
-			name = "enabled",
-			prefix = CouchDbMigrationProperties.PREFIX)
-	public HttpClientFactoryBean couchDbMigrationHttpClientFactory() throws Exception {
-		final HttpClientFactoryBean factory = new PatchedHttpClientFactoryBean();
-		factory.setHost(migrationProperties.getHost());
-		factory.setPort(migrationProperties.getPort());
-		if (!migrationProperties.getUsername().isEmpty()) {
-			factory.setUsername(migrationProperties.getUsername());
-			factory.setPassword(migrationProperties.getPassword());
-		}
-		factory.setSocketTimeout(MIGRATION_SOCKET_TIMEOUT);
-
-		return factory;
-	}
-
-	@Bean
 	public CouchDbObjectMapperFactory couchDbObjectMapperFactory() {
 		return new CouchDbObjectMapperFactory();
-	}
-
-	@Bean
-	public LogEntryRepository logEntryRepository() throws Exception {
-		return new CouchDbLogEntryRepository(couchDbConnector(), false);
 	}
 
 	@Bean

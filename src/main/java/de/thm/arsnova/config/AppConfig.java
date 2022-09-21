@@ -20,7 +20,6 @@ package de.thm.arsnova.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -48,19 +47,14 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.config.properties.SystemProperties.Mail;
 import de.thm.arsnova.config.properties.TemplateProperties;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.migration.FromV2Migrator;
-import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.web.CorsFilter;
 import de.thm.arsnova.web.PathBasedContentNegotiationStrategy;
@@ -101,7 +95,6 @@ public class AppConfig implements WebMvcConfigurer {
 	@Override
 	public void configureMessageConverters(final List<HttpMessageConverter<?>> converters) {
 		converters.add(defaultJsonMessageConverter());
-		converters.add(apiV2JsonMessageConverter());
 		converters.add(stringMessageConverter());
 		converters.add(byteArrayHttpMessageConverter());
 	}
@@ -122,11 +115,6 @@ public class AppConfig implements WebMvcConfigurer {
 	@Override
 	public void configureViewResolvers(final ViewResolverRegistry registry) {
 		registry.viewResolver(new InternalResourceViewResolver());
-	}
-
-	@Override
-	public void addResourceHandlers(final ResourceHandlerRegistry registry) {
-		registry.addResourceHandler("swagger.json").addResourceLocations("classpath:/");
 	}
 
 	@Bean
@@ -167,26 +155,6 @@ public class AppConfig implements WebMvcConfigurer {
 		final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
 		final List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(API_V3_MEDIA_TYPE);
-		mediaTypes.add(MediaType.APPLICATION_JSON);
-		converter.setSupportedMediaTypes(mediaTypes);
-
-		return converter;
-	}
-
-	@Bean
-	public MappingJackson2HttpMessageConverter apiV2JsonMessageConverter() {
-		final Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
-		builder
-				.serializationInclusion(JsonInclude.Include.NON_NULL)
-				.defaultViewInclusion(false)
-				.indentOutput(systemProperties.getApi().isIndentResponseBody())
-				.featuresToEnable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-				.featuresToEnable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
-				.modules(new CouchDbDocumentModule());
-		final ObjectMapper mapper = builder.build();
-		mapper.setConfig(mapper.getSerializationConfig().withView(View.Public.class));
-		final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
-		final List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(MediaType.APPLICATION_JSON);
 		converter.setSupportedMediaTypes(mediaTypes);
 
@@ -276,13 +244,5 @@ public class AppConfig implements WebMvcConfigurer {
 		mailSender.getJavaMailProperties().setProperty("mail.smtp.starttls.enable", "true");
 
 		return mailSender;
-	}
-
-	@Bean
-	public FromV2Migrator fromV2Migrator(final CouchDbMigrationProperties couchDbMigrationProperties) {
-		final UserProfile.AuthProvider authProviderFallback = couchDbMigrationProperties.isEnabled()
-				? couchDbMigrationProperties.getAuthenticationProviderFallback()
-				: UserProfile.AuthProvider.UNKNOWN;
-		return new FromV2Migrator(authProviderFallback, couchDbMigrationProperties.getContentGroupNames());
 	}
 }

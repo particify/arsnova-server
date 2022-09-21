@@ -52,11 +52,6 @@ public class JwtTokenFilter extends GenericFilterBean {
 			final FilterChain filterChain)
 			throws IOException, ServletException {
 		final HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
-		if (httpServletRequest.getRequestURI().startsWith("/v2/")) {
-			filterChain.doFilter(servletRequest, servletResponse);
-			return;
-		}
-
 		JwtToken token = null;
 		final String jwtHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
 		if (jwtHeader != null) {
