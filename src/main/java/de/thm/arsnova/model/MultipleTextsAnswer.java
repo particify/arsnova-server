@@ -8,7 +8,7 @@ import javax.validation.constraints.NotEmpty;
 import de.thm.arsnova.model.serialization.View;
 
 public class MultipleTextsAnswer extends Answer {
-	private @NotEmpty List<String> texts = new ArrayList<>();
+	private @NotEmpty List<@NotEmpty String> texts = new ArrayList<>();
 
 	public MultipleTextsAnswer() {
 

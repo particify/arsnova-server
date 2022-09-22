@@ -417,6 +417,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			}
 			answer.setRound(content.getState().getRound());
 		}
+		validate(answer);
 	}
 
 	@Override
@@ -425,6 +426,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		final Room room = roomService.get(content.getRoomId());
 		answer.setContentId(content.getId());
 		answer.setRoomId(room.getId());
+		validate(answer);
 	}
 
 	@EventListener
