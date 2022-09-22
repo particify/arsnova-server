@@ -21,13 +21,14 @@ package de.thm.arsnova.model;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
 
 public class ChoiceAnswer extends Answer {
-	private List<@PositiveOrZero Integer> selectedChoiceIndexes = new ArrayList<>();
+	private List<@NotNull @PositiveOrZero Integer> selectedChoiceIndexes = new ArrayList<>();
 
 	public ChoiceAnswer() {
 
