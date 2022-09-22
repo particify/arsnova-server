@@ -79,6 +79,8 @@ public class AnswerHandler {
 				stats = answerService.getChoiceStatistics(contentId);
 			} else if (format == Content.Format.WORDCLOUD) {
 				stats = answerService.getTextStatistics(contentId);
+			} else if (format == Content.Format.PRIORIZATION) {
+				stats = answerService.getPriorizationStatistics(contentId);
 			}
 			final AnswersChanged changedMessage = new AnswersChanged(answerIds, stats);
 			messagingTemplate.convertAndSend(

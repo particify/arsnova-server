@@ -57,6 +57,8 @@ import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.GridImageContent;
 import de.thm.arsnova.model.MultipleTextsAnswer;
+import de.thm.arsnova.model.PriorizationAnswerStatistics;
+import de.thm.arsnova.model.PriorizationChoiceContent;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.ScaleChoiceContent;
 import de.thm.arsnova.model.TextAnswer;
@@ -213,6 +215,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			final TextAnswerStatistics textStats2 = getTextStatistics(content.getId(), 2);
 			textStats.getRoundStatistics().add(textStats2.getRoundStatistics().get(1));
 			stats = textStats;
+		} else if (content.getFormat() == Content.Format.PRIORIZATION) {
+			stats = getPriorizationStatistics(content.getId());
 		} else {
 			final ChoiceAnswerStatistics choiceStats = getChoiceStatistics(content.getId(), 1);
 			final ChoiceAnswerStatistics choiceStats2 = getChoiceStatistics(content.getId(), 2);
@@ -305,6 +309,18 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		}
 
 		return getTextStatistics(content.getId(), content.getState().getRound());
+	}
+
+	@Override
+	public PriorizationAnswerStatistics getPriorizationStatistics(final String contentId) {
+		final Content content = contentService.get(contentId);
+		if (content == null) {
+			throw new NotFoundException();
+		}
+		final Integer optionCount = ((PriorizationChoiceContent) content).getOptions().size();
+		final PriorizationAnswerStatistics stats =
+				answerRepository.findByContentIdRoundForPriorization(contentId, optionCount);
+		return stats;
 	}
 
 	@Override
