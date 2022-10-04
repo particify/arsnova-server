@@ -18,7 +18,7 @@
 		<guava.version>31.1-jre</guava.version>
 		<aspectj.version>1.9.9.1</aspectj.version>
 		<jakarta-xml-bind.version>2.3.3</jakarta-xml-bind.version>
-		<pac4j.version>5.6.0</pac4j.version>
+		<pac4j.version>5.6.1</pac4j.version>
 		<graalvm.version>22.2.0</graalvm.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
