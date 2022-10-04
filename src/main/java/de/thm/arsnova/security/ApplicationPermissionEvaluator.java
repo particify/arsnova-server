@@ -91,7 +91,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object targetDomainObject,
 			final Object permission) {
 		logger.debug(
-				"Evaluating permission: hasPermission({}, {}. {})",
+				"Evaluating permission: hasPermission({}, {}, {})",
 				authentication,
 				targetDomainObject,
 				permission);
