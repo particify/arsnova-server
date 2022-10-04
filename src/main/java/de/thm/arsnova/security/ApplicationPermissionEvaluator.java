@@ -37,6 +37,7 @@ import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.service.AnnouncementService;
 import de.thm.arsnova.service.AnswerService;
 import de.thm.arsnova.service.ContentGroupService;
 import de.thm.arsnova.service.ContentService;
@@ -68,17 +69,20 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	private final ContentService contentService;
 	private final ContentGroupService contentGroupService;
 	private final AnswerService answerService;
+	private final AnnouncementService announcementService;
 
 	public ApplicationPermissionEvaluator(
 			final RoomService roomService,
 			final ContentService contentService,
 			final ContentGroupService contentGroupService,
-			final AnswerService answerService
+			final AnswerService answerService,
+			final AnnouncementService announcementService
 	) {
 		this.roomService = roomService;
 		this.contentService = contentService;
 		this.contentGroupService = contentGroupService;
 		this.answerService = answerService;
+		this.announcementService = announcementService;
 	}
 
 	@Override
@@ -156,6 +160,10 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 					final Answer targetAnswer = answerService.get(targetId.toString());
 					return targetAnswer != null
 							&& hasAnswerPermission(authentication, targetAnswer, permission.toString());
+				case "announcement":
+					final Announcement targetAnnouncement = announcementService.get(targetId.toString());
+					return targetAnnouncement != null
+							&& hasAnnouncementPermission(authentication, targetAnnouncement, permission.toString());
 				default:
 					return false;
 			}
