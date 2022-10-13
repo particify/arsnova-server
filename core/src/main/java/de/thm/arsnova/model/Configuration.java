@@ -27,30 +27,30 @@ import java.util.Map;
 import de.thm.arsnova.model.serialization.View;
 
 public class Configuration {
-	private List<AuthenticationProvider> authenticationProviders;
-	private Map<String, Object> ui;
+  private List<AuthenticationProvider> authenticationProviders;
+  private Map<String, Object> ui;
 
-	@JsonView(View.Public.class)
-	public List<AuthenticationProvider> getAuthenticationProviders() {
-		return authenticationProviders;
-	}
+  @JsonView(View.Public.class)
+  public List<AuthenticationProvider> getAuthenticationProviders() {
+    return authenticationProviders;
+  }
 
-	public void setAuthenticationProviders(final List<AuthenticationProvider> authenticationProviders) {
-		this.authenticationProviders = authenticationProviders;
-	}
+  public void setAuthenticationProviders(final List<AuthenticationProvider> authenticationProviders) {
+    this.authenticationProviders = authenticationProviders;
+  }
 
-	@JsonView(View.Public.class)
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public Map<String, Object> getFeatures() {
-		return Collections.emptyMap();
-	}
+  @JsonView(View.Public.class)
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  public Map<String, Object> getFeatures() {
+    return Collections.emptyMap();
+  }
 
-	@JsonView(View.Public.class)
-	public Map<String, Object> getUi() {
-		return ui;
-	}
+  @JsonView(View.Public.class)
+  public Map<String, Object> getUi() {
+    return ui;
+  }
 
-	public void setUi(final Map<String, Object> ui) {
-		this.ui = ui;
-	}
+  public void setUi(final Map<String, Object> ui) {
+    this.ui = ui;
+  }
 }

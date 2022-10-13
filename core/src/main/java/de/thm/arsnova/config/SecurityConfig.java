@@ -113,651 +113,651 @@ import de.thm.arsnova.security.pac4j.SsoCallbackFilter;
 @Configuration
 @EnableWebSecurity
 @EnableConfigurationProperties({
-		AuthenticationProviderProperties.class,
-		SecurityProperties.class})
+    AuthenticationProviderProperties.class,
+    SecurityProperties.class})
 @Profile("!test")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-	public static final String AUTH_CALLBACK_PATH = "/auth/callback";
-	public static final String OAUTH_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/oauth";
-	public static final String SAML_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/saml";
-	public static final String CAS_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/cas";
-	public static final String CAS_LOGOUT_PATH = "/auth/logout/cas";
-	public static final String RUN_AS_KEY_PREFIX = "RUN_AS_KEY";
-	public static final String INTERNAL_PROVIDER_ID = "user-db";
-	public static final String LDAP_PROVIDER_ID = "ldap";
-	public static final String OIDC_PROVIDER_ID = "oidc";
-	public static final String SAML_PROVIDER_ID = "saml";
-	public static final String CAS_PROVIDER_ID = "cas";
-	public static final String GOOGLE_PROVIDER_ID = "google";
-	public static final String TWITTER_PROVIDER_ID = "twitter";
-	public static final String FACEBOOK_PROVIDER_ID = "facebook";
-	private static final String OIDC_DISCOVERY_PATH = "/.well-known/openid-configuration";
-	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
-
-	private ServletContext servletContext;
-	private SystemProperties systemProperties;
-	private AuthenticationProviderProperties providerProperties;
-	private String rootUrl;
-	private String apiPath;
-	private JwtTokenFilter jwtTokenFilter;
-	private JwtAuthenticationProvider jwtAuthenticationProvider;
-	private RegisteredUserDetailsService registeredUserDetailsService;
-	private SsoAuthenticationProvider ssoAuthenticationProvider;
-
-	public SecurityConfig(
-			final SystemProperties systemProperties,
-			final AuthenticationProviderProperties authenticationProviderProperties,
-			final ServletContext servletContext) {
-		this.systemProperties = systemProperties;
-		this.providerProperties = authenticationProviderProperties;
-		this.rootUrl = systemProperties.getRootUrl();
-		this.apiPath = systemProperties.getApi().getProxyPath();
-		this.servletContext = servletContext;
-	}
-
-	@PostConstruct
-	private void init() {
-		if (apiPath == null || "".equals(apiPath)) {
-			apiPath = servletContext.getContextPath();
-		}
-	}
-
-	@Autowired
-	public void setJwtTokenFilter(final JwtTokenFilter jwtTokenFilter) {
-		this.jwtTokenFilter = jwtTokenFilter;
-	}
-
-	@Autowired
-	public void setJwtAuthenticationProvider(final JwtAuthenticationProvider jwtAuthenticationProvider) {
-		this.jwtAuthenticationProvider = jwtAuthenticationProvider;
-	}
-
-	@Autowired
-	public void setRegisteredUserDetailsService(final RegisteredUserDetailsService registeredUserDetailsService) {
-		this.registeredUserDetailsService = registeredUserDetailsService;
-	}
-
-	@Autowired
-	public void setSsoAuthenticationProvider(final SsoAuthenticationProvider ssoAuthenticationProvider) {
-		this.ssoAuthenticationProvider = ssoAuthenticationProvider;
-	}
-
-	public class HttpSecurityConfig extends WebSecurityConfigurerAdapter {
-		protected AuthenticationEntryPoint authenticationEntryPoint;
-		protected AccessDeniedHandler accessDeniedHandler;
-
-		public HttpSecurityConfig(final AuthenticationEntryPoint authenticationEntryPoint,
-				final AccessDeniedHandler accessDeniedHandler) {
-			this.authenticationEntryPoint = authenticationEntryPoint;
-			this.accessDeniedHandler = accessDeniedHandler;
-		}
-
-		@Override
-		protected void configure(final HttpSecurity http) throws Exception {
-			http.exceptionHandling()
-					.authenticationEntryPoint(authenticationEntryPoint)
-					.accessDeniedHandler(accessDeniedHandler);
-			http.csrf().disable();
-			http.headers().addHeaderWriter(new HstsHeaderWriter(false));
-
-			http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-			if (providerProperties.getCas().isEnabled()) {
-				http.addFilter(casAuthenticationFilter());
-				http.addFilter(casLogoutFilter());
-			}
-			if (providerProperties.getSaml().isEnabled()) {
-				http.addFilterAfter(samlCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
-			}
-			if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())
-					|| providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
-				http.addFilterAfter(oauthCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
-			}
-		}
-	}
-
-	@Configuration
-	@Order(2)
-	@Profile("!test")
-	public class StatelessHttpSecurityConfig extends HttpSecurityConfig {
-		public StatelessHttpSecurityConfig(
-				@Qualifier("restAuthenticationEntryPoint") final AuthenticationEntryPoint authenticationEntryPoint,
-				final AccessDeniedHandler accessDeniedHandler) {
-			super(authenticationEntryPoint, accessDeniedHandler);
-		}
-
-		@Override
-		protected void configure(final HttpSecurity http) throws Exception {
-			super.configure(http);
-			http.antMatcher("/**");
-			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		}
-	}
-
-	@Configuration
-	@Order(Ordered.HIGHEST_PRECEDENCE)
-	@Profile("!test")
-	public class ManagementHttpSecurityConfig extends HttpSecurityConfig {
-		private final String managementPath;
-
-		public ManagementHttpSecurityConfig(
-				@Qualifier("restAuthenticationEntryPoint") final AuthenticationEntryPoint authenticationEntryPoint,
-				final AccessDeniedHandler accessDeniedHandler,
-				final WebEndpointProperties webEndpointProperties) {
-			super(authenticationEntryPoint, accessDeniedHandler);
-			this.managementPath = webEndpointProperties.getBasePath();
-		}
-
-		@Override
-		protected void configure(final HttpSecurity http) throws Exception {
-			super.configure(http);
-			http.antMatcher(managementPath + "/**");
-			http.authorizeRequests()
-					.antMatchers(managementPath + "/health", managementPath + "/info").permitAll()
-					.antMatchers(
-						managementPath + "/health/**",
-						managementPath + "/metrics",
-						managementPath + "/metrics/**",
-						managementPath + "/prometheus",
-						managementPath + "/stats"
-					).hasAnyRole("ADMIN", "MONITORING")
-					.anyRequest().hasRole("ADMIN");
-			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		}
-	}
-
-	@Configuration
-	@EnableGlobalMethodSecurity(mode = AdviceMode.ASPECTJ, prePostEnabled = true, securedEnabled = true)
-	public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
-		@Override
-		protected RunAsManager runAsManager() {
-			final StringKeyGenerator keyGenerator = new Base64StringKeyGenerator();
-			final RunAsManagerImpl runAsManager = new RunAsManagerImpl();
-			/* Since RunAsTokens should currently only be used internally, we generate a random key. */
-			runAsManager.setKey(RUN_AS_KEY_PREFIX + keyGenerator.generateKey());
-
-			return runAsManager;
-		}
-	}
-
-	@Override
-	protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-		final List<String> providers = new ArrayList<>();
-		auth.authenticationProvider(jwtAuthenticationProvider);
-		logger.info("oauthProps: {}", providerProperties.getOauth());
-		if (providerProperties.getLdap().stream().anyMatch(p -> p.isEnabled())) {
-			providers.add(LDAP_PROVIDER_ID);
-			auth.authenticationProvider(ldapAuthenticationProvider());
-		}
-		if (providerProperties.getCas().isEnabled()) {
-			providers.add(CAS_PROVIDER_ID);
-			auth.authenticationProvider(casAuthenticationProvider());
-		}
-		if (providerProperties.getRegistered().isEnabled()) {
-			providers.add(INTERNAL_PROVIDER_ID);
-			auth.authenticationProvider(daoAuthenticationProvider());
-		}
-		boolean ssoProvider = false;
-		if (providerProperties.getSaml().isEnabled()) {
-			ssoProvider = true;
-			providers.add(SAML_PROVIDER_ID);
-		}
-		if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
-			ssoProvider = true;
-			providers.add(OIDC_PROVIDER_ID);
-		}
-		if (providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
-			ssoProvider = true;
-			if (providerProperties.getOauth().containsKey(GOOGLE_PROVIDER_ID)
-					&& providerProperties.getOauth().get(GOOGLE_PROVIDER_ID).isEnabled()) {
-				providers.add(GOOGLE_PROVIDER_ID);
-			}
-			if (providerProperties.getOauth().containsKey(FACEBOOK_PROVIDER_ID)
-					&& providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID).isEnabled()) {
-				providers.add(FACEBOOK_PROVIDER_ID);
-			}
-			if (providerProperties.getOauth().containsKey(TWITTER_PROVIDER_ID)
-					&& providerProperties.getOauth().get(TWITTER_PROVIDER_ID).isEnabled()) {
-				providers.add(TWITTER_PROVIDER_ID);
-			}
-		}
-		if (ssoProvider) {
-			auth.authenticationProvider(ssoAuthenticationProvider);
-		}
-		logger.info("Enabled authentication providers: {}", providers);
-	}
-
-	@Bean
-	public SessionRegistry sessionRegistry() {
-		return new SessionRegistryImpl();
-	}
-
-	@Bean
-	public static AuthenticationEntryPoint restAuthenticationEntryPoint(
-			@Qualifier("defaultJsonMessageConverter")
-			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
-			final ControllerExceptionHelper controllerExceptionHelper) {
-		return (request, response, accessDeniedException) -> {
-			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-			response.setContentType(MediaType.APPLICATION_JSON.toString());
-			response.getWriter().write(jackson2HttpMessageConverter.getObjectMapper().writeValueAsString(
-					controllerExceptionHelper.handleException(accessDeniedException, Level.DEBUG)));
-		};
-	}
-
-	@Bean
-	public AccessDeniedHandler customAccessDeniedHandler(
-			@Qualifier("defaultJsonMessageConverter")
-			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
-			final ControllerExceptionHelper controllerExceptionHelper) {
-		return (request, response, accessDeniedException) -> {
-			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-			response.setContentType(MediaType.APPLICATION_JSON.toString());
-			response.getWriter().write(jackson2HttpMessageConverter.getObjectMapper().writeValueAsString(
-					controllerExceptionHelper.handleException(accessDeniedException, Level.DEBUG)));
-		};
-	}
-
-	@Bean
-	LoginAuthenticationSucessHandler successHandler() {
-		final LoginAuthenticationSucessHandler successHandler =
-				new LoginAuthenticationSucessHandler(systemProperties, servletContext);
-		successHandler.setTargetUrl(rootUrl);
-
-		return successHandler;
-	}
-
-	@Bean
-	LoginAuthenticationFailureHandler failureHandler() {
-		final LoginAuthenticationFailureHandler failureHandler = new LoginAuthenticationFailureHandler();
-		failureHandler.setDefaultFailureUrl(rootUrl);
-
-		return failureHandler;
-	}
-
-	// Database Authentication Configuration
-
-	@Bean
-	public DaoAuthenticationProvider daoAuthenticationProvider() {
-		final DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-		authProvider.setUserDetailsService(registeredUserDetailsService);
-		authProvider.setPasswordEncoder(passwordEncoder());
-
-		return authProvider;
-	}
-
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-
-	@Bean
-	public SecurityContextLogoutHandler logoutHandler() {
-		return new SecurityContextLogoutHandler();
-	}
-
-	// LDAP Authentication Configuration
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "ldap[0].enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public LdapAuthenticationProvider ldapAuthenticationProvider() {
-		final LdapAuthenticationProvider ldapAuthenticationProvider =
-				new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
-		ldapAuthenticationProvider.setUserDetailsContextMapper(customLdapUserDetailsMapper());
-
-		return ldapAuthenticationProvider;
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "ldap[0].enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public LdapContextSource ldapContextSource() {
-		final AuthenticationProviderProperties.Ldap ldapProperties = providerProperties.getLdap().get(0);
-		final DefaultSpringSecurityContextSource contextSource =
-				new DefaultSpringSecurityContextSource(ldapProperties.getHostUrl());
-		contextSource.setBaseEnvironmentProperties(Collections.singletonMap(
-				"com.sun.jndi.ldap.connect.timeout", String.valueOf(ldapProperties.getConnectTimeout())));
-		/* TODO: implement support for LDAP bind using manager credentials */
-		if (!"".equals(ldapProperties.getManagerUserDn()) && !"".equals(ldapProperties.getManagerPassword())) {
-			logger.debug("ldapManagerUserDn: {}", ldapProperties.getManagerUserDn());
-			contextSource.setUserDn(ldapProperties.getManagerUserDn());
-			contextSource.setPassword(ldapProperties.getManagerPassword());
-		}
-
-		return contextSource;
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "ldap[0].enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public LdapAuthenticator ldapAuthenticator() {
-		final AuthenticationProviderProperties.Ldap ldapProperties = providerProperties.getLdap().get(0);
-		final BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
-		authenticator.setUserAttributes(new String[] {ldapProperties.getUserIdAttribute()});
-		if (!"".equals(ldapProperties.getUserSearchFilter())) {
-			logger.debug("ldapSearch: {} {}", ldapProperties.getUserSearchBase(), ldapProperties.getUserSearchFilter());
-			authenticator.setUserSearch(new FilterBasedLdapUserSearch(
-					ldapProperties.getUserSearchBase(), ldapProperties.getUserSearchFilter(), ldapContextSource()));
-		} else {
-			logger.debug("ldapUserDn: {}", ldapProperties.getUserDnPattern());
-			authenticator.setUserDnPatterns(new String[] {ldapProperties.getUserDnPattern()});
-		}
-
-		return authenticator;
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "ldap[0].enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() {
-		return new NullLdapAuthoritiesPopulator();
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "ldap[0].enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public LdapUserDetailsMapper customLdapUserDetailsMapper() {
-		final AuthenticationProviderProperties.Ldap ldapProperties = providerProperties.getLdap().get(0);
-		logger.debug("ldapUserIdAttr: {}", ldapProperties.getUserIdAttribute());
-
-		return new CustomLdapUserDetailsMapper(ldapProperties.getUserIdAttribute());
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "ldap[0].enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public LdapTemplate ldapTemplate() {
-		return new LdapTemplate(ldapContextSource());
-	}
-
-	// CAS Authentication Configuration
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "cas.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public CasAuthenticationProvider casAuthenticationProvider() {
-		final CasAuthenticationProvider authProvider = new CasAuthenticationProvider();
-		authProvider.setAuthenticationUserDetailsService(casUserDetailsService());
-		authProvider.setServiceProperties(casServiceProperties());
-		authProvider.setTicketValidator(casTicketValidator());
-		authProvider.setKey("casAuthProviderKey");
-
-		return authProvider;
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "cas.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public CasUserDetailsService casUserDetailsService() {
-		return new CasUserDetailsService();
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "cas.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public ServiceProperties casServiceProperties() {
-		final ServiceProperties properties = new ServiceProperties();
-		properties.setService(rootUrl + apiPath + CAS_CALLBACK_PATH);
-		properties.setSendRenew(false);
-
-		return properties;
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "cas.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public Cas20ProxyTicketValidator casTicketValidator() {
-		return new Cas20ProxyTicketValidator(providerProperties.getCas().getHostUrl());
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "cas.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
-		final CasAuthenticationEntryPoint entryPoint = new CasAuthenticationEntryPoint();
-		entryPoint.setLoginUrl(providerProperties.getCas().getHostUrl() + "/login");
-		entryPoint.setServiceProperties(casServiceProperties());
-
-		return entryPoint;
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "cas.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
-		final CasAuthenticationFilter filter = new CasAuthenticationFilter();
-		filter.setAuthenticationManager(authenticationManager());
-		filter.setServiceProperties(casServiceProperties());
-		filter.setFilterProcessesUrl("/**" + CAS_CALLBACK_PATH);
-		filter.setAuthenticationSuccessHandler(successHandler());
-		filter.setAuthenticationFailureHandler(failureHandler());
-
-		return filter;
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "cas.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public LogoutFilter casLogoutFilter() {
-		final LogoutFilter filter = new LogoutFilter(casLogoutSuccessHandler(), logoutHandler());
-		filter.setLogoutRequestMatcher(new AntPathRequestMatcher("/**" + CAS_LOGOUT_PATH));
-
-		return filter;
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "cas.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public LogoutSuccessHandler casLogoutSuccessHandler() {
-		final CasLogoutSuccessHandler handler = new CasLogoutSuccessHandler();
-		handler.setCasUrl(providerProperties.getCas().getHostUrl());
-		handler.setDefaultTarget(rootUrl);
-
-		return handler;
-	}
-
-	// SAML Authentication Configuration
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "saml.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public Config samlConfig() {
-		return new Config(rootUrl + apiPath + SAML_CALLBACK_PATH, saml2Client());
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "saml.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public SsoCallbackFilter samlCallbackFilter() throws Exception {
-		final SsoCallbackFilter callbackFilter = new SsoCallbackFilter(samlConfig(), SAML_CALLBACK_PATH);
-		callbackFilter.setAuthenticationManager(authenticationManager());
-		callbackFilter.setAuthenticationSuccessHandler(successHandler());
-		callbackFilter.setAuthenticationFailureHandler(failureHandler());
-
-		return callbackFilter;
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "saml.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public SAML2Client saml2Client() {
-		final AuthenticationProviderProperties.Saml samlProperties = providerProperties.getSaml();
-		final Pattern pathPattern = Pattern.compile("[a-z]+:.*");
-		final String idpMetadataPath = pathPattern.matcher(samlProperties.getIdp().getMetaFile()).matches()
-				? samlProperties.getIdp().getMetaFile()
-				: "file:" + samlProperties.getIdp().getMetaFile();
-		final SAML2Configuration config = new SAML2Configuration(
-				"file:" + samlProperties.getKeystore().getFile(),
-				samlProperties.getKeystore().getStorePassword(),
-				samlProperties.getKeystore().getKeyPassword(),
-				idpMetadataPath);
-		config.setKeystoreAlias(samlProperties.getKeystore().getKeyAlias());
-		if (!samlProperties.getSp().getMetaFile().isEmpty()) {
-			config.setServiceProviderMetadataPath("file:" + samlProperties.getSp().getMetaFile());
-		}
-		if (!samlProperties.getSp().getEntityId().isEmpty()) {
-			config.setServiceProviderEntityId(samlProperties.getSp().getEntityId());
-		}
-		if (!samlProperties.getIdp().getEntityId().isEmpty()) {
-			config.setIdentityProviderEntityId(samlProperties.getIdp().getEntityId());
-		}
-		config.setAssertionConsumerServiceIndex(samlProperties.getAssertionConsumerServiceIndex());
-		config.setMaximumAuthenticationLifetime(samlProperties.getMaxAuthenticationLifetime());
-		config.setAuthnRequestBindingType(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
-		config.setAuthnRequestSigned(true);
-		final SAML2Client client = new SAML2Client(config);
-		client.setName(SAML_PROVIDER_ID);
-		client.setCallbackUrl(rootUrl + apiPath + AUTH_CALLBACK_PATH);
-		client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
-
-		/* Initialize the client manually for the metadata endpoint */
-		client.init();
-
-		return client;
-	}
-
-	// OAuth Authentication Configuration
-
-	@Bean
-	public Config oauthConfig() {
-		final List<Client> clients = new ArrayList<>();
-		if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
-			clients.add(oidcClient());
-		}
-		if (providerProperties.getOauth().containsKey(FACEBOOK_PROVIDER_ID)
-				&& providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID).isEnabled()) {
-			clients.add(facebookClient());
-		}
-		if (providerProperties.getOauth().containsKey(GOOGLE_PROVIDER_ID)
-				&& providerProperties.getOauth().get(GOOGLE_PROVIDER_ID).isEnabled()) {
-			clients.add(googleClient());
-		}
-		if (providerProperties.getOauth().containsKey(TWITTER_PROVIDER_ID)
-				&& providerProperties.getOauth().get(TWITTER_PROVIDER_ID).isEnabled()) {
-			clients.add(twitterClient());
-		}
-
-		return new Config(rootUrl + apiPath + OAUTH_CALLBACK_PATH, clients);
-	}
-
-	@Bean
-	public SsoCallbackFilter oauthCallbackFilter() throws Exception {
-		final SsoCallbackFilter callbackFilter = new SsoCallbackFilter(oauthConfig(), OAUTH_CALLBACK_PATH + "/**");
-		callbackFilter.setAuthenticationManager(authenticationManager());
-		callbackFilter.setAuthenticationSuccessHandler(successHandler());
-		callbackFilter.setAuthenticationFailureHandler(failureHandler());
-
-		return callbackFilter;
-	}
-
-	@Bean
-	public PathParameterCallbackUrlResolver pathParameterCallbackUrlResolver() {
-		return new PathParameterCallbackUrlResolver();
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "oidc[0].enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public OidcClient oidcClient() {
-		final AuthenticationProviderProperties.Oidc oidcProperties = providerProperties.getOidc().get(0);
-		final OidcConfiguration config = new OidcConfiguration();
-		config.setDiscoveryURI(oidcProperties.getIssuer() + OIDC_DISCOVERY_PATH);
-		config.setClientId(oidcProperties.getClientId());
-		config.setSecret(oidcProperties.getSecret());
-		config.setScope("openid");
-		final OidcClient client = new OidcClient(config);
-		client.setName(OIDC_PROVIDER_ID);
-		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
-		client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
-
-		return client;
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "oauth.facebook.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public FacebookClient facebookClient() {
-		final AuthenticationProviderProperties.Oauth oauthProperties =
-				providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID);
-		final FacebookClient client = new FacebookClient(oauthProperties.getKey(), oauthProperties.getSecret());
-		client.setName(FACEBOOK_PROVIDER_ID);
-		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
-		client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
-
-		return client;
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "oauth.twitter.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public TwitterClient twitterClient() {
-		final AuthenticationProviderProperties.Oauth oauthProperties =
-				providerProperties.getOauth().get(TWITTER_PROVIDER_ID);
-		final TwitterClient client = new TwitterClient(oauthProperties.getKey(), oauthProperties.getSecret());
-		client.setName(TWITTER_PROVIDER_ID);
-		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
-		client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
-
-		return client;
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			name = "oauth.google.enabled",
-			prefix = AuthenticationProviderProperties.PREFIX,
-			havingValue = "true")
-	public GoogleOidcClient googleClient() {
-		final AuthenticationProviderProperties.Oauth oauthProperties =
-				providerProperties.getOauth().get(GOOGLE_PROVIDER_ID);
-		final OidcConfiguration config = new OidcConfiguration();
-		config.setClientId(oauthProperties.getKey());
-		config.setSecret(oauthProperties.getSecret());
-		config.setScope("openid email");
-		final GoogleOidcClient client = new GoogleOidcClient(config);
-		client.setName(GOOGLE_PROVIDER_ID);
-		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
-		client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
-
-		return client;
-	}
+  public static final String AUTH_CALLBACK_PATH = "/auth/callback";
+  public static final String OAUTH_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/oauth";
+  public static final String SAML_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/saml";
+  public static final String CAS_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/cas";
+  public static final String CAS_LOGOUT_PATH = "/auth/logout/cas";
+  public static final String RUN_AS_KEY_PREFIX = "RUN_AS_KEY";
+  public static final String INTERNAL_PROVIDER_ID = "user-db";
+  public static final String LDAP_PROVIDER_ID = "ldap";
+  public static final String OIDC_PROVIDER_ID = "oidc";
+  public static final String SAML_PROVIDER_ID = "saml";
+  public static final String CAS_PROVIDER_ID = "cas";
+  public static final String GOOGLE_PROVIDER_ID = "google";
+  public static final String TWITTER_PROVIDER_ID = "twitter";
+  public static final String FACEBOOK_PROVIDER_ID = "facebook";
+  private static final String OIDC_DISCOVERY_PATH = "/.well-known/openid-configuration";
+  private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
+  private ServletContext servletContext;
+  private SystemProperties systemProperties;
+  private AuthenticationProviderProperties providerProperties;
+  private String rootUrl;
+  private String apiPath;
+  private JwtTokenFilter jwtTokenFilter;
+  private JwtAuthenticationProvider jwtAuthenticationProvider;
+  private RegisteredUserDetailsService registeredUserDetailsService;
+  private SsoAuthenticationProvider ssoAuthenticationProvider;
+
+  public SecurityConfig(
+      final SystemProperties systemProperties,
+      final AuthenticationProviderProperties authenticationProviderProperties,
+      final ServletContext servletContext) {
+    this.systemProperties = systemProperties;
+    this.providerProperties = authenticationProviderProperties;
+    this.rootUrl = systemProperties.getRootUrl();
+    this.apiPath = systemProperties.getApi().getProxyPath();
+    this.servletContext = servletContext;
+  }
+
+  @PostConstruct
+  private void init() {
+    if (apiPath == null || "".equals(apiPath)) {
+      apiPath = servletContext.getContextPath();
+    }
+  }
+
+  @Autowired
+  public void setJwtTokenFilter(final JwtTokenFilter jwtTokenFilter) {
+    this.jwtTokenFilter = jwtTokenFilter;
+  }
+
+  @Autowired
+  public void setJwtAuthenticationProvider(final JwtAuthenticationProvider jwtAuthenticationProvider) {
+    this.jwtAuthenticationProvider = jwtAuthenticationProvider;
+  }
+
+  @Autowired
+  public void setRegisteredUserDetailsService(final RegisteredUserDetailsService registeredUserDetailsService) {
+    this.registeredUserDetailsService = registeredUserDetailsService;
+  }
+
+  @Autowired
+  public void setSsoAuthenticationProvider(final SsoAuthenticationProvider ssoAuthenticationProvider) {
+    this.ssoAuthenticationProvider = ssoAuthenticationProvider;
+  }
+
+  public class HttpSecurityConfig extends WebSecurityConfigurerAdapter {
+    protected AuthenticationEntryPoint authenticationEntryPoint;
+    protected AccessDeniedHandler accessDeniedHandler;
+
+    public HttpSecurityConfig(final AuthenticationEntryPoint authenticationEntryPoint,
+        final AccessDeniedHandler accessDeniedHandler) {
+      this.authenticationEntryPoint = authenticationEntryPoint;
+      this.accessDeniedHandler = accessDeniedHandler;
+    }
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+      http.exceptionHandling()
+          .authenticationEntryPoint(authenticationEntryPoint)
+          .accessDeniedHandler(accessDeniedHandler);
+      http.csrf().disable();
+      http.headers().addHeaderWriter(new HstsHeaderWriter(false));
+
+      http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+      if (providerProperties.getCas().isEnabled()) {
+        http.addFilter(casAuthenticationFilter());
+        http.addFilter(casLogoutFilter());
+      }
+      if (providerProperties.getSaml().isEnabled()) {
+        http.addFilterAfter(samlCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
+      }
+      if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())
+          || providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
+        http.addFilterAfter(oauthCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
+      }
+    }
+  }
+
+  @Configuration
+  @Order(2)
+  @Profile("!test")
+  public class StatelessHttpSecurityConfig extends HttpSecurityConfig {
+    public StatelessHttpSecurityConfig(
+        @Qualifier("restAuthenticationEntryPoint") final AuthenticationEntryPoint authenticationEntryPoint,
+        final AccessDeniedHandler accessDeniedHandler) {
+      super(authenticationEntryPoint, accessDeniedHandler);
+    }
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+      super.configure(http);
+      http.antMatcher("/**");
+      http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    }
+  }
+
+  @Configuration
+  @Order(Ordered.HIGHEST_PRECEDENCE)
+  @Profile("!test")
+  public class ManagementHttpSecurityConfig extends HttpSecurityConfig {
+    private final String managementPath;
+
+    public ManagementHttpSecurityConfig(
+        @Qualifier("restAuthenticationEntryPoint") final AuthenticationEntryPoint authenticationEntryPoint,
+        final AccessDeniedHandler accessDeniedHandler,
+        final WebEndpointProperties webEndpointProperties) {
+      super(authenticationEntryPoint, accessDeniedHandler);
+      this.managementPath = webEndpointProperties.getBasePath();
+    }
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+      super.configure(http);
+      http.antMatcher(managementPath + "/**");
+      http.authorizeRequests()
+          .antMatchers(managementPath + "/health", managementPath + "/info").permitAll()
+          .antMatchers(
+            managementPath + "/health/**",
+            managementPath + "/metrics",
+            managementPath + "/metrics/**",
+            managementPath + "/prometheus",
+            managementPath + "/stats"
+          ).hasAnyRole("ADMIN", "MONITORING")
+          .anyRequest().hasRole("ADMIN");
+      http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    }
+  }
+
+  @Configuration
+  @EnableGlobalMethodSecurity(mode = AdviceMode.ASPECTJ, prePostEnabled = true, securedEnabled = true)
+  public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
+    @Override
+    protected RunAsManager runAsManager() {
+      final StringKeyGenerator keyGenerator = new Base64StringKeyGenerator();
+      final RunAsManagerImpl runAsManager = new RunAsManagerImpl();
+      /* Since RunAsTokens should currently only be used internally, we generate a random key. */
+      runAsManager.setKey(RUN_AS_KEY_PREFIX + keyGenerator.generateKey());
+
+      return runAsManager;
+    }
+  }
+
+  @Override
+  protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+    final List<String> providers = new ArrayList<>();
+    auth.authenticationProvider(jwtAuthenticationProvider);
+    logger.info("oauthProps: {}", providerProperties.getOauth());
+    if (providerProperties.getLdap().stream().anyMatch(p -> p.isEnabled())) {
+      providers.add(LDAP_PROVIDER_ID);
+      auth.authenticationProvider(ldapAuthenticationProvider());
+    }
+    if (providerProperties.getCas().isEnabled()) {
+      providers.add(CAS_PROVIDER_ID);
+      auth.authenticationProvider(casAuthenticationProvider());
+    }
+    if (providerProperties.getRegistered().isEnabled()) {
+      providers.add(INTERNAL_PROVIDER_ID);
+      auth.authenticationProvider(daoAuthenticationProvider());
+    }
+    boolean ssoProvider = false;
+    if (providerProperties.getSaml().isEnabled()) {
+      ssoProvider = true;
+      providers.add(SAML_PROVIDER_ID);
+    }
+    if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
+      ssoProvider = true;
+      providers.add(OIDC_PROVIDER_ID);
+    }
+    if (providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
+      ssoProvider = true;
+      if (providerProperties.getOauth().containsKey(GOOGLE_PROVIDER_ID)
+          && providerProperties.getOauth().get(GOOGLE_PROVIDER_ID).isEnabled()) {
+        providers.add(GOOGLE_PROVIDER_ID);
+      }
+      if (providerProperties.getOauth().containsKey(FACEBOOK_PROVIDER_ID)
+          && providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID).isEnabled()) {
+        providers.add(FACEBOOK_PROVIDER_ID);
+      }
+      if (providerProperties.getOauth().containsKey(TWITTER_PROVIDER_ID)
+          && providerProperties.getOauth().get(TWITTER_PROVIDER_ID).isEnabled()) {
+        providers.add(TWITTER_PROVIDER_ID);
+      }
+    }
+    if (ssoProvider) {
+      auth.authenticationProvider(ssoAuthenticationProvider);
+    }
+    logger.info("Enabled authentication providers: {}", providers);
+  }
+
+  @Bean
+  public SessionRegistry sessionRegistry() {
+    return new SessionRegistryImpl();
+  }
+
+  @Bean
+  public static AuthenticationEntryPoint restAuthenticationEntryPoint(
+      @Qualifier("defaultJsonMessageConverter")
+      final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+      final ControllerExceptionHelper controllerExceptionHelper) {
+    return (request, response, accessDeniedException) -> {
+      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      response.setContentType(MediaType.APPLICATION_JSON.toString());
+      response.getWriter().write(jackson2HttpMessageConverter.getObjectMapper().writeValueAsString(
+          controllerExceptionHelper.handleException(accessDeniedException, Level.DEBUG)));
+    };
+  }
+
+  @Bean
+  public AccessDeniedHandler customAccessDeniedHandler(
+      @Qualifier("defaultJsonMessageConverter")
+      final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+      final ControllerExceptionHelper controllerExceptionHelper) {
+    return (request, response, accessDeniedException) -> {
+      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      response.setContentType(MediaType.APPLICATION_JSON.toString());
+      response.getWriter().write(jackson2HttpMessageConverter.getObjectMapper().writeValueAsString(
+          controllerExceptionHelper.handleException(accessDeniedException, Level.DEBUG)));
+    };
+  }
+
+  @Bean
+  LoginAuthenticationSucessHandler successHandler() {
+    final LoginAuthenticationSucessHandler successHandler =
+        new LoginAuthenticationSucessHandler(systemProperties, servletContext);
+    successHandler.setTargetUrl(rootUrl);
+
+    return successHandler;
+  }
+
+  @Bean
+  LoginAuthenticationFailureHandler failureHandler() {
+    final LoginAuthenticationFailureHandler failureHandler = new LoginAuthenticationFailureHandler();
+    failureHandler.setDefaultFailureUrl(rootUrl);
+
+    return failureHandler;
+  }
+
+  // Database Authentication Configuration
+
+  @Bean
+  public DaoAuthenticationProvider daoAuthenticationProvider() {
+    final DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+    authProvider.setUserDetailsService(registeredUserDetailsService);
+    authProvider.setPasswordEncoder(passwordEncoder());
+
+    return authProvider;
+  }
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
+
+  @Bean
+  public SecurityContextLogoutHandler logoutHandler() {
+    return new SecurityContextLogoutHandler();
+  }
+
+  // LDAP Authentication Configuration
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "ldap[0].enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public LdapAuthenticationProvider ldapAuthenticationProvider() {
+    final LdapAuthenticationProvider ldapAuthenticationProvider =
+        new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
+    ldapAuthenticationProvider.setUserDetailsContextMapper(customLdapUserDetailsMapper());
+
+    return ldapAuthenticationProvider;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "ldap[0].enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public LdapContextSource ldapContextSource() {
+    final AuthenticationProviderProperties.Ldap ldapProperties = providerProperties.getLdap().get(0);
+    final DefaultSpringSecurityContextSource contextSource =
+        new DefaultSpringSecurityContextSource(ldapProperties.getHostUrl());
+    contextSource.setBaseEnvironmentProperties(Collections.singletonMap(
+        "com.sun.jndi.ldap.connect.timeout", String.valueOf(ldapProperties.getConnectTimeout())));
+    /* TODO: implement support for LDAP bind using manager credentials */
+    if (!"".equals(ldapProperties.getManagerUserDn()) && !"".equals(ldapProperties.getManagerPassword())) {
+      logger.debug("ldapManagerUserDn: {}", ldapProperties.getManagerUserDn());
+      contextSource.setUserDn(ldapProperties.getManagerUserDn());
+      contextSource.setPassword(ldapProperties.getManagerPassword());
+    }
+
+    return contextSource;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "ldap[0].enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public LdapAuthenticator ldapAuthenticator() {
+    final AuthenticationProviderProperties.Ldap ldapProperties = providerProperties.getLdap().get(0);
+    final BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
+    authenticator.setUserAttributes(new String[] {ldapProperties.getUserIdAttribute()});
+    if (!"".equals(ldapProperties.getUserSearchFilter())) {
+      logger.debug("ldapSearch: {} {}", ldapProperties.getUserSearchBase(), ldapProperties.getUserSearchFilter());
+      authenticator.setUserSearch(new FilterBasedLdapUserSearch(
+          ldapProperties.getUserSearchBase(), ldapProperties.getUserSearchFilter(), ldapContextSource()));
+    } else {
+      logger.debug("ldapUserDn: {}", ldapProperties.getUserDnPattern());
+      authenticator.setUserDnPatterns(new String[] {ldapProperties.getUserDnPattern()});
+    }
+
+    return authenticator;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "ldap[0].enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() {
+    return new NullLdapAuthoritiesPopulator();
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "ldap[0].enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public LdapUserDetailsMapper customLdapUserDetailsMapper() {
+    final AuthenticationProviderProperties.Ldap ldapProperties = providerProperties.getLdap().get(0);
+    logger.debug("ldapUserIdAttr: {}", ldapProperties.getUserIdAttribute());
+
+    return new CustomLdapUserDetailsMapper(ldapProperties.getUserIdAttribute());
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "ldap[0].enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public LdapTemplate ldapTemplate() {
+    return new LdapTemplate(ldapContextSource());
+  }
+
+  // CAS Authentication Configuration
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public CasAuthenticationProvider casAuthenticationProvider() {
+    final CasAuthenticationProvider authProvider = new CasAuthenticationProvider();
+    authProvider.setAuthenticationUserDetailsService(casUserDetailsService());
+    authProvider.setServiceProperties(casServiceProperties());
+    authProvider.setTicketValidator(casTicketValidator());
+    authProvider.setKey("casAuthProviderKey");
+
+    return authProvider;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public CasUserDetailsService casUserDetailsService() {
+    return new CasUserDetailsService();
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public ServiceProperties casServiceProperties() {
+    final ServiceProperties properties = new ServiceProperties();
+    properties.setService(rootUrl + apiPath + CAS_CALLBACK_PATH);
+    properties.setSendRenew(false);
+
+    return properties;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public Cas20ProxyTicketValidator casTicketValidator() {
+    return new Cas20ProxyTicketValidator(providerProperties.getCas().getHostUrl());
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
+    final CasAuthenticationEntryPoint entryPoint = new CasAuthenticationEntryPoint();
+    entryPoint.setLoginUrl(providerProperties.getCas().getHostUrl() + "/login");
+    entryPoint.setServiceProperties(casServiceProperties());
+
+    return entryPoint;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
+    final CasAuthenticationFilter filter = new CasAuthenticationFilter();
+    filter.setAuthenticationManager(authenticationManager());
+    filter.setServiceProperties(casServiceProperties());
+    filter.setFilterProcessesUrl("/**" + CAS_CALLBACK_PATH);
+    filter.setAuthenticationSuccessHandler(successHandler());
+    filter.setAuthenticationFailureHandler(failureHandler());
+
+    return filter;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public LogoutFilter casLogoutFilter() {
+    final LogoutFilter filter = new LogoutFilter(casLogoutSuccessHandler(), logoutHandler());
+    filter.setLogoutRequestMatcher(new AntPathRequestMatcher("/**" + CAS_LOGOUT_PATH));
+
+    return filter;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public LogoutSuccessHandler casLogoutSuccessHandler() {
+    final CasLogoutSuccessHandler handler = new CasLogoutSuccessHandler();
+    handler.setCasUrl(providerProperties.getCas().getHostUrl());
+    handler.setDefaultTarget(rootUrl);
+
+    return handler;
+  }
+
+  // SAML Authentication Configuration
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "saml.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public Config samlConfig() {
+    return new Config(rootUrl + apiPath + SAML_CALLBACK_PATH, saml2Client());
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "saml.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public SsoCallbackFilter samlCallbackFilter() throws Exception {
+    final SsoCallbackFilter callbackFilter = new SsoCallbackFilter(samlConfig(), SAML_CALLBACK_PATH);
+    callbackFilter.setAuthenticationManager(authenticationManager());
+    callbackFilter.setAuthenticationSuccessHandler(successHandler());
+    callbackFilter.setAuthenticationFailureHandler(failureHandler());
+
+    return callbackFilter;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "saml.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public SAML2Client saml2Client() {
+    final AuthenticationProviderProperties.Saml samlProperties = providerProperties.getSaml();
+    final Pattern pathPattern = Pattern.compile("[a-z]+:.*");
+    final String idpMetadataPath = pathPattern.matcher(samlProperties.getIdp().getMetaFile()).matches()
+        ? samlProperties.getIdp().getMetaFile()
+        : "file:" + samlProperties.getIdp().getMetaFile();
+    final SAML2Configuration config = new SAML2Configuration(
+        "file:" + samlProperties.getKeystore().getFile(),
+        samlProperties.getKeystore().getStorePassword(),
+        samlProperties.getKeystore().getKeyPassword(),
+        idpMetadataPath);
+    config.setKeystoreAlias(samlProperties.getKeystore().getKeyAlias());
+    if (!samlProperties.getSp().getMetaFile().isEmpty()) {
+      config.setServiceProviderMetadataPath("file:" + samlProperties.getSp().getMetaFile());
+    }
+    if (!samlProperties.getSp().getEntityId().isEmpty()) {
+      config.setServiceProviderEntityId(samlProperties.getSp().getEntityId());
+    }
+    if (!samlProperties.getIdp().getEntityId().isEmpty()) {
+      config.setIdentityProviderEntityId(samlProperties.getIdp().getEntityId());
+    }
+    config.setAssertionConsumerServiceIndex(samlProperties.getAssertionConsumerServiceIndex());
+    config.setMaximumAuthenticationLifetime(samlProperties.getMaxAuthenticationLifetime());
+    config.setAuthnRequestBindingType(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+    config.setAuthnRequestSigned(true);
+    final SAML2Client client = new SAML2Client(config);
+    client.setName(SAML_PROVIDER_ID);
+    client.setCallbackUrl(rootUrl + apiPath + AUTH_CALLBACK_PATH);
+    client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
+
+    /* Initialize the client manually for the metadata endpoint */
+    client.init();
+
+    return client;
+  }
+
+  // OAuth Authentication Configuration
+
+  @Bean
+  public Config oauthConfig() {
+    final List<Client> clients = new ArrayList<>();
+    if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
+      clients.add(oidcClient());
+    }
+    if (providerProperties.getOauth().containsKey(FACEBOOK_PROVIDER_ID)
+        && providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID).isEnabled()) {
+      clients.add(facebookClient());
+    }
+    if (providerProperties.getOauth().containsKey(GOOGLE_PROVIDER_ID)
+        && providerProperties.getOauth().get(GOOGLE_PROVIDER_ID).isEnabled()) {
+      clients.add(googleClient());
+    }
+    if (providerProperties.getOauth().containsKey(TWITTER_PROVIDER_ID)
+        && providerProperties.getOauth().get(TWITTER_PROVIDER_ID).isEnabled()) {
+      clients.add(twitterClient());
+    }
+
+    return new Config(rootUrl + apiPath + OAUTH_CALLBACK_PATH, clients);
+  }
+
+  @Bean
+  public SsoCallbackFilter oauthCallbackFilter() throws Exception {
+    final SsoCallbackFilter callbackFilter = new SsoCallbackFilter(oauthConfig(), OAUTH_CALLBACK_PATH + "/**");
+    callbackFilter.setAuthenticationManager(authenticationManager());
+    callbackFilter.setAuthenticationSuccessHandler(successHandler());
+    callbackFilter.setAuthenticationFailureHandler(failureHandler());
+
+    return callbackFilter;
+  }
+
+  @Bean
+  public PathParameterCallbackUrlResolver pathParameterCallbackUrlResolver() {
+    return new PathParameterCallbackUrlResolver();
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "oidc[0].enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public OidcClient oidcClient() {
+    final AuthenticationProviderProperties.Oidc oidcProperties = providerProperties.getOidc().get(0);
+    final OidcConfiguration config = new OidcConfiguration();
+    config.setDiscoveryURI(oidcProperties.getIssuer() + OIDC_DISCOVERY_PATH);
+    config.setClientId(oidcProperties.getClientId());
+    config.setSecret(oidcProperties.getSecret());
+    config.setScope("openid");
+    final OidcClient client = new OidcClient(config);
+    client.setName(OIDC_PROVIDER_ID);
+    client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
+    client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
+
+    return client;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "oauth.facebook.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public FacebookClient facebookClient() {
+    final AuthenticationProviderProperties.Oauth oauthProperties =
+        providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID);
+    final FacebookClient client = new FacebookClient(oauthProperties.getKey(), oauthProperties.getSecret());
+    client.setName(FACEBOOK_PROVIDER_ID);
+    client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
+    client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
+
+    return client;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "oauth.twitter.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public TwitterClient twitterClient() {
+    final AuthenticationProviderProperties.Oauth oauthProperties =
+        providerProperties.getOauth().get(TWITTER_PROVIDER_ID);
+    final TwitterClient client = new TwitterClient(oauthProperties.getKey(), oauthProperties.getSecret());
+    client.setName(TWITTER_PROVIDER_ID);
+    client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
+    client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
+
+    return client;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "oauth.google.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public GoogleOidcClient googleClient() {
+    final AuthenticationProviderProperties.Oauth oauthProperties =
+        providerProperties.getOauth().get(GOOGLE_PROVIDER_ID);
+    final OidcConfiguration config = new OidcConfiguration();
+    config.setClientId(oauthProperties.getKey());
+    config.setSecret(oauthProperties.getSecret());
+    config.setScope("openid email");
+    final GoogleOidcClient client = new GoogleOidcClient(config);
+    client.setName(GOOGLE_PROVIDER_ID);
+    client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
+    client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
+
+    return client;
+  }
 }

@@ -7,28 +7,28 @@ import de.thm.arsnova.model.serialization.View;
 
 public class PriorizationAnswerStatistics extends AnswerStatistics {
 
-	public static class PriorizationRoundStatistics extends RoundStatistics {
-		private List<Integer> assignedPoints;
+  public static class PriorizationRoundStatistics extends RoundStatistics {
+    private List<Integer> assignedPoints;
 
-		@JsonView(View.Public.class)
-		public List<Integer> getAssignedPoints() {
-			return assignedPoints;
-		}
+    @JsonView(View.Public.class)
+    public List<Integer> getAssignedPoints() {
+      return assignedPoints;
+    }
 
-		@JsonView(View.Public.class)
-		public void setAssignedPoints(final List<Integer> assignedPoints) {
-			this.assignedPoints = assignedPoints;
-		}
-	}
+    @JsonView(View.Public.class)
+    public void setAssignedPoints(final List<Integer> assignedPoints) {
+      this.assignedPoints = assignedPoints;
+    }
+  }
 
-	private List<PriorizationRoundStatistics> roundStatistics;
+  private List<PriorizationRoundStatistics> roundStatistics;
 
-	@JsonView(View.Public.class)
-	public List<PriorizationRoundStatistics> getRoundStatistics() {
-		return roundStatistics;
-	}
+  @JsonView(View.Public.class)
+  public List<PriorizationRoundStatistics> getRoundStatistics() {
+    return roundStatistics;
+  }
 
-	public void setRoundStatistics(final List<PriorizationRoundStatistics> roundStatistics) {
-		this.roundStatistics = roundStatistics;
-	}
+  public void setRoundStatistics(final List<PriorizationRoundStatistics> roundStatistics) {
+    this.roundStatistics = roundStatistics;
+  }
 }

@@ -7,18 +7,18 @@ import org.springframework.stereotype.Component
 
 @Component
 class StompMetaHandler {
-	private val logger = LoggerFactory.getLogger(StompMetaHandler::class.java)
-	private lateinit var simpUserRegistry: SimpUserRegistry
+  private val logger = LoggerFactory.getLogger(StompMetaHandler::class.java)
+  private lateinit var simpUserRegistry: SimpUserRegistry
 
-	@Autowired
-	fun setSimpUserRegistry(simpUserRegistry: SimpUserRegistry) {
-		this.simpUserRegistry = simpUserRegistry
-	}
+  @Autowired
+  fun setSimpUserRegistry(simpUserRegistry: SimpUserRegistry) {
+    this.simpUserRegistry = simpUserRegistry
+  }
 
-	fun handleUserSubscribed(roomId: String) {
-		logger.error("/topic/${roomId}.comment.stream")
-		logger.error(simpUserRegistry.findSubscriptions {
-			it.destination == "/topic/${roomId}.comment.stream"
-		}.count().toString())
-	}
+  fun handleUserSubscribed(roomId: String) {
+    logger.error("/topic/${roomId}.comment.stream")
+    logger.error(simpUserRegistry.findSubscriptions {
+      it.destination == "/topic/${roomId}.comment.stream"
+    }.count().toString())
+  }
 }

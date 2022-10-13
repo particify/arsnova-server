@@ -22,20 +22,20 @@ import javax.validation.ValidationException;
 import org.springframework.validation.Errors;
 
 public class EntityValidationException extends ValidationException {
-	private Errors errors;
-	private Entity entity;
+  private Errors errors;
+  private Entity entity;
 
-	public EntityValidationException(final Errors errors, final Entity entity) {
-		super(errors.getAllErrors().toString());
-		this.errors = errors;
-		this.entity = entity;
-	}
+  public EntityValidationException(final Errors errors, final Entity entity) {
+    super(errors.getAllErrors().toString());
+    this.errors = errors;
+    this.entity = entity;
+  }
 
-	public Errors getErrors() {
-		return errors;
-	}
+  public Errors getErrors() {
+    return errors;
+  }
 
-	public Entity getEntity() {
-		return entity;
-	}
+  public Entity getEntity() {
+    return entity;
+  }
 }

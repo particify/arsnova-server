@@ -20,5 +20,5 @@ package de.thm.arsnova.persistence.couchdb.migrations;
 
 @FunctionalInterface
 public interface InterruptibleFunction<T, R> {
-	R apply(T t) throws InterruptedException;
+  R apply(T t) throws InterruptedException;
 }

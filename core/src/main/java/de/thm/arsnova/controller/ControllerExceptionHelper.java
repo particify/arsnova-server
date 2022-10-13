@@ -30,46 +30,46 @@ import de.thm.arsnova.config.properties.SystemProperties;
 
 @Component
 public class ControllerExceptionHelper {
-	private static final Logger logger = LoggerFactory.getLogger(ControllerExceptionHelper.class);
+  private static final Logger logger = LoggerFactory.getLogger(ControllerExceptionHelper.class);
 
-	/* Since exception messages might contain sensitive data, they are not exposed by default. */
-	private boolean exposeMessages;
+  /* Since exception messages might contain sensitive data, they are not exposed by default. */
+  private boolean exposeMessages;
 
-	public ControllerExceptionHelper(final SystemProperties systemProperties) {
-		this.exposeMessages = systemProperties.getApi().isExposeErrorMessages();
-	}
+  public ControllerExceptionHelper(final SystemProperties systemProperties) {
+    this.exposeMessages = systemProperties.getApi().isExposeErrorMessages();
+  }
 
-	public Map<String, Object> handleException(@NonNull final Throwable e, @NonNull final Level level) {
-		final String message = e.getMessage() != null ? e.getMessage() : "";
-		log(level, message, e);
-		final Map<String, Object> result = new HashMap<>();
-		result.put("errorType", e.getClass().getSimpleName());
-		if (exposeMessages) {
-			result.put("errorMessage", e.getMessage());
-		}
+  public Map<String, Object> handleException(@NonNull final Throwable e, @NonNull final Level level) {
+    final String message = e.getMessage() != null ? e.getMessage() : "";
+    log(level, message, e);
+    final Map<String, Object> result = new HashMap<>();
+    result.put("errorType", e.getClass().getSimpleName());
+    if (exposeMessages) {
+      result.put("errorMessage", e.getMessage());
+    }
 
-		return result;
-	}
+    return result;
+  }
 
-	private void log(final Level level, final String message, final Throwable e) {
-		switch (level) {
-			case ERROR:
-				logger.error(message, e);
-				break;
-			case WARN:
-				logger.warn(message, e);
-				break;
-			case INFO:
-				logger.info(message, e);
-				break;
-			case DEBUG:
-				logger.debug(message, e);
-				break;
-			case TRACE:
-				logger.trace(message, e);
-				break;
-			default:
-				break;
-		}
-	}
+  private void log(final Level level, final String message, final Throwable e) {
+    switch (level) {
+      case ERROR:
+        logger.error(message, e);
+        break;
+      case WARN:
+        logger.warn(message, e);
+        break;
+      case INFO:
+        logger.info(message, e);
+        break;
+      case DEBUG:
+        logger.debug(message, e);
+        break;
+      case TRACE:
+        logger.trace(message, e);
+        break;
+      default:
+        break;
+    }
+  }
 }

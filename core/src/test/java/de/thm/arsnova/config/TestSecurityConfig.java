@@ -50,60 +50,60 @@ import de.thm.arsnova.security.CasUserDetailsService;
 @EnableWebSecurity
 @Profile("test")
 public class TestSecurityConfig extends SecurityConfig {
-	public TestSecurityConfig(
-			final SystemProperties systemProperties,
-			final AuthenticationProviderProperties authenticationProviderProperties,
-			final ServletContext servletContext) {
-		super(systemProperties, authenticationProviderProperties, servletContext);
-	}
+  public TestSecurityConfig(
+      final SystemProperties systemProperties,
+      final AuthenticationProviderProperties authenticationProviderProperties,
+      final ServletContext servletContext) {
+    super(systemProperties, authenticationProviderProperties, servletContext);
+  }
 
-	@Override
-	protected void configure(final HttpSecurity http) {}
+  @Override
+  protected void configure(final HttpSecurity http) {}
 
-	@Override
-	@Bean
-	public SessionRegistry sessionRegistry() {
-		return new SessionRegistryImpl();
-	}
+  @Override
+  @Bean
+  public SessionRegistry sessionRegistry() {
+    return new SessionRegistryImpl();
+  }
 
 
-	/* Override for test unnecessary Beans with null */
+  /* Override for test unnecessary Beans with null */
 
-	@MockBean
-	public DaoAuthenticationProvider daoAuthenticationProvider;
+  @MockBean
+  public DaoAuthenticationProvider daoAuthenticationProvider;
 
-	@MockBean
-	public CasAuthenticationProvider casAuthenticationProvider;
+  @MockBean
+  public CasAuthenticationProvider casAuthenticationProvider;
 
-	@MockBean
-	public CasUserDetailsService casUserDetailsService;
+  @MockBean
+  public CasUserDetailsService casUserDetailsService;
 
-	@MockBean
-	public ServiceProperties casServiceProperties;
+  @MockBean
+  public ServiceProperties casServiceProperties;
 
-	@MockBean
-	public Cas20ProxyTicketValidator casTicketValidator;
+  @MockBean
+  public Cas20ProxyTicketValidator casTicketValidator;
 
-	@MockBean
-	public CasAuthenticationEntryPoint casAuthenticationEntryPoint;
+  @MockBean
+  public CasAuthenticationEntryPoint casAuthenticationEntryPoint;
 
-	@MockBean
-	public CasAuthenticationFilter casAuthenticationFilter;
+  @MockBean
+  public CasAuthenticationFilter casAuthenticationFilter;
 
-	@MockBean
-	public FacebookClient facebookClient;
+  @MockBean
+  public FacebookClient facebookClient;
 
-	@MockBean
-	public GoogleOidcClient googleClient;
+  @MockBean
+  public GoogleOidcClient googleClient;
 
-	@MockBean
-	public TwitterClient twitterClient;
+  @MockBean
+  public TwitterClient twitterClient;
 
-	@MockBean
-	@Qualifier("oauthConfig")
-	public Config oauthConfig;
+  @MockBean
+  @Qualifier("oauthConfig")
+  public Config oauthConfig;
 
-	@MockBean
-	@Qualifier("samlConfig")
-	public Config samlConfig;
+  @MockBean
+  @Qualifier("samlConfig")
+  public Config samlConfig;
 }

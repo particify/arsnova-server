@@ -34,24 +34,24 @@ import de.thm.arsnova.persistence.StatisticsRepository;
  */
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
-	private static final long STATISTICS_REFRESH_INTERVAL_MS = 30000;
-	private static final Logger logger = LoggerFactory.getLogger(StatisticsServiceImpl.class);
-	private StatisticsRepository statisticsRepository;
+  private static final long STATISTICS_REFRESH_INTERVAL_MS = 30000;
+  private static final Logger logger = LoggerFactory.getLogger(StatisticsServiceImpl.class);
+  private StatisticsRepository statisticsRepository;
 
-	public StatisticsServiceImpl(final StatisticsRepository repository) {
-		this.statisticsRepository = repository;
-	}
+  public StatisticsServiceImpl(final StatisticsRepository repository) {
+    this.statisticsRepository = repository;
+  }
 
-	@Scheduled(initialDelay = 0, fixedRate = STATISTICS_REFRESH_INTERVAL_MS)
-	@CacheEvict(value = "system", key = "'statistics'")
-	private void clearCachedStatistics() {
-		logger.trace("Evicting statistics from cache.");
-	}
+  @Scheduled(initialDelay = 0, fixedRate = STATISTICS_REFRESH_INTERVAL_MS)
+  @CacheEvict(value = "system", key = "'statistics'")
+  private void clearCachedStatistics() {
+    logger.trace("Evicting statistics from cache.");
+  }
 
-	@Override
-	@Cacheable(value = "system", key = "'statistics'")
-	public Statistics getStatistics() {
-		logger.debug("Loading statistics (uncached).");
-		return statisticsRepository.getStatistics();
-	}
+  @Override
+  @Cacheable(value = "system", key = "'statistics'")
+  public Statistics getStatistics() {
+    logger.debug("Loading statistics (uncached).");
+    return statisticsRepository.getStatistics();
+  }
 }

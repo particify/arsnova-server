@@ -29,29 +29,29 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CacheControl {
-	enum Policy {
-		NO_CACHE("no-cache"),
-		NO_STORE("no-store"),
-		PRIVATE("private"),
-		PUBLIC("public");
+  enum Policy {
+    NO_CACHE("no-cache"),
+    NO_STORE("no-store"),
+    PRIVATE("private"),
+    PUBLIC("public");
 
-		Policy() {
-			this.policyString = null;
-		}
+    Policy() {
+      this.policyString = null;
+    }
 
-		Policy(final String policyString) {
-			this.policyString = policyString;
-		}
+    Policy(final String policyString) {
+      this.policyString = policyString;
+    }
 
-		public String getPolicyString() {
-			return this.policyString;
-		}
+    public String getPolicyString() {
+      return this.policyString;
+    }
 
-		private final String policyString;
-	}
+    private final String policyString;
+  }
 
-	boolean noCache() default false;
+  boolean noCache() default false;
 
-	int maxAge() default 0;
-	Policy[] policy() default {};
+  int maxAge() default 0;
+  Policy[] policy() default {};
 }

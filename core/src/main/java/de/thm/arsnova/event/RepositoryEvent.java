@@ -21,14 +21,14 @@ package de.thm.arsnova.event;
 import org.springframework.context.ApplicationEvent;
 
 public abstract class RepositoryEvent extends ApplicationEvent {
-	private final String typeName;
+  private final String typeName;
 
-	public RepositoryEvent(final Object source, final String typeName) {
-		super(source);
-		this.typeName = typeName;
-	}
+  public RepositoryEvent(final Object source, final String typeName) {
+    super(source);
+    this.typeName = typeName;
+  }
 
-	public String getTypeName() {
-		return typeName;
-	}
+  public String getTypeName() {
+    return typeName;
+  }
 }

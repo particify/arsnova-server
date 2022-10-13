@@ -30,114 +30,114 @@ import org.springframework.core.style.ToStringCreator;
 import de.thm.arsnova.model.serialization.View;
 
 public class Comment extends Entity implements RoomIdAware {
-	@NotEmpty
-	private String roomId;
+  @NotEmpty
+  private String roomId;
 
-	@NotEmpty
-	private String creatorId;
+  @NotEmpty
+  private String creatorId;
 
-	@NotBlank
-	private String body;
+  @NotBlank
+  private String body;
 
-	@NotNull
-	private Date timestamp;
+  @NotNull
+  private Date timestamp;
 
-	private boolean read;
-	private Map<String, Map<String, Object>> extensions;
+  private boolean read;
+  private Map<String, Map<String, Object>> extensions;
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getRoomId() {
-		return roomId;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getRoomId() {
+    return roomId;
+  }
 
-	@JsonView(View.Persistence.class)
-	public void setRoomId(final String roomId) {
-		this.roomId = roomId;
-	}
+  @JsonView(View.Persistence.class)
+  public void setRoomId(final String roomId) {
+    this.roomId = roomId;
+  }
 
-	@JsonView(View.Persistence.class)
-	public String getCreatorId() {
-		return creatorId;
-	}
+  @JsonView(View.Persistence.class)
+  public String getCreatorId() {
+    return creatorId;
+  }
 
-	@JsonView(View.Persistence.class)
-	public void setCreatorId(final String creatorId) {
-		this.creatorId = creatorId;
-	}
+  @JsonView(View.Persistence.class)
+  public void setCreatorId(final String creatorId) {
+    this.creatorId = creatorId;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getBody() {
-		return body;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getBody() {
+    return body;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setBody(final String body) {
-		this.body = body;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setBody(final String body) {
+    this.body = body;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Date getTimestamp() {
-		return timestamp;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public Date getTimestamp() {
+    return timestamp;
+  }
 
-	@JsonView(View.Persistence.class)
-	public void setTimestamp(final Date timestamp) {
-		this.timestamp = timestamp;
-	}
+  @JsonView(View.Persistence.class)
+  public void setTimestamp(final Date timestamp) {
+    this.timestamp = timestamp;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public boolean isRead() {
-		return read;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public boolean isRead() {
+    return read;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRead(final boolean read) {
-		this.read = read;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setRead(final boolean read) {
+    this.read = read;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Map<String, Map<String, Object>> getExtensions() {
-		return extensions;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public Map<String, Map<String, Object>> getExtensions() {
+    return extensions;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(final Map<String, Map<String, Object>> extensions) {
-		this.extensions = extensions;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setExtensions(final Map<String, Map<String, Object>> extensions) {
+    this.extensions = extensions;
+  }
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The following fields of <tt>LogEntry</tt> are excluded from equality checks:
-	 * {@link #extensions}.
-	 * </p>
-	 */
-	@Override
-	public boolean equals(final Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (!super.equals(o)) {
-			return false;
-		}
-		final Comment comment = (Comment) o;
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * The following fields of <tt>LogEntry</tt> are excluded from equality checks:
+   * {@link #extensions}.
+   * </p>
+   */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    final Comment comment = (Comment) o;
 
-		return read == comment.read
-				&& Objects.equals(roomId, comment.roomId)
-				&& Objects.equals(creatorId, comment.creatorId)
-				&& Objects.equals(body, comment.body)
-				&& Objects.equals(timestamp, comment.timestamp)
-				&& Objects.equals(extensions, comment.extensions);
-	}
+    return read == comment.read
+        && Objects.equals(roomId, comment.roomId)
+        && Objects.equals(creatorId, comment.creatorId)
+        && Objects.equals(body, comment.body)
+        && Objects.equals(timestamp, comment.timestamp)
+        && Objects.equals(extensions, comment.extensions);
+  }
 
-	@Override
-	protected ToStringCreator buildToString() {
-		return super.buildToString()
-				.append("roomId", roomId)
-				.append("creatorId", creatorId)
-				.append("body", body)
-				.append("timestamp", timestamp)
-				.append("read", read);
-	}
+  @Override
+  protected ToStringCreator buildToString() {
+    return super.buildToString()
+        .append("roomId", roomId)
+        .append("creatorId", creatorId)
+        .append("body", body)
+        .append("timestamp", timestamp)
+        .append("read", read);
+  }
 }

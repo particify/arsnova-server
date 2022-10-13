@@ -66,162 +66,162 @@ import de.thm.arsnova.web.exceptions.NotFoundException;
  * @author Daniel Gerhardt
  */
 public abstract class AbstractEntityController<E extends Entity> {
-	public static final String MEDIATYPE_EMPTY = "application/x-empty";
-	private static final Logger logger = LoggerFactory.getLogger(AbstractEntityController.class);
-	public static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
-	public static final String ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision";
-	protected static final String NO_ID_MAPPING = "/-";
-	protected static final String DEFAULT_ROOT_MAPPING = "/";
-	protected static final String DEFAULT_ID_MAPPING = "/{id:[^~-].*}";
-	protected static final String DEFAULT_ALIAS_MAPPING = "/~{alias}";
-	protected static final String DEFAULT_FIND_MAPPING = NO_ID_MAPPING + "/find";
-	protected static final String ALIAS_SUBPATH = "/**";
-	protected static final String GET_MAPPING = DEFAULT_ID_MAPPING;
-	protected static final String GET_MULTIPLE_MAPPING = DEFAULT_ROOT_MAPPING;
-	protected static final String PUT_MAPPING = DEFAULT_ID_MAPPING;
-	protected static final String POST_MAPPING = DEFAULT_ROOT_MAPPING;
-	protected static final String PATCH_MAPPING = DEFAULT_ID_MAPPING;
-	protected static final String DELETE_MAPPING = DEFAULT_ID_MAPPING;
-	protected static final String FIND_MAPPING = DEFAULT_FIND_MAPPING;
-	protected static final String LEGACY_FIND_MAPPING = "/find";
-	protected final EntityService<E> entityService;
-	protected FindQueryService<E> findQueryService;
+  public static final String MEDIATYPE_EMPTY = "application/x-empty";
+  private static final Logger logger = LoggerFactory.getLogger(AbstractEntityController.class);
+  public static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
+  public static final String ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision";
+  protected static final String NO_ID_MAPPING = "/-";
+  protected static final String DEFAULT_ROOT_MAPPING = "/";
+  protected static final String DEFAULT_ID_MAPPING = "/{id:[^~-].*}";
+  protected static final String DEFAULT_ALIAS_MAPPING = "/~{alias}";
+  protected static final String DEFAULT_FIND_MAPPING = NO_ID_MAPPING + "/find";
+  protected static final String ALIAS_SUBPATH = "/**";
+  protected static final String GET_MAPPING = DEFAULT_ID_MAPPING;
+  protected static final String GET_MULTIPLE_MAPPING = DEFAULT_ROOT_MAPPING;
+  protected static final String PUT_MAPPING = DEFAULT_ID_MAPPING;
+  protected static final String POST_MAPPING = DEFAULT_ROOT_MAPPING;
+  protected static final String PATCH_MAPPING = DEFAULT_ID_MAPPING;
+  protected static final String DELETE_MAPPING = DEFAULT_ID_MAPPING;
+  protected static final String FIND_MAPPING = DEFAULT_FIND_MAPPING;
+  protected static final String LEGACY_FIND_MAPPING = "/find";
+  protected final EntityService<E> entityService;
+  protected FindQueryService<E> findQueryService;
 
-	protected AbstractEntityController(final EntityService<E> entityService) {
-		if (!(entityService instanceof SecuredService)) {
-			throw new SecurityException("Only EntityServices implementing SecuredService are accepted.");
-		}
-		this.entityService = entityService;
-	}
+  protected AbstractEntityController(final EntityService<E> entityService) {
+    if (!(entityService instanceof SecuredService)) {
+      throw new SecurityException("Only EntityServices implementing SecuredService are accepted.");
+    }
+    this.entityService = entityService;
+  }
 
-	protected abstract String getMapping();
+  protected abstract String getMapping();
 
-	@GetMapping(GET_MAPPING)
-	public E get(@PathVariable final String id) {
-		return entityService.get(id);
-	}
+  @GetMapping(GET_MAPPING)
+  public E get(@PathVariable final String id) {
+    return entityService.get(id);
+  }
 
-	@GetMapping(value = GET_MULTIPLE_MAPPING, params = "ids")
-	public List<E> getMultiple(
-			@RequestParam final Collection<String> ids,
-			@RequestParam(defaultValue = "true") final boolean skipMissing
-	) {
-		/* We need to keep a copy of the original list because it might be
-		 * modified in meantime. */
-		final List<String> requestedIds = List.copyOf(ids);
-		final List<E> entities = entityService.get(ids);
-		if (skipMissing || entities.size() == requestedIds.size()) {
-			return entities;
-		}
+  @GetMapping(value = GET_MULTIPLE_MAPPING, params = "ids")
+  public List<E> getMultiple(
+      @RequestParam final Collection<String> ids,
+      @RequestParam(defaultValue = "true") final boolean skipMissing
+  ) {
+    /* We need to keep a copy of the original list because it might be
+     * modified in meantime. */
+    final List<String> requestedIds = List.copyOf(ids);
+    final List<E> entities = entityService.get(ids);
+    if (skipMissing || entities.size() == requestedIds.size()) {
+      return entities;
+    }
 
-		/* Add nulls for missing entities (not found or no read permission). */
-		final Map<String, E> idEntityMappings = entities.stream().collect(Collectors.toMap(
-				e -> e.getId(),
-				e -> e
-		));
+    /* Add nulls for missing entities (not found or no read permission). */
+    final Map<String, E> idEntityMappings = entities.stream().collect(Collectors.toMap(
+        e -> e.getId(),
+        e -> e
+    ));
 
-		return requestedIds.stream().map(id -> idEntityMappings.get(id)).collect(Collectors.toList());
-	}
+    return requestedIds.stream().map(id -> idEntityMappings.get(id)).collect(Collectors.toList());
+  }
 
-	@PutMapping(value = PUT_MAPPING, produces = MEDIATYPE_EMPTY)
-	public void putWithoutResponse(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
-		put(entity, httpServletResponse);
-	}
+  @PutMapping(value = PUT_MAPPING, produces = MEDIATYPE_EMPTY)
+  public void putWithoutResponse(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
+    put(entity, httpServletResponse);
+  }
 
-	@PutMapping(PUT_MAPPING)
-	public E put(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
-		final E oldEntity = entityService.get(entity.getId());
-		final E updatedEntity = entityService.update(oldEntity, entity, View.Public.class);
-		httpServletResponse.setHeader(ENTITY_ID_HEADER, updatedEntity.getId());
-		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, updatedEntity.getRevision());
+  @PutMapping(PUT_MAPPING)
+  public E put(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
+    final E oldEntity = entityService.get(entity.getId());
+    final E updatedEntity = entityService.update(oldEntity, entity, View.Public.class);
+    httpServletResponse.setHeader(ENTITY_ID_HEADER, updatedEntity.getId());
+    httpServletResponse.setHeader(ENTITY_REVISION_HEADER, updatedEntity.getRevision());
 
-		return updatedEntity;
-	}
+    return updatedEntity;
+  }
 
-	@PostMapping(value = POST_MAPPING, produces = MEDIATYPE_EMPTY)
-	@ResponseStatus(HttpStatus.CREATED)
-	public void postWithoutResponse(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
-		post(entity, httpServletResponse);
-	}
+  @PostMapping(value = POST_MAPPING, produces = MEDIATYPE_EMPTY)
+  @ResponseStatus(HttpStatus.CREATED)
+  public void postWithoutResponse(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
+    post(entity, httpServletResponse);
+  }
 
-	@PostMapping(POST_MAPPING)
-	@ResponseStatus(HttpStatus.CREATED)
-	public E post(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
-		entityService.create(entity);
-		final Map<String, String> params = new HashMap<>();
-		params.put("id", entity.getId());
-		if (entity instanceof RoomIdAware) {
-			params.put("roomId", ((RoomIdAware) entity).getRoomId());
-		}
-		final String uri = UriComponentsBuilder.fromPath(getMapping()).path(GET_MAPPING)
-				.buildAndExpand(params).toUriString();
-		httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
-		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
-		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
+  @PostMapping(POST_MAPPING)
+  @ResponseStatus(HttpStatus.CREATED)
+  public E post(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
+    entityService.create(entity);
+    final Map<String, String> params = new HashMap<>();
+    params.put("id", entity.getId());
+    if (entity instanceof RoomIdAware) {
+      params.put("roomId", ((RoomIdAware) entity).getRoomId());
+    }
+    final String uri = UriComponentsBuilder.fromPath(getMapping()).path(GET_MAPPING)
+        .buildAndExpand(params).toUriString();
+    httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
+    httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
+    httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
 
-		return entity;
-	}
+    return entity;
+  }
 
-	@PatchMapping(value = PATCH_MAPPING, produces = MEDIATYPE_EMPTY)
-	public void patchWithoutResponse(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
-			final HttpServletResponse httpServletResponse) throws IOException {
-		patch(id, changes, httpServletResponse);
-	}
+  @PatchMapping(value = PATCH_MAPPING, produces = MEDIATYPE_EMPTY)
+  public void patchWithoutResponse(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
+      final HttpServletResponse httpServletResponse) throws IOException {
+    patch(id, changes, httpServletResponse);
+  }
 
-	@PatchMapping(PATCH_MAPPING)
-	public E patch(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
-			final HttpServletResponse httpServletResponse) throws IOException {
-		final E entity = entityService.get(id);
-		entityService.patch(entity, changes, View.Public.class);
-		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
-		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
+  @PatchMapping(PATCH_MAPPING)
+  public E patch(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
+      final HttpServletResponse httpServletResponse) throws IOException {
+    final E entity = entityService.get(id);
+    entityService.patch(entity, changes, View.Public.class);
+    httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
+    httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
 
-		return entity;
-	}
+    return entity;
+  }
 
-	@DeleteMapping(DELETE_MAPPING)
-	public void delete(@PathVariable final String id, final HttpServletResponse httpServletResponse) {
-		final E entity = entityService.get(id);
-		entityService.delete(entity);
-		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
-		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
-	}
+  @DeleteMapping(DELETE_MAPPING)
+  public void delete(@PathVariable final String id, final HttpServletResponse httpServletResponse) {
+    final E entity = entityService.get(id);
+    entityService.delete(entity);
+    httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
+    httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
+  }
 
-	@PostMapping({FIND_MAPPING, LEGACY_FIND_MAPPING})
-	public List<E> find(@RequestBody final FindQuery<E> findQuery) throws OperationNotSupportedException {
-		if (findQueryService != null) {
-			logger.debug("Resolving find query: {}", findQuery);
-			final Set<String> ids = findQueryService.resolveQuery(findQuery);
-			logger.debug("Resolved find query to IDs: {}", ids);
+  @PostMapping({FIND_MAPPING, LEGACY_FIND_MAPPING})
+  public List<E> find(@RequestBody final FindQuery<E> findQuery) throws OperationNotSupportedException {
+    if (findQueryService != null) {
+      logger.debug("Resolving find query: {}", findQuery);
+      final Set<String> ids = findQueryService.resolveQuery(findQuery);
+      logger.debug("Resolved find query to IDs: {}", ids);
 
-			return entityService.get(ids);
-		} else {
-			throw new OperationNotSupportedException("Find is not supported for this entity type.");
-		}
-	}
+      return entityService.get(ids);
+    } else {
+      throw new OperationNotSupportedException("Find is not supported for this entity type.");
+    }
+  }
 
-	@RequestMapping(value = {DEFAULT_ALIAS_MAPPING, DEFAULT_ALIAS_MAPPING + ALIAS_SUBPATH})
-	public void forwardAlias(@PathVariable final String alias,
-			final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
-			throws ServletException, IOException {
-		final String subPath = UriUtils.encodePath(
-				new AntPathMatcher().extractPathWithinPattern(
-				(String) httpServletRequest.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE),
-				(String) httpServletRequest.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)),
-				StandardCharsets.UTF_8);
-		final String targetPath = String.format(
-				"%s/%s%s", getMapping(), resolveAlias(alias), subPath != null ? "/" + subPath : "");
-		logger.debug("Forwarding alias request to {}", targetPath);
-		httpServletRequest.getRequestDispatcher(targetPath)
-				.forward(httpServletRequest, httpServletResponse);
-	}
+  @RequestMapping(value = {DEFAULT_ALIAS_MAPPING, DEFAULT_ALIAS_MAPPING + ALIAS_SUBPATH})
+  public void forwardAlias(@PathVariable final String alias,
+      final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
+      throws ServletException, IOException {
+    final String subPath = UriUtils.encodePath(
+        new AntPathMatcher().extractPathWithinPattern(
+        (String) httpServletRequest.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE),
+        (String) httpServletRequest.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)),
+        StandardCharsets.UTF_8);
+    final String targetPath = String.format(
+        "%s/%s%s", getMapping(), resolveAlias(alias), subPath != null ? "/" + subPath : "");
+    logger.debug("Forwarding alias request to {}", targetPath);
+    httpServletRequest.getRequestDispatcher(targetPath)
+        .forward(httpServletRequest, httpServletResponse);
+  }
 
-	protected String resolveAlias(final String alias) {
-		throw new NotFoundException("Aliases not supported for " + getMapping() + ".");
-	}
+  protected String resolveAlias(final String alias) {
+    throw new NotFoundException("Aliases not supported for " + getMapping() + ".");
+  }
 
-	@Autowired(required = false)
-	public void setFindQueryService(final FindQueryService<E> findQueryService) {
-		this.findQueryService = findQueryService;
-	}
+  @Autowired(required = false)
+  public void setFindQueryService(final FindQueryService<E> findQueryService) {
+    this.findQueryService = findQueryService;
+  }
 }

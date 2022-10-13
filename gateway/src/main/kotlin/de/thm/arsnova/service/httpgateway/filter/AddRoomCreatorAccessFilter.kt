@@ -23,75 +23,75 @@ import reactor.core.publisher.Mono
  */
 @Component
 class AddRoomCreatorAccessFilter(
-    private val jwtTokenUtil: JwtTokenUtil,
-    private val roomAccessService: RoomAccessService
+  private val jwtTokenUtil: JwtTokenUtil,
+  private val roomAccessService: RoomAccessService
 ) : AbstractGatewayFilterFactory<AddRoomCreatorAccessFilter.Config>(Config::class.java) {
 
-    companion object {
-        const val ENTITY_ID_HEADER = "Arsnova-Entity-Id"
-        const val ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision"
-        const val BEARER_HEADER = "Bearer "
-        const val ROOM_POST_PATH = "/room/"
-    }
+  companion object {
+    const val ENTITY_ID_HEADER = "Arsnova-Entity-Id"
+    const val ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision"
+    const val BEARER_HEADER = "Bearer "
+    const val ROOM_POST_PATH = "/room/"
+  }
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+  private val logger = LoggerFactory.getLogger(javaClass)
 
-    override fun apply(config: Config): GatewayFilter {
-        return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
-            chain.filter(exchange)
-                .then(
-                    Mono.just(exchange)
-                        .filter { e: ServerWebExchange ->
-                            e.response.statusCode != null &&
-                                e.response.statusCode!!.is2xxSuccessful &&
-                                e.request.method == HttpMethod.POST
-                        }
-                        .map { e: ServerWebExchange ->
-                            val path = e.request.path.toString()
-                            val method = e.request.method!!
-                            val roomId = e.response.headers.getFirst(ENTITY_ID_HEADER)!!
-                            val revId = e.response.headers.getFirst(ENTITY_REVISION_HEADER)!!
-                            val token = e.request.headers.getFirst(HttpHeaders.AUTHORIZATION)!!.removePrefix(BEARER_HEADER)
-                            val userId = jwtTokenUtil.getUserIdFromPublicToken(token)
+  override fun apply(config: Config): GatewayFilter {
+    return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
+      chain.filter(exchange)
+        .then(
+          Mono.just(exchange)
+            .filter { e: ServerWebExchange ->
+              e.response.statusCode != null &&
+                e.response.statusCode!!.is2xxSuccessful &&
+                e.request.method == HttpMethod.POST
+            }
+            .map { e: ServerWebExchange ->
+              val path = e.request.path.toString()
+              val method = e.request.method!!
+              val roomId = e.response.headers.getFirst(ENTITY_ID_HEADER)!!
+              val revId = e.response.headers.getFirst(ENTITY_REVISION_HEADER)!!
+              val token = e.request.headers.getFirst(HttpHeaders.AUTHORIZATION)!!.removePrefix(BEARER_HEADER)
+              val userId = jwtTokenUtil.getUserIdFromPublicToken(token)
 
-                            if (path == ROOM_POST_PATH && method == HttpMethod.POST) {
-                                listOf(
-                                    AccessChangeRequest(
-                                        AccessChangeRequestType.CREATE,
-                                        roomId,
-                                        revId,
-                                        userId,
-                                        AccessLevel.CREATOR
-                                    )
-                                )
-                            } else {
-                                listOf()
-                            }
-                        }
-                        .flatMapMany { list: List<AccessChangeRequest> ->
-                            Flux.fromIterable(list)
-                        }
-                        .flatMap { accessChangeRequest: AccessChangeRequest ->
-                            when (accessChangeRequest.type) {
-                                AccessChangeRequestType.CREATE -> {
-                                    val roomAccess = RoomAccess(
-                                        accessChangeRequest.roomId,
-                                        accessChangeRequest.userId,
-                                        accessChangeRequest.revId,
-                                        accessChangeRequest.level.name,
-                                        null
-                                    )
-                                    roomAccessService.postRoomAccess(roomAccess)
-                                }
-                                else -> throw IllegalStateException("Unexpected AccessChangeRequestType")
-                            }
-                        }
-                        .then()
+              if (path == ROOM_POST_PATH && method == HttpMethod.POST) {
+                listOf(
+                  AccessChangeRequest(
+                    AccessChangeRequestType.CREATE,
+                    roomId,
+                    revId,
+                    userId,
+                    AccessLevel.CREATOR
+                  )
                 )
-        }
+              } else {
+                listOf()
+              }
+            }
+            .flatMapMany { list: List<AccessChangeRequest> ->
+              Flux.fromIterable(list)
+            }
+            .flatMap { accessChangeRequest: AccessChangeRequest ->
+              when (accessChangeRequest.type) {
+                AccessChangeRequestType.CREATE -> {
+                  val roomAccess = RoomAccess(
+                    accessChangeRequest.roomId,
+                    accessChangeRequest.userId,
+                    accessChangeRequest.revId,
+                    accessChangeRequest.level.name,
+                    null
+                  )
+                  roomAccessService.postRoomAccess(roomAccess)
+                }
+                else -> throw IllegalStateException("Unexpected AccessChangeRequestType")
+              }
+            }
+            .then()
+        )
     }
+  }
 
-    class Config {
-        var name: String = "RoomCreationAuthFilter"
-    }
+  class Config {
+    var name: String = "RoomCreationAuthFilter"
+  }
 }

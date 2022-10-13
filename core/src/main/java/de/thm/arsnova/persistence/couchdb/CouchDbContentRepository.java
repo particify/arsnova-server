@@ -27,50 +27,50 @@ import de.thm.arsnova.model.Content;
 import de.thm.arsnova.persistence.ContentRepository;
 
 public class CouchDbContentRepository extends CouchDbCrudRepository<Content> implements ContentRepository {
-	public CouchDbContentRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Content.class, db, "by_id", createIfNotExists);
-	}
+  public CouchDbContentRepository(final CouchDbConnector db, final boolean createIfNotExists) {
+    super(Content.class, db, "by_id", createIfNotExists);
+  }
 
-	@Override
-	public int countByRoomId(final String roomId) {
-		final ViewResult result = db.queryView(createQuery("by_roomid")
-				.key(roomId)
-				.reduce(true));
+  @Override
+  public int countByRoomId(final String roomId) {
+    final ViewResult result = db.queryView(createQuery("by_roomid")
+        .key(roomId)
+        .reduce(true));
 
-		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
-	}
+    return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
+  }
 
-	@Override
-	public List<String> findIdsByRoomId(final String roomId) {
-		final ViewResult result = db.queryView(createQuery("by_roomid").reduce(false).key(roomId));
+  @Override
+  public List<String> findIdsByRoomId(final String roomId) {
+    final ViewResult result = db.queryView(createQuery("by_roomid").reduce(false).key(roomId));
 
-		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
-	}
+    return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
+  }
 
-	@Override
-	public Iterable<Content> findStubsByIds(final List<String> ids) {
-		return super.createEntityStubs(db.queryView(createQuery("by_id")
-				.keys(ids)
-				.reduce(false)), (a, b) -> {});
-	}
+  @Override
+  public Iterable<Content> findStubsByIds(final List<String> ids) {
+    return super.createEntityStubs(db.queryView(createQuery("by_id")
+        .keys(ids)
+        .reduce(false)), (a, b) -> {});
+  }
 
-	@Override
-	public Iterable<Content> findStubsByRoomId(final String roomId) {
-		return createEntityStubs(db.queryView(createQuery("by_roomid")
-				.key(roomId)
-				.reduce(false)));
-	}
+  @Override
+  public Iterable<Content> findStubsByRoomId(final String roomId) {
+    return createEntityStubs(db.queryView(createQuery("by_roomid")
+        .key(roomId)
+        .reduce(false)));
+  }
 
-	protected Iterable<Content> createEntityStubs(final ViewResult viewResult) {
-		return super.createEntityStubs(viewResult, Content::setRoomId);
-	}
+  protected Iterable<Content> createEntityStubs(final ViewResult viewResult) {
+    return super.createEntityStubs(viewResult, Content::setRoomId);
+  }
 
-	@Override
-	public List<Content> findByRoomId(final String roomId) {
-		return db.queryView(createQuery("by_roomid")
-						.includeDocs(true)
-						.reduce(false)
-						.key(roomId),
-				Content.class);
-	}
+  @Override
+  public List<Content> findByRoomId(final String roomId) {
+    return db.queryView(createQuery("by_roomid")
+            .includeDocs(true)
+            .reduce(false)
+            .key(roomId),
+        Content.class);
+  }
 }

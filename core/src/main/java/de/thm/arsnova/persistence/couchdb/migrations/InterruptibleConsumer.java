@@ -20,5 +20,5 @@ package de.thm.arsnova.persistence.couchdb.migrations;
 
 @FunctionalInterface
 public interface InterruptibleConsumer<T> {
-	void accept(T t) throws InterruptedException;
+  void accept(T t) throws InterruptedException;
 }

@@ -31,125 +31,125 @@ import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.persistence.StatisticsRepository;
 
 public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implements StatisticsRepository {
-	private static final Logger logger = LoggerFactory.getLogger(CouchDbStatisticsRepository.class);
+  private static final Logger logger = LoggerFactory.getLogger(CouchDbStatisticsRepository.class);
 
-	public CouchDbStatisticsRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Object.class, db, "statistics", createIfNotExists);
-	}
+  public CouchDbStatisticsRepository(final CouchDbConnector db, final boolean createIfNotExists) {
+    super(Object.class, db, "statistics", createIfNotExists);
+  }
 
-	@Override
-	public Statistics getStatistics() {
-		final Statistics stats = new Statistics();
-		final Statistics.UserProfileStats userProfileStats = stats.getUserProfile();
-		final Statistics.RoomStats roomStats = stats.getRoom();
-		final Statistics.ContentGroupStats contentGroupStats = stats.getContentGroup();
-		final Statistics.ContentStats contentStats = stats.getContent();
-		final Statistics.AnswerStats answerStats = stats.getAnswer();
-		final Statistics.AnnouncementStats announcementStats = stats.getAnnouncement();
+  @Override
+  public Statistics getStatistics() {
+    final Statistics stats = new Statistics();
+    final Statistics.UserProfileStats userProfileStats = stats.getUserProfile();
+    final Statistics.RoomStats roomStats = stats.getRoom();
+    final Statistics.ContentGroupStats contentGroupStats = stats.getContentGroup();
+    final Statistics.ContentStats contentStats = stats.getContent();
+    final Statistics.AnswerStats answerStats = stats.getAnswer();
+    final Statistics.AnnouncementStats announcementStats = stats.getAnnouncement();
 
-		try {
-			final ViewResult statsResult = db.queryView(createQuery("statistics").group(true));
+    try {
+      final ViewResult statsResult = db.queryView(createQuery("statistics").group(true));
 
-			if (!statsResult.isEmpty()) {
-				for (final ViewResult.Row row : statsResult.getRows()) {
-					final JsonNode key = row.getKeyAsNode();
-					final int value = row.getValueAsInt();
-					if (!key.isArray()) {
-						throw new DbAccessException("Invalid key for statistics item.");
-					}
-					switch (key.get(0).asText()) {
-						case "UserProfile":
-							if (key.size() == 1) {
-								userProfileStats.setTotalCount(value);
-							} else if (key.size() > 1) {
-								switch (key.get(1).asText()) {
-									case "activationPending":
-										userProfileStats.setActivationsPending(value);
-										break;
-									case "authProvider":
-										userProfileStats.getCountByAuthProvider().put(key.get(2).asText(), value);
-										break;
-									default:
-										break;
-								}
-							}
-							break;
-						case "Room":
-							if (key.size() == 1) {
-								roomStats.setTotalCount(value);
-							} else if (key.size() > 1) {
-								switch (key.get(1).asText()) {
-									case "closed":
-										roomStats.setClosed(value);
-										break;
-									default:
-										break;
-								}
-							}
-							break;
-						case "ContentGroup":
-							if (key.size() == 1) {
-								contentGroupStats.setTotalCount(value);
-							} else if (key.size() > 1) {
-								switch (key.get(1).asText()) {
-									case "published":
-										contentGroupStats.setPublished(value);
-										break;
-									case "usingPublishingRange":
-										contentGroupStats.setUsingPublishingRange(value);
-										break;
-									default:
-										break;
-								}
-							}
-							break;
-						case "Content":
-							if (key.size() == 1) {
-								contentStats.setTotalCount(value);
-							} else if (key.size() > 1) {
-								switch (key.get(1).asText()) {
-									case "format":
-										contentStats.getCountByFormat().put(key.get(2).asText(), value);
-										break;
-									default:
-										break;
-								}
-							}
-							break;
-						case "Answer":
-							if (key.size() == 1) {
-								answerStats.setTotalCount(value);
-							} else if (key.size() > 1) {
-								switch (key.get(1).asText()) {
-									case "format":
-										answerStats.getCountByFormat().put(key.get(2).asText(), value);
-										break;
-									default:
-										break;
-								}
-							}
-							break;
-						case "Announcement":
-							if (key.size() == 1) {
-								announcementStats.setTotalCount(value);
-							}
-							break;
-						default:
-							break;
-					}
-				}
-				userProfileStats.setAccountCount(
-						userProfileStats.getTotalCount()
-								- userProfileStats.getCountByAuthProvider()
-								.getOrDefault(UserProfile.AuthProvider.ARSNOVA_GUEST.toString(), 0)
-								- userProfileStats.getActivationsPending());
-			}
+      if (!statsResult.isEmpty()) {
+        for (final ViewResult.Row row : statsResult.getRows()) {
+          final JsonNode key = row.getKeyAsNode();
+          final int value = row.getValueAsInt();
+          if (!key.isArray()) {
+            throw new DbAccessException("Invalid key for statistics item.");
+          }
+          switch (key.get(0).asText()) {
+            case "UserProfile":
+              if (key.size() == 1) {
+                userProfileStats.setTotalCount(value);
+              } else if (key.size() > 1) {
+                switch (key.get(1).asText()) {
+                  case "activationPending":
+                    userProfileStats.setActivationsPending(value);
+                    break;
+                  case "authProvider":
+                    userProfileStats.getCountByAuthProvider().put(key.get(2).asText(), value);
+                    break;
+                  default:
+                    break;
+                }
+              }
+              break;
+            case "Room":
+              if (key.size() == 1) {
+                roomStats.setTotalCount(value);
+              } else if (key.size() > 1) {
+                switch (key.get(1).asText()) {
+                  case "closed":
+                    roomStats.setClosed(value);
+                    break;
+                  default:
+                    break;
+                }
+              }
+              break;
+            case "ContentGroup":
+              if (key.size() == 1) {
+                contentGroupStats.setTotalCount(value);
+              } else if (key.size() > 1) {
+                switch (key.get(1).asText()) {
+                  case "published":
+                    contentGroupStats.setPublished(value);
+                    break;
+                  case "usingPublishingRange":
+                    contentGroupStats.setUsingPublishingRange(value);
+                    break;
+                  default:
+                    break;
+                }
+              }
+              break;
+            case "Content":
+              if (key.size() == 1) {
+                contentStats.setTotalCount(value);
+              } else if (key.size() > 1) {
+                switch (key.get(1).asText()) {
+                  case "format":
+                    contentStats.getCountByFormat().put(key.get(2).asText(), value);
+                    break;
+                  default:
+                    break;
+                }
+              }
+              break;
+            case "Answer":
+              if (key.size() == 1) {
+                answerStats.setTotalCount(value);
+              } else if (key.size() > 1) {
+                switch (key.get(1).asText()) {
+                  case "format":
+                    answerStats.getCountByFormat().put(key.get(2).asText(), value);
+                    break;
+                  default:
+                    break;
+                }
+              }
+              break;
+            case "Announcement":
+              if (key.size() == 1) {
+                announcementStats.setTotalCount(value);
+              }
+              break;
+            default:
+              break;
+          }
+        }
+        userProfileStats.setAccountCount(
+            userProfileStats.getTotalCount()
+                - userProfileStats.getCountByAuthProvider()
+                .getOrDefault(UserProfile.AuthProvider.ARSNOVA_GUEST.toString(), 0)
+                - userProfileStats.getActivationsPending());
+      }
 
-			return stats;
-		} catch (final DbAccessException e) {
-			logger.error("Could not retrieve statistics.", e);
-		}
+      return stats;
+    } catch (final DbAccessException e) {
+      logger.error("Could not retrieve statistics.", e);
+    }
 
-		return stats;
-	}
+    return stats;
+  }
 }

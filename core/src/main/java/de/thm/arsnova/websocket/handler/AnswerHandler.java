@@ -46,63 +46,63 @@ import de.thm.arsnova.websocket.message.TextAnswerCreated;
 @Component
 @EnableConfigurationProperties(MessageBrokerProperties.class)
 @ConditionalOnProperty(
-		name = RabbitConfig.RabbitConfigProperties.RABBIT_ENABLED,
-		prefix = MessageBrokerProperties.PREFIX,
-		havingValue = "true")
+    name = RabbitConfig.RabbitConfigProperties.RABBIT_ENABLED,
+    prefix = MessageBrokerProperties.PREFIX,
+    havingValue = "true")
 public class AnswerHandler {
-	private static final Logger logger = LoggerFactory.getLogger(AnswerHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(AnswerHandler.class);
 
-	private final RabbitTemplate messagingTemplate;
-	private final AnswerService answerService;
+  private final RabbitTemplate messagingTemplate;
+  private final AnswerService answerService;
 
-	public AnswerHandler(final RabbitTemplate messagingTemplate,
-			final AnswerService answerService) {
-		this.messagingTemplate = messagingTemplate;
-		this.answerService = answerService;
-	}
+  public AnswerHandler(final RabbitTemplate messagingTemplate,
+      final AnswerService answerService) {
+    this.messagingTemplate = messagingTemplate;
+    this.answerService = answerService;
+  }
 
-	@EventListener
-	public void handleAnswersChanged(final BulkChangeEvent<Answer> event) {
-		/* Group by content so we can send one event per distinct content */
-		final Map<String, List<Answer>> groupedAnswers = StreamSupport.stream(event.getEntities().spliterator(), false)
-				.collect(Collectors.groupingBy(Answer::getContentId));
-		final Set<String> ids = groupedAnswers.keySet();
-		logger.debug("Sending events to topic with key answers-changed for contents: {}", ids);
-		for (final String contentId : ids) {
-			final Answer anyAnswer = groupedAnswers.get(contentId).get(0);
-			final String roomId = anyAnswer.getRoomId();
-			final List<String> answerIds = groupedAnswers.get(contentId).stream()
-					.map(Answer::getId).collect(Collectors.toList());
-			AnswerStatistics stats = null;
-			final Format format = anyAnswer.getFormat();
-			if (format == Content.Format.CHOICE || format == Content.Format.SCALE || format == Content.Format.SORT) {
-				stats = answerService.getChoiceStatistics(contentId);
-			} else if (format == Content.Format.WORDCLOUD) {
-				stats = answerService.getTextStatistics(contentId);
-			} else if (format == Content.Format.PRIORIZATION) {
-				stats = answerService.getPriorizationStatistics(contentId);
-			}
-			final AnswersChanged changedMessage = new AnswersChanged(answerIds, stats);
-			messagingTemplate.convertAndSend(
-					"amq.topic",
-					roomId + ".content-" + contentId + ".answers-changed.stream",
-					changedMessage
-			);
-		}
-	}
+  @EventListener
+  public void handleAnswersChanged(final BulkChangeEvent<Answer> event) {
+    /* Group by content so we can send one event per distinct content */
+    final Map<String, List<Answer>> groupedAnswers = StreamSupport.stream(event.getEntities().spliterator(), false)
+        .collect(Collectors.groupingBy(Answer::getContentId));
+    final Set<String> ids = groupedAnswers.keySet();
+    logger.debug("Sending events to topic with key answers-changed for contents: {}", ids);
+    for (final String contentId : ids) {
+      final Answer anyAnswer = groupedAnswers.get(contentId).get(0);
+      final String roomId = anyAnswer.getRoomId();
+      final List<String> answerIds = groupedAnswers.get(contentId).stream()
+          .map(Answer::getId).collect(Collectors.toList());
+      AnswerStatistics stats = null;
+      final Format format = anyAnswer.getFormat();
+      if (format == Content.Format.CHOICE || format == Content.Format.SCALE || format == Content.Format.SORT) {
+        stats = answerService.getChoiceStatistics(contentId);
+      } else if (format == Content.Format.WORDCLOUD) {
+        stats = answerService.getTextStatistics(contentId);
+      } else if (format == Content.Format.PRIORIZATION) {
+        stats = answerService.getPriorizationStatistics(contentId);
+      }
+      final AnswersChanged changedMessage = new AnswersChanged(answerIds, stats);
+      messagingTemplate.convertAndSend(
+          "amq.topic",
+          roomId + ".content-" + contentId + ".answers-changed.stream",
+          changedMessage
+      );
+    }
+  }
 
-	@EventListener
-	public void handleTextAnswersChanged(final BulkChangeEvent<Answer> event) {
-		for (final Answer answer : event.getEntities()) {
-			if (!(answer instanceof TextAnswer)) {
-				continue;
-			}
-			final TextAnswerCreated createdMessage = new TextAnswerCreated((TextAnswer) answer);
-			messagingTemplate.convertAndSend(
-					"amq.topic",
-					answer.getRoomId() + ".content-" + answer.getContentId() + ".text-answer-created.stream",
-					createdMessage
-			);
-		}
-	}
+  @EventListener
+  public void handleTextAnswersChanged(final BulkChangeEvent<Answer> event) {
+    for (final Answer answer : event.getEntities()) {
+      if (!(answer instanceof TextAnswer)) {
+        continue;
+      }
+      final TextAnswerCreated createdMessage = new TextAnswerCreated((TextAnswer) answer);
+      messagingTemplate.convertAndSend(
+          "amq.topic",
+          answer.getRoomId() + ".content-" + answer.getContentId() + ".text-answer-created.stream",
+          createdMessage
+      );
+    }
+  }
 }

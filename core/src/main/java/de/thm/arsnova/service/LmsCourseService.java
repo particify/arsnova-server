@@ -7,7 +7,7 @@ import de.thm.arsnova.model.UserProfile;
 import net.particify.arsnova.connector.model.Course;
 
 public interface LmsCourseService {
-	List<Course> getCoursesByUserProfile(UserProfile userProfile);
+  List<Course> getCoursesByUserProfile(UserProfile userProfile);
 
-	List<Room> getCourseRoomsByUserProfile(UserProfile userProfile);
+  List<Room> getCourseRoomsByUserProfile(UserProfile userProfile);
 }

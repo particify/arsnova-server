@@ -36,168 +36,168 @@ import de.thm.arsnova.model.serialization.View;
  * @author Daniel Gerhardt
  */
 public abstract class Entity {
-	protected String id;
-	protected String rev;
-	protected Date creationTimestamp;
-	protected Date updateTimestamp;
-	private boolean internal;
-	private List<EntityRenderingMapping<?>> renderingMapping;
+  protected String id;
+  protected String rev;
+  protected Date creationTimestamp;
+  protected Date updateTimestamp;
+  private boolean internal;
+  private List<EntityRenderingMapping<?>> renderingMapping;
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getId() {
-		return id;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getId() {
+    return id;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setId(final String id) {
-		this.id = id;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setId(final String id) {
+    this.id = id;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getRevision() {
-		return rev;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getRevision() {
+    return rev;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRevision(final String rev) {
-		this.rev = rev;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setRevision(final String rev) {
+    this.rev = rev;
+  }
 
-	@JsonView(View.Persistence.class)
-	public Date getCreationTimestamp() {
-		return creationTimestamp;
-	}
+  @JsonView(View.Persistence.class)
+  public Date getCreationTimestamp() {
+    return creationTimestamp;
+  }
 
-	@JsonView(View.Persistence.class)
-	public void setCreationTimestamp(final Date creationTimestamp) {
-		this.creationTimestamp = creationTimestamp;
-	}
+  @JsonView(View.Persistence.class)
+  public void setCreationTimestamp(final Date creationTimestamp) {
+    this.creationTimestamp = creationTimestamp;
+  }
 
-	@JsonView(View.Persistence.class)
-	public Date getUpdateTimestamp() {
-		return updateTimestamp;
-	}
+  @JsonView(View.Persistence.class)
+  public Date getUpdateTimestamp() {
+    return updateTimestamp;
+  }
 
-	@JsonView(View.Persistence.class)
-	public void setUpdateTimestamp(final Date updateTimestamp) {
-		this.updateTimestamp = updateTimestamp;
-	}
+  @JsonView(View.Persistence.class)
+  public void setUpdateTimestamp(final Date updateTimestamp) {
+    this.updateTimestamp = updateTimestamp;
+  }
 
-	@JsonView(View.Persistence.class)
-	public Class<? extends Entity> getType() {
-		return getClass();
-	}
+  @JsonView(View.Persistence.class)
+  public Class<? extends Entity> getType() {
+    return getClass();
+  }
 
-	public Class<? extends Entity> getSupertype() {
-		Class<? extends Entity> clazz = getClass();
-		while (!clazz.getSuperclass().equals(Entity.class)) {
-			clazz = (Class<? extends Entity>) clazz.getSuperclass();
-		}
+  public Class<? extends Entity> getSupertype() {
+    Class<? extends Entity> clazz = getClass();
+    while (!clazz.getSuperclass().equals(Entity.class)) {
+      clazz = (Class<? extends Entity>) clazz.getSuperclass();
+    }
 
-		return clazz;
-	}
+    return clazz;
+  }
 
-	@JsonIgnore
-	public List<EntityRenderingMapping<?>> getRenderingMapping() {
-		if (this.renderingMapping == null) {
-			this.renderingMapping = new ArrayList<>();
-		}
+  @JsonIgnore
+  public List<EntityRenderingMapping<?>> getRenderingMapping() {
+    if (this.renderingMapping == null) {
+      this.renderingMapping = new ArrayList<>();
+    }
 
-		return renderingMapping;
-	}
+    return renderingMapping;
+  }
 
-	public void addRenderingMapping(
-			final Supplier<String> rawValueSupplier,
-			final Consumer<String> renderedValueConsumer,
-			final TextRenderingOptions textRenderingOptions) {
-		final StringEntityRenderingMapping mapping = new StringEntityRenderingMapping(
-				rawValueSupplier,
-				renderedValueConsumer,
-				textRenderingOptions
-		);
-		this.getRenderingMapping().add(mapping);
-	}
+  public void addRenderingMapping(
+      final Supplier<String> rawValueSupplier,
+      final Consumer<String> renderedValueConsumer,
+      final TextRenderingOptions textRenderingOptions) {
+    final StringEntityRenderingMapping mapping = new StringEntityRenderingMapping(
+        rawValueSupplier,
+        renderedValueConsumer,
+        textRenderingOptions
+    );
+    this.getRenderingMapping().add(mapping);
+  }
 
-	public void addListRenderingMapping(
-			final Supplier<List<String>> rawValueSupplier,
-			final Consumer<List<String>> renderedValueConsumer,
-			final TextRenderingOptions textRenderingOptions) {
-		final ListEntityRenderingMapping mapping = new ListEntityRenderingMapping(
-				rawValueSupplier,
-				renderedValueConsumer,
-				textRenderingOptions
-		);
-		this.getRenderingMapping().add(mapping);
-	}
+  public void addListRenderingMapping(
+      final Supplier<List<String>> rawValueSupplier,
+      final Consumer<List<String>> renderedValueConsumer,
+      final TextRenderingOptions textRenderingOptions) {
+    final ListEntityRenderingMapping mapping = new ListEntityRenderingMapping(
+        rawValueSupplier,
+        renderedValueConsumer,
+        textRenderingOptions
+    );
+    this.getRenderingMapping().add(mapping);
+  }
 
-	public boolean isInternal() {
-		return internal;
-	}
+  public boolean isInternal() {
+    return internal;
+  }
 
-	public void setInternal(final boolean internal) {
-		this.internal = internal;
-	}
+  public void setInternal(final boolean internal) {
+    this.internal = internal;
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, rev, creationTimestamp, updateTimestamp);
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, rev, creationTimestamp, updateTimestamp);
+  }
 
-	/**
-	 * Use this helper method when overriding {@link #hashCode()}.
-	 *
-	 * @param init The result of <tt>super.hashCode()</tt>
-	 * @param additionalFields Fields introduced by the subclass which should be included in the hash code generation
-	 *
-	 * @see java.util.Arrays#hashCode(Object[])
-	 */
-	protected int hashCode(final int init, final Object... additionalFields) {
-		int result = init;
-		if (additionalFields == null) {
-			return result;
-		}
-		for (final Object element : additionalFields) {
-			result = 31 * result + (element == null ? 0 : element.hashCode());
-		}
+  /**
+   * Use this helper method when overriding {@link #hashCode()}.
+   *
+   * @param init The result of <tt>super.hashCode()</tt>
+   * @param additionalFields Fields introduced by the subclass which should be included in the hash code generation
+   *
+   * @see java.util.Arrays#hashCode(Object[])
+   */
+  protected int hashCode(final int init, final Object... additionalFields) {
+    int result = init;
+    if (additionalFields == null) {
+      return result;
+    }
+    for (final Object element : additionalFields) {
+      result = 31 * result + (element == null ? 0 : element.hashCode());
+    }
 
-		return result;
-	}
+    return result;
+  }
 
-	@Override
-	public boolean equals(final Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		final Entity entity = (Entity) o;
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final Entity entity = (Entity) o;
 
-		return Objects.equals(id, entity.id)
-				&& Objects.equals(rev, entity.rev)
-				&& Objects.equals(creationTimestamp, entity.creationTimestamp)
-				&& Objects.equals(updateTimestamp, entity.updateTimestamp);
-	}
+    return Objects.equals(id, entity.id)
+        && Objects.equals(rev, entity.rev)
+        && Objects.equals(creationTimestamp, entity.creationTimestamp)
+        && Objects.equals(updateTimestamp, entity.updateTimestamp);
+  }
 
-	@Override
-	public String toString() {
-		return buildToString().toString();
-	}
+  @Override
+  public String toString() {
+    return buildToString().toString();
+  }
 
-	/**
-	 * Use this helper method to adjust the output of {@link #toString()}.
-	 * Override this method instead of <tt>toString()</tt> and call <tt>super.buildToString()</tt>.
-	 * Additional fields can be added to the String by calling
-	 * {@link org.springframework.core.style.ToStringCreator#append} on the <tt>ToStringCreator</tt>.
-	 */
-	protected ToStringCreator buildToString() {
-		final ToStringCreator toStringCreator = new ToStringCreator(this);
-		toStringCreator
-				.append("id", id)
-				.append("revision", rev)
-				.append("creationTimestamp", creationTimestamp)
-				.append("updateTimestamp", updateTimestamp);
+  /**
+   * Use this helper method to adjust the output of {@link #toString()}.
+   * Override this method instead of <tt>toString()</tt> and call <tt>super.buildToString()</tt>.
+   * Additional fields can be added to the String by calling
+   * {@link org.springframework.core.style.ToStringCreator#append} on the <tt>ToStringCreator</tt>.
+   */
+  protected ToStringCreator buildToString() {
+    final ToStringCreator toStringCreator = new ToStringCreator(this);
+    toStringCreator
+        .append("id", id)
+        .append("revision", rev)
+        .append("creationTimestamp", creationTimestamp)
+        .append("updateTimestamp", updateTimestamp);
 
-		return toStringCreator;
-	}
+    return toStringCreator;
+  }
 }

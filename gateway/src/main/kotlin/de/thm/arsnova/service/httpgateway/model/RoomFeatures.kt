@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class RoomFeatures(
-    val roomId: String,
-    val features: List<String>,
-    val tierId: String?
+  val roomId: String,
+  val features: List<String>,
+  val tierId: String?
 )

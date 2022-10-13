@@ -35,18 +35,18 @@ import de.thm.arsnova.security.User;
  * @author Daniel Gerhardt
  */
 public class WithMockUserSecurityContextFactory implements WithSecurityContextFactory<WithMockUser> {
-	@Override
-	public SecurityContext createSecurityContext(final WithMockUser withMockUser) {
-		final String loginId = StringUtils.hasLength(withMockUser.loginId()) ? withMockUser.loginId() : withMockUser.value();
-		final UserProfile userProfile = new UserProfile(withMockUser.authProvider(), loginId);
-		userProfile.setId(!withMockUser.userId().isEmpty() ? withMockUser.userId() : loginId);
-		final User user = new User(userProfile, Arrays.stream(withMockUser.roles())
-				.map(r -> new SimpleGrantedAuthority("ROLE_" + r)).collect(Collectors.toList()));
-		final Authentication authentication =
-				new UsernamePasswordAuthenticationToken(user, withMockUser.password(), user.getAuthorities());
-		final SecurityContext context = SecurityContextHolder.createEmptyContext();
-		context.setAuthentication(authentication);
+  @Override
+  public SecurityContext createSecurityContext(final WithMockUser withMockUser) {
+    final String loginId = StringUtils.hasLength(withMockUser.loginId()) ? withMockUser.loginId() : withMockUser.value();
+    final UserProfile userProfile = new UserProfile(withMockUser.authProvider(), loginId);
+    userProfile.setId(!withMockUser.userId().isEmpty() ? withMockUser.userId() : loginId);
+    final User user = new User(userProfile, Arrays.stream(withMockUser.roles())
+        .map(r -> new SimpleGrantedAuthority("ROLE_" + r)).collect(Collectors.toList()));
+    final Authentication authentication =
+        new UsernamePasswordAuthenticationToken(user, withMockUser.password(), user.getAuthorities());
+    final SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(authentication);
 
-		return context;
-	}
+    return context;
+  }
 }

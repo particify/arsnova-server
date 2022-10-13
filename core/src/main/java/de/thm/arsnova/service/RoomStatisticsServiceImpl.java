@@ -11,26 +11,26 @@ import de.thm.arsnova.model.RoomStatistics;
 @Service
 @Primary
 public class RoomStatisticsServiceImpl implements RoomStatisticsService {
-	final ContentGroupService contentGroupService;
+  final ContentGroupService contentGroupService;
 
-	public RoomStatisticsServiceImpl(final ContentGroupService contentGroupService) {
-		this.contentGroupService = contentGroupService;
-	}
+  public RoomStatisticsServiceImpl(final ContentGroupService contentGroupService) {
+    this.contentGroupService = contentGroupService;
+  }
 
-	@Override
-	public RoomStatistics getAllRoomStatistics(final String roomId) {
-		final RoomStatistics roomStatistics = new RoomStatistics();
-		final List<ContentGroup> contentGroups = contentGroupService.getByRoomId(roomId);
-		roomStatistics.updateFromContentGroups(contentGroups);
-		return roomStatistics;
-	}
+  @Override
+  public RoomStatistics getAllRoomStatistics(final String roomId) {
+    final RoomStatistics roomStatistics = new RoomStatistics();
+    final List<ContentGroup> contentGroups = contentGroupService.getByRoomId(roomId);
+    roomStatistics.updateFromContentGroups(contentGroups);
+    return roomStatistics;
+  }
 
-	@Override
-	public RoomStatistics getPublicRoomStatistics(final String roomId) {
-		final RoomStatistics roomStatistics = new RoomStatistics();
-		final List<ContentGroup> contentGroups = contentGroupService.getByRoomId(roomId).stream()
-				.filter(cg -> cg.isPublished()).collect(Collectors.toList());;
-		roomStatistics.updateFromContentGroups(contentGroups);
-		return roomStatistics;
-	}
+  @Override
+  public RoomStatistics getPublicRoomStatistics(final String roomId) {
+    final RoomStatistics roomStatistics = new RoomStatistics();
+    final List<ContentGroup> contentGroups = contentGroupService.getByRoomId(roomId).stream()
+        .filter(cg -> cg.isPublished()).collect(Collectors.toList());;
+    roomStatistics.updateFromContentGroups(contentGroups);
+    return roomStatistics;
+  }
 }

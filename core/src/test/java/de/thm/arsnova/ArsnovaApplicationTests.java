@@ -11,14 +11,14 @@ import de.thm.arsnova.config.TestSecurityConfig;
 
 @SpringBootTest
 @Import({
-		TestAppConfig.class,
-		TestPersistanceConfig.class,
-		TestSecurityConfig.class})
+    TestAppConfig.class,
+    TestPersistanceConfig.class,
+    TestSecurityConfig.class})
 @ActiveProfiles("test")
 class ArsnovaApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+  @Test
+  void contextLoads() {
+  }
 
 }

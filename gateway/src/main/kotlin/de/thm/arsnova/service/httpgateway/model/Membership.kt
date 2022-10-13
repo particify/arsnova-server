@@ -5,8 +5,8 @@ import java.util.Date
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Membership(
-    var roomId: String = "",
-    var roomShortId: String = "",
-    var roles: Set<String> = setOf(),
-    var lastVisit: Date
+  var roomId: String = "",
+  var roomShortId: String = "",
+  var roles: Set<String> = setOf(),
+  var lastVisit: Date
 )

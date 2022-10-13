@@ -42,122 +42,122 @@ import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
  */
 @Service
 @ConditionalOnProperty(
-		name = "enabled",
-		prefix = CouchDbMigrationProperties.PREFIX)
+    name = "enabled",
+    prefix = CouchDbMigrationProperties.PREFIX)
 public class MigratedContentGroupMigration extends AbstractMigration {
-	private static final String ID = "20201208172400";
-	private static final String CONTENT_GROUP_INDEX = "contentgroup-index";
-	private static final String CONTENT_DESIGN_DOC = "_design/Content";
-	private static final String CONTENT_BY_ID_VIEW = "by_id";
-	private static final Map<String, Boolean> notExistsSelector = Map.of("$exists", false);
+  private static final String ID = "20201208172400";
+  private static final String CONTENT_GROUP_INDEX = "contentgroup-index";
+  private static final String CONTENT_DESIGN_DOC = "_design/Content";
+  private static final String CONTENT_BY_ID_VIEW = "by_id";
+  private static final Map<String, Boolean> notExistsSelector = Map.of("$exists", false);
 
-	private final Map<String, String> contentGroupNames;
+  private final Map<String, String> contentGroupNames;
 
-	public MigratedContentGroupMigration(
-			final MangoCouchDbConnector connector,
-			final CouchDbMigrationProperties couchDbMigrationProperties) {
-		super(ID, connector);
-		this.contentGroupNames = couchDbMigrationProperties.getContentGroupNames();
-	}
+  public MigratedContentGroupMigration(
+      final MangoCouchDbConnector connector,
+      final CouchDbMigrationProperties couchDbMigrationProperties) {
+    super(ID, connector);
+    this.contentGroupNames = couchDbMigrationProperties.getContentGroupNames();
+  }
 
-	@PostConstruct
-	public void initMigration() {
-		addEntityMigrationStepHandler(
-				ContentGroupMigrationEntity.class,
-				CONTENT_GROUP_INDEX,
-				Map.of(
-						"type", "ContentGroup",
-						/* The creationTimestamp was not set for migrated ContentGroups in the
-						 * past, so its non-existence is a feature of migrated ContentGroups. */
-						"creationTimestamp", notExistsSelector
-				),
-				contentGroup -> {
-					contentGroup.setName(contentGroupNames.getOrDefault(contentGroup.getName(), contentGroup.getName()));
-					contentGroup.setAutoSort(false);
-					/* Apply alphanumerical sorting if the ContentGroup has not yet been manually modified. */
-					if (contentGroup.getUpdateTimestamp() == null) {
-						final List<ContentMigrationEntity> contents = connector.queryView(new ViewQuery()
-										.designDocId(CONTENT_DESIGN_DOC)
-										.viewName(CONTENT_BY_ID_VIEW)
-										.keys(contentGroup.getContentIds())
-										.reduce(false)
-										.includeDocs(true),
-								ContentMigrationEntity.class);
-						contentGroup.setContentIds(
-								contents.stream()
-										.sorted(Comparator.comparing(ContentMigrationEntity::getBody))
-										.map(ContentMigrationEntity::getId)
-										.collect(Collectors.toList()));
-					}
-					final RoomMigrationEntity room = connector.get(RoomMigrationEntity.class, contentGroup.getRoomId());
-					contentGroup.setCreationTimestamp(room.getCreationTimestamp());
+  @PostConstruct
+  public void initMigration() {
+    addEntityMigrationStepHandler(
+        ContentGroupMigrationEntity.class,
+        CONTENT_GROUP_INDEX,
+        Map.of(
+            "type", "ContentGroup",
+            /* The creationTimestamp was not set for migrated ContentGroups in the
+             * past, so its non-existence is a feature of migrated ContentGroups. */
+            "creationTimestamp", notExistsSelector
+        ),
+        contentGroup -> {
+          contentGroup.setName(contentGroupNames.getOrDefault(contentGroup.getName(), contentGroup.getName()));
+          contentGroup.setAutoSort(false);
+          /* Apply alphanumerical sorting if the ContentGroup has not yet been manually modified. */
+          if (contentGroup.getUpdateTimestamp() == null) {
+            final List<ContentMigrationEntity> contents = connector.queryView(new ViewQuery()
+                    .designDocId(CONTENT_DESIGN_DOC)
+                    .viewName(CONTENT_BY_ID_VIEW)
+                    .keys(contentGroup.getContentIds())
+                    .reduce(false)
+                    .includeDocs(true),
+                ContentMigrationEntity.class);
+            contentGroup.setContentIds(
+                contents.stream()
+                    .sorted(Comparator.comparing(ContentMigrationEntity::getBody))
+                    .map(ContentMigrationEntity::getId)
+                    .collect(Collectors.toList()));
+          }
+          final RoomMigrationEntity room = connector.get(RoomMigrationEntity.class, contentGroup.getRoomId());
+          contentGroup.setCreationTimestamp(room.getCreationTimestamp());
 
-					return List.of(contentGroup);
-				}
-		);
-	}
+          return List.of(contentGroup);
+        }
+    );
+  }
 
-	private static class ContentGroupMigrationEntity extends MigrationEntity {
-		private String roomId;
-		private String name;
-		private List<String> contentIds;
-		private boolean autoSort;
+  private static class ContentGroupMigrationEntity extends MigrationEntity {
+    private String roomId;
+    private String name;
+    private List<String> contentIds;
+    private boolean autoSort;
 
-		@JsonView(View.Persistence.class)
-		public String getRoomId() {
-			return roomId;
-		}
+    @JsonView(View.Persistence.class)
+    public String getRoomId() {
+      return roomId;
+    }
 
-		@JsonView(View.Persistence.class)
-		public void setRoomId(final String roomId) {
-			this.roomId = roomId;
-		}
+    @JsonView(View.Persistence.class)
+    public void setRoomId(final String roomId) {
+      this.roomId = roomId;
+    }
 
-		@JsonView(View.Persistence.class)
-		public String getName() {
-			return name;
-		}
+    @JsonView(View.Persistence.class)
+    public String getName() {
+      return name;
+    }
 
-		@JsonView(View.Persistence.class)
-		public void setName(final String name) {
-			this.name = name;
-		}
+    @JsonView(View.Persistence.class)
+    public void setName(final String name) {
+      this.name = name;
+    }
 
-		@JsonView(View.Persistence.class)
-		public List<String> getContentIds() {
-			return contentIds;
-		}
+    @JsonView(View.Persistence.class)
+    public List<String> getContentIds() {
+      return contentIds;
+    }
 
-		@JsonView(View.Persistence.class)
-		public void setContentIds(final List<String> contentIds) {
-			this.contentIds = contentIds;
-		}
+    @JsonView(View.Persistence.class)
+    public void setContentIds(final List<String> contentIds) {
+      this.contentIds = contentIds;
+    }
 
-		@JsonView(View.Persistence.class)
-		public boolean isAutoSort() {
-			return autoSort;
-		}
+    @JsonView(View.Persistence.class)
+    public boolean isAutoSort() {
+      return autoSort;
+    }
 
-		@JsonView(View.Persistence.class)
-		public void setAutoSort(final boolean autoSort) {
-			this.autoSort = autoSort;
-		}
-	}
+    @JsonView(View.Persistence.class)
+    public void setAutoSort(final boolean autoSort) {
+      this.autoSort = autoSort;
+    }
+  }
 
-	private static class ContentMigrationEntity extends MigrationEntity {
-		private String body;
+  private static class ContentMigrationEntity extends MigrationEntity {
+    private String body;
 
-		@JsonView(View.Persistence.class)
-		public String getBody() {
-			return body;
-		}
+    @JsonView(View.Persistence.class)
+    public String getBody() {
+      return body;
+    }
 
-		@JsonView(View.Persistence.class)
-		public void setBody(final String body) {
-			this.body = body;
-		}
-	}
+    @JsonView(View.Persistence.class)
+    public void setBody(final String body) {
+      this.body = body;
+    }
+  }
 
-	private static class RoomMigrationEntity extends MigrationEntity {
-	}
+  private static class RoomMigrationEntity extends MigrationEntity {
+  }
 }

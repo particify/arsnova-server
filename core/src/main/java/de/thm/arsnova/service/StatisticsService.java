@@ -24,5 +24,5 @@ import de.thm.arsnova.model.Statistics;
  * The functionality the statistics service should provide.
  */
 public interface StatisticsService {
-	Statistics getStatistics();
+  Statistics getStatistics();
 }

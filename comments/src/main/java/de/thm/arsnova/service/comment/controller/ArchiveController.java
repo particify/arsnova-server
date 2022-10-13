@@ -25,54 +25,54 @@ import de.thm.arsnova.service.comment.service.ArchiveService;
 @RestController("ArchiveController")
 @RequestMapping(ArchiveController.REQUEST_MAPPING)
 public class ArchiveController extends AbstractEntityController {
-    private static final Logger logger = LoggerFactory.getLogger(ArchiveController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ArchiveController.class);
 
-    private final ArchiveService service;
+  private final ArchiveService service;
 
-    protected static final String REQUEST_MAPPING = "/room/{roomId}/comment/-/archive";
-    private static final String GET_BY_ROOM_ID = "/";
+  protected static final String REQUEST_MAPPING = "/room/{roomId}/comment/-/archive";
+  private static final String GET_BY_ROOM_ID = "/";
 
-    @Autowired
-    public ArchiveController(
-            final ArchiveService service
-    ) {
-        this.service = service;
-    }
+  @Autowired
+  public ArchiveController(
+      final ArchiveService service
+  ) {
+    this.service = service;
+  }
 
-    @GetMapping(GET_MAPPING)
-    public Optional<Archive> get(
-            @PathVariable final String id
-    ) {
-        return service.get(id);
-    }
+  @GetMapping(GET_MAPPING)
+  public Optional<Archive> get(
+      @PathVariable final String id
+  ) {
+    return service.get(id);
+  }
 
-    @GetMapping(GET_BY_ROOM_ID)
-    public List<Archive> getByRoom(
-            @PathVariable final String roomId
-    ) {
-        return service.getByRoomId(roomId);
-    }
+  @GetMapping(GET_BY_ROOM_ID)
+  public List<Archive> getByRoom(
+      @PathVariable final String roomId
+  ) {
+    return service.getByRoomId(roomId);
+  }
 
-    @PostMapping(POST_MAPPING)
-    @ResponseStatus(HttpStatus.CREATED)
-    public Archive post(
-            @RequestBody final CreateArchiveCommand cmd,
-            final HttpServletResponse httpServletResponse
-    ) {
-        final Archive archive = service.create(cmd);
+  @PostMapping(POST_MAPPING)
+  @ResponseStatus(HttpStatus.CREATED)
+  public Archive post(
+      @RequestBody final CreateArchiveCommand cmd,
+      final HttpServletResponse httpServletResponse
+  ) {
+    final Archive archive = service.create(cmd);
 
-        final String uri = UriComponentsBuilder.fromPath(REQUEST_MAPPING).path(GET_MAPPING)
-                .buildAndExpand(archive.getRoomId(), archive.getId()).toUriString();
-        httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
-        httpServletResponse.setHeader(ENTITY_ID_HEADER, archive.getId());
+    final String uri = UriComponentsBuilder.fromPath(REQUEST_MAPPING).path(GET_MAPPING)
+        .buildAndExpand(archive.getRoomId(), archive.getId()).toUriString();
+    httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
+    httpServletResponse.setHeader(ENTITY_ID_HEADER, archive.getId());
 
-        return archive;
-    }
+    return archive;
+  }
 
-    @DeleteMapping(DELETE_MAPPING)
-    public void delete(
-            @PathVariable final String id
-    ) {
-        service.delete(id);
-    }
+  @DeleteMapping(DELETE_MAPPING)
+  public void delete(
+      @PathVariable final String id
+  ) {
+    service.delete(id);
+  }
 }

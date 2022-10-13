@@ -24,13 +24,13 @@ import java.util.List;
 import de.thm.arsnova.model.Room;
 
 public interface RoomRepository extends CrudRepository<Room, String> {
-	Room findByShortId(String shortId);
+  Room findByShortId(String shortId);
 
-	List<Room> findByOwnerId(String ownerId, int start, int limit);
+  List<Room> findByOwnerId(String ownerId, int start, int limit);
 
-	List<String> findIdsByOwnerId(String ownerId);
+  List<String> findIdsByOwnerId(String ownerId);
 
-	List<String> findIdsByLmsCourseIds(List<String> lmsCourseIds);
+  List<String> findIdsByLmsCourseIds(List<String> lmsCourseIds);
 
-	List<Room> findStubsByScheduledDeletionAfter(Date scheduledDeletion);
+  List<Room> findStubsByScheduledDeletionAfter(Date scheduledDeletion);
 }

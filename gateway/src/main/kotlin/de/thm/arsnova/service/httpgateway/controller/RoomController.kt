@@ -12,22 +12,22 @@ import java.util.Optional
 
 @Controller
 class RoomController(
-    private val roomView: RoomView
+  private val roomView: RoomView
 ) {
 
-    companion object {
-        const val baseMapping = "/_view/room"
-        const val summaryMapping = "$baseMapping/summary"
-    }
+  companion object {
+    const val baseMapping = "/_view/room"
+    const val summaryMapping = "$baseMapping/summary"
+  }
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+  private val logger = LoggerFactory.getLogger(javaClass)
 
-    @GetMapping(path = [summaryMapping])
-    @ResponseBody
-    fun getRoomSummaries(
-        @RequestParam ids: List<String>
-    ): Flux<Optional<RoomSummary>> {
-        logger.trace("Getting room summaries by ids: {}", ids)
-        return roomView.getSummaries(ids)
-    }
+  @GetMapping(path = [summaryMapping])
+  @ResponseBody
+  fun getRoomSummaries(
+    @RequestParam ids: List<String>
+  ): Flux<Optional<RoomSummary>> {
+    logger.trace("Getting room summaries by ids: {}", ids)
+    return roomView.getSummaries(ids)
+  }
 }

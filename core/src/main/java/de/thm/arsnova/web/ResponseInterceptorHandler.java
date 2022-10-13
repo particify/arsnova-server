@@ -33,18 +33,18 @@ import de.thm.arsnova.service.ResponseProviderService;
 @Component
 public class ResponseInterceptorHandler extends HandlerInterceptorAdapter {
 
-	@Autowired
-	ResponseProviderService responseProviderService;
+  @Autowired
+  ResponseProviderService responseProviderService;
 
-	@Override
-	public boolean preHandle(
-			final HttpServletRequest request,
-			final HttpServletResponse response,
-			final Object handler
-	) throws Exception {
-		responseProviderService.setResponse(response);
+  @Override
+  public boolean preHandle(
+      final HttpServletRequest request,
+      final HttpServletResponse response,
+      final Object handler
+  ) throws Exception {
+    responseProviderService.setResponse(response);
 
-		return true;
-	}
+    return true;
+  }
 
 }

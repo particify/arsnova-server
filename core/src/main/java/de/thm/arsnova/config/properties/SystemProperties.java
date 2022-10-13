@@ -25,239 +25,239 @@ import org.springframework.boot.convert.DurationUnit;
 
 @ConfigurationProperties(SystemProperties.PREFIX)
 public class SystemProperties {
-	public static final String PREFIX = "system";
+  public static final String PREFIX = "system";
 
-	public static class Api {
-		private String proxyPath;
-		private boolean indentResponseBody;
-		private boolean exposeErrorMessages;
+  public static class Api {
+    private String proxyPath;
+    private boolean indentResponseBody;
+    private boolean exposeErrorMessages;
 
-		public String getProxyPath() {
-			return proxyPath;
-		}
+    public String getProxyPath() {
+      return proxyPath;
+    }
 
-		public void setProxyPath(final String proxyPath) {
-			this.proxyPath = proxyPath;
-		}
+    public void setProxyPath(final String proxyPath) {
+      this.proxyPath = proxyPath;
+    }
 
-		public boolean isIndentResponseBody() {
-			return indentResponseBody;
-		}
+    public boolean isIndentResponseBody() {
+      return indentResponseBody;
+    }
 
-		public void setIndentResponseBody(final boolean indentResponseBody) {
-			this.indentResponseBody = indentResponseBody;
-		}
+    public void setIndentResponseBody(final boolean indentResponseBody) {
+      this.indentResponseBody = indentResponseBody;
+    }
 
-		public boolean isExposeErrorMessages() {
-			return exposeErrorMessages;
-		}
+    public boolean isExposeErrorMessages() {
+      return exposeErrorMessages;
+    }
 
-		public void setExposeErrorMessages(final boolean exposeErrorMessages) {
-			this.exposeErrorMessages = exposeErrorMessages;
-		}
-	}
+    public void setExposeErrorMessages(final boolean exposeErrorMessages) {
+      this.exposeErrorMessages = exposeErrorMessages;
+    }
+  }
 
-	public static class Mail {
-		private String senderName;
-		private String senderAddress;
-		private String host;
-		private int port;
-		private boolean implicitTls;
-		private String username;
-		private String password;
+  public static class Mail {
+    private String senderName;
+    private String senderAddress;
+    private String host;
+    private int port;
+    private boolean implicitTls;
+    private String username;
+    private String password;
 
-		public String getSenderName() {
-			return senderName;
-		}
+    public String getSenderName() {
+      return senderName;
+    }
 
-		public void setSenderName(final String senderName) {
-			this.senderName = senderName;
-		}
+    public void setSenderName(final String senderName) {
+      this.senderName = senderName;
+    }
 
-		public String getSenderAddress() {
-			return senderAddress;
-		}
+    public String getSenderAddress() {
+      return senderAddress;
+    }
 
-		public void setSenderAddress(final String senderAddress) {
-			this.senderAddress = senderAddress;
-		}
+    public void setSenderAddress(final String senderAddress) {
+      this.senderAddress = senderAddress;
+    }
 
-		public String getHost() {
-			return host;
-		}
+    public String getHost() {
+      return host;
+    }
 
-		public void setHost(final String host) {
-			this.host = host;
-		}
+    public void setHost(final String host) {
+      this.host = host;
+    }
 
-		public int getPort() {
-			return port;
-		}
+    public int getPort() {
+      return port;
+    }
 
-		public void setPort(final int port) {
-			this.port = port;
-		}
+    public void setPort(final int port) {
+      this.port = port;
+    }
 
-		public boolean getImplicitTls() {
-			return implicitTls;
-		}
+    public boolean getImplicitTls() {
+      return implicitTls;
+    }
 
-		public void setImplicitTls(final boolean implicitTls) {
-			this.implicitTls = implicitTls;
-		}
+    public void setImplicitTls(final boolean implicitTls) {
+      this.implicitTls = implicitTls;
+    }
 
-		public String getUsername() {
-			return username;
-		}
+    public String getUsername() {
+      return username;
+    }
 
-		public void setUsername(final String username) {
-			this.username = username;
-		}
+    public void setUsername(final String username) {
+      this.username = username;
+    }
 
-		public String getPassword() {
-			return password;
-		}
+    public String getPassword() {
+      return password;
+    }
 
-		public void setPassword(final String password) {
-			this.password = password;
-		}
-	}
+    public void setPassword(final String password) {
+      this.password = password;
+    }
+  }
 
-	public static class Caching {
-		private long maxEntries;
+  public static class Caching {
+    private long maxEntries;
 
-		@DurationUnit(ChronoUnit.MINUTES)
-		private Duration expiry;
+    @DurationUnit(ChronoUnit.MINUTES)
+    private Duration expiry;
 
-		public long getMaxEntries() {
-			return maxEntries;
-		}
+    public long getMaxEntries() {
+      return maxEntries;
+    }
 
-		public void setMaxEntries(final long maxEntries) {
-			this.maxEntries = maxEntries;
-		}
+    public void setMaxEntries(final long maxEntries) {
+      this.maxEntries = maxEntries;
+    }
 
-		public Duration getExpiry() {
-			return expiry;
-		}
+    public Duration getExpiry() {
+      return expiry;
+    }
 
-		public void setExpiry(final Duration expiry) {
-			this.expiry = expiry;
-		}
-	}
+    public void setExpiry(final Duration expiry) {
+      this.expiry = expiry;
+    }
+  }
 
-	public static class FormattingService {
-		private boolean enabled;
-		private String hostUrl;
+  public static class FormattingService {
+    private boolean enabled;
+    private String hostUrl;
 
-		public boolean isEnabled() {
-			return enabled;
-		}
+    public boolean isEnabled() {
+      return enabled;
+    }
 
-		public void setEnabled(final boolean enabled) {
-			this.enabled = enabled;
-		}
+    public void setEnabled(final boolean enabled) {
+      this.enabled = enabled;
+    }
 
-		public String getHostUrl() {
-			return hostUrl;
-		}
+    public String getHostUrl() {
+      return hostUrl;
+    }
 
-		public void setHostUrl(final String hostUrl) {
-			this.hostUrl = hostUrl;
-		}
-	}
+    public void setHostUrl(final String hostUrl) {
+      this.hostUrl = hostUrl;
+    }
+  }
 
-	public static class LmsConnector {
-		private boolean enabled;
-		private String hostUrl;
-		private String username;
-		private String password;
+  public static class LmsConnector {
+    private boolean enabled;
+    private String hostUrl;
+    private String username;
+    private String password;
 
-		public boolean isEnabled() {
-			return enabled;
-		}
+    public boolean isEnabled() {
+      return enabled;
+    }
 
-		public void setEnabled(final boolean enabled) {
-			this.enabled = enabled;
-		}
+    public void setEnabled(final boolean enabled) {
+      this.enabled = enabled;
+    }
 
-		public String getHostUrl() {
-			return hostUrl;
-		}
+    public String getHostUrl() {
+      return hostUrl;
+    }
 
-		public void setHostUrl(final String hostUrl) {
-			this.hostUrl = hostUrl;
-		}
+    public void setHostUrl(final String hostUrl) {
+      this.hostUrl = hostUrl;
+    }
 
-		public String getUsername() {
-			return username;
-		}
+    public String getUsername() {
+      return username;
+    }
 
-		public void setUsername(final String username) {
-			this.username = username;
-		}
+    public void setUsername(final String username) {
+      this.username = username;
+    }
 
-		public String getPassword() {
-			return password;
-		}
+    public String getPassword() {
+      return password;
+    }
 
-		public void setPassword(final String password) {
-			this.password = password;
-		}
-	}
+    public void setPassword(final String password) {
+      this.password = password;
+    }
+  }
 
-	private String rootUrl;
-	private Api api;
-	private Mail mail;
-	private Caching caching;
-	private FormattingService formattingService;
-	private LmsConnector lmsConnector;
+  private String rootUrl;
+  private Api api;
+  private Mail mail;
+  private Caching caching;
+  private FormattingService formattingService;
+  private LmsConnector lmsConnector;
 
-	public String getRootUrl() {
-		return rootUrl;
-	}
+  public String getRootUrl() {
+    return rootUrl;
+  }
 
-	public void setRootUrl(final String rootUrl) {
-		this.rootUrl = rootUrl;
-	}
+  public void setRootUrl(final String rootUrl) {
+    this.rootUrl = rootUrl;
+  }
 
-	public Api getApi() {
-		return api;
-	}
+  public Api getApi() {
+    return api;
+  }
 
-	public void setApi(final Api api) {
-		this.api = api;
-	}
+  public void setApi(final Api api) {
+    this.api = api;
+  }
 
-	public Mail getMail() {
-		return mail;
-	}
+  public Mail getMail() {
+    return mail;
+  }
 
-	public void setMail(final Mail mail) {
-		this.mail = mail;
-	}
+  public void setMail(final Mail mail) {
+    this.mail = mail;
+  }
 
-	public Caching getCaching() {
-		return caching;
-	}
+  public Caching getCaching() {
+    return caching;
+  }
 
-	public void setCaching(final Caching caching) {
-		this.caching = caching;
-	}
+  public void setCaching(final Caching caching) {
+    this.caching = caching;
+  }
 
-	public FormattingService getFormattingService() {
-		return formattingService;
-	}
+  public FormattingService getFormattingService() {
+    return formattingService;
+  }
 
-	public void setFormattingService(final FormattingService formattingService) {
-		this.formattingService = formattingService;
-	}
+  public void setFormattingService(final FormattingService formattingService) {
+    this.formattingService = formattingService;
+  }
 
-	public LmsConnector getLmsConnector() {
-		return lmsConnector;
-	}
+  public LmsConnector getLmsConnector() {
+    return lmsConnector;
+  }
 
-	public void setLmsConnector(final LmsConnector lmsConnector) {
-		this.lmsConnector = lmsConnector;
-	}
+  public void setLmsConnector(final LmsConnector lmsConnector) {
+    this.lmsConnector = lmsConnector;
+  }
 }

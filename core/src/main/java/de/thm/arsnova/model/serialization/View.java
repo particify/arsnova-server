@@ -19,13 +19,13 @@
 package de.thm.arsnova.model.serialization;
 
 public class View {
-	public interface Persistence {}
+  public interface Persistence {}
 
-	public interface Public {}
+  public interface Public {}
 
-	public interface Extended extends Public {}
+  public interface Extended extends Public {}
 
-	public interface Owner extends Extended {}
+  public interface Owner extends Extended {}
 
-	public interface Admin extends Owner {}
+  public interface Admin extends Owner {}
 }

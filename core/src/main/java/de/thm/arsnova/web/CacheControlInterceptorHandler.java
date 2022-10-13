@@ -30,61 +30,61 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 @Component
 public class CacheControlInterceptorHandler extends HandlerInterceptorAdapter {
 
-	@Override
-	public boolean preHandle(
-			final HttpServletRequest request,
-			final HttpServletResponse response,
-			final Object handler) throws Exception {
+  @Override
+  public boolean preHandle(
+      final HttpServletRequest request,
+      final HttpServletResponse response,
+      final Object handler) throws Exception {
 
-		setCacheControlResponseHeader(response, handler);
-		return super.preHandle(request, response, handler);
-	}
+    setCacheControlResponseHeader(response, handler);
+    return super.preHandle(request, response, handler);
+  }
 
-	private void setCacheControlResponseHeader(
-			final HttpServletResponse response,
-			final Object handler) {
+  private void setCacheControlResponseHeader(
+      final HttpServletResponse response,
+      final Object handler) {
 
-		final CacheControl cacheControl = getCacheControlAnnotation(handler);
+    final CacheControl cacheControl = getCacheControlAnnotation(handler);
 
-		if (cacheControl == null) {
-			return;
-		}
+    if (cacheControl == null) {
+      return;
+    }
 
-		final StringBuilder headerValue = new StringBuilder();
+    final StringBuilder headerValue = new StringBuilder();
 
-		if (cacheControl.policy().length > 0) {
-			for (final CacheControl.Policy policy : cacheControl.policy()) {
-				if (headerValue.length() > 0) {
-					headerValue.append(", ");
-				}
-				headerValue.append(policy.getPolicyString());
-			}
-		}
+    if (cacheControl.policy().length > 0) {
+      for (final CacheControl.Policy policy : cacheControl.policy()) {
+        if (headerValue.length() > 0) {
+          headerValue.append(", ");
+        }
+        headerValue.append(policy.getPolicyString());
+      }
+    }
 
-		if (cacheControl.noCache()) {
-			if (headerValue.length() > 0) {
-				headerValue.append(", ");
-			}
-			headerValue.append("max-age=0, no-cache");
-			response.setHeader("cache-control", headerValue.toString());
-		}
+    if (cacheControl.noCache()) {
+      if (headerValue.length() > 0) {
+        headerValue.append(", ");
+      }
+      headerValue.append("max-age=0, no-cache");
+      response.setHeader("cache-control", headerValue.toString());
+    }
 
-		if (cacheControl.maxAge() >= 0) {
-			if (headerValue.length() > 0) {
-				headerValue.append(", ");
-			}
-			headerValue.append("max-age=").append(cacheControl.maxAge());
-		}
+    if (cacheControl.maxAge() >= 0) {
+      if (headerValue.length() > 0) {
+        headerValue.append(", ");
+      }
+      headerValue.append("max-age=").append(cacheControl.maxAge());
+    }
 
-		response.setHeader("cache-control", headerValue.toString());
-	}
+    response.setHeader("cache-control", headerValue.toString());
+  }
 
-	private CacheControl getCacheControlAnnotation(final Object handler) {
-		if (!(handler instanceof HandlerMethod)) {
-			return null;
-		}
+  private CacheControl getCacheControlAnnotation(final Object handler) {
+    if (!(handler instanceof HandlerMethod)) {
+      return null;
+    }
 
-		final HandlerMethod handlerMethod = (HandlerMethod) handler;
-		return handlerMethod.getMethodAnnotation(CacheControl.class);
-	}
+    final HandlerMethod handlerMethod = (HandlerMethod) handler;
+    return handlerMethod.getMethodAnnotation(CacheControl.class);
+  }
 }

@@ -33,23 +33,23 @@ import java.util.Map;
  * @author Daniel Gerhardt
  */
 public abstract class InnerMigrationEntity {
-	private Map<String, Object> properties = new HashMap<>();
+  private Map<String, Object> properties = new HashMap<>();
 
-	public <T> T getProperty(final String key, final Class<T> clazz) {
-		return (T) properties.get(key);
-	}
+  public <T> T getProperty(final String key, final Class<T> clazz) {
+    return (T) properties.get(key);
+  }
 
-	@JsonAnySetter
-	public void setProperty(final String key, final Object value) {
-		properties.put(key, value);
-	}
+  @JsonAnySetter
+  public void setProperty(final String key, final Object value) {
+    properties.put(key, value);
+  }
 
-	@JsonAnyGetter
-	public Map<String, Object> getProperties() {
-		return properties;
-	}
+  @JsonAnyGetter
+  public Map<String, Object> getProperties() {
+    return properties;
+  }
 
-	public void removeProperty(final String key) {
-		properties.remove(key);
-	}
+  public void removeProperty(final String key) {
+    properties.remove(key);
+  }
 }

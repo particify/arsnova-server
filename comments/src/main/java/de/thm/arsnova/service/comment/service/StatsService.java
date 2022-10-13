@@ -9,24 +9,24 @@ import de.thm.arsnova.service.comment.service.persistence.VoteRepository;
 
 @Service
 public class StatsService {
-    private final CommentRepository commentRepository;
-    private final VoteRepository voteRepository;
+  private final CommentRepository commentRepository;
+  private final VoteRepository voteRepository;
 
-    @Autowired
-    public StatsService(
-            final CommentRepository commentRepository,
-            final VoteRepository voteRepository
-    ) {
-        this.commentRepository = commentRepository;
-        this.voteRepository = voteRepository;
-    }
+  @Autowired
+  public StatsService(
+      final CommentRepository commentRepository,
+      final VoteRepository voteRepository
+  ) {
+    this.commentRepository = commentRepository;
+    this.voteRepository = voteRepository;
+  }
 
-    public Stats get() {
-        final long commentCount = commentRepository.count();
-        final long voteCount = voteRepository.count();
+  public Stats get() {
+    final long commentCount = commentRepository.count();
+    final long voteCount = voteRepository.count();
 
-        final Stats stats = new Stats(commentCount, voteCount);
+    final Stats stats = new Stats(commentCount, voteCount);
 
-        return stats;
-    }
+    return stats;
+  }
 }

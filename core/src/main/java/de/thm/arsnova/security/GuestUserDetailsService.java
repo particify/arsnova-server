@@ -38,25 +38,25 @@ import de.thm.arsnova.service.UserService;
  */
 @Service
 public class GuestUserDetailsService implements UserDetailsService {
-	public static final GrantedAuthority ROLE_GUEST_USER = new SimpleGrantedAuthority("ROLE_GUEST_USER");
+  public static final GrantedAuthority ROLE_GUEST_USER = new SimpleGrantedAuthority("ROLE_GUEST_USER");
 
-	private final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
-			User.ROLE_USER,
-			ROLE_GUEST_USER
-	);
-	private final UserService userService;
+  private final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
+      User.ROLE_USER,
+      ROLE_GUEST_USER
+  );
+  private final UserService userService;
 
-	public GuestUserDetailsService(final UserService userService) {
-		this.userService = userService;
-	}
+  public GuestUserDetailsService(final UserService userService) {
+    this.userService = userService;
+  }
 
-	@Override
-	public UserDetails loadUserByUsername(final String loginId) throws UsernameNotFoundException {
-		return loadUserByUsername(loginId, false);
-	}
+  @Override
+  public UserDetails loadUserByUsername(final String loginId) throws UsernameNotFoundException {
+    return loadUserByUsername(loginId, false);
+  }
 
-	public UserDetails loadUserByUsername(final String loginId, final boolean autoCreate) {
-		return userService.loadUser(UserProfile.AuthProvider.ARSNOVA_GUEST, loginId,
-				defaultGrantedAuthorities, autoCreate);
-	}
+  public UserDetails loadUserByUsername(final String loginId, final boolean autoCreate) {
+    return userService.loadUser(UserProfile.AuthProvider.ARSNOVA_GUEST, loginId,
+        defaultGrantedAuthorities, autoCreate);
+  }
 }

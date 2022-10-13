@@ -4,6 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class CommentStats(
-    var roomId: String = "",
-    var ackCommentCount: Int?
+  var roomId: String = "",
+  var ackCommentCount: Int?
 )

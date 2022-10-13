@@ -18,82 +18,82 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class VoteCommandHandler {
-    private static final Logger logger = LoggerFactory.getLogger(VoteCommandHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(VoteCommandHandler.class);
 
-    private final VoteService service;
-    private final CommentEventSource eventer;
-    private final PermissionEvaluator permissionEvaluator;
+  private final VoteService service;
+  private final CommentEventSource eventer;
+  private final PermissionEvaluator permissionEvaluator;
 
-    @Autowired
-    public VoteCommandHandler(
-            VoteService service,
-            CommentEventSource eventer,
-            PermissionEvaluator permissionEvaluator
-    ) {
-        this.service = service;
-        this.eventer = eventer;
-        this.permissionEvaluator = permissionEvaluator;
+  @Autowired
+  public VoteCommandHandler(
+      VoteService service,
+      CommentEventSource eventer,
+      PermissionEvaluator permissionEvaluator
+  ) {
+    this.service = service;
+    this.eventer = eventer;
+    this.permissionEvaluator = permissionEvaluator;
+  }
+
+  public Vote handle(Upvote vote) {
+    logger.debug("Got new command: {}", vote);
+
+    VotePayload p = vote.getPayload();
+    Vote v = new Vote();
+    v.setCommentId(p.getCommentId());
+    v.setVote(1);
+    v.setUserId(p.getUserId());
+
+    if (!permissionEvaluator.checkVoteOwnerPermission(v)) {
+      throw new ForbiddenException();
     }
 
-    public Vote handle(Upvote vote) {
-        logger.debug("Got new command: {}", vote);
+    Vote saved = service.create(v);
 
-        VotePayload p = vote.getPayload();
-        Vote v = new Vote();
-        v.setCommentId(p.getCommentId());
-        v.setVote(1);
-        v.setUserId(p.getUserId());
+    eventer.ScoreChanged(p.getCommentId());
 
-        if (!permissionEvaluator.checkVoteOwnerPermission(v)) {
-            throw new ForbiddenException();
-        }
+    return saved;
+  }
 
-        Vote saved = service.create(v);
+  public Vote handle(Downvote vote) {
+    logger.debug("Got new command: {}", vote);
 
-        eventer.ScoreChanged(p.getCommentId());
+    VotePayload p = vote.getPayload();
+    Vote v = new Vote();
+    v.setCommentId(p.getCommentId());
+    v.setVote(-1);
+    v.setUserId(p.getUserId());
 
-        return saved;
+    if (!permissionEvaluator.checkVoteOwnerPermission(v)) {
+      throw new ForbiddenException();
     }
 
-    public Vote handle(Downvote vote) {
-        logger.debug("Got new command: {}", vote);
+    Vote saved = service.create(v);
 
-        VotePayload p = vote.getPayload();
-        Vote v = new Vote();
-        v.setCommentId(p.getCommentId());
-        v.setVote(-1);
-        v.setUserId(p.getUserId());
+    eventer.ScoreChanged(p.getCommentId());
 
-        if (!permissionEvaluator.checkVoteOwnerPermission(v)) {
-            throw new ForbiddenException();
-        }
+    return saved;
+  }
 
-        Vote saved = service.create(v);
+  public void handle(ResetVote vote) {
+    logger.debug("Got new command: {}", vote);
 
-        eventer.ScoreChanged(p.getCommentId());
+    VotePayload p = vote.getPayload();
 
-        return saved;
+    Vote v = new Vote();
+    v.setUserId(p.getUserId());
+
+    if (!permissionEvaluator.checkVoteOwnerPermission(v)) {
+      throw new ForbiddenException();
     }
 
-    public void handle(ResetVote vote) {
-        logger.debug("Got new command: {}", vote);
+    v = service.resetVote(p.getCommentId(), p.getUserId());
 
-        VotePayload p = vote.getPayload();
-
-        Vote v = new Vote();
-        v.setUserId(p.getUserId());
-
-        if (!permissionEvaluator.checkVoteOwnerPermission(v)) {
-            throw new ForbiddenException();
-        }
-
-        v = service.resetVote(p.getCommentId(), p.getUserId());
-
-        if (v == null) {
-            logger.trace("No vote to reset");
-        } else {
-            logger.trace("Initialize sending the new score");
-            eventer.ScoreChanged(p.getCommentId());
-        }
+    if (v == null) {
+      logger.trace("No vote to reset");
+    } else {
+      logger.trace("Initialize sending the new score");
+      eventer.ScoreChanged(p.getCommentId());
     }
+  }
 }

@@ -28,14 +28,14 @@ import de.thm.arsnova.service.StatisticsService;
 @Component
 @Endpoint(id = "stats")
 public class StatisticsEndpoint {
-	private StatisticsService statisticsService;
+  private StatisticsService statisticsService;
 
-	public StatisticsEndpoint(final StatisticsService statisticsService) {
-		this.statisticsService = statisticsService;
-	}
+  public StatisticsEndpoint(final StatisticsService statisticsService) {
+    this.statisticsService = statisticsService;
+  }
 
-	@ReadOperation
-	public Statistics readStatistics() {
-		return statisticsService.getStatistics();
-	}
+  @ReadOperation
+  public Statistics readStatistics() {
+    return statisticsService.getStatistics();
+  }
 }

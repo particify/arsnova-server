@@ -25,21 +25,21 @@ import de.thm.arsnova.model.serialization.View;
 
 public abstract class AnswerStatistics {
 
-	private String contentId;
+  private String contentId;
 
-	@JsonView(View.Public.class)
-	public String getContentId() {
-		return contentId;
-	}
+  @JsonView(View.Public.class)
+  public String getContentId() {
+    return contentId;
+  }
 
-	public void setContentId(final String contentId) {
-		this.contentId = contentId;
-	}
+  public void setContentId(final String contentId) {
+    this.contentId = contentId;
+  }
 
-	@Override
-	public String toString() {
-		return new ToStringCreator(this)
-				.append("contentId", contentId)
-				.toString();
-	}
+  @Override
+  public String toString() {
+    return new ToStringCreator(this)
+        .append("contentId", contentId)
+        .toString();
+  }
 }

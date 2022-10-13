@@ -14,35 +14,35 @@ import org.springframework.core.task.TaskExecutor
 @Configuration
 @EnableConfigurationProperties(WebSocketProperties::class)
 class RabbitConfig(
-		private val webSocketProperties: WebSocketProperties
+    private val webSocketProperties: WebSocketProperties
 ) {
-	@Bean
-	@Autowired
-	fun connectionFactory(
-			@TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor?
-	): ConnectionFactory? {
-		val connectionFactory = CachingConnectionFactory(
-				webSocketProperties.rabbitmq.host,
-				webSocketProperties.rabbitmq.port
-		)
-		connectionFactory.username = webSocketProperties.rabbitmq.username
-		connectionFactory.setPassword(webSocketProperties.rabbitmq.password)
-		connectionFactory.virtualHost = webSocketProperties.rabbitmq.virtualHost
-		connectionFactory.setExecutor(executor!!)
-		return connectionFactory
-	}
+  @Bean
+  @Autowired
+  fun connectionFactory(
+      @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor?
+  ): ConnectionFactory? {
+    val connectionFactory = CachingConnectionFactory(
+        webSocketProperties.rabbitmq.host,
+        webSocketProperties.rabbitmq.port
+    )
+    connectionFactory.username = webSocketProperties.rabbitmq.username
+    connectionFactory.setPassword(webSocketProperties.rabbitmq.password)
+    connectionFactory.virtualHost = webSocketProperties.rabbitmq.virtualHost
+    connectionFactory.setExecutor(executor!!)
+    return connectionFactory
+  }
 
-	@Bean
-	@Autowired
-	fun rabbitTemplate(connectionFactory: ConnectionFactory?): RabbitTemplate? {
-		val rabbitTemplate = RabbitTemplate(connectionFactory!!)
-		rabbitTemplate.messageConverter = jsonMessageConverter()
-		return rabbitTemplate
-	}
+  @Bean
+  @Autowired
+  fun rabbitTemplate(connectionFactory: ConnectionFactory?): RabbitTemplate? {
+    val rabbitTemplate = RabbitTemplate(connectionFactory!!)
+    rabbitTemplate.messageConverter = jsonMessageConverter()
+    return rabbitTemplate
+  }
 
-	@Bean
-	fun jsonMessageConverter(): MessageConverter {
-		val converter = Jackson2JsonMessageConverter()
-		return converter
-	}
+  @Bean
+  fun jsonMessageConverter(): MessageConverter {
+    val converter = Jackson2JsonMessageConverter()
+    return converter
+  }
 }

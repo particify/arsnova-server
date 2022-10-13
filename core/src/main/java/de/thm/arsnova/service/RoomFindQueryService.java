@@ -29,19 +29,19 @@ import de.thm.arsnova.model.Room;
 
 @Service
 public class RoomFindQueryService implements FindQueryService<Room> {
-	private RoomService roomService;
+  private RoomService roomService;
 
-	public RoomFindQueryService(final RoomService roomService) {
-		this.roomService = roomService;
-	}
+  public RoomFindQueryService(final RoomService roomService) {
+    this.roomService = roomService;
+  }
 
-	@Override
-	public Set<String> resolveQuery(final FindQuery<Room> findQuery) {
-		final List<List<String>> ids = new ArrayList<>();
-		if (findQuery.getProperties().getOwnerId() != null) {
-			ids.add(roomService.getUserRoomIds(findQuery.getProperties().getOwnerId()));
-		}
+  @Override
+  public Set<String> resolveQuery(final FindQuery<Room> findQuery) {
+    final List<List<String>> ids = new ArrayList<>();
+    if (findQuery.getProperties().getOwnerId() != null) {
+      ids.add(roomService.getUserRoomIds(findQuery.getProperties().getOwnerId()));
+    }
 
-		return ids.stream().flatMap(list -> list.stream()).collect(Collectors.toSet());
-	}
+    return ids.stream().flatMap(list -> list.stream()).collect(Collectors.toSet());
+  }
 }

@@ -44,107 +44,107 @@ import de.thm.arsnova.service.UserService;
 
 @Service
 public class JwtService {
-	private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
-	private static final String ROLE_PREFIX = "ROLE_";
-	private static final String USER_ROLE = "USER";
-	private static final String GUEST_ROLE = "GUEST_USER";
-	private static final String ROLES_CLAIM_NAME = "roles";
-	private Algorithm algorithm;
-	private String serverId;
-	private TemporalAmount defaultValidityPeriod;
-	private TemporalAmount guestValidityPeriod;
-	private TemporalAmount temporaryValidityPeriod;
-	private JWTVerifier verifier;
-	private JWTVerifier legacyVerifier;
-	private UserService userService;
-	private List<GrantedAuthority> legacyAllowedAuthorities;
+  private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
+  private static final String ROLE_PREFIX = "ROLE_";
+  private static final String USER_ROLE = "USER";
+  private static final String GUEST_ROLE = "GUEST_USER";
+  private static final String ROLES_CLAIM_NAME = "roles";
+  private Algorithm algorithm;
+  private String serverId;
+  private TemporalAmount defaultValidityPeriod;
+  private TemporalAmount guestValidityPeriod;
+  private TemporalAmount temporaryValidityPeriod;
+  private JWTVerifier verifier;
+  private JWTVerifier legacyVerifier;
+  private UserService userService;
+  private List<GrantedAuthority> legacyAllowedAuthorities;
 
-	public JwtService(
-			final UserService userService,
-			final SecurityProperties securityProperties) {
-		this.userService = userService;
-		this.serverId = securityProperties.getJwt().getServerId();
-		this.defaultValidityPeriod = securityProperties.getJwt().getValidityPeriod();
-		guestValidityPeriod = Duration.parse("P180D");
-		temporaryValidityPeriod = Duration.parse("PT30S");
-		algorithm = Algorithm.HMAC256(securityProperties.getJwt().getSecret());
-		verifier = JWT.require(algorithm)
-				.withAudience(serverId)
-				.build();
-		/* Legacy token handling */
-		if (securityProperties.getJwt().getLegacySecret() != null
-				&& securityProperties.getJwt().getLegacyServerId() != null) {
-			logger.info("JWT settings for legacy tokens active.");
-			final Algorithm previousAlgorithm = Algorithm.HMAC256(securityProperties.getJwt().getLegacySecret());
-			legacyVerifier = JWT.require(previousAlgorithm)
-					.withAudience(securityProperties.getJwt().getLegacyServerId())
-					.build();
-			legacyAllowedAuthorities = List.of(
-					new SimpleGrantedAuthority(ROLE_PREFIX + USER_ROLE),
-					new SimpleGrantedAuthority(ROLE_PREFIX + GUEST_ROLE)
-			);
-		}
-	}
+  public JwtService(
+      final UserService userService,
+      final SecurityProperties securityProperties) {
+    this.userService = userService;
+    this.serverId = securityProperties.getJwt().getServerId();
+    this.defaultValidityPeriod = securityProperties.getJwt().getValidityPeriod();
+    guestValidityPeriod = Duration.parse("P180D");
+    temporaryValidityPeriod = Duration.parse("PT30S");
+    algorithm = Algorithm.HMAC256(securityProperties.getJwt().getSecret());
+    verifier = JWT.require(algorithm)
+        .withAudience(serverId)
+        .build();
+    /* Legacy token handling */
+    if (securityProperties.getJwt().getLegacySecret() != null
+        && securityProperties.getJwt().getLegacyServerId() != null) {
+      logger.info("JWT settings for legacy tokens active.");
+      final Algorithm previousAlgorithm = Algorithm.HMAC256(securityProperties.getJwt().getLegacySecret());
+      legacyVerifier = JWT.require(previousAlgorithm)
+          .withAudience(securityProperties.getJwt().getLegacyServerId())
+          .build();
+      legacyAllowedAuthorities = List.of(
+          new SimpleGrantedAuthority(ROLE_PREFIX + USER_ROLE),
+          new SimpleGrantedAuthority(ROLE_PREFIX + GUEST_ROLE)
+      );
+    }
+  }
 
-	public String createSignedToken(final User user, final boolean temporary) {
-		final String[] roles = user.getAuthorities().stream()
-				.map(ga -> ga.getAuthority())
-				.filter(ga -> ga.startsWith(ROLE_PREFIX))
-				.map(ga -> ga.substring(ROLE_PREFIX.length())).toArray(String[]::new);
-		final TemporalAmount expiresAt = temporary ? temporaryValidityPeriod
-				: (user.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA_GUEST
-				? guestValidityPeriod : defaultValidityPeriod);
-		return JWT.create()
-				.withIssuer(serverId)
-				.withAudience(serverId)
-				.withIssuedAt(new Date())
-				.withExpiresAt(Date.from(
-						LocalDateTime.now().plus(expiresAt).atZone(ZoneId.systemDefault()).toInstant()))
-				.withSubject(user.getId())
-				.withArrayClaim(ROLES_CLAIM_NAME, roles)
-				.sign(algorithm);
-	}
+  public String createSignedToken(final User user, final boolean temporary) {
+    final String[] roles = user.getAuthorities().stream()
+        .map(ga -> ga.getAuthority())
+        .filter(ga -> ga.startsWith(ROLE_PREFIX))
+        .map(ga -> ga.substring(ROLE_PREFIX.length())).toArray(String[]::new);
+    final TemporalAmount expiresAt = temporary ? temporaryValidityPeriod
+        : (user.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA_GUEST
+        ? guestValidityPeriod : defaultValidityPeriod);
+    return JWT.create()
+        .withIssuer(serverId)
+        .withAudience(serverId)
+        .withIssuedAt(new Date())
+        .withExpiresAt(Date.from(
+            LocalDateTime.now().plus(expiresAt).atZone(ZoneId.systemDefault()).toInstant()))
+        .withSubject(user.getId())
+        .withArrayClaim(ROLES_CLAIM_NAME, roles)
+        .sign(algorithm);
+  }
 
-	public User verifyToken(final String token) {
-		try {
-			final DecodedJWT decodedJwt = verifier.verify(token);
-			final String userId = decodedJwt.getSubject();
-			final Collection<GrantedAuthority> authorities =
-					decodedJwt.getClaim(ROLES_CLAIM_NAME).asList(String.class).stream()
-					.map(role -> role.replace("-", "__"))
-					.map(role -> role.replaceFirst("^CREATOR__", "OWNER__"))
-					.map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role)).collect(Collectors.toList());
+  public User verifyToken(final String token) {
+    try {
+      final DecodedJWT decodedJwt = verifier.verify(token);
+      final String userId = decodedJwt.getSubject();
+      final Collection<GrantedAuthority> authorities =
+          decodedJwt.getClaim(ROLES_CLAIM_NAME).asList(String.class).stream()
+          .map(role -> role.replace("-", "__"))
+          .map(role -> role.replaceFirst("^CREATOR__", "OWNER__"))
+          .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role)).collect(Collectors.toList());
 
-			return userService.loadUser(userId, authorities);
-		} catch (final JWTVerificationException e) {
-			if (legacyVerifier == null) {
-				throw e;
-			}
-			logger.debug("Token invalid, trying with legacy algorithm settings.");
-			final User user = verifyLegacyToken(token);
-			if (user == null) {
-				throw e;
-			}
-			return user;
-		}
-	}
+      return userService.loadUser(userId, authorities);
+    } catch (final JWTVerificationException e) {
+      if (legacyVerifier == null) {
+        throw e;
+      }
+      logger.debug("Token invalid, trying with legacy algorithm settings.");
+      final User user = verifyLegacyToken(token);
+      if (user == null) {
+        throw e;
+      }
+      return user;
+    }
+  }
 
-	/**
-	 * Verifies tokens which were created with a legacy algorithm configuration.
-	 * For security reasons, only tokens created for guest accounts are allowed
-	 * and claimed roles are ignored for authorization and instead overridden.
-	 */
-	private User verifyLegacyToken(final String token) {
-		final DecodedJWT decodedJwt = legacyVerifier.verify(token);
-		logger.debug("Legacy token verified.");
-		final String userId = decodedJwt.getSubject();
-		final List<String> roleClaims = decodedJwt.getClaim(ROLES_CLAIM_NAME).asList(String.class);
-		if (!roleClaims.contains(GUEST_ROLE)) {
-			logger.warn("Legacy token for user ID {} valid but not acceptable for non-guest role claims: {}",
-					userId, roleClaims);
-			return null;
-		}
+  /**
+   * Verifies tokens which were created with a legacy algorithm configuration.
+   * For security reasons, only tokens created for guest accounts are allowed
+   * and claimed roles are ignored for authorization and instead overridden.
+   */
+  private User verifyLegacyToken(final String token) {
+    final DecodedJWT decodedJwt = legacyVerifier.verify(token);
+    logger.debug("Legacy token verified.");
+    final String userId = decodedJwt.getSubject();
+    final List<String> roleClaims = decodedJwt.getClaim(ROLES_CLAIM_NAME).asList(String.class);
+    if (!roleClaims.contains(GUEST_ROLE)) {
+      logger.warn("Legacy token for user ID {} valid but not acceptable for non-guest role claims: {}",
+          userId, roleClaims);
+      return null;
+    }
 
-		return userService.loadUser(userId, legacyAllowedAuthorities);
-	}
+    return userService.loadUser(userId, legacyAllowedAuthorities);
+  }
 }

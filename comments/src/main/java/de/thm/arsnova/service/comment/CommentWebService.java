@@ -8,18 +8,18 @@ import org.springframework.context.annotation.PropertySource;
 
 @SpringBootApplication
 @PropertySource(
-        value = {"classpath:arsnova.comment.properties.example", "file:/etc/arsnova/arsnova.comment.properties"},
-        ignoreResourceNotFound = true,
-        encoding = "UTF-8"
+    value = {"classpath:arsnova.comment.properties.example", "file:/etc/arsnova/arsnova.comment.properties"},
+    ignoreResourceNotFound = true,
+    encoding = "UTF-8"
 )
 public class CommentWebService extends SpringBootServletInitializer {
 
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(CommentWebService.class);
-    }
+  @Override
+  protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+    return application.sources(CommentWebService.class);
+  }
 
-    public static void main(String[] args) {
-        SpringApplication.run(CommentWebService.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(CommentWebService.class, args);
+  }
 }

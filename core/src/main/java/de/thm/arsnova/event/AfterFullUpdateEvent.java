@@ -23,8 +23,8 @@ import java.util.Map;
 import de.thm.arsnova.model.Entity;
 
 public class AfterFullUpdateEvent<E extends Entity> extends AfterUpdateEvent<E> {
-	public AfterFullUpdateEvent(final Object source, final E entity, final E oldEntity,
-			final Map<String, Object> changes) {
-		super(source, entity, oldEntity, changes);
-	}
+  public AfterFullUpdateEvent(final Object source, final E entity, final E oldEntity,
+      final Map<String, Object> changes) {
+    super(source, entity, oldEntity, changes);
+  }
 }

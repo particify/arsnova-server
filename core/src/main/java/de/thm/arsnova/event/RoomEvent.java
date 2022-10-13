@@ -23,16 +23,16 @@ package de.thm.arsnova.event;
  */
 public abstract class RoomEvent extends ArsnovaEvent {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	private final String roomId;
+  private final String roomId;
 
-	public RoomEvent(final Object source, final String roomId) {
-		super(source);
-		this.roomId = roomId;
-	}
+  public RoomEvent(final Object source, final String roomId) {
+    super(source);
+    this.roomId = roomId;
+  }
 
-	public String getRoomId() {
-		return roomId;
-	}
+  public String getRoomId() {
+    return roomId;
+  }
 }

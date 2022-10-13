@@ -4,6 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class RoomCreatedEvent(
-    val id: String = "",
-    val ownerId: String = ""
+  val id: String = "",
+  val ownerId: String = ""
 )

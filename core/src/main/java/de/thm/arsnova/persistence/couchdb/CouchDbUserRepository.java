@@ -35,73 +35,73 @@ import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.persistence.UserRepository;
 
 public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> implements UserRepository {
-	private static final int BULK_PARTITION_SIZE = 500;
+  private static final int BULK_PARTITION_SIZE = 500;
 
-	private static final Logger logger = LoggerFactory.getLogger(CouchDbUserRepository.class);
+  private static final Logger logger = LoggerFactory.getLogger(CouchDbUserRepository.class);
 
-	public CouchDbUserRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(UserProfile.class, db, "by_id", createIfNotExists);
-	}
+  public CouchDbUserRepository(final CouchDbConnector db, final boolean createIfNotExists) {
+    super(UserProfile.class, db, "by_id", createIfNotExists);
+  }
 
-	private void log(final Object... strings) {
-		/* TODO: method stub */
-	}
+  private void log(final Object... strings) {
+    /* TODO: method stub */
+  }
 
-	@Override
-	public UserProfile findByAuthProviderAndLoginId(final UserProfile.AuthProvider authProvider, final String loginId) {
-		final List<UserProfile> users = queryView("by_authprovider_loginid",
-				ComplexKey.of(authProvider.toString(), loginId));
+  @Override
+  public UserProfile findByAuthProviderAndLoginId(final UserProfile.AuthProvider authProvider, final String loginId) {
+    final List<UserProfile> users = queryView("by_authprovider_loginid",
+        ComplexKey.of(authProvider.toString(), loginId));
 
-		return !users.isEmpty() ? users.get(0) : null;
-	}
+    return !users.isEmpty() ? users.get(0) : null;
+  }
 
-	@Override
-	public List<UserProfile> findByLoginId(final String loginId) {
-		final List<UserProfile> users = queryView("by_loginid", loginId);
+  @Override
+  public List<UserProfile> findByLoginId(final String loginId) {
+    final List<UserProfile> users = queryView("by_loginid", loginId);
 
-		return users;
-	}
+    return users;
+  }
 
-	@Override
-	public void delete(final UserProfile user) {
-		if (db.delete(user) != null) {
-			log("delete", "type", "user", "id", user.getId());
-		} else {
-			logger.error("Could not delete user {}", user.getId());
-			throw new DbAccessException("Could not delete document.");
-		}
-	}
+  @Override
+  public void delete(final UserProfile user) {
+    if (db.delete(user) != null) {
+      log("delete", "type", "user", "id", user.getId());
+    } else {
+      logger.error("Could not delete user {}", user.getId());
+      throw new DbAccessException("Could not delete document.");
+    }
+  }
 
-	@Override
-	public int deleteInactiveUsers(final long lastActivityBefore) {
-		final ViewQuery q = createQuery("by_creationtimestamp_for_inactive").endKey(lastActivityBefore);
-		final List<ViewResult.Row> rows = db.queryView(q).getRows();
+  @Override
+  public int deleteInactiveUsers(final long lastActivityBefore) {
+    final ViewQuery q = createQuery("by_creationtimestamp_for_inactive").endKey(lastActivityBefore);
+    final List<ViewResult.Row> rows = db.queryView(q).getRows();
 
-		int count = 0;
-		final List<List<ViewResult.Row>> partitions = Lists.partition(rows, BULK_PARTITION_SIZE);
-		for (final List<ViewResult.Row> partition : partitions) {
-			final List<BulkDeleteDocument> newDocs = new ArrayList<>();
-			for (final ViewResult.Row oldDoc : partition) {
-				final BulkDeleteDocument newDoc =
-						new BulkDeleteDocument(oldDoc.getId(), oldDoc.getValueAsNode().get("_rev").asText());
-				newDocs.add(newDoc);
-				logger.debug("Marked user document {} for deletion.", oldDoc.getId());
-			}
+    int count = 0;
+    final List<List<ViewResult.Row>> partitions = Lists.partition(rows, BULK_PARTITION_SIZE);
+    for (final List<ViewResult.Row> partition : partitions) {
+      final List<BulkDeleteDocument> newDocs = new ArrayList<>();
+      for (final ViewResult.Row oldDoc : partition) {
+        final BulkDeleteDocument newDoc =
+            new BulkDeleteDocument(oldDoc.getId(), oldDoc.getValueAsNode().get("_rev").asText());
+        newDocs.add(newDoc);
+        logger.debug("Marked user document {} for deletion.", oldDoc.getId());
+      }
 
-			if (newDocs.size() > 0) {
-				final List<DocumentOperationResult> results = db.executeBulk(newDocs);
-				if (!results.isEmpty()) {
-					/* TODO: This condition should be improved so that it checks the operation results. */
-					count += newDocs.size();
-				}
-			}
-		}
+      if (newDocs.size() > 0) {
+        final List<DocumentOperationResult> results = db.executeBulk(newDocs);
+        if (!results.isEmpty()) {
+          /* TODO: This condition should be improved so that it checks the operation results. */
+          count += newDocs.size();
+        }
+      }
+    }
 
-		if (count > 0) {
-			logger.info("Deleted {} non-activated user accounts.", count);
-			log("cleanup", "type", "user", "count", count);
-		}
+    if (count > 0) {
+      logger.info("Deleted {} non-activated user accounts.", count);
+      log("cleanup", "type", "user", "count", count);
+    }
 
-		return count;
-	}
+    return count;
+  }
 }

@@ -50,46 +50,46 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
  * @author Daniel Gerhardt
  */
 public class SsoCallbackFilter extends AbstractAuthenticationProcessingFilter {
-	private static final Logger logger = LoggerFactory.getLogger(SsoCallbackFilter.class);
-	private final ClientFinder clientFinder = new DefaultCallbackClientFinder();
-	private Config config;
+  private static final Logger logger = LoggerFactory.getLogger(SsoCallbackFilter.class);
+  private final ClientFinder clientFinder = new DefaultCallbackClientFinder();
+  private Config config;
 
-	public SsoCallbackFilter(final Config pac4jConfig, final String callbackPath) {
-		super(new AntPathRequestMatcher("/**" + callbackPath));
-		this.config = pac4jConfig;
-	}
+  public SsoCallbackFilter(final Config pac4jConfig, final String callbackPath) {
+    super(new AntPathRequestMatcher("/**" + callbackPath));
+    this.config = pac4jConfig;
+  }
 
-	@Override
-	public Authentication attemptAuthentication(
-			final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
-			throws AuthenticationException {
-		final UserProfile profile = retrieveProfile(new JEEContext(httpServletRequest, httpServletResponse), null);
-		return getAuthenticationManager().authenticate(new SsoAuthenticationToken(null, profile, Collections.emptyList()));
-	}
+  @Override
+  public Authentication attemptAuthentication(
+      final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
+      throws AuthenticationException {
+    final UserProfile profile = retrieveProfile(new JEEContext(httpServletRequest, httpServletResponse), null);
+    return getAuthenticationManager().authenticate(new SsoAuthenticationToken(null, profile, Collections.emptyList()));
+  }
 
-	private UserProfile retrieveProfile(final JEEContext context, final String clientName)
-			throws AuthenticationServiceException {
-		/* Adapted from Pac4j: org.pac4j.core.engine.DefaultCallbackLogic.perform */
-		final Clients clients = config.getClients();
-		CommonHelper.assertNotNull("clients", clients);
-		final List<Client> foundClients = clientFinder.find(clients, context, clientName);
-		CommonHelper.assertTrue(foundClients != null && foundClients.size() == 1,
-				"unable to find one indirect client for the callback:"
-						+ " check the callback URL for a client name parameter or suffix path"
-						+ " or ensure that your configuration defaults to one indirect client");
-		final Client foundClient = foundClients.get(0);
-		logger.debug("client: {}", foundClient);
-		CommonHelper.assertNotNull("client", foundClient);
-		CommonHelper.assertTrue(foundClient instanceof IndirectClient,
-				"only indirect clients are allowed on the callback url");
+  private UserProfile retrieveProfile(final JEEContext context, final String clientName)
+      throws AuthenticationServiceException {
+    /* Adapted from Pac4j: org.pac4j.core.engine.DefaultCallbackLogic.perform */
+    final Clients clients = config.getClients();
+    CommonHelper.assertNotNull("clients", clients);
+    final List<Client> foundClients = clientFinder.find(clients, context, clientName);
+    CommonHelper.assertTrue(foundClients != null && foundClients.size() == 1,
+        "unable to find one indirect client for the callback:"
+            + " check the callback URL for a client name parameter or suffix path"
+            + " or ensure that your configuration defaults to one indirect client");
+    final Client foundClient = foundClients.get(0);
+    logger.debug("client: {}", foundClient);
+    CommonHelper.assertNotNull("client", foundClient);
+    CommonHelper.assertTrue(foundClient instanceof IndirectClient,
+        "only indirect clients are allowed on the callback url");
 
-		final SessionStore sessionStore = FindBest.sessionStoreFactory(
-				null, config, JEESessionStoreFactory.INSTANCE).newSessionStore();
-		final Optional<Credentials> credentials = foundClient.getCredentials(context, sessionStore);
-		logger.debug("credentials: {}", credentials);
-		final Optional<UserProfile> profile = foundClient.getUserProfile(credentials.orElse(null), context, sessionStore);
-		logger.debug("profile: {}", profile);
+    final SessionStore sessionStore = FindBest.sessionStoreFactory(
+        null, config, JEESessionStoreFactory.INSTANCE).newSessionStore();
+    final Optional<Credentials> credentials = foundClient.getCredentials(context, sessionStore);
+    logger.debug("credentials: {}", credentials);
+    final Optional<UserProfile> profile = foundClient.getUserProfile(credentials.orElse(null), context, sessionStore);
+    logger.debug("profile: {}", profile);
 
-		return profile.orElseThrow(() -> new AuthenticationServiceException("No user profile found."));
-	}
+    return profile.orElseThrow(() -> new AuthenticationServiceException("No user profile found."));
+  }
 }

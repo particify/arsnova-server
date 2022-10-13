@@ -39,27 +39,27 @@ import de.thm.arsnova.service.UserService;
  */
 @Service
 public class RegisteredUserDetailsService implements UserDetailsService {
-	public static final GrantedAuthority ROLE_REGISTERED_USER = new SimpleGrantedAuthority("ROLE_REGISTERED_USER");
+  public static final GrantedAuthority ROLE_REGISTERED_USER = new SimpleGrantedAuthority("ROLE_REGISTERED_USER");
 
-	private final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
-			User.ROLE_USER,
-			ROLE_REGISTERED_USER
-	);
-	private UserService userService;
+  private final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
+      User.ROLE_USER,
+      ROLE_REGISTERED_USER
+  );
+  private UserService userService;
 
-	@Override
-	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
-		final String loginId = username.toLowerCase();
-		final Collection<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
-		if (userService.isAdmin(loginId, UserProfile.AuthProvider.ARSNOVA)) {
-			grantedAuthorities.add(User.ROLE_ADMIN);
-		}
-		return userService.loadUser(UserProfile.AuthProvider.ARSNOVA, loginId,
-				grantedAuthorities, false);
-	}
+  @Override
+  public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
+    final String loginId = username.toLowerCase();
+    final Collection<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
+    if (userService.isAdmin(loginId, UserProfile.AuthProvider.ARSNOVA)) {
+      grantedAuthorities.add(User.ROLE_ADMIN);
+    }
+    return userService.loadUser(UserProfile.AuthProvider.ARSNOVA, loginId,
+        grantedAuthorities, false);
+  }
 
-	@Autowired
-	public void setUserService(final UserService userService) {
-		this.userService = userService;
-	}
+  @Autowired
+  public void setUserService(final UserService userService) {
+    this.userService = userService;
+  }
 }

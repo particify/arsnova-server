@@ -32,15 +32,15 @@ import de.thm.arsnova.model.Entity;
  */
 @Aspect
 public class InternalEntityAspect {
-	private static final Logger logger = LoggerFactory.getLogger(InternalEntityAspect.class);
+  private static final Logger logger = LoggerFactory.getLogger(InternalEntityAspect.class);
 
-	@AfterReturning(pointcut = "execution(de.thm.arsnova.model.Entity+ de.thm.arsnova.controller.*.*(..))",
-			returning = "entity")
-	public void prohibitInternalEntitySerialization(final Entity entity) {
-		logger.debug("Executing InternalEntityAspect for entity: {}", entity);
+  @AfterReturning(pointcut = "execution(de.thm.arsnova.model.Entity+ de.thm.arsnova.controller.*.*(..))",
+      returning = "entity")
+  public void prohibitInternalEntitySerialization(final Entity entity) {
+    logger.debug("Executing InternalEntityAspect for entity: {}", entity);
 
-		if (entity != null && entity.isInternal()) {
-			throw new SecurityException("Serialization of internal entities is not allowed.");
-		}
-	}
+    if (entity != null && entity.isInternal()) {
+      throw new SecurityException("Serialization of internal entities is not allowed.");
+    }
+  }
 }

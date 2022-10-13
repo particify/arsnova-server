@@ -24,50 +24,50 @@ import de.thm.arsnova.websocket.message.FeedbackChanged;
 @ExtendWith(SpringExtension.class)
 public class FeedbackCommandHandlerTest {
 
-	@MockBean
-	private RabbitTemplate messagingTemplate;
+  @MockBean
+  private RabbitTemplate messagingTemplate;
 
-	@MockBean
-	private FeedbackStorageService feedbackStorage;
+  @MockBean
+  private FeedbackStorageService feedbackStorage;
 
-	@MockBean
-	private RoomService roomService;
+  @MockBean
+  private RoomService roomService;
 
-	private FeedbackCommandHandler commandHandler;
+  private FeedbackCommandHandler commandHandler;
 
-	private Room getTestRoom() {
-		Room r = new Room();
-		r.setId("12345678");
-		r.getSettings().setFeedbackLocked(false);
-		return r;
-	}
+  private Room getTestRoom() {
+    Room r = new Room();
+    r.setId("12345678");
+    r.getSettings().setFeedbackLocked(false);
+    return r;
+  }
 
-	@BeforeEach
-	public void setUp() {
-		this.commandHandler = new FeedbackCommandHandler(messagingTemplate, feedbackStorage, roomService);
-	}
+  @BeforeEach
+  public void setUp() {
+    this.commandHandler = new FeedbackCommandHandler(messagingTemplate, feedbackStorage, roomService);
+  }
 
-	@Test
-	public void sendFeedback() {
-		Room r = getTestRoom();
-		final String roomId = r.getId();
+  @Test
+  public void sendFeedback() {
+    Room r = getTestRoom();
+    final String roomId = r.getId();
 
-		Mockito.when(roomService.get(roomId, true)).thenReturn(r);
-		Mockito.when(feedbackStorage.getByRoom(r)).thenReturn(new Feedback(0, 1, 0, 0));
+    Mockito.when(roomService.get(roomId, true)).thenReturn(r);
+    Mockito.when(feedbackStorage.getByRoom(r)).thenReturn(new Feedback(0, 1, 0, 0));
 
-		final CreateFeedbackPayload createFeedbackPayload = new CreateFeedbackPayload(roomId, "1", 1);
-		createFeedbackPayload.setValue(1);
-		final CreateFeedback createFeedback = new CreateFeedback();
-		createFeedback.setPayload(createFeedbackPayload);
+    final CreateFeedbackPayload createFeedbackPayload = new CreateFeedbackPayload(roomId, "1", 1);
+    createFeedbackPayload.setValue(1);
+    final CreateFeedback createFeedback = new CreateFeedback();
+    createFeedback.setPayload(createFeedbackPayload);
 
-		commandHandler.handle(createFeedback);
+    commandHandler.handle(createFeedback);
 
-		final ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
-		final ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
-		verify(messagingTemplate).convertAndSend(topicCaptor.capture(), keyCaptor.capture(), any(FeedbackChanged.class));
-		assertThat(topicCaptor.getValue()).isEqualTo("amq.topic");
-		assertThat(keyCaptor.getValue()).isEqualTo(roomId + ".feedback.stream");
-	}
+    final ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
+    final ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
+    verify(messagingTemplate).convertAndSend(topicCaptor.capture(), keyCaptor.capture(), any(FeedbackChanged.class));
+    assertThat(topicCaptor.getValue()).isEqualTo("amq.topic");
+    assertThat(keyCaptor.getValue()).isEqualTo(roomId + ".feedback.stream");
+  }
 }
 
 

@@ -11,23 +11,23 @@ import reactor.core.publisher.Flux
 
 @Controller
 class RoomModeratorController(
-    private val roomAccessService: RoomAccessService
+  private val roomAccessService: RoomAccessService
 ) {
 
-    companion object {
-        const val baseMapping = "/room/{roomId}/moderator"
-    }
+  companion object {
+    const val baseMapping = "/room/{roomId}/moderator"
+  }
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+  private val logger = LoggerFactory.getLogger(javaClass)
 
-    @GetMapping(path = [baseMapping])
-    @ResponseBody
-    fun getRoomModerators(
-        @PathVariable roomId: String
-    ): Flux<RoomRole> {
-        logger.trace("Getting moderators for room: {}", roomId)
-        return roomAccessService.getRoomModerators(roomId).map { roomAccess ->
-            RoomRole(roomAccess.userId, roomAccess.role)
-        }
+  @GetMapping(path = [baseMapping])
+  @ResponseBody
+  fun getRoomModerators(
+    @PathVariable roomId: String
+  ): Flux<RoomRole> {
+    logger.trace("Getting moderators for room: {}", roomId)
+    return roomAccessService.getRoomModerators(roomId).map { roomAccess ->
+      RoomRole(roomAccess.userId, roomAccess.role)
     }
+  }
 }

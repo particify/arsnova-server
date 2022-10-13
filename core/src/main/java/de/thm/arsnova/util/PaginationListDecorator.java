@@ -29,187 +29,187 @@ import java.util.ListIterator;
  * @param <T> type of the List items
  */
 public class PaginationListDecorator<T> implements List<T> {
-	private final List<T> list;
-	private List<T> subList;
-	private int offset;
-	private int limit;
+  private final List<T> list;
+  private List<T> subList;
+  private int offset;
+  private int limit;
 
-	public PaginationListDecorator(final List<T> list, final int offset, final int limit) {
-		this.list = list;
-		this.offset = offset;
-		this.limit = limit;
-		checkRange();
-		subList = list.subList(this.offset, this.offset + this.limit);
-	}
+  public PaginationListDecorator(final List<T> list, final int offset, final int limit) {
+    this.list = list;
+    this.offset = offset;
+    this.limit = limit;
+    checkRange();
+    subList = list.subList(this.offset, this.offset + this.limit);
+  }
 
-	private void checkRange() {
-		if (offset < 0) {
-			offset = 0;
-		}
-		if (limit <= 0 || limit > list.size() - offset) {
-			limit = list.size();
-		}
-	}
+  private void checkRange() {
+    if (offset < 0) {
+      offset = 0;
+    }
+    if (limit <= 0 || limit > list.size() - offset) {
+      limit = list.size();
+    }
+  }
 
-	/**
-	 * Returns the original (not paginated) List.
-	 */
-	public List<T> getList() {
-		return list;
-	}
+  /**
+   * Returns the original (not paginated) List.
+   */
+  public List<T> getList() {
+    return list;
+  }
 
-	/**
-	 * Returns the number of skipped items.
-	 */
-	public int getOffset() {
-		return offset;
-	}
+  /**
+   * Returns the number of skipped items.
+   */
+  public int getOffset() {
+    return offset;
+  }
 
-	/**
-	 * Sets the number of items to be skipped.
-	 */
-	public void setOffset(final int offset) {
-		this.offset = offset;
-		checkRange();
-		subList = list.subList(this.offset, this.offset + this.limit);
-	}
+  /**
+   * Sets the number of items to be skipped.
+   */
+  public void setOffset(final int offset) {
+    this.offset = offset;
+    checkRange();
+    subList = list.subList(this.offset, this.offset + this.limit);
+  }
 
-	/**
-	 * Returns the size limit of the paginated list.
-	 */
-	public int getLimit() {
-		return limit;
-	}
+  /**
+   * Returns the size limit of the paginated list.
+   */
+  public int getLimit() {
+    return limit;
+  }
 
-	/**
-	 * Sets the size limit for the resulting list.
-	 */
-	public void setLimit(final int limit) {
-		this.limit = limit;
-		checkRange();
-		subList = list.subList(this.offset, this.offset + this.limit);
-	}
+  /**
+   * Sets the size limit for the resulting list.
+   */
+  public void setLimit(final int limit) {
+    this.limit = limit;
+    checkRange();
+    subList = list.subList(this.offset, this.offset + this.limit);
+  }
 
-	/**
-	 * Returns the size of the original (not paginated) List.
-	 */
-	public int getTotalSize() {
-		return list.size();
-	}
+  /**
+   * Returns the size of the original (not paginated) List.
+   */
+  public int getTotalSize() {
+    return list.size();
+  }
 
-	@Override
-	public Iterator<T> iterator() {
-		return subList.iterator();
-	}
+  @Override
+  public Iterator<T> iterator() {
+    return subList.iterator();
+  }
 
-	@Override
-	public boolean add(final T e) {
-		return subList.add(e);
-	}
+  @Override
+  public boolean add(final T e) {
+    return subList.add(e);
+  }
 
-	@Override
-	public void add(final int index, final T element) {
-		subList.add(index, element);
-	}
+  @Override
+  public void add(final int index, final T element) {
+    subList.add(index, element);
+  }
 
-	@Override
-	public boolean addAll(final Collection<? extends T> c) {
-		return subList.addAll(c);
-	}
+  @Override
+  public boolean addAll(final Collection<? extends T> c) {
+    return subList.addAll(c);
+  }
 
-	@Override
-	public boolean addAll(final int index, final Collection<? extends T> c) {
-		return subList.addAll(index, c);
-	}
+  @Override
+  public boolean addAll(final int index, final Collection<? extends T> c) {
+    return subList.addAll(index, c);
+  }
 
-	@Override
-	public void clear() {
-		subList.clear();
-	}
+  @Override
+  public void clear() {
+    subList.clear();
+  }
 
-	@Override
-	public boolean contains(final Object o) {
-		return subList.contains(o);
-	}
+  @Override
+  public boolean contains(final Object o) {
+    return subList.contains(o);
+  }
 
-	@Override
-	public boolean containsAll(final Collection<?> c) {
-		return subList.containsAll(c);
-	}
+  @Override
+  public boolean containsAll(final Collection<?> c) {
+    return subList.containsAll(c);
+  }
 
-	@Override
-	public T get(final int index) {
-		return subList.get(index);
-	}
+  @Override
+  public T get(final int index) {
+    return subList.get(index);
+  }
 
-	@Override
-	public int indexOf(final Object o) {
-		return subList.indexOf(o);
-	}
+  @Override
+  public int indexOf(final Object o) {
+    return subList.indexOf(o);
+  }
 
-	@Override
-	public boolean isEmpty() {
-		return subList.isEmpty();
-	}
+  @Override
+  public boolean isEmpty() {
+    return subList.isEmpty();
+  }
 
-	@Override
-	public int lastIndexOf(final Object o) {
-		return subList.lastIndexOf(o);
-	}
+  @Override
+  public int lastIndexOf(final Object o) {
+    return subList.lastIndexOf(o);
+  }
 
-	@Override
-	public ListIterator<T> listIterator() {
-		return subList.listIterator();
-	}
+  @Override
+  public ListIterator<T> listIterator() {
+    return subList.listIterator();
+  }
 
-	@Override
-	public ListIterator<T> listIterator(final int index) {
-		return subList.listIterator(index);
-	}
+  @Override
+  public ListIterator<T> listIterator(final int index) {
+    return subList.listIterator(index);
+  }
 
-	@Override
-	public boolean remove(final Object o) {
-		return subList.remove(o);
-	}
+  @Override
+  public boolean remove(final Object o) {
+    return subList.remove(o);
+  }
 
-	@Override
-	public T remove(final int index) {
-		return subList.remove(index);
-	}
+  @Override
+  public T remove(final int index) {
+    return subList.remove(index);
+  }
 
-	@Override
-	public boolean removeAll(final Collection<?> c) {
-		return subList.removeAll(c);
-	}
+  @Override
+  public boolean removeAll(final Collection<?> c) {
+    return subList.removeAll(c);
+  }
 
-	@Override
-	public boolean retainAll(final Collection<?> c) {
-		return subList.retainAll(c);
-	}
+  @Override
+  public boolean retainAll(final Collection<?> c) {
+    return subList.retainAll(c);
+  }
 
-	@Override
-	public T set(final int index, final T element) {
-		return subList.set(index, element);
-	}
+  @Override
+  public T set(final int index, final T element) {
+    return subList.set(index, element);
+  }
 
-	@Override
-	public int size() {
-		return subList.size();
-	}
+  @Override
+  public int size() {
+    return subList.size();
+  }
 
-	@Override
-	public List<T> subList(final int fromIndex, final int toIndex) {
-		return subList.subList(fromIndex, toIndex);
-	}
+  @Override
+  public List<T> subList(final int fromIndex, final int toIndex) {
+    return subList.subList(fromIndex, toIndex);
+  }
 
-	@Override
-	public Object[] toArray() {
-		return subList.toArray();
-	}
+  @Override
+  public Object[] toArray() {
+    return subList.toArray();
+  }
 
-	@Override
-	public <A> A[] toArray(final A[] a) {
-		return subList.toArray(a);
-	}
+  @Override
+  public <A> A[] toArray(final A[] a) {
+    return subList.toArray(a);
+  }
 
 }

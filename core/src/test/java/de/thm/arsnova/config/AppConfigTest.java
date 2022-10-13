@@ -35,30 +35,30 @@ import net.particify.arsnova.connector.client.ConnectorClient;
 
 @SpringBootTest
 @Import({
-		TestAppConfig.class,
-		TestPersistanceConfig.class,
-		TestSecurityConfig.class})
+    TestAppConfig.class,
+    TestPersistanceConfig.class,
+    TestSecurityConfig.class})
 @ActiveProfiles("test")
 public class AppConfigTest {
-	@Autowired
-	private SecurityProperties securityProperties;
+  @Autowired
+  private SecurityProperties securityProperties;
 
-	@Autowired(required = false)
-	private ConnectorClient connectorClient;
+  @Autowired(required = false)
+  private ConnectorClient connectorClient;
 
-	private List<String> adminAccounts;
+  private List<String> adminAccounts;
 
-	@Test
-	public void testShouldNotLoadConnectorClientByDefault() {
-		assertNull(connectorClient);
-	}
+  @Test
+  public void testShouldNotLoadConnectorClientByDefault() {
+    assertNull(connectorClient);
+  }
 
-	@Test
-	public void testShouldUseAdminAccountFromTestPropertiesFile() {
-		final List<String> expected = Collections.singletonList("TestAdmin");
-		final List<String> actual = securityProperties.getAdminAccounts().stream()
-				.map(adminAccount -> adminAccount.getLoginId()).collect(Collectors.toList());
+  @Test
+  public void testShouldUseAdminAccountFromTestPropertiesFile() {
+    final List<String> expected = Collections.singletonList("TestAdmin");
+    final List<String> actual = securityProperties.getAdminAccounts().stream()
+        .map(adminAccount -> adminAccount.getLoginId()).collect(Collectors.toList());
 
-		assertEquals(expected, actual, "Configuration did not load correct property file");
-	}
+    assertEquals(expected, actual, "Configuration did not load correct property file");
+  }
 }

@@ -27,19 +27,19 @@ import java.util.List;
  * @author Daniel Gerhardt
  */
 public class PagedMangoResponse<T> {
-	private List<T> entities;
-	private String bookmark;
+  private List<T> entities;
+  private String bookmark;
 
-	public PagedMangoResponse(final List<T> entities, final String bookmark) {
-		this.entities = entities;
-		this.bookmark = bookmark;
-	}
+  public PagedMangoResponse(final List<T> entities, final String bookmark) {
+    this.entities = entities;
+    this.bookmark = bookmark;
+  }
 
-	public List<T> getEntities() {
-		return entities;
-	}
+  public List<T> getEntities() {
+    return entities;
+  }
 
-	public String getBookmark() {
-		return bookmark;
-	}
+  public String getBookmark() {
+    return bookmark;
+  }
 }

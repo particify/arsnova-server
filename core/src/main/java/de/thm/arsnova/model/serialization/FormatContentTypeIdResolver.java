@@ -33,54 +33,54 @@ import de.thm.arsnova.model.ScaleChoiceContent;
 import de.thm.arsnova.model.WordcloudContent;
 
 public class FormatContentTypeIdResolver extends TypeIdResolverBase {
-	@Override
-	public String idFromValue(final Object value) {
-		if (value instanceof Content) {
-			final Content content = (Content) value;
-			return content.getFormat() != null ? content.getFormat().toString() : null;
-		} else {
-			throw new IllegalArgumentException("Unsupported type.");
-		}
-	}
+  @Override
+  public String idFromValue(final Object value) {
+    if (value instanceof Content) {
+      final Content content = (Content) value;
+      return content.getFormat() != null ? content.getFormat().toString() : null;
+    } else {
+      throw new IllegalArgumentException("Unsupported type.");
+    }
+  }
 
-	@Override
-	public String idFromValueAndType(final Object value, final Class<?> suggestedType) {
-		return idFromValue(value);
-	}
+  @Override
+  public String idFromValueAndType(final Object value, final Class<?> suggestedType) {
+    return idFromValue(value);
+  }
 
-	@Override
-	public JavaType typeFromId(final DatabindContext context, final String id) throws IOException {
-		final Content.Format format = Content.Format.valueOf(id);
-		switch (format) {
-			case BINARY:
-				return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
-			case CHOICE:
-				return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
-			case NUMBER:
-				return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
-			case SCALE:
-				return TypeFactory.defaultInstance().constructType(ScaleChoiceContent.class);
-			case SORT:
-				return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
-			case TEXT:
-				return TypeFactory.defaultInstance().constructType(Content.class);
-			case SLIDE:
-				return TypeFactory.defaultInstance().constructType(Content.class);
-			case FLASHCARD:
-				return TypeFactory.defaultInstance().constructType(Content.class);
-			case GRID:
-				return TypeFactory.defaultInstance().constructType(GridImageContent.class);
-			case WORDCLOUD:
-				return TypeFactory.defaultInstance().constructType(WordcloudContent.class);
-			case PRIORIZATION:
-				return TypeFactory.defaultInstance().constructType(PriorizationChoiceContent.class);
-			default:
-				throw new IllegalArgumentException("Unsupported type ID.");
-		}
-	}
+  @Override
+  public JavaType typeFromId(final DatabindContext context, final String id) throws IOException {
+    final Content.Format format = Content.Format.valueOf(id);
+    switch (format) {
+      case BINARY:
+        return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
+      case CHOICE:
+        return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
+      case NUMBER:
+        return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
+      case SCALE:
+        return TypeFactory.defaultInstance().constructType(ScaleChoiceContent.class);
+      case SORT:
+        return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
+      case TEXT:
+        return TypeFactory.defaultInstance().constructType(Content.class);
+      case SLIDE:
+        return TypeFactory.defaultInstance().constructType(Content.class);
+      case FLASHCARD:
+        return TypeFactory.defaultInstance().constructType(Content.class);
+      case GRID:
+        return TypeFactory.defaultInstance().constructType(GridImageContent.class);
+      case WORDCLOUD:
+        return TypeFactory.defaultInstance().constructType(WordcloudContent.class);
+      case PRIORIZATION:
+        return TypeFactory.defaultInstance().constructType(PriorizationChoiceContent.class);
+      default:
+        throw new IllegalArgumentException("Unsupported type ID.");
+    }
+  }
 
-	@Override
-	public JsonTypeInfo.Id getMechanism() {
-		return JsonTypeInfo.Id.CUSTOM;
-	}
+  @Override
+  public JsonTypeInfo.Id getMechanism() {
+    return JsonTypeInfo.Id.CUSTOM;
+  }
 }

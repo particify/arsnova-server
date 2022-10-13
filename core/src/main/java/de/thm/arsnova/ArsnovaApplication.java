@@ -18,17 +18,17 @@ import de.thm.arsnova.config.YamlPropertySourceFactory;
 @EnableScheduling
 @EnableSpringConfigured
 @PropertySource(
-		value = {
-				"classpath:config/defaults.yml",
-				"classpath:config/actuator.yml",
-				"file:${arsnova.config-dir:.}/application.yml",
-				"file:${arsnova.config-dir:.}/secrets.yml",
-				"file:${arsnova.config-dir:.}/ui.yml"},
-		ignoreResourceNotFound = true,
-		encoding = CharEncoding.UTF_8,
-		factory = YamlPropertySourceFactory.class)
+    value = {
+        "classpath:config/defaults.yml",
+        "classpath:config/actuator.yml",
+        "file:${arsnova.config-dir:.}/application.yml",
+        "file:${arsnova.config-dir:.}/secrets.yml",
+        "file:${arsnova.config-dir:.}/ui.yml"},
+    ignoreResourceNotFound = true,
+    encoding = CharEncoding.UTF_8,
+    factory = YamlPropertySourceFactory.class)
 public class ArsnovaApplication {
-	public static void main(final String[] args) {
-		SpringApplication.run(ArsnovaApplication.class, args);
-	}
+  public static void main(final String[] args) {
+    SpringApplication.run(ArsnovaApplication.class, args);
+  }
 }

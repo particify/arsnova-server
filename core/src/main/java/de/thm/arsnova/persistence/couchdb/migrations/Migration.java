@@ -21,9 +21,9 @@ package de.thm.arsnova.persistence.couchdb.migrations;
 import de.thm.arsnova.model.MigrationState;
 
 public interface Migration {
-	String getId();
+  String getId();
 
-	int getStepCount();
+  int getStepCount();
 
-	void migrate(MigrationState.Migration state) throws MigrationException;
+  void migrate(MigrationState.Migration state) throws MigrationException;
 }

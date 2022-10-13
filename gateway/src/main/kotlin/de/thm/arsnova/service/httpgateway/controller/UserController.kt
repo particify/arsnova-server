@@ -17,56 +17,56 @@ import reactor.core.publisher.Mono
 
 @Controller
 class UserController(
-    private val announcementService: AnnouncementService,
-    private val userService: UserService,
-    private val authProcessor: AuthProcessor
+  private val announcementService: AnnouncementService,
+  private val userService: UserService,
+  private val authProcessor: AuthProcessor
 ) {
-    companion object {
-        const val baseMapping = "/user/{userId}"
-        const val announcementMapping = "$baseMapping/announcement"
-        const val announcementStateMapping = "$announcementMapping/state"
-    }
+  companion object {
+    const val baseMapping = "/user/{userId}"
+    const val announcementMapping = "$baseMapping/announcement"
+    const val announcementStateMapping = "$announcementMapping/state"
+  }
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
+  private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @GetMapping(path = [announcementMapping])
-    @ResponseBody
-    fun getAnnouncements(@PathVariable userId: String): Flux<Announcement> {
-        logger.trace("Getting announcements")
-        return announcementService.getByUserIdWithRoomName(userId)
-    }
+  @GetMapping(path = [announcementMapping])
+  @ResponseBody
+  fun getAnnouncements(@PathVariable userId: String): Flux<Announcement> {
+    logger.trace("Getting announcements")
+    return announcementService.getByUserIdWithRoomName(userId)
+  }
 
-    @PostMapping(path = [announcementMapping])
-    @ResponseBody
-    fun postAnnouncements(@PathVariable userId: String): Flux<Announcement> {
-        logger.trace("Getting announcements and updating timestamp")
-        return authProcessor.getAuthentication()
-            .filter { authentication ->
-                authentication.principal == userId
-            }
-            .switchIfEmpty(Mono.error(ForbiddenException()))
-            .map { it.credentials.toString() }
-            .flatMapMany { jwt ->
-                announcementService.getByUserIdWithRoomName(userId).doOnComplete {
-                    userService.updateAnnouncementReadTimestamp(userId, jwt).subscribe()
-                }
-            }
-    }
+  @PostMapping(path = [announcementMapping])
+  @ResponseBody
+  fun postAnnouncements(@PathVariable userId: String): Flux<Announcement> {
+    logger.trace("Getting announcements and updating timestamp")
+    return authProcessor.getAuthentication()
+      .filter { authentication ->
+        authentication.principal == userId
+      }
+      .switchIfEmpty(Mono.error(ForbiddenException()))
+      .map { it.credentials.toString() }
+      .flatMapMany { jwt ->
+        announcementService.getByUserIdWithRoomName(userId).doOnComplete {
+          userService.updateAnnouncementReadTimestamp(userId, jwt).subscribe()
+        }
+      }
+  }
 
-    @GetMapping(path = [announcementStateMapping])
-    @ResponseBody
-    fun getAnnouncementState(@PathVariable userId: String): Mono<AnnouncementState> {
-        logger.trace("Getting announcement state")
-        return authProcessor.getAuthentication()
-            .filter { authentication ->
-                authentication.principal == userId
-            }
-            .switchIfEmpty(Mono.error(ForbiddenException()))
-            .map { it.credentials.toString() }
-            .flatMap { jwt ->
-                userService.get(userId, jwt).flatMap {
-                    announcementService.getStateByUser(it)
-                }
-            }
-    }
+  @GetMapping(path = [announcementStateMapping])
+  @ResponseBody
+  fun getAnnouncementState(@PathVariable userId: String): Mono<AnnouncementState> {
+    logger.trace("Getting announcement state")
+    return authProcessor.getAuthentication()
+      .filter { authentication ->
+        authentication.principal == userId
+      }
+      .switchIfEmpty(Mono.error(ForbiddenException()))
+      .map { it.credentials.toString() }
+      .flatMap { jwt ->
+        userService.get(userId, jwt).flatMap {
+          announcementService.getStateByUser(it)
+        }
+      }
+  }
 }

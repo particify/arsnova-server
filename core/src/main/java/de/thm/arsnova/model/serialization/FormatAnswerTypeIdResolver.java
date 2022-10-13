@@ -33,50 +33,50 @@ import de.thm.arsnova.model.PriorizationAnswer;
 import de.thm.arsnova.model.TextAnswer;
 
 public class FormatAnswerTypeIdResolver extends TypeIdResolverBase {
-	@Override
-	public String idFromValue(final Object value) {
-		if (value instanceof Answer) {
-			final Answer answer = (Answer) value;
-			return answer.getFormat() != null ? answer.getFormat().toString() : null;
-		} else {
-			throw new IllegalArgumentException("Unsupported type.");
-		}
-	}
+  @Override
+  public String idFromValue(final Object value) {
+    if (value instanceof Answer) {
+      final Answer answer = (Answer) value;
+      return answer.getFormat() != null ? answer.getFormat().toString() : null;
+    } else {
+      throw new IllegalArgumentException("Unsupported type.");
+    }
+  }
 
-	@Override
-	public String idFromValueAndType(final Object value, final Class<?> suggestedType) {
-		return idFromValue(value);
-	}
+  @Override
+  public String idFromValueAndType(final Object value, final Class<?> suggestedType) {
+    return idFromValue(value);
+  }
 
-	@Override
-	public JavaType typeFromId(final DatabindContext context, final String id) throws IOException {
-		final Content.Format format = Content.Format.valueOf(id);
-		switch (format) {
-			case BINARY:
-				return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
-			case CHOICE:
-				return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
-			case NUMBER:
-				return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
-			case SCALE:
-				return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
-			case TEXT:
-				return TypeFactory.defaultInstance().constructType(TextAnswer.class);
-			case GRID:
-				return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
-			case SORT:
-				return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
-			case WORDCLOUD:
-				return TypeFactory.defaultInstance().constructType(MultipleTextsAnswer.class);
-			case PRIORIZATION:
-				return TypeFactory.defaultInstance().constructType(PriorizationAnswer.class);
-			default:
-				throw new IllegalArgumentException("Unsupported type ID.");
-		}
-	}
+  @Override
+  public JavaType typeFromId(final DatabindContext context, final String id) throws IOException {
+    final Content.Format format = Content.Format.valueOf(id);
+    switch (format) {
+      case BINARY:
+        return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
+      case CHOICE:
+        return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
+      case NUMBER:
+        return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
+      case SCALE:
+        return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
+      case TEXT:
+        return TypeFactory.defaultInstance().constructType(TextAnswer.class);
+      case GRID:
+        return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
+      case SORT:
+        return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
+      case WORDCLOUD:
+        return TypeFactory.defaultInstance().constructType(MultipleTextsAnswer.class);
+      case PRIORIZATION:
+        return TypeFactory.defaultInstance().constructType(PriorizationAnswer.class);
+      default:
+        throw new IllegalArgumentException("Unsupported type ID.");
+    }
+  }
 
-	@Override
-	public JsonTypeInfo.Id getMechanism() {
-		return JsonTypeInfo.Id.CUSTOM;
-	}
+  @Override
+  public JsonTypeInfo.Id getMechanism() {
+    return JsonTypeInfo.Id.CUSTOM;
+  }
 }

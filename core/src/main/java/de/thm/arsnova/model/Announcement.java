@@ -28,117 +28,117 @@ import org.springframework.core.style.ToStringCreator;
 import de.thm.arsnova.model.serialization.View;
 
 public class Announcement extends Entity implements RoomIdAware {
-	@NotEmpty
-	private String roomId;
+  @NotEmpty
+  private String roomId;
 
-	@NotEmpty
-	private String creatorId;
+  @NotEmpty
+  private String creatorId;
 
-	@NotBlank
-	private String title;
+  @NotBlank
+  private String title;
 
-	@NotBlank
-	private String body;
+  @NotBlank
+  private String body;
 
-	private String renderedBody;
+  private String renderedBody;
 
-	{
-		final TextRenderingOptions options = new TextRenderingOptions();
-		options.setMarkdownFeatureset(TextRenderingOptions.MarkdownFeatureset.EXTENDED);
-		this.addRenderingMapping(
-				this::getBody,
-				this::setRenderedBody,
-				options);
-	}
+  {
+    final TextRenderingOptions options = new TextRenderingOptions();
+    options.setMarkdownFeatureset(TextRenderingOptions.MarkdownFeatureset.EXTENDED);
+    this.addRenderingMapping(
+        this::getBody,
+        this::setRenderedBody,
+        options);
+  }
 
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Date getCreationTimestamp() {
-		return creationTimestamp;
-	}
+  @Override
+  @JsonView({View.Persistence.class, View.Public.class})
+  public Date getCreationTimestamp() {
+    return creationTimestamp;
+  }
 
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Date getUpdateTimestamp() {
-		return updateTimestamp;
-	}
+  @Override
+  @JsonView({View.Persistence.class, View.Public.class})
+  public Date getUpdateTimestamp() {
+    return updateTimestamp;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getRoomId() {
-		return roomId;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getRoomId() {
+    return roomId;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRoomId(final String roomId) {
-		this.roomId = roomId;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setRoomId(final String roomId) {
+    this.roomId = roomId;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getCreatorId() {
-		return creatorId;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getCreatorId() {
+    return creatorId;
+  }
 
-	@JsonView(View.Persistence.class)
-	public void setCreatorId(final String creatorId) {
-		this.creatorId = creatorId;
-	}
+  @JsonView(View.Persistence.class)
+  public void setCreatorId(final String creatorId) {
+    this.creatorId = creatorId;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getTitle() {
-		return title;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getTitle() {
+    return title;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setTitle(final String title) {
-		this.title = title;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setTitle(final String title) {
+    this.title = title;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getBody() {
-		return body;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getBody() {
+    return body;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setBody(final String body) {
-		this.body = body;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setBody(final String body) {
+    this.body = body;
+  }
 
-	@JsonView(View.Public.class)
-	public String getRenderedBody() {
-		return renderedBody;
-	}
+  @JsonView(View.Public.class)
+  public String getRenderedBody() {
+    return renderedBody;
+  }
 
-	public void setRenderedBody(final String renderedBody) {
-		this.renderedBody = renderedBody;
-	}
+  public void setRenderedBody(final String renderedBody) {
+    this.renderedBody = renderedBody;
+  }
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * All fields of <tt>Announcement</tt> are included in equality checks.
-	 * </p>
-	 */
-	@Override
-	public boolean equals(final Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (!super.equals(o)) {
-			return false;
-		}
-		final Announcement announcement = (Announcement) o;
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * All fields of <tt>Announcement</tt> are included in equality checks.
+   * </p>
+   */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    final Announcement announcement = (Announcement) o;
 
-		return Objects.equals(roomId, announcement.roomId)
-				&& Objects.equals(title, announcement.title)
-				&& Objects.equals(body, announcement.body);
-	}
+    return Objects.equals(roomId, announcement.roomId)
+        && Objects.equals(title, announcement.title)
+        && Objects.equals(body, announcement.body);
+  }
 
-	@Override
-	protected ToStringCreator buildToString() {
-		return super.buildToString()
-				.append("roomId", roomId)
-				.append("title", title)
-				.append("body", body);
-	}
+  @Override
+  protected ToStringCreator buildToString() {
+    return super.buildToString()
+        .append("roomId", roomId)
+        .append("title", title)
+        .append("body", body);
+  }
 }

@@ -22,51 +22,51 @@ import java.util.Set;
 @RestController("BonusTokenController")
 @RequestMapping("/room/{roomId}/bonustoken")
 public class BonusTokenController extends AbstractEntityController {
-    private static final Logger logger = LoggerFactory.getLogger(BonusTokenController.class);
+  private static final Logger logger = LoggerFactory.getLogger(BonusTokenController.class);
 
-    protected static final String REQUEST_MAPPING = "/bonustoken";
-    protected static final String DELETE_MAPPING = "/deleteby";
+  protected static final String REQUEST_MAPPING = "/bonustoken";
+  protected static final String DELETE_MAPPING = "/deleteby";
 
-    private final BonusTokenService service;
-    private final BonusTokenFindQueryService findQueryService;
+  private final BonusTokenService service;
+  private final BonusTokenFindQueryService findQueryService;
 
-    @Autowired
-    public BonusTokenController(
-            BonusTokenService service,
-            BonusTokenFindQueryService findQueryService
-    ) {
-        this.service = service;
-        this.findQueryService = findQueryService;
+  @Autowired
+  public BonusTokenController(
+      BonusTokenService service,
+      BonusTokenFindQueryService findQueryService
+  ) {
+    this.service = service;
+    this.findQueryService = findQueryService;
+  }
+
+  @DeleteMapping(DELETE_MAPPING)
+  public void delete(
+      @RequestParam("roomid") final String roomId,
+      @RequestParam(value = "commentid", required = false) final String commentId,
+      @RequestParam(value = "userid", required = false) final String userId
+  ) {
+    if (commentId != null && userId != null) {
+      logger.debug("Searching for and deleting bonus token, roomId = {}, commentId = {}", roomId, commentId);
+
+      service.deleteByPK(roomId, commentId, userId);
+    } else {
+      logger.debug("Searching for bonus tokens with roomId = {}", roomId);
+      List<BonusToken> list = service.getByRoomId(roomId);
+      for (BonusToken t : list) {
+        logger.debug("Deleting BonusToken = {}", t.toString());
+        service.delete(t);
+      }
     }
+  }
 
-    @DeleteMapping(DELETE_MAPPING)
-    public void delete(
-            @RequestParam("roomid") final String roomId,
-            @RequestParam(value = "commentid", required = false) final String commentId,
-            @RequestParam(value = "userid", required = false) final String userId
-    ) {
-        if (commentId != null && userId != null) {
-            logger.debug("Searching for and deleting bonus token, roomId = {}, commentId = {}", roomId, commentId);
+  @PostMapping(FIND_MAPPING)
+  public List<BonusToken> find(@RequestBody final FindQuery<BonusToken> findQuery) {
+    logger.debug("Resolving find query: {}", findQuery);
 
-            service.deleteByPK(roomId, commentId, userId);
-        } else {
-            logger.debug("Searching for bonus tokens with roomId = {}", roomId);
-            List<BonusToken> list = service.getByRoomId(roomId);
-            for (BonusToken t : list) {
-                logger.debug("Deleting BonusToken = {}", t.toString());
-                service.delete(t);
-            }
-        }
-    }
+    Set<BonusTokenPK> ids = findQueryService.resolveQuery(findQuery);
 
-    @PostMapping(FIND_MAPPING)
-    public List<BonusToken> find(@RequestBody final FindQuery<BonusToken> findQuery) {
-        logger.debug("Resolving find query: {}", findQuery);
+    logger.debug("Resolved find query to IDs: {}", ids);
 
-        Set<BonusTokenPK> ids = findQueryService.resolveQuery(findQuery);
-
-        logger.debug("Resolved find query to IDs: {}", ids);
-
-        return service.get(new ArrayList<>(ids));
-    }
+    return service.get(new ArrayList<>(ids));
+  }
 }

@@ -53,97 +53,97 @@ import de.thm.arsnova.service.StubUserService;
 
 @TestConfiguration
 @ComponentScan({
-		"de.thm.arsnova.controller",
-		"de.thm.arsnova.security",
-		"de.thm.arsnova.service",
-		"de.thm.arsnova.web",
-		"de.thm.arsnova.websocket.handler"})
+    "de.thm.arsnova.controller",
+    "de.thm.arsnova.security",
+    "de.thm.arsnova.service",
+    "de.thm.arsnova.web",
+    "de.thm.arsnova.websocket.handler"})
 @PropertySource(
-		value = {
-				"classpath:config/defaults.yml",
-				"classpath:config/actuator.yml",
-				"classpath:config/test.yml"
-		},
-		encoding = "UTF-8",
-		factory = YamlPropertySourceFactory.class)
+    value = {
+        "classpath:config/defaults.yml",
+        "classpath:config/actuator.yml",
+        "classpath:config/test.yml"
+    },
+    encoding = "UTF-8",
+    factory = YamlPropertySourceFactory.class)
 @Import({
-		ArsnovaApplication.class,
-		AppConfig.class})
+    ArsnovaApplication.class,
+    AppConfig.class})
 @Profile("test")
 public class TestAppConfig {
-	private static int testPortOffset = 0;
+  private static int testPortOffset = 0;
 
-	@Autowired
-	private SystemProperties systemProperties;
+  @Autowired
+  private SystemProperties systemProperties;
 
-	@Bean
-	public MockServletContext servletContext() {
-		return new MockServletContext();
-	}
+  @Bean
+  public MockServletContext servletContext() {
+    return new MockServletContext();
+  }
 
-	@Bean
-	public static CustomScopeConfigurer customScopeConfigurer() {
-		final CustomScopeConfigurer configurer = new CustomScopeConfigurer();
-		configurer.addScope("session", new SimpleThreadScope());
+  @Bean
+  public static CustomScopeConfigurer customScopeConfigurer() {
+    final CustomScopeConfigurer configurer = new CustomScopeConfigurer();
+    configurer.addScope("session", new SimpleThreadScope());
 
-		return configurer;
-	}
+    return configurer;
+  }
 
-	@Bean("userServiceImpl")
-	@Primary
-	public StubUserService stubUserService(
-			final UserRepository repository,
-			final SystemProperties systemProperties,
-			final SecurityProperties securityProperties,
-			final AuthenticationProviderProperties authenticationProviderProperties,
-			final EmailService emailService,
-			@Qualifier("defaultJsonMessageConverter")
-			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
-			final Validator validator,
-			final PasswordUtils passwordUtils) {
-		return new StubUserService(repository, systemProperties, securityProperties, authenticationProviderProperties,
-				emailService, jackson2HttpMessageConverter, validator, passwordUtils);
-	}
+  @Bean("userServiceImpl")
+  @Primary
+  public StubUserService stubUserService(
+      final UserRepository repository,
+      final SystemProperties systemProperties,
+      final SecurityProperties securityProperties,
+      final AuthenticationProviderProperties authenticationProviderProperties,
+      final EmailService emailService,
+      @Qualifier("defaultJsonMessageConverter")
+      final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+      final Validator validator,
+      final PasswordUtils passwordUtils) {
+    return new StubUserService(repository, systemProperties, securityProperties, authenticationProviderProperties,
+        emailService, jackson2HttpMessageConverter, validator, passwordUtils);
+  }
 
-	@Bean
-	@Autowired
-	@TaskExecutorConfig.RabbitConnectionExecutor
-	public TaskExecutor rabbitConnectionExecutor() {
-		final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setThreadNamePrefix("RabbitConnection");
-		executor.afterPropertiesSet();
-		return executor;
-	}
+  @Bean
+  @Autowired
+  @TaskExecutorConfig.RabbitConnectionExecutor
+  public TaskExecutor rabbitConnectionExecutor() {
+    final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setThreadNamePrefix("RabbitConnection");
+    executor.afterPropertiesSet();
+    return executor;
+  }
 
-	@Bean
-	@Autowired
-	public ConnectionFactory connectionFactory(
-		@TaskExecutorConfig.RabbitConnectionExecutor final TaskExecutor executor,
-		final MessageBrokerProperties messageBrokerProperties
-	) {
-		final CachingConnectionFactory connectionFactory = new CachingConnectionFactory(
-			messageBrokerProperties.getRabbitmq().getHost(),
-			messageBrokerProperties.getRabbitmq().getPort());
-		connectionFactory.setUsername(messageBrokerProperties.getRabbitmq().getUsername());
-		connectionFactory.setPassword(messageBrokerProperties.getRabbitmq().getPassword());
-		connectionFactory.setVirtualHost(messageBrokerProperties.getRabbitmq().getVirtualHost());
-		connectionFactory.setExecutor(executor);
+  @Bean
+  @Autowired
+  public ConnectionFactory connectionFactory(
+    @TaskExecutorConfig.RabbitConnectionExecutor final TaskExecutor executor,
+    final MessageBrokerProperties messageBrokerProperties
+  ) {
+    final CachingConnectionFactory connectionFactory = new CachingConnectionFactory(
+      messageBrokerProperties.getRabbitmq().getHost(),
+      messageBrokerProperties.getRabbitmq().getPort());
+    connectionFactory.setUsername(messageBrokerProperties.getRabbitmq().getUsername());
+    connectionFactory.setPassword(messageBrokerProperties.getRabbitmq().getPassword());
+    connectionFactory.setVirtualHost(messageBrokerProperties.getRabbitmq().getVirtualHost());
+    connectionFactory.setExecutor(executor);
 
-		return connectionFactory;
-	}
+    return connectionFactory;
+  }
 
-	@Bean
-	public MessageConverter jsonMessageConverter() {
-		return new Jackson2JsonMessageConverter();
-	}
+  @Bean
+  public MessageConverter jsonMessageConverter() {
+    return new Jackson2JsonMessageConverter();
+  }
 
-	@Bean
-	@Autowired
-	public RabbitTemplate rabbitTemplate(
-			final ConnectionFactory connectionFactory,
-			final MessageConverter messageConverter) {
-		final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-		rabbitTemplate.setMessageConverter(messageConverter);
-		return rabbitTemplate;
-	}
+  @Bean
+  @Autowired
+  public RabbitTemplate rabbitTemplate(
+      final ConnectionFactory connectionFactory,
+      final MessageConverter messageConverter) {
+    final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+    rabbitTemplate.setMessageConverter(messageConverter);
+    return rabbitTemplate;
+  }
 }

@@ -25,144 +25,144 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(MessageBrokerProperties.PREFIX)
 public class MessageBrokerProperties {
-	public static final String PREFIX = SystemProperties.PREFIX + ".message-broker";
+  public static final String PREFIX = SystemProperties.PREFIX + ".message-broker";
 
-	public abstract static class Server {
-		private boolean enabled;
-		private String host;
-		private int port;
-		private String username;
-		private String password;
+  public abstract static class Server {
+    private boolean enabled;
+    private String host;
+    private int port;
+    private String username;
+    private String password;
 
-		public boolean isEnabled() {
-			return enabled;
-		}
+    public boolean isEnabled() {
+      return enabled;
+    }
 
-		public void setEnabled(final boolean enabled) {
-			this.enabled = enabled;
-		}
+    public void setEnabled(final boolean enabled) {
+      this.enabled = enabled;
+    }
 
-		public String getHost() {
-			return host;
-		}
+    public String getHost() {
+      return host;
+    }
 
-		public void setHost(final String host) {
-			this.host = host;
-		}
+    public void setHost(final String host) {
+      this.host = host;
+    }
 
-		public int getPort() {
-			return port;
-		}
+    public int getPort() {
+      return port;
+    }
 
-		public void setPort(final int port) {
-			this.port = port;
-		}
+    public void setPort(final int port) {
+      this.port = port;
+    }
 
-		public String getUsername() {
-			return username;
-		}
+    public String getUsername() {
+      return username;
+    }
 
-		public void setUsername(final String username) {
-			this.username = username;
-		}
+    public void setUsername(final String username) {
+      this.username = username;
+    }
 
-		public String getPassword() {
-			return password;
-		}
+    public String getPassword() {
+      return password;
+    }
 
-		public void setPassword(final String password) {
-			this.password = password;
-		}
-	}
+    public void setPassword(final String password) {
+      this.password = password;
+    }
+  }
 
-	public static class Rabbitmq extends Server {
-		private String virtualHost;
-		private boolean manageDeclarations;
-		private Listener listener;
+  public static class Rabbitmq extends Server {
+    private String virtualHost;
+    private boolean manageDeclarations;
+    private Listener listener;
 
-		public String getVirtualHost() {
-			return virtualHost;
-		}
+    public String getVirtualHost() {
+      return virtualHost;
+    }
 
-		public void setVirtualHost(final String virtualHost) {
-			this.virtualHost = virtualHost;
-		}
+    public void setVirtualHost(final String virtualHost) {
+      this.virtualHost = virtualHost;
+    }
 
-		public boolean isManageDeclarations() {
-			return manageDeclarations;
-		}
+    public boolean isManageDeclarations() {
+      return manageDeclarations;
+    }
 
-		public void setManageDeclarations(final boolean manageDeclarations) {
-			this.manageDeclarations = manageDeclarations;
-		}
+    public void setManageDeclarations(final boolean manageDeclarations) {
+      this.manageDeclarations = manageDeclarations;
+    }
 
-		public Listener getListener() {
-			return listener;
-		}
+    public Listener getListener() {
+      return listener;
+    }
 
-		public void setListener(final Listener listener) {
-			this.listener = listener;
-		}
-	}
+    public void setListener(final Listener listener) {
+      this.listener = listener;
+    }
+  }
 
-	public static class Listener {
-		private int maxAttempts;
+  public static class Listener {
+    private int maxAttempts;
 
-		public int getMaxAttempts() {
-			return maxAttempts;
-		}
+    public int getMaxAttempts() {
+      return maxAttempts;
+    }
 
-		public void setMaxAttempts(final int maxAttempts) {
-			this.maxAttempts = maxAttempts;
-		}
-	}
+    public void setMaxAttempts(final int maxAttempts) {
+      this.maxAttempts = maxAttempts;
+    }
+  }
 
-	public static class PublishedEvent {
-		public String entityType;
-		public String eventType;
-		public Set<String> includedProperties = new HashSet<>();
+  public static class PublishedEvent {
+    public String entityType;
+    public String eventType;
+    public Set<String> includedProperties = new HashSet<>();
 
-		public String getEntityType() {
-			return entityType;
-		}
+    public String getEntityType() {
+      return entityType;
+    }
 
-		public void setEntityType(final String entityType) {
-			this.entityType = entityType;
-		}
+    public void setEntityType(final String entityType) {
+      this.entityType = entityType;
+    }
 
-		public String getEventType() {
-			return eventType;
-		}
+    public String getEventType() {
+      return eventType;
+    }
 
-		public void setEventType(final String eventType) {
-			this.eventType = eventType;
-		}
+    public void setEventType(final String eventType) {
+      this.eventType = eventType;
+    }
 
-		public Set<String> getIncludedProperties() {
-			return includedProperties;
-		}
+    public Set<String> getIncludedProperties() {
+      return includedProperties;
+    }
 
-		public void setIncludedProperties(final Set<String> includedProperties) {
-			this.includedProperties = includedProperties;
-		}
-	}
+    public void setIncludedProperties(final Set<String> includedProperties) {
+      this.includedProperties = includedProperties;
+    }
+  }
 
-	private Rabbitmq rabbitmq;
-	private List<PublishedEvent> publishedEvents;
+  private Rabbitmq rabbitmq;
+  private List<PublishedEvent> publishedEvents;
 
-	public Rabbitmq getRabbitmq() {
-		return rabbitmq;
-	}
+  public Rabbitmq getRabbitmq() {
+    return rabbitmq;
+  }
 
-	public void setRabbitmq(final Rabbitmq rabbitmq) {
-		this.rabbitmq = rabbitmq;
-	}
+  public void setRabbitmq(final Rabbitmq rabbitmq) {
+    this.rabbitmq = rabbitmq;
+  }
 
-	public List<PublishedEvent> getPublishedEvents() {
-		return publishedEvents;
-	}
+  public List<PublishedEvent> getPublishedEvents() {
+    return publishedEvents;
+  }
 
-	public void setPublishedEvents(final List<PublishedEvent> publishedEvents) {
-		this.publishedEvents = publishedEvents;
-	}
+  public void setPublishedEvents(final List<PublishedEvent> publishedEvents) {
+    this.publishedEvents = publishedEvents;
+  }
 }

@@ -13,43 +13,43 @@ import de.thm.arsnova.service.comment.service.SettingsService;
 
 @Service
 public class RoomDeletedListener {
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    static class RoomDeletedEvent {
-        private String id;
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  static class RoomDeletedEvent {
+    private String id;
 
-        public String getId() {
-            return id;
-        }
-
-        public void setId(final String id) {
-            this.id = id;
-        }
-
-        @Override
-        public String toString() {
-            return "RoomDeletedEvent{" +
-                    "id='" + id + '\'' +
-                    '}';
-        }
+    public String getId() {
+      return id;
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(RoomDeletedListener.class);
-    private final CommentService commentService;
-    private final SettingsService settingsService;
-
-    @Autowired
-    public RoomDeletedListener(
-            final CommentService commentService,
-            final SettingsService settingsService
-    ) {
-        this.commentService = commentService;
-        this.settingsService = settingsService;
+    public void setId(final String id) {
+      this.id = id;
     }
 
-    @RabbitListener(queues = RabbitConfig.ROOM_DELETED_QUEUE_NAME)
-    public void receiveMessage(final RoomDeletedEvent event) {
-        logger.info("Reveiced room deleted event {}", event);
-        commentService.deleteByRoomId(event.getId());
-        settingsService.delete(event.getId());
+    @Override
+    public String toString() {
+      return "RoomDeletedEvent{" +
+          "id='" + id + '\'' +
+          '}';
     }
+  }
+
+  private static final Logger logger = LoggerFactory.getLogger(RoomDeletedListener.class);
+  private final CommentService commentService;
+  private final SettingsService settingsService;
+
+  @Autowired
+  public RoomDeletedListener(
+      final CommentService commentService,
+      final SettingsService settingsService
+  ) {
+    this.commentService = commentService;
+    this.settingsService = settingsService;
+  }
+
+  @RabbitListener(queues = RabbitConfig.ROOM_DELETED_QUEUE_NAME)
+  public void receiveMessage(final RoomDeletedEvent event) {
+    logger.info("Reveiced room deleted event {}", event);
+    commentService.deleteByRoomId(event.getId());
+    settingsService.delete(event.getId());
+  }
 }

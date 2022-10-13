@@ -60,154 +60,154 @@ import de.thm.arsnova.web.exceptions.NotImplementedException;
 @RestController
 @EntityRequestMapping("/auth")
 public class AuthenticationController {
-	private UserService userService;
-	private OidcClient oidcClient;
-	private SAML2Client saml2Client;
-	private CasAuthenticationEntryPoint casEntryPoint;
-	private Config oauthConfig;
-	private Config samlConfig;
-	private String apiPath;
+  private UserService userService;
+  private OidcClient oidcClient;
+  private SAML2Client saml2Client;
+  private CasAuthenticationEntryPoint casEntryPoint;
+  private Config oauthConfig;
+  private Config samlConfig;
+  private String apiPath;
 
-	public AuthenticationController(
-			@Qualifier("securedUserService") final UserService userService,
-			final SystemProperties systemProperties,
-			final ServletContext servletContext,
-			@Qualifier("oauthConfig") final Config oauthConfig,
-			@Autowired(required = false) @Qualifier("samlConfig") final Config samlConfig) {
-		this.userService = userService;
-		this.oauthConfig = oauthConfig;
-		this.samlConfig = samlConfig;
-		final String proxyPath = systemProperties.getApi().getProxyPath();
-		this.apiPath = proxyPath != null && !proxyPath.isEmpty() ? proxyPath : servletContext.getContextPath();
-	}
+  public AuthenticationController(
+      @Qualifier("securedUserService") final UserService userService,
+      final SystemProperties systemProperties,
+      final ServletContext servletContext,
+      @Qualifier("oauthConfig") final Config oauthConfig,
+      @Autowired(required = false) @Qualifier("samlConfig") final Config samlConfig) {
+    this.userService = userService;
+    this.oauthConfig = oauthConfig;
+    this.samlConfig = samlConfig;
+    final String proxyPath = systemProperties.getApi().getProxyPath();
+    this.apiPath = proxyPath != null && !proxyPath.isEmpty() ? proxyPath : servletContext.getContextPath();
+  }
 
-	@Autowired(required = false)
-	public void setOidcClient(final OidcClient oidcClient) {
-		this.oidcClient = oidcClient;
-	}
+  @Autowired(required = false)
+  public void setOidcClient(final OidcClient oidcClient) {
+    this.oidcClient = oidcClient;
+  }
 
-	@Autowired(required = false)
-	public void setSaml2Client(final SAML2Client saml2Client) {
-		this.saml2Client = saml2Client;
-	}
+  @Autowired(required = false)
+  public void setSaml2Client(final SAML2Client saml2Client) {
+    this.saml2Client = saml2Client;
+  }
 
-	@Autowired(required = false)
-	public void setCasEntryPoint(final CasAuthenticationEntryPoint casEntryPoint) {
-		this.casEntryPoint = casEntryPoint;
-	}
+  @Autowired(required = false)
+  public void setCasEntryPoint(final CasAuthenticationEntryPoint casEntryPoint) {
+    this.casEntryPoint = casEntryPoint;
+  }
 
-	@PostMapping("/login")
-	public ClientAuthentication login(@RequestParam(defaultValue = "false") final boolean refresh,
-			final HttpServletRequest request, final HttpServletResponse response) {
-		if (request.getCookies() != null && Arrays.stream(request.getCookies())
-				.anyMatch(c -> c.getName().equalsIgnoreCase(LoginAuthenticationSucessHandler.AUTH_COOKIE_NAME))) {
-			/* Delete cookie */
-			final Cookie cookie = new Cookie(LoginAuthenticationSucessHandler.AUTH_COOKIE_NAME, null);
-			cookie.setPath(apiPath);
-			cookie.setMaxAge(0);
-			response.addCookie(cookie);
-		}
+  @PostMapping("/login")
+  public ClientAuthentication login(@RequestParam(defaultValue = "false") final boolean refresh,
+      final HttpServletRequest request, final HttpServletResponse response) {
+    if (request.getCookies() != null && Arrays.stream(request.getCookies())
+        .anyMatch(c -> c.getName().equalsIgnoreCase(LoginAuthenticationSucessHandler.AUTH_COOKIE_NAME))) {
+      /* Delete cookie */
+      final Cookie cookie = new Cookie(LoginAuthenticationSucessHandler.AUTH_COOKIE_NAME, null);
+      cookie.setPath(apiPath);
+      cookie.setMaxAge(0);
+      response.addCookie(cookie);
+    }
 
-		final ClientAuthentication authentication = userService.getCurrentClientAuthentication(refresh);
-		if (authentication == null) {
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		}
-		return authentication;
-	}
+    final ClientAuthentication authentication = userService.getCurrentClientAuthentication(refresh);
+    if (authentication == null) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    }
+    return authentication;
+  }
 
-	@PostMapping("/login/guest")
-	public ClientAuthentication loginGuest(
-			final HttpServletRequest request,
-			@RequestBody(required = false) final LoginCredentials loginCredentials) {
-		final String guestId = loginCredentials != null ? loginCredentials.getLoginId() : null;
-		if (guestId == null) {
-			final ClientAuthentication currentAuthentication = userService.getCurrentClientAuthentication(false);
-			if (currentAuthentication != null
-					&& currentAuthentication.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA_GUEST) {
-				return currentAuthentication;
-			}
-		}
-		userService.authenticate(new UsernamePasswordAuthenticationToken(guestId, null),
-				UserProfile.AuthProvider.ARSNOVA_GUEST, request.getRemoteAddr());
+  @PostMapping("/login/guest")
+  public ClientAuthentication loginGuest(
+      final HttpServletRequest request,
+      @RequestBody(required = false) final LoginCredentials loginCredentials) {
+    final String guestId = loginCredentials != null ? loginCredentials.getLoginId() : null;
+    if (guestId == null) {
+      final ClientAuthentication currentAuthentication = userService.getCurrentClientAuthentication(false);
+      if (currentAuthentication != null
+          && currentAuthentication.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA_GUEST) {
+        return currentAuthentication;
+      }
+    }
+    userService.authenticate(new UsernamePasswordAuthenticationToken(guestId, null),
+        UserProfile.AuthProvider.ARSNOVA_GUEST, request.getRemoteAddr());
 
-		return userService.getCurrentClientAuthentication(false);
-	}
+    return userService.getCurrentClientAuthentication(false);
+  }
 
-	@PostMapping("/login/{providerId}")
-	public ClientAuthentication loginViaProvider(
-			@PathVariable final String providerId,
-			@RequestBody final LoginCredentials loginCredentials,
-			final HttpServletRequest request) {
-		switch (providerId) {
-			case "registered":
-				final String loginId = loginCredentials.getLoginId().toLowerCase();
-				userService.authenticate(new UsernamePasswordAuthenticationToken(
-						loginId, loginCredentials.getPassword()),
-						UserProfile.AuthProvider.ARSNOVA, request.getRemoteAddr());
+  @PostMapping("/login/{providerId}")
+  public ClientAuthentication loginViaProvider(
+      @PathVariable final String providerId,
+      @RequestBody final LoginCredentials loginCredentials,
+      final HttpServletRequest request) {
+    switch (providerId) {
+      case "registered":
+        final String loginId = loginCredentials.getLoginId().toLowerCase();
+        userService.authenticate(new UsernamePasswordAuthenticationToken(
+            loginId, loginCredentials.getPassword()),
+            UserProfile.AuthProvider.ARSNOVA, request.getRemoteAddr());
 
-				return userService.getCurrentClientAuthentication(false);
-			case SecurityConfig.LDAP_PROVIDER_ID:
-				userService.authenticate(new UsernamePasswordAuthenticationToken(
-						loginCredentials.getLoginId(), loginCredentials.getPassword()),
-						UserProfile.AuthProvider.LDAP, request.getRemoteAddr());
+        return userService.getCurrentClientAuthentication(false);
+      case SecurityConfig.LDAP_PROVIDER_ID:
+        userService.authenticate(new UsernamePasswordAuthenticationToken(
+            loginCredentials.getLoginId(), loginCredentials.getPassword()),
+            UserProfile.AuthProvider.LDAP, request.getRemoteAddr());
 
-				return userService.getCurrentClientAuthentication(false);
-			default:
-				throw new IllegalArgumentException("Invalid provider ID.");
-		}
-	}
+        return userService.getCurrentClientAuthentication(false);
+      default:
+        throw new IllegalArgumentException("Invalid provider ID.");
+    }
+  }
 
-	@GetMapping("/sso/{providerId}")
-	public View redirectToSso(@PathVariable final String providerId,
-			final HttpServletRequest request, final HttpServletResponse response)
-			throws IOException {
-		switch (providerId) {
-			case SecurityConfig.OIDC_PROVIDER_ID:
-				if (oidcClient == null) {
-					throw new IllegalArgumentException("Invalid provider ID.");
-				}
-				return buildSsoRedirectView(oidcClient, oauthConfig, request, response);
-			case SecurityConfig.SAML_PROVIDER_ID:
-				if (saml2Client == null) {
-					throw new IllegalArgumentException("Invalid provider ID.");
-				}
-				return buildSsoRedirectView(saml2Client, samlConfig, request, response);
-			case SecurityConfig.CAS_PROVIDER_ID:
-				if (casEntryPoint == null) {
-					throw new IllegalArgumentException("Invalid provider ID.");
-				}
-				casEntryPoint.commence(request, response, null);
-				return null;
-			default:
-				throw new IllegalArgumentException("Invalid provider ID.");
-		}
-	}
+  @GetMapping("/sso/{providerId}")
+  public View redirectToSso(@PathVariable final String providerId,
+      final HttpServletRequest request, final HttpServletResponse response)
+      throws IOException {
+    switch (providerId) {
+      case SecurityConfig.OIDC_PROVIDER_ID:
+        if (oidcClient == null) {
+          throw new IllegalArgumentException("Invalid provider ID.");
+        }
+        return buildSsoRedirectView(oidcClient, oauthConfig, request, response);
+      case SecurityConfig.SAML_PROVIDER_ID:
+        if (saml2Client == null) {
+          throw new IllegalArgumentException("Invalid provider ID.");
+        }
+        return buildSsoRedirectView(saml2Client, samlConfig, request, response);
+      case SecurityConfig.CAS_PROVIDER_ID:
+        if (casEntryPoint == null) {
+          throw new IllegalArgumentException("Invalid provider ID.");
+        }
+        casEntryPoint.commence(request, response, null);
+        return null;
+      default:
+        throw new IllegalArgumentException("Invalid provider ID.");
+    }
+  }
 
-	private RedirectView buildSsoRedirectView(
-			final IndirectClient client,
-			final Config config,
-			final HttpServletRequest request,
-			final HttpServletResponse response) {
-		final JEEContext context = new JEEContext(request, response);
-		final SessionStore sessionStore = FindBest.sessionStoreFactory(
-				null, config, JEESessionStoreFactory.INSTANCE).newSessionStore();
-		final Optional<RedirectView> view = client.getRedirectionAction(context, sessionStore).map(action -> {
-			if (action instanceof WithLocationAction) {
-				return new RedirectView(((WithLocationAction) action).getLocation());
-			}
-			return null;
-		});
-		return view.orElseThrow(() -> {
-			throw new IllegalStateException("No URL for redirect found.");
-		});
-	}
+  private RedirectView buildSsoRedirectView(
+      final IndirectClient client,
+      final Config config,
+      final HttpServletRequest request,
+      final HttpServletResponse response) {
+    final JEEContext context = new JEEContext(request, response);
+    final SessionStore sessionStore = FindBest.sessionStoreFactory(
+        null, config, JEESessionStoreFactory.INSTANCE).newSessionStore();
+    final Optional<RedirectView> view = client.getRedirectionAction(context, sessionStore).map(action -> {
+      if (action instanceof WithLocationAction) {
+        return new RedirectView(((WithLocationAction) action).getLocation());
+      }
+      return null;
+    });
+    return view.orElseThrow(() -> {
+      throw new IllegalStateException("No URL for redirect found.");
+    });
+  }
 
-	@GetMapping(value = "/config/saml/sp-metadata.xml", produces = MediaType.APPLICATION_XML_VALUE)
-	public String samlSpMetadata() throws IOException {
-		if (saml2Client == null) {
-			throw new NotImplementedException("SAML authentication is disabled.");
-		}
+  @GetMapping(value = "/config/saml/sp-metadata.xml", produces = MediaType.APPLICATION_XML_VALUE)
+  public String samlSpMetadata() throws IOException {
+    if (saml2Client == null) {
+      throw new NotImplementedException("SAML authentication is disabled.");
+    }
 
-		return saml2Client.getServiceProviderMetadataResolver().getMetadata();
-	}
+    return saml2Client.getServiceProviderMetadataResolver().getMetadata();
+  }
 }

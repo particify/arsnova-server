@@ -25,19 +25,19 @@ import org.springframework.core.ResolvableTypeProvider;
 import de.thm.arsnova.model.Entity;
 
 public abstract class CrudEvent<E extends Entity> extends ApplicationEvent implements ResolvableTypeProvider {
-	private E entity;
+  private E entity;
 
-	public CrudEvent(final Object source, final E entity) {
-		super(source);
-		this.entity = entity;
-	}
+  public CrudEvent(final Object source, final E entity) {
+    super(source);
+    this.entity = entity;
+  }
 
-	public E getEntity() {
-		return entity;
-	}
+  public E getEntity() {
+    return entity;
+  }
 
-	@Override
-	public ResolvableType getResolvableType() {
-		return ResolvableType.forClassWithGenerics(getClass(), entity.getClass());
-	}
+  @Override
+  public ResolvableType getResolvableType() {
+    return ResolvableType.forClassWithGenerics(getClass(), entity.getClass());
+  }
 }

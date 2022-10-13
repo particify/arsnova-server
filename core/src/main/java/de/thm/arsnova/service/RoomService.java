@@ -28,17 +28,17 @@ import de.thm.arsnova.model.RoomMembership;
  * The functionality the session service should provide.
  */
 public interface RoomService extends EntityService<Room> {
-	String getIdByShortId(String shortId);
+  String getIdByShortId(String shortId);
 
-	List<String> getUserRoomIds(String userId);
+  List<String> getUserRoomIds(String userId);
 
-	String getPassword(Room room);
+  String getPassword(Room room);
 
-	void setPassword(Room room, String password);
+  void setPassword(Room room, String password);
 
-	Optional<RoomMembership> requestMembership(String roomId, String password);
+  Optional<RoomMembership> requestMembership(String roomId, String password);
 
-	Optional<RoomMembership> requestMembershipByToken(String roomId, String token);
+  Optional<RoomMembership> requestMembershipByToken(String roomId, String token);
 
-	String generateShortId();
+  String generateShortId();
 }

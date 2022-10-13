@@ -12,25 +12,25 @@ import net.particify.arsnova.connector.model.Course;
 
 @Service
 @ConditionalOnProperty(
-		name =  "enabled",
-		prefix = SystemProperties.PREFIX + ".lms-connector"
+    name =  "enabled",
+    prefix = SystemProperties.PREFIX + ".lms-connector"
 )
 public class SecuredLmsCourseService implements LmsCourseService {
-	private LmsCourseService lmsCourseService;
+  private LmsCourseService lmsCourseService;
 
-	public SecuredLmsCourseService(final LmsCourseService lmsCourseService) {
-		this.lmsCourseService = lmsCourseService;
-	}
+  public SecuredLmsCourseService(final LmsCourseService lmsCourseService) {
+    this.lmsCourseService = lmsCourseService;
+  }
 
-	@Override
-	@PreAuthorize("hasPermission(#userProfile, 'owner')")
-	public List<Course> getCoursesByUserProfile(final UserProfile userProfile) {
-		return lmsCourseService.getCoursesByUserProfile(userProfile);
-	}
+  @Override
+  @PreAuthorize("hasPermission(#userProfile, 'owner')")
+  public List<Course> getCoursesByUserProfile(final UserProfile userProfile) {
+    return lmsCourseService.getCoursesByUserProfile(userProfile);
+  }
 
-	@Override
-	@PreAuthorize("hasPermission(#userProfile, 'owner')")
-	public List<Room> getCourseRoomsByUserProfile(final UserProfile userProfile) {
-		return lmsCourseService.getCourseRoomsByUserProfile(userProfile);
-	}
+  @Override
+  @PreAuthorize("hasPermission(#userProfile, 'owner')")
+  public List<Room> getCourseRoomsByUserProfile(final UserProfile userProfile) {
+    return lmsCourseService.getCourseRoomsByUserProfile(userProfile);
+  }
 }

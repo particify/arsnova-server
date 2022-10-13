@@ -33,29 +33,29 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
  * This class gets called when a user failed to login.
  */
 public class LoginAuthenticationFailureHandler extends
-		SimpleUrlAuthenticationFailureHandler {
-	public static final String URL_ATTRIBUTE = "ars-login-failure-url";
+    SimpleUrlAuthenticationFailureHandler {
+  public static final String URL_ATTRIBUTE = "ars-login-failure-url";
 
-	private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-	private String failureUrl;
+  private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+  private String failureUrl;
 
-	@Override
-	public void onAuthenticationFailure(
-			final HttpServletRequest request,
-			final HttpServletResponse response,
-			final AuthenticationException exception
-	) throws IOException, ServletException {
-		final HttpSession session = request.getSession();
-		if (session != null && session.getAttribute(URL_ATTRIBUTE) != null) {
-			failureUrl = (String) session.getAttribute(URL_ATTRIBUTE);
-		}
+  @Override
+  public void onAuthenticationFailure(
+      final HttpServletRequest request,
+      final HttpServletResponse response,
+      final AuthenticationException exception
+  ) throws IOException, ServletException {
+    final HttpSession session = request.getSession();
+    if (session != null && session.getAttribute(URL_ATTRIBUTE) != null) {
+      failureUrl = (String) session.getAttribute(URL_ATTRIBUTE);
+    }
 
-		redirectStrategy.sendRedirect(request, response, failureUrl);
-	}
+    redirectStrategy.sendRedirect(request, response, failureUrl);
+  }
 
-	@Override
-	public void setDefaultFailureUrl(final String url) {
-		failureUrl = url;
-	}
+  @Override
+  public void setDefaultFailureUrl(final String url) {
+    failureUrl = url;
+  }
 
 }

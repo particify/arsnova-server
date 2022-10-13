@@ -5,7 +5,7 @@ import java.util.List;
 import de.thm.arsnova.model.Announcement;
 
 public interface AnnouncementRepository extends CrudRepository<Announcement, String> {
-	List<String> findIdsByRoomId(String roomId);
+  List<String> findIdsByRoomId(String roomId);
 
-	List<String> findIdsByRoomIds(List<String> roomIds);
+  List<String> findIdsByRoomIds(List<String> roomIds);
 }

@@ -42,58 +42,58 @@ import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
 
 @Component
 public class JwtTokenFilter extends GenericFilterBean {
-	private static final Pattern BEARER_TOKEN_PATTERN = Pattern.compile("Bearer (.*)", Pattern.CASE_INSENSITIVE);
-	private static final Logger logger = LoggerFactory.getLogger(JwtTokenFilter.class);
-	private JwtAuthenticationProvider jwtAuthenticationProvider;
+  private static final Pattern BEARER_TOKEN_PATTERN = Pattern.compile("Bearer (.*)", Pattern.CASE_INSENSITIVE);
+  private static final Logger logger = LoggerFactory.getLogger(JwtTokenFilter.class);
+  private JwtAuthenticationProvider jwtAuthenticationProvider;
 
-	@Override
-	public void doFilter(final ServletRequest servletRequest,
-			final ServletResponse servletResponse,
-			final FilterChain filterChain)
-			throws IOException, ServletException {
-		final HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
-		JwtToken token = null;
-		final String jwtHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
-		if (jwtHeader != null) {
-			final Matcher tokenMatcher = BEARER_TOKEN_PATTERN.matcher(jwtHeader);
-			if (tokenMatcher.matches()) {
-				token = new JwtToken(tokenMatcher.group(1));
-			} else {
-				logger.debug("Unsupported authentication scheme.");
-			}
-		} else {
-			logger.debug("No authentication header present.");
-			/* Look for auth cookie if Authorization header is not present. */
-			if (httpServletRequest.getCookies() != null) {
-				final Optional<Cookie> cookie = Arrays.stream(httpServletRequest.getCookies())
-						.filter(c -> c.getName().equalsIgnoreCase(LoginAuthenticationSucessHandler.AUTH_COOKIE_NAME))
-						.findFirst();
-				if (cookie.isPresent()) {
-					logger.debug("Trying to use authentication from cookie.");
-					token = new JwtToken(cookie.get().getValue());
-				}
-			}
-		}
+  @Override
+  public void doFilter(final ServletRequest servletRequest,
+      final ServletResponse servletResponse,
+      final FilterChain filterChain)
+      throws IOException, ServletException {
+    final HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+    JwtToken token = null;
+    final String jwtHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
+    if (jwtHeader != null) {
+      final Matcher tokenMatcher = BEARER_TOKEN_PATTERN.matcher(jwtHeader);
+      if (tokenMatcher.matches()) {
+        token = new JwtToken(tokenMatcher.group(1));
+      } else {
+        logger.debug("Unsupported authentication scheme.");
+      }
+    } else {
+      logger.debug("No authentication header present.");
+      /* Look for auth cookie if Authorization header is not present. */
+      if (httpServletRequest.getCookies() != null) {
+        final Optional<Cookie> cookie = Arrays.stream(httpServletRequest.getCookies())
+            .filter(c -> c.getName().equalsIgnoreCase(LoginAuthenticationSucessHandler.AUTH_COOKIE_NAME))
+            .findFirst();
+        if (cookie.isPresent()) {
+          logger.debug("Trying to use authentication from cookie.");
+          token = new JwtToken(cookie.get().getValue());
+        }
+      }
+    }
 
-		if (token != null) {
-			try {
-				final Authentication authenticatedToken = jwtAuthenticationProvider.authenticate(token);
-				if (authenticatedToken != null) {
-					logger.debug("Storing JWT to SecurityContext: {}", authenticatedToken);
-					SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
-				} else {
-					logger.debug("Could not authenticate JWT.");
-				}
-			} catch (final Exception e) {
-				logger.debug("JWT authentication failed", e);
-			}
-		}
+    if (token != null) {
+      try {
+        final Authentication authenticatedToken = jwtAuthenticationProvider.authenticate(token);
+        if (authenticatedToken != null) {
+          logger.debug("Storing JWT to SecurityContext: {}", authenticatedToken);
+          SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
+        } else {
+          logger.debug("Could not authenticate JWT.");
+        }
+      } catch (final Exception e) {
+        logger.debug("JWT authentication failed", e);
+      }
+    }
 
-		filterChain.doFilter(servletRequest, servletResponse);
-	}
+    filterChain.doFilter(servletRequest, servletResponse);
+  }
 
-	@Autowired
-	public void setJwtAuthenticationProvider(final JwtAuthenticationProvider jwtAuthenticationProvider) {
-		this.jwtAuthenticationProvider = jwtAuthenticationProvider;
-	}
+  @Autowired
+  public void setJwtAuthenticationProvider(final JwtAuthenticationProvider jwtAuthenticationProvider) {
+    this.jwtAuthenticationProvider = jwtAuthenticationProvider;
+  }
 }

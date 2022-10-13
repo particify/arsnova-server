@@ -28,37 +28,37 @@ import de.thm.arsnova.model.serialization.View;
  */
 public class ScoreOptions implements Serializable {
 
-	private String type = "questions";
+  private String type = "questions";
 
-	private String questionVariant = "";
+  private String questionVariant = "";
 
-	public ScoreOptions(final ScoreOptions scoreOptions) {
-		this();
-		this.type = scoreOptions.getType();
-		this.questionVariant = scoreOptions.getQuestionVariant();
-	}
+  public ScoreOptions(final ScoreOptions scoreOptions) {
+    this();
+    this.type = scoreOptions.getType();
+    this.questionVariant = scoreOptions.getQuestionVariant();
+  }
 
-	public ScoreOptions() {
+  public ScoreOptions() {
 
-	}
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getType() {
-		return type;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getType() {
+    return type;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setType(final String type) {
-		this.type = type;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setType(final String type) {
+    this.type = type;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getQuestionVariant() {
-		return questionVariant;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getQuestionVariant() {
+    return questionVariant;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setQuestionVariant(final String questionVariant) {
-		this.questionVariant = questionVariant;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setQuestionVariant(final String questionVariant) {
+    this.questionVariant = questionVariant;
+  }
 }

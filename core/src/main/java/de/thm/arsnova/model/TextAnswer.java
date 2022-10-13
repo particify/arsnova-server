@@ -26,85 +26,85 @@ import org.springframework.core.style.ToStringCreator;
 import de.thm.arsnova.model.serialization.View;
 
 public class TextAnswer extends Answer {
-	private String subject;
+  private String subject;
 
-	// Validation: null is allowed for abstentions
-	@Size(min = 1, max = 500)
-	private String body;
+  // Validation: null is allowed for abstentions
+  @Size(min = 1, max = 500)
+  private String body;
 
-	private boolean read;
-	private boolean hidden;
+  private boolean read;
+  private boolean hidden;
 
-	public TextAnswer() {
+  public TextAnswer() {
 
-	}
+  }
 
-	public TextAnswer(final Content content, final String creatorId) {
-		super(content, creatorId);
-	}
+  public TextAnswer(final Content content, final String creatorId) {
+    super(content, creatorId);
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getSubject() {
-		return null;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getSubject() {
+    return null;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSubject(final String subject) {
-		this.subject = subject;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setSubject(final String subject) {
+    this.subject = subject;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getBody() {
-		if (subject != null && !subject.isBlank()) {
-			return subject + ": " + body;
-		} else {
-			return body;
-		}
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getBody() {
+    if (subject != null && !subject.isBlank()) {
+      return subject + ": " + body;
+    } else {
+      return body;
+    }
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setBody(final String body) {
-		this.body = body;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setBody(final String body) {
+    this.body = body;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public boolean isRead() {
-		return read;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public boolean isRead() {
+    return read;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRead(final boolean read) {
-		this.read = read;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setRead(final boolean read) {
+    this.read = read;
+  }
 
 
-	@JsonView(View.Persistence.class)
-	public boolean isHidden() {
-		return hidden;
-	}
+  @JsonView(View.Persistence.class)
+  public boolean isHidden() {
+    return hidden;
+  }
 
-	@JsonView(View.Persistence.class)
-	public void setHidden(final boolean hidden) {
-		this.hidden = hidden;
-	}
+  @JsonView(View.Persistence.class)
+  public void setHidden(final boolean hidden) {
+    this.hidden = hidden;
+  }
 
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Date getCreationTimestamp() {
-		return creationTimestamp;
-	}
+  @Override
+  @JsonView({View.Persistence.class, View.Public.class})
+  public Date getCreationTimestamp() {
+    return creationTimestamp;
+  }
 
-	@Override
-	public boolean isAbstention() {
-		return body == null;
-	}
+  @Override
+  public boolean isAbstention() {
+    return body == null;
+  }
 
-	@Override
-	protected ToStringCreator buildToString() {
-		return super.buildToString()
-				.append("subject", subject)
-				.append("body", body)
-				.append("read", read)
-				.append("hidden", hidden);
-	}
+  @Override
+  protected ToStringCreator buildToString() {
+    return super.buildToString()
+        .append("subject", subject)
+        .append("body", body)
+        .append("read", read)
+        .append("hidden", hidden);
+  }
 }

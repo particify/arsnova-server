@@ -21,7 +21,7 @@ package de.thm.arsnova.event;
 import de.thm.arsnova.model.Entity;
 
 public class BeforeFullUpdateEvent<E extends Entity> extends BeforeUpdateEvent<E> {
-	public BeforeFullUpdateEvent(final Object source, final E entity, final E oldEntity) {
-		super(source, entity, oldEntity);
-	}
+  public BeforeFullUpdateEvent(final Object source, final E entity, final E oldEntity) {
+    super(source, entity, oldEntity);
+  }
 }

@@ -40,61 +40,61 @@ import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
  */
 @Service
 public class UserProfileRoomHistoryMigration extends AbstractMigration {
-	private static final String ID = "20210511192000";
-	private static final String USER_PROFILE_INDEX = "userprofile-index";
-	private static final Map<String, Map<String, Integer>> arrayNotEmptySelector =
-			Map.of("$not", Map.of("$size", 0));
+  private static final String ID = "20210511192000";
+  private static final String USER_PROFILE_INDEX = "userprofile-index";
+  private static final Map<String, Map<String, Integer>> arrayNotEmptySelector =
+      Map.of("$not", Map.of("$size", 0));
 
-	private final ApplicationEventPublisher applicationEventPublisher;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
-	public UserProfileRoomHistoryMigration(
-			final MangoCouchDbConnector connector, final ApplicationEventPublisher applicationEventPublisher) {
-		super(ID, connector);
-		this.applicationEventPublisher = applicationEventPublisher;
-	}
+  public UserProfileRoomHistoryMigration(
+      final MangoCouchDbConnector connector, final ApplicationEventPublisher applicationEventPublisher) {
+    super(ID, connector);
+    this.applicationEventPublisher = applicationEventPublisher;
+  }
 
-	@PostConstruct
-	public void initMigration() {
-		addEntityMigrationStepHandler(
-				UserProfileMigrationEntity.class,
-				USER_PROFILE_INDEX,
-				Map.of(
-						"type", "UserProfile",
-						"roomHistory", arrayNotEmptySelector
-				),
-				userProfile -> {
-					this.applicationEventPublisher.publishEvent(new RoomHistoryMigrationEvent(
-							this,
-							userProfile.getId(),
-							userProfile.getRoomHistory().stream().map(rh -> rh.roomId).collect(Collectors.toList())));
-					return Collections.emptyList();
-				}
-		);
-	}
+  @PostConstruct
+  public void initMigration() {
+    addEntityMigrationStepHandler(
+        UserProfileMigrationEntity.class,
+        USER_PROFILE_INDEX,
+        Map.of(
+            "type", "UserProfile",
+            "roomHistory", arrayNotEmptySelector
+        ),
+        userProfile -> {
+          this.applicationEventPublisher.publishEvent(new RoomHistoryMigrationEvent(
+              this,
+              userProfile.getId(),
+              userProfile.getRoomHistory().stream().map(rh -> rh.roomId).collect(Collectors.toList())));
+          return Collections.emptyList();
+        }
+    );
+  }
 
-	@JsonView(View.Persistence.class)
-	private static class UserProfileMigrationEntity extends MigrationEntity {
-		private List<RoomHistoryEntryMigrationEntity> roomHistory;
+  @JsonView(View.Persistence.class)
+  private static class UserProfileMigrationEntity extends MigrationEntity {
+    private List<RoomHistoryEntryMigrationEntity> roomHistory;
 
-		public List<RoomHistoryEntryMigrationEntity> getRoomHistory() {
-			return roomHistory;
-		}
+    public List<RoomHistoryEntryMigrationEntity> getRoomHistory() {
+      return roomHistory;
+    }
 
-		public void setRoomHistory(final List<RoomHistoryEntryMigrationEntity> roomHistory) {
-			this.roomHistory = roomHistory;
-		}
+    public void setRoomHistory(final List<RoomHistoryEntryMigrationEntity> roomHistory) {
+      this.roomHistory = roomHistory;
+    }
 
-		@JsonView(View.Persistence.class)
-		public static class RoomHistoryEntryMigrationEntity extends InnerMigrationEntity {
-			private String roomId;
+    @JsonView(View.Persistence.class)
+    public static class RoomHistoryEntryMigrationEntity extends InnerMigrationEntity {
+      private String roomId;
 
-			public String getRoomId() {
-				return roomId;
-			}
+      public String getRoomId() {
+        return roomId;
+      }
 
-			public void setRoomId(final String roomId) {
-				this.roomId = roomId;
-			}
-		}
-	}
+      public void setRoomId(final String roomId) {
+        this.roomId = roomId;
+      }
+    }
+  }
 }

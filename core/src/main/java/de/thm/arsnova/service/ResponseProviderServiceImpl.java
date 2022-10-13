@@ -27,16 +27,16 @@ import org.springframework.stereotype.Service;
 @Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class ResponseProviderServiceImpl implements ResponseProviderService {
 
-	HttpServletResponse response;
+  HttpServletResponse response;
 
-	@Override
-	public void setResponse(final HttpServletResponse response) {
-		this.response = response;
-	}
+  @Override
+  public void setResponse(final HttpServletResponse response) {
+    this.response = response;
+  }
 
-	@Override
-	public HttpServletResponse getResponse() {
-		return response;
-	}
+  @Override
+  public HttpServletResponse getResponse() {
+    return response;
+  }
 
 }

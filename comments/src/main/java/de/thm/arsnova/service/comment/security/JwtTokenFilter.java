@@ -23,49 +23,49 @@ import org.springframework.web.filter.GenericFilterBean;
 
 @Component
 public class JwtTokenFilter extends GenericFilterBean {
-    private static final Pattern BEARER_TOKEN_PATTERN = Pattern.compile("Bearer (.*)", Pattern.CASE_INSENSITIVE);
-    private static final Logger logger = LoggerFactory.getLogger(JwtTokenFilter.class);
-    private JwtAuthenticationProvider jwtAuthenticationProvider;
+  private static final Pattern BEARER_TOKEN_PATTERN = Pattern.compile("Bearer (.*)", Pattern.CASE_INSENSITIVE);
+  private static final Logger logger = LoggerFactory.getLogger(JwtTokenFilter.class);
+  private JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    @Override
-    public void doFilter(final ServletRequest servletRequest,
-            final ServletResponse servletResponse,
-            final FilterChain filterChain)
-            throws IOException, ServletException {
-        final HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
-        final HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
+  @Override
+  public void doFilter(final ServletRequest servletRequest,
+      final ServletResponse servletResponse,
+      final FilterChain filterChain)
+      throws IOException, ServletException {
+    final HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+    final HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
 
 
-        JwtToken token = null;
-        final String jwtHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
-        if (jwtHeader != null) {
-            final Matcher tokenMatcher = BEARER_TOKEN_PATTERN.matcher(jwtHeader);
-            if (tokenMatcher.matches()) {
-                token = new JwtToken(tokenMatcher.group(1));
-            } else {
-                logger.debug("Unsupported authentication scheme.");
-            }
-        }
-
-        if (token != null) {
-            try {
-                final Authentication authenticatedToken = jwtAuthenticationProvider.authenticate(token);
-                if (authenticatedToken != null) {
-                    logger.debug("Storing JWT to SecurityContext: {}", authenticatedToken);
-                    SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
-                } else {
-                    logger.debug("Could not authenticate JWT.");
-                }
-            } catch (final Exception e) {
-                logger.debug("JWT authentication failed", e);
-            }
-        }
-
-        filterChain.doFilter(servletRequest, servletResponse);
+    JwtToken token = null;
+    final String jwtHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
+    if (jwtHeader != null) {
+      final Matcher tokenMatcher = BEARER_TOKEN_PATTERN.matcher(jwtHeader);
+      if (tokenMatcher.matches()) {
+        token = new JwtToken(tokenMatcher.group(1));
+      } else {
+        logger.debug("Unsupported authentication scheme.");
+      }
     }
 
-    @Autowired
-    public void setJwtAuthenticationProvider(final JwtAuthenticationProvider jwtAuthenticationProvider) {
-        this.jwtAuthenticationProvider = jwtAuthenticationProvider;
+    if (token != null) {
+      try {
+        final Authentication authenticatedToken = jwtAuthenticationProvider.authenticate(token);
+        if (authenticatedToken != null) {
+          logger.debug("Storing JWT to SecurityContext: {}", authenticatedToken);
+          SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
+        } else {
+          logger.debug("Could not authenticate JWT.");
+        }
+      } catch (final Exception e) {
+        logger.debug("JWT authentication failed", e);
+      }
     }
+
+    filterChain.doFilter(servletRequest, servletResponse);
+  }
+
+  @Autowired
+  public void setJwtAuthenticationProvider(final JwtAuthenticationProvider jwtAuthenticationProvider) {
+    this.jwtAuthenticationProvider = jwtAuthenticationProvider;
+  }
 }

@@ -8,6 +8,6 @@ import reactor.tools.agent.ReactorDebugAgent
 class ArsnovaHttpGatewayServiceApplication
 
 fun main(args: Array<String>) {
-    ReactorDebugAgent.init()
-    SpringApplication.run(ArsnovaHttpGatewayServiceApplication::class.java, *args)
+  ReactorDebugAgent.init()
+  SpringApplication.run(ArsnovaHttpGatewayServiceApplication::class.java, *args)
 }

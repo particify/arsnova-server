@@ -61,117 +61,117 @@ import de.thm.arsnova.test.context.support.WithMockUser;
  */
 @SpringBootTest
 @Import({
-		TestAppConfig.class,
-		TestPersistanceConfig.class,
-		TestSecurityConfig.class})
+    TestAppConfig.class,
+    TestPersistanceConfig.class,
+    TestSecurityConfig.class})
 @ActiveProfiles({"test", "JsonViewControllerAdviceTest"})
 public class JsonViewControllerAdviceTest {
-	private static final Logger logger = LoggerFactory.getLogger(JsonViewControllerAdviceTest.class);
+  private static final Logger logger = LoggerFactory.getLogger(JsonViewControllerAdviceTest.class);
 
-	@Autowired
-	private WebApplicationContext webApplicationContext;
+  @Autowired
+  private WebApplicationContext webApplicationContext;
 
-	private MockMvc mockMvc;
+  private MockMvc mockMvc;
 
-	@MockBean(extraInterfaces = SecuredService.class)
-	private DummyEntityService dummyEntityService;
+  @MockBean(extraInterfaces = SecuredService.class)
+  private DummyEntityService dummyEntityService;
 
-	@Autowired
-	private DummyEntityController dummyEntityController;
+  @Autowired
+  private DummyEntityController dummyEntityController;
 
-	@BeforeEach
-	public void setup() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-		when(dummyEntityService.get("1")).thenReturn(new DummyEntity());
-	}
+  @BeforeEach
+  public void setup() {
+    mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    when(dummyEntityService.get("1")).thenReturn(new DummyEntity());
+  }
 
-	@Test
-	@WithMockUser("TestUser")
-	public void testShouldNotSerializeAdminViewForRegularUser() throws Exception {
-		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
-		mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
-				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
-				.andExpect(status().isForbidden());
-	}
+  @Test
+  @WithMockUser("TestUser")
+  public void testShouldNotSerializeAdminViewForRegularUser() throws Exception {
+    logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
+    mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
+        .andDo(h -> logger.info(h.getResponse().getContentAsString()))
+        .andExpect(status().isForbidden());
+  }
 
-	@Test
-	@WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
-	public void testShouldSerializeAdminViewForAdmin() throws Exception {
-		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
-		mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
-				.andExpect(status().isOk());
-	}
+  @Test
+  @WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
+  public void testShouldSerializeAdminViewForAdmin() throws Exception {
+    logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
+    mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andDo(h -> logger.info(h.getResponse().getContentAsString()))
+        .andExpect(status().isOk());
+  }
 
-	@Test
-	@WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
-	public void testShouldSerializeOwnerViewForAdmin() throws Exception {
-		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
-		mockMvc.perform(get("/dummy/1?view=owner").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
-				.andExpect(status().isOk());
-	}
+  @Test
+  @WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
+  public void testShouldSerializeOwnerViewForAdmin() throws Exception {
+    logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
+    mockMvc.perform(get("/dummy/1?view=owner").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andDo(h -> logger.info(h.getResponse().getContentAsString()))
+        .andExpect(status().isOk());
+  }
 
-	@Test
-	@WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
-	public void testAdminViewShouldContainAdminProperties() throws Exception {
-		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
-		mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
-				.andExpect(jsonPath("$.adminReadableString").exists())
-				.andExpect(jsonPath("$.ownerReadableString").exists())
-				.andExpect(jsonPath("$.publicReadableString").exists());
-	}
+  @Test
+  @WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
+  public void testAdminViewShouldContainAdminProperties() throws Exception {
+    logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
+    mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andDo(h -> logger.info(h.getResponse().getContentAsString()))
+        .andExpect(jsonPath("$.adminReadableString").exists())
+        .andExpect(jsonPath("$.ownerReadableString").exists())
+        .andExpect(jsonPath("$.publicReadableString").exists());
+  }
 
-	@Test
-	@WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
-	public void testOwnerViewShouldContainOwnerProperties() throws Exception {
-		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
-		mockMvc.perform(get("/dummy/1?view=owner").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
-				.andExpect(jsonPath("$.adminReadableString").doesNotExist())
-				.andExpect(jsonPath("$.ownerReadableString").exists())
-				.andExpect(jsonPath("$.publicReadableString").exists());
-	}
+  @Test
+  @WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
+  public void testOwnerViewShouldContainOwnerProperties() throws Exception {
+    logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
+    mockMvc.perform(get("/dummy/1?view=owner").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andDo(h -> logger.info(h.getResponse().getContentAsString()))
+        .andExpect(jsonPath("$.adminReadableString").doesNotExist())
+        .andExpect(jsonPath("$.ownerReadableString").exists())
+        .andExpect(jsonPath("$.publicReadableString").exists());
+  }
 
-	@Test
-	@WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
-	public void testDefaultViewShouldContainPublicProperties() throws Exception {
-		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
-		mockMvc.perform(get("/dummy/1").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
-				.andExpect(jsonPath("$.adminReadableString").doesNotExist())
-				.andExpect(jsonPath("$.ownerReadableString").doesNotExist())
-				.andExpect(jsonPath("$.publicReadableString").exists());
-	}
+  @Test
+  @WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
+  public void testDefaultViewShouldContainPublicProperties() throws Exception {
+    logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
+    mockMvc.perform(get("/dummy/1").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andDo(h -> logger.info(h.getResponse().getContentAsString()))
+        .andExpect(jsonPath("$.adminReadableString").doesNotExist())
+        .andExpect(jsonPath("$.ownerReadableString").doesNotExist())
+        .andExpect(jsonPath("$.publicReadableString").exists());
+  }
 
-	@RestController
-	@RequestMapping(DummyEntityController.REQUEST_MAPPING)
-	@Profile("JsonViewControllerAdviceTest")
-	static class DummyEntityController extends AbstractEntityController<DummyEntity> {
-		private static final String REQUEST_MAPPING = "/dummy";
+  @RestController
+  @RequestMapping(DummyEntityController.REQUEST_MAPPING)
+  @Profile("JsonViewControllerAdviceTest")
+  static class DummyEntityController extends AbstractEntityController<DummyEntity> {
+    private static final String REQUEST_MAPPING = "/dummy";
 
-		protected DummyEntityController(final DummyEntityService dummyEntityService) {
-			super(dummyEntityService);
-		}
+    protected DummyEntityController(final DummyEntityService dummyEntityService) {
+      super(dummyEntityService);
+    }
 
-		@Override
-		protected String getMapping() {
-			return REQUEST_MAPPING;
-		}
-	}
+    @Override
+    protected String getMapping() {
+      return REQUEST_MAPPING;
+    }
+  }
 
-	static class DummyEntity extends Entity {
-		@JsonView(View.Public.class) public String publicReadableString = "public";
-		@JsonView(View.Owner.class) public String ownerReadableString = "owner";
-		@JsonView(View.Admin.class) public String adminReadableString = "admin";
-	}
+  static class DummyEntity extends Entity {
+    @JsonView(View.Public.class) public String publicReadableString = "public";
+    @JsonView(View.Owner.class) public String ownerReadableString = "owner";
+    @JsonView(View.Admin.class) public String adminReadableString = "admin";
+  }
 
-	interface DummyEntityService extends EntityService<DummyEntity> {
-	}
+  interface DummyEntityService extends EntityService<DummyEntity> {
+  }
 }

@@ -19,38 +19,38 @@
 package de.thm.arsnova.event;
 
 public class ReadRepositoryEvent extends RepositoryEvent {
-	private final boolean reduced;
-	private final boolean multiple;
-	private final boolean partial;
+  private final boolean reduced;
+  private final boolean multiple;
+  private final boolean partial;
 
-	public ReadRepositoryEvent(final Object source, final String typeName) {
-		super(source, typeName);
-		this.multiple = false;
-		this.partial = false;
-		this.reduced = false;
-	}
+  public ReadRepositoryEvent(final Object source, final String typeName) {
+    super(source, typeName);
+    this.multiple = false;
+    this.partial = false;
+    this.reduced = false;
+  }
 
-	public ReadRepositoryEvent(
-			final Object source,
-			final String typeName,
-			final boolean multiple,
-			final boolean partial,
-			final boolean reduced) {
-		super(source, typeName);
-		this.multiple = multiple;
-		this.partial = partial;
-		this.reduced = reduced;
-	}
+  public ReadRepositoryEvent(
+      final Object source,
+      final String typeName,
+      final boolean multiple,
+      final boolean partial,
+      final boolean reduced) {
+    super(source, typeName);
+    this.multiple = multiple;
+    this.partial = partial;
+    this.reduced = reduced;
+  }
 
-	public boolean isReduced() {
-		return reduced;
-	}
+  public boolean isReduced() {
+    return reduced;
+  }
 
-	public boolean isMultiple() {
-		return multiple && !isReduced();
-	}
+  public boolean isMultiple() {
+    return multiple && !isReduced();
+  }
 
-	public boolean isPartial() {
-		return partial && !isReduced();
-	}
+  public boolean isPartial() {
+    return partial && !isReduced();
+  }
 }

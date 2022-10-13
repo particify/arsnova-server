@@ -9,8 +9,8 @@ import org.springframework.web.client.RestTemplate
 @Configuration
 class RestConfig {
 
-	@Bean
-	fun restTemplate(builder: RestTemplateBuilder): RestTemplate? {
-		return builder.build()
-	}
+  @Bean
+  fun restTemplate(builder: RestTemplateBuilder): RestTemplate? {
+    return builder.build()
+  }
 }

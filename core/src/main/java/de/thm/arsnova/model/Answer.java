@@ -31,130 +31,130 @@ import de.thm.arsnova.model.serialization.FormatAnswerTypeIdResolver;
 import de.thm.arsnova.model.serialization.View;
 
 @JsonTypeInfo(
-		use = JsonTypeInfo.Id.CUSTOM,
-		property = "format",
-		visible = true,
-		defaultImpl = Answer.class
+    use = JsonTypeInfo.Id.CUSTOM,
+    property = "format",
+    visible = true,
+    defaultImpl = Answer.class
 )
 @JsonTypeIdResolver(FormatAnswerTypeIdResolver.class)
 public class Answer extends Entity implements RoomIdAware {
-	public Answer() {
+  public Answer() {
 
-	}
+  }
 
-	public Answer(final Content content, final String creatorId) {
-		this.contentId = content.getId();
-		this.roomId = content.getRoomId();
-		this.format = content.getFormat();
-		this.round = content.getState().getRound();
-		this.creatorId = creatorId;
-	}
+  public Answer(final Content content, final String creatorId) {
+    this.contentId = content.getId();
+    this.roomId = content.getRoomId();
+    this.format = content.getFormat();
+    this.round = content.getState().getRound();
+    this.creatorId = creatorId;
+  }
 
-	@NotEmpty
-	private String contentId;
+  @NotEmpty
+  private String contentId;
 
-	@NotEmpty
-	private String roomId;
+  @NotEmpty
+  private String roomId;
 
-	@NotEmpty
-	private String creatorId;
+  @NotEmpty
+  private String creatorId;
 
-	@NotNull
-	private Content.Format format;
+  @NotNull
+  private Content.Format format;
 
-	@PositiveOrZero
-	private int round = 1;
+  @PositiveOrZero
+  private int round = 1;
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getContentId() {
-		return contentId;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getContentId() {
+    return contentId;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setContentId(final String contentId) {
-		this.contentId = contentId;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setContentId(final String contentId) {
+    this.contentId = contentId;
+  }
 
-	@JsonView(View.Persistence.class)
-	public String getRoomId() {
-		return roomId;
-	}
+  @JsonView(View.Persistence.class)
+  public String getRoomId() {
+    return roomId;
+  }
 
-	@JsonView(View.Persistence.class)
-	public void setRoomId(final String roomId) {
-		this.roomId = roomId;
-	}
+  @JsonView(View.Persistence.class)
+  public void setRoomId(final String roomId) {
+    this.roomId = roomId;
+  }
 
-	@JsonView(View.Persistence.class)
-	public String getCreatorId() {
-		return creatorId;
-	}
+  @JsonView(View.Persistence.class)
+  public String getCreatorId() {
+    return creatorId;
+  }
 
-	public void setCreatorId(final String creatorId) {
-		this.creatorId = creatorId;
-	}
+  public void setCreatorId(final String creatorId) {
+    this.creatorId = creatorId;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Content.Format getFormat() {
-		return format;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public Content.Format getFormat() {
+    return format;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setFormat(final Content.Format format) {
-		this.format = format;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setFormat(final Content.Format format) {
+    this.format = format;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public int getRound() {
-		return round;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public int getRound() {
+    return round;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRound(final int round) {
-		this.round = round;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setRound(final int round) {
+    this.round = round;
+  }
 
-	public boolean isAbstention() {
-		return false;
-	}
+  public boolean isAbstention() {
+    return false;
+  }
 
-	@JsonView(View.Persistence.class)
-	@Override
-	public Class<? extends Entity> getType() {
-		return Answer.class;
-	}
+  @JsonView(View.Persistence.class)
+  @Override
+  public Class<? extends Entity> getType() {
+    return Answer.class;
+  }
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The following fields of <tt>Answer</tt> are excluded from equality checks:
-	 * none.
-	 * </p>
-	 */
-	@Override
-	public boolean equals(final Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (!super.equals(o)) {
-			return false;
-		}
-		final Answer answer = (Answer) o;
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * The following fields of <tt>Answer</tt> are excluded from equality checks:
+   * none.
+   * </p>
+   */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    final Answer answer = (Answer) o;
 
-		return round == answer.round
-				&& Objects.equals(contentId, answer.contentId)
-				&& Objects.equals(roomId, answer.roomId)
-				&& Objects.equals(creatorId, answer.creatorId);
-	}
+    return round == answer.round
+        && Objects.equals(contentId, answer.contentId)
+        && Objects.equals(roomId, answer.roomId)
+        && Objects.equals(creatorId, answer.creatorId);
+  }
 
-	@Override
-	protected ToStringCreator buildToString() {
-		return super.buildToString()
-				.append("contentId", contentId)
-				.append("roomId", roomId)
-				.append("creatorId", creatorId)
-				.append("format", format)
-				.append("round", round);
-	}
+  @Override
+  protected ToStringCreator buildToString() {
+    return super.buildToString()
+        .append("contentId", contentId)
+        .append("roomId", roomId)
+        .append("creatorId", creatorId)
+        .append("format", format)
+        .append("round", round);
+  }
 }

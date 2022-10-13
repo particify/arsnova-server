@@ -36,349 +36,349 @@ import de.thm.arsnova.model.serialization.FormatContentTypeIdResolver;
 import de.thm.arsnova.model.serialization.View;
 
 @JsonTypeInfo(
-		use = JsonTypeInfo.Id.CUSTOM,
-		property = "format",
-		visible = true,
-		defaultImpl = Content.class
+    use = JsonTypeInfo.Id.CUSTOM,
+    property = "format",
+    visible = true,
+    defaultImpl = Content.class
 )
 @JsonTypeIdResolver(FormatContentTypeIdResolver.class)
 public class Content extends Entity implements RoomIdAware {
-	public enum Format {
-		CHOICE,
-		BINARY,
-		SCALE,
-		NUMBER,
-		TEXT,
-		GRID,
-		SLIDE,
-		SORT,
-		FLASHCARD,
-		WORDCLOUD,
-		PRIORIZATION
-	}
+  public enum Format {
+    CHOICE,
+    BINARY,
+    SCALE,
+    NUMBER,
+    TEXT,
+    GRID,
+    SLIDE,
+    SORT,
+    FLASHCARD,
+    WORDCLOUD,
+    PRIORIZATION
+  }
 
-	public static class State {
-		@Positive
-		private int round = 1;
+  public static class State {
+    @Positive
+    private int round = 1;
 
-		private Date answeringEndTime;
-		private boolean answersPublished;
+    private Date answeringEndTime;
+    private boolean answersPublished;
 
-		@JsonView({View.Persistence.class, View.Public.class})
-		public int getRound() {
-			return round;
-		}
+    @JsonView({View.Persistence.class, View.Public.class})
+    public int getRound() {
+      return round;
+    }
 
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setRound(final int round) {
-			this.round = round;
-		}
+    @JsonView({View.Persistence.class, View.Public.class})
+    public void setRound(final int round) {
+      this.round = round;
+    }
 
-		@JsonView({View.Persistence.class, View.Public.class})
-		public Date getAnsweringEndTime() {
-			return answeringEndTime;
-		}
+    @JsonView({View.Persistence.class, View.Public.class})
+    public Date getAnsweringEndTime() {
+      return answeringEndTime;
+    }
 
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setAnsweringEndTime(final Date answeringEndTime) {
-			this.answeringEndTime = answeringEndTime;
-		}
+    @JsonView({View.Persistence.class, View.Public.class})
+    public void setAnsweringEndTime(final Date answeringEndTime) {
+      this.answeringEndTime = answeringEndTime;
+    }
 
-		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isAnswersPublished() {
-			return answersPublished;
-		}
+    @JsonView({View.Persistence.class, View.Public.class})
+    public boolean isAnswersPublished() {
+      return answersPublished;
+    }
 
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setAnswersPublished(final boolean answersPublished) {
-			this.answersPublished = answersPublished;
-		}
+    @JsonView({View.Persistence.class, View.Public.class})
+    public void setAnswersPublished(final boolean answersPublished) {
+      this.answersPublished = answersPublished;
+    }
 
-		public boolean isAnswerable() {
-			return answeringEndTime == null || answeringEndTime.compareTo(new Date()) > 0;
-		}
+    public boolean isAnswerable() {
+      return answeringEndTime == null || answeringEndTime.compareTo(new Date()) > 0;
+    }
 
-		@Override
-		public int hashCode() {
-			return Objects.hash(round, answeringEndTime);
-		}
+    @Override
+    public int hashCode() {
+      return Objects.hash(round, answeringEndTime);
+    }
 
-		@Override
-		public boolean equals(final Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (!super.equals(o)) {
-				return false;
-			}
-			final State state = (State) o;
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (!super.equals(o)) {
+        return false;
+      }
+      final State state = (State) o;
 
-			return round == state.round
-					&& Objects.equals(answeringEndTime, state.answeringEndTime);
-		}
+      return round == state.round
+          && Objects.equals(answeringEndTime, state.answeringEndTime);
+    }
 
-		@Override
-		public String toString() {
-			return new ToStringCreator(this)
-					.append("round", round)
-					.append("answeringEndTime", answeringEndTime)
-					.toString();
-		}
-	}
+    @Override
+    public String toString() {
+      return new ToStringCreator(this)
+          .append("round", round)
+          .append("answeringEndTime", answeringEndTime)
+          .toString();
+    }
+  }
 
-	private static final String SUBJECT_LEGACY_PLACEHOLDER = "Subject";
+  private static final String SUBJECT_LEGACY_PLACEHOLDER = "Subject";
 
-	@NotEmpty
-	private String roomId;
+  @NotEmpty
+  private String roomId;
 
-	@NotNull
-	private String subject = "";
+  @NotNull
+  private String subject = "";
 
-	@NotBlank
-	private String body;
+  @NotBlank
+  private String body;
 
-	private String renderedBody;
+  private String renderedBody;
 
-	@NotNull
-	private Format format;
+  @NotNull
+  private Format format;
 
-	private Set<String> groups;
-	private boolean abstentionsAllowed;
+  private Set<String> groups;
+  private boolean abstentionsAllowed;
 
-	@JsonMerge
-	private State state;
+  @JsonMerge
+  private State state;
 
-	private Date timestamp;
-	private String additionalText;
-	private String renderedAdditionalText;
-	private String additionalTextTitle;
+  private Date timestamp;
+  private String additionalText;
+  private String renderedAdditionalText;
+  private String additionalTextTitle;
 
-	private TextRenderingOptions bodyRenderingOptions;
+  private TextRenderingOptions bodyRenderingOptions;
 
-	{
-		this.bodyRenderingOptions = new TextRenderingOptions();
-		this.addRenderingMapping(
-				this::getBody,
-				this::setRenderedBody,
-				this.bodyRenderingOptions);
-		this.addRenderingMapping(
-				this::getAdditionalText,
-				this::setRenderedAdditionalText,
-				this.bodyRenderingOptions);
-	}
+  {
+    this.bodyRenderingOptions = new TextRenderingOptions();
+    this.addRenderingMapping(
+        this::getBody,
+        this::setRenderedBody,
+        this.bodyRenderingOptions);
+    this.addRenderingMapping(
+        this::getAdditionalText,
+        this::setRenderedAdditionalText,
+        this.bodyRenderingOptions);
+  }
 
-	public Content() {
+  public Content() {
 
-	}
+  }
 
-	/**
-	 * Copying constructor which adopts most of the original content's
-	 * properties which are not used to store relations to other data.
-	 */
-	public Content(final Content content) {
-		this.body = content.body;
-		this.format = content.format;
-		this.abstentionsAllowed = content.abstentionsAllowed;
-		this.state = content.state;
-		this.timestamp = content.timestamp;
-		this.additionalText = content.additionalText;
-		this.additionalTextTitle = content.additionalTextTitle;
-	}
+  /**
+   * Copying constructor which adopts most of the original content's
+   * properties which are not used to store relations to other data.
+   */
+  public Content(final Content content) {
+    this.body = content.body;
+    this.format = content.format;
+    this.abstentionsAllowed = content.abstentionsAllowed;
+    this.state = content.state;
+    this.timestamp = content.timestamp;
+    this.additionalText = content.additionalText;
+    this.additionalTextTitle = content.additionalTextTitle;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getRoomId() {
-		return roomId;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getRoomId() {
+    return roomId;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRoomId(final String roomId) {
-		this.roomId = roomId;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setRoomId(final String roomId) {
+    this.roomId = roomId;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getSubject() {
-		return "";
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getSubject() {
+    return "";
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSubject(final String subject) {
-		this.subject = subject != null ? subject : "";
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setSubject(final String subject) {
+    this.subject = subject != null ? subject : "";
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getBody() {
-		return (!subject.isBlank() && !subject.equals(SUBJECT_LEGACY_PLACEHOLDER) && !body.startsWith(subject))
-				? "**" + subject + "**\n\n" + body
-				: body;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getBody() {
+    return (!subject.isBlank() && !subject.equals(SUBJECT_LEGACY_PLACEHOLDER) && !body.startsWith(subject))
+        ? "**" + subject + "**\n\n" + body
+        : body;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setBody(final String body) {
-		this.body = body;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setBody(final String body) {
+    this.body = body;
+  }
 
-	@JsonView(View.Public.class)
-	public String getRenderedBody() {
-		return renderedBody;
-	}
+  @JsonView(View.Public.class)
+  public String getRenderedBody() {
+    return renderedBody;
+  }
 
-	public void setRenderedBody(final String renderedBody) {
-		this.renderedBody = renderedBody;
-	}
+  public void setRenderedBody(final String renderedBody) {
+    this.renderedBody = renderedBody;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Format getFormat() {
-		return format;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public Format getFormat() {
+    return format;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setFormat(final Format format) {
-		this.format = format;
-		this.bodyRenderingOptions.setMarkdownFeatureset(
-				format == Format.SLIDE || format == Format.FLASHCARD
-				? TextRenderingOptions.MarkdownFeatureset.EXTENDED
-				: TextRenderingOptions.MarkdownFeatureset.SIMPLE);
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setFormat(final Format format) {
+    this.format = format;
+    this.bodyRenderingOptions.setMarkdownFeatureset(
+        format == Format.SLIDE || format == Format.FLASHCARD
+        ? TextRenderingOptions.MarkdownFeatureset.EXTENDED
+        : TextRenderingOptions.MarkdownFeatureset.SIMPLE);
+  }
 
-	@JsonView(View.Public.class)
-	public Set<String> getGroups() {
-		if (groups == null) {
-			groups = new HashSet<>();
-		}
+  @JsonView(View.Public.class)
+  public Set<String> getGroups() {
+    if (groups == null) {
+      groups = new HashSet<>();
+    }
 
-		return groups;
-	}
+    return groups;
+  }
 
-	/* Content groups are persisted in the Room */
-	@JsonView(View.Public.class)
-	public void setGroups(final Set<String> groups) {
-		this.groups = groups;
-	}
+  /* Content groups are persisted in the Room */
+  @JsonView(View.Public.class)
+  public void setGroups(final Set<String> groups) {
+    this.groups = groups;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public State getState() {
-		return state != null ? state : (state = new State());
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public State getState() {
+    return state != null ? state : (state = new State());
+  }
 
-	public void resetState() {
-		this.state = new State();
-	}
+  public void resetState() {
+    this.state = new State();
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setState(final State state) {
-		this.state = state;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setState(final State state) {
+    this.state = state;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Date getTimestamp() {
-		return timestamp;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public Date getTimestamp() {
+    return timestamp;
+  }
 
-	@JsonView(View.Persistence.class)
-	public void setTimestamp(final Date timestamp) {
-		this.timestamp = timestamp;
-	}
+  @JsonView(View.Persistence.class)
+  public void setTimestamp(final Date timestamp) {
+    this.timestamp = timestamp;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getAdditionalText() {
-		return additionalText;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getAdditionalText() {
+    return additionalText;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAdditionalText(final String additionalText) {
-		this.additionalText = additionalText;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setAdditionalText(final String additionalText) {
+    this.additionalText = additionalText;
+  }
 
-	@JsonView({View.Persistence.class, View.Extended.class})
-	public String getAdditionalTextTitle() {
-		return additionalTextTitle;
-	}
+  @JsonView({View.Persistence.class, View.Extended.class})
+  public String getAdditionalTextTitle() {
+    return additionalTextTitle;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAdditionalTextTitle(final String additionalTextTitle) {
-		this.additionalTextTitle = additionalTextTitle;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setAdditionalTextTitle(final String additionalTextTitle) {
+    this.additionalTextTitle = additionalTextTitle;
+  }
 
-	@JsonView(View.Public.class)
-	public String getRenderedAdditionalText() {
-		return renderedAdditionalText;
-	}
+  @JsonView(View.Public.class)
+  public String getRenderedAdditionalText() {
+    return renderedAdditionalText;
+  }
 
-	public void setRenderedAdditionalText(final String renderedAdditionalText) {
-		this.renderedAdditionalText = renderedAdditionalText;
-	}
+  public void setRenderedAdditionalText(final String renderedAdditionalText) {
+    this.renderedAdditionalText = renderedAdditionalText;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public boolean isAbstentionsAllowed() {
-		return abstentionsAllowed;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public boolean isAbstentionsAllowed() {
+    return abstentionsAllowed;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAbstentionsAllowed(final boolean abstentionsAllowed) {
-		this.abstentionsAllowed = abstentionsAllowed;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setAbstentionsAllowed(final boolean abstentionsAllowed) {
+    this.abstentionsAllowed = abstentionsAllowed;
+  }
 
-	@JsonView(View.Public.class)
-	public int getPoints() {
-		return 0;
-	}
+  @JsonView(View.Public.class)
+  public int getPoints() {
+    return 0;
+  }
 
-	@JsonView(View.Public.class)
-	public boolean isScorable() {
-		return false;
-	}
+  @JsonView(View.Public.class)
+  public boolean isScorable() {
+    return false;
+  }
 
-	public AnswerResult determineAnswerResult(final Answer answer) {
-		final AnswerResult.AnswerResultState state = answer.isAbstention()
-				? AnswerResult.AnswerResultState.ABSTAINED
-				: AnswerResult.AnswerResultState.NEUTRAL;
-		return new AnswerResult(this.id, 0, this.getPoints(), state);
-	}
+  public AnswerResult determineAnswerResult(final Answer answer) {
+    final AnswerResult.AnswerResultState state = answer.isAbstention()
+        ? AnswerResult.AnswerResultState.ABSTAINED
+        : AnswerResult.AnswerResultState.NEUTRAL;
+    return new AnswerResult(this.id, 0, this.getPoints(), state);
+  }
 
-	@JsonView(View.Persistence.class)
-	@Override
-	public Class<? extends Entity> getType() {
-		return Content.class;
-	}
+  @JsonView(View.Persistence.class)
+  @Override
+  public Class<? extends Entity> getType() {
+    return Content.class;
+  }
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The following fields of <tt>LogEntry</tt> are excluded from equality checks:
-	 * {@link #state}.
-	 * </p>
-	 */
-	@Override
-	public boolean equals(final Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (!super.equals(o)) {
-			return false;
-		}
-		final Content content = (Content) o;
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * The following fields of <tt>LogEntry</tt> are excluded from equality checks:
+   * {@link #state}.
+   * </p>
+   */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    final Content content = (Content) o;
 
-		return Objects.equals(roomId, content.roomId)
-				&& Objects.equals(subject, content.subject)
-				&& Objects.equals(body, content.body)
-				&& format == content.format
-				&& Objects.equals(groups, content.groups)
-				&& Objects.equals(timestamp, content.timestamp);
-	}
+    return Objects.equals(roomId, content.roomId)
+        && Objects.equals(subject, content.subject)
+        && Objects.equals(body, content.body)
+        && format == content.format
+        && Objects.equals(groups, content.groups)
+        && Objects.equals(timestamp, content.timestamp);
+  }
 
-	@Override
-	protected ToStringCreator buildToString() {
-		return super.buildToString()
-				.append("roomId", roomId)
-				.append("subject", subject)
-				.append("body", body)
-				.append("format", format)
-				.append("groups", groups)
-				.append("abstentionsAllowed", abstentionsAllowed)
-				.append("state", state)
-				.append("additionalText", additionalText)
-				.append("additionalTextTitle", additionalTextTitle)
-				.append("timestamp", timestamp);
-	}
+  @Override
+  protected ToStringCreator buildToString() {
+    return super.buildToString()
+        .append("roomId", roomId)
+        .append("subject", subject)
+        .append("body", body)
+        .append("format", format)
+        .append("groups", groups)
+        .append("abstentionsAllowed", abstentionsAllowed)
+        .append("state", state)
+        .append("additionalText", additionalText)
+        .append("additionalTextTitle", additionalTextTitle)
+        .append("timestamp", timestamp);
+  }
 }

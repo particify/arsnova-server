@@ -48,139 +48,139 @@ import de.thm.arsnova.web.exceptions.NotFoundException;
 @RestController
 @EntityRequestMapping(ContentController.REQUEST_MAPPING)
 public class ContentController extends AbstractEntityController<Content> {
-	protected static final String REQUEST_MAPPING = "/content";
-	private static final String GET_ANSWER_STATISTICS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
-	private static final String DELETE_ANSWERS_MAPPING = DEFAULT_ID_MAPPING + "/answer";
-	private static final String CORRECT_CHOICE_INDEXES_MAPPING = DEFAULT_ID_MAPPING + "/correct-choice-indexes";
-	private static final String DUPLICATE_MAPPING = DEFAULT_ID_MAPPING + "/duplicate";
-	private static final String CONTENT_COUNT_MAPPING = NO_ID_MAPPING + "/count";
-	private static final String EXPORT_MAPPING = NO_ID_MAPPING + "/export";
-	private static final String BANNED_KEYWORDS_MAPPING = DEFAULT_ID_MAPPING + "/banned-keywords";
+  protected static final String REQUEST_MAPPING = "/content";
+  private static final String GET_ANSWER_STATISTICS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
+  private static final String DELETE_ANSWERS_MAPPING = DEFAULT_ID_MAPPING + "/answer";
+  private static final String CORRECT_CHOICE_INDEXES_MAPPING = DEFAULT_ID_MAPPING + "/correct-choice-indexes";
+  private static final String DUPLICATE_MAPPING = DEFAULT_ID_MAPPING + "/duplicate";
+  private static final String CONTENT_COUNT_MAPPING = NO_ID_MAPPING + "/count";
+  private static final String EXPORT_MAPPING = NO_ID_MAPPING + "/export";
+  private static final String BANNED_KEYWORDS_MAPPING = DEFAULT_ID_MAPPING + "/banned-keywords";
 
-	private ContentService contentService;
-	private AnswerService answerService;
-	private DuplicationService duplicationService;
+  private ContentService contentService;
+  private AnswerService answerService;
+  private DuplicationService duplicationService;
 
-	public ContentController(
-			@Qualifier("securedContentService") final ContentService contentService,
-			@Qualifier("securedAnswerService") final AnswerService answerService,
-			@Qualifier("securedDuplicationService") final DuplicationService duplicationService) {
-		super(contentService);
-		this.contentService = contentService;
-		this.answerService = answerService;
-		this.duplicationService = duplicationService;
-	}
+  public ContentController(
+      @Qualifier("securedContentService") final ContentService contentService,
+      @Qualifier("securedAnswerService") final AnswerService answerService,
+      @Qualifier("securedDuplicationService") final DuplicationService duplicationService) {
+    super(contentService);
+    this.contentService = contentService;
+    this.answerService = answerService;
+    this.duplicationService = duplicationService;
+  }
 
-	@Override
-	protected String getMapping() {
-		return REQUEST_MAPPING;
-	}
+  @Override
+  protected String getMapping() {
+    return REQUEST_MAPPING;
+  }
 
-	@GetMapping(GET_ANSWER_STATISTICS_MAPPING)
-	public AnswerStatistics getAnswerStatistics(@PathVariable final String id) {
-		return answerService.getAllStatistics(id);
-	}
+  @GetMapping(GET_ANSWER_STATISTICS_MAPPING)
+  public AnswerStatistics getAnswerStatistics(@PathVariable final String id) {
+    return answerService.getAllStatistics(id);
+  }
 
-	@DeleteMapping(DELETE_ANSWERS_MAPPING)
-	public void deleteAnswers(@PathVariable final String id) {
-		answerService.deleteAnswers(id);
-	}
+  @DeleteMapping(DELETE_ANSWERS_MAPPING)
+  public void deleteAnswers(@PathVariable final String id) {
+    answerService.deleteAnswers(id);
+  }
 
-	@GetMapping(CORRECT_CHOICE_INDEXES_MAPPING)
-	public List<Integer> getCorrectOptionIndexes(@PathVariable final String id) {
-		return contentService.getCorrectChoiceIndexes(id);
-	}
+  @GetMapping(CORRECT_CHOICE_INDEXES_MAPPING)
+  public List<Integer> getCorrectOptionIndexes(@PathVariable final String id) {
+    return contentService.getCorrectChoiceIndexes(id);
+  }
 
-	@PostMapping(DUPLICATE_MAPPING)
-	public Content duplicate(
-			@PathVariable final String id,
-			@RequestBody final DuplicateRequestEntity duplicateRequestEntity) {
-		final Content content = contentService.get(id);
-		if (content == null) {
-			throw new NotFoundException();
-		}
-		return duplicationService.duplicateContent(content, duplicateRequestEntity.contentGroupId);
-	}
+  @PostMapping(DUPLICATE_MAPPING)
+  public Content duplicate(
+      @PathVariable final String id,
+      @RequestBody final DuplicateRequestEntity duplicateRequestEntity) {
+    final Content content = contentService.get(id);
+    if (content == null) {
+      throw new NotFoundException();
+    }
+    return duplicationService.duplicateContent(content, duplicateRequestEntity.contentGroupId);
+  }
 
-	@GetMapping(CONTENT_COUNT_MAPPING)
-	public List<Integer> getCounts(
-			@RequestParam final List<String> roomIds
-	) {
-		return roomIds.stream().map(roomId -> contentService.countByRoomId(roomId)).collect(Collectors.toList());
-	}
+  @GetMapping(CONTENT_COUNT_MAPPING)
+  public List<Integer> getCounts(
+      @RequestParam final List<String> roomIds
+  ) {
+    return roomIds.stream().map(roomId -> contentService.countByRoomId(roomId)).collect(Collectors.toList());
+  }
 
-	@PostMapping(value = EXPORT_MAPPING, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-	public ResponseEntity<?> export(@RequestBody final ExportRequestEntity exportRequestEntity)
-			throws JsonProcessingException {
-		final ResponseEntity.BodyBuilder builder = ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment");
-		switch (exportRequestEntity.fileType) {
-			case CSV:
-				return builder
-						.contentType(AppConfig.CSV_MEDIA_TYPE)
-						.body(contentService.exportToCsv(exportRequestEntity.contentIds, exportRequestEntity.charset));
-			case TSV:
-				return builder
-						.contentType(AppConfig.TSV_MEDIA_TYPE)
-						.body(contentService.exportToTsv(exportRequestEntity.contentIds, exportRequestEntity.charset));
-			default:
-				throw new BadRequestException("Unsupported export type.");
-		}
-	}
+  @PostMapping(value = EXPORT_MAPPING, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<?> export(@RequestBody final ExportRequestEntity exportRequestEntity)
+      throws JsonProcessingException {
+    final ResponseEntity.BodyBuilder builder = ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment");
+    switch (exportRequestEntity.fileType) {
+      case CSV:
+        return builder
+            .contentType(AppConfig.CSV_MEDIA_TYPE)
+            .body(contentService.exportToCsv(exportRequestEntity.contentIds, exportRequestEntity.charset));
+      case TSV:
+        return builder
+            .contentType(AppConfig.TSV_MEDIA_TYPE)
+            .body(contentService.exportToTsv(exportRequestEntity.contentIds, exportRequestEntity.charset));
+      default:
+        throw new BadRequestException("Unsupported export type.");
+    }
+  }
 
-	@PostMapping(BANNED_KEYWORDS_MAPPING)
-	public void addToBannedKeywords(
-			@PathVariable final String id,
-			@RequestBody final BannedKeywordRequestEntity bannedKeywordEntity) {
-		final Content content = contentService.get(id);
-		if (!(content instanceof WordcloudContent)) {
-			throw new BadRequestException("Only wordcloud contents are supported.");
-		}
-		final WordcloudContent wordcloudContent = (WordcloudContent) content;
-		contentService.addToBannedKeywords(wordcloudContent, bannedKeywordEntity.keyword);
-	}
+  @PostMapping(BANNED_KEYWORDS_MAPPING)
+  public void addToBannedKeywords(
+      @PathVariable final String id,
+      @RequestBody final BannedKeywordRequestEntity bannedKeywordEntity) {
+    final Content content = contentService.get(id);
+    if (!(content instanceof WordcloudContent)) {
+      throw new BadRequestException("Only wordcloud contents are supported.");
+    }
+    final WordcloudContent wordcloudContent = (WordcloudContent) content;
+    contentService.addToBannedKeywords(wordcloudContent, bannedKeywordEntity.keyword);
+  }
 
-	@DeleteMapping(BANNED_KEYWORDS_MAPPING)
-	public void clearBannedKeywords(@PathVariable final String id) {
-		final Content content = contentService.get(id);
-		if (!(content instanceof WordcloudContent)) {
-			throw new BadRequestException("Only wordcloud contents are supported.");
-		}
-		final WordcloudContent wordcloudContent = (WordcloudContent) content;
-		contentService.clearBannedKeywords(wordcloudContent);
-	}
+  @DeleteMapping(BANNED_KEYWORDS_MAPPING)
+  public void clearBannedKeywords(@PathVariable final String id) {
+    final Content content = contentService.get(id);
+    if (!(content instanceof WordcloudContent)) {
+      throw new BadRequestException("Only wordcloud contents are supported.");
+    }
+    final WordcloudContent wordcloudContent = (WordcloudContent) content;
+    contentService.clearBannedKeywords(wordcloudContent);
+  }
 
-	@JsonView(View.Public.class)
-	private static class ExportRequestEntity {
-		private FileType fileType;
-		private List<String> contentIds;
-		private String charset;
+  @JsonView(View.Public.class)
+  private static class ExportRequestEntity {
+    private FileType fileType;
+    private List<String> contentIds;
+    private String charset;
 
-		public void setFileType(final FileType fileType) {
-			this.fileType = fileType;
-		}
+    public void setFileType(final FileType fileType) {
+      this.fileType = fileType;
+    }
 
-		public void setContentIds(final List<String> contentIds) {
-			this.contentIds = contentIds;
-		}
+    public void setContentIds(final List<String> contentIds) {
+      this.contentIds = contentIds;
+    }
 
-		public void setCharset(final String charset) {
-			this.charset = charset;
-		}
+    public void setCharset(final String charset) {
+      this.charset = charset;
+    }
 
-		private enum FileType {
-			CSV,
-			TSV
-		}
-	}
+    private enum FileType {
+      CSV,
+      TSV
+    }
+  }
 
-	private static class DuplicateRequestEntity {
-		private String contentGroupId;
+  private static class DuplicateRequestEntity {
+    private String contentGroupId;
 
-		public void setContentGroupId(final String contentGroupId) {
-			this.contentGroupId = contentGroupId;
-		}
-	}
+    public void setContentGroupId(final String contentGroupId) {
+      this.contentGroupId = contentGroupId;
+    }
+  }
 
-	private record BannedKeywordRequestEntity(String keyword) { }
+  private record BannedKeywordRequestEntity(String keyword) { }
 }

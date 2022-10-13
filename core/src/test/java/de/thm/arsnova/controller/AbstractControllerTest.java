@@ -35,34 +35,34 @@ import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.service.StubUserService;
 
 @SpringJUnitWebConfig({
-		AppConfig.class,
-		TestAppConfig.class,
-		TestPersistanceConfig.class,
-		TestSecurityConfig.class})
+    AppConfig.class,
+    TestAppConfig.class,
+    TestPersistanceConfig.class,
+    TestSecurityConfig.class})
 @ActiveProfiles("test")
 public abstract class AbstractControllerTest {
 
-	@Autowired protected StubUserService userService;
+  @Autowired protected StubUserService userService;
 
-	public AbstractControllerTest() {
-		super();
-	}
+  public AbstractControllerTest() {
+    super();
+  }
 
-	protected void setAuthenticated(final boolean isAuthenticated, final String username) {
-		final List<GrantedAuthority> ga = new ArrayList<>();
-		if (isAuthenticated) {
-			final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
-			SecurityContextHolder.getContext().setAuthentication(token);
-			userService.setUserAuthenticated(isAuthenticated, username);
-		} else {
-			userService.setUserAuthenticated(isAuthenticated);
-		}
-	}
+  protected void setAuthenticated(final boolean isAuthenticated, final String username) {
+    final List<GrantedAuthority> ga = new ArrayList<>();
+    if (isAuthenticated) {
+      final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
+      SecurityContextHolder.getContext().setAuthentication(token);
+      userService.setUserAuthenticated(isAuthenticated, username);
+    } else {
+      userService.setUserAuthenticated(isAuthenticated);
+    }
+  }
 
-	@AfterEach
-	public void cleanup() {
-		SecurityContextHolder.clearContext();
-		userService.setUserAuthenticated(false);
-	}
+  @AfterEach
+  public void cleanup() {
+    SecurityContextHolder.clearContext();
+    userService.setUserAuthenticated(false);
+  }
 
 }

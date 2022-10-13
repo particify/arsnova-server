@@ -25,10 +25,10 @@ import org.springframework.context.ApplicationEvent;
  */
 public abstract class ArsnovaEvent extends ApplicationEvent {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public ArsnovaEvent(final Object source) {
-		super(source);
-	}
+  public ArsnovaEvent(final Object source) {
+    super(source);
+  }
 
 }

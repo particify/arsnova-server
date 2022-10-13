@@ -7,15 +7,15 @@ import de.thm.arsnova.model.Room;
 
 @Service
 public class SecuredDataGenerationService implements DataGenerationService {
-	private DataGenerationService dataGenerationService;
+  private DataGenerationService dataGenerationService;
 
-	public SecuredDataGenerationService(final DataGenerationService dataGenerationService) {
-		this.dataGenerationService = dataGenerationService;
-	}
+  public SecuredDataGenerationService(final DataGenerationService dataGenerationService) {
+    this.dataGenerationService = dataGenerationService;
+  }
 
-	@Override
-	@PreAuthorize("hasPermission(#room, 'update')")
-	public void generateRandomAnswers(final Room room) {
-		dataGenerationService.generateRandomAnswers(room);
-	}
+  @Override
+  @PreAuthorize("hasPermission(#room, 'update')")
+  public void generateRandomAnswers(final Room room) {
+    dataGenerationService.generateRandomAnswers(room);
+  }
 }

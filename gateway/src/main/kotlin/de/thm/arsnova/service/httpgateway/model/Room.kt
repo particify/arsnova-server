@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Room(
-    var id: String,
-    var shortId: String,
-    var name: String
+  var id: String,
+  var shortId: String,
+  var name: String
 )

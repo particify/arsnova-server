@@ -25,19 +25,19 @@ import de.thm.arsnova.security.RoomRole;
 
 @JsonView(View.Public.class)
 public class RoomMembership {
-	private Room room;
-	private RoomRole role;
+  private Room room;
+  private RoomRole role;
 
-	public RoomMembership(final Room room, final RoomRole role) {
-		this.room = room;
-		this.role = role;
-	}
+  public RoomMembership(final Room room, final RoomRole role) {
+    this.room = room;
+    this.role = role;
+  }
 
-	public Room getRoom() {
-		return room;
-	}
+  public Room getRoom() {
+    return room;
+  }
 
-	public RoomRole getRole() {
-		return role;
-	}
+  public RoomRole getRole() {
+    return role;
+  }
 }

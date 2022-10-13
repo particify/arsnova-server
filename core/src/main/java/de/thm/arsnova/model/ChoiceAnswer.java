@@ -28,34 +28,34 @@ import org.springframework.core.style.ToStringCreator;
 import de.thm.arsnova.model.serialization.View;
 
 public class ChoiceAnswer extends Answer {
-	private List<@NotNull @PositiveOrZero Integer> selectedChoiceIndexes = new ArrayList<>();
+  private List<@NotNull @PositiveOrZero Integer> selectedChoiceIndexes = new ArrayList<>();
 
-	public ChoiceAnswer() {
+  public ChoiceAnswer() {
 
-	}
+  }
 
-	public ChoiceAnswer(final ChoiceQuestionContent content, final String creatorId) {
-		super(content, creatorId);
-	}
+  public ChoiceAnswer(final ChoiceQuestionContent content, final String creatorId) {
+    super(content, creatorId);
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public List<Integer> getSelectedChoiceIndexes() {
-		return selectedChoiceIndexes;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public List<Integer> getSelectedChoiceIndexes() {
+    return selectedChoiceIndexes;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSelectedChoiceIndexes(final List<Integer> selectedChoiceIndexes) {
-		this.selectedChoiceIndexes = selectedChoiceIndexes;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setSelectedChoiceIndexes(final List<Integer> selectedChoiceIndexes) {
+    this.selectedChoiceIndexes = selectedChoiceIndexes;
+  }
 
-	@Override
-	public boolean isAbstention() {
-		return selectedChoiceIndexes.isEmpty();
-	}
+  @Override
+  public boolean isAbstention() {
+    return selectedChoiceIndexes.isEmpty();
+  }
 
-	@Override
-	protected ToStringCreator buildToString() {
-		return super.buildToString()
-				.append("selectedChoiceIndexes", selectedChoiceIndexes);
-	}
+  @Override
+  protected ToStringCreator buildToString() {
+    return super.buildToString()
+        .append("selectedChoiceIndexes", selectedChoiceIndexes);
+  }
 }

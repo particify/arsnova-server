@@ -11,14 +11,14 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class JwtTokenUtil(
-		private val webSocketProperties: WebSocketProperties
+    private val webSocketProperties: WebSocketProperties
 ) {
-	private val algorithm = Algorithm.HMAC256(webSocketProperties.security.jwt.secret)
-	private val verifier: JWTVerifier = JWT.require(algorithm).build()
+  private val algorithm = Algorithm.HMAC256(webSocketProperties.security.jwt.secret)
+  private val verifier: JWTVerifier = JWT.require(algorithm).build()
 
-	@Throws(JWTVerificationException::class)
-	fun getUser(token: String): User {
-		val decodedJwt = verifier.verify(token)
-		return User(decodedJwt.subject)
-	}
+  @Throws(JWTVerificationException::class)
+  fun getUser(token: String): User {
+    val decodedJwt = verifier.verify(token)
+    return User(decodedJwt.subject)
+  }
 }

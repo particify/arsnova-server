@@ -23,10 +23,10 @@ package de.thm.arsnova.event;
  */
 public class NewFeedbackEvent extends RoomEvent {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public NewFeedbackEvent(final Object source, final String roomId) {
-		super(source, roomId);
-	}
+  public NewFeedbackEvent(final Object source, final String roomId) {
+    super(source, roomId);
+  }
 
 }

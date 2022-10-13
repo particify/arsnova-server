@@ -56,128 +56,128 @@ import de.thm.arsnova.web.exceptions.UnauthorizedException;
  */
 @ControllerAdvice
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
-	private ControllerExceptionHelper helper;
+  private ControllerExceptionHelper helper;
 
-	public ControllerExceptionHandler(final ControllerExceptionHelper helper) {
-		this.helper = helper;
-	}
+  public ControllerExceptionHandler(final ControllerExceptionHelper helper) {
+    this.helper = helper;
+  }
 
-	@ExceptionHandler(NoContentException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public Map<String, Object> handleNoContentException(final Exception e, final HttpServletRequest request) {
-		return helper.handleException(e, Level.TRACE);
-	}
+  @ExceptionHandler(NoContentException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public Map<String, Object> handleNoContentException(final Exception e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.TRACE);
+  }
 
-	@ExceptionHandler(NotFoundException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.NOT_FOUND)
-	public Map<String, Object> handleNotFoundException(final Exception e, final HttpServletRequest request) {
-		return helper.handleException(e, Level.TRACE);
-	}
+  @ExceptionHandler(NotFoundException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public Map<String, Object> handleNotFoundException(final Exception e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.TRACE);
+  }
 
-	@ExceptionHandler(UnauthorizedException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-	public Map<String, Object> handleUnauthorizedException(final Exception e, final HttpServletRequest request) {
-		return helper.handleException(e, Level.TRACE);
-	}
+  @ExceptionHandler(UnauthorizedException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  public Map<String, Object> handleUnauthorizedException(final Exception e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.TRACE);
+  }
 
-	@ExceptionHandler(AuthenticationException.class)
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-	@ResponseBody
-	public Map<String, Object> handleAuthenticationExceptionException(
-			final Exception e, final HttpServletRequest request) {
-		return helper.handleException(e, Level.DEBUG);
-	}
+  @ExceptionHandler(AuthenticationException.class)
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  @ResponseBody
+  public Map<String, Object> handleAuthenticationExceptionException(
+      final Exception e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.DEBUG);
+  }
 
-	@ExceptionHandler(AccessDeniedException.class)
-	@ResponseBody
-	public Map<String, Object> handleAccessDeniedException(
-			final Exception e,
-			final HttpServletRequest request,
-			final HttpServletResponse response) {
-		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication == null
-				|| authentication.getPrincipal() == null
-				|| authentication instanceof AnonymousAuthenticationToken) {
-			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-		} else {
-			response.setStatus(HttpStatus.FORBIDDEN.value());
-		}
+  @ExceptionHandler(AccessDeniedException.class)
+  @ResponseBody
+  public Map<String, Object> handleAccessDeniedException(
+      final Exception e,
+      final HttpServletRequest request,
+      final HttpServletResponse response) {
+    final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null
+        || authentication.getPrincipal() == null
+        || authentication instanceof AnonymousAuthenticationToken) {
+      response.setStatus(HttpStatus.UNAUTHORIZED.value());
+    } else {
+      response.setStatus(HttpStatus.FORBIDDEN.value());
+    }
 
-		return helper.handleException(e, Level.DEBUG);
-	}
+    return helper.handleException(e, Level.DEBUG);
+  }
 
-	@ExceptionHandler(ForbiddenException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.FORBIDDEN)
-	public Map<String, Object> handleForbiddenException(final Exception e, final HttpServletRequest request) {
-		return helper.handleException(e, Level.DEBUG);
-	}
+  @ExceptionHandler(ForbiddenException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public Map<String, Object> handleForbiddenException(final Exception e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.DEBUG);
+  }
 
-	@ExceptionHandler(BadRequestException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public Map<String, Object> handleBadRequestException(final Exception e, final HttpServletRequest request) {
-		return helper.handleException(e, Level.DEBUG);
-	}
+  @ExceptionHandler(BadRequestException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public Map<String, Object> handleBadRequestException(final Exception e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.DEBUG);
+  }
 
-	@ExceptionHandler(EntityValidationException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public Map<String, Object> handleEntityValidationException(
-			final EntityValidationException e, final HttpServletRequest request) {
-		return helper.handleException(e, Level.DEBUG);
-	}
+  @ExceptionHandler(EntityValidationException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public Map<String, Object> handleEntityValidationException(
+      final EntityValidationException e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.DEBUG);
+  }
 
-	@ExceptionHandler(UserAlreadyExistsException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public Map<String, Object> handleUserAlreadyExistsException(
-			final UserAlreadyExistsException e, final HttpServletRequest request) {
-		return helper.handleException(e, Level.DEBUG);
-	}
+  @ExceptionHandler(UserAlreadyExistsException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public Map<String, Object> handleUserAlreadyExistsException(
+      final UserAlreadyExistsException e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.DEBUG);
+  }
 
-	@ExceptionHandler(AlreadyAnsweredContentException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.CONFLICT)
-	public Map<String, Object> handleAlreadyAnsweredContentException(
-			final AlreadyAnsweredContentException e, final HttpServletRequest request) {
-		return helper.handleException(e, Level.DEBUG);
-	}
+  @ExceptionHandler(AlreadyAnsweredContentException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.CONFLICT)
+  public Map<String, Object> handleAlreadyAnsweredContentException(
+      final AlreadyAnsweredContentException e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.DEBUG);
+  }
 
-	@ExceptionHandler(PreconditionFailedException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.PRECONDITION_FAILED)
-	public Map<String, Object> handlePreconditionFailedException(final Exception e, final HttpServletRequest request) {
-		return helper.handleException(e, Level.DEBUG);
-	}
+  @ExceptionHandler(PreconditionFailedException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+  public Map<String, Object> handlePreconditionFailedException(final Exception e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.DEBUG);
+  }
 
-	@ExceptionHandler({NotImplementedException.class, OperationNotSupportedException.class})
-	@ResponseBody
-	@ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
-	public Map<String, Object> handleNotImplementedException(final Exception e, final HttpServletRequest request) {
-		return helper.handleException(e, Level.DEBUG);
-	}
+  @ExceptionHandler({NotImplementedException.class, OperationNotSupportedException.class})
+  @ResponseBody
+  @ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
+  public Map<String, Object> handleNotImplementedException(final Exception e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.DEBUG);
+  }
 
-	@ExceptionHandler(PayloadTooLargeException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
-	public Map<String, Object> handlePayloadTooLargeException(final Exception e, final HttpServletRequest request) {
-		return helper.handleException(e, Level.DEBUG);
-	}
+  @ExceptionHandler(PayloadTooLargeException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
+  public Map<String, Object> handlePayloadTooLargeException(final Exception e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.DEBUG);
+  }
 
-	@ExceptionHandler(DocumentNotFoundException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.NOT_FOUND)
-	public Map<String, Object> handleDocumentNotFoundException(final Exception e, final HttpServletRequest request) {
-		return helper.handleException(e, Level.TRACE);
-	}
+  @ExceptionHandler(DocumentNotFoundException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public Map<String, Object> handleDocumentNotFoundException(final Exception e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.TRACE);
+  }
 
-	@Override
-	protected ResponseEntity<Object> handleExceptionInternal(final Exception ex, final Object body,
-			final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
-		return new ResponseEntity<>(helper.handleException(ex, Level.TRACE), headers, status);
-	}
+  @Override
+  protected ResponseEntity<Object> handleExceptionInternal(final Exception ex, final Object body,
+      final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+    return new ResponseEntity<>(helper.handleException(ex, Level.TRACE), headers, status);
+  }
 }

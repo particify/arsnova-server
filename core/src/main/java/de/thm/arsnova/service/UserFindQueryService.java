@@ -28,22 +28,22 @@ import de.thm.arsnova.model.UserProfile;
 
 @Service
 public class UserFindQueryService implements FindQueryService<UserProfile> {
-	private UserService userService;
+  private UserService userService;
 
-	public UserFindQueryService(final UserService userService) {
-		this.userService = userService;
-	}
+  public UserFindQueryService(final UserService userService) {
+    this.userService = userService;
+  }
 
-	@Override
-	public Set<String> resolveQuery(final FindQuery<UserProfile> findQuery) {
-		final Set<String> userIds = new HashSet<>();
-		if (findQuery.getProperties().getLoginId() != null) {
-			final List<UserProfile> userList = userService.getByLoginId(findQuery.getProperties().getLoginId());
-			for (final UserProfile user : userList) {
-				userIds.add(user.getId());
-			}
-		}
+  @Override
+  public Set<String> resolveQuery(final FindQuery<UserProfile> findQuery) {
+    final Set<String> userIds = new HashSet<>();
+    if (findQuery.getProperties().getLoginId() != null) {
+      final List<UserProfile> userList = userService.getByLoginId(findQuery.getProperties().getLoginId());
+      for (final UserProfile user : userList) {
+        userIds.add(user.getId());
+      }
+    }
 
-		return userIds;
-	}
+    return userIds;
+  }
 }

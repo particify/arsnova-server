@@ -15,61 +15,61 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SettingsCommandHandler {
-    private static final Logger logger = LoggerFactory.getLogger(SettingsCommandHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(SettingsCommandHandler.class);
 
-    private final SettingsService service;
-    private final PermissionEvaluator permissionEvaluator;
+  private final SettingsService service;
+  private final PermissionEvaluator permissionEvaluator;
 
-    @Autowired
-    public SettingsCommandHandler(
-            SettingsService service,
-            PermissionEvaluator permissionEvaluator
-    ) {
-        this.service = service;
-        this.permissionEvaluator = permissionEvaluator;
+  @Autowired
+  public SettingsCommandHandler(
+      SettingsService service,
+      PermissionEvaluator permissionEvaluator
+  ) {
+    this.service = service;
+    this.permissionEvaluator = permissionEvaluator;
+  }
+
+  public Settings handle(
+      final String roomId,
+      CreateSettings command
+  ) {
+    logger.debug("Got new command: {}", command);
+
+    CreateSettingsPayload payload = command.getPayload();
+
+    if (!permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(payload.getRoomId())) {
+      throw new ForbiddenException();
     }
 
-    public Settings handle(
-            final String roomId,
-            CreateSettings command
-    ) {
-        logger.debug("Got new command: {}", command);
+    Settings newSettings = new Settings();
+    newSettings.setRoomId(roomId);
+    newSettings.setDirectSend(payload.getDirectSend());
 
-        CreateSettingsPayload payload = command.getPayload();
+    Settings saved = service.create(newSettings);
 
-        if (!permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(payload.getRoomId())) {
-            throw new ForbiddenException();
-        }
+    return saved;
+  }
 
-        Settings newSettings = new Settings();
-        newSettings.setRoomId(roomId);
-        newSettings.setDirectSend(payload.getDirectSend());
+  public Settings handle(
+      final String roomId,
+      UpdateSettings command
+  ) {
+    logger.debug("Got new command: {}", command);
 
-        Settings saved = service.create(newSettings);
+    UpdateSettingsPayload payload = command.getPayload();
 
-        return saved;
+    if (!permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(payload.getRoomId())) {
+      throw new ForbiddenException();
     }
 
-    public Settings handle(
-            final String roomId,
-            UpdateSettings command
-    ) {
-        logger.debug("Got new command: {}", command);
+    Settings settings = service.get(roomId);
+    settings.setRoomId(roomId);
+    settings.setDirectSend(payload.getDirectSend());
+    settings.setFileUploadEnabled(payload.isFileUploadEnabled());
 
-        UpdateSettingsPayload payload = command.getPayload();
+    Settings updated = service.update(settings);
 
-        if (!permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(payload.getRoomId())) {
-            throw new ForbiddenException();
-        }
+    return updated;
 
-        Settings settings = service.get(roomId);
-        settings.setRoomId(roomId);
-        settings.setDirectSend(payload.getDirectSend());
-        settings.setFileUploadEnabled(payload.isFileUploadEnabled());
-
-        Settings updated = service.update(settings);
-
-        return updated;
-
-    }
+  }
 }

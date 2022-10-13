@@ -45,34 +45,34 @@ import de.thm.arsnova.service.UserService;
 @Aspect
 @Configurable
 public class SystemAuthenticationAspect {
-	private static final Logger logger = LoggerFactory.getLogger(SystemAuthenticationAspect.class);
-	private static final GrantedAuthority SYSTEM_AUTHORITY = new SimpleGrantedAuthority("ROLE_SYSTEM");
+  private static final Logger logger = LoggerFactory.getLogger(SystemAuthenticationAspect.class);
+  private static final GrantedAuthority SYSTEM_AUTHORITY = new SimpleGrantedAuthority("ROLE_SYSTEM");
 
-	private UserService userService;
+  private UserService userService;
 
-	@Around("execution(void de.thm.arsnova..*(..)) && @annotation(org.springframework.scheduling.annotation.Scheduled)")
-	public <T> void handleWebsocketAuthentication(final ProceedingJoinPoint pjp) throws Throwable {
-		logger.trace("Executing SystemAuthenticationAspect for @Scheduled method {}.",
-				pjp.toShortString());
-		try {
-			populateSecurityContext();
-			pjp.proceed();
-		} finally {
-			clearSecurityContext();
-		}
-	}
+  @Around("execution(void de.thm.arsnova..*(..)) && @annotation(org.springframework.scheduling.annotation.Scheduled)")
+  public <T> void handleWebsocketAuthentication(final ProceedingJoinPoint pjp) throws Throwable {
+    logger.trace("Executing SystemAuthenticationAspect for @Scheduled method {}.",
+        pjp.toShortString());
+    try {
+      populateSecurityContext();
+      pjp.proceed();
+    } finally {
+      clearSecurityContext();
+    }
+  }
 
-	private void populateSecurityContext() {
-		final SecurityContext context = SecurityContextHolder.getContext();
-		final Set<GrantedAuthority> authorities = new HashSet<>();
-		authorities.add(SYSTEM_AUTHORITY);
-		final Authentication auth = new UsernamePasswordAuthenticationToken(
-				SYSTEM_AUTHORITY.toString(), SYSTEM_AUTHORITY.toString(), authorities);
-		context.setAuthentication(auth);
-		SecurityContextHolder.setContext(context);
-	}
+  private void populateSecurityContext() {
+    final SecurityContext context = SecurityContextHolder.getContext();
+    final Set<GrantedAuthority> authorities = new HashSet<>();
+    authorities.add(SYSTEM_AUTHORITY);
+    final Authentication auth = new UsernamePasswordAuthenticationToken(
+        SYSTEM_AUTHORITY.toString(), SYSTEM_AUTHORITY.toString(), authorities);
+    context.setAuthentication(auth);
+    SecurityContextHolder.setContext(context);
+  }
 
-	private void clearSecurityContext() {
-		SecurityContextHolder.clearContext();
-	}
+  private void clearSecurityContext() {
+    SecurityContextHolder.clearContext();
+  }
 }

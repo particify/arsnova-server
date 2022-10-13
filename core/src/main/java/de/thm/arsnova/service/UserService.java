@@ -31,37 +31,37 @@ import de.thm.arsnova.security.User;
  * The functionality the user service should provide.
  */
 public interface UserService extends EntityService<UserProfile> {
-	User getCurrentUser();
+  User getCurrentUser();
 
-	de.thm.arsnova.model.ClientAuthentication getCurrentClientAuthentication(boolean refresh);
+  de.thm.arsnova.model.ClientAuthentication getCurrentClientAuthentication(boolean refresh);
 
-	boolean isAdmin(String loginId, UserProfile.AuthProvider authProvider);
+  boolean isAdmin(String loginId, UserProfile.AuthProvider authProvider);
 
-	void authenticate(UsernamePasswordAuthenticationToken token, UserProfile.AuthProvider authProvider,
-			String clientAddress);
+  void authenticate(UsernamePasswordAuthenticationToken token, UserProfile.AuthProvider authProvider,
+      String clientAddress);
 
-	User loadUser(UserProfile.AuthProvider authProvider, String loginId,
-			Collection<GrantedAuthority> grantedAuthorities, boolean autoCreate) throws UsernameNotFoundException;
+  User loadUser(UserProfile.AuthProvider authProvider, String loginId,
+      Collection<GrantedAuthority> grantedAuthorities, boolean autoCreate) throws UsernameNotFoundException;
 
-	User loadUser(String userId, Collection<GrantedAuthority> grantedAuthorities);
+  User loadUser(String userId, Collection<GrantedAuthority> grantedAuthorities);
 
-	UserProfile getByAuthProviderAndLoginId(UserProfile.AuthProvider authProvider, String loginId);
+  UserProfile getByAuthProviderAndLoginId(UserProfile.AuthProvider authProvider, String loginId);
 
-	List<UserProfile> getByLoginId(String loginId);
+  List<UserProfile> getByLoginId(String loginId);
 
-	UserProfile getByUsername(String username);
+  UserProfile getByUsername(String username);
 
-	UserProfile create(String username, String password);
+  UserProfile create(String username, String password);
 
-	UserProfile createAnonymizedGuestUser();
+  UserProfile createAnonymizedGuestUser();
 
-	boolean activateAccount(String id, String key, String clientAddress);
+  boolean activateAccount(String id, String key, String clientAddress);
 
-	void activateAccount(String id);
+  void activateAccount(String id);
 
-	void initiatePasswordReset(String id);
+  void initiatePasswordReset(String id);
 
-	boolean resetPassword(String id, String key, String password);
+  boolean resetPassword(String id, String key, String password);
 
-	UserProfile resetActivation(String id, String clientAddress);
+  UserProfile resetActivation(String id, String clientAddress);
 }

@@ -26,28 +26,28 @@ import org.springframework.security.core.GrantedAuthority;
 import de.thm.arsnova.security.User;
 
 public class JwtToken extends AbstractAuthenticationToken {
-	private String token;
-	private User principal;
+  private String token;
+  private User principal;
 
-	public JwtToken(final String token, final User principal,
-			final Collection<? extends GrantedAuthority> grantedAuthorities) {
-		super(grantedAuthorities);
-		this.token = token;
-		this.principal = principal;
-		setAuthenticated(!grantedAuthorities.isEmpty());
-	}
+  public JwtToken(final String token, final User principal,
+      final Collection<? extends GrantedAuthority> grantedAuthorities) {
+    super(grantedAuthorities);
+    this.token = token;
+    this.principal = principal;
+    setAuthenticated(!grantedAuthorities.isEmpty());
+  }
 
-	public JwtToken(final String token) {
-		this(token, null, Collections.emptyList());
-	}
+  public JwtToken(final String token) {
+    this(token, null, Collections.emptyList());
+  }
 
-	@Override
-	public Object getCredentials() {
-		return token;
-	}
+  @Override
+  public Object getCredentials() {
+    return token;
+  }
 
-	@Override
-	public Object getPrincipal() {
-		return principal;
-	}
+  @Override
+  public Object getPrincipal() {
+    return principal;
+  }
 }

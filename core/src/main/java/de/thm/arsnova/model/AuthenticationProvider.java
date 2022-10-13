@@ -25,86 +25,86 @@ import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
 import de.thm.arsnova.model.serialization.View;
 
 public class AuthenticationProvider {
-	public enum Type {
-		ANONYMOUS,
-		USERNAME_PASSWORD,
-		SSO
-	}
+  public enum Type {
+    ANONYMOUS,
+    USERNAME_PASSWORD,
+    SSO
+  }
 
-	private String id;
-	private boolean enabled;
-	private String title;
-	private int order;
-	private Set<AuthenticationProviderProperties.Provider.Role> allowedRoles;
-	private Type type;
+  private String id;
+  private boolean enabled;
+  private String title;
+  private int order;
+  private Set<AuthenticationProviderProperties.Provider.Role> allowedRoles;
+  private Type type;
 
-	public AuthenticationProvider(final String id, final AuthenticationProviderProperties.Provider provider) {
-		this.id = id;
-		this.enabled = provider.isEnabled();
-		this.title = provider.getTitle();
-		this.order = provider.getOrder();
-		this.allowedRoles = provider.getAllowedRoles();
+  public AuthenticationProvider(final String id, final AuthenticationProviderProperties.Provider provider) {
+    this.id = id;
+    this.enabled = provider.isEnabled();
+    this.title = provider.getTitle();
+    this.order = provider.getOrder();
+    this.allowedRoles = provider.getAllowedRoles();
 
-		if (provider instanceof AuthenticationProviderProperties.Guest) {
-			type = Type.ANONYMOUS;
-		} else if (provider instanceof AuthenticationProviderProperties.Registered
-				|| provider instanceof AuthenticationProviderProperties.Ldap) {
-			type = Type.USERNAME_PASSWORD;
-		} else {
-			type = Type.SSO;
-		}
-	}
+    if (provider instanceof AuthenticationProviderProperties.Guest) {
+      type = Type.ANONYMOUS;
+    } else if (provider instanceof AuthenticationProviderProperties.Registered
+        || provider instanceof AuthenticationProviderProperties.Ldap) {
+      type = Type.USERNAME_PASSWORD;
+    } else {
+      type = Type.SSO;
+    }
+  }
 
-	@JsonView(View.Public.class)
-	public String getId() {
-		return id;
-	}
+  @JsonView(View.Public.class)
+  public String getId() {
+    return id;
+  }
 
-	public void setId(final String id) {
-		this.id = id;
-	}
+  public void setId(final String id) {
+    this.id = id;
+  }
 
-	public boolean isEnabled() {
-		return enabled;
-	}
+  public boolean isEnabled() {
+    return enabled;
+  }
 
-	public void setEnabled(final boolean enabled) {
-		this.enabled = enabled;
-	}
+  public void setEnabled(final boolean enabled) {
+    this.enabled = enabled;
+  }
 
-	@JsonView(View.Public.class)
-	public String getTitle() {
-		return title;
-	}
+  @JsonView(View.Public.class)
+  public String getTitle() {
+    return title;
+  }
 
-	public void setTitle(final String title) {
-		this.title = title;
-	}
+  public void setTitle(final String title) {
+    this.title = title;
+  }
 
-	@JsonView(View.Public.class)
-	public int getOrder() {
-		return order;
-	}
+  @JsonView(View.Public.class)
+  public int getOrder() {
+    return order;
+  }
 
-	public void setOrder(final int order) {
-		this.order = order;
-	}
+  public void setOrder(final int order) {
+    this.order = order;
+  }
 
-	@JsonView(View.Public.class)
-	public Set<AuthenticationProviderProperties.Provider.Role> getAllowedRoles() {
-		return allowedRoles;
-	}
+  @JsonView(View.Public.class)
+  public Set<AuthenticationProviderProperties.Provider.Role> getAllowedRoles() {
+    return allowedRoles;
+  }
 
-	public void setAllowedRoles(final Set<AuthenticationProviderProperties.Provider.Role> allowedRoles) {
-		this.allowedRoles = allowedRoles;
-	}
+  public void setAllowedRoles(final Set<AuthenticationProviderProperties.Provider.Role> allowedRoles) {
+    this.allowedRoles = allowedRoles;
+  }
 
-	@JsonView(View.Public.class)
-	public Type getType() {
-		return type;
-	}
+  @JsonView(View.Public.class)
+  public Type getType() {
+    return type;
+  }
 
-	public void setType(final Type type) {
-		this.type = type;
-	}
+  public void setType(final Type type) {
+    this.type = type;
+  }
 }

@@ -22,14 +22,14 @@ package de.thm.arsnova.controller;
  * Base class of all controllers.
  */
 public class AbstractController {
-	protected static final String X_DEPRECATED_API = "X-Deprecated-API";
-	protected static final String X_FORWARDED = "X-Forwarded";
-	protected static final String HTML_STATUS_200 = "OK";
-	protected static final String HTML_STATUS_201 = "Created";
-	protected static final String HTML_STATUS_204 = "No Content";
-	protected static final String HTML_STATUS_400 = "Bad request";
-	protected static final String HTML_STATUS_403 = "Forbidden";
-	protected static final String HTML_STATUS_404 = "Not Found";
-	protected static final String HTML_STATUS_501 = "Not Implemented";
-	protected static final String HTML_STATUS_503 = "Service Unavailable";
+  protected static final String X_DEPRECATED_API = "X-Deprecated-API";
+  protected static final String X_FORWARDED = "X-Forwarded";
+  protected static final String HTML_STATUS_200 = "OK";
+  protected static final String HTML_STATUS_201 = "Created";
+  protected static final String HTML_STATUS_204 = "No Content";
+  protected static final String HTML_STATUS_400 = "Bad request";
+  protected static final String HTML_STATUS_403 = "Forbidden";
+  protected static final String HTML_STATUS_404 = "Not Found";
+  protected static final String HTML_STATUS_501 = "Not Implemented";
+  protected static final String HTML_STATUS_503 = "Service Unavailable";
 }

@@ -21,7 +21,7 @@ package de.thm.arsnova.event;
 import org.springframework.context.ApplicationEvent;
 
 public class DatabaseInitializedEvent extends ApplicationEvent {
-	public DatabaseInitializedEvent(final Object source) {
-		super(source);
-	}
+  public DatabaseInitializedEvent(final Object source) {
+    super(source);
+  }
 }

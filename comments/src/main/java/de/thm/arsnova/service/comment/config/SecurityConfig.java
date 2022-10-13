@@ -21,38 +21,38 @@ import de.thm.arsnova.service.comment.security.JwtTokenFilter;
 @EnableWebSecurity
 @EnableConfigurationProperties(SecurityProperties.class)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private JwtTokenFilter jwtTokenFilter;
-    private String managementPath;
+  private JwtTokenFilter jwtTokenFilter;
+  private String managementPath;
 
-    SecurityConfig(final WebEndpointProperties webEndpointProperties) {
-        this.managementPath = webEndpointProperties.getBasePath();
-    }
+  SecurityConfig(final WebEndpointProperties webEndpointProperties) {
+    this.managementPath = webEndpointProperties.getBasePath();
+  }
 
-    @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
-        // We don't need CSRF for this example
-        httpSecurity.csrf().disable();
-        //httpSecurity.authorizeRequests().anyRequest().authenticated();
-        httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        // Add a filter to validate the tokens with every request
-        httpSecurity.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-        httpSecurity.authorizeRequests()
-                .antMatchers(managementPath + "/**").hasAnyRole("ADMIN", "MONITORING");
-    }
+  @Override
+  protected void configure(HttpSecurity httpSecurity) throws Exception {
+    // We don't need CSRF for this example
+    httpSecurity.csrf().disable();
+    //httpSecurity.authorizeRequests().anyRequest().authenticated();
+    httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    // Add a filter to validate the tokens with every request
+    httpSecurity.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+    httpSecurity.authorizeRequests()
+        .antMatchers(managementPath + "/**").hasAnyRole("ADMIN", "MONITORING");
+  }
 
-    @Override
-    protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(jwtAuthenticationProvider());
-    }
+  @Override
+  protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+    auth.authenticationProvider(jwtAuthenticationProvider());
+  }
 
-    @Bean
-    public JwtAuthenticationProvider jwtAuthenticationProvider() {
-        return new JwtAuthenticationProvider();
-    }
+  @Bean
+  public JwtAuthenticationProvider jwtAuthenticationProvider() {
+    return new JwtAuthenticationProvider();
+  }
 
-    @Autowired
-    @Lazy
-    public void setJwtTokenFilter(final JwtTokenFilter jwtTokenFilter) {
-        this.jwtTokenFilter = jwtTokenFilter;
-    }
+  @Autowired
+  @Lazy
+  public void setJwtTokenFilter(final JwtTokenFilter jwtTokenFilter) {
+    this.jwtTokenFilter = jwtTokenFilter;
+  }
 }

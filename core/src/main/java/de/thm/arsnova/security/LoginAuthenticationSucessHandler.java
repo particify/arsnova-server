@@ -37,57 +37,57 @@ import de.thm.arsnova.security.jwt.JwtService;
  * This class gets called when a user successfully logged in.
  */
 public class LoginAuthenticationSucessHandler extends
-		SimpleUrlAuthenticationSuccessHandler {
-	public static final String AUTH_COOKIE_NAME = "auth";
-	public static final String URL_ATTRIBUTE = "ars-login-success-url";
+    SimpleUrlAuthenticationSuccessHandler {
+  public static final String AUTH_COOKIE_NAME = "auth";
+  public static final String URL_ATTRIBUTE = "ars-login-success-url";
 
-	private JwtService jwtService;
-	private String targetUrl;
-	private String apiPath;
+  private JwtService jwtService;
+  private String targetUrl;
+  private String apiPath;
 
-	public LoginAuthenticationSucessHandler(
-			final SystemProperties systemProperties,
-			final ServletContext servletContext) {
-		final String proxyPath = systemProperties.getApi().getProxyPath();
-		this.apiPath = proxyPath != null && !proxyPath.isEmpty() ? proxyPath : servletContext.getContextPath();
-	}
+  public LoginAuthenticationSucessHandler(
+      final SystemProperties systemProperties,
+      final ServletContext servletContext) {
+    final String proxyPath = systemProperties.getApi().getProxyPath();
+    this.apiPath = proxyPath != null && !proxyPath.isEmpty() ? proxyPath : servletContext.getContextPath();
+  }
 
-	@Autowired
-	public void setJwtService(final JwtService jwtService) {
-		this.jwtService = jwtService;
-	}
+  @Autowired
+  public void setJwtService(final JwtService jwtService) {
+    this.jwtService = jwtService;
+  }
 
-	@Override
-	protected String determineTargetUrl(
-			final HttpServletRequest request,
-			final HttpServletResponse response) {
-		final HttpSession session = request.getSession(false);
-		final String url = (String) session.getAttribute(URL_ATTRIBUTE);
-		session.removeAttribute(URL_ATTRIBUTE);
+  @Override
+  protected String determineTargetUrl(
+      final HttpServletRequest request,
+      final HttpServletResponse response) {
+    final HttpSession session = request.getSession(false);
+    final String url = (String) session.getAttribute(URL_ATTRIBUTE);
+    session.removeAttribute(URL_ATTRIBUTE);
 
-		return url;
-	}
+    return url;
+  }
 
-	@Override
-	public void onAuthenticationSuccess(final HttpServletRequest request, final HttpServletResponse response,
-			final Authentication authentication) throws IOException, ServletException {
-		final HttpSession session = request.getSession(false);
-		if (session == null || session.getAttribute(URL_ATTRIBUTE) == null) {
-			final String token = jwtService.createSignedToken((User) authentication.getPrincipal(), true);
-			final Cookie cookie = new Cookie(AUTH_COOKIE_NAME, token);
-			cookie.setPath(apiPath);
-			cookie.setSecure(request.isSecure());
-			cookie.setHttpOnly(true);
-			response.addCookie(cookie);
-			response.setContentType(MediaType.TEXT_HTML_VALUE);
-			response.getWriter().println("<!DOCTYPE html><script>if (window.opener) window.close()</script>");
+  @Override
+  public void onAuthenticationSuccess(final HttpServletRequest request, final HttpServletResponse response,
+      final Authentication authentication) throws IOException, ServletException {
+    final HttpSession session = request.getSession(false);
+    if (session == null || session.getAttribute(URL_ATTRIBUTE) == null) {
+      final String token = jwtService.createSignedToken((User) authentication.getPrincipal(), true);
+      final Cookie cookie = new Cookie(AUTH_COOKIE_NAME, token);
+      cookie.setPath(apiPath);
+      cookie.setSecure(request.isSecure());
+      cookie.setHttpOnly(true);
+      response.addCookie(cookie);
+      response.setContentType(MediaType.TEXT_HTML_VALUE);
+      response.getWriter().println("<!DOCTYPE html><script>if (window.opener) window.close()</script>");
 
-			return;
-		}
-		super.onAuthenticationSuccess(request, response, authentication);
-	}
+      return;
+    }
+    super.onAuthenticationSuccess(request, response, authentication);
+  }
 
-	public void setTargetUrl(final String url) {
-		targetUrl = url;
-	}
+  public void setTargetUrl(final String url) {
+    targetUrl = url;
+  }
 }

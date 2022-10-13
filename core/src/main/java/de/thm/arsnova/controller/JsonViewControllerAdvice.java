@@ -45,58 +45,58 @@ import de.thm.arsnova.model.serialization.View;
  */
 @ControllerAdvice
 public class JsonViewControllerAdvice extends AbstractMappingJacksonResponseBodyAdvice {
-	private static final String VIEW_PARAMETER = "view";
+  private static final String VIEW_PARAMETER = "view";
 
-	private static final Logger logger = LoggerFactory.getLogger(JsonViewControllerAdvice.class);
+  private static final Logger logger = LoggerFactory.getLogger(JsonViewControllerAdvice.class);
 
-	@Override
-	protected void beforeBodyWriteInternal(final MappingJacksonValue bodyContainer,
-			final MediaType contentType, final MethodParameter returnType,
-			final ServerHttpRequest request, final ServerHttpResponse response) {
-		/* TODO: Why does @ControllerAdvice(assignableTypes = AbstractEntityController.class) not work? */
-		if (!AbstractEntityController.class.isAssignableFrom(returnType.getContainingClass())) {
-			return;
-		}
+  @Override
+  protected void beforeBodyWriteInternal(final MappingJacksonValue bodyContainer,
+      final MediaType contentType, final MethodParameter returnType,
+      final ServerHttpRequest request, final ServerHttpResponse response) {
+    /* TODO: Why does @ControllerAdvice(assignableTypes = AbstractEntityController.class) not work? */
+    if (!AbstractEntityController.class.isAssignableFrom(returnType.getContainingClass())) {
+      return;
+    }
 
-		final List<String> viewList = UriComponentsBuilder.fromUri(request.getURI()).build()
-				.getQueryParams().getOrDefault(VIEW_PARAMETER, Collections.emptyList());
-		if (viewList.isEmpty()) {
-			return;
-		}
-		final String view = viewList.get(0);
-		logger.debug("'{}' parameter found in request URI: {}", VIEW_PARAMETER, view);
-		final String permission;
-		switch (view) {
-			case "extended":
-				permission = "read-extended";
-				bodyContainer.setSerializationView(View.Extended.class);
-				break;
-			case "owner":
-				permission = "owner";
-				bodyContainer.setSerializationView(View.Owner.class);
-				break;
-			case "admin":
-				permission = "admin";
-				bodyContainer.setSerializationView(View.Admin.class);
-				break;
-			default:
-				return;
-		}
-		if (bodyContainer.getValue() instanceof Collection) {
-			tryAccess((Collection) bodyContainer.getValue(), permission);
-		} else {
-			tryAccess(bodyContainer.getValue(), permission);
-		}
-	}
+    final List<String> viewList = UriComponentsBuilder.fromUri(request.getURI()).build()
+        .getQueryParams().getOrDefault(VIEW_PARAMETER, Collections.emptyList());
+    if (viewList.isEmpty()) {
+      return;
+    }
+    final String view = viewList.get(0);
+    logger.debug("'{}' parameter found in request URI: {}", VIEW_PARAMETER, view);
+    final String permission;
+    switch (view) {
+      case "extended":
+        permission = "read-extended";
+        bodyContainer.setSerializationView(View.Extended.class);
+        break;
+      case "owner":
+        permission = "owner";
+        bodyContainer.setSerializationView(View.Owner.class);
+        break;
+      case "admin":
+        permission = "admin";
+        bodyContainer.setSerializationView(View.Admin.class);
+        break;
+      default:
+        return;
+    }
+    if (bodyContainer.getValue() instanceof Collection) {
+      tryAccess((Collection) bodyContainer.getValue(), permission);
+    } else {
+      tryAccess(bodyContainer.getValue(), permission);
+    }
+  }
 
-	protected void tryAccess(final Collection targetDomainObjects, final Object permission) {
-		for (final Object targetDomainObject : targetDomainObjects) {
-			tryAccess(targetDomainObject, permission);
-		}
-	}
+  protected void tryAccess(final Collection targetDomainObjects, final Object permission) {
+    for (final Object targetDomainObject : targetDomainObjects) {
+      tryAccess(targetDomainObject, permission);
+    }
+  }
 
-	@PreAuthorize("hasPermission(#targetDomainObject, #permission)")
-	protected void tryAccess(final Object targetDomainObject, final Object permission) {
-		/* Access check is done by aspect. No additional implementation needed. */
-	}
+  @PreAuthorize("hasPermission(#targetDomainObject, #permission)")
+  protected void tryAccess(final Object targetDomainObject, final Object permission) {
+    /* Access check is done by aspect. No additional implementation needed. */
+  }
 }

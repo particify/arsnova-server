@@ -23,13 +23,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties
 public class UiProperties {
-	private Map<String, Object> ui;
+  private Map<String, Object> ui;
 
-	public Map<String, Object> getUi() {
-		return ui;
-	}
+  public Map<String, Object> getUi() {
+    return ui;
+  }
 
-	public void setUi(final Map<String, Object> ui) {
-		this.ui = ui;
-	}
+  public void setUi(final Map<String, Object> ui) {
+    this.ui = ui;
+  }
 }

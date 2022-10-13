@@ -33,76 +33,76 @@ import reactor.kotlin.core.util.function.component3
  */
 @Component
 class AuthFilter(
-    private val jwtTokenUtil: JwtTokenUtil,
-    private val httpGatewayProperties: HttpGatewayProperties,
-    private val roomAccessService: RoomAccessService,
-    private val subscriptionService: SubscriptionService
+  private val jwtTokenUtil: JwtTokenUtil,
+  private val httpGatewayProperties: HttpGatewayProperties,
+  private val roomAccessService: RoomAccessService,
+  private val subscriptionService: SubscriptionService
 ) : AbstractGatewayFilterFactory<AuthFilter.Config>(Config::class.java) {
 
-    private val logger = LoggerFactory.getLogger(AuthFilter::class.java)
+  private val logger = LoggerFactory.getLogger(AuthFilter::class.java)
 
-    override fun apply(config: Config): GatewayFilter {
-        return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
-            var request: ServerHttpRequest = exchange.request
-            val headers: HttpHeaders = request.headers
-            val bearer = headers[HttpHeaders.AUTHORIZATION]
+  override fun apply(config: Config): GatewayFilter {
+    return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
+      var request: ServerHttpRequest = exchange.request
+      val headers: HttpHeaders = request.headers
+      val bearer = headers[HttpHeaders.AUTHORIZATION]
 
-            if (bearer != null) {
-                val jwt = bearer[0].removePrefix("Bearer ")
-                val uriVariables = ServerWebExchangeUtils.getUriTemplateVariables(exchange)
-                val roomId = uriVariables["roomId"]
-                if (!roomId!!.matches(RoomIdFilter.roomIdRegex)) {
-                    logger.debug("Didn't get a valid roomId out of the uri variables: {}", uriVariables)
-                    throw ResponseStatusException(HttpStatus.BAD_REQUEST)
-                }
-                Mono.just(jwtTokenUtil.getUserIdAndClientRolesFromPublicToken(jwt))
-                    .onErrorResume { exception ->
-                        logger.debug("Exception on verifying JWT and obtaining userId", exception)
-                        Mono.error(UnauthorizedException())
-                    }
-                    .flatMap { pair: Pair<String, List<String>> ->
-                        val userId = pair.first
-                        val authorities = pair.second
-                        Mono.zip(
-                            roomAccessService.getRoomAccess(roomId, userId)
-                                .onErrorResume(WebClientResponseException::class) { e ->
-                                    if (e.statusCode != HttpStatus.NOT_FOUND) {
-                                        logger.error("Unexpected response from auth service")
-                                        throw e
-                                    }
-                                    logger.debug("Auth service did not return a role (user ID: {}, room ID: {})", userId, roomId)
-                                    if (!config.requireAuthentication) {
-                                        Mono.just(RoomAccess(roomId, userId, "", "NONE", null))
-                                    } else if (httpGatewayProperties.gateway.requireMembership && !authorities.contains("ADMIN")) {
-                                        Mono.error(ForbiddenException())
-                                    } else {
-                                        Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT", null))
-                                    }
-                                },
-                            subscriptionService.getRoomFeatures(roomId, true),
-                            Mono.just(authorities)
-                        )
-                    }
-                    .map { (roomAccess: RoomAccess, roomFeatures: RoomFeatures, authorityList: List<String>) ->
-                        logger.trace("Working with roomAccess: {}, roomFeatures: {}, authorityList: {}", roomAccess, roomFeatures, authorityList)
-                        jwtTokenUtil.createSignedInternalToken(roomAccess, roomFeatures, authorityList)
-                    }
-                    .map { token ->
-                        logger.trace("new token: {}", token)
-                        exchange.mutate().request { r ->
-                            r.headers { headers ->
-                                headers.setBearerAuth(token)
-                            }
-                        }.build()
-                    }
-                    .defaultIfEmpty(exchange).flatMap(chain::filter)
-            } else {
-                throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
-            }
+      if (bearer != null) {
+        val jwt = bearer[0].removePrefix("Bearer ")
+        val uriVariables = ServerWebExchangeUtils.getUriTemplateVariables(exchange)
+        val roomId = uriVariables["roomId"]
+        if (!roomId!!.matches(RoomIdFilter.roomIdRegex)) {
+          logger.debug("Didn't get a valid roomId out of the uri variables: {}", uriVariables)
+          throw ResponseStatusException(HttpStatus.BAD_REQUEST)
         }
+        Mono.just(jwtTokenUtil.getUserIdAndClientRolesFromPublicToken(jwt))
+          .onErrorResume { exception ->
+            logger.debug("Exception on verifying JWT and obtaining userId", exception)
+            Mono.error(UnauthorizedException())
+          }
+          .flatMap { pair: Pair<String, List<String>> ->
+            val userId = pair.first
+            val authorities = pair.second
+            Mono.zip(
+              roomAccessService.getRoomAccess(roomId, userId)
+                .onErrorResume(WebClientResponseException::class) { e ->
+                  if (e.statusCode != HttpStatus.NOT_FOUND) {
+                    logger.error("Unexpected response from auth service")
+                    throw e
+                  }
+                  logger.debug("Auth service did not return a role (user ID: {}, room ID: {})", userId, roomId)
+                  if (!config.requireAuthentication) {
+                    Mono.just(RoomAccess(roomId, userId, "", "NONE", null))
+                  } else if (httpGatewayProperties.gateway.requireMembership && !authorities.contains("ADMIN")) {
+                    Mono.error(ForbiddenException())
+                  } else {
+                    Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT", null))
+                  }
+                },
+              subscriptionService.getRoomFeatures(roomId, true),
+              Mono.just(authorities)
+            )
+          }
+          .map { (roomAccess: RoomAccess, roomFeatures: RoomFeatures, authorityList: List<String>) ->
+            logger.trace("Working with roomAccess: {}, roomFeatures: {}, authorityList: {}", roomAccess, roomFeatures, authorityList)
+            jwtTokenUtil.createSignedInternalToken(roomAccess, roomFeatures, authorityList)
+          }
+          .map { token ->
+            logger.trace("new token: {}", token)
+            exchange.mutate().request { r ->
+              r.headers { headers ->
+                headers.setBearerAuth(token)
+              }
+            }.build()
+          }
+          .defaultIfEmpty(exchange).flatMap(chain::filter)
+      } else {
+        throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+      }
     }
+  }
 
-    class Config(val requireAuthentication: Boolean = true) {
-        var name: String = "AuthFilter"
-    }
+  class Config(val requireAuthentication: Boolean = true) {
+    var name: String = "AuthFilter"
+  }
 }

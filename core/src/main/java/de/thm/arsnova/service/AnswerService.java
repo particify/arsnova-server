@@ -29,33 +29,33 @@ import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.model.TextAnswerStatistics;
 
 public interface AnswerService extends EntityService<Answer> {
-	Answer getMyAnswer(String contentId);
+  Answer getMyAnswer(String contentId);
 
-	ChoiceAnswerStatistics getChoiceStatistics(String contentId, int piRound);
+  ChoiceAnswerStatistics getChoiceStatistics(String contentId, int piRound);
 
-	ChoiceAnswerStatistics getChoiceStatistics(String contentId);
+  ChoiceAnswerStatistics getChoiceStatistics(String contentId);
 
-	AnswerStatistics getAllStatistics(String contentId);
+  AnswerStatistics getAllStatistics(String contentId);
 
-	TextAnswerStatistics getTextStatistics(String contentId, int round);
+  TextAnswerStatistics getTextStatistics(String contentId, int round);
 
-	TextAnswerStatistics getTextStatistics(String contentId);
+  TextAnswerStatistics getTextStatistics(String contentId);
 
-	PriorizationAnswerStatistics getPriorizationStatistics(String contentId);
+  PriorizationAnswerStatistics getPriorizationStatistics(String contentId);
 
-	AnswerStatisticsUserSummary getStatisticsByUserIdAndContentIds(String userId, List<String> contentIds);
+  AnswerStatisticsUserSummary getStatisticsByUserIdAndContentIds(String userId, List<String> contentIds);
 
-	List<String> getAnswerIdsByContentIdNotHidden(String contentId);
+  List<String> getAnswerIdsByContentIdNotHidden(String contentId);
 
-	List<String> getAnswerIdsByCreatorIdRoomId(String creatorId, String roomId);
+  List<String> getAnswerIdsByCreatorIdRoomId(String creatorId, String roomId);
 
-	List<String> getAnswerIdsByCreatorIdContentIdsRound(String creatorId, List<String> contentIds, int round);
+  List<String> getAnswerIdsByCreatorIdContentIdsRound(String creatorId, List<String> contentIds, int round);
 
-	Answer getAnswerByContentIdAndUserIdAndCurrentRound(String contentId, String userId);
+  Answer getAnswerByContentIdAndUserIdAndCurrentRound(String contentId, String userId);
 
-	void deleteAnswers(String contentId);
+  void deleteAnswers(String contentId);
 
-	Answer create(Answer answer);
+  Answer create(Answer answer);
 
-	void hideTextAnswer(TextAnswer answer, boolean hidden);
+  void hideTextAnswer(TextAnswer answer, boolean hidden);
 }

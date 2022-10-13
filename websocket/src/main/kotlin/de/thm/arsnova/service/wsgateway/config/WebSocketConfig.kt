@@ -18,35 +18,35 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableScheduling
 @EnableWebSocketMessageBroker
 class WebSocketConfig(
-		private val webSocketProperties: WebSocketProperties,
-		private val authChannelInterceptorAdapter: AuthChannelInterceptorAdapter
+    private val webSocketProperties: WebSocketProperties,
+    private val authChannelInterceptorAdapter: AuthChannelInterceptorAdapter
 ) : WebSocketMessageBrokerConfigurer {
-	private val logger = LoggerFactory.getLogger(javaClass)
+  private val logger = LoggerFactory.getLogger(javaClass)
 
 
-	override fun configureMessageBroker(config: MessageBrokerRegistry) {
-		config
-			.setApplicationDestinationPrefixes(webSocketProperties.messagingPrefix)
-			.enableStompBrokerRelay(*webSocketProperties.stomp.destinationPrefix)
-			.setUserRegistryBroadcast(webSocketProperties.stomp.userRegistryBroadcast)
-			.setUserDestinationBroadcast(webSocketProperties.stomp.userDestinationBroadcast)
-			.setRelayHost(webSocketProperties.stomp.relay.host)
-			.setRelayPort(webSocketProperties.stomp.relay.port)
-			.setClientLogin(webSocketProperties.stomp.relay.user)
-			.setClientPasscode(webSocketProperties.stomp.relay.password)
-	}
+  override fun configureMessageBroker(config: MessageBrokerRegistry) {
+    config
+      .setApplicationDestinationPrefixes(webSocketProperties.messagingPrefix)
+      .enableStompBrokerRelay(*webSocketProperties.stomp.destinationPrefix)
+      .setUserRegistryBroadcast(webSocketProperties.stomp.userRegistryBroadcast)
+      .setUserDestinationBroadcast(webSocketProperties.stomp.userDestinationBroadcast)
+      .setRelayHost(webSocketProperties.stomp.relay.host)
+      .setRelayPort(webSocketProperties.stomp.relay.port)
+      .setClientLogin(webSocketProperties.stomp.relay.user)
+      .setClientPasscode(webSocketProperties.stomp.relay.password)
+  }
 
-	override fun registerStompEndpoints(registry: StompEndpointRegistry) {
-		registry.addEndpoint("/ws").withSockJS()
-	}
+  override fun registerStompEndpoints(registry: StompEndpointRegistry) {
+    registry.addEndpoint("/ws").withSockJS()
+  }
 
 
-	override fun configureClientInboundChannel(registration: ChannelRegistration) {
-		registration.interceptors(authChannelInterceptorAdapter)
-	}
+  override fun configureClientInboundChannel(registration: ChannelRegistration) {
+    registration.interceptors(authChannelInterceptorAdapter)
+  }
 
-	@Autowired
-	fun disableWebSocketStatsLogging(webSocketMessageBrokerStats: WebSocketMessageBrokerStats) {
-		webSocketMessageBrokerStats.loggingPeriod = 0
-	}
+  @Autowired
+  fun disableWebSocketStatsLogging(webSocketMessageBrokerStats: WebSocketMessageBrokerStats) {
+    webSocketMessageBrokerStats.loggingPeriod = 0
+  }
 }

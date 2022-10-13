@@ -28,91 +28,91 @@ import net.particify.arsnova.connector.model.UserRole;
 @RestController
 @EntityRequestMapping(LmsCourseController.REQUEST_MAPPING)
 @ConditionalOnProperty(
-		name =  "enabled",
-		prefix = SystemProperties.PREFIX + ".lms-connector"
+    name =  "enabled",
+    prefix = SystemProperties.PREFIX + ".lms-connector"
 )
 public class LmsCourseController {
-	public static final String REQUEST_MAPPING = "/user/{id}/lms";
-	public static final String COURSES_MAPPING = "/courses";
-	public static final String ROOMS_MAPPING = "/rooms";
+  public static final String REQUEST_MAPPING = "/user/{id}/lms";
+  public static final String COURSES_MAPPING = "/courses";
+  public static final String ROOMS_MAPPING = "/rooms";
 
-	private LmsCourseService lmsCourseService;
-	private UserService userService;
+  private LmsCourseService lmsCourseService;
+  private UserService userService;
 
-	public LmsCourseController(
-			final @Qualifier("securedLmsCourseService") LmsCourseService lmsCourseService,
-			final @Qualifier("securedUserService") UserService userService) {
-		this.lmsCourseService = lmsCourseService;
-		this.userService = userService;
-	}
+  public LmsCourseController(
+      final @Qualifier("securedLmsCourseService") LmsCourseService lmsCourseService,
+      final @Qualifier("securedUserService") UserService userService) {
+    this.lmsCourseService = lmsCourseService;
+    this.userService = userService;
+  }
 
-	@GetMapping(COURSES_MAPPING)
-	public List<LmsCourseMembership> listCourses(
-			@PathVariable final String id,
-			@RequestParam(value = "sortby", defaultValue = "startdate") final String sortby) {
-		final UserProfile userProfile = userService.get(id);
-		final List<Course> courses = lmsCourseService.getCoursesByUserProfile(userProfile);
+  @GetMapping(COURSES_MAPPING)
+  public List<LmsCourseMembership> listCourses(
+      @PathVariable final String id,
+      @RequestParam(value = "sortby", defaultValue = "startdate") final String sortby) {
+    final UserProfile userProfile = userService.get(id);
+    final List<Course> courses = lmsCourseService.getCoursesByUserProfile(userProfile);
 
-		switch (sortby) {
-			case "name":
-				Collections.sort(courses, Comparator
-						.comparing(Course::getFullname)
-						.thenComparing(Course::getStartdate, Comparator.nullsFirst(Comparator.reverseOrder())));
-				break;
-			case "shortname":
-				Collections.sort(courses, Comparator
-						.comparing(Course::getShortname)
-						.thenComparing(Course::getStartdate, Comparator.nullsFirst(Comparator.reverseOrder())));
-				break;
-			case "enddate":
-				Collections.sort(courses, Comparator
-						.comparing(Course::getEnddate, Comparator.nullsFirst(Comparator.reverseOrder()))
-						.thenComparing(Course::getFullname));
-				break;
-			default:
-				Collections.sort(courses, Comparator
-						.comparing(Course::getStartdate, Comparator.nullsFirst(Comparator.reverseOrder()))
-						.thenComparing(Course::getFullname));
-				break;
-		}
+    switch (sortby) {
+      case "name":
+        Collections.sort(courses, Comparator
+            .comparing(Course::getFullname)
+            .thenComparing(Course::getStartdate, Comparator.nullsFirst(Comparator.reverseOrder())));
+        break;
+      case "shortname":
+        Collections.sort(courses, Comparator
+            .comparing(Course::getShortname)
+            .thenComparing(Course::getStartdate, Comparator.nullsFirst(Comparator.reverseOrder())));
+        break;
+      case "enddate":
+        Collections.sort(courses, Comparator
+            .comparing(Course::getEnddate, Comparator.nullsFirst(Comparator.reverseOrder()))
+            .thenComparing(Course::getFullname));
+        break;
+      default:
+        Collections.sort(courses, Comparator
+            .comparing(Course::getStartdate, Comparator.nullsFirst(Comparator.reverseOrder()))
+            .thenComparing(Course::getFullname));
+        break;
+    }
 
-		return courses.stream().map(c -> new LmsCourseMembership(c)).collect(Collectors.toList());
-	}
+    return courses.stream().map(c -> new LmsCourseMembership(c)).collect(Collectors.toList());
+  }
 
-	@GetMapping(ROOMS_MAPPING)
-	public final List<Room> listCourseRooms(@PathVariable final String id) {
-		final UserProfile userProfile = userService.get(id);
-		return lmsCourseService.getCourseRoomsByUserProfile(userProfile);
-	}
+  @GetMapping(ROOMS_MAPPING)
+  public final List<Room> listCourseRooms(@PathVariable final String id) {
+    final UserProfile userProfile = userService.get(id);
+    return lmsCourseService.getCourseRoomsByUserProfile(userProfile);
+  }
 
-	@JsonView(View.Public.class)
-	private class LmsCourseMembership {
-		private String id;
-		private String fullname;
-		private Instant startdate;
-		private UserRole userRole;
+  @JsonView(View.Public.class)
+  private class LmsCourseMembership {
+    private String id;
+    private String fullname;
+    private Instant startdate;
+    private UserRole userRole;
 
-		private LmsCourseMembership(final Course course) {
-			this.id = course.getId();
-			this.fullname = course.getFullname();
-			this.startdate = course.getStartdate();
-			this.userRole = course.getMembership().getUserrole();
-		}
+    private LmsCourseMembership(final Course course) {
+      this.id = course.getId();
+      this.fullname = course.getFullname();
+      this.startdate = course.getStartdate();
+      this.userRole = course.getMembership().getUserrole();
+    }
 
-		public String getId() {
-			return id;
-		}
+    public String getId() {
+      return id;
+    }
 
-		public String getFullname() {
-			return fullname;
-		}
+    public String getFullname() {
+      return fullname;
+    }
 
-		public Instant getStartdate() {
-			return startdate;
-		}
+    public Instant getStartdate() {
+      return startdate;
+    }
 
-		public UserRole getUserRole() {
-			return userRole;
-		}
-	}
+    public UserRole getUserRole() {
+      return userRole;
+    }
+  }
 }

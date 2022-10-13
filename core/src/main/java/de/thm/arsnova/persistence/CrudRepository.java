@@ -29,19 +29,19 @@ import java.util.List;
  * @author Daniel Gerhardt
  */
 public interface CrudRepository<T, I> extends org.springframework.data.repository.CrudRepository<T, I> {
-	/**
-	 * Retrieve a single entity by ID.
-	 *
-	 * @param id The entity's ID
-	 * @return The retrieved entity or null
-	 * @deprecated Use {@link #findById(Object)} instead.
-	 */
-	@Deprecated
-	T findOne(I id);
+  /**
+   * Retrieve a single entity by ID.
+   *
+   * @param id The entity's ID
+   * @return The retrieved entity or null
+   * @deprecated Use {@link #findById(Object)} instead.
+   */
+  @Deprecated
+  T findOne(I id);
 
-	<S extends T> List<S> saveAll(Iterable<S> var1);
+  <S extends T> List<S> saveAll(Iterable<S> var1);
 
-	List<T> findAll();
+  List<T> findAll();
 
-	List<T> findAllById(Iterable<I> var1);
+  List<T> findAllById(Iterable<I> var1);
 }

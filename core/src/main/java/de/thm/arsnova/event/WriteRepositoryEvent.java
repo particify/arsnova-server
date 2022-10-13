@@ -19,18 +19,18 @@
 package de.thm.arsnova.event;
 
 public class WriteRepositoryEvent extends RepositoryEvent {
-	private boolean multiple;
+  private boolean multiple;
 
-	public WriteRepositoryEvent(final Object source, final String typeName) {
-		super(source, typeName);
-	}
+  public WriteRepositoryEvent(final Object source, final String typeName) {
+    super(source, typeName);
+  }
 
-	public WriteRepositoryEvent(final Object source, final String typeName, final boolean multiple) {
-		super(source, typeName);
-		this.multiple = multiple;
-	}
+  public WriteRepositoryEvent(final Object source, final String typeName, final boolean multiple) {
+    super(source, typeName);
+    this.multiple = multiple;
+  }
 
-	public boolean isMultiple() {
-		return multiple;
-	}
+  public boolean isMultiple() {
+    return multiple;
+  }
 }

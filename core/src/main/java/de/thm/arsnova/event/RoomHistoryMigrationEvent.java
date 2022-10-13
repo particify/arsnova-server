@@ -22,20 +22,20 @@ import java.util.List;
 import org.springframework.context.ApplicationEvent;
 
 public class RoomHistoryMigrationEvent extends ApplicationEvent {
-	private String userId;
-	private List<String> roomIds;
+  private String userId;
+  private List<String> roomIds;
 
-	public RoomHistoryMigrationEvent(final Object source, final String userId, final List<String> roomIds) {
-		super(source);
-		this.userId = userId;
-		this.roomIds = roomIds;
-	}
+  public RoomHistoryMigrationEvent(final Object source, final String userId, final List<String> roomIds) {
+    super(source);
+    this.userId = userId;
+    this.roomIds = roomIds;
+  }
 
-	public String getUserId() {
-		return userId;
-	}
+  public String getUserId() {
+    return userId;
+  }
 
-	public List<String> getRoomIds() {
-		return roomIds;
-	}
+  public List<String> getRoomIds() {
+    return roomIds;
+  }
 }

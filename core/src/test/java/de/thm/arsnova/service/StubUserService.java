@@ -36,49 +36,49 @@ import de.thm.arsnova.security.PasswordUtils;
 import de.thm.arsnova.security.User;
 
 public class StubUserService extends UserServiceImpl {
-	private final Set<GrantedAuthority> grantedAuthorities;
-	private User stubUser = null;
+  private final Set<GrantedAuthority> grantedAuthorities;
+  private User stubUser = null;
 
-	public StubUserService(
-			final UserRepository repository,
-			final SystemProperties systemProperties,
-			final SecurityProperties securityProperties,
-			final AuthenticationProviderProperties authenticationProviderProperties,
-			final EmailService emailService,
-			@Qualifier("defaultJsonMessageConverter")
-			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
-			final Validator validator,
-			final PasswordUtils passwordUtils) {
-		super(repository, systemProperties, securityProperties, authenticationProviderProperties,
-				emailService, jackson2HttpMessageConverter, validator, passwordUtils);
-		grantedAuthorities = new HashSet<>();
-		grantedAuthorities.add(User.ROLE_USER);
-	}
+  public StubUserService(
+      final UserRepository repository,
+      final SystemProperties systemProperties,
+      final SecurityProperties securityProperties,
+      final AuthenticationProviderProperties authenticationProviderProperties,
+      final EmailService emailService,
+      @Qualifier("defaultJsonMessageConverter")
+      final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+      final Validator validator,
+      final PasswordUtils passwordUtils) {
+    super(repository, systemProperties, securityProperties, authenticationProviderProperties,
+        emailService, jackson2HttpMessageConverter, validator, passwordUtils);
+    grantedAuthorities = new HashSet<>();
+    grantedAuthorities.add(User.ROLE_USER);
+  }
 
-	public void setUserAuthenticated(final boolean isAuthenticated) {
-		this.setUserAuthenticated(isAuthenticated, "ptsr00");
-	}
+  public void setUserAuthenticated(final boolean isAuthenticated) {
+    this.setUserAuthenticated(isAuthenticated, "ptsr00");
+  }
 
-	public void setUserAuthenticated(final boolean isAuthenticated, final String username) {
-		setUserAuthenticated(isAuthenticated, username, "");
-	}
+  public void setUserAuthenticated(final boolean isAuthenticated, final String username) {
+    setUserAuthenticated(isAuthenticated, username, "");
+  }
 
-	public void setUserAuthenticated(final boolean isAuthenticated, final String username, final String userId) {
-		if (isAuthenticated) {
-			final UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.ARSNOVA, username);
-			if (userId == null || userId.isEmpty()) {
-				userProfile.setId(UUID.randomUUID().toString());
-			} else {
-				userProfile.setId(userId);
-			}
-			stubUser = new User(userProfile, grantedAuthorities);
-		} else {
-			stubUser = null;
-		}
-	}
+  public void setUserAuthenticated(final boolean isAuthenticated, final String username, final String userId) {
+    if (isAuthenticated) {
+      final UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.ARSNOVA, username);
+      if (userId == null || userId.isEmpty()) {
+        userProfile.setId(UUID.randomUUID().toString());
+      } else {
+        userProfile.setId(userId);
+      }
+      stubUser = new User(userProfile, grantedAuthorities);
+    } else {
+      stubUser = null;
+    }
+  }
 
-	@Override
-	public User getCurrentUser() {
-		return stubUser;
-	}
+  @Override
+  public User getCurrentUser() {
+    return stubUser;
+  }
 }

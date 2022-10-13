@@ -34,53 +34,53 @@ import de.thm.arsnova.model.Configuration;
 @EntityRequestMapping(ConfigurationController.REQUEST_MAPPING)
 @EnableConfigurationProperties(UiProperties.class)
 public class ConfigurationController {
-	protected static final String REQUEST_MAPPING = "/configuration";
+  protected static final String REQUEST_MAPPING = "/configuration";
 
-	private AuthenticationProviderProperties providerProperties;
-	private UiProperties uiProperties;
-	private List<AuthenticationProvider> authenticationProviders;
+  private AuthenticationProviderProperties providerProperties;
+  private UiProperties uiProperties;
+  private List<AuthenticationProvider> authenticationProviders;
 
-	public ConfigurationController(
-			final AuthenticationProviderProperties authenticationProviderProperties,
-			final UiProperties uiProperties) {
-		this.providerProperties = authenticationProviderProperties;
-		this.uiProperties = uiProperties;
-		buildAuthenticationProviderConfig();
-	}
+  public ConfigurationController(
+      final AuthenticationProviderProperties authenticationProviderProperties,
+      final UiProperties uiProperties) {
+    this.providerProperties = authenticationProviderProperties;
+    this.uiProperties = uiProperties;
+    buildAuthenticationProviderConfig();
+  }
 
-	@GetMapping
-	public Configuration get() {
-		final Configuration configuration = new Configuration();
-		configuration.setAuthenticationProviders(authenticationProviders);
-		configuration.setUi(uiProperties.getUi());
+  @GetMapping
+  public Configuration get() {
+    final Configuration configuration = new Configuration();
+    configuration.setAuthenticationProviders(authenticationProviders);
+    configuration.setUi(uiProperties.getUi());
 
-		return configuration;
-	}
+    return configuration;
+  }
 
-	private void buildAuthenticationProviderConfig() {
-		this.authenticationProviders = new ArrayList<>();
-		if (providerProperties.getGuest().isEnabled()) {
-			authenticationProviders.add(new AuthenticationProvider("guest", providerProperties.getGuest()));
-		}
-		if (providerProperties.getRegistered().isEnabled()) {
-			authenticationProviders.add(new AuthenticationProvider(
-					SecurityConfig.INTERNAL_PROVIDER_ID, providerProperties.getRegistered()));
-		}
-		if (!providerProperties.getLdap().isEmpty() && providerProperties.getLdap().get(0).isEnabled()) {
-			authenticationProviders.add(new AuthenticationProvider(
-					SecurityConfig.LDAP_PROVIDER_ID, providerProperties.getLdap().get(0)));
-		}
-		if (!providerProperties.getOidc().isEmpty() && providerProperties.getOidc().get(0).isEnabled()) {
-			authenticationProviders.add(new AuthenticationProvider(
-					SecurityConfig.OIDC_PROVIDER_ID, providerProperties.getOidc().get(0)));
-		}
-		if (providerProperties.getSaml().isEnabled()) {
-			authenticationProviders.add(new AuthenticationProvider(
-					SecurityConfig.SAML_PROVIDER_ID, providerProperties.getSaml()));
-		}
-		if (providerProperties.getCas().isEnabled()) {
-			authenticationProviders.add(new AuthenticationProvider(
-					SecurityConfig.CAS_PROVIDER_ID, providerProperties.getCas()));
-		}
-	}
+  private void buildAuthenticationProviderConfig() {
+    this.authenticationProviders = new ArrayList<>();
+    if (providerProperties.getGuest().isEnabled()) {
+      authenticationProviders.add(new AuthenticationProvider("guest", providerProperties.getGuest()));
+    }
+    if (providerProperties.getRegistered().isEnabled()) {
+      authenticationProviders.add(new AuthenticationProvider(
+          SecurityConfig.INTERNAL_PROVIDER_ID, providerProperties.getRegistered()));
+    }
+    if (!providerProperties.getLdap().isEmpty() && providerProperties.getLdap().get(0).isEnabled()) {
+      authenticationProviders.add(new AuthenticationProvider(
+          SecurityConfig.LDAP_PROVIDER_ID, providerProperties.getLdap().get(0)));
+    }
+    if (!providerProperties.getOidc().isEmpty() && providerProperties.getOidc().get(0).isEnabled()) {
+      authenticationProviders.add(new AuthenticationProvider(
+          SecurityConfig.OIDC_PROVIDER_ID, providerProperties.getOidc().get(0)));
+    }
+    if (providerProperties.getSaml().isEnabled()) {
+      authenticationProviders.add(new AuthenticationProvider(
+          SecurityConfig.SAML_PROVIDER_ID, providerProperties.getSaml()));
+    }
+    if (providerProperties.getCas().isEnabled()) {
+      authenticationProviders.add(new AuthenticationProvider(
+          SecurityConfig.CAS_PROVIDER_ID, providerProperties.getCas()));
+    }
+  }
 }

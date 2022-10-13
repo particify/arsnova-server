@@ -28,145 +28,145 @@ import org.springframework.core.style.ToStringCreator;
 import de.thm.arsnova.model.serialization.View;
 
 public class MigrationState extends Entity {
-	public static class Migration {
-		private String id;
-		private Date start;
-		private int step;
-		private Object state;
+  public static class Migration {
+    private String id;
+    private Date start;
+    private int step;
+    private Object state;
 
-		public Migration() {
+    public Migration() {
 
-		}
+    }
 
-		public Migration(final String id, final Date start) {
-			this.id = id;
-			this.start = start;
-		}
+    public Migration(final String id, final Date start) {
+      this.id = id;
+      this.start = start;
+    }
 
-		@JsonView({View.Persistence.class, View.Public.class})
-		public String getId() {
-			return id;
-		}
+    @JsonView({View.Persistence.class, View.Public.class})
+    public String getId() {
+      return id;
+    }
 
-		@JsonView({View.Persistence.class, View.Public.class})
-		public Date getStart() {
-			return start;
-		}
+    @JsonView({View.Persistence.class, View.Public.class})
+    public Date getStart() {
+      return start;
+    }
 
-		@JsonView({View.Persistence.class, View.Public.class})
-		public int getStep() {
-			return step;
-		}
+    @JsonView({View.Persistence.class, View.Public.class})
+    public int getStep() {
+      return step;
+    }
 
-		@JsonView(View.Persistence.class)
-		public void setStep(final int step) {
-			this.step = step;
-		}
+    @JsonView(View.Persistence.class)
+    public void setStep(final int step) {
+      this.step = step;
+    }
 
-		@JsonView({View.Persistence.class, View.Public.class})
-		public Object getState() {
-			return state;
-		}
+    @JsonView({View.Persistence.class, View.Public.class})
+    public Object getState() {
+      return state;
+    }
 
-		@JsonView(View.Persistence.class)
-		public void setState(final Object state) {
-			this.state = state;
-		}
+    @JsonView(View.Persistence.class)
+    public void setState(final Object state) {
+      this.state = state;
+    }
 
-		@Override
-		public String toString() {
-			return new ToStringCreator(this)
-					.append("id", id)
-					.append("start", start)
-					.append("step", step)
-					.append("state", state)
-					.toString();
-		}
-	}
+    @Override
+    public String toString() {
+      return new ToStringCreator(this)
+          .append("id", id)
+          .append("start", start)
+          .append("step", step)
+          .append("state", state)
+          .toString();
+    }
+  }
 
-	public static final String ID = "MigrationState";
-	private Migration active;
-	private List<String> completed = new ArrayList<>();
+  public static final String ID = "MigrationState";
+  private Migration active;
+  private List<String> completed = new ArrayList<>();
 
-	{
-		id = ID;
-	}
+  {
+    id = ID;
+  }
 
-	@Override
-	@JsonView(View.Persistence.class)
-	public String getId() {
-		return ID;
-	}
+  @Override
+  @JsonView(View.Persistence.class)
+  public String getId() {
+    return ID;
+  }
 
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setId(final String id) {
-		if (!id.equals(this.ID)) {
-			throw new IllegalArgumentException("ID of this entity must not be changed.");
-		}
-	}
+  @Override
+  @JsonView(View.Persistence.class)
+  public void setId(final String id) {
+    if (!id.equals(this.ID)) {
+      throw new IllegalArgumentException("ID of this entity must not be changed.");
+    }
+  }
 
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getRevision() {
-		return rev;
-	}
+  @Override
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getRevision() {
+    return rev;
+  }
 
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setRevision(final String rev) {
-		this.rev = rev;
-	}
+  @Override
+  @JsonView(View.Persistence.class)
+  public void setRevision(final String rev) {
+    this.rev = rev;
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Migration getActive() {
-		return active;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public Migration getActive() {
+    return active;
+  }
 
-	@JsonView(View.Persistence.class)
-	public void setActive(final Migration active) {
-		this.active = active;
-	}
+  @JsonView(View.Persistence.class)
+  public void setActive(final Migration active) {
+    this.active = active;
+  }
 
-	public void setActive(final String id, final Date start) {
-		this.setActive(new Migration(id, start));
-	}
+  public void setActive(final String id, final Date start) {
+    this.setActive(new Migration(id, start));
+  }
 
-	@JsonView({View.Persistence.class, View.Public.class})
-	public List<String> getCompleted() {
-		return completed;
-	}
+  @JsonView({View.Persistence.class, View.Public.class})
+  public List<String> getCompleted() {
+    return completed;
+  }
 
-	@JsonView(View.Persistence.class)
-	public void setCompleted(final List<String> completed) {
-		this.completed = completed;
-	}
+  @JsonView(View.Persistence.class)
+  public void setCompleted(final List<String> completed) {
+    this.completed = completed;
+  }
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * All fields of <tt>MigrationState</tt> are included in equality checks.
-	 * </p>
-	 */
-	@Override
-	public boolean equals(final Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (!super.equals(o)) {
-			return false;
-		}
-		final MigrationState that = (MigrationState) o;
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * All fields of <tt>MigrationState</tt> are included in equality checks.
+   * </p>
+   */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    final MigrationState that = (MigrationState) o;
 
-		return Objects.equals(active, that.active)
-				&& Objects.equals(completed, that.completed);
-	}
+    return Objects.equals(active, that.active)
+        && Objects.equals(completed, that.completed);
+  }
 
-	@Override
-	protected ToStringCreator buildToString() {
-		return super.buildToString()
-				.append("active", active)
-				.append("completed", completed);
-	}
+  @Override
+  protected ToStringCreator buildToString() {
+    return super.buildToString()
+        .append("active", active)
+        .append("completed", completed);
+  }
 }

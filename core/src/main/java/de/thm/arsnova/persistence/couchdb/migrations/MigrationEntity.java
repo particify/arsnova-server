@@ -40,73 +40,73 @@ import de.thm.arsnova.model.serialization.View;
  * @author Daniel Gerhardt
  */
 public abstract class MigrationEntity {
-	private Map<String, Object> properties = new HashMap<>();
-	private String id;
-	private String revision;
-	private Date creationTimestamp;
-	private Date updateTimestamp;
+  private Map<String, Object> properties = new HashMap<>();
+  private String id;
+  private String revision;
+  private Date creationTimestamp;
+  private Date updateTimestamp;
 
-	@JsonProperty("_id")
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	@JsonView(View.Persistence.class)
-	public String getId() {
-		return id;
-	}
+  @JsonProperty("_id")
+  @JsonInclude(JsonInclude.Include.NON_EMPTY)
+  @JsonView(View.Persistence.class)
+  public String getId() {
+    return id;
+  }
 
-	@JsonProperty("_id")
-	@JsonView(View.Persistence.class)
-	public void setId(final String id) {
-		this.id = id;
-	}
+  @JsonProperty("_id")
+  @JsonView(View.Persistence.class)
+  public void setId(final String id) {
+    this.id = id;
+  }
 
-	@JsonProperty("_rev")
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	@JsonView(View.Persistence.class)
-	public String getRevision() {
-		return revision;
-	}
+  @JsonProperty("_rev")
+  @JsonInclude(JsonInclude.Include.NON_EMPTY)
+  @JsonView(View.Persistence.class)
+  public String getRevision() {
+    return revision;
+  }
 
-	@JsonProperty("_rev")
-	@JsonView(View.Persistence.class)
-	public void setRevision(final String revision) {
-		this.revision = revision;
-	}
+  @JsonProperty("_rev")
+  @JsonView(View.Persistence.class)
+  public void setRevision(final String revision) {
+    this.revision = revision;
+  }
 
-	@JsonView(View.Persistence.class)
-	public Date getCreationTimestamp() {
-		return creationTimestamp;
-	}
+  @JsonView(View.Persistence.class)
+  public Date getCreationTimestamp() {
+    return creationTimestamp;
+  }
 
-	@JsonView(View.Persistence.class)
-	public void setCreationTimestamp(final Date creationTimestamp) {
-		this.creationTimestamp = creationTimestamp;
-	}
+  @JsonView(View.Persistence.class)
+  public void setCreationTimestamp(final Date creationTimestamp) {
+    this.creationTimestamp = creationTimestamp;
+  }
 
-	@JsonView(View.Persistence.class)
-	public Date getUpdateTimestamp() {
-		return updateTimestamp;
-	}
+  @JsonView(View.Persistence.class)
+  public Date getUpdateTimestamp() {
+    return updateTimestamp;
+  }
 
-	@JsonView(View.Persistence.class)
-	public void setUpdateTimestamp(final Date updateTimestamp) {
-		this.updateTimestamp = updateTimestamp;
-	}
+  @JsonView(View.Persistence.class)
+  public void setUpdateTimestamp(final Date updateTimestamp) {
+    this.updateTimestamp = updateTimestamp;
+  }
 
-	public <T> T getProperty(final String key, final Class<T> clazz) {
-		return (T) properties.get(key);
-	}
+  public <T> T getProperty(final String key, final Class<T> clazz) {
+    return (T) properties.get(key);
+  }
 
-	@JsonAnySetter
-	public void setProperty(final String key, final Object value) {
-		properties.put(key, value);
-	}
+  @JsonAnySetter
+  public void setProperty(final String key, final Object value) {
+    properties.put(key, value);
+  }
 
-	@JsonAnyGetter
-	public Map<String, Object> getProperties() {
-		return properties;
-	}
+  @JsonAnyGetter
+  public Map<String, Object> getProperties() {
+    return properties;
+  }
 
-	public void removeProperty(final String key) {
-		properties.remove(key);
-	}
+  public void removeProperty(final String key) {
+    properties.remove(key);
+  }
 }

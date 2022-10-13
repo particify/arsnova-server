@@ -23,12 +23,12 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.thm.arsnova.model.Entity;
 
 public class CouchDbDocumentModule extends SimpleModule {
-	public CouchDbDocumentModule() {
-		super("CouchDbDocumentModule");
-	}
+  public CouchDbDocumentModule() {
+    super("CouchDbDocumentModule");
+  }
 
-	@Override
-	public void setupModule(final SetupContext context) {
-		context.setMixInAnnotations(Entity.class, CouchDbDocumentMixIn.class);
-	}
+  @Override
+  public void setupModule(final SetupContext context) {
+    context.setMixInAnnotations(Entity.class, CouchDbDocumentMixIn.class);
+  }
 }

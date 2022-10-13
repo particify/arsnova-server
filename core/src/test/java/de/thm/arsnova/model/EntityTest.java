@@ -35,78 +35,78 @@ import org.springframework.core.style.ToStringCreator;
  * @author Daniel Gerhardt
  */
 public class EntityTest {
-	class SomeEntity extends Entity {
-		private String testA;
+  class SomeEntity extends Entity {
+    private String testA;
 
-		public SomeEntity(final String id, final String rev, final Date creationTimestamp, final Date updateTimestamp, final String testA) {
-			this.id = id;
-			this.rev = rev;
-			this.creationTimestamp = creationTimestamp;
-			this.updateTimestamp = updateTimestamp;
-			this.testA = testA;
-		}
+    public SomeEntity(final String id, final String rev, final Date creationTimestamp, final Date updateTimestamp, final String testA) {
+      this.id = id;
+      this.rev = rev;
+      this.creationTimestamp = creationTimestamp;
+      this.updateTimestamp = updateTimestamp;
+      this.testA = testA;
+    }
 
-		@Override
-		public int hashCode() {
-			return hashCode(super.hashCode(), testA);
-		}
+    @Override
+    public int hashCode() {
+      return hashCode(super.hashCode(), testA);
+    }
 
-		@Override
-		public ToStringCreator buildToString() {
-			return super.buildToString().append("testA", testA);
-		}
-	}
+    @Override
+    public ToStringCreator buildToString() {
+      return super.buildToString().append("testA", testA);
+    }
+  }
 
-	class AnotherEntity extends SomeEntity {
-		private String testB;
+  class AnotherEntity extends SomeEntity {
+    private String testB;
 
-		public AnotherEntity(
-				final String id, final String rev, final Date creationTimestamp, final Date updateTimestamp, final String testA, final String testB) {
-			super(id, rev, creationTimestamp, updateTimestamp, testA);
-			this.testB = testB;
-		}
+    public AnotherEntity(
+        final String id, final String rev, final Date creationTimestamp, final Date updateTimestamp, final String testA, final String testB) {
+      super(id, rev, creationTimestamp, updateTimestamp, testA);
+      this.testB = testB;
+    }
 
-		@Override
-		public int hashCode() {
-			return hashCode(super.hashCode(), testB);
-		}
+    @Override
+    public int hashCode() {
+      return hashCode(super.hashCode(), testB);
+    }
 
-		@Override
-		public ToStringCreator buildToString() {
-			return super.buildToString().append("testB", testB);
-		}
-	}
+    @Override
+    public ToStringCreator buildToString() {
+      return super.buildToString().append("testB", testB);
+    }
+  }
 
-	@Test
-	public void testHashCode() {
-		final SomeEntity entity1 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
-		final SomeEntity entity2 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
-		final SomeEntity entity3 = new SomeEntity("wrongId", "rev", new Date(0), new Date(0), "test");
-		assertEquals(entity1.hashCode(), entity2.hashCode());
-		assertNotEquals(entity1.hashCode(), entity3.hashCode());
-		final AnotherEntity entity4 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "anotherTest");
-		final AnotherEntity entity5 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "anotherTest");
-		final AnotherEntity entity6 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "wrong");
-		assertEquals(entity4.hashCode(), entity5.hashCode());
-		assertNotEquals(entity4.hashCode(), entity6.hashCode());
-	}
+  @Test
+  public void testHashCode() {
+    final SomeEntity entity1 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
+    final SomeEntity entity2 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
+    final SomeEntity entity3 = new SomeEntity("wrongId", "rev", new Date(0), new Date(0), "test");
+    assertEquals(entity1.hashCode(), entity2.hashCode());
+    assertNotEquals(entity1.hashCode(), entity3.hashCode());
+    final AnotherEntity entity4 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "anotherTest");
+    final AnotherEntity entity5 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "anotherTest");
+    final AnotherEntity entity6 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "wrong");
+    assertEquals(entity4.hashCode(), entity5.hashCode());
+    assertNotEquals(entity4.hashCode(), entity6.hashCode());
+  }
 
-	@Test
-	public void testEquals() {
-		final SomeEntity entity1 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
-		final SomeEntity entity2 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
-		final SomeEntity entity3 = new SomeEntity("wrongId", "rev", new Date(0), new Date(0), "test");
-		assertEquals(entity1, entity2);
-		assertNotEquals(entity1, entity3);
-	}
+  @Test
+  public void testEquals() {
+    final SomeEntity entity1 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
+    final SomeEntity entity2 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
+    final SomeEntity entity3 = new SomeEntity("wrongId", "rev", new Date(0), new Date(0), "test");
+    assertEquals(entity1, entity2);
+    assertNotEquals(entity1, entity3);
+  }
 
-	@Test
-	public void testToString() {
-		final SomeEntity entity1 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
-		assertThat(entity1.toString(), startsWith("[EntityTest.SomeEntity"));
-		assertThat(entity1.toString(), endsWith("testA = 'test']"));
-		final AnotherEntity entity2 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "anotherTest");
-		assertThat(entity2.toString(), startsWith("[EntityTest.AnotherEntity"));
-		assertThat(entity2.toString(), endsWith("testA = 'someTest', testB = 'anotherTest']"));
-	}
+  @Test
+  public void testToString() {
+    final SomeEntity entity1 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
+    assertThat(entity1.toString(), startsWith("[EntityTest.SomeEntity"));
+    assertThat(entity1.toString(), endsWith("testA = 'test']"));
+    final AnotherEntity entity2 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "anotherTest");
+    assertThat(entity2.toString(), startsWith("[EntityTest.AnotherEntity"));
+    assertThat(entity2.toString(), endsWith("testA = 'someTest', testB = 'anotherTest']"));
+  }
 }

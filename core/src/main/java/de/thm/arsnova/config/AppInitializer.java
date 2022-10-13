@@ -26,62 +26,62 @@ import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
-	private static final int UPLOAD_MAX_FILE_SIZE = 50 * 1024;
-	private static final int UPLOAD_MAX_REQUST_SIZE = UPLOAD_MAX_FILE_SIZE;
-	private static final int UPLOAD_FILE_SIZE_THRESHOLD = UPLOAD_MAX_FILE_SIZE;
-	private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
+  private static final int UPLOAD_MAX_FILE_SIZE = 50 * 1024;
+  private static final int UPLOAD_MAX_REQUST_SIZE = UPLOAD_MAX_FILE_SIZE;
+  private static final int UPLOAD_FILE_SIZE_THRESHOLD = UPLOAD_MAX_FILE_SIZE;
+  private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
 
-	@Override
-	protected Class<?>[] getRootConfigClasses() {
-		return new Class[] {
-				AppConfig.class,
-				PersistenceConfig.class,
-				SecurityConfig.class,
-				RabbitConfig.class,
-				TaskExecutorConfig.class,
-		};
-	}
+  @Override
+  protected Class<?>[] getRootConfigClasses() {
+    return new Class[] {
+        AppConfig.class,
+        PersistenceConfig.class,
+        SecurityConfig.class,
+        RabbitConfig.class,
+        TaskExecutorConfig.class,
+    };
+  }
 
-	@Override
-	protected Class<?>[] getServletConfigClasses() {
-		return new Class[0];
-	}
+  @Override
+  protected Class<?>[] getServletConfigClasses() {
+    return new Class[0];
+  }
 
-	@Override
-	protected String[] getServletMappings() {
-		return new String[] {
-				"/"
-		};
-	}
+  @Override
+  protected String[] getServletMappings() {
+    return new String[] {
+        "/"
+    };
+  }
 
-	@Override
-	protected Filter[] getServletFilters() {
-		final CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter("UTF-8");
-		final DelegatingFilterProxy webMvcMetricsFilter = new DelegatingFilterProxy("webMvcMetricsFilterOverride");
-		final DelegatingFilterProxy corsFilter = new DelegatingFilterProxy("corsFilter");
-		final DelegatingFilterProxy maintenanceModeFilter = new DelegatingFilterProxy("maintenanceModeFilter");
+  @Override
+  protected Filter[] getServletFilters() {
+    final CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter("UTF-8");
+    final DelegatingFilterProxy webMvcMetricsFilter = new DelegatingFilterProxy("webMvcMetricsFilterOverride");
+    final DelegatingFilterProxy corsFilter = new DelegatingFilterProxy("corsFilter");
+    final DelegatingFilterProxy maintenanceModeFilter = new DelegatingFilterProxy("maintenanceModeFilter");
 
-		return new Filter[] {
-				webMvcMetricsFilter,
-				characterEncodingFilter,
-				corsFilter,
-				maintenanceModeFilter
-		};
-	}
+    return new Filter[] {
+        webMvcMetricsFilter,
+        characterEncodingFilter,
+        corsFilter,
+        maintenanceModeFilter
+    };
+  }
 
-	@Override
-	protected void customizeRegistration(final ServletRegistration.Dynamic registration) {
-		registration.setInitParameter("throwExceptionIfNoHandlerFound", "true");
-		final MultipartConfigElement multipartConfigElement = new MultipartConfigElement(
-				TMP_DIR,
-				UPLOAD_MAX_FILE_SIZE,
-				UPLOAD_MAX_REQUST_SIZE,
-				UPLOAD_FILE_SIZE_THRESHOLD);
-		registration.setMultipartConfig(multipartConfigElement);
-	}
+  @Override
+  protected void customizeRegistration(final ServletRegistration.Dynamic registration) {
+    registration.setInitParameter("throwExceptionIfNoHandlerFound", "true");
+    final MultipartConfigElement multipartConfigElement = new MultipartConfigElement(
+        TMP_DIR,
+        UPLOAD_MAX_FILE_SIZE,
+        UPLOAD_MAX_REQUST_SIZE,
+        UPLOAD_FILE_SIZE_THRESHOLD);
+    registration.setMultipartConfig(multipartConfigElement);
+  }
 
-	@Override
-	protected String getServletName() {
-		return "arsnova";
-	}
+  @Override
+  protected String getServletName() {
+    return "arsnova";
+  }
 }

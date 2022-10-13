@@ -36,133 +36,133 @@ import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
  * @author Daniel Gerhardt
  */
 public abstract class AbstractMigration implements Migration {
-	protected static final int LIMIT = 200;
-	private static final Logger logger = LoggerFactory.getLogger(AbstractMigration.class);
+  protected static final int LIMIT = 200;
+  private static final Logger logger = LoggerFactory.getLogger(AbstractMigration.class);
 
-	protected final MangoCouchDbConnector connector;
-	private final String id;
-	private final List<InterruptibleConsumer<MigrationState.Migration>> migrationStepHandlers = new ArrayList<>();
+  protected final MangoCouchDbConnector connector;
+  private final String id;
+  private final List<InterruptibleConsumer<MigrationState.Migration>> migrationStepHandlers = new ArrayList<>();
 
-	public AbstractMigration(final String id, final MangoCouchDbConnector connector) {
-		this.id = id;
-		this.connector = connector;
-	}
+  public AbstractMigration(final String id, final MangoCouchDbConnector connector) {
+    this.id = id;
+    this.connector = connector;
+  }
 
-	/**
-	 * Returns the migrations ID which is used for ordering and as prefix for
-	 * index names.
-	 */
-	@Override
-	public String getId() {
-		return id;
-	}
+  /**
+   * Returns the migrations ID which is used for ordering and as prefix for
+   * index names.
+   */
+  @Override
+  public String getId() {
+    return id;
+  }
 
-	/**
-	 * Returns the number of steps which can be executed for this migration.
-	 */
-	@Override
-	public int getStepCount() {
-		return migrationStepHandlers.size();
-	}
+  /**
+   * Returns the number of steps which can be executed for this migration.
+   */
+  @Override
+  public int getStepCount() {
+    return migrationStepHandlers.size();
+  }
 
-	/**
-	 * Performs the next migration step or continues the current one.
-	 *
-	 * @param state determines which migration step will be performed
-	 * @throws MigrationException on interruption
-	 */
-	@Override
-	public void migrate(final MigrationState.Migration state) throws MigrationException {
-		try {
-			migrationStepHandlers.get(state.getStep()).accept(state);
-		} catch (final InterruptedException e) {
-			throw new MigrationException("Migration was interrupted.", e);
-		}
-	}
+  /**
+   * Performs the next migration step or continues the current one.
+   *
+   * @param state determines which migration step will be performed
+   * @throws MigrationException on interruption
+   */
+  @Override
+  public void migrate(final MigrationState.Migration state) throws MigrationException {
+    try {
+      migrationStepHandlers.get(state.getStep()).accept(state);
+    } catch (final InterruptedException e) {
+      throw new MigrationException("Migration was interrupted.", e);
+    }
+  }
 
-	protected <E extends MigrationEntity, R extends List<? extends MigrationEntity>> void addEntityMigrationStepHandler(
-			final Class<E> type,
-			final String migrationIndexName,
-			final Map<String, Object> querySelector,
-			final InterruptibleFunction<E, R> migrationStepHandler) {
-		final String fullIndexName = buildFullIndexName(migrationIndexName);
-		migrationStepHandlers.add(state ->
-				performEntityMigrationStep(type, fullIndexName, querySelector, state, migrationStepHandler));
-	}
+  protected <E extends MigrationEntity, R extends List<? extends MigrationEntity>> void addEntityMigrationStepHandler(
+      final Class<E> type,
+      final String migrationIndexName,
+      final Map<String, Object> querySelector,
+      final InterruptibleFunction<E, R> migrationStepHandler) {
+    final String fullIndexName = buildFullIndexName(migrationIndexName);
+    migrationStepHandlers.add(state ->
+        performEntityMigrationStep(type, fullIndexName, querySelector, state, migrationStepHandler));
+  }
 
-	protected void addCustomMigrationStepHandler(
-			final InterruptibleConsumer<MigrationState.Migration> migrationStepHandler) {
-		migrationStepHandlers.add(migrationStepHandler);
-	}
+  protected void addCustomMigrationStepHandler(
+      final InterruptibleConsumer<MigrationState.Migration> migrationStepHandler) {
+    migrationStepHandlers.add(migrationStepHandler);
+  }
 
-	private <E extends MigrationEntity, R extends List<? extends MigrationEntity>> void performEntityMigrationStep(
-			final Class<E> type,
-			final String indexName,
-			final Map<String, Object> querySelector,
-			final MigrationState.Migration state,
-			final InterruptibleFunction<E, R> migrationStepHandler)
-			throws InterruptedException {
-		connector.createPartialJsonIndex(indexName, Collections.emptyList(), querySelector);
-		waitForIndex(indexName);
+  private <E extends MigrationEntity, R extends List<? extends MigrationEntity>> void performEntityMigrationStep(
+      final Class<E> type,
+      final String indexName,
+      final Map<String, Object> querySelector,
+      final MigrationState.Migration state,
+      final InterruptibleFunction<E, R> migrationStepHandler)
+      throws InterruptedException {
+    connector.createPartialJsonIndex(indexName, Collections.emptyList(), querySelector);
+    waitForIndex(indexName);
 
-		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(querySelector);
-		query.setIndexDocument(indexName);
-		query.setLimit(LIMIT);
-		String bookmark = (String) state.getState();
+    final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(querySelector);
+    query.setIndexDocument(indexName);
+    query.setLimit(LIMIT);
+    String bookmark = (String) state.getState();
 
-		query.setBookmark(bookmark);
-		PagedMangoResponse<E> response =
-				connector.queryForPage(query, type);
+    query.setBookmark(bookmark);
+    PagedMangoResponse<E> response =
+        connector.queryForPage(query, type);
 
-		// CouchDB bookmarks are used to iterate through all documents. The
-		// total number of items is not known upfront. Up to LIMIT documents are
-		// retrieved at a time. Termination of the loop is guaranteed under the
-		// assumption that the database server handles requests correctly. When
-		// there are no more documents, the query using the current bookmark
-		// will result in an empty set of documents which will trigger the break
-		// condition in the middle of the loop.
-		for (int skip = 0;; skip += LIMIT) {
-			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
-			final List<E> entities = response.getEntities();
-			bookmark = response.getBookmark();
-			if (entities.size() == 0) {
-				break;
-			}
+    // CouchDB bookmarks are used to iterate through all documents. The
+    // total number of items is not known upfront. Up to LIMIT documents are
+    // retrieved at a time. Termination of the loop is guaranteed under the
+    // assumption that the database server handles requests correctly. When
+    // there are no more documents, the query using the current bookmark
+    // will result in an empty set of documents which will trigger the break
+    // condition in the middle of the loop.
+    for (int skip = 0;; skip += LIMIT) {
+      logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
+      final List<E> entities = response.getEntities();
+      bookmark = response.getBookmark();
+      if (entities.size() == 0) {
+        break;
+      }
 
-			final List<MigrationEntity> entitiesForUpdate = new ArrayList<>();
-			for (final E entity : entities) {
-				// Perform the domain-specific migration logic
-				entitiesForUpdate.addAll(migrationStepHandler.apply(entity));
-			}
+      final List<MigrationEntity> entitiesForUpdate = new ArrayList<>();
+      for (final E entity : entities) {
+        // Perform the domain-specific migration logic
+        entitiesForUpdate.addAll(migrationStepHandler.apply(entity));
+      }
 
-			// Request next page before updating to avoid skipping documents
-			// https://github.com/apache/couchdb/issues/3657
-			query.setBookmark(bookmark);
-			response = connector.queryForPage(query, type);
+      // Request next page before updating to avoid skipping documents
+      // https://github.com/apache/couchdb/issues/3657
+      query.setBookmark(bookmark);
+      response = connector.queryForPage(query, type);
 
-			connector.executeBulk(entitiesForUpdate);
-			state.setState(bookmark);
-		}
-		deleteIndex(indexName);
-		state.setState(null);
-	}
+      connector.executeBulk(entitiesForUpdate);
+      state.setState(bookmark);
+    }
+    deleteIndex(indexName);
+    state.setState(null);
+  }
 
-	private void waitForIndex(final String name) throws InterruptedException {
-		for (int i = 0; i < 10; i++) {
-			if (connector.initializeIndex(name)) {
-				return;
-			}
-			Thread.sleep(10000 * Math.round(1.0 + 0.5 * i));
-		}
-	}
+  private void waitForIndex(final String name) throws InterruptedException {
+    for (int i = 0; i < 10; i++) {
+      if (connector.initializeIndex(name)) {
+        return;
+      }
+      Thread.sleep(10000 * Math.round(1.0 + 0.5 * i));
+    }
+  }
 
-	private void deleteIndex(final String name) {
-		final String designDocName = "_design/" + name;
-		final String rev = connector.getCurrentRevision(designDocName);
-		connector.delete(designDocName, rev);
-	}
+  private void deleteIndex(final String name) {
+    final String designDocName = "_design/" + name;
+    final String rev = connector.getCurrentRevision(designDocName);
+    connector.delete(designDocName, rev);
+  }
 
-	private String buildFullIndexName(final String migrationIndexName) {
-		return "migration-" + id + '-' + migrationIndexName;
-	}
+  private String buildFullIndexName(final String migrationIndexName) {
+    return "migration-" + id + '-' + migrationIndexName;
+  }
 }

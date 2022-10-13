@@ -15,46 +15,46 @@ import reactor.kotlin.core.util.function.component2
 
 @Component
 class RemoveMembershipFilter(
-    private val jwtTokenUtil: JwtTokenUtil,
-    private val roomAccessService: RoomAccessService
+  private val jwtTokenUtil: JwtTokenUtil,
+  private val roomAccessService: RoomAccessService
 ) : AbstractGatewayFilterFactory<RemoveMembershipFilter.Config>(Config::class.java) {
-    override fun apply(config: Config): GatewayFilter {
-        return GatewayFilter { exchange, _ ->
-            // Both tuple elements are ensured to be there because of previous filters
-            Mono.zip(
-                Mono.just(ServerWebExchangeUtils.getUriTemplateVariables(exchange))
-                    .map { uriVariables ->
-                        uriVariables["roomId"]!!
-                    },
-                Mono.just(exchange.request.headers[HttpHeaders.AUTHORIZATION]!![0])
-                    .map { bearer ->
-                        bearer.removePrefix("Bearer ")
-                    }
-                    .map { token ->
-                        jwtTokenUtil.getUserIdFromPublicToken(token)
-                    }
-            )
-                .map { (token: String, userId: String) ->
-                    // Can be mostly a dummy object as room access service only needs both the IDs
-                    RoomAccess(
-                        token,
-                        userId,
-                        "",
-                        "",
-                        null
-                    )
-                }
-                .flatMap { roomAccess ->
-                    roomAccessService.deleteRoomAccess(roomAccess)
-                }
-                .map { _ ->
-                    exchange.response.statusCode = HttpStatus.OK
-                }
-                .then()
+  override fun apply(config: Config): GatewayFilter {
+    return GatewayFilter { exchange, _ ->
+      // Both tuple elements are ensured to be there because of previous filters
+      Mono.zip(
+        Mono.just(ServerWebExchangeUtils.getUriTemplateVariables(exchange))
+          .map { uriVariables ->
+            uriVariables["roomId"]!!
+          },
+        Mono.just(exchange.request.headers[HttpHeaders.AUTHORIZATION]!![0])
+          .map { bearer ->
+            bearer.removePrefix("Bearer ")
+          }
+          .map { token ->
+            jwtTokenUtil.getUserIdFromPublicToken(token)
+          }
+      )
+        .map { (token: String, userId: String) ->
+          // Can be mostly a dummy object as room access service only needs both the IDs
+          RoomAccess(
+            token,
+            userId,
+            "",
+            "",
+            null
+          )
         }
+        .flatMap { roomAccess ->
+          roomAccessService.deleteRoomAccess(roomAccess)
+        }
+        .map { _ ->
+          exchange.response.statusCode = HttpStatus.OK
+        }
+        .then()
     }
+  }
 
-    class Config {
-        var name: String = "CancelMembershipFilter"
-    }
+  class Config {
+    var name: String = "CancelMembershipFilter"
+  }
 }

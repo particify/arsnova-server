@@ -31,28 +31,28 @@ import de.thm.arsnova.security.User;
  * @author Daniel Gerhardt
  */
 public class SsoAuthenticationToken extends AbstractAuthenticationToken {
-	private User principal;
+  private User principal;
 
-	public SsoAuthenticationToken(final User principal, final UserProfile profile,
-			final Collection<? extends GrantedAuthority> grantedAuthorities) {
-		super(grantedAuthorities);
-		this.principal = principal;
-		this.setDetails(profile);
-		setAuthenticated(!grantedAuthorities.isEmpty());
-	}
+  public SsoAuthenticationToken(final User principal, final UserProfile profile,
+      final Collection<? extends GrantedAuthority> grantedAuthorities) {
+    super(grantedAuthorities);
+    this.principal = principal;
+    this.setDetails(profile);
+    setAuthenticated(!grantedAuthorities.isEmpty());
+  }
 
-	@Override
-	public Object getCredentials() {
-		return null;
-	}
+  @Override
+  public Object getCredentials() {
+    return null;
+  }
 
-	@Override
-	public Object getPrincipal() {
-		return principal;
-	}
+  @Override
+  public Object getPrincipal() {
+    return principal;
+  }
 
-	@Override
-	public boolean isAuthenticated() {
-		return super.isAuthenticated();
-	}
+  @Override
+  public boolean isAuthenticated() {
+    return super.isAuthenticated();
+  }
 }

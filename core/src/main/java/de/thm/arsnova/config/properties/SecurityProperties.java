@@ -30,148 +30,148 @@ import de.thm.arsnova.model.UserProfile;
 
 @ConfigurationProperties(SecurityProperties.PREFIX)
 public class SecurityProperties {
-	public static final String PREFIX = "security";
+  public static final String PREFIX = "security";
 
-	public static class Jwt {
-		private String serverId;
-		private String secret;
-		private String legacyServerId;
-		private String legacySecret;
+  public static class Jwt {
+    private String serverId;
+    private String secret;
+    private String legacyServerId;
+    private String legacySecret;
 
-		@DurationUnit(ChronoUnit.MINUTES)
-		private Duration validityPeriod;
+    @DurationUnit(ChronoUnit.MINUTES)
+    private Duration validityPeriod;
 
-		public String getServerId() {
-			return serverId;
-		}
+    public String getServerId() {
+      return serverId;
+    }
 
-		public void setServerId(final String serverId) {
-			this.serverId = serverId;
-		}
+    public void setServerId(final String serverId) {
+      this.serverId = serverId;
+    }
 
-		public String getSecret() {
-			return secret;
-		}
+    public String getSecret() {
+      return secret;
+    }
 
-		public void setSecret(final String secret) {
-			this.secret = secret;
-		}
+    public void setSecret(final String secret) {
+      this.secret = secret;
+    }
 
-		public Duration getValidityPeriod() {
-			return validityPeriod;
-		}
+    public Duration getValidityPeriod() {
+      return validityPeriod;
+    }
 
-		public void setValidityPeriod(final Duration validityPeriod) {
-			this.validityPeriod = validityPeriod;
-		}
+    public void setValidityPeriod(final Duration validityPeriod) {
+      this.validityPeriod = validityPeriod;
+    }
 
-		public String getLegacyServerId() {
-			return legacyServerId;
-		}
+    public String getLegacyServerId() {
+      return legacyServerId;
+    }
 
-		public void setLegacyServerId(final String legacyServerId) {
-			this.legacyServerId = legacyServerId;
-		}
+    public void setLegacyServerId(final String legacyServerId) {
+      this.legacyServerId = legacyServerId;
+    }
 
-		public String getLegacySecret() {
-			return legacySecret;
-		}
+    public String getLegacySecret() {
+      return legacySecret;
+    }
 
-		public void setLegacySecret(final String legacySecret) {
-			this.legacySecret = legacySecret;
-		}
-	}
+    public void setLegacySecret(final String legacySecret) {
+      this.legacySecret = legacySecret;
+    }
+  }
 
-	@ConstructorBinding
-	public static class AdminAccount {
-		private String loginId;
-		private UserProfile.AuthProvider authProvider;
+  @ConstructorBinding
+  public static class AdminAccount {
+    private String loginId;
+    private UserProfile.AuthProvider authProvider;
 
-		public AdminAccount(final String loginId, final UserProfile.AuthProvider authProvider) {
-			this.loginId = loginId;
-			this.authProvider = authProvider;
-		}
+    public AdminAccount(final String loginId, final UserProfile.AuthProvider authProvider) {
+      this.loginId = loginId;
+      this.authProvider = authProvider;
+    }
 
-		public String getLoginId() {
-			return loginId;
-		}
+    public String getLoginId() {
+      return loginId;
+    }
 
-		public UserProfile.AuthProvider getAuthProvider() {
-			return authProvider;
-		}
+    public UserProfile.AuthProvider getAuthProvider() {
+      return authProvider;
+    }
 
-		@Override
-		public boolean equals(final Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-			final AdminAccount that = (AdminAccount) o;
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      final AdminAccount that = (AdminAccount) o;
 
-			return Objects.equals(loginId, that.loginId)
-					&& authProvider == that.authProvider;
-		}
+      return Objects.equals(loginId, that.loginId)
+          && authProvider == that.authProvider;
+    }
 
-		@Override
-		public int hashCode() {
-			return Objects.hash(loginId, authProvider);
-		}
-	}
+    @Override
+    public int hashCode() {
+      return Objects.hash(loginId, authProvider);
+    }
+  }
 
-	private Jwt jwt;
-	private List<AdminAccount> adminAccounts;
-	private int loginTryLimit;
-	private int resendMailLimit;
-	private int passwordStrictnessLevel;
-	private List<String> corsOrigins;
+  private Jwt jwt;
+  private List<AdminAccount> adminAccounts;
+  private int loginTryLimit;
+  private int resendMailLimit;
+  private int passwordStrictnessLevel;
+  private List<String> corsOrigins;
 
-	public Jwt getJwt() {
-		return jwt;
-	}
+  public Jwt getJwt() {
+    return jwt;
+  }
 
-	public void setJwt(final Jwt jwt) {
-		this.jwt = jwt;
-	}
+  public void setJwt(final Jwt jwt) {
+    this.jwt = jwt;
+  }
 
-	public List<AdminAccount> getAdminAccounts() {
-		return adminAccounts;
-	}
+  public List<AdminAccount> getAdminAccounts() {
+    return adminAccounts;
+  }
 
-	public void setAdminAccounts(final List<AdminAccount> adminAccounts) {
-		this.adminAccounts = adminAccounts;
-	}
+  public void setAdminAccounts(final List<AdminAccount> adminAccounts) {
+    this.adminAccounts = adminAccounts;
+  }
 
-	public int getLoginTryLimit() {
-		return loginTryLimit;
-	}
+  public int getLoginTryLimit() {
+    return loginTryLimit;
+  }
 
-	public void setLoginTryLimit(final int loginTryLimit) {
-		this.loginTryLimit = loginTryLimit;
-	}
+  public void setLoginTryLimit(final int loginTryLimit) {
+    this.loginTryLimit = loginTryLimit;
+  }
 
-	public int getResendMailLimit() {
-		return resendMailLimit;
-	}
+  public int getResendMailLimit() {
+    return resendMailLimit;
+  }
 
-	public void setResendMailLimit(final int resendMailLimit) {
-		this.resendMailLimit = resendMailLimit;
-	}
+  public void setResendMailLimit(final int resendMailLimit) {
+    this.resendMailLimit = resendMailLimit;
+  }
 
-	public int getPasswordStrictnessLevel() {
-		return passwordStrictnessLevel;
-	}
+  public int getPasswordStrictnessLevel() {
+    return passwordStrictnessLevel;
+  }
 
-	public void setPasswordStrictnessLevel(final int passwordStrictnessLevel) {
-		this.passwordStrictnessLevel = passwordStrictnessLevel;
-	}
+  public void setPasswordStrictnessLevel(final int passwordStrictnessLevel) {
+    this.passwordStrictnessLevel = passwordStrictnessLevel;
+  }
 
-	public List<String> getCorsOrigins() {
-		return corsOrigins;
-	}
+  public List<String> getCorsOrigins() {
+    return corsOrigins;
+  }
 
-	public void setCorsOrigins(final List<String> corsOrigins) {
-		this.corsOrigins = corsOrigins;
-	}
+  public void setCorsOrigins(final List<String> corsOrigins) {
+    this.corsOrigins = corsOrigins;
+  }
 }

@@ -15,31 +15,31 @@ import org.springframework.stereotype.Service
 
 @Service
 class RoomAccessListener(
-    private val handler: RoomAccessHandler
+  private val handler: RoomAccessHandler
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+  private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    @RabbitListener(queues = [RabbitConfig.roomCreatedQueueName])
-    fun receiveRoomCreatedEvent(event: RoomCreatedEvent) {
-        logger.debug("Got event on room created queue: {}", event)
-        handler.create(RoomAccess(event.id, event.ownerId, "1-0", "CREATOR", null, null))
-    }
+  @RabbitListener(queues = [RabbitConfig.roomCreatedQueueName])
+  fun receiveRoomCreatedEvent(event: RoomCreatedEvent) {
+    logger.debug("Got event on room created queue: {}", event)
+    handler.create(RoomAccess(event.id, event.ownerId, "1-0", "CREATOR", null, null))
+  }
 
-    @RabbitListener(queues = [RabbitConfig.roomDeletedQueueName])
-    fun receiveRoomDeletedEvent(event: RoomDeletedEvent) {
-        logger.debug("Got event on room deleted queue: {}", event)
-        handler.deleteByRoomId(event.id)
-    }
+  @RabbitListener(queues = [RabbitConfig.roomDeletedQueueName])
+  fun receiveRoomDeletedEvent(event: RoomDeletedEvent) {
+    logger.debug("Got event on room deleted queue: {}", event)
+    handler.deleteByRoomId(event.id)
+  }
 
-    @RabbitListener(queues = [RabbitConfig.roomAccessSyncResponseQueueName])
-    fun receiveRoomAccessSyncResponseEvent(event: RoomAccessSyncEvent) {
-        logger.debug("Got event on room access sync response queue: {}", event)
-        handler.handleSyncRoomAccessCommand(SyncRoomAccessCommand(event.rev, event.roomId, event.access))
-    }
+  @RabbitListener(queues = [RabbitConfig.roomAccessSyncResponseQueueName])
+  fun receiveRoomAccessSyncResponseEvent(event: RoomAccessSyncEvent) {
+    logger.debug("Got event on room access sync response queue: {}", event)
+    handler.handleSyncRoomAccessCommand(SyncRoomAccessCommand(event.rev, event.roomId, event.access))
+  }
 
-    @RabbitListener(queues = [RabbitConfig.participantAccessMigrationQueueName])
-    fun receiveParticipantAccessMigrationEvent(event: ParticipantAccessMigrationEvent) {
-        logger.debug("Got event on participant access migration queue: {}", event)
-        handler.migrateParticipantAccess(event.userId, event.roomIds)
-    }
+  @RabbitListener(queues = [RabbitConfig.participantAccessMigrationQueueName])
+  fun receiveParticipantAccessMigrationEvent(event: ParticipantAccessMigrationEvent) {
+    logger.debug("Got event on participant access migration queue: {}", event)
+    handler.migrateParticipantAccess(event.userId, event.roomIds)
+  }
 }

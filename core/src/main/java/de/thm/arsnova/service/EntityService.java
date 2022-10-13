@@ -32,47 +32,47 @@ import de.thm.arsnova.model.Entity;
  * @author Daniel Gerhardt
  */
 public interface EntityService<T extends Entity> {
-	T get(String id);
+  T get(String id);
 
-	T get(String id, boolean internal);
+  T get(String id, boolean internal);
 
-	List<T> get(Iterable<String> ids);
+  List<T> get(Iterable<String> ids);
 
-	T create(T entity);
+  T create(T entity);
 
-	List<T> create(List<T> entities);
+  List<T> create(List<T> entities);
 
-	T update(T entity);
+  T update(T entity);
 
-	T update(T entity, Class<?> view);
+  T update(T entity, Class<?> view);
 
-	T update(T oldEntity, T newEntity, Class<?> view);
+  T update(T oldEntity, T newEntity, Class<?> view);
 
-	T patch(T entity, Map<String, Object> changes) throws IOException;
+  T patch(T entity, Map<String, Object> changes) throws IOException;
 
-	T patch(T entity, Map<String, Object> changes, Class<?> view) throws IOException;
+  T patch(T entity, Map<String, Object> changes, Class<?> view) throws IOException;
 
-	T patch(T entity, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter) throws IOException;
+  T patch(T entity, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter) throws IOException;
 
-	T patch(T entity, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter, Class<?> view)
-			throws IOException;
+  T patch(T entity, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter, Class<?> view)
+      throws IOException;
 
-	List<T> patch(Iterable<T> entities, Map<String, Object> changes) throws IOException;
+  List<T> patch(Iterable<T> entities, Map<String, Object> changes) throws IOException;
 
-	List<T> patch(Iterable<T> entities, Map<String, Object> changes, Class<?> view) throws IOException;
+  List<T> patch(Iterable<T> entities, Map<String, Object> changes, Class<?> view) throws IOException;
 
-	List<T> patch(
-			Iterable<T> entities,
-			Map<String, Object> changes,
-			Function<T, ? extends Object> propertyGetter) throws IOException;
+  List<T> patch(
+      Iterable<T> entities,
+      Map<String, Object> changes,
+      Function<T, ? extends Object> propertyGetter) throws IOException;
 
-	List<T> patch(
-			Iterable<T> entities,
-			Map<String, Object> changes,
-			Function<T, ? extends Object> propertyGetter,
-			Class<?> view) throws IOException;
+  List<T> patch(
+      Iterable<T> entities,
+      Map<String, Object> changes,
+      Function<T, ? extends Object> propertyGetter,
+      Class<?> view) throws IOException;
 
-	void delete(T entity);
+  void delete(T entity);
 
-	void delete(Iterable<T> entities);
+  void delete(Iterable<T> entities);
 }

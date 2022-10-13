@@ -36,18 +36,18 @@ import de.thm.arsnova.model.UserProfile;
 @Inherited
 @Documented
 @WithSecurityContext(
-		factory = WithMockUserSecurityContextFactory.class
+    factory = WithMockUserSecurityContextFactory.class
 )
 public @interface WithMockUser {
-	String value() default "user";
+  String value() default "user";
 
-	UserProfile.AuthProvider authProvider() default UserProfile.AuthProvider.ARSNOVA;
+  UserProfile.AuthProvider authProvider() default UserProfile.AuthProvider.ARSNOVA;
 
-	String loginId() default "";
+  String loginId() default "";
 
-	String userId() default "";
+  String userId() default "";
 
-	String[] roles() default {"USER"};
+  String[] roles() default {"USER"};
 
-	String password() default "password";
+  String password() default "password";
 }

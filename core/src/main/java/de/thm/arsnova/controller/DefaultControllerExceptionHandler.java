@@ -30,26 +30,26 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
 public class DefaultControllerExceptionHandler {
-	private ControllerExceptionHelper helper;
+  private ControllerExceptionHelper helper;
 
-	public DefaultControllerExceptionHandler(final ControllerExceptionHelper helper) {
-		this.helper = helper;
-	}
+  public DefaultControllerExceptionHandler(final ControllerExceptionHelper helper) {
+    this.helper = helper;
+  }
 
-	@ExceptionHandler
-	@ResponseBody
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, Object> defaultExceptionHandler(
-			final Exception e,
-			final HttpServletRequest req
-	) throws Exception {
-		/* If the exception is annotated with @ResponseStatus rethrow it and let
-		 * the framework handle it.
-		 * See https://spring.io/blog/2013/11/01/exception-handling-in-spring-mvc. */
-		if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null) {
-			throw e;
-		}
+  @ExceptionHandler
+  @ResponseBody
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public Map<String, Object> defaultExceptionHandler(
+      final Exception e,
+      final HttpServletRequest req
+  ) throws Exception {
+    /* If the exception is annotated with @ResponseStatus rethrow it and let
+     * the framework handle it.
+     * See https://spring.io/blog/2013/11/01/exception-handling-in-spring-mvc. */
+    if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null) {
+      throw e;
+    }
 
-		return helper.handleException(e, Level.ERROR);
-	}
+    return helper.handleException(e, Level.ERROR);
+  }
 }

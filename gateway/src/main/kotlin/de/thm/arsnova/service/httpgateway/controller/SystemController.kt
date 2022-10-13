@@ -11,27 +11,27 @@ import reactor.core.publisher.Mono
 
 @Controller
 class SystemController(
-    private val systemView: SystemView
+  private val systemView: SystemView
 ) {
-    companion object {
-        const val baseMapping = "/_system"
-        const val serviceStatsMapping = "$baseMapping/servicestats"
-        const val summarizedStatsMapping = "$baseMapping/summarizedstats"
-    }
+  companion object {
+    const val baseMapping = "/_system"
+    const val serviceStatsMapping = "$baseMapping/servicestats"
+    const val summarizedStatsMapping = "$baseMapping/summarizedstats"
+  }
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
+  private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @GetMapping(path = [serviceStatsMapping])
-    @ResponseBody
-    fun getServiceStats(): Mono<Stats> {
-        logger.trace("Getting stats")
-        return systemView.getServiceStats()
-    }
+  @GetMapping(path = [serviceStatsMapping])
+  @ResponseBody
+  fun getServiceStats(): Mono<Stats> {
+    logger.trace("Getting stats")
+    return systemView.getServiceStats()
+  }
 
-    @GetMapping(path = [summarizedStatsMapping])
-    @ResponseBody
-    fun getSummarizedStats(): Mono<SummarizedStats> {
-        logger.trace("Getting summarized stats")
-        return systemView.getSummarizedStats()
-    }
+  @GetMapping(path = [summarizedStatsMapping])
+  @ResponseBody
+  fun getSummarizedStats(): Mono<SummarizedStats> {
+    logger.trace("Getting summarized stats")
+    return systemView.getSummarizedStats()
+  }
 }

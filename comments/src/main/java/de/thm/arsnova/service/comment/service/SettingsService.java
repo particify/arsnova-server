@@ -11,37 +11,37 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SettingsService {
-    private static final Logger logger = LoggerFactory.getLogger(SettingsService.class);
-    private final SettingsRepository repository;
+  private static final Logger logger = LoggerFactory.getLogger(SettingsService.class);
+  private final SettingsRepository repository;
 
-    @Autowired
-    public SettingsService(
-            final SettingsRepository repository
-    ) {
-        this.repository = repository;
-    }
+  @Autowired
+  public SettingsService(
+      final SettingsRepository repository
+  ) {
+    this.repository = repository;
+  }
 
-    public Settings get(String id) {
-        Settings defaults = new Settings();
-        defaults.setRoomId(id);
-        defaults.setDirectSend(true);
-        Settings s = repository.findById(id).orElse(defaults);
+  public Settings get(String id) {
+    Settings defaults = new Settings();
+    defaults.setRoomId(id);
+    defaults.setDirectSend(true);
+    Settings s = repository.findById(id).orElse(defaults);
 
-        return s;
-    }
+    return s;
+  }
 
-    public Settings create(Settings s) {
-        repository.save(s);
+  public Settings create(Settings s) {
+    repository.save(s);
 
-        return s;
-    }
+    return s;
+  }
 
-    public Settings update(final Settings s) {
-        return repository.save(s);
-    }
+  public Settings update(final Settings s) {
+    return repository.save(s);
+  }
 
-    public void delete(final String roomId) {
-        Optional<Settings> maybeSettings = repository.findById(roomId);
-        maybeSettings.ifPresent(repository::delete);
-    }
+  public void delete(final String roomId) {
+    Optional<Settings> maybeSettings = repository.findById(roomId);
+    maybeSettings.ifPresent(repository::delete);
+  }
 }

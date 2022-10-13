@@ -27,47 +27,47 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 public class CorsFilter extends org.springframework.web.filter.CorsFilter {
-	private static final String X_REQUESTED_WITH = "X-Requested-With";
-	private static final String TOKEN_HEADER_NAME = "Arsnova-Auth-Token";
-	private final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
+  private static final String X_REQUESTED_WITH = "X-Requested-With";
+  private static final String TOKEN_HEADER_NAME = "Arsnova-Auth-Token";
+  private final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
 
-	public CorsFilter(final List<String> origins) {
-		super(configurationSource(origins));
-		logger.info("CorsFilter initialized. Allowed origins: {}", origins);
-	}
+  public CorsFilter(final List<String> origins) {
+    super(configurationSource(origins));
+    logger.info("CorsFilter initialized. Allowed origins: {}", origins);
+  }
 
-	private static UrlBasedCorsConfigurationSource configurationSource(final List<String> origins) {
-		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		final CorsConfiguration config;
+  private static UrlBasedCorsConfigurationSource configurationSource(final List<String> origins) {
+    final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    final CorsConfiguration config;
 
-		if (!origins.isEmpty()) {
-			/* Grant full access from specified origins */
-			config = new CorsConfiguration();
-			config.setAllowedOrigins(origins);
-			config.addAllowedHeader(HttpHeaders.ACCEPT);
-			config.addAllowedHeader(HttpHeaders.CONTENT_TYPE);
-			config.addAllowedHeader(HttpHeaders.AUTHORIZATION);
-			config.addAllowedHeader(X_REQUESTED_WITH);
-			config.addAllowedMethod(HttpMethod.GET);
-			config.addAllowedMethod(HttpMethod.POST);
-			config.addAllowedMethod(HttpMethod.PUT);
-			config.addAllowedMethod(HttpMethod.PATCH);
-			config.addAllowedMethod(HttpMethod.DELETE);
-			config.setAllowCredentials(true);
-			source.registerCorsConfiguration("/**", config);
-		} else {
-			/* Grant limited access from all origins */
-			config = new CorsConfiguration();
-			config.addAllowedOrigin("*");
-			config.addAllowedHeader(HttpHeaders.ACCEPT);
-			config.addAllowedHeader(X_REQUESTED_WITH);
-			config.addAllowedMethod(HttpMethod.GET);
-			source.registerCorsConfiguration("/", config);
-			source.registerCorsConfiguration("/arsnova-config", config);
-			source.registerCorsConfiguration("/configuration/", config);
-			source.registerCorsConfiguration("/statistics", config);
-		}
+    if (!origins.isEmpty()) {
+      /* Grant full access from specified origins */
+      config = new CorsConfiguration();
+      config.setAllowedOrigins(origins);
+      config.addAllowedHeader(HttpHeaders.ACCEPT);
+      config.addAllowedHeader(HttpHeaders.CONTENT_TYPE);
+      config.addAllowedHeader(HttpHeaders.AUTHORIZATION);
+      config.addAllowedHeader(X_REQUESTED_WITH);
+      config.addAllowedMethod(HttpMethod.GET);
+      config.addAllowedMethod(HttpMethod.POST);
+      config.addAllowedMethod(HttpMethod.PUT);
+      config.addAllowedMethod(HttpMethod.PATCH);
+      config.addAllowedMethod(HttpMethod.DELETE);
+      config.setAllowCredentials(true);
+      source.registerCorsConfiguration("/**", config);
+    } else {
+      /* Grant limited access from all origins */
+      config = new CorsConfiguration();
+      config.addAllowedOrigin("*");
+      config.addAllowedHeader(HttpHeaders.ACCEPT);
+      config.addAllowedHeader(X_REQUESTED_WITH);
+      config.addAllowedMethod(HttpMethod.GET);
+      source.registerCorsConfiguration("/", config);
+      source.registerCorsConfiguration("/arsnova-config", config);
+      source.registerCorsConfiguration("/configuration/", config);
+      source.registerCorsConfiguration("/statistics", config);
+    }
 
-		return source;
-	}
+    return source;
+  }
 }

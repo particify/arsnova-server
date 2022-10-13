@@ -16,39 +16,39 @@ import java.util.Map;
 
 @Component
 public class CommentEventSource {
-    private static final Logger logger = LoggerFactory.getLogger(CommentEventSource.class);
+  private static final Logger logger = LoggerFactory.getLogger(CommentEventSource.class);
 
-    private final AmqpTemplate messagingTemplate;
-    private final CommentService service;
-    private final VoteService voteService;
+  private final AmqpTemplate messagingTemplate;
+  private final CommentService service;
+  private final VoteService voteService;
 
-    @Autowired
-    public CommentEventSource(
-            AmqpTemplate messagingTemplate,
-            CommentService service,
-            VoteService voteService
-    ) {
-        this.messagingTemplate = messagingTemplate;
-        this.service = service;
-        this.voteService = voteService;
-    }
+  @Autowired
+  public CommentEventSource(
+      AmqpTemplate messagingTemplate,
+      CommentService service,
+      VoteService voteService
+  ) {
+    this.messagingTemplate = messagingTemplate;
+    this.service = service;
+    this.voteService = voteService;
+  }
 
-    public void ScoreChanged(String id) {
-        Comment c = service.getWithScore(id);
-        int score = c.getScore();
+  public void ScoreChanged(String id) {
+    Comment c = service.getWithScore(id);
+    int score = c.getScore();
 
-        Map<String, Object> changeMap = new HashMap<>();
-        changeMap.put("score", score);
+    Map<String, Object> changeMap = new HashMap<>();
+    changeMap.put("score", score);
 
-        CommentPatchedPayload p = new CommentPatchedPayload(id, changeMap);
-        CommentPatched event = new CommentPatched(p, c.getRoomId());
+    CommentPatchedPayload p = new CommentPatchedPayload(id, changeMap);
+    CommentPatched event = new CommentPatched(p, c.getRoomId());
 
-        logger.debug("Sending event to comment stream: {}", event);
+    logger.debug("Sending event to comment stream: {}", event);
 
-        messagingTemplate.convertAndSend(
-                "amq.topic",
-                event.getRoomId() + ".comment.stream",
-                event
-        );
-    }
+    messagingTemplate.convertAndSend(
+        "amq.topic",
+        event.getRoomId() + ".comment.stream",
+        event
+    );
+  }
 }

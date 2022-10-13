@@ -28,28 +28,28 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class VersionInfoContributor implements InfoContributor {
-	private Map<String, Object> infoDetails;
+  private Map<String, Object> infoDetails;
 
-	@Override
-	public void contribute(final Info.Builder builder) {
-		builder.withDetails(infoDetails);
-	}
+  @Override
+  public void contribute(final Info.Builder builder) {
+    builder.withDetails(infoDetails);
+  }
 
-	@Resource(name = "versionInfoProperties")
-	public void setVersionInfoProperties(final Properties versionInfoProperties) {
-		infoDetails = new HashMap<>();
-		final Map<String, Object> version = new HashMap<>();
+  @Resource(name = "versionInfoProperties")
+  public void setVersionInfoProperties(final Properties versionInfoProperties) {
+    infoDetails = new HashMap<>();
+    final Map<String, Object> version = new HashMap<>();
 
-		version.put("string", versionInfoProperties.getProperty("version.string"));
-		version.put("buildTime", versionInfoProperties.getProperty("version.build-time"));
-		version.put("gitCommitId", versionInfoProperties.getProperty("version.git.commit-id"));
-		version.put("gitDirty", Boolean.parseBoolean(versionInfoProperties.getProperty("version.git.dirty")));
+    version.put("string", versionInfoProperties.getProperty("version.string"));
+    version.put("buildTime", versionInfoProperties.getProperty("version.build-time"));
+    version.put("gitCommitId", versionInfoProperties.getProperty("version.git.commit-id"));
+    version.put("gitDirty", Boolean.parseBoolean(versionInfoProperties.getProperty("version.git.dirty")));
 
-		infoDetails.put("productName", "arsnova-backend");
-		infoDetails.put("version", version);
-	}
+    infoDetails.put("productName", "arsnova-backend");
+    infoDetails.put("version", version);
+  }
 
-	public Map<String, Object> getInfoDetails() {
-		return infoDetails;
-	}
+  public Map<String, Object> getInfoDetails() {
+    return infoDetails;
+  }
 }

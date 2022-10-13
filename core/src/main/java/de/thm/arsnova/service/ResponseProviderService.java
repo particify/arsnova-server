@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
  * Allows access to the {@link HttpServletResponse} outside of Controllers.
  */
 public interface ResponseProviderService {
-	void setResponse(HttpServletResponse response);
+  void setResponse(HttpServletResponse response);
 
-	HttpServletResponse getResponse();
+  HttpServletResponse getResponse();
 }

@@ -6,5 +6,5 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 @JsonTypeInfo(include=As.WRAPPER_OBJECT, use=Id.NAME)
 data class UserCountChanged(
-		val userCount: Int
+    val userCount: Int
 )

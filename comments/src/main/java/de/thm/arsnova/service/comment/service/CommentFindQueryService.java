@@ -14,26 +14,26 @@ import java.util.Set;
 @Service
 public class CommentFindQueryService {
 
-    private static final Logger logger = LoggerFactory.getLogger(CommentFindQueryService.class);
+  private static final Logger logger = LoggerFactory.getLogger(CommentFindQueryService.class);
 
-    private final CommentService commentService;
+  private final CommentService commentService;
 
-    @Autowired
-    public CommentFindQueryService(final CommentService commentService) {
-        this.commentService = commentService;
-    }
+  @Autowired
+  public CommentFindQueryService(final CommentService commentService) {
+    this.commentService = commentService;
+  }
 
-    public Set<String> resolveQuery(final FindQuery<Comment> findQuery) {
-        Set<String> commentIds = new HashSet<>();
-        if (findQuery.getProperties().getRoomId() != null) {
-            List<Comment> contentList = commentService.getByRoomIdAndArchiveIdNull(findQuery.getProperties().getRoomId());
-            for (Comment c : contentList) {
-                if (findQuery.getProperties().isAck() == c.isAck()) {
-                    commentIds.add(c.getId());
-                }
-            }
+  public Set<String> resolveQuery(final FindQuery<Comment> findQuery) {
+    Set<String> commentIds = new HashSet<>();
+    if (findQuery.getProperties().getRoomId() != null) {
+      List<Comment> contentList = commentService.getByRoomIdAndArchiveIdNull(findQuery.getProperties().getRoomId());
+      for (Comment c : contentList) {
+        if (findQuery.getProperties().isAck() == c.isAck()) {
+          commentIds.add(c.getId());
         }
-
-        return commentIds;
+      }
     }
+
+    return commentIds;
+  }
 }

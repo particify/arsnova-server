@@ -4,15 +4,15 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(CouchDbMainProperties.PREFIX)
 public class CouchDbMainProperties extends CouchDbProperties {
-	public static final String PREFIX = SystemProperties.PREFIX + ".couchdb";
+  public static final String PREFIX = SystemProperties.PREFIX + ".couchdb";
 
-	private boolean createDb;
+  private boolean createDb;
 
-	public boolean isCreateDb() {
-		return createDb;
-	}
+  public boolean isCreateDb() {
+    return createDb;
+  }
 
-	public void setCreateDb(final boolean createDb) {
-		this.createDb = createDb;
-	}
+  public void setCreateDb(final boolean createDb) {
+    this.createDb = createDb;
+  }
 }

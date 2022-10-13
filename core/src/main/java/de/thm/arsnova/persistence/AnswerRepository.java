@@ -26,21 +26,21 @@ import de.thm.arsnova.model.MultipleTextsAnswer;
 import de.thm.arsnova.model.PriorizationAnswerStatistics;
 
 public interface AnswerRepository extends CrudRepository<Answer, String> {
-	<T extends Answer> T findByContentIdUserIdPiRound(String contentId, Class<T> type, String userId, int piRound);
+  <T extends Answer> T findByContentIdUserIdPiRound(String contentId, Class<T> type, String userId, int piRound);
 
-	ChoiceAnswerStatistics findByContentIdRound(String contentId, int round, int optionCount);
+  ChoiceAnswerStatistics findByContentIdRound(String contentId, int round, int optionCount);
 
-	Iterable<Answer> findStubsByContentIdAndHidden(String contentId, boolean excludeHidden);
+  Iterable<Answer> findStubsByContentIdAndHidden(String contentId, boolean excludeHidden);
 
-	List<String> findIdsByContentIdAndHidden(String contentId, boolean excludeHidden);
+  List<String> findIdsByContentIdAndHidden(String contentId, boolean excludeHidden);
 
-	List<String> findIdsByCreatorIdRoomId(String creatorId, String roomId);
+  List<String> findIdsByCreatorIdRoomId(String creatorId, String roomId);
 
-	List<String> findIdsByCreatorIdContentIdsRound(String creatorId, List<String> contentIds, int round);
+  List<String> findIdsByCreatorIdContentIdsRound(String creatorId, List<String> contentIds, int round);
 
-	List<String> findIdsByAnswerStubs(List<Answer> answerStubs);
+  List<String> findIdsByAnswerStubs(List<Answer> answerStubs);
 
-	List<MultipleTextsAnswer> findByContentIdRoundForText(String contentId, int round);
+  List<MultipleTextsAnswer> findByContentIdRoundForText(String contentId, int round);
 
-	PriorizationAnswerStatistics findByContentIdRoundForPriorization(String contentId, int optionCount);
+  PriorizationAnswerStatistics findByContentIdRoundForPriorization(String contentId, int optionCount);
 }

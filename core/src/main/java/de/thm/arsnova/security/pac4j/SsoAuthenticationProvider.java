@@ -34,23 +34,23 @@ import de.thm.arsnova.security.User;
  */
 @Component
 public class SsoAuthenticationProvider implements AuthenticationProvider {
-	private SsoUserDetailsService ssoUserDetailsService;
+  private SsoUserDetailsService ssoUserDetailsService;
 
-	@Override
-	public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
-		final SsoAuthenticationToken ssoAuthenticationToken = (SsoAuthenticationToken) authentication;
-		final User user = ssoUserDetailsService.loadUserDetails(ssoAuthenticationToken);
+  @Override
+  public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
+    final SsoAuthenticationToken ssoAuthenticationToken = (SsoAuthenticationToken) authentication;
+    final User user = ssoUserDetailsService.loadUserDetails(ssoAuthenticationToken);
 
-		return new SsoAuthenticationToken(user, (CommonProfile) ssoAuthenticationToken.getDetails(), user.getAuthorities());
-	}
+    return new SsoAuthenticationToken(user, (CommonProfile) ssoAuthenticationToken.getDetails(), user.getAuthorities());
+  }
 
-	@Override
-	public boolean supports(final Class<?> authentication) {
-		return authentication.isAssignableFrom(SsoAuthenticationToken.class);
-	}
+  @Override
+  public boolean supports(final Class<?> authentication) {
+    return authentication.isAssignableFrom(SsoAuthenticationToken.class);
+  }
 
-	@Autowired
-	public void setSsoUserDetailsService(final SsoUserDetailsService ssoUserDetailsService) {
-		this.ssoUserDetailsService = ssoUserDetailsService;
-	}
+  @Autowired
+  public void setSsoUserDetailsService(final SsoUserDetailsService ssoUserDetailsService) {
+    this.ssoUserDetailsService = ssoUserDetailsService;
+  }
 }

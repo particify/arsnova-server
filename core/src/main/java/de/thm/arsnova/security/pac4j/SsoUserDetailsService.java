@@ -46,65 +46,65 @@ import de.thm.arsnova.service.UserService;
  */
 @Service
 public class SsoUserDetailsService implements AuthenticationUserDetailsService<SsoAuthenticationToken> {
-	public static final GrantedAuthority ROLE_OAUTH_USER = new SimpleGrantedAuthority("ROLE_OAUTH_USER");
+  public static final GrantedAuthority ROLE_OAUTH_USER = new SimpleGrantedAuthority("ROLE_OAUTH_USER");
 
-	protected final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
-			User.ROLE_USER,
-			ROLE_OAUTH_USER
-	);
-	private final AuthenticationProviderProperties.Saml samlProperties;
-	private final UserService userService;
+  protected final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
+      User.ROLE_USER,
+      ROLE_OAUTH_USER
+  );
+  private final AuthenticationProviderProperties.Saml samlProperties;
+  private final UserService userService;
 
-	public SsoUserDetailsService(final UserService userService,
-			final AuthenticationProviderProperties authenticationProviderProperties) {
-		this.userService = userService;
-		this.samlProperties = authenticationProviderProperties.getSaml();
-	}
+  public SsoUserDetailsService(final UserService userService,
+      final AuthenticationProviderProperties authenticationProviderProperties) {
+    this.userService = userService;
+    this.samlProperties = authenticationProviderProperties.getSaml();
+  }
 
-	public User loadUserDetails(final SsoAuthenticationToken token)
-			throws UsernameNotFoundException {
-		final User user;
-		final Set<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
-		if (token.getDetails() instanceof GoogleOidcProfile) {
-			final GoogleOidcProfile profile = (GoogleOidcProfile) token.getDetails();
-			if (!profile.getEmailVerified()) {
-				throw new IllegalArgumentException("Email is not verified.");
-			}
-			user = userService.loadUser(UserProfile.AuthProvider.GOOGLE, profile.getEmail(),
-					grantedAuthorities, true);
-		} else if (token.getDetails() instanceof TwitterProfile) {
-			final TwitterProfile profile = (TwitterProfile) token.getDetails();
-			user = userService.loadUser(UserProfile.AuthProvider.TWITTER, profile.getUsername(),
-					grantedAuthorities, true);
-		} else if (token.getDetails() instanceof FacebookProfile) {
-			final FacebookProfile profile = (FacebookProfile) token.getDetails();
-			user = userService.loadUser(UserProfile.AuthProvider.FACEBOOK, profile.getId(),
-					grantedAuthorities, true);
-		} else if (token.getDetails() instanceof OidcProfile) {
-			final OidcProfile profile = (OidcProfile) token.getDetails();
-			if (userService.isAdmin(profile.getId(), UserProfile.AuthProvider.OIDC)) {
-				grantedAuthorities.add(User.ROLE_ADMIN);
-			}
-			user = userService.loadUser(UserProfile.AuthProvider.OIDC, profile.getId(),
-					grantedAuthorities, true);
-		} else if (token.getDetails() instanceof SAML2Profile) {
-			final SAML2Profile profile = (SAML2Profile) token.getDetails();
-			final String uidAttr = samlProperties.getUserIdAttribute();
-			final String uid;
-			if (uidAttr == null || "".equals(uidAttr)) {
-				uid = profile.getId();
-			} else {
-				uid = profile.getAttribute(uidAttr, List.class).get(0).toString();
-			}
-			if (userService.isAdmin(uid, UserProfile.AuthProvider.SAML)) {
-				grantedAuthorities.add(User.ROLE_ADMIN);
-			}
-			user = userService.loadUser(UserProfile.AuthProvider.SAML, uid,
-					grantedAuthorities, true);
-		} else {
-			throw new IllegalArgumentException("AuthenticationToken not supported");
-		}
+  public User loadUserDetails(final SsoAuthenticationToken token)
+      throws UsernameNotFoundException {
+    final User user;
+    final Set<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
+    if (token.getDetails() instanceof GoogleOidcProfile) {
+      final GoogleOidcProfile profile = (GoogleOidcProfile) token.getDetails();
+      if (!profile.getEmailVerified()) {
+        throw new IllegalArgumentException("Email is not verified.");
+      }
+      user = userService.loadUser(UserProfile.AuthProvider.GOOGLE, profile.getEmail(),
+          grantedAuthorities, true);
+    } else if (token.getDetails() instanceof TwitterProfile) {
+      final TwitterProfile profile = (TwitterProfile) token.getDetails();
+      user = userService.loadUser(UserProfile.AuthProvider.TWITTER, profile.getUsername(),
+          grantedAuthorities, true);
+    } else if (token.getDetails() instanceof FacebookProfile) {
+      final FacebookProfile profile = (FacebookProfile) token.getDetails();
+      user = userService.loadUser(UserProfile.AuthProvider.FACEBOOK, profile.getId(),
+          grantedAuthorities, true);
+    } else if (token.getDetails() instanceof OidcProfile) {
+      final OidcProfile profile = (OidcProfile) token.getDetails();
+      if (userService.isAdmin(profile.getId(), UserProfile.AuthProvider.OIDC)) {
+        grantedAuthorities.add(User.ROLE_ADMIN);
+      }
+      user = userService.loadUser(UserProfile.AuthProvider.OIDC, profile.getId(),
+          grantedAuthorities, true);
+    } else if (token.getDetails() instanceof SAML2Profile) {
+      final SAML2Profile profile = (SAML2Profile) token.getDetails();
+      final String uidAttr = samlProperties.getUserIdAttribute();
+      final String uid;
+      if (uidAttr == null || "".equals(uidAttr)) {
+        uid = profile.getId();
+      } else {
+        uid = profile.getAttribute(uidAttr, List.class).get(0).toString();
+      }
+      if (userService.isAdmin(uid, UserProfile.AuthProvider.SAML)) {
+        grantedAuthorities.add(User.ROLE_ADMIN);
+      }
+      user = userService.loadUser(UserProfile.AuthProvider.SAML, uid,
+          grantedAuthorities, true);
+    } else {
+      throw new IllegalArgumentException("AuthenticationToken not supported");
+    }
 
-		return user;
-	}
+    return user;
+  }
 }

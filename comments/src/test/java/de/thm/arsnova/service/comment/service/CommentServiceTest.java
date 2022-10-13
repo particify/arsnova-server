@@ -26,80 +26,80 @@ import de.thm.arsnova.service.comment.service.persistence.VoteRepository;
 @ExtendWith(MockitoExtension.class)
 public class CommentServiceTest {
 
-    @Mock
-    CommentRepository repository;
+  @Mock
+  CommentRepository repository;
 
-    @Mock
-    VoteRepository voteRepository;
+  @Mock
+  VoteRepository voteRepository;
 
-    @Mock
-    VoteService voteService;
+  @Mock
+  VoteService voteService;
 
-    @Mock
-    MappingJackson2MessageConverter converter;
+  @Mock
+  MappingJackson2MessageConverter converter;
 
-    private CommentService service;
+  private CommentService service;
 
-    @BeforeEach
-    public void setup() {
-        service = new CommentService(repository, voteRepository, voteService, converter);
-    }
+  @BeforeEach
+  public void setup() {
+    service = new CommentService(repository, voteRepository, voteService, converter);
+  }
 
-    @Test
-    public void testShouldCreateComment() {
-        String roomId = "52f08e8314aba247c50faacef600254c";
-        String creatorId = "52f08e8314aba247c50faacef600254c";
+  @Test
+  public void testShouldCreateComment() {
+    String roomId = "52f08e8314aba247c50faacef600254c";
+    String creatorId = "52f08e8314aba247c50faacef600254c";
 
-        Comment c = new Comment();
-        c.setRoomId(roomId);
-        c.setCreatorId(creatorId);
+    Comment c = new Comment();
+    c.setRoomId(roomId);
+    c.setCreatorId(creatorId);
 
-        Comment saved = service.create(c);
+    Comment saved = service.create(c);
 
-        verify(repository, times(1)).save(c);
-        assertNotNull(saved.getId());
-    }
+    verify(repository, times(1)).save(c);
+    assertNotNull(saved.getId());
+  }
 
-    @Test
-    public void testShouldGetCommentById() {
-        String id = "52f08e8314aba247c50faacef60025ff";
-        String roomId = "52f08e8314aba247c50faacef600254c";
-        String creatorId = "52f08e8314aba247c50faacef600254c";
-        Comment c = new Comment();
-        c.setId(id);
-        c.setRoomId(roomId);
-        c.setCreatorId(creatorId);
+  @Test
+  public void testShouldGetCommentById() {
+    String id = "52f08e8314aba247c50faacef60025ff";
+    String roomId = "52f08e8314aba247c50faacef600254c";
+    String creatorId = "52f08e8314aba247c50faacef600254c";
+    Comment c = new Comment();
+    c.setId(id);
+    c.setRoomId(roomId);
+    c.setCreatorId(creatorId);
 
-        when(repository.findById(id)).thenReturn(Optional.of(c));
+    when(repository.findById(id)).thenReturn(Optional.of(c));
 
-        Comment comment = service.getWithScore(id);
+    Comment comment = service.getWithScore(id);
 
-        assertEquals(roomId, comment.getRoomId());
-        assertEquals(creatorId, comment.getCreatorId());
-        assertNotNull(comment.getScore());
-    }
+    assertEquals(roomId, comment.getRoomId());
+    assertEquals(creatorId, comment.getCreatorId());
+    assertNotNull(comment.getScore());
+  }
 
-    @Test
-    public void testShouldDelete() {
-        String id = "52f08e8314aba247c50faacef60025ff";
+  @Test
+  public void testShouldDelete() {
+    String id = "52f08e8314aba247c50faacef60025ff";
 
-        Vote v1 = new Vote();
-        Vote v2 = new Vote();
-        List<Vote> voteList = new ArrayList<>();
-        voteList.add(v1);
-        voteList.add(v2);
+    Vote v1 = new Vote();
+    Vote v2 = new Vote();
+    List<Vote> voteList = new ArrayList<>();
+    voteList.add(v1);
+    voteList.add(v2);
 
-        when(voteRepository.findByCommentId(id)).thenReturn(voteList);
+    when(voteRepository.findByCommentId(id)).thenReturn(voteList);
 
-        service.delete(id);
+    service.delete(id);
 
-        @SuppressWarnings("unchecked")
-        Class<ArrayList<Vote>> listClass =
-                (Class<ArrayList<Vote>>)(Class)ArrayList.class;
-        ArgumentCaptor<List<Vote>> voteListCaptor = ArgumentCaptor.forClass(listClass);
+    @SuppressWarnings("unchecked")
+    Class<ArrayList<Vote>> listClass =
+        (Class<ArrayList<Vote>>)(Class)ArrayList.class;
+    ArgumentCaptor<List<Vote>> voteListCaptor = ArgumentCaptor.forClass(listClass);
 
-        verify(voteRepository, times(1)).deleteAll(voteListCaptor.capture());
-        assertThat(voteListCaptor.getValue()).isEqualTo(voteList);
-    }
+    verify(voteRepository, times(1)).deleteAll(voteListCaptor.capture());
+    assertThat(voteListCaptor.getValue()).isEqualTo(voteList);
+  }
 
 }

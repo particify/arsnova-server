@@ -8,12 +8,12 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 @SpringBootApplication
 class ArsnovaWsGatewayServiceApplication : SpringBootServletInitializer() {
 
-	override fun configure(application: SpringApplicationBuilder): SpringApplicationBuilder {
-		return application.sources(ArsnovaWsGatewayServiceApplication::class.java!!)
-	}
+  override fun configure(application: SpringApplicationBuilder): SpringApplicationBuilder {
+    return application.sources(ArsnovaWsGatewayServiceApplication::class.java!!)
+  }
 
 }
 
 fun main(args: Array<String>) {
-	SpringApplication.run(ArsnovaWsGatewayServiceApplication::class.java, *args)
+  SpringApplication.run(ArsnovaWsGatewayServiceApplication::class.java, *args)
 }

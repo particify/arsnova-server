@@ -11,28 +11,28 @@ import java.util.Set;
 
 @Service
 public class BonusTokenFindQueryService {
-    private final BonusTokenService bonusTokenService;
+  private final BonusTokenService bonusTokenService;
 
-    @Autowired
-    public BonusTokenFindQueryService(
-            BonusTokenService bonusTokenService
-    ) {
-        this.bonusTokenService = bonusTokenService;
-    }
+  @Autowired
+  public BonusTokenFindQueryService(
+      BonusTokenService bonusTokenService
+  ) {
+    this.bonusTokenService = bonusTokenService;
+  }
 
-    public Set<BonusTokenPK> resolveQuery(final FindQuery<BonusToken> findQuery) {
-        Set<BonusTokenPK> bonusTokenIds = new HashSet<>();
-        if (findQuery.getProperties().getRoomId() != null) {
-            List<BonusToken> bonusTokenList = bonusTokenService.getByRoomId(findQuery.getProperties().getRoomId());
-            for (BonusToken bt : bonusTokenList) {
-                bonusTokenIds.add(new BonusTokenPK(bt.getRoomId(), bt.getCommentId(), bt.getUserId()));
-            }
-        } else if (findQuery.getProperties().getUserId() != null) {
-            List<BonusToken> bonusTokenList = bonusTokenService.getByUserId(findQuery.getProperties().getUserId());
-            for (BonusToken bt : bonusTokenList) {
-                bonusTokenIds.add(new BonusTokenPK(bt.getRoomId(), bt.getCommentId(), bt.getUserId()));
-            }
-        }
-        return bonusTokenIds;
+  public Set<BonusTokenPK> resolveQuery(final FindQuery<BonusToken> findQuery) {
+    Set<BonusTokenPK> bonusTokenIds = new HashSet<>();
+    if (findQuery.getProperties().getRoomId() != null) {
+      List<BonusToken> bonusTokenList = bonusTokenService.getByRoomId(findQuery.getProperties().getRoomId());
+      for (BonusToken bt : bonusTokenList) {
+        bonusTokenIds.add(new BonusTokenPK(bt.getRoomId(), bt.getCommentId(), bt.getUserId()));
+      }
+    } else if (findQuery.getProperties().getUserId() != null) {
+      List<BonusToken> bonusTokenList = bonusTokenService.getByUserId(findQuery.getProperties().getUserId());
+      for (BonusToken bt : bonusTokenList) {
+        bonusTokenIds.add(new BonusTokenPK(bt.getRoomId(), bt.getCommentId(), bt.getUserId()));
+      }
     }
+    return bonusTokenIds;
+  }
 }

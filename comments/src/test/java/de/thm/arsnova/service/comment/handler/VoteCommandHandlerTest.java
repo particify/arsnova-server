@@ -25,104 +25,104 @@ import de.thm.arsnova.service.comment.service.VoteService;
 
 @ExtendWith(MockitoExtension.class)
 public class VoteCommandHandlerTest {
-    @Mock
-    private VoteService voteService;
+  @Mock
+  private VoteService voteService;
 
-    @Mock
-    private CommentEventSource commentEventSource;
+  @Mock
+  private CommentEventSource commentEventSource;
 
-    @Mock
-    private PermissionEvaluator permissionEvaluator;
+  @Mock
+  private PermissionEvaluator permissionEvaluator;
 
-    private VoteCommandHandler commandHandler;
+  private VoteCommandHandler commandHandler;
 
-    @BeforeEach
-    public void setup() {
-        this.commandHandler = new VoteCommandHandler(voteService, commentEventSource, permissionEvaluator);
-    }
+  @BeforeEach
+  public void setup() {
+    this.commandHandler = new VoteCommandHandler(voteService, commentEventSource, permissionEvaluator);
+  }
 
-    @Test
-    public void testHandleUpvote() {
-        String commentId = "52f08e8314aba247c50faacef600254c";
-        String creatorId = "52f08e8314aba247c50faacef600254c";
-        VotePayload payload = new VotePayload(creatorId, commentId);
-        Upvote command = new Upvote(payload);
-        Vote expectedVote = new Vote();
-        expectedVote.setCommentId(commentId);
-        expectedVote.setUserId(creatorId);
-        expectedVote.setVote(1);
+  @Test
+  public void testHandleUpvote() {
+    String commentId = "52f08e8314aba247c50faacef600254c";
+    String creatorId = "52f08e8314aba247c50faacef600254c";
+    VotePayload payload = new VotePayload(creatorId, commentId);
+    Upvote command = new Upvote(payload);
+    Vote expectedVote = new Vote();
+    expectedVote.setCommentId(commentId);
+    expectedVote.setUserId(creatorId);
+    expectedVote.setVote(1);
 
-        when(voteService.create(any())).thenReturn(expectedVote);
-        when(permissionEvaluator.checkVoteOwnerPermission(any())).thenReturn(true);
+    when(voteService.create(any())).thenReturn(expectedVote);
+    when(permissionEvaluator.checkVoteOwnerPermission(any())).thenReturn(true);
 
-        Vote returned = commandHandler.handle(command);
+    Vote returned = commandHandler.handle(command);
 
-        ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
 
-        verify(commentEventSource, times(1)).ScoreChanged(commentIdCaptor.capture());
-        assertThat(returned).isEqualTo(expectedVote);
-        assertThat(commentIdCaptor.getValue()).isEqualTo(commentId);
-    }
+    verify(commentEventSource, times(1)).ScoreChanged(commentIdCaptor.capture());
+    assertThat(returned).isEqualTo(expectedVote);
+    assertThat(commentIdCaptor.getValue()).isEqualTo(commentId);
+  }
 
-    @Test
-    public void testHandleDownvote() {
-        String commentId = "52f08e8314aba247c50faacef600254c";
-        String creatorId = "52f08e8314aba247c50faacef600254c";
-        VotePayload payload = new VotePayload(creatorId, commentId);
-        Downvote command = new Downvote(payload);
-        Vote expectedVote = new Vote();
-        expectedVote.setCommentId(commentId);
-        expectedVote.setUserId(creatorId);
-        expectedVote.setVote(-1);
+  @Test
+  public void testHandleDownvote() {
+    String commentId = "52f08e8314aba247c50faacef600254c";
+    String creatorId = "52f08e8314aba247c50faacef600254c";
+    VotePayload payload = new VotePayload(creatorId, commentId);
+    Downvote command = new Downvote(payload);
+    Vote expectedVote = new Vote();
+    expectedVote.setCommentId(commentId);
+    expectedVote.setUserId(creatorId);
+    expectedVote.setVote(-1);
 
-        when(voteService.create(any())).thenReturn(expectedVote);
-        when(permissionEvaluator.checkVoteOwnerPermission(any())).thenReturn(true);
+    when(voteService.create(any())).thenReturn(expectedVote);
+    when(permissionEvaluator.checkVoteOwnerPermission(any())).thenReturn(true);
 
-        Vote returned = commandHandler.handle(command);
+    Vote returned = commandHandler.handle(command);
 
-        ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
 
-        verify(commentEventSource, times(1)).ScoreChanged(commentIdCaptor.capture());
-        assertThat(returned).isEqualTo(expectedVote);
-        assertThat(commentIdCaptor.getValue()).isEqualTo(commentId);
-    }
+    verify(commentEventSource, times(1)).ScoreChanged(commentIdCaptor.capture());
+    assertThat(returned).isEqualTo(expectedVote);
+    assertThat(commentIdCaptor.getValue()).isEqualTo(commentId);
+  }
 
-    @Test
-    public void testHandleResetVote() {
-        String commentId = "52f08e8314aba247c50faacef600254c";
-        String creatorId = "52f08e8314aba247c50faacef600254c";
-        VotePayload payload = new VotePayload(creatorId, commentId);
-        ResetVote command = new ResetVote(payload);
-        Vote currentVote = new Vote();
-        currentVote.setCommentId(commentId);
-        currentVote.setUserId(creatorId);
-        currentVote.setVote(-1);
+  @Test
+  public void testHandleResetVote() {
+    String commentId = "52f08e8314aba247c50faacef600254c";
+    String creatorId = "52f08e8314aba247c50faacef600254c";
+    VotePayload payload = new VotePayload(creatorId, commentId);
+    ResetVote command = new ResetVote(payload);
+    Vote currentVote = new Vote();
+    currentVote.setCommentId(commentId);
+    currentVote.setUserId(creatorId);
+    currentVote.setVote(-1);
 
-        when(voteService.resetVote(commentId, creatorId)).thenReturn(currentVote);
-        when(permissionEvaluator.checkVoteOwnerPermission(any())).thenReturn(true);
+    when(voteService.resetVote(commentId, creatorId)).thenReturn(currentVote);
+    when(permissionEvaluator.checkVoteOwnerPermission(any())).thenReturn(true);
 
-        commandHandler.handle(command);
+    commandHandler.handle(command);
 
-        ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
 
-        verify(commentEventSource, times(1)).ScoreChanged(commentIdCaptor.capture());
-        assertThat(commentIdCaptor.getValue()).isEqualTo(commentId);
-    }
+    verify(commentEventSource, times(1)).ScoreChanged(commentIdCaptor.capture());
+    assertThat(commentIdCaptor.getValue()).isEqualTo(commentId);
+  }
 
-    @Test
-    public void testHandleResetVoteWithoutCurrentVote() {
-        String commentId = "52f08e8314aba247c50faacef600254c";
-        String creatorId = "52f08e8314aba247c50faacef600254c";
-        VotePayload payload = new VotePayload(creatorId, commentId);
-        ResetVote command = new ResetVote(payload);
+  @Test
+  public void testHandleResetVoteWithoutCurrentVote() {
+    String commentId = "52f08e8314aba247c50faacef600254c";
+    String creatorId = "52f08e8314aba247c50faacef600254c";
+    VotePayload payload = new VotePayload(creatorId, commentId);
+    ResetVote command = new ResetVote(payload);
 
-        when(voteService.resetVote(commentId, creatorId)).thenReturn(null);
-        when(permissionEvaluator.checkVoteOwnerPermission(any())).thenReturn(true);
+    when(voteService.resetVote(commentId, creatorId)).thenReturn(null);
+    when(permissionEvaluator.checkVoteOwnerPermission(any())).thenReturn(true);
 
-        commandHandler.handle(command);
+    commandHandler.handle(command);
 
-        ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
 
-        verify(commentEventSource, never()).ScoreChanged(commentIdCaptor.capture());
-    }
+    verify(commentEventSource, never()).ScoreChanged(commentIdCaptor.capture());
+  }
 }

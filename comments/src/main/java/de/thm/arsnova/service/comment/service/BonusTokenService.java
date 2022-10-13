@@ -14,47 +14,47 @@ import java.util.UUID;
 
 @Service
 public class BonusTokenService {
-    private static final Logger logger = LoggerFactory.getLogger(BonusTokenService.class);
+  private static final Logger logger = LoggerFactory.getLogger(BonusTokenService.class);
 
-    final BonusTokenRepository repository;
+  final BonusTokenRepository repository;
 
-    @Autowired
-    public BonusTokenService(
-            BonusTokenRepository repository
-    ) {
-        this.repository = repository;
-    }
+  @Autowired
+  public BonusTokenService(
+      BonusTokenRepository repository
+  ) {
+    this.repository = repository;
+  }
 
-    public List<BonusToken> get(List<BonusTokenPK> ids) {
-        Iterable<BonusToken> it = repository.findAllById(ids);
-        List<BonusToken> list = new ArrayList<>();
-        it.forEach(list::add);
+  public List<BonusToken> get(List<BonusTokenPK> ids) {
+    Iterable<BonusToken> it = repository.findAllById(ids);
+    List<BonusToken> list = new ArrayList<>();
+    it.forEach(list::add);
 
-        return list;
-    }
+    return list;
+  }
 
-    public BonusToken create(BonusToken b) {
-        String token = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
-        b.setToken(token);
-        repository.save(b);
+  public BonusToken create(BonusToken b) {
+    String token = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+    b.setToken(token);
+    repository.save(b);
 
-        return b;
-    }
+    return b;
+  }
 
-    public void delete(BonusToken b) {
-        repository.delete(b);
-    }
+  public void delete(BonusToken b) {
+    repository.delete(b);
+  }
 
-    public void deleteByPK(String roomId, String commentId, String userId) {
-        BonusToken bt = repository.findById(new BonusTokenPK(roomId, commentId, userId)).orElse(null);
-        repository.delete(bt);
-    }
+  public void deleteByPK(String roomId, String commentId, String userId) {
+    BonusToken bt = repository.findById(new BonusTokenPK(roomId, commentId, userId)).orElse(null);
+    repository.delete(bt);
+  }
 
-    public List<BonusToken> getByRoomId(String roomId) {
-        return repository.findByRoomId(roomId);
-    }
+  public List<BonusToken> getByRoomId(String roomId) {
+    return repository.findByRoomId(roomId);
+  }
 
-    public List<BonusToken> getByUserId(String userId) {
-        return repository.findByUserId(userId);
-    }
+  public List<BonusToken> getByUserId(String userId) {
+    return repository.findByUserId(userId);
+  }
 }

@@ -19,36 +19,36 @@ import de.thm.arsnova.service.comment.service.StatsService;
 @RestController("StatsController")
 @RequestMapping(StatsController.REQUEST_MAPPING)
 public class StatsController extends AbstractEntityController {
-    private static final Logger logger = LoggerFactory.getLogger(StatsController.class);
+  private static final Logger logger = LoggerFactory.getLogger(StatsController.class);
 
-    protected static final String REQUEST_MAPPING = "/stats";
-    private static final String COMMENT_STATS_BY_ROOMS_MAPPING = "/comment-stats-by-rooms";
-    private static final String STATS_GET_MAPPNIG = "";
+  protected static final String REQUEST_MAPPING = "/stats";
+  private static final String COMMENT_STATS_BY_ROOMS_MAPPING = "/comment-stats-by-rooms";
+  private static final String STATS_GET_MAPPNIG = "";
 
-    private final StatsService service;
-    private final CommentCommandHandler commentCommandHandler;
+  private final StatsService service;
+  private final CommentCommandHandler commentCommandHandler;
 
-    @Autowired
-    public StatsController(
-            StatsService service,
-            CommentCommandHandler commentCommandHandler
-    ) {
-        this.service = service;
-        this.commentCommandHandler = commentCommandHandler;
-    }
+  @Autowired
+  public StatsController(
+      StatsService service,
+      CommentCommandHandler commentCommandHandler
+  ) {
+    this.service = service;
+    this.commentCommandHandler = commentCommandHandler;
+  }
 
-    @GetMapping(STATS_GET_MAPPNIG)
-    public Stats get() {
-        return service.get();
-    }
+  @GetMapping(STATS_GET_MAPPNIG)
+  public Stats get() {
+    return service.get();
+  }
 
-    @GetMapping(COMMENT_STATS_BY_ROOMS_MAPPING)
-    public List<CommentStats> statsByRoom(
-            @RequestParam final List<String> roomIds
-    ) {
-        CalculateStatsPayload p = new CalculateStatsPayload(roomIds);
-        CalculateStats command = new CalculateStats(p);
+  @GetMapping(COMMENT_STATS_BY_ROOMS_MAPPING)
+  public List<CommentStats> statsByRoom(
+      @RequestParam final List<String> roomIds
+  ) {
+    CalculateStatsPayload p = new CalculateStatsPayload(roomIds);
+    CalculateStats command = new CalculateStats(p);
 
-        return commentCommandHandler.handle(command);
-    }
+    return commentCommandHandler.handle(command);
+  }
 }

@@ -35,42 +35,42 @@ import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
  */
 @Service
 public class ImportedRoomUnsetClosedFlagMigration extends AbstractMigration {
-	private static final String ID = "20210319160400";
-	private static final String ROOM_INDEX = "room-imported-closed-index";
+  private static final String ID = "20210319160400";
+  private static final String ROOM_INDEX = "room-imported-closed-index";
 
-	public ImportedRoomUnsetClosedFlagMigration(
-			final MangoCouchDbConnector connector) {
-		super(ID, connector);
-	}
+  public ImportedRoomUnsetClosedFlagMigration(
+      final MangoCouchDbConnector connector) {
+    super(ID, connector);
+  }
 
-	@PostConstruct
-	public void initMigration() {
-		addEntityMigrationStepHandler(
-				RoomMigrationEntity.class,
-				ROOM_INDEX,
-				Map.of(
-						"type", "Room",
-						"closed", true,
-						"importMetadata", Map.of("source", "V2_IMPORT")
-				),
-				room -> {
-					room.setClosed(false);
-					return List.of(room);
-				}
-		);
-	}
+  @PostConstruct
+  public void initMigration() {
+    addEntityMigrationStepHandler(
+        RoomMigrationEntity.class,
+        ROOM_INDEX,
+        Map.of(
+            "type", "Room",
+            "closed", true,
+            "importMetadata", Map.of("source", "V2_IMPORT")
+        ),
+        room -> {
+          room.setClosed(false);
+          return List.of(room);
+        }
+    );
+  }
 
-	private static class RoomMigrationEntity extends MigrationEntity {
-		private boolean closed;
+  private static class RoomMigrationEntity extends MigrationEntity {
+    private boolean closed;
 
-		@JsonView(View.Persistence.class)
-		public boolean isClosed() {
-			return closed;
-		}
+    @JsonView(View.Persistence.class)
+    public boolean isClosed() {
+      return closed;
+    }
 
-		@JsonView(View.Persistence.class)
-		public void setClosed(final boolean closed) {
-			this.closed = closed;
-		}
-	}
+    @JsonView(View.Persistence.class)
+    public void setClosed(final boolean closed) {
+      this.closed = closed;
+    }
+  }
 }

@@ -29,35 +29,35 @@ import de.thm.arsnova.model.FindQuery;
 
 @Service
 public class ContentFindQueryService implements FindQueryService<Content> {
-	private ContentService contentService;
-	private ContentGroupService contentGroupService;
+  private ContentService contentService;
+  private ContentGroupService contentGroupService;
 
-	public ContentFindQueryService(final ContentService contentService,
-			final ContentGroupService contentGroupService) {
-		this.contentService = contentService;
-		this.contentGroupService = contentGroupService;
-	}
+  public ContentFindQueryService(final ContentService contentService,
+      final ContentGroupService contentGroupService) {
+    this.contentService = contentService;
+    this.contentGroupService = contentGroupService;
+  }
 
-	@Override
-	public Set<String> resolveQuery(final FindQuery<Content> findQuery) {
-		final Set<String> contentIds = new HashSet<>();
+  @Override
+  public Set<String> resolveQuery(final FindQuery<Content> findQuery) {
+    final Set<String> contentIds = new HashSet<>();
 
-		if (findQuery.getExternalFilters().get("notInContentGroupOfRoomId") instanceof String) {
-			final String roomId = (String) findQuery.getExternalFilters().get("notInContentGroupOfRoomId");
-			final Set<String> idsWithGroup = contentGroupService.getByRoomId(roomId).stream()
-					.flatMap(cg -> cg.getContentIds().stream()).collect(Collectors.toSet());
-			final Set<String> idsWithoutGroup = contentService.getByRoomId(roomId).stream()
-					.map(Content::getId).filter(id -> !idsWithGroup.contains(id)).collect(Collectors.toSet());
-			contentIds.addAll(idsWithoutGroup);
-		}
+    if (findQuery.getExternalFilters().get("notInContentGroupOfRoomId") instanceof String) {
+      final String roomId = (String) findQuery.getExternalFilters().get("notInContentGroupOfRoomId");
+      final Set<String> idsWithGroup = contentGroupService.getByRoomId(roomId).stream()
+          .flatMap(cg -> cg.getContentIds().stream()).collect(Collectors.toSet());
+      final Set<String> idsWithoutGroup = contentService.getByRoomId(roomId).stream()
+          .map(Content::getId).filter(id -> !idsWithGroup.contains(id)).collect(Collectors.toSet());
+      contentIds.addAll(idsWithoutGroup);
+    }
 
-		if (findQuery.getProperties().getRoomId() != null) {
-			final List<Content> contentList = contentService.getByRoomId(findQuery.getProperties().getRoomId());
-			for (final Content c : contentList) {
-				contentIds.add(c.getId());
-			}
-		}
+    if (findQuery.getProperties().getRoomId() != null) {
+      final List<Content> contentList = contentService.getByRoomId(findQuery.getProperties().getRoomId());
+      for (final Content c : contentList) {
+        contentIds.add(c.getId());
+      }
+    }
 
-		return contentIds;
-	}
+    return contentIds;
+  }
 }

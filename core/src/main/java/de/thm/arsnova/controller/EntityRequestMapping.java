@@ -14,22 +14,22 @@ import de.thm.arsnova.config.AppConfig;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @RequestMapping(produces = {
-		AppConfig.API_V3_MEDIA_TYPE_VALUE,
-		MediaType.APPLICATION_JSON_VALUE
+    AppConfig.API_V3_MEDIA_TYPE_VALUE,
+    MediaType.APPLICATION_JSON_VALUE
 })
 public @interface EntityRequestMapping {
-	@AliasFor(annotation = RequestMapping.class, attribute = "value")
-	String[] value() default {};
+  @AliasFor(annotation = RequestMapping.class, attribute = "value")
+  String[] value() default {};
 
-	@AliasFor(annotation = RequestMapping.class, attribute = "method")
-	RequestMethod[] method() default {};
+  @AliasFor(annotation = RequestMapping.class, attribute = "method")
+  RequestMethod[] method() default {};
 
-	@AliasFor(annotation = RequestMapping.class, attribute = "params")
-	String[] params() default {};
+  @AliasFor(annotation = RequestMapping.class, attribute = "params")
+  String[] params() default {};
 
-	@AliasFor(annotation = RequestMapping.class, attribute = "headers")
-	String[] headers() default {};
+  @AliasFor(annotation = RequestMapping.class, attribute = "headers")
+  String[] headers() default {};
 
-	@AliasFor(annotation = RequestMapping.class, attribute = "consumes")
-	String[] consumes() default {};
+  @AliasFor(annotation = RequestMapping.class, attribute = "consumes")
+  String[] consumes() default {};
 }

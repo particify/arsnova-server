@@ -27,20 +27,20 @@ import de.thm.arsnova.model.Entity;
 
 @JsonIgnoreProperties(value = {"type"}, allowGetters = true)
 public abstract class CouchDbDocumentMixIn {
-	@JsonProperty("_id")
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	abstract String getId();
+  @JsonProperty("_id")
+  @JsonInclude(JsonInclude.Include.NON_EMPTY)
+  abstract String getId();
 
-	@JsonProperty("_id")
-	abstract void setId(String id);
+  @JsonProperty("_id")
+  abstract void setId(String id);
 
-	@JsonProperty("_rev")
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	abstract String getRevision();
+  @JsonProperty("_rev")
+  @JsonInclude(JsonInclude.Include.NON_EMPTY)
+  abstract String getRevision();
 
-	@JsonProperty("_rev")
-	abstract String setRevision(String rev);
+  @JsonProperty("_rev")
+  abstract String setRevision(String rev);
 
-	@JsonSerialize(converter = CouchDbTypeFieldConverter.class)
-	abstract Class<? extends Entity> getType();
+  @JsonSerialize(converter = CouchDbTypeFieldConverter.class)
+  abstract Class<? extends Entity> getType();
 }

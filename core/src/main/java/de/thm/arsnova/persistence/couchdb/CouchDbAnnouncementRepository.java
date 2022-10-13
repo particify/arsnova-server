@@ -9,22 +9,22 @@ import de.thm.arsnova.model.Announcement;
 import de.thm.arsnova.persistence.AnnouncementRepository;
 
 public class CouchDbAnnouncementRepository extends CouchDbCrudRepository<Announcement>
-		implements AnnouncementRepository {
-	public CouchDbAnnouncementRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Announcement.class, db, "by_id", createIfNotExists);
-	}
+    implements AnnouncementRepository {
+  public CouchDbAnnouncementRepository(final CouchDbConnector db, final boolean createIfNotExists) {
+    super(Announcement.class, db, "by_id", createIfNotExists);
+  }
 
-	@Override
-	public List<String> findIdsByRoomId(final String roomId) {
-		final ViewResult result = db.queryView(createQuery("by_roomid").reduce(false).key(roomId));
+  @Override
+  public List<String> findIdsByRoomId(final String roomId) {
+    final ViewResult result = db.queryView(createQuery("by_roomid").reduce(false).key(roomId));
 
-		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
-	}
+    return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
+  }
 
-	@Override
-	public List<String> findIdsByRoomIds(final List<String> roomIds) {
-		final ViewResult result = db.queryView(createQuery("by_roomid").reduce(false).keys(roomIds));
+  @Override
+  public List<String> findIdsByRoomIds(final List<String> roomIds) {
+    final ViewResult result = db.queryView(createQuery("by_roomid").reduce(false).keys(roomIds));
 
-		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
-	}
+    return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
+  }
 }

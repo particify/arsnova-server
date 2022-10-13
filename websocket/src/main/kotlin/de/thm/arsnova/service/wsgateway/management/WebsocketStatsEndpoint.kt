@@ -8,8 +8,8 @@ import org.springframework.web.socket.config.WebSocketMessageBrokerStats
 @Component
 @Endpoint(id = "websocket-stats")
 class WebsocketStatsEndpoint(private val webSocketMessageBrokerStats: WebSocketMessageBrokerStats) {
-    @ReadOperation
-    fun readStats(): WebSocketMessageBrokerStats {
-        return webSocketMessageBrokerStats
-    }
+  @ReadOperation
+  fun readStats(): WebSocketMessageBrokerStats {
+    return webSocketMessageBrokerStats
+  }
 }

@@ -27,350 +27,350 @@ import java.util.List;
 
 @Component
 public class CommentCommandHandler {
-    private static final Logger logger = LoggerFactory.getLogger(CommentCommandHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(CommentCommandHandler.class);
 
-    private final AmqpTemplate messagingTemplate;
-    private final CommentService service;
-    private final BonusTokenService bonusTokenService;
-    private final SettingsService settingsService;
-    private final PermissionEvaluator permissionEvaluator;
+  private final AmqpTemplate messagingTemplate;
+  private final CommentService service;
+  private final BonusTokenService bonusTokenService;
+  private final SettingsService settingsService;
+  private final PermissionEvaluator permissionEvaluator;
 
-    @Autowired
-    public CommentCommandHandler(
-            AmqpTemplate messagingTemplate,
-            CommentService service,
-            BonusTokenService bonusTokenService,
-            SettingsService settingsService,
-            PermissionEvaluator permissionEvaluator
-    ) {
-        this.messagingTemplate = messagingTemplate;
-        this.service = service;
-        this.bonusTokenService = bonusTokenService;
-        this.settingsService = settingsService;
-        this.permissionEvaluator = permissionEvaluator;
+  @Autowired
+  public CommentCommandHandler(
+      AmqpTemplate messagingTemplate,
+      CommentService service,
+      BonusTokenService bonusTokenService,
+      SettingsService settingsService,
+      PermissionEvaluator permissionEvaluator
+  ) {
+    this.messagingTemplate = messagingTemplate;
+    this.service = service;
+    this.bonusTokenService = bonusTokenService;
+    this.settingsService = settingsService;
+    this.permissionEvaluator = permissionEvaluator;
+  }
+
+  private Comment createOrImportComment(Comment comment, Settings settings) {
+    Comment saved = service.create(comment);
+
+    CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(saved);
+    commentCreatedPayload.setTimestamp(comment.getTimestamp());
+
+    CommentCreated event = new CommentCreated(commentCreatedPayload, comment.getRoomId());
+
+    if (settings.getDirectSend()) {
+      logger.debug("Sending event to comment stream: {}", event);
+
+      messagingTemplate.convertAndSend(
+          "amq.topic",
+          comment.getRoomId() + ".comment.stream",
+          event
+      );
+    } else {
+      logger.debug("Sending event to moderated stream: {}", event);
+      messagingTemplate.convertAndSend(
+          "amq.topic",
+          comment.getRoomId() + ".comment.moderator.stream",
+          event
+      );
     }
 
-    private Comment createOrImportComment(Comment comment, Settings settings) {
-        Comment saved = service.create(comment);
+    return saved;
+  }
 
-        CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(saved);
-        commentCreatedPayload.setTimestamp(comment.getTimestamp());
+  public Comment handle(CreateComment command) {
+    logger.debug("Got new command: {}", command);
 
-        CommentCreated event = new CommentCreated(commentCreatedPayload, comment.getRoomId());
+    Date now = new Date();
 
-        if (settings.getDirectSend()) {
-            logger.debug("Sending event to comment stream: {}", event);
+    Comment newComment = new Comment();
+    CreateCommentPayload payload = command.getPayload();
 
-            messagingTemplate.convertAndSend(
-                    "amq.topic",
-                    comment.getRoomId() + ".comment.stream",
-                    event
-            );
-        } else {
-            logger.debug("Sending event to moderated stream: {}", event);
-            messagingTemplate.convertAndSend(
-                    "amq.topic",
-                    comment.getRoomId() + ".comment.moderator.stream",
-                    event
-            );
-        }
+    Settings settings = settingsService.get(payload.getRoomId());
 
-        return saved;
+    newComment.setRoomId(payload.getRoomId());
+    newComment.setCreatorId(payload.getCreatorId());
+    newComment.setBody(payload.getBody());
+    newComment.setTag(payload.getTag());
+    newComment.setTimestamp(now);
+    newComment.setRead(false);
+    newComment.setCorrect(0);
+    newComment.setFavorite(false);
+    newComment.setAck(settings.getDirectSend());
+
+    if (!permissionEvaluator.checkCommentOwnerPermission(newComment)) {
+      throw new BadRequestException();
     }
 
-    public Comment handle(CreateComment command) {
-        logger.debug("Got new command: {}", command);
+    return createOrImportComment(newComment, settings);
+  }
 
-        Date now = new Date();
+  public Comment handle(ImportComment command) {
+    logger.debug("Got new command: {}", command);
 
-        Comment newComment = new Comment();
-        CreateCommentPayload payload = command.getPayload();
+    Comment newComment = new Comment();
+    ImportCommentPayload payload = command.getPayload();
 
-        Settings settings = settingsService.get(payload.getRoomId());
+    Settings settings = settingsService.get(payload.getRoomId());
 
-        newComment.setRoomId(payload.getRoomId());
-        newComment.setCreatorId(payload.getCreatorId());
-        newComment.setBody(payload.getBody());
-        newComment.setTag(payload.getTag());
-        newComment.setTimestamp(now);
-        newComment.setRead(false);
-        newComment.setCorrect(0);
-        newComment.setFavorite(false);
-        newComment.setAck(settings.getDirectSend());
+    newComment.setRoomId(payload.getRoomId());
+    newComment.setCreatorId(payload.getCreatorId());
+    newComment.setBody(payload.getBody());
+    newComment.setTag(payload.getTag());
+    newComment.setTimestamp(payload.getTimestamp());
+    newComment.setRead(payload.isRead());
+    newComment.setCorrect(0);
+    newComment.setFavorite(false);
+    newComment.setAck(settings.getDirectSend());
 
-        if (!permissionEvaluator.checkCommentOwnerPermission(newComment)) {
-            throw new BadRequestException();
-        }
+    return createOrImportComment(newComment, settings);
+  }
 
-        return createOrImportComment(newComment, settings);
+  public Comment handle(PatchComment command) throws IOException {
+    logger.debug("Got new command: {}", command);
+
+    PatchCommentPayload p = command.getPayload();
+    Comment c = this.service.get(p.getId());
+
+    if (!permissionEvaluator.checkCommentPatchPermission(c, p.getChanges())) {
+      throw new ForbiddenException();
     }
 
-    public Comment handle(ImportComment command) {
-        logger.debug("Got new command: {}", command);
+    boolean wasAck = c.isAck();
+    boolean wasFavorited = c.isFavorite();
 
-        Comment newComment = new Comment();
-        ImportCommentPayload payload = command.getPayload();
+    if (c.getId() != null) {
+      try {
+        Comment patched = this.service.patch(c, p.getChanges());
 
-        Settings settings = settingsService.get(payload.getRoomId());
+        CommentPatchedPayload payload = new CommentPatchedPayload(patched.getId(), p.getChanges());
+        CommentPatched event = new CommentPatched(payload, patched.getRoomId());
 
-        newComment.setRoomId(payload.getRoomId());
-        newComment.setCreatorId(payload.getCreatorId());
-        newComment.setBody(payload.getBody());
-        newComment.setTag(payload.getTag());
-        newComment.setTimestamp(payload.getTimestamp());
-        newComment.setRead(payload.isRead());
-        newComment.setCorrect(0);
-        newComment.setFavorite(false);
-        newComment.setAck(settings.getDirectSend());
+        if (!wasFavorited && patched.isFavorite()) {
+          BonusToken bt = new BonusToken();
+          Date now = new Date();
+          bt.setRoomId(patched.getRoomId());
+          bt.setCommentId(patched.getId());
+          bt.setUserId(patched.getCreatorId());
+          bt.setTimestamp(now);
 
-        return createOrImportComment(newComment, settings);
-    }
+          logger.debug("Creating token as a side effect: {}", bt);
 
-    public Comment handle(PatchComment command) throws IOException {
-        logger.debug("Got new command: {}", command);
+          bonusTokenService.create(bt);
 
-        PatchCommentPayload p = command.getPayload();
-        Comment c = this.service.get(p.getId());
-
-        if (!permissionEvaluator.checkCommentPatchPermission(c, p.getChanges())) {
-            throw new ForbiddenException();
+        } else if (wasFavorited && !patched.isFavorite()) {
+          bonusTokenService.deleteByPK(patched.getRoomId(), patched.getId(), patched.getCreatorId());
         }
 
-        boolean wasAck = c.isAck();
-        boolean wasFavorited = c.isFavorite();
+        if (!wasAck && patched.isAck()) {
+          CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(patched);
+          commentCreatedPayload.setTimestamp(new Date());
+          CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, patched.getRoomId());
 
-        if (c.getId() != null) {
-            try {
-                Comment patched = this.service.patch(c, p.getChanges());
+          logger.debug("Sending event to comment stream: {}", quoteOnQuoteNew);
 
-                CommentPatchedPayload payload = new CommentPatchedPayload(patched.getId(), p.getChanges());
-                CommentPatched event = new CommentPatched(payload, patched.getRoomId());
+          messagingTemplate.convertAndSend(
+              "amq.topic",
+              c.getRoomId() + ".comment.stream",
+              quoteOnQuoteNew
+          );
+        } else if (wasAck && !patched.isAck()) {
+          CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(patched);
+          commentCreatedPayload.setTimestamp(new Date());
+          CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, patched.getRoomId());
 
-                if (!wasFavorited && patched.isFavorite()) {
-                    BonusToken bt = new BonusToken();
-                    Date now = new Date();
-                    bt.setRoomId(patched.getRoomId());
-                    bt.setCommentId(patched.getId());
-                    bt.setUserId(patched.getCreatorId());
-                    bt.setTimestamp(now);
+          logger.debug("Sending event to moderated stream: {}", quoteOnQuoteNew);
 
-                    logger.debug("Creating token as a side effect: {}", bt);
-
-                    bonusTokenService.create(bt);
-
-                } else if (wasFavorited && !patched.isFavorite()) {
-                    bonusTokenService.deleteByPK(patched.getRoomId(), patched.getId(), patched.getCreatorId());
-                }
-
-                if (!wasAck && patched.isAck()) {
-                    CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(patched);
-                    commentCreatedPayload.setTimestamp(new Date());
-                    CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, patched.getRoomId());
-
-                    logger.debug("Sending event to comment stream: {}", quoteOnQuoteNew);
-
-                    messagingTemplate.convertAndSend(
-                            "amq.topic",
-                            c.getRoomId() + ".comment.stream",
-                            quoteOnQuoteNew
-                    );
-                } else if (wasAck && !patched.isAck()) {
-                    CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(patched);
-                    commentCreatedPayload.setTimestamp(new Date());
-                    CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, patched.getRoomId());
-
-                    logger.debug("Sending event to moderated stream: {}", quoteOnQuoteNew);
-
-                    messagingTemplate.convertAndSend(
-                            "amq.topic",
-                            c.getRoomId() + ".comment.moderator.stream",
-                            quoteOnQuoteNew
-                    );
-                }
-
-                logger.debug("Sending event to moderated stream: {}", event);
-
-                messagingTemplate.convertAndSend(
-                        "amq.topic",
-                        c.getRoomId() + ".comment.stream",
-                        event
-                );
-
-                return patched;
-            } catch (IOException e) {
-                logger.error("Patching of comment {} failed.", c.getId(), e);
-            }
-        } else {
-            logger.debug("No comment found for patch command {}", command);
-        }
-        return c;
-    }
-
-    public Comment handle(UpdateComment command) {
-        logger.debug("Got new command: {}", command);
-
-        UpdateCommentPayload p = command.getPayload();
-        Comment old = this.service.get(p.getId());
-        Comment newComment = this.service.get(p.getId());
-        newComment.setBody(p.getBody());
-        newComment.setRead(p.isRead());
-        newComment.setFavorite(p.isFavorite());
-        newComment.setCorrect(p.getCorrect());
-        newComment.setTag(p.getTag());
-        newComment.setAnswer(p.getAnswer());
-
-        if (!permissionEvaluator.checkCommentUpdatePermission(newComment, old)) {
-            throw new ForbiddenException();
+          messagingTemplate.convertAndSend(
+              "amq.topic",
+              c.getRoomId() + ".comment.moderator.stream",
+              quoteOnQuoteNew
+          );
         }
 
-        Comment updated = this.service.update(newComment);
-
-        CommentUpdatedPayload payload = new CommentUpdatedPayload(updated);
-        CommentUpdated event = new CommentUpdated(payload, updated.getRoomId());
-
-        if (!old.isAck() && updated.isAck()) {
-            CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(updated);
-            commentCreatedPayload.setTimestamp(new Date());
-            CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, updated.getRoomId());
-
-            logger.debug("Sending event to comment stream: {}", quoteOnQuoteNew);
-
-            messagingTemplate.convertAndSend(
-                    "amq.topic",
-                    old.getRoomId() + ".comment.stream",
-                    quoteOnQuoteNew
-            );
-        } else if (old.isAck() && !updated.isAck()) {
-            CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(updated);
-            commentCreatedPayload.setTimestamp(new Date());
-            CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, updated.getRoomId());
-
-            logger.debug("Sending event to moderated stream: {}", quoteOnQuoteNew);
-
-            messagingTemplate.convertAndSend(
-                    "amq.topic",
-                    old.getRoomId() + ".comment.moderator.stream",
-                    quoteOnQuoteNew
-            );
-        }
-
-        logger.debug("Sending event to comment stream: {}", event);
+        logger.debug("Sending event to moderated stream: {}", event);
 
         messagingTemplate.convertAndSend(
-                "amq.topic",
-                old.getRoomId() + ".comment.stream",
-                event
+            "amq.topic",
+            c.getRoomId() + ".comment.stream",
+            event
         );
 
-        return updated;
+        return patched;
+      } catch (IOException e) {
+        logger.error("Patching of comment {} failed.", c.getId(), e);
+      }
+    } else {
+      logger.debug("No comment found for patch command {}", command);
+    }
+    return c;
+  }
+
+  public Comment handle(UpdateComment command) {
+    logger.debug("Got new command: {}", command);
+
+    UpdateCommentPayload p = command.getPayload();
+    Comment old = this.service.get(p.getId());
+    Comment newComment = this.service.get(p.getId());
+    newComment.setBody(p.getBody());
+    newComment.setRead(p.isRead());
+    newComment.setFavorite(p.isFavorite());
+    newComment.setCorrect(p.getCorrect());
+    newComment.setTag(p.getTag());
+    newComment.setAnswer(p.getAnswer());
+
+    if (!permissionEvaluator.checkCommentUpdatePermission(newComment, old)) {
+      throw new ForbiddenException();
     }
 
-    public void handle(DeleteComment command) {
-        logger.debug("Got new command: {}", command);
+    Comment updated = this.service.update(newComment);
 
-        String id = command.getPayload().getId();
-        Comment c = service.get(id);
+    CommentUpdatedPayload payload = new CommentUpdatedPayload(updated);
+    CommentUpdated event = new CommentUpdated(payload, updated.getRoomId());
 
-        if (!permissionEvaluator.checkCommentDeletePermission(c)) {
-            throw new ForbiddenException();
-        }
+    if (!old.isAck() && updated.isAck()) {
+      CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(updated);
+      commentCreatedPayload.setTimestamp(new Date());
+      CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, updated.getRoomId());
 
-        if (c.getId() != null) {
-            service.delete(id);
+      logger.debug("Sending event to comment stream: {}", quoteOnQuoteNew);
 
-            CommentDeletedPayload p = new CommentDeletedPayload();
-            p.setId(c.getId());
-            CommentDeleted event = new CommentDeleted(p, c.getRoomId());
+      messagingTemplate.convertAndSend(
+          "amq.topic",
+          old.getRoomId() + ".comment.stream",
+          quoteOnQuoteNew
+      );
+    } else if (old.isAck() && !updated.isAck()) {
+      CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(updated);
+      commentCreatedPayload.setTimestamp(new Date());
+      CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, updated.getRoomId());
 
-            logger.debug("Sending event to comment stream: {}", event);
+      logger.debug("Sending event to moderated stream: {}", quoteOnQuoteNew);
 
-            messagingTemplate.convertAndSend(
-                    "amq.topic",
-                    c.getRoomId() + ".comment.stream",
-                    event
-            );
-
-            messagingTemplate.convertAndSend(
-                    RabbitConfig.COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME,
-                    "",
-                    event
-            );
-        }
+      messagingTemplate.convertAndSend(
+          "amq.topic",
+          old.getRoomId() + ".comment.moderator.stream",
+          quoteOnQuoteNew
+      );
     }
 
-    public void handle(HighlightComment command) {
-        logger.debug("Got new command: {}", command);
+    logger.debug("Sending event to comment stream: {}", event);
 
-        String id = command.getPayload().getId();
-        Comment c = service.get(id);
+    messagingTemplate.convertAndSend(
+        "amq.topic",
+        old.getRoomId() + ".comment.stream",
+        event
+    );
 
-        if (!permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(c.getRoomId())) {
-            throw new ForbiddenException();
-        }
+    return updated;
+  }
 
-        if (c.getId() != null) {
-            CommentHighlightedPayload p = new CommentHighlightedPayload(c, command.getPayload().getLights());
-            CommentHighlighted event = new CommentHighlighted(p, c.getRoomId());
+  public void handle(DeleteComment command) {
+    logger.debug("Got new command: {}", command);
 
-            logger.debug("Sending event to comment stream: {}", event);
+    String id = command.getPayload().getId();
+    Comment c = service.get(id);
 
-            messagingTemplate.convertAndSend(
-                    "amq.topic",
-                    c.getRoomId() + ".comment.stream",
-                    event
-            );
-        }
+    if (!permissionEvaluator.checkCommentDeletePermission(c)) {
+      throw new ForbiddenException();
     }
 
-    public void handle(DeleteCommentsByRoom command) {
-        logger.debug("Got new command: {}", command);
+    if (c.getId() != null) {
+      service.delete(id);
 
-        String roomId = command.getPayload().getRoomId();
+      CommentDeletedPayload p = new CommentDeletedPayload();
+      p.setId(c.getId());
+      CommentDeleted event = new CommentDeleted(p, c.getRoomId());
 
-        if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(roomId)) {
-            throw new ForbiddenException();
-        }
+      logger.debug("Sending event to comment stream: {}", event);
 
-        List<Comment> deletedComments = service.deleteByRoomId(roomId);
-        for (Comment c : deletedComments) {
-            CommentDeletedPayload p = new CommentDeletedPayload();
-            p.setId(c.getId());
-            CommentDeleted event = new CommentDeleted(p, c.getRoomId());
+      messagingTemplate.convertAndSend(
+          "amq.topic",
+          c.getRoomId() + ".comment.stream",
+          event
+      );
 
-            logger.debug("Sending event to comment stream: {}", event);
+      messagingTemplate.convertAndSend(
+          RabbitConfig.COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME,
+          "",
+          event
+      );
+    }
+  }
 
-            messagingTemplate.convertAndSend(
-                    "amq.topic",
-                    c.getRoomId() + ".comment.stream",
-                    event
-            );
+  public void handle(HighlightComment command) {
+    logger.debug("Got new command: {}", command);
 
-            messagingTemplate.convertAndSend(
-                    RabbitConfig.COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME,
-                    "",
-                    event
-            );
-        }
+    String id = command.getPayload().getId();
+    Comment c = service.get(id);
+
+    if (!permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(c.getRoomId())) {
+      throw new ForbiddenException();
     }
 
-    public List<CommentStats> handle(CalculateStats command) {
-        logger.debug("Got new command: {}", command);
+    if (c.getId() != null) {
+      CommentHighlightedPayload p = new CommentHighlightedPayload(c, command.getPayload().getLights());
+      CommentHighlighted event = new CommentHighlighted(p, c.getRoomId());
 
-        final List<String> roomIds = command.getPayload().getRoomIds();
-        final List<CommentStats> stats = new ArrayList<>();
+      logger.debug("Sending event to comment stream: {}", event);
 
-        for (final String roomId : roomIds) {
-            CommentStats roomStatistics = new CommentStats();
-            int ackCommentcount = (int) service.countByRoomIdAndAck(roomId, true);
-            // ToDo: Implement view to show unacknowledge counter to owner / moderators
-            // int unackCommentcount = (int) service.countByRoomIdAndAck(roomId, false);
-            // roomStatistics.setUnackCommentCount(unackCommentcount);
-            roomStatistics.setRoomId(roomId);
-            roomStatistics.setAckCommentCount(ackCommentcount);
-            stats.add(roomStatistics);
-        }
-
-        return stats;
+      messagingTemplate.convertAndSend(
+          "amq.topic",
+          c.getRoomId() + ".comment.stream",
+          event
+      );
     }
+  }
+
+  public void handle(DeleteCommentsByRoom command) {
+    logger.debug("Got new command: {}", command);
+
+    String roomId = command.getPayload().getRoomId();
+
+    if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(roomId)) {
+      throw new ForbiddenException();
+    }
+
+    List<Comment> deletedComments = service.deleteByRoomId(roomId);
+    for (Comment c : deletedComments) {
+      CommentDeletedPayload p = new CommentDeletedPayload();
+      p.setId(c.getId());
+      CommentDeleted event = new CommentDeleted(p, c.getRoomId());
+
+      logger.debug("Sending event to comment stream: {}", event);
+
+      messagingTemplate.convertAndSend(
+          "amq.topic",
+          c.getRoomId() + ".comment.stream",
+          event
+      );
+
+      messagingTemplate.convertAndSend(
+          RabbitConfig.COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME,
+          "",
+          event
+      );
+    }
+  }
+
+  public List<CommentStats> handle(CalculateStats command) {
+    logger.debug("Got new command: {}", command);
+
+    final List<String> roomIds = command.getPayload().getRoomIds();
+    final List<CommentStats> stats = new ArrayList<>();
+
+    for (final String roomId : roomIds) {
+      CommentStats roomStatistics = new CommentStats();
+      int ackCommentcount = (int) service.countByRoomIdAndAck(roomId, true);
+      // ToDo: Implement view to show unacknowledge counter to owner / moderators
+      // int unackCommentcount = (int) service.countByRoomIdAndAck(roomId, false);
+      // roomStatistics.setUnackCommentCount(unackCommentcount);
+      roomStatistics.setRoomId(roomId);
+      roomStatistics.setAckCommentCount(ackCommentcount);
+      stats.add(roomStatistics);
+    }
+
+    return stats;
+  }
 
 }

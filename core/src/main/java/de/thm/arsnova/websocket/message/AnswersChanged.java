@@ -24,32 +24,32 @@ import de.thm.arsnova.model.AnswerStatistics;
 
 public class AnswersChanged extends WebSocketMessage<AnswersChanged.AnswersChangedPayload> {
 
-	public static class AnswersChangedPayload implements WebSocketPayload {
-		private List<String> ids;
-		private AnswerStatistics stats;
+  public static class AnswersChangedPayload implements WebSocketPayload {
+    private List<String> ids;
+    private AnswerStatistics stats;
 
-		public List<String> getIds() {
-			return ids;
-		}
+    public List<String> getIds() {
+      return ids;
+    }
 
-		public void setIds(final List<String> ids) {
-			this.ids = ids;
-		}
+    public void setIds(final List<String> ids) {
+      this.ids = ids;
+    }
 
-		public AnswerStatistics getStats() {
-			return stats;
-		}
+    public AnswerStatistics getStats() {
+      return stats;
+    }
 
-		public void setStats(final AnswerStatistics stats) {
-			this.stats = stats;
-		}
-	}
+    public void setStats(final AnswerStatistics stats) {
+      this.stats = stats;
+    }
+  }
 
-	public AnswersChanged(final List<String> ids, final AnswerStatistics stats) {
-		super(AnswersChanged.class.getSimpleName());
-		final AnswersChangedPayload payload = new AnswersChangedPayload();
-		payload.ids = ids;
-		payload.stats = stats;
-		this.setPayload(payload);
-	}
+  public AnswersChanged(final List<String> ids, final AnswerStatistics stats) {
+    super(AnswersChanged.class.getSimpleName());
+    final AnswersChangedPayload payload = new AnswersChangedPayload();
+    payload.ids = ids;
+    payload.stats = stats;
+    this.setPayload(payload);
+  }
 }

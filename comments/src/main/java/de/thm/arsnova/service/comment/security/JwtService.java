@@ -15,27 +15,27 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class JwtService {
-    private static final String ROLE_PREFIX = "ROLE_";
-    private static final String ROLES_CLAIM_NAME = "roles";
+  private static final String ROLE_PREFIX = "ROLE_";
+  private static final String ROLES_CLAIM_NAME = "roles";
 
-    private Algorithm algorithm;
-    private JWTVerifier verifier;
-    private String jwtSecret;
+  private Algorithm algorithm;
+  private JWTVerifier verifier;
+  private String jwtSecret;
 
-    public JwtService(final SecurityProperties securityProperties) {
-        jwtSecret = securityProperties.getJwt().getSecret();
-        algorithm = Algorithm.HMAC256(jwtSecret);
-        verifier = JWT.require(algorithm)
-                .build();
-    }
+  public JwtService(final SecurityProperties securityProperties) {
+    jwtSecret = securityProperties.getJwt().getSecret();
+    algorithm = Algorithm.HMAC256(jwtSecret);
+    verifier = JWT.require(algorithm)
+        .build();
+  }
 
-    public AuthenticatedUser verifyToken(final String token) {
-        final DecodedJWT decodedJwt = verifier.verify(token);
-        String userId = decodedJwt.getSubject();
+  public AuthenticatedUser verifyToken(final String token) {
+    final DecodedJWT decodedJwt = verifier.verify(token);
+    String userId = decodedJwt.getSubject();
 
-        final Collection<GrantedAuthority> authorities = decodedJwt.getClaim(ROLES_CLAIM_NAME).asList(String.class).stream()
-                .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role)).collect(Collectors.toList());
+    final Collection<GrantedAuthority> authorities = decodedJwt.getClaim(ROLES_CLAIM_NAME).asList(String.class).stream()
+        .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role)).collect(Collectors.toList());
 
-        return new AuthenticatedUser(userId, authorities, token);
-    }
+    return new AuthenticatedUser(userId, authorities, token);
+  }
 }

@@ -10,21 +10,21 @@ import org.springframework.core.io.support.DefaultPropertySourceFactory;
 import org.springframework.core.io.support.EncodedResource;
 
 public class YamlPropertySourceFactory extends DefaultPropertySourceFactory {
-	@Override
-	public PropertySource<?> createPropertySource(final String name, final EncodedResource resource)
-			throws IOException {
-		try {
-			final YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new PrefixedYamlPropertiesFactoryBean();
-			yamlPropertiesFactoryBean.setResources(resource.getResource());
-			yamlPropertiesFactoryBean.afterPropertiesSet();
-			final Properties properties = yamlPropertiesFactoryBean.getObject();
+  @Override
+  public PropertySource<?> createPropertySource(final String name, final EncodedResource resource)
+      throws IOException {
+    try {
+      final YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new PrefixedYamlPropertiesFactoryBean();
+      yamlPropertiesFactoryBean.setResources(resource.getResource());
+      yamlPropertiesFactoryBean.afterPropertiesSet();
+      final Properties properties = yamlPropertiesFactoryBean.getObject();
 
-			return new PropertiesPropertySource(name != null ? name : resource.getResource().getFilename(), properties);
-		} catch (final IllegalStateException e) {
-			if (e.getCause() instanceof FileNotFoundException) {
-				throw (FileNotFoundException) e.getCause();
-			}
-			throw e;
-		}
-	}
+      return new PropertiesPropertySource(name != null ? name : resource.getResource().getFilename(), properties);
+    } catch (final IllegalStateException e) {
+      if (e.getCause() instanceof FileNotFoundException) {
+        throw (FileNotFoundException) e.getCause();
+      }
+      throw e;
+    }
+  }
 }

@@ -43,151 +43,151 @@ import de.thm.arsnova.web.exceptions.NotFoundException;
 @RestController
 @EntityRequestMapping(RoomController.REQUEST_MAPPING)
 public class RoomController extends AbstractEntityController<Room> {
-	protected static final String REQUEST_MAPPING = "/room";
-	private static final String STATS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
-	private static final String PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/password";
-	private static final String REQUEST_MEMBERSHIP_MAPPING = DEFAULT_ID_MAPPING + "/request-membership";
-	private static final String DUPLICATE_MAPPING = DEFAULT_ID_MAPPING + "/duplicate";
-	private static final String GENERATE_RANDOM_DATA_MAPPING = DEFAULT_ID_MAPPING + "/generate-random-data";
+  protected static final String REQUEST_MAPPING = "/room";
+  private static final String STATS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
+  private static final String PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/password";
+  private static final String REQUEST_MEMBERSHIP_MAPPING = DEFAULT_ID_MAPPING + "/request-membership";
+  private static final String DUPLICATE_MAPPING = DEFAULT_ID_MAPPING + "/duplicate";
+  private static final String GENERATE_RANDOM_DATA_MAPPING = DEFAULT_ID_MAPPING + "/generate-random-data";
 
-	private static final String ROOM_ROLE_HEADER = "ARS-Room-Role";
+  private static final String ROOM_ROLE_HEADER = "ARS-Room-Role";
 
-	private RoomService roomService;
-	private RoomStatisticsService roomStatisticsService;
-	private DuplicationService duplicationService;
-	private DataGenerationService dataGenerationService;
+  private RoomService roomService;
+  private RoomStatisticsService roomStatisticsService;
+  private DuplicationService duplicationService;
+  private DataGenerationService dataGenerationService;
 
-	public RoomController(
-			@Qualifier("securedRoomService") final RoomService roomService,
-			@Qualifier("securedRoomStatisticsService") final RoomStatisticsService roomStatisticsService,
-			@Qualifier("securedDuplicationService") final DuplicationService duplicationService,
-			@Qualifier("securedDataGenerationService") final DataGenerationService dataGenerationService) {
-		super(roomService);
-		this.roomService = roomService;
-		this.roomStatisticsService = roomStatisticsService;
-		this.duplicationService = duplicationService;
-		this.dataGenerationService = dataGenerationService;
-	}
+  public RoomController(
+      @Qualifier("securedRoomService") final RoomService roomService,
+      @Qualifier("securedRoomStatisticsService") final RoomStatisticsService roomStatisticsService,
+      @Qualifier("securedDuplicationService") final DuplicationService duplicationService,
+      @Qualifier("securedDataGenerationService") final DataGenerationService dataGenerationService) {
+    super(roomService);
+    this.roomService = roomService;
+    this.roomStatisticsService = roomStatisticsService;
+    this.duplicationService = duplicationService;
+    this.dataGenerationService = dataGenerationService;
+  }
 
-	@Override
-	protected String getMapping() {
-		return REQUEST_MAPPING;
-	}
+  @Override
+  protected String getMapping() {
+    return REQUEST_MAPPING;
+  }
 
-	@Override
-	protected String resolveAlias(final String shortId) {
-		return roomService.getIdByShortId(shortId);
-	}
+  @Override
+  protected String resolveAlias(final String shortId) {
+    return roomService.getIdByShortId(shortId);
+  }
 
-	@GetMapping(STATS_MAPPING)
-	public RoomStatistics getStats(
-			@PathVariable final String id,
-			@RequestParam(required = false) final String view) {
-		final RoomStatistics roomStatistics = "read-extended".equals(view)
-				? roomStatisticsService.getAllRoomStatistics(id)
-				: roomStatisticsService.getPublicRoomStatistics(id);
+  @GetMapping(STATS_MAPPING)
+  public RoomStatistics getStats(
+      @PathVariable final String id,
+      @RequestParam(required = false) final String view) {
+    final RoomStatistics roomStatistics = "read-extended".equals(view)
+        ? roomStatisticsService.getAllRoomStatistics(id)
+        : roomStatisticsService.getPublicRoomStatistics(id);
 
-		return roomStatistics;
-	}
+    return roomStatistics;
+  }
 
-	@GetMapping(value = PASSWORD_MAPPING)
-	public PasswordEntity getPassword(@PathVariable final String id) {
-		final Room room = roomService.get(id);
-		if (room == null) {
-			throw new NotFoundException();
-		}
-		return new PasswordEntity(roomService.getPassword(room));
-	}
+  @GetMapping(value = PASSWORD_MAPPING)
+  public PasswordEntity getPassword(@PathVariable final String id) {
+    final Room room = roomService.get(id);
+    if (room == null) {
+      throw new NotFoundException();
+    }
+    return new PasswordEntity(roomService.getPassword(room));
+  }
 
-	@PostMapping(value = PASSWORD_MAPPING)
-	public void postPassword(
-			@PathVariable final String id,
-			@RequestBody final PasswordEntity passwordRequestEntity) {
-		final Room room = roomService.get(id);
-		if (room == null) {
-			throw new NotFoundException();
-		}
-		roomService.setPassword(room, passwordRequestEntity.password);
-	}
+  @PostMapping(value = PASSWORD_MAPPING)
+  public void postPassword(
+      @PathVariable final String id,
+      @RequestBody final PasswordEntity passwordRequestEntity) {
+    final Room room = roomService.get(id);
+    if (room == null) {
+      throw new NotFoundException();
+    }
+    roomService.setPassword(room, passwordRequestEntity.password);
+  }
 
-	@PostMapping(value = REQUEST_MEMBERSHIP_MAPPING)
-	public Room requestMembership(
-			@PathVariable final String id,
-			@RequestBody final RequestMembershipRequestEntity requestMembershipRequestEntity,
-			final HttpServletResponse httpServletResponse) {
-		final Optional<RoomMembership> membership;
-		if (requestMembershipRequestEntity.token != null) {
-			membership = roomService.requestMembershipByToken(id, requestMembershipRequestEntity.token);
-		} else {
-			membership = roomService.requestMembership(
-					id, requestMembershipRequestEntity.password != null ? requestMembershipRequestEntity.password : "");
-		}
-		membership.ifPresent(m -> {
-			httpServletResponse.setHeader(ENTITY_ID_HEADER, m.getRoom().getId());
-			httpServletResponse.setHeader(ENTITY_REVISION_HEADER, m.getRoom().getRevision());
-			/* Sending of the role as a header is a temporary solution for
-			 * now to allow accessing it without parsing the body. */
-			httpServletResponse.setHeader(ROOM_ROLE_HEADER, m.getRole().toString());
-		});
+  @PostMapping(value = REQUEST_MEMBERSHIP_MAPPING)
+  public Room requestMembership(
+      @PathVariable final String id,
+      @RequestBody final RequestMembershipRequestEntity requestMembershipRequestEntity,
+      final HttpServletResponse httpServletResponse) {
+    final Optional<RoomMembership> membership;
+    if (requestMembershipRequestEntity.token != null) {
+      membership = roomService.requestMembershipByToken(id, requestMembershipRequestEntity.token);
+    } else {
+      membership = roomService.requestMembership(
+          id, requestMembershipRequestEntity.password != null ? requestMembershipRequestEntity.password : "");
+    }
+    membership.ifPresent(m -> {
+      httpServletResponse.setHeader(ENTITY_ID_HEADER, m.getRoom().getId());
+      httpServletResponse.setHeader(ENTITY_REVISION_HEADER, m.getRoom().getRevision());
+      /* Sending of the role as a header is a temporary solution for
+       * now to allow accessing it without parsing the body. */
+      httpServletResponse.setHeader(ROOM_ROLE_HEADER, m.getRole().toString());
+    });
 
-		return membership.orElseThrow(ForbiddenException::new).getRoom();
-	}
+    return membership.orElseThrow(ForbiddenException::new).getRoom();
+  }
 
-	@PostMapping(DUPLICATE_MAPPING)
-	public Room duplicateRoom(
-			@PathVariable final String id,
-			@RequestParam(defaultValue = "false") final boolean temporary,
-			@RequestParam(defaultValue = "") final String name) {
-		final Room room = roomService.get(id);
-		if (room == null) {
-			throw new NotFoundException();
-		}
-		return duplicationService.duplicateRoomCascading(room, temporary, name);
-	}
+  @PostMapping(DUPLICATE_MAPPING)
+  public Room duplicateRoom(
+      @PathVariable final String id,
+      @RequestParam(defaultValue = "false") final boolean temporary,
+      @RequestParam(defaultValue = "") final String name) {
+    final Room room = roomService.get(id);
+    if (room == null) {
+      throw new NotFoundException();
+    }
+    return duplicationService.duplicateRoomCascading(room, temporary, name);
+  }
 
-	@PostMapping(GENERATE_RANDOM_DATA_MAPPING)
-	public void generateRandomData(@PathVariable final String id) {
-		final Room room = roomService.get(id);
-		if (room == null) {
-			throw new NotFoundException();
-		}
-		dataGenerationService.generateRandomAnswers(room);
-	}
+  @PostMapping(GENERATE_RANDOM_DATA_MAPPING)
+  public void generateRandomData(@PathVariable final String id) {
+    final Room room = roomService.get(id);
+    if (room == null) {
+      throw new NotFoundException();
+    }
+    dataGenerationService.generateRandomAnswers(room);
+  }
 
-	private static class PasswordEntity {
-		private String password;
+  private static class PasswordEntity {
+    private String password;
 
-		private PasswordEntity() {
+    private PasswordEntity() {
 
-		}
+    }
 
-		private PasswordEntity(final String password) {
-			this.password = password;
-		}
+    private PasswordEntity(final String password) {
+      this.password = password;
+    }
 
-		@JsonView(View.Public.class)
-		public String getPassword() {
-			return password;
-		}
+    @JsonView(View.Public.class)
+    public String getPassword() {
+      return password;
+    }
 
-		@JsonView(View.Public.class)
-		public void setPassword(final String password) {
-			this.password = password;
-		}
-	}
+    @JsonView(View.Public.class)
+    public void setPassword(final String password) {
+      this.password = password;
+    }
+  }
 
-	private static class RequestMembershipRequestEntity {
-		private String password;
-		private String token;
+  private static class RequestMembershipRequestEntity {
+    private String password;
+    private String token;
 
-		@JsonView(View.Public.class)
-		public void setPassword(final String password) {
-			this.password = password;
-		}
+    @JsonView(View.Public.class)
+    public void setPassword(final String password) {
+      this.password = password;
+    }
 
-		@JsonView(View.Public.class)
-		public void setToken(final String token) {
-			this.token = token;
-		}
-	}
+    @JsonView(View.Public.class)
+    public void setToken(final String token) {
+      this.token = token;
+    }
+  }
 }

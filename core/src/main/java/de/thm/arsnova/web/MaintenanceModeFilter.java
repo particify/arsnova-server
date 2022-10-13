@@ -35,21 +35,21 @@ import de.thm.arsnova.service.StatusService;
  */
 @Component
 public class MaintenanceModeFilter extends OncePerRequestFilter {
-	private StatusService statusService;
+  private StatusService statusService;
 
-	public MaintenanceModeFilter(final StatusService statusService) {
-		this.statusService = statusService;
-	}
+  public MaintenanceModeFilter(final StatusService statusService) {
+    this.statusService = statusService;
+  }
 
-	@Override
-	protected void doFilterInternal(final HttpServletRequest httpServletRequest,
-			final HttpServletResponse httpServletResponse,
-			final FilterChain filterChain)
-			throws ServletException, IOException {
-		if (statusService.isMaintenanceActive()) {
-			httpServletResponse.setStatus(503);
-			return;
-		}
-		filterChain.doFilter(httpServletRequest, httpServletResponse);
-	}
+  @Override
+  protected void doFilterInternal(final HttpServletRequest httpServletRequest,
+      final HttpServletResponse httpServletResponse,
+      final FilterChain filterChain)
+      throws ServletException, IOException {
+    if (statusService.isMaintenanceActive()) {
+      httpServletResponse.setStatus(503);
+      return;
+    }
+    filterChain.doFilter(httpServletRequest, httpServletResponse);
+  }
 }

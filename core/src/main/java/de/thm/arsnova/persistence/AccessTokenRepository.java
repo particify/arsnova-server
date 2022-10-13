@@ -7,9 +7,9 @@ import java.util.Optional;
 import de.thm.arsnova.model.AccessToken;
 
 public interface AccessTokenRepository extends CrudRepository<AccessToken, String> {
-	List<AccessToken> findByRoomId(String roomId);
+  List<AccessToken> findByRoomId(String roomId);
 
-	Optional<AccessToken> findByRoomIdAndToken(String roomId, String token);
+  Optional<AccessToken> findByRoomIdAndToken(String roomId, String token);
 
-	List<AccessToken> findIdsByExpirationDateIsBefore(LocalDateTime expirationDate);
+  List<AccessToken> findIdsByExpirationDateIsBefore(LocalDateTime expirationDate);
 }

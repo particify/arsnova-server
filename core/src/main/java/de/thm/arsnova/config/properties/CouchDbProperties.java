@@ -19,49 +19,49 @@
 package de.thm.arsnova.config.properties;
 
 abstract class CouchDbProperties {
-	private String host;
-	private int port;
-	private String dbName;
-	private String username;
-	private String password;
+  private String host;
+  private int port;
+  private String dbName;
+  private String username;
+  private String password;
 
-	public String getHost() {
-		return host;
-	}
+  public String getHost() {
+    return host;
+  }
 
-	public void setHost(final String host) {
-		this.host = host;
-	}
+  public void setHost(final String host) {
+    this.host = host;
+  }
 
-	public int getPort() {
-		return port;
-	}
+  public int getPort() {
+    return port;
+  }
 
-	public void setPort(final int port) {
-		this.port = port;
-	}
+  public void setPort(final int port) {
+    this.port = port;
+  }
 
-	public String getDbName() {
-		return dbName;
-	}
+  public String getDbName() {
+    return dbName;
+  }
 
-	public void setDbName(final String dbName) {
-		this.dbName = dbName;
-	}
+  public void setDbName(final String dbName) {
+    this.dbName = dbName;
+  }
 
-	public String getUsername() {
-		return username;
-	}
+  public String getUsername() {
+    return username;
+  }
 
-	public void setUsername(final String username) {
-		this.username = username;
-	}
+  public void setUsername(final String username) {
+    this.username = username;
+  }
 
-	public String getPassword() {
-		return password;
-	}
+  public String getPassword() {
+    return password;
+  }
 
-	public void setPassword(final String password) {
-		this.password = password;
-	}
+  public void setPassword(final String password) {
+    this.password = password;
+  }
 }

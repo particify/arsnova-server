@@ -26,38 +26,38 @@ import org.ektorp.util.Assert;
 
 public class MangoResponseHandler<T> extends StdResponseHandler<List<T>> {
 
-	private MangoQueryResultParser<T> parser;
-	private String bookmark;
+  private MangoQueryResultParser<T> parser;
+  private String bookmark;
 
-	public MangoResponseHandler(final Class<T> docType, final ObjectMapper om) {
-		Assert.notNull(om, "ObjectMapper may not be null");
-		Assert.notNull(docType, "docType may not be null");
-		parser = new MangoQueryResultParser<T>(docType, om);
-	}
+  public MangoResponseHandler(final Class<T> docType, final ObjectMapper om) {
+    Assert.notNull(om, "ObjectMapper may not be null");
+    Assert.notNull(docType, "docType may not be null");
+    parser = new MangoQueryResultParser<T>(docType, om);
+  }
 
-	public MangoResponseHandler(final Class<T> docType, final ObjectMapper om,
-			final boolean ignoreNotFound) {
-		Assert.notNull(om, "ObjectMapper may not be null");
-		Assert.notNull(docType, "docType may not be null");
-		parser = new MangoQueryResultParser<T>(docType, om);
-	}
+  public MangoResponseHandler(final Class<T> docType, final ObjectMapper om,
+      final boolean ignoreNotFound) {
+    Assert.notNull(om, "ObjectMapper may not be null");
+    Assert.notNull(docType, "docType may not be null");
+    parser = new MangoQueryResultParser<T>(docType, om);
+  }
 
-	public MangoResponseHandler(final String propertyName, final Class<T> propertyType, final ObjectMapper om) {
-		Assert.notNull(om, "ObjectMapper may not be null");
-		Assert.notNull(propertyType, "propertyType may not be null");
-		Assert.notNull(propertyName, "propertyName may not be null");
-		parser = new MangoQueryResultParser<T>(propertyName, propertyType, om);
-	}
+  public MangoResponseHandler(final String propertyName, final Class<T> propertyType, final ObjectMapper om) {
+    Assert.notNull(om, "ObjectMapper may not be null");
+    Assert.notNull(propertyType, "propertyType may not be null");
+    Assert.notNull(propertyName, "propertyName may not be null");
+    parser = new MangoQueryResultParser<T>(propertyName, propertyType, om);
+  }
 
-	@Override
-	public List<T> success(final HttpResponse hr) throws Exception {
-		parser.parseResult(hr.getContent());
-		bookmark = parser.getBookmark();
+  @Override
+  public List<T> success(final HttpResponse hr) throws Exception {
+    parser.parseResult(hr.getContent());
+    bookmark = parser.getBookmark();
 
-		return parser.getDocs();
-	}
+    return parser.getDocs();
+  }
 
-	public String getBookmark() {
-		return bookmark;
-	}
+  public String getBookmark() {
+    return bookmark;
+  }
 }

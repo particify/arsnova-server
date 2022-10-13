@@ -9,11 +9,11 @@
  *
  * ARSnova Backend is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.	 If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package de.thm.arsnova.persistence.couchdb;
@@ -26,31 +26,31 @@ import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.persistence.ContentGroupRepository;
 
 public class CouchDbContentGroupRepository extends CouchDbCrudRepository<ContentGroup>
-		implements ContentGroupRepository {
-	public CouchDbContentGroupRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(ContentGroup.class, db, "by_id", createIfNotExists);
-	}
+    implements ContentGroupRepository {
+  public CouchDbContentGroupRepository(final CouchDbConnector db, final boolean createIfNotExists) {
+    super(ContentGroup.class, db, "by_id", createIfNotExists);
+  }
 
-	@Override
-	public ContentGroup findByRoomIdAndName(final String roomId, final String name) {
-		final List<ContentGroup> contentGroupList = db.queryView(createQuery("by_roomid_name")
-						.key(ComplexKey.of(roomId, name))
-						.includeDocs(true)
-						.reduce(false),
-				ContentGroup.class);
+  @Override
+  public ContentGroup findByRoomIdAndName(final String roomId, final String name) {
+    final List<ContentGroup> contentGroupList = db.queryView(createQuery("by_roomid_name")
+            .key(ComplexKey.of(roomId, name))
+            .includeDocs(true)
+            .reduce(false),
+        ContentGroup.class);
 
-		return !contentGroupList.isEmpty() ? contentGroupList.get(0) : null;
-	}
+    return !contentGroupList.isEmpty() ? contentGroupList.get(0) : null;
+  }
 
-	@Override
-	public List<ContentGroup> findByRoomId(final String roomId) {
-		final List<ContentGroup> contentGroups = db.queryView(createQuery("by_roomid_name")
-						.startKey(ComplexKey.of(roomId))
-						.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))
-						.includeDocs(true)
-						.reduce(false),
-				ContentGroup.class);
+  @Override
+  public List<ContentGroup> findByRoomId(final String roomId) {
+    final List<ContentGroup> contentGroups = db.queryView(createQuery("by_roomid_name")
+            .startKey(ComplexKey.of(roomId))
+            .endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))
+            .includeDocs(true)
+            .reduce(false),
+        ContentGroup.class);
 
-		return contentGroups;
-	}
+    return contentGroups;
+  }
 }

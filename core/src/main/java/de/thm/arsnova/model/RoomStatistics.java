@@ -28,160 +28,160 @@ import org.springframework.core.style.ToStringCreator;
 import de.thm.arsnova.model.serialization.View;
 
 public class RoomStatistics {
-	private int currentParticipants;
-	private int contentCount = 0;
-	private int unansweredContentCount = 0;
-	private int answerCount = 0;
-	private int unreadAnswerCount = 0;
-	private int commentCount = 0;
-	private int unreadCommentCount = 0;
-	private List<ContentGroupStatistics> groupStats;
+  private int currentParticipants;
+  private int contentCount = 0;
+  private int unansweredContentCount = 0;
+  private int answerCount = 0;
+  private int unreadAnswerCount = 0;
+  private int commentCount = 0;
+  private int unreadCommentCount = 0;
+  private List<ContentGroupStatistics> groupStats;
 
-	@JsonView(View.Public.class)
-	public int getCurrentParticipants() {
-		return currentParticipants;
-	}
+  @JsonView(View.Public.class)
+  public int getCurrentParticipants() {
+    return currentParticipants;
+  }
 
-	public void setCurrentParticipants(final int currentParticipants) {
-		this.currentParticipants = currentParticipants;
-	}
+  public void setCurrentParticipants(final int currentParticipants) {
+    this.currentParticipants = currentParticipants;
+  }
 
-	public int getUnansweredContentCount() {
-		return unansweredContentCount;
-	}
+  public int getUnansweredContentCount() {
+    return unansweredContentCount;
+  }
 
-	public void setUnansweredContentCount(final int unansweredContentCount) {
-		this.unansweredContentCount = unansweredContentCount;
-	}
+  public void setUnansweredContentCount(final int unansweredContentCount) {
+    this.unansweredContentCount = unansweredContentCount;
+  }
 
-	@JsonView(View.Public.class)
-	public int getContentCount() {
-		return contentCount;
-	}
+  @JsonView(View.Public.class)
+  public int getContentCount() {
+    return contentCount;
+  }
 
-	public void setContentCount(final int contentCount) {
-		this.contentCount = contentCount;
-	}
+  public void setContentCount(final int contentCount) {
+    this.contentCount = contentCount;
+  }
 
-	@JsonView(View.Public.class)
-	public int getAnswerCount() {
-		return answerCount;
-	}
+  @JsonView(View.Public.class)
+  public int getAnswerCount() {
+    return answerCount;
+  }
 
-	public void setAnswerCount(final int answerCount) {
-		this.answerCount = answerCount;
-	}
+  public void setAnswerCount(final int answerCount) {
+    this.answerCount = answerCount;
+  }
 
-	public int getUnreadAnswerCount() {
-		return unreadAnswerCount;
-	}
+  public int getUnreadAnswerCount() {
+    return unreadAnswerCount;
+  }
 
-	public void setUnreadAnswerCount(final int unreadAnswerCount) {
-		this.unreadAnswerCount = unreadAnswerCount;
-	}
+  public void setUnreadAnswerCount(final int unreadAnswerCount) {
+    this.unreadAnswerCount = unreadAnswerCount;
+  }
 
-	@JsonView(View.Public.class)
-	public int getCommentCount() {
-		return commentCount;
-	}
+  @JsonView(View.Public.class)
+  public int getCommentCount() {
+    return commentCount;
+  }
 
-	public void setCommentCount(final int commentCount) {
-		this.commentCount = commentCount;
-	}
+  public void setCommentCount(final int commentCount) {
+    this.commentCount = commentCount;
+  }
 
-	public int getUnreadCommentCount() {
-		return unreadCommentCount;
-	}
+  public int getUnreadCommentCount() {
+    return unreadCommentCount;
+  }
 
-	public void setUnreadCommentCount(final int unreadCommentCount) {
-		this.unreadCommentCount = unreadCommentCount;
-	}
+  public void setUnreadCommentCount(final int unreadCommentCount) {
+    this.unreadCommentCount = unreadCommentCount;
+  }
 
-	@JsonView(View.Public.class)
-	public List<ContentGroupStatistics> getGroupStats() {
-		if (groupStats == null) {
-			groupStats = new ArrayList<>();
-		}
+  @JsonView(View.Public.class)
+  public List<ContentGroupStatistics> getGroupStats() {
+    if (groupStats == null) {
+      groupStats = new ArrayList<>();
+    }
 
-		return groupStats;
-	}
+    return groupStats;
+  }
 
-	public void setGroupStats(final List<ContentGroupStatistics> groupStats) {
-		this.groupStats = groupStats;
-	}
+  public void setGroupStats(final List<ContentGroupStatistics> groupStats) {
+    this.groupStats = groupStats;
+  }
 
-	public RoomStatistics updateFromContentGroups(final Collection<ContentGroup> contentGroups) {
-		setGroupStats(contentGroups.stream()
-				.map(cg ->  new RoomStatistics.ContentGroupStatistics(cg)).collect(Collectors.toList()));
-		setContentCount(contentGroups.stream()
-				.mapToInt(cg -> cg.getContentIds().size()).reduce((a, b) -> a + b).orElse(0));
+  public RoomStatistics updateFromContentGroups(final Collection<ContentGroup> contentGroups) {
+    setGroupStats(contentGroups.stream()
+        .map(cg ->  new RoomStatistics.ContentGroupStatistics(cg)).collect(Collectors.toList()));
+    setContentCount(contentGroups.stream()
+        .mapToInt(cg -> cg.getContentIds().size()).reduce((a, b) -> a + b).orElse(0));
 
-		return this;
-	}
+    return this;
+  }
 
-	@Override
-	public String toString() {
-		return new ToStringCreator(this)
-			.append("currentParticipants", currentParticipants)
-			.append("contentCount", contentCount)
-			.append("unansweredContentCount", unansweredContentCount)
-			.append("answerCount", answerCount)
-			.append("unreadAnswerCount", unreadAnswerCount)
-			.append("commentCount", commentCount)
-			.append("unreadCommentCount", unreadCommentCount)
-			.append("groupStats", groupStats)
-			.toString();
-	}
+  @Override
+  public String toString() {
+    return new ToStringCreator(this)
+      .append("currentParticipants", currentParticipants)
+      .append("contentCount", contentCount)
+      .append("unansweredContentCount", unansweredContentCount)
+      .append("answerCount", answerCount)
+      .append("unreadAnswerCount", unreadAnswerCount)
+      .append("commentCount", commentCount)
+      .append("unreadCommentCount", unreadCommentCount)
+      .append("groupStats", groupStats)
+      .toString();
+  }
 
-	public static class ContentGroupStatistics {
-		private String id;
-		private String groupName;
-		private int contentCount = 0;
+  public static class ContentGroupStatistics {
+    private String id;
+    private String groupName;
+    private int contentCount = 0;
 
-		public ContentGroupStatistics() {
+    public ContentGroupStatistics() {
 
-		}
+    }
 
-		public ContentGroupStatistics(final ContentGroup contentGroup) {
-			this.setId(contentGroup.getId());
-			this.setGroupName(contentGroup.getName());
-			this.setContentCount(contentGroup.getContentIds().size());
-		}
+    public ContentGroupStatistics(final ContentGroup contentGroup) {
+      this.setId(contentGroup.getId());
+      this.setGroupName(contentGroup.getName());
+      this.setContentCount(contentGroup.getContentIds().size());
+    }
 
-		@JsonView(View.Public.class)
-		public String getId() {
-			return id;
-		}
+    @JsonView(View.Public.class)
+    public String getId() {
+      return id;
+    }
 
-		public void setId(final String id) {
-			this.id = id;
-		}
+    public void setId(final String id) {
+      this.id = id;
+    }
 
-		@JsonView(View.Public.class)
-		public String getGroupName() {
-			return groupName;
-		}
+    @JsonView(View.Public.class)
+    public String getGroupName() {
+      return groupName;
+    }
 
-		public void setGroupName(final String groupName) {
-			this.groupName = groupName;
-		}
+    public void setGroupName(final String groupName) {
+      this.groupName = groupName;
+    }
 
-		@JsonView(View.Public.class)
-		public int getContentCount() {
-			return contentCount;
-		}
+    @JsonView(View.Public.class)
+    public int getContentCount() {
+      return contentCount;
+    }
 
-		public void setContentCount(final int contentCount) {
-			this.contentCount = contentCount;
-		}
+    public void setContentCount(final int contentCount) {
+      this.contentCount = contentCount;
+    }
 
-		@Override
-		public String toString() {
-			return new ToStringCreator(this)
-				.append("id", id)
-				.append("groupName", groupName)
-				.append("contentCount", contentCount)
-				.toString();
-		}
-	}
+    @Override
+    public String toString() {
+      return new ToStringCreator(this)
+        .append("id", id)
+        .append("groupName", groupName)
+        .append("contentCount", contentCount)
+        .toString();
+    }
+  }
 }

@@ -1,12 +1,12 @@
 <Configure class="org.eclipse.jetty.webapp.WebAppContext">
-	<!--
-	  Exclude the JavaMail implementation bundled with Jetty 9. It does not
-	  work with Java 11, so we provide a more current version.
-	-->
-	<Get name="systemClasspathPattern">
-		<Call name="add"><Arg>-javax.mail.</Arg></Call>
-	</Get>
-	<Get name="serverClasspathPattern">
-		<Call name="add"><Arg>javax.mail.</Arg></Call>
-	</Get>
+  <!--
+    Exclude the JavaMail implementation bundled with Jetty 9. It does not
+    work with Java 11, so we provide a more current version.
+  -->
+  <Get name="systemClasspathPattern">
+    <Call name="add"><Arg>-javax.mail.</Arg></Call>
+  </Get>
+  <Get name="serverClasspathPattern">
+    <Call name="add"><Arg>javax.mail.</Arg></Call>
+  </Get>
 </Configure>

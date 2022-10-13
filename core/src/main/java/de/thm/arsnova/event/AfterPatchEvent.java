@@ -24,23 +24,23 @@ import java.util.function.Function;
 import de.thm.arsnova.model.Entity;
 
 public class AfterPatchEvent<E extends Entity> extends AfterUpdateEvent<E> {
-	private final Function<E, ? extends Object> propertyGetter;
-	private final Map<String, Object> requestedChanges;
+  private final Function<E, ? extends Object> propertyGetter;
+  private final Map<String, Object> requestedChanges;
 
-	public AfterPatchEvent(final Object source, final E entity, final E oldEntity,
-			final Function<E, ? extends Object> propertyGetter,
-			final Map<String, Object> changes,
-			final Map<String, Object> requestedChanges) {
-		super(source, entity, oldEntity, changes);
-		this.propertyGetter = propertyGetter;
-		this.requestedChanges = requestedChanges;
-	}
+  public AfterPatchEvent(final Object source, final E entity, final E oldEntity,
+      final Function<E, ? extends Object> propertyGetter,
+      final Map<String, Object> changes,
+      final Map<String, Object> requestedChanges) {
+    super(source, entity, oldEntity, changes);
+    this.propertyGetter = propertyGetter;
+    this.requestedChanges = requestedChanges;
+  }
 
-	public Function<E, ? extends Object> getPropertyGetter() {
-		return propertyGetter;
-	}
+  public Function<E, ? extends Object> getPropertyGetter() {
+    return propertyGetter;
+  }
 
-	public Map<String, Object> getRequestedChanges() {
-		return requestedChanges;
-	}
+  public Map<String, Object> getRequestedChanges() {
+    return requestedChanges;
+  }
 }

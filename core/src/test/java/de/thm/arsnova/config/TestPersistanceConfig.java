@@ -38,30 +38,30 @@ import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
 @EnableConfigurationProperties(CouchDbMigrationProperties.class)
 @Profile("test")
 public class TestPersistanceConfig {
-	@MockBean
-	private MangoCouchDbConnector mangoCouchDbConnector;
+  @MockBean
+  private MangoCouchDbConnector mangoCouchDbConnector;
 
-	@MockBean
-	private UserRepository userRepository;
+  @MockBean
+  private UserRepository userRepository;
 
-	@MockBean
-	private RoomRepository sessionRepository;
+  @MockBean
+  private RoomRepository sessionRepository;
 
-	@MockBean
-	private ContentRepository contentRepository;
+  @MockBean
+  private ContentRepository contentRepository;
 
-	@MockBean
-	private ContentGroupRepository contentGroupRepository;
+  @MockBean
+  private ContentGroupRepository contentGroupRepository;
 
-	@MockBean
-	private AnswerRepository answerRepository;
+  @MockBean
+  private AnswerRepository answerRepository;
 
-	@MockBean
-	private AnnouncementRepository announcementRepository;
+  @MockBean
+  private AnnouncementRepository announcementRepository;
 
-	@MockBean
-	private StatisticsRepository statisticsRepository;
+  @MockBean
+  private StatisticsRepository statisticsRepository;
 
-	@MockBean
-	public AccessTokenRepository accessTokenRepository;
+  @MockBean
+  public AccessTokenRepository accessTokenRepository;
 }

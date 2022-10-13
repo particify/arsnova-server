@@ -30,100 +30,100 @@ import de.thm.arsnova.model.UserProfile;
  * @author Daniel Gerhardt
  */
 public class User implements org.springframework.security.core.userdetails.UserDetails {
-	public static final GrantedAuthority ROLE_USER = new SimpleGrantedAuthority("ROLE_USER");
-	public static final GrantedAuthority ROLE_ADMIN = new SimpleGrantedAuthority("ROLE_ADMIN");
+  public static final GrantedAuthority ROLE_USER = new SimpleGrantedAuthority("ROLE_USER");
+  public static final GrantedAuthority ROLE_ADMIN = new SimpleGrantedAuthority("ROLE_ADMIN");
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	private String id;
-	private String loginId;
-	private UserProfile.AuthProvider authProvider;
-	private String password;
-	private org.springframework.security.core.userdetails.UserDetails providerUserDetails;
-	private Collection<? extends GrantedAuthority> authorities;
-	private boolean enabled;
-	private String token;
+  private String id;
+  private String loginId;
+  private UserProfile.AuthProvider authProvider;
+  private String password;
+  private org.springframework.security.core.userdetails.UserDetails providerUserDetails;
+  private Collection<? extends GrantedAuthority> authorities;
+  private boolean enabled;
+  private String token;
 
-	public User(final UserProfile profile, final Collection<? extends GrantedAuthority> authorities) {
-		if (profile == null || profile.getId() == null) {
-			throw new IllegalArgumentException();
-		}
-		id = profile.getId();
-		loginId = profile.getLoginId();
-		authProvider = profile.getAuthProvider();
-		password = profile.getAccount() == null ? null : profile.getAccount().getPassword();
-		this.authorities = authorities;
-		enabled = profile.getAccount() == null || profile.getAccount().getActivationKey() == null;
-	}
+  public User(final UserProfile profile, final Collection<? extends GrantedAuthority> authorities) {
+    if (profile == null || profile.getId() == null) {
+      throw new IllegalArgumentException();
+    }
+    id = profile.getId();
+    loginId = profile.getLoginId();
+    authProvider = profile.getAuthProvider();
+    password = profile.getAccount() == null ? null : profile.getAccount().getPassword();
+    this.authorities = authorities;
+    enabled = profile.getAccount() == null || profile.getAccount().getActivationKey() == null;
+  }
 
-	public User(final UserProfile profile, final Collection<? extends GrantedAuthority> authorities,
-			final org.springframework.security.core.userdetails.UserDetails details) {
-		this(profile, authorities);
-		providerUserDetails = details;
-	}
+  public User(final UserProfile profile, final Collection<? extends GrantedAuthority> authorities,
+      final org.springframework.security.core.userdetails.UserDetails details) {
+    this(profile, authorities);
+    providerUserDetails = details;
+  }
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return authorities;
-	}
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return authorities;
+  }
 
-	@Override
-	public String getPassword() {
-		return providerUserDetails != null ? providerUserDetails.getPassword() : password;
-	}
+  @Override
+  public String getPassword() {
+    return providerUserDetails != null ? providerUserDetails.getPassword() : password;
+  }
 
-	@Override
-	public String getUsername() {
-		return loginId;
-	}
+  @Override
+  public String getUsername() {
+    return loginId;
+  }
 
-	@Override
-	public boolean isAccountNonExpired() {
-		return providerUserDetails == null || providerUserDetails.isAccountNonExpired();
-	}
+  @Override
+  public boolean isAccountNonExpired() {
+    return providerUserDetails == null || providerUserDetails.isAccountNonExpired();
+  }
 
-	@Override
-	public boolean isAccountNonLocked() {
-		return providerUserDetails == null || providerUserDetails.isAccountNonLocked();
-	}
+  @Override
+  public boolean isAccountNonLocked() {
+    return providerUserDetails == null || providerUserDetails.isAccountNonLocked();
+  }
 
-	@Override
-	public boolean isCredentialsNonExpired() {
-		return providerUserDetails == null || providerUserDetails.isCredentialsNonExpired();
-	}
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return providerUserDetails == null || providerUserDetails.isCredentialsNonExpired();
+  }
 
-	@Override
-	public boolean isEnabled() {
-		return enabled && (providerUserDetails == null || providerUserDetails.isEnabled());
-	}
+  @Override
+  public boolean isEnabled() {
+    return enabled && (providerUserDetails == null || providerUserDetails.isEnabled());
+  }
 
-	public UserProfile.AuthProvider getAuthProvider() {
-		return authProvider;
-	}
+  public UserProfile.AuthProvider getAuthProvider() {
+    return authProvider;
+  }
 
-	public String getId() {
-		return id;
-	}
+  public String getId() {
+    return id;
+  }
 
-	public boolean hasRole(final String role) {
-		return getAuthorities().stream().anyMatch(ga -> ga.getAuthority().equals("ROLE_" + role));
-	}
+  public boolean hasRole(final String role) {
+    return getAuthorities().stream().anyMatch(ga -> ga.getAuthority().equals("ROLE_" + role));
+  }
 
-	public boolean isAdmin() {
-		return hasRole("ADMIN");
-	}
+  public boolean isAdmin() {
+    return hasRole("ADMIN");
+  }
 
-	public String getToken() {
-		return token;
-	}
+  public String getToken() {
+    return token;
+  }
 
-	public void setToken(final String token) {
-		this.token = token;
-	}
+  public void setToken(final String token) {
+    this.token = token;
+  }
 
-	@Override
-	public String toString() {
-		return String.format("Id: %s, LoginId: %s, AuthProvider: %s, Admin: %b",
-				id, loginId, authProvider, isAdmin());
-	}
+  @Override
+  public String toString() {
+    return String.format("Id: %s, LoginId: %s, AuthProvider: %s, Admin: %b",
+        id, loginId, authProvider, isAdmin());
+  }
 }

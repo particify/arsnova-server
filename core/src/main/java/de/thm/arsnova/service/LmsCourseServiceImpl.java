@@ -18,43 +18,43 @@ import net.particify.arsnova.connector.model.UserRole;
 @Service
 @Primary
 @ConditionalOnProperty(
-		name =  "enabled",
-		prefix = SystemProperties.PREFIX + ".lms-connector"
+    name =  "enabled",
+    prefix = SystemProperties.PREFIX + ".lms-connector"
 )
 public class LmsCourseServiceImpl implements LmsCourseService {
-	private ConnectorClient connectorClient;
-	private RoomService roomService;
-	private RoomRepository roomRepository;
+  private ConnectorClient connectorClient;
+  private RoomService roomService;
+  private RoomRepository roomRepository;
 
-	public LmsCourseServiceImpl(
-			final ConnectorClient connectorClient,
-			final RoomService roomService,
-			final RoomRepository roomRepository) {
-		this.connectorClient = connectorClient;
-		this.roomService = roomService;
-		this.roomRepository = roomRepository;
-	}
+  public LmsCourseServiceImpl(
+      final ConnectorClient connectorClient,
+      final RoomService roomService,
+      final RoomRepository roomRepository) {
+    this.connectorClient = connectorClient;
+    this.roomService = roomService;
+    this.roomRepository = roomRepository;
+  }
 
-	@Override
-	public List<Course> getCoursesByUserProfile(final UserProfile userProfile) {
-		final List<Course> courses = new ArrayList<>();
+  @Override
+  public List<Course> getCoursesByUserProfile(final UserProfile userProfile) {
+    final List<Course> courses = new ArrayList<>();
 
-		for (final Course course : connectorClient.getCourses(userProfile.getLoginId()).getCourse()) {
-			if (course.getMembership().isMember()
-					&& course.getMembership().getUserrole().equals(UserRole.TEACHER)
-			) {
-				courses.add(course);
-			}
-		}
+    for (final Course course : connectorClient.getCourses(userProfile.getLoginId()).getCourse()) {
+      if (course.getMembership().isMember()
+          && course.getMembership().getUserrole().equals(UserRole.TEACHER)
+      ) {
+        courses.add(course);
+      }
+    }
 
-		return courses;
-	}
+    return courses;
+  }
 
-	@Override
-	public List<Room> getCourseRoomsByUserProfile(final UserProfile userProfile) {
-		final List<String> courseIds = connectorClient.getCourses(userProfile.getLoginId()).getCourse().stream()
-				.map(c -> c.getId())
-				.collect(Collectors.toList());
-		return roomService.get(roomRepository.findIdsByLmsCourseIds(courseIds));
-	}
+  @Override
+  public List<Room> getCourseRoomsByUserProfile(final UserProfile userProfile) {
+    final List<String> courseIds = connectorClient.getCourses(userProfile.getLoginId()).getCourse().stream()
+        .map(c -> c.getId())
+        .collect(Collectors.toList());
+    return roomService.get(roomRepository.findIdsByLmsCourseIds(courseIds));
+  }
 }

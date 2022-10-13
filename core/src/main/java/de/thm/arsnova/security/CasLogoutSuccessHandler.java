@@ -34,37 +34,37 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
  */
 public class CasLogoutSuccessHandler implements LogoutSuccessHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(CasLogoutSuccessHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(CasLogoutSuccessHandler.class);
 
-	private String casUrl;
-	private String defaultTarget;
+  private String casUrl;
+  private String defaultTarget;
 
-	private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+  private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
-	@Override
-	public void onLogoutSuccess(
-			final HttpServletRequest request,
-			final HttpServletResponse response,
-			final Authentication authentication
-	) throws IOException, ServletException {
-		/* Typo in "referer" intended. It is in the spec. */
-		final String referrer = request.getHeader("referer");
-		if (response.isCommitted()) {
-			logger.info("Response has already been committed. Unable to redirect to target");
-			return;
-		}
-		redirectStrategy.sendRedirect(
-				request,
-				response,
-				(casUrl + "/logout?url=") + (referrer != null ? referrer : defaultTarget)
-		);
-	}
+  @Override
+  public void onLogoutSuccess(
+      final HttpServletRequest request,
+      final HttpServletResponse response,
+      final Authentication authentication
+  ) throws IOException, ServletException {
+    /* Typo in "referer" intended. It is in the spec. */
+    final String referrer = request.getHeader("referer");
+    if (response.isCommitted()) {
+      logger.info("Response has already been committed. Unable to redirect to target");
+      return;
+    }
+    redirectStrategy.sendRedirect(
+        request,
+        response,
+        (casUrl + "/logout?url=") + (referrer != null ? referrer : defaultTarget)
+    );
+  }
 
-	public void setCasUrl(final String newCasUrl) {
-		casUrl = newCasUrl;
-	}
+  public void setCasUrl(final String newCasUrl) {
+    casUrl = newCasUrl;
+  }
 
-	public void setDefaultTarget(final String newDefaultTarget) {
-		defaultTarget = newDefaultTarget;
-	}
+  public void setDefaultTarget(final String newDefaultTarget) {
+    defaultTarget = newDefaultTarget;
+  }
 }

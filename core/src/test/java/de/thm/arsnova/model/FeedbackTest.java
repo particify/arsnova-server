@@ -27,74 +27,74 @@ import org.junit.jupiter.api.Test;
 
 public class FeedbackTest {
 
-	@Test
-	public void differentObjectsShouldNotBeEqual() {
-		final Feedback f = new Feedback(0, 0, 0, 0);
-		final String x = "";
+  @Test
+  public void differentObjectsShouldNotBeEqual() {
+    final Feedback f = new Feedback(0, 0, 0, 0);
+    final String x = "";
 
-		assertFalse(f.equals(x));
-	}
+    assertFalse(f.equals(x));
+  }
 
-	@Test
-	public void differentlySizedFeedbacksShouldNotBeEqual() {
-		final Feedback f1 = new Feedback(0, 0, 0, 0);
-		final Feedback f2 = new Feedback(0, 0, 0, 0);
-		f2.getValues().add(0);
+  @Test
+  public void differentlySizedFeedbacksShouldNotBeEqual() {
+    final Feedback f1 = new Feedback(0, 0, 0, 0);
+    final Feedback f2 = new Feedback(0, 0, 0, 0);
+    f2.getValues().add(0);
 
-		assertFalse(f1.equals(f2));
-	}
+    assertFalse(f1.equals(f2));
+  }
 
-	@Test
-	public void nullShouldNotBeEqual() {
-		final Feedback f = new Feedback(0, 0, 0, 0);
-		assertFalse(f.equals(null));
-	}
+  @Test
+  public void nullShouldNotBeEqual() {
+    final Feedback f = new Feedback(0, 0, 0, 0);
+    assertFalse(f.equals(null));
+  }
 
-	@Test
-	public void sameContentsShouldBeEqual() {
-		final Feedback f1 = new Feedback(1, 2, 3, 4);
-		final Feedback f2 = new Feedback(1, 2, 3, 4);
+  @Test
+  public void sameContentsShouldBeEqual() {
+    final Feedback f1 = new Feedback(1, 2, 3, 4);
+    final Feedback f2 = new Feedback(1, 2, 3, 4);
 
-		assertTrue(f1.equals(f2));
-		assertTrue(f2.equals(f1));
-	}
+    assertTrue(f1.equals(f2));
+    assertTrue(f2.equals(f1));
+  }
 
-	@Test
-	public void differentContentsShouldNotBeEqual() {
-		final Feedback f1 = new Feedback(1, 2, 3, 4);
-		final Feedback f2 = new Feedback(4, 3, 2, 1);
+  @Test
+  public void differentContentsShouldNotBeEqual() {
+    final Feedback f1 = new Feedback(1, 2, 3, 4);
+    final Feedback f2 = new Feedback(4, 3, 2, 1);
 
-		assertFalse(f1.equals(f2));
-		assertFalse(f2.equals(f1));
-	}
+    assertFalse(f1.equals(f2));
+    assertFalse(f2.equals(f1));
+  }
 
-	@Test
-	public void shouldCalculateAverageValue() {
-		final Feedback f = new Feedback(1, 0, 0, 1);
+  @Test
+  public void shouldCalculateAverageValue() {
+    final Feedback f = new Feedback(1, 0, 0, 1);
 
-		final double expected = 1.5;
-		final double actual = f.getAverage().get();
+    final double expected = 1.5;
+    final double actual = f.getAverage().get();
 
-		assertEquals(expected, actual, 0.01);
-	}
+    assertEquals(expected, actual, 0.01);
+  }
 
-	@Test
-	public void averageCalculationShouldAvoidDivisionByZero() {
-		final Feedback f = new Feedback(0, 0, 0, 0);
+  @Test
+  public void averageCalculationShouldAvoidDivisionByZero() {
+    final Feedback f = new Feedback(0, 0, 0, 0);
 
-		final Optional<Double> actual = f.getAverage();
+    final Optional<Double> actual = f.getAverage();
 
-		assertFalse(actual.isPresent());
-	}
+    assertFalse(actual.isPresent());
+  }
 
-	@Test
-	public void shouldCountVotes() {
-		final Feedback f = new Feedback(2, 4, 8, 16);
+  @Test
+  public void shouldCountVotes() {
+    final Feedback f = new Feedback(2, 4, 8, 16);
 
-		final int expected = 30;
-		final int actual = f.getCount();
+    final int expected = 30;
+    final int actual = f.getCount();
 
-		assertEquals(expected, actual);
+    assertEquals(expected, actual);
 
-	}
+  }
 }

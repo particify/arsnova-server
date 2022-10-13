@@ -38,44 +38,44 @@ import de.thm.arsnova.service.UserService;
  * to get a consistent ID despite case insensitivity.
  */
 public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
-	public static final GrantedAuthority ROLE_LDAP_USER = new SimpleGrantedAuthority("ROLE_LDAP_USER");
+  public static final GrantedAuthority ROLE_LDAP_USER = new SimpleGrantedAuthority("ROLE_LDAP_USER");
 
-	private static final Logger logger = LoggerFactory.getLogger(CustomLdapUserDetailsMapper.class);
+  private static final Logger logger = LoggerFactory.getLogger(CustomLdapUserDetailsMapper.class);
 
-	private String userIdAttr;
-	private final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
-			User.ROLE_USER,
-			ROLE_LDAP_USER
-	);
+  private String userIdAttr;
+  private final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
+      User.ROLE_USER,
+      ROLE_LDAP_USER
+  );
 
-	private UserService userService;
+  private UserService userService;
 
-	public CustomLdapUserDetailsMapper(final String ldapUserIdAttr) {
-		this.userIdAttr = ldapUserIdAttr;
-	}
+  public CustomLdapUserDetailsMapper(final String ldapUserIdAttr) {
+    this.userIdAttr = ldapUserIdAttr;
+  }
 
-	public UserDetails mapUserFromContext(
-			final DirContextOperations ctx,
-			final String username,
-			final Collection<? extends GrantedAuthority> authorities) {
-		String ldapUsername = ctx.getStringAttribute(userIdAttr);
-		if (ldapUsername == null) {
-			logger.warn("LDAP attribute {} not set. Falling back to lowercased user provided username.", userIdAttr);
-			ldapUsername = username.toLowerCase();
-		}
+  public UserDetails mapUserFromContext(
+      final DirContextOperations ctx,
+      final String username,
+      final Collection<? extends GrantedAuthority> authorities) {
+    String ldapUsername = ctx.getStringAttribute(userIdAttr);
+    if (ldapUsername == null) {
+      logger.warn("LDAP attribute {} not set. Falling back to lowercased user provided username.", userIdAttr);
+      ldapUsername = username.toLowerCase();
+    }
 
-		final Collection<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
-		grantedAuthorities.addAll(authorities);
-		if (userService.isAdmin(ldapUsername, UserProfile.AuthProvider.LDAP)) {
-			grantedAuthorities.add(User.ROLE_ADMIN);
-		}
+    final Collection<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
+    grantedAuthorities.addAll(authorities);
+    if (userService.isAdmin(ldapUsername, UserProfile.AuthProvider.LDAP)) {
+      grantedAuthorities.add(User.ROLE_ADMIN);
+    }
 
-		return userService.loadUser(UserProfile.AuthProvider.LDAP, ldapUsername,
-				grantedAuthorities, true);
-	}
+    return userService.loadUser(UserProfile.AuthProvider.LDAP, ldapUsername,
+        grantedAuthorities, true);
+  }
 
-	@Autowired
-	public void setUserService(final UserService userService) {
-		this.userService = userService;
-	}
+  @Autowired
+  public void setUserService(final UserService userService) {
+    this.userService = userService;
+  }
 }

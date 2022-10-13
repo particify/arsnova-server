@@ -20,61 +20,61 @@ import javax.servlet.http.HttpServletResponse;
 @RestController("SettingsController")
 @RequestMapping(SettingsController.REQUEST_MAPPING)
 public class SettingsController extends AbstractEntityController {
-    private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
+  private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
 
-    protected static final String REQUEST_MAPPING = "/room/{roomId}/settings";
+  protected static final String REQUEST_MAPPING = "/room/{roomId}/settings";
 
-    private final SettingsService service;
-    private final SettingsCommandHandler commandHandler;
+  private final SettingsService service;
+  private final SettingsCommandHandler commandHandler;
 
-    @Autowired
-    public SettingsController(
-            SettingsService service,
-            SettingsCommandHandler commandHandler
-    ) {
-        this.service = service;
-        this.commandHandler = commandHandler;
-    }
+  @Autowired
+  public SettingsController(
+      SettingsService service,
+      SettingsCommandHandler commandHandler
+  ) {
+    this.service = service;
+    this.commandHandler = commandHandler;
+  }
 
-    @GetMapping(GET_MAPPING)
-    public Settings get(@PathVariable String id) {
-        return service.get(id);
-    }
+  @GetMapping(GET_MAPPING)
+  public Settings get(@PathVariable String id) {
+    return service.get(id);
+  }
 
-    @PostMapping(POST_MAPPING)
-    @ResponseStatus(HttpStatus.CREATED)
-    public Settings post(
-            @PathVariable final String roomId,
-            @RequestBody final Settings settings,
-            final HttpServletResponse httpServletResponse
-    ) {
-        final CreateSettingsPayload payload  = new CreateSettingsPayload(settings);
-        final CreateSettings command = new CreateSettings(payload);
+  @PostMapping(POST_MAPPING)
+  @ResponseStatus(HttpStatus.CREATED)
+  public Settings post(
+      @PathVariable final String roomId,
+      @RequestBody final Settings settings,
+      final HttpServletResponse httpServletResponse
+  ) {
+    final CreateSettingsPayload payload  = new CreateSettingsPayload(settings);
+    final CreateSettings command = new CreateSettings(payload);
 
-        Settings s = commandHandler.handle(roomId, command);
+    Settings s = commandHandler.handle(roomId, command);
 
-        final String uri = UriComponentsBuilder.fromPath(REQUEST_MAPPING).path(GET_MAPPING)
-                .buildAndExpand(s.getRoomId()).toUriString();
-        httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
-        httpServletResponse.setHeader(ENTITY_ID_HEADER, s.getRoomId());
+    final String uri = UriComponentsBuilder.fromPath(REQUEST_MAPPING).path(GET_MAPPING)
+        .buildAndExpand(s.getRoomId()).toUriString();
+    httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
+    httpServletResponse.setHeader(ENTITY_ID_HEADER, s.getRoomId());
 
-        return s;
-    }
+    return s;
+  }
 
-    @PutMapping(PUT_MAPPING)
-    public Settings put(
-            @PathVariable final String roomId,
-            @RequestBody final Settings entity,
-            final HttpServletResponse httpServletResponse
-    ) {
-        UpdateSettingsPayload p = new UpdateSettingsPayload(entity);
-        UpdateSettings command = new UpdateSettings(p);
+  @PutMapping(PUT_MAPPING)
+  public Settings put(
+      @PathVariable final String roomId,
+      @RequestBody final Settings entity,
+      final HttpServletResponse httpServletResponse
+  ) {
+    UpdateSettingsPayload p = new UpdateSettingsPayload(entity);
+    UpdateSettings command = new UpdateSettings(p);
 
-        Settings s = this.commandHandler.handle(roomId, command);
+    Settings s = this.commandHandler.handle(roomId, command);
 
-        httpServletResponse.setHeader(ENTITY_ID_HEADER, s.getRoomId());
+    httpServletResponse.setHeader(ENTITY_ID_HEADER, s.getRoomId());
 
-        return s;
-    }
+    return s;
+  }
 
 }

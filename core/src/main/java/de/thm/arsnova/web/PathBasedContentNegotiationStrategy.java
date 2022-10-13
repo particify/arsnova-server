@@ -39,42 +39,42 @@ import de.thm.arsnova.controller.AbstractEntityController;
  * @author Daniel Gerhardt
  */
 public class PathBasedContentNegotiationStrategy implements ContentNegotiationStrategy {
-	private static final MediaType ACTUATOR_MEDIA_TYPE =
-			new MediaType("application", "vnd.spring-boot.actuator.v2+json");
-	private static final Logger logger = LoggerFactory.getLogger(PathBasedContentNegotiationStrategy.class);
+  private static final MediaType ACTUATOR_MEDIA_TYPE =
+      new MediaType("application", "vnd.spring-boot.actuator.v2+json");
+  private static final Logger logger = LoggerFactory.getLogger(PathBasedContentNegotiationStrategy.class);
 
-	private final String managementPath;
+  private final String managementPath;
 
-	private List<MediaType> fallbacks;
-	private MediaType empty = MediaType.valueOf(AbstractEntityController.MEDIATYPE_EMPTY);
+  private List<MediaType> fallbacks;
+  private MediaType empty = MediaType.valueOf(AbstractEntityController.MEDIATYPE_EMPTY);
 
-	public PathBasedContentNegotiationStrategy(final List<MediaType> fallbacks, final String managementPath) {
-		this.fallbacks = fallbacks;
-		this.managementPath = managementPath + "/";
-	}
+  public PathBasedContentNegotiationStrategy(final List<MediaType> fallbacks, final String managementPath) {
+    this.fallbacks = fallbacks;
+    this.managementPath = managementPath + "/";
+  }
 
-	@Override
-	public List<MediaType> resolveMediaTypes(final NativeWebRequest webRequest)
-			throws HttpMediaTypeNotAcceptableException {
-		final HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-		final List<MediaType> mediaTypes = new ArrayList<>();
-		if (servletRequest.getServletPath().startsWith(managementPath)) {
-			logger.trace("Negotiating content based on path for management API");
-			mediaTypes.add(ACTUATOR_MEDIA_TYPE);
-			mediaTypes.add(MediaType.TEXT_PLAIN);
-		} else {
-			if (servletRequest.getHeader(HttpHeaders.ACCEPT) == null
-					&& Arrays.asList("POST", "PUT", "PATCH").contains(servletRequest.getMethod())) {
-				/* This allows AbstractEntityController to send an empty response if no Accept header is set */
-				logger.debug("No Accept header present for {} request. Entity will not be sent in response",
-						servletRequest.getMethod());
-				mediaTypes.add(empty);
-			} else {
-				logger.trace("Content negotiation falling back to {}", fallbacks);
-				mediaTypes.addAll(fallbacks);
-			}
-		}
+  @Override
+  public List<MediaType> resolveMediaTypes(final NativeWebRequest webRequest)
+      throws HttpMediaTypeNotAcceptableException {
+    final HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
+    final List<MediaType> mediaTypes = new ArrayList<>();
+    if (servletRequest.getServletPath().startsWith(managementPath)) {
+      logger.trace("Negotiating content based on path for management API");
+      mediaTypes.add(ACTUATOR_MEDIA_TYPE);
+      mediaTypes.add(MediaType.TEXT_PLAIN);
+    } else {
+      if (servletRequest.getHeader(HttpHeaders.ACCEPT) == null
+          && Arrays.asList("POST", "PUT", "PATCH").contains(servletRequest.getMethod())) {
+        /* This allows AbstractEntityController to send an empty response if no Accept header is set */
+        logger.debug("No Accept header present for {} request. Entity will not be sent in response",
+            servletRequest.getMethod());
+        mediaTypes.add(empty);
+      } else {
+        logger.trace("Content negotiation falling back to {}", fallbacks);
+        mediaTypes.addAll(fallbacks);
+      }
+    }
 
-		return mediaTypes;
-	}
+    return mediaTypes;
+  }
 }

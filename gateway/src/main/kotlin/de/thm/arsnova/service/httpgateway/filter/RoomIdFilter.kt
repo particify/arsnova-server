@@ -20,37 +20,37 @@ import org.springframework.web.server.ServerWebExchange
 @Component
 class RoomIdFilter : AbstractGatewayFilterFactory<RoomIdFilter.Config>(Config::class.java) {
 
-    companion object {
-        val topicRoomIdLength = 32
-        val roomIdRegex: Regex = Regex("[0-9a-f]{$topicRoomIdLength}")
-        val roomPrefix = "/room"
-        val roomIdHeaderName = "ARS_ROOM_ID"
+  companion object {
+    val topicRoomIdLength = 32
+    val roomIdRegex: Regex = Regex("[0-9a-f]{$topicRoomIdLength}")
+    val roomPrefix = "/room"
+    val roomIdHeaderName = "ARS_ROOM_ID"
+  }
+
+  private val logger = LoggerFactory.getLogger(RoomIdFilter::class.java)
+
+  override fun apply(config: Config): GatewayFilter {
+    return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
+      val request: ServerHttpRequest = exchange.request
+      val uriVariables = ServerWebExchangeUtils.getUriTemplateVariables(exchange)
+      val roomId = uriVariables["roomId"]
+      if (!roomId!!.matches(roomIdRegex)) {
+        logger.debug("Didn't get a valid roomId out of the uri variables: {}", uriVariables)
+        throw ResponseStatusException(HttpStatus.BAD_REQUEST)
+      }
+
+      // The +1 is for the extra '/' that needs to be cut
+      val strippedPath = request.path.value().substring(topicRoomIdLength + 1 + roomPrefix.length)
+      var modifiedRequest: ServerHttpRequest = exchange.request
+        .mutate().path(strippedPath)
+        .header(roomIdHeaderName, roomId)
+        .build()
+
+      chain.filter(exchange.mutate().request(modifiedRequest).build())
     }
+  }
 
-    private val logger = LoggerFactory.getLogger(RoomIdFilter::class.java)
-
-    override fun apply(config: Config): GatewayFilter {
-        return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
-            val request: ServerHttpRequest = exchange.request
-            val uriVariables = ServerWebExchangeUtils.getUriTemplateVariables(exchange)
-            val roomId = uriVariables["roomId"]
-            if (!roomId!!.matches(roomIdRegex)) {
-                logger.debug("Didn't get a valid roomId out of the uri variables: {}", uriVariables)
-                throw ResponseStatusException(HttpStatus.BAD_REQUEST)
-            }
-
-            // The +1 is for the extra '/' that needs to be cut
-            val strippedPath = request.path.value().substring(topicRoomIdLength + 1 + roomPrefix.length)
-            var modifiedRequest: ServerHttpRequest = exchange.request
-                .mutate().path(strippedPath)
-                .header(roomIdHeaderName, roomId)
-                .build()
-
-            chain.filter(exchange.mutate().request(modifiedRequest).build())
-        }
-    }
-
-    class Config {
-        var name: String = "RoomIdFilter"
-    }
+  class Config {
+    var name: String = "RoomIdFilter"
+  }
 }

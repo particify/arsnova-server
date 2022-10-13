@@ -37,104 +37,104 @@ import de.thm.arsnova.web.exceptions.ForbiddenException;
 @RestController
 @EntityRequestMapping(UserController.REQUEST_MAPPING)
 public class UserController extends AbstractEntityController<UserProfile> {
-	protected static final String REQUEST_MAPPING = "/user";
-	private static final String REGISTER_MAPPING = "/register";
-	private static final String ACTIVATE_MAPPING = DEFAULT_ID_MAPPING + "/activate";
-	private static final String RESET_ACTIVATE_MAPPING = DEFAULT_ID_MAPPING + "/resetactivation";
-	private static final String RESET_PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/resetpassword";
+  protected static final String REQUEST_MAPPING = "/user";
+  private static final String REGISTER_MAPPING = "/register";
+  private static final String ACTIVATE_MAPPING = DEFAULT_ID_MAPPING + "/activate";
+  private static final String RESET_ACTIVATE_MAPPING = DEFAULT_ID_MAPPING + "/resetactivation";
+  private static final String RESET_PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/resetpassword";
 
-	private UserService userService;
+  private UserService userService;
 
-	public UserController(
-			@Qualifier("securedUserService") final UserService userService) {
-		super(userService);
-		this.userService = userService;
-	}
+  public UserController(
+      @Qualifier("securedUserService") final UserService userService) {
+    super(userService);
+    this.userService = userService;
+  }
 
-	static class Activation {
-		private String key;
+  static class Activation {
+    private String key;
 
-		public String getKey() {
-			return key;
-		}
+    public String getKey() {
+      return key;
+    }
 
-		@JsonView(View.Public.class)
-		public void setKey(final String key) {
-			this.key = key;
-		}
-	}
+    @JsonView(View.Public.class)
+    public void setKey(final String key) {
+      this.key = key;
+    }
+  }
 
-	static class PasswordReset {
-		private String key;
-		private String password;
+  static class PasswordReset {
+    private String key;
+    private String password;
 
-		public String getKey() {
-			return key;
-		}
+    public String getKey() {
+      return key;
+    }
 
-		@JsonView(View.Public.class)
-		public void setKey(final String key) {
-			this.key = key;
-		}
+    @JsonView(View.Public.class)
+    public void setKey(final String key) {
+      this.key = key;
+    }
 
-		public String getPassword() {
-			return password;
-		}
+    public String getPassword() {
+      return password;
+    }
 
-		@JsonView(View.Public.class)
-		public void setPassword(final String password) {
-			this.password = password;
-		}
-	}
+    @JsonView(View.Public.class)
+    public void setPassword(final String password) {
+      this.password = password;
+    }
+  }
 
-	@Override
-	protected String getMapping() {
-		return REQUEST_MAPPING;
-	}
+  @Override
+  protected String getMapping() {
+    return REQUEST_MAPPING;
+  }
 
-	@PostMapping(REGISTER_MAPPING)
-	public void register(@RequestBody final LoginCredentials loginCredentials) {
-		if (userService.create(loginCredentials.getLoginId(), loginCredentials.getPassword()) == null) {
-			throw new ForbiddenException();
-		}
-	}
+  @PostMapping(REGISTER_MAPPING)
+  public void register(@RequestBody final LoginCredentials loginCredentials) {
+    if (userService.create(loginCredentials.getLoginId(), loginCredentials.getPassword()) == null) {
+      throw new ForbiddenException();
+    }
+  }
 
-	@PostMapping(ACTIVATE_MAPPING)
-	public void activate(
-			@PathVariable final String id,
-			@RequestParam(required = false) final String key,
-			final HttpServletRequest request) {
-		if (key != null) {
-			if (!userService.activateAccount(id, key, request.getRemoteAddr())) {
-				throw new BadRequestException();
-			}
-		} else {
-			userService.activateAccount(id);
-		}
-	}
+  @PostMapping(ACTIVATE_MAPPING)
+  public void activate(
+      @PathVariable final String id,
+      @RequestParam(required = false) final String key,
+      final HttpServletRequest request) {
+    if (key != null) {
+      if (!userService.activateAccount(id, key, request.getRemoteAddr())) {
+        throw new BadRequestException();
+      }
+    } else {
+      userService.activateAccount(id);
+    }
+  }
 
-	@PostMapping(RESET_ACTIVATE_MAPPING)
-	public void resetActivation(
-			@PathVariable final String id,
-			final HttpServletRequest request) {
-		userService.resetActivation(id, request.getRemoteAddr());
-	}
+  @PostMapping(RESET_ACTIVATE_MAPPING)
+  public void resetActivation(
+      @PathVariable final String id,
+      final HttpServletRequest request) {
+    userService.resetActivation(id, request.getRemoteAddr());
+  }
 
-	@PostMapping(RESET_PASSWORD_MAPPING)
-	public void resetPassword(
-			@PathVariable final String id,
-			@RequestBody final PasswordReset passwordReset) {
-		if (passwordReset.getKey() != null) {
-			if (!userService.resetPassword(id, passwordReset.getKey(), passwordReset.getPassword())) {
-				throw new ForbiddenException();
-			}
-		} else {
-			userService.initiatePasswordReset(id);
-		}
-	}
+  @PostMapping(RESET_PASSWORD_MAPPING)
+  public void resetPassword(
+      @PathVariable final String id,
+      @RequestBody final PasswordReset passwordReset) {
+    if (passwordReset.getKey() != null) {
+      if (!userService.resetPassword(id, passwordReset.getKey(), passwordReset.getPassword())) {
+        throw new ForbiddenException();
+      }
+    } else {
+      userService.initiatePasswordReset(id);
+    }
+  }
 
-	@Override
-	protected String resolveAlias(final String alias) {
-		return userService.getByUsername(alias).getId();
-	}
+  @Override
+  protected String resolveAlias(final String alias) {
+    return userService.getByUsername(alias).getId();
+  }
 }

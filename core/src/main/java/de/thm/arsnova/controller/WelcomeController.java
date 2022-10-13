@@ -33,17 +33,17 @@ import de.thm.arsnova.management.VersionInfoContributor;
  */
 @Controller
 public class WelcomeController extends AbstractController {
-	@Autowired
-	private VersionInfoContributor versionInfoContributor;
+  @Autowired
+  private VersionInfoContributor versionInfoContributor;
 
-	@GetMapping("/")
-	public View home() {
-		return new RedirectView("/", false);
-	}
+  @GetMapping("/")
+  public View home() {
+    return new RedirectView("/", false);
+  }
 
-	@GetMapping(value = "/", produces = "application/json")
-	@ResponseBody
-	public Map<String, Object> jsonHome() {
-		return versionInfoContributor.getInfoDetails();
-	}
+  @GetMapping(value = "/", produces = "application/json")
+  @ResponseBody
+  public Map<String, Object> jsonHome() {
+    return versionInfoContributor.getInfoDetails();
+  }
 }

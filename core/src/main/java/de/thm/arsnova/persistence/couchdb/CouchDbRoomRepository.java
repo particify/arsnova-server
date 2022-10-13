@@ -29,59 +29,59 @@ import de.thm.arsnova.model.Room;
 import de.thm.arsnova.persistence.RoomRepository;
 
 public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implements RoomRepository {
-	public CouchDbRoomRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Room.class, db, "by_id", createIfNotExists);
-	}
+  public CouchDbRoomRepository(final CouchDbConnector db, final boolean createIfNotExists) {
+    super(Room.class, db, "by_id", createIfNotExists);
+  }
 
-	@Override
-	public Room findByShortId(final String shortId) {
-		if (shortId == null) {
-			return null;
-		}
-		final List<Room> roomList = queryView("by_shortid", shortId);
+  @Override
+  public Room findByShortId(final String shortId) {
+    if (shortId == null) {
+      return null;
+    }
+    final List<Room> roomList = queryView("by_shortid", shortId);
 
-		return !roomList.isEmpty() ? roomList.get(0) : null;
-	}
+    return !roomList.isEmpty() ? roomList.get(0) : null;
+  }
 
-	@Override
-	public List<Room> findByOwnerId(final String ownerId, final int start, final int limit) {
-		final int qSkip = start > 0 ? start : -1;
-		final int qLimit = limit > 0 ? limit : -1;
+  @Override
+  public List<Room> findByOwnerId(final String ownerId, final int start, final int limit) {
+    final int qSkip = start > 0 ? start : -1;
+    final int qLimit = limit > 0 ? limit : -1;
 
-		/* TODO: Only load IDs and check against cache for data. */
-		return db.queryView(
-				createQuery("partial_by_pool_ownerid_name")
-						.skip(qSkip)
-						.limit(qLimit)
-						.startKey(ComplexKey.of(false, ownerId))
-						.endKey(ComplexKey.of(false, ownerId, ComplexKey.emptyObject()))
-						.includeDocs(true),
-				Room.class);
-	}
+    /* TODO: Only load IDs and check against cache for data. */
+    return db.queryView(
+        createQuery("partial_by_pool_ownerid_name")
+            .skip(qSkip)
+            .limit(qLimit)
+            .startKey(ComplexKey.of(false, ownerId))
+            .endKey(ComplexKey.of(false, ownerId, ComplexKey.emptyObject()))
+            .includeDocs(true),
+        Room.class);
+  }
 
-	@Override
-	public List<String> findIdsByOwnerId(final String ownerId) {
-		final ViewResult result = db.queryView(createQuery("by_ownerid")
-				.key(ownerId)
-				.includeDocs(false));
+  @Override
+  public List<String> findIdsByOwnerId(final String ownerId) {
+    final ViewResult result = db.queryView(createQuery("by_ownerid")
+        .key(ownerId)
+        .includeDocs(false));
 
-		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
-	}
+    return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
+  }
 
-	@Override
-	public List<String> findIdsByLmsCourseIds(final List<String> lmsCourseIds) {
-		final ViewResult result = db.queryView(createQuery("by_lmscourseid")
-				.keys(lmsCourseIds)
-				.includeDocs(false));
+  @Override
+  public List<String> findIdsByLmsCourseIds(final List<String> lmsCourseIds) {
+    final ViewResult result = db.queryView(createQuery("by_lmscourseid")
+        .keys(lmsCourseIds)
+        .includeDocs(false));
 
-		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
-	}
+    return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
+  }
 
-	@Override
-	public List<Room> findStubsByScheduledDeletionAfter(final Date scheduledDeletion) {
-		final ViewResult result = db.queryView(createQuery("by_scheduleddeletion")
-				.endKey(scheduledDeletion.getTime())
-				.includeDocs(false));
-		return createEntityStubs(result, (r, k) -> {});
-	}
+  @Override
+  public List<Room> findStubsByScheduledDeletionAfter(final Date scheduledDeletion) {
+    final ViewResult result = db.queryView(createQuery("by_scheduleddeletion")
+        .endKey(scheduledDeletion.getTime())
+        .includeDocs(false));
+    return createEntityStubs(result, (r, k) -> {});
+  }
 }

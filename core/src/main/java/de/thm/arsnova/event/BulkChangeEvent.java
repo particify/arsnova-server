@@ -25,25 +25,25 @@ import org.springframework.core.ResolvableTypeProvider;
 import de.thm.arsnova.model.Entity;
 
 public class BulkChangeEvent<E extends Entity> extends ApplicationEvent implements ResolvableTypeProvider {
-	private Iterable<E> entities;
-	private Class<E> clazz;
+  private Iterable<E> entities;
+  private Class<E> clazz;
 
-	public BulkChangeEvent(final Object source, final Class<E> clazz, final Iterable<E> entities) {
-		super(source);
-		this.clazz = clazz;
-		this.entities = entities;
-	}
+  public BulkChangeEvent(final Object source, final Class<E> clazz, final Iterable<E> entities) {
+    super(source);
+    this.clazz = clazz;
+    this.entities = entities;
+  }
 
-	public Iterable<E> getEntities() {
-		return entities;
-	}
+  public Iterable<E> getEntities() {
+    return entities;
+  }
 
-	public void setEntities(final Iterable<E> entities) {
-		this.entities = entities;
-	}
+  public void setEntities(final Iterable<E> entities) {
+    this.entities = entities;
+  }
 
-	@Override
-	public ResolvableType getResolvableType() {
-		return ResolvableType.forClassWithGenerics(getClass(), clazz);
-	}
+  @Override
+  public ResolvableType getResolvableType() {
+    return ResolvableType.forClassWithGenerics(getClass(), clazz);
+  }
 }

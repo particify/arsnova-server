@@ -31,29 +31,29 @@ import de.thm.arsnova.web.exceptions.BadRequestException;
 @RestController
 @EntityRequestMapping(AnswerController.REQUEST_MAPPING)
 public class AnswerController extends AbstractEntityController<Answer> {
-	protected static final String REQUEST_MAPPING = "/answer";
-	private static final String HIDE_MAPPING = DEFAULT_ID_MAPPING + "/hide";
+  protected static final String REQUEST_MAPPING = "/answer";
+  private static final String HIDE_MAPPING = DEFAULT_ID_MAPPING + "/hide";
 
-	private AnswerService answerService;
+  private AnswerService answerService;
 
-	public AnswerController(
-			@Qualifier("securedAnswerService") final AnswerService answerService) {
-		super(answerService);
-		this.answerService = answerService;
-	}
+  public AnswerController(
+      @Qualifier("securedAnswerService") final AnswerService answerService) {
+    super(answerService);
+    this.answerService = answerService;
+  }
 
-	@Override
-	protected String getMapping() {
-		return REQUEST_MAPPING;
-	}
+  @Override
+  protected String getMapping() {
+    return REQUEST_MAPPING;
+  }
 
-	@PostMapping(HIDE_MAPPING)
-	public void hide(@PathVariable final String id) {
-		final Answer answer = answerService.get(id);
-		if (!(answer instanceof TextAnswer)) {
-			throw new BadRequestException("Only text answers can be hidden.");
-		}
-		final TextAnswer textAnswer = (TextAnswer) answer;
-		answerService.hideTextAnswer(textAnswer, true);
-	}
+  @PostMapping(HIDE_MAPPING)
+  public void hide(@PathVariable final String id) {
+    final Answer answer = answerService.get(id);
+    if (!(answer instanceof TextAnswer)) {
+      throw new BadRequestException("Only text answers can be hidden.");
+    }
+    final TextAnswer textAnswer = (TextAnswer) answer;
+    answerService.hideTextAnswer(textAnswer, true);
+  }
 }

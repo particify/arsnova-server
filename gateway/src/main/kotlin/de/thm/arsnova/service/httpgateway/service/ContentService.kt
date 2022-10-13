@@ -8,18 +8,18 @@ import reactor.core.publisher.Flux
 
 @Service
 class ContentService(
-    private val webClient: WebClient,
-    private val httpGatewayProperties: HttpGatewayProperties
+  private val webClient: WebClient,
+  private val httpGatewayProperties: HttpGatewayProperties
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+  private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun getStats(roomIds: List<String>, jwt: String): Flux<Int> {
-        val url = "${httpGatewayProperties.httpClient.core}/content/-/count?roomIds=${roomIds.joinToString(",")}"
-        logger.trace("Querying core for content stats with url: {}", url)
-        return webClient.get()
-            .uri(url)
-            .header("Authorization", jwt)
-            .retrieve().bodyToFlux(Int::class.java).cache()
-            .checkpoint("Request failed in ${this::class.simpleName}::${::getStats.name}.")
-    }
+  fun getStats(roomIds: List<String>, jwt: String): Flux<Int> {
+    val url = "${httpGatewayProperties.httpClient.core}/content/-/count?roomIds=${roomIds.joinToString(",")}"
+    logger.trace("Querying core for content stats with url: {}", url)
+    return webClient.get()
+      .uri(url)
+      .header("Authorization", jwt)
+      .retrieve().bodyToFlux(Int::class.java).cache()
+      .checkpoint("Request failed in ${this::class.simpleName}::${::getStats.name}.")
+  }
 }

@@ -10,16 +10,16 @@ import reactor.core.publisher.Mono
 
 @RestController("StatsController")
 class StatsController(
-		private val roomSubscriptionEventDispatcher: RoomSubscriptionEventDispatcher,
+    private val roomSubscriptionEventDispatcher: RoomSubscriptionEventDispatcher,
 ) {
-	companion object {
-		const val STATS_MAPPING = "/stats"
-	}
+  companion object {
+    const val STATS_MAPPING = "/stats"
+  }
 
-	private val logger = LoggerFactory.getLogger(this::class.java)
+  private val logger = LoggerFactory.getLogger(this::class.java)
 
-	@GetMapping(STATS_MAPPING)
-	fun getStats(): Mono<Stats> {
-		return Mono.just(Stats(roomSubscriptionEventDispatcher.getWsSessionCount()))
-	}
+  @GetMapping(STATS_MAPPING)
+  fun getStats(): Mono<Stats> {
+    return Mono.just(Stats(roomSubscriptionEventDispatcher.getWsSessionCount()))
+  }
 }

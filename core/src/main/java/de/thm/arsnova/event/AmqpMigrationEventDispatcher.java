@@ -32,36 +32,36 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AmqpMigrationEventDispatcher {
-	public static final String PARTICIPANT_ACCESS_MIGRATION_QUEUE_NAME = "backend.event.migration.access.participant";
+  public static final String PARTICIPANT_ACCESS_MIGRATION_QUEUE_NAME = "backend.event.migration.access.participant";
 
-	private final RabbitTemplate rabbitTemplate;
+  private final RabbitTemplate rabbitTemplate;
 
-	public AmqpMigrationEventDispatcher(final RabbitTemplate rabbitTemplate) {
-		this.rabbitTemplate = rabbitTemplate;
-	}
+  public AmqpMigrationEventDispatcher(final RabbitTemplate rabbitTemplate) {
+    this.rabbitTemplate = rabbitTemplate;
+  }
 
-	@EventListener
-	public void dispatchRoomHistoryMigrationEvent(final RoomHistoryMigrationEvent event) {
-		rabbitTemplate.convertAndSend(
-				PARTICIPANT_ACCESS_MIGRATION_QUEUE_NAME,
-				new ParticipantAccessMigrationMessage(event.getUserId(), event.getRoomIds()));
-	}
+  @EventListener
+  public void dispatchRoomHistoryMigrationEvent(final RoomHistoryMigrationEvent event) {
+    rabbitTemplate.convertAndSend(
+        PARTICIPANT_ACCESS_MIGRATION_QUEUE_NAME,
+        new ParticipantAccessMigrationMessage(event.getUserId(), event.getRoomIds()));
+  }
 
-	private static class ParticipantAccessMigrationMessage {
-		private String userId;
-		private List<String> roomIds;
+  private static class ParticipantAccessMigrationMessage {
+    private String userId;
+    private List<String> roomIds;
 
-		private ParticipantAccessMigrationMessage(final String userId, final List<String> roomIds) {
-			this.userId = userId;
-			this.roomIds = roomIds;
-		}
+    private ParticipantAccessMigrationMessage(final String userId, final List<String> roomIds) {
+      this.userId = userId;
+      this.roomIds = roomIds;
+    }
 
-		public String getUserId() {
-			return userId;
-		}
+    public String getUserId() {
+      return userId;
+    }
 
-		public List<String> getRoomIds() {
-			return roomIds;
-		}
-	}
+    public List<String> getRoomIds() {
+      return roomIds;
+    }
+  }
 }

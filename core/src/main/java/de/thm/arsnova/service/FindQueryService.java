@@ -30,5 +30,5 @@ import de.thm.arsnova.model.FindQuery;
  * @author Daniel Gerhardt
  */
 public interface FindQueryService<E extends Entity> {
-	Set<String> resolveQuery(FindQuery<E> findQuery);
+  Set<String> resolveQuery(FindQuery<E> findQuery);
 }
