@@ -21,6 +21,8 @@ package de.thm.arsnova.config;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -241,7 +243,24 @@ public class AppConfig implements WebMvcConfigurer {
 			mailSender.getJavaMailProperties().setProperty("mail.smtp.auth", "true");
 			mailSender.getJavaMailProperties().setProperty("mail.smtps.auth", "true");
 		}
-		mailSender.getJavaMailProperties().setProperty("mail.smtp.starttls.enable", "true");
+
+		// Enable STARTTLS when the mail server has a public IP address and
+		// implicit TLS is disabled. Internal mail servers usually use
+		// self-signed certificates which cannot be verified without a trust
+		// store. Implicit TLS can be used if encryption is required.
+		boolean localAddress = false;
+		try {
+			final InetAddress address = InetAddress.getByName(mailProperties.getHost());
+			localAddress = address.isLoopbackAddress() || address.isSiteLocalAddress();
+			logger.debug("Mail server IP address: {} (is local address? {})",
+					address.getHostAddress(), localAddress);
+		} catch (final UnknownHostException e) {
+			logger.error("Cannot resolve hostname for mail server.", e);
+		}
+		if (!localAddress && !mailProperties.getImplicitTls()) {
+			logger.info("Enabling STARTTLS for mail server connections.");
+			mailSender.getJavaMailProperties().setProperty("mail.smtp.starttls.enable", "true");
+		}
 
 		return mailSender;
 	}
