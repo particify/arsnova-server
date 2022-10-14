@@ -20,7 +20,7 @@ package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.Date;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
@@ -28,7 +28,8 @@ import de.thm.arsnova.model.serialization.View;
 public class TextAnswer extends Answer {
 	private String subject;
 
-	@NotBlank
+	// Validation: null is allowed for abstentions
+	@Size(min = 1, max = 500)
 	private String body;
 
 	private boolean read;
