@@ -32,12 +32,16 @@ import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.security.User;
 
 /**
+ * This class handles the creation of the security context for the
+ * {@link WithMockUser} annotation.
+ *
  * @author Daniel Gerhardt
  */
 public class WithMockUserSecurityContextFactory implements WithSecurityContextFactory<WithMockUser> {
   @Override
   public SecurityContext createSecurityContext(final WithMockUser withMockUser) {
-    final String loginId = StringUtils.hasLength(withMockUser.loginId()) ? withMockUser.loginId() : withMockUser.value();
+    final String loginId = StringUtils.hasLength(withMockUser.loginId())
+        ? withMockUser.loginId() : withMockUser.value();
     final UserProfile userProfile = new UserProfile(withMockUser.authProvider(), loginId);
     userProfile.setId(!withMockUser.userId().isEmpty() ? withMockUser.userId() : loginId);
     final User user = new User(userProfile, Arrays.stream(withMockUser.roles())

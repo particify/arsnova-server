@@ -327,7 +327,7 @@ public class DefaultEntityServiceImplTest {
   public void testValidation() {
     final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
     final DefaultEntityServiceImpl<Room> entityService =
-      new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
+        new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
     entityService.setApplicationEventPublisher(eventPublisher);
 
     when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
@@ -366,7 +366,7 @@ public class DefaultEntityServiceImplTest {
     );
 
     entityService.update(room1, room2, View.Public.class);
-    Map<String, Object> changes = eventListenerConfig.getRoomAfterUpdateEvents().get(0).getChanges();
+    final Map<String, Object> changes = eventListenerConfig.getRoomAfterUpdateEvents().get(0).getChanges();
     assertEquals(expectedChanges, changes);
   }
 

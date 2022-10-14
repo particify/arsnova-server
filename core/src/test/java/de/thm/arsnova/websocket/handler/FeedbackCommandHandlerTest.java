@@ -36,7 +36,7 @@ public class FeedbackCommandHandlerTest {
   private FeedbackCommandHandler commandHandler;
 
   private Room getTestRoom() {
-    Room r = new Room();
+    final Room r = new Room();
     r.setId("12345678");
     r.getSettings().setFeedbackLocked(false);
     return r;
@@ -49,7 +49,7 @@ public class FeedbackCommandHandlerTest {
 
   @Test
   public void sendFeedback() {
-    Room r = getTestRoom();
+    final Room r = getTestRoom();
     final String roomId = r.getId();
 
     Mockito.when(roomService.get(roomId, true)).thenReturn(r);

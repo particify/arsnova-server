@@ -29,6 +29,8 @@ import org.springframework.security.test.context.support.WithSecurityContext;
 import de.thm.arsnova.model.UserProfile;
 
 /**
+ * This annotation can be used to mock a user for a test method.
+ *
  * @author Daniel Gerhardt
  */
 @Target({ElementType.METHOD, ElementType.TYPE})

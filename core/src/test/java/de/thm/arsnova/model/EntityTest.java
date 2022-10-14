@@ -38,7 +38,12 @@ public class EntityTest {
   class SomeEntity extends Entity {
     private String testA;
 
-    public SomeEntity(final String id, final String rev, final Date creationTimestamp, final Date updateTimestamp, final String testA) {
+    SomeEntity(
+        final String id,
+        final String rev,
+        final Date creationTimestamp,
+        final Date updateTimestamp,
+        final String testA) {
       this.id = id;
       this.rev = rev;
       this.creationTimestamp = creationTimestamp;
@@ -60,8 +65,13 @@ public class EntityTest {
   class AnotherEntity extends SomeEntity {
     private String testB;
 
-    public AnotherEntity(
-        final String id, final String rev, final Date creationTimestamp, final Date updateTimestamp, final String testA, final String testB) {
+    AnotherEntity(
+        final String id,
+        final String rev,
+        final Date creationTimestamp,
+        final Date updateTimestamp,
+        final String testA,
+        final String testB) {
       super(id, rev, creationTimestamp, updateTimestamp, testA);
       this.testB = testB;
     }

@@ -36,7 +36,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.SimpleThreadScope;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.validation.Validator;
@@ -118,12 +117,11 @@ public class TestAppConfig {
   @Bean
   @Autowired
   public ConnectionFactory connectionFactory(
-    @TaskExecutorConfig.RabbitConnectionExecutor final TaskExecutor executor,
-    final MessageBrokerProperties messageBrokerProperties
-  ) {
+      @TaskExecutorConfig.RabbitConnectionExecutor final TaskExecutor executor,
+      final MessageBrokerProperties messageBrokerProperties) {
     final CachingConnectionFactory connectionFactory = new CachingConnectionFactory(
-      messageBrokerProperties.getRabbitmq().getHost(),
-      messageBrokerProperties.getRabbitmq().getPort());
+        messageBrokerProperties.getRabbitmq().getHost(),
+        messageBrokerProperties.getRabbitmq().getPort());
     connectionFactory.setUsername(messageBrokerProperties.getRabbitmq().getUsername());
     connectionFactory.setPassword(messageBrokerProperties.getRabbitmq().getPassword());
     connectionFactory.setVirtualHost(messageBrokerProperties.getRabbitmq().getVirtualHost());
