@@ -23,4 +23,4 @@ ssl_stapling_verify on;
 ssl_trusted_certificate /mnt/tls-certs/${HOSTNAME}_ca.pem;
 
 # replace with the IP address of your resolver
-resolver 127.0.0.1;
+resolver $NGINX_DNS_RESOLVER;
