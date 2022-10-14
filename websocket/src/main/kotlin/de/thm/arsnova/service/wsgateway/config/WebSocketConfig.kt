@@ -18,11 +18,10 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableScheduling
 @EnableWebSocketMessageBroker
 class WebSocketConfig(
-    private val webSocketProperties: WebSocketProperties,
-    private val authChannelInterceptorAdapter: AuthChannelInterceptorAdapter
+  private val webSocketProperties: WebSocketProperties,
+  private val authChannelInterceptorAdapter: AuthChannelInterceptorAdapter
 ) : WebSocketMessageBrokerConfigurer {
   private val logger = LoggerFactory.getLogger(javaClass)
-
 
   override fun configureMessageBroker(config: MessageBrokerRegistry) {
     config
@@ -39,7 +38,6 @@ class WebSocketConfig(
   override fun registerStompEndpoints(registry: StompEndpointRegistry) {
     registry.addEndpoint("/ws").withSockJS()
   }
-
 
   override fun configureClientInboundChannel(registration: ChannelRegistration) {
     registration.interceptors(authChannelInterceptorAdapter)

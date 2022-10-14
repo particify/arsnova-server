@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class AuthChannelInterceptorAdapter(
-    private val jwtTokenUtil: JwtTokenUtil,
-    private val roomAccessService: RoomAccessService,
+  private val jwtTokenUtil: JwtTokenUtil,
+  private val roomAccessService: RoomAccessService,
 ) : ChannelInterceptor {
 
   companion object {
@@ -63,13 +63,13 @@ class AuthChannelInterceptorAdapter(
       } else {
         // no token given -> auth failed
         logger.debug("no auth token given, dropping connection attempt")
-        return null;
+        return null
       }
     } else {
       logger.trace("Incoming message is anything but a connect command")
       val userId = accessor.user?.name
       if (userId == null) {
-        logger.debug("User didn't authenticate himself, dropping message. WebSocket session id: {}", wsSessionId);
+        logger.debug("User didn't authenticate himself, dropping message. WebSocket session id: {}", wsSessionId)
         return null
       }
 

@@ -14,7 +14,7 @@ class User(private val userId: String) : Principal {
 
   override fun toString(): String {
     return ToStringCreator(this)
-        .append("userId", userId)
-        .toString()
+      .append("userId", userId)
+      .toString()
   }
 }

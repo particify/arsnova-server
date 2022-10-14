@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class RoomSubscriptionEventDispatcher(
-    private val applicationEventPublisher: ApplicationEventPublisher,
+  private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
   private val roomTopicPattern = Regex("^/topic/([0-9a-f]{32})\\.stream$")
@@ -34,23 +34,27 @@ class RoomSubscriptionEventDispatcher(
     synchronized(wsSessionIdToSubscriptionMapping) {
       val oldRoomSubscription = wsSessionIdToSubscriptionMapping[accessor.sessionId]
       if (oldRoomSubscription != null) {
-        applicationEventPublisher.publishEvent(RoomLeaveEvent(
+        applicationEventPublisher.publishEvent(
+          RoomLeaveEvent(
             wsSessionId = accessor.sessionId!!,
             userId = userId,
             roomId = oldRoomSubscription.roomId,
-        ))
+          )
+        )
       }
       roomSubscription = RoomSubscription(
-          subscriptionId = accessor.subscriptionId!!,
-          roomId = roomId,
+        subscriptionId = accessor.subscriptionId!!,
+        roomId = roomId,
       )
       logger.debug("Adding WS session -> subscription mapping: {} -> {}, ", accessor.sessionId, roomSubscription)
       wsSessionIdToSubscriptionMapping[accessor.sessionId!!] = roomSubscription
-      applicationEventPublisher.publishEvent(RoomJoinEvent(
+      applicationEventPublisher.publishEvent(
+        RoomJoinEvent(
           wsSessionId = accessor.sessionId!!,
           userId = userId,
           roomId = roomSubscription.roomId,
-      ))
+        )
+      )
     }
   }
 
@@ -66,11 +70,13 @@ class RoomSubscriptionEventDispatcher(
       }
       logger.debug("Removing WS session -> subscription mapping: {} -> {}, ", accessor.sessionId, roomSubscription)
       wsSessionIdToSubscriptionMapping.remove(accessor.sessionId)
-      applicationEventPublisher.publishEvent(RoomLeaveEvent(
+      applicationEventPublisher.publishEvent(
+        RoomLeaveEvent(
           wsSessionId = accessor.sessionId!!,
           userId = userId,
           roomId = roomSubscription.roomId,
-      ))
+        )
+      )
     }
   }
 
@@ -83,11 +89,13 @@ class RoomSubscriptionEventDispatcher(
       val roomSubscription = wsSessionIdToSubscriptionMapping[accessor.sessionId] ?: return
       logger.debug("Removing WS session -> subscription mapping: {} -> {}, ", accessor.sessionId, roomSubscription)
       wsSessionIdToSubscriptionMapping.remove(accessor.sessionId)
-      applicationEventPublisher.publishEvent(RoomLeaveEvent(
+      applicationEventPublisher.publishEvent(
+        RoomLeaveEvent(
           wsSessionId = accessor.sessionId!!,
           userId = userId,
           roomId = roomSubscription.roomId,
-      ))
+        )
+      )
     }
   }
 }

@@ -21,51 +21,51 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Service
 class MetricsService(
-    meterRegistry: MeterRegistry,
-    private val roomSubscriptionService: RoomSubscriptionService,
+  meterRegistry: MeterRegistry,
+  private val roomSubscriptionService: RoomSubscriptionService,
 ) {
   companion object {
     const val GATHERING_INTERVAL = 60 * 1000L
     const val MIN_USERS = 5
     const val ACTIVE_ROOM_MIN_USERS = 8
-    const val ACTIVE_ROOM_MIN_USERS_TOLERANCE_FACTOR = 2.0/3
-    const val SESSION_END_USER_FACTOR = 1.0/3
+    const val ACTIVE_ROOM_MIN_USERS_TOLERANCE_FACTOR = 2.0 / 3
+    const val SESSION_END_USER_FACTOR = 1.0 / 3
     const val SESSION_RESTART_USER_FACTOR = 1.5
   }
 
   val logger: Logger = LoggerFactory.getLogger(this::class.java)
   val connectCounter = Counter
-      .builder("websocket.broker.connect")
-      .baseUnit(BaseUnits.EVENTS)
-      .register(meterRegistry)
+    .builder("websocket.broker.connect")
+    .baseUnit(BaseUnits.EVENTS)
+    .register(meterRegistry)
   val disconnectCounter = Counter
-      .builder("websocket.broker.disconnect")
-      .baseUnit(BaseUnits.EVENTS)
-      .register(meterRegistry)
+    .builder("websocket.broker.disconnect")
+    .baseUnit(BaseUnits.EVENTS)
+    .register(meterRegistry)
   val subscribeCounter = Counter
-      .builder("websocket.broker.subscribe")
-      .baseUnit(BaseUnits.EVENTS)
-      .register(meterRegistry)
+    .builder("websocket.broker.subscribe")
+    .baseUnit(BaseUnits.EVENTS)
+    .register(meterRegistry)
   val unsubscribeCounter = Counter
-      .builder("websocket.broker.unsubscribe")
-      .baseUnit(BaseUnits.EVENTS)
-      .register(meterRegistry)
+    .builder("websocket.broker.unsubscribe")
+    .baseUnit(BaseUnits.EVENTS)
+    .register(meterRegistry)
   val roomUserDistribution = DistributionSummary
-      .builder("arsnova.room.users")
-      .publishPercentileHistogram()
-      .maximumExpectedValue(1000.0)
-      .register(meterRegistry)
+    .builder("arsnova.room.users")
+    .publishPercentileHistogram()
+    .maximumExpectedValue(1000.0)
+    .register(meterRegistry)
   val roomSessionUserDistribution = DistributionSummary
-      .builder("arsnova.room.session.users")
-      .publishPercentileHistogram()
-      .maximumExpectedValue(1000.0)
-      .register(meterRegistry)
+    .builder("arsnova.room.session.users")
+    .publishPercentileHistogram()
+    .maximumExpectedValue(1000.0)
+    .register(meterRegistry)
   val roomSessionDurationDistribution = DistributionSummary
-      .builder("arsnova.room.session.duration")
-      .baseUnit("minutes")
-      .publishPercentileHistogram()
-      .maximumExpectedValue(360.0)
-      .register(meterRegistry)
+    .builder("arsnova.room.session.duration")
+    .baseUnit("minutes")
+    .publishPercentileHistogram()
+    .maximumExpectedValue(360.0)
+    .register(meterRegistry)
   val activeRooms = ConcurrentHashMap<String, ActiveRoomMetrics>()
 
   @Scheduled(fixedRate = GATHERING_INTERVAL)
@@ -130,8 +130,8 @@ class MetricsService(
               activeRooms[event.roomId] = metrics.copy(decliningMinUserCount = event.count)
               trackSessionEnd(metrics)
             }
-            event.count >= ACTIVE_ROOM_MIN_USERS
-                && event.count > metrics.decliningMinUserCount * SESSION_RESTART_USER_FACTOR -> {
+            event.count >= ACTIVE_ROOM_MIN_USERS &&
+              event.count > metrics.decliningMinUserCount * SESSION_RESTART_USER_FACTOR -> {
               // User count increases after session has ended -> reset/new session
               activeRooms[event.roomId] = ActiveRoomMetrics(event.count, LocalDateTime.now())
             }
@@ -151,8 +151,8 @@ class MetricsService(
   }
 
   data class ActiveRoomMetrics(
-      val maxUserCount: Int,
-      val sessionStart: LocalDateTime,
-      val decliningMinUserCount: Int = -1,
+    val maxUserCount: Int,
+    val sessionStart: LocalDateTime,
+    val decliningMinUserCount: Int = -1,
   )
 }

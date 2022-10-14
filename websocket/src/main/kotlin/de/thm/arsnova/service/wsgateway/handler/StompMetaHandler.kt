@@ -16,9 +16,11 @@ class StompMetaHandler {
   }
 
   fun handleUserSubscribed(roomId: String) {
-    logger.error("/topic/${roomId}.comment.stream")
-    logger.error(simpUserRegistry.findSubscriptions {
-      it.destination == "/topic/${roomId}.comment.stream"
-    }.count().toString())
+    logger.error("/topic/$roomId.comment.stream")
+    logger.error(
+      simpUserRegistry.findSubscriptions {
+        it.destination == "/topic/$roomId.comment.stream"
+      }.count().toString()
+    )
   }
 }

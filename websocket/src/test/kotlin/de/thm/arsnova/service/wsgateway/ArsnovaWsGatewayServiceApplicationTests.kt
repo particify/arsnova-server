@@ -9,5 +9,4 @@ class ArsnovaWsGatewayServiceApplicationTests {
   @Test
   fun contextLoads() {
   }
-
 }

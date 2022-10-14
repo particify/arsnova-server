@@ -10,8 +10,8 @@ import org.springframework.web.client.RestTemplate
 
 @Service
 class RoomAccessService(
-    private val webSocketProperties: WebSocketProperties,
-    private val restTemplate: RestTemplate
+  private val webSocketProperties: WebSocketProperties,
+  private val restTemplate: RestTemplate
 ) {
   companion object {
     val roomAccessString = "roomaccess"
@@ -25,11 +25,13 @@ class RoomAccessService(
     val url = "$roomAccessGetEndpoint/{roomId}/{userId}"
     logger.trace("Querying auth service for room access with url: {}", url)
     try {
-      return restTemplate.getForObject(url, RoomAccess::class.java,
+      return restTemplate.getForObject(
+        url, RoomAccess::class.java,
         mapOf(
           "roomId" to roomId,
           "userId" to userId
-        ))
+        )
+      )
         ?: RoomAccess(roomId, userId, "", AuthChannelInterceptorAdapter.participantRoleString)
     } catch (e: HttpClientErrorException.NotFound) {
       return RoomAccess(roomId, userId, "", AuthChannelInterceptorAdapter.participantRoleString)

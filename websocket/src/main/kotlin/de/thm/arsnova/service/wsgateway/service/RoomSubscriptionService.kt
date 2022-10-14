@@ -10,19 +10,19 @@ import io.github.bucket4j.Bucket
 import io.github.bucket4j.Bucket4j
 import io.github.bucket4j.Refill
 import kotlinx.coroutines.GlobalScope
-import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
+import java.util.concurrent.ConcurrentHashMap
 
 @Service
 class RoomSubscriptionService(
-    private val rabbitTemplate: RabbitTemplate,
-    private val webSocketProperties: WebSocketProperties,
-    private val applicationEventPublisher: ApplicationEventPublisher,
+  private val rabbitTemplate: RabbitTemplate,
+  private val webSocketProperties: WebSocketProperties,
+  private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
   private val logger = LoggerFactory.getLogger(RoomSubscriptionService::class.java)
 
@@ -90,7 +90,7 @@ class RoomSubscriptionService(
     if (canSend) {
       rabbitTemplate.convertAndSend(
         "amq.topic",
-        "${roomId}.stream",
+        "$roomId.stream",
         UserCountChanged(currentUserCount)
       )
     }
