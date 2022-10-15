@@ -1,0 +1,98 @@
+variables:
+  BUILD_DIR: lib
+  YARN_CACHE_FOLDER: .yarn-cache
+
+# Override rules from parent CI config
+workflow:
+  rules:
+    - when: always
+
+default:
+  interruptible: true
+
+default:
+  image: node:16.17-alpine
+  before_script:
+    - echo "$PROJECT"
+    - cd "$PROJECT"
+    - export PATH="`pwd`/node_modules/.bin:$PATH"
+    - date
+  after_script:
+    - date
+
+.yarn_cache: &yarn_cache
+  key: yarn-cache
+  paths:
+    - $PROJECT/node_modules
+    - $PROJECT/$YARN_CACHE_FOLDER
+
+yarn_populate_cache:
+  stage: .pre
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH || $CI_MERGE_REQUEST_ID
+      when: never
+    - changes:
+        - $PROJECT/package.json
+        - $PROJECT/yarn.lock
+      when: on_success
+    - when: manual
+  # allow_failure: Do not block pipeline if job is created but not run.
+  allow_failure: true
+  cache:
+    <<: *yarn_cache
+    policy: pull-push
+  script:
+    - echo Populating cache...
+    - umask 0000
+    - yarn --frozen-lockfile
+
+yarn_install:
+  stage: .pre
+  artifacts:
+    expire_in: 12 hours
+    paths:
+      - $PROJECT/node_modules
+  cache:
+    <<: *yarn_cache
+    policy: pull
+  script:
+    - umask 0000
+    - yarn --frozen-lockfile
+
+eslint:
+  stage: test
+  needs:
+    - yarn_install
+  allow_failure: false
+  script:
+    - yarn eslint --config eslint.json .
+
+docker_image:
+  stage: deploy
+  dependencies:
+    - yarn_install
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      when: on_success
+      variables:
+        DOCKER_TAG: next
+    - when: manual
+      variables:
+        DOCKER_TAG: dev-$CI_COMMIT_REF_SLUG
+  variables:
+    DOCKER_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH/$PROJECT
+    KANIKO_CONTEXT: $CI_PROJECT_DIR/$PROJECT
+    KANIKO_DOCKERFILE: $CI_PROJECT_DIR/$PROJECT/.docker/Dockerfile
+  allow_failure: true
+  interruptible: false
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --context "$KANIKO_CONTEXT"
+      --dockerfile "$KANIKO_DOCKERFILE"
+      --destination "$DOCKER_IMAGE:$DOCKER_TAG"
+      --build-arg "BUILD_DIR=`echo $BUILD_DIR`"
