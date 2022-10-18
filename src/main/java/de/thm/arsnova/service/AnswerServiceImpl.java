@@ -67,7 +67,7 @@ import de.thm.arsnova.model.TextAnswerStatistics.TextRoundStatistics;
 import de.thm.arsnova.model.WordcloudContent;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.security.User;
-import de.thm.arsnova.web.exceptions.ForbiddenException;
+import de.thm.arsnova.service.exceptions.AlreadyAnsweredContentException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 
 /**
@@ -392,7 +392,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 					content.getState().getRound());
 
 			if (maybeExistingAnswer != null) {
-				throw new ForbiddenException();
+				throw new AlreadyAnsweredContentException();
 			}
 		}
 
