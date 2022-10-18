@@ -235,7 +235,16 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		// Results for answered contents
 		final Map<String, AnswerResult> answerResults = answers.stream()
 				.map(a -> contents.get(contentIds.indexOf(a.getContentId())).determineAnswerResult(a))
-				.collect(Collectors.toMap(AnswerResult::getContentId, Function.identity()));
+				.collect(Collectors.toMap(
+						AnswerResult::getContentId,
+						Function.identity(),
+						(r1, r2) -> {
+							// The creation of duplicate answers is prevented but duplicates might
+							// exist in data from earlier versions (there is no migration to remove
+							// duplicates).
+							logger.warn("Ignoring duplicate answer for content ID {}.", r1.getContentId());
+							return r1;
+						}));
 		// Add results for unanswered contents
 		final List<AnswerResult> answerResultList = contents.stream()
 				.map(c -> answerResults.containsKey(c.getId())
