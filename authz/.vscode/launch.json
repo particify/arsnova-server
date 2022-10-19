@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "mainClass": "de.thm.arsnova.service.authservice.ArsnovaAuthServiceApplicationKt",
+      "name": "Run Auth Service",
+      "projectRoot": "${workspaceFolder}",
+      "request": "launch",
+      "type": "kotlin"
+    }
+  ]
+}
