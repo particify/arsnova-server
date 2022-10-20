@@ -3,7 +3,9 @@ PATH=$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/cl
 COMMAND=$1
 PROJECT=$2
 
-cd `dirname $0`
+COMPOSE_DIR=$(dirname $(readlink -f $0))
+ROOT_DIR=$(readlink -f $COMPOSE_DIR/../../..)
+cd "$COMPOSE_DIR"
 
 source project-mapping-vars.sh
 
@@ -30,7 +32,7 @@ determine_image_tags() {
       if [ -v 'PROJECT_DIRS[$project]' ]; then
         project_dir=${PROJECT_DIRS[$project]}
       fi
-      cd "$project_dir"
+      cd "$ROOT_DIR/$project_dir"
       branch=`git rev-parse --abbrev-ref HEAD`
       if [ "$branch" = HEAD ] || [ "$branch" = master ]; then
         img_tag=next
@@ -39,10 +41,10 @@ determine_image_tags() {
       fi
       img_tag=`echo $img_tag | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' -`
       export ${TAG_VARS[$project]}=$img_tag
-      cd ..
     fi
     echo "$project -> ${!TAG_VARS[$project]}"
   done
+  cd "$COMPOSE_DIR"
 }
 
 update_config() {
@@ -58,7 +60,7 @@ update_config() {
   merge_env
   determine_image_tags
   echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .compose.yaml
-  docker compose --project-directory `dirname $0` \
+  docker compose --project-directory "$COMPOSE_DIR" \
     $COMPOSE_FILE_ARGS \
     -f local.compose.yaml \
     config >> .compose.yaml
@@ -116,10 +118,10 @@ fi
 ENV_FILES=""
 BASE_COMPOSE_FILE_ARGS=""
 while read config_name; do
-  if [ -f "docker-orchestration/$config_name.env" ]; then
-    ENV_FILES="$ENV_FILES docker-orchestration/$config_name.env"
+  if [ -f "../production/$config_name.env" ]; then
+    ENV_FILES="$ENV_FILES ../production/$config_name.env"
   fi
-  BASE_COMPOSE_FILE_ARGS="$BASE_COMPOSE_FILE_ARGS -f docker-orchestration/$config_name.compose.yaml"
+  BASE_COMPOSE_FILE_ARGS="$BASE_COMPOSE_FILE_ARGS -f ../production/$config_name.compose.yaml"
 done <config-list
 COMPOSE_FILE_ARGS=$BASE_COMPOSE_FILE_ARGS
 while read config_name; do
@@ -136,11 +138,11 @@ case $COMMAND in
       echo Updating Git repository...
       git pull
       git submodule init
-      git submodule update docker-orchestration
+      git submodule update webclient
     fi
     update_config
     echo Updating base images for Devcontainers...
-    docker compose --project-directory `dirname $0` \
+    docker compose --project-directory "$COMPOSE_DIR" \
       $BASE_COMPOSE_FILE_ARGS \
       pull $@
     build $@

@@ -1,10 +1,10 @@
 {
-  "name": "WS Gateway",
-  "service": "arsnova-ws-gateway",
+  "name": "Server: Websocket",
+  "service": "arsnova-server-websocket",
   "dockerComposeFile": [
     "../../.compose.yaml"
   ],
-  "workspaceFolder": "/workspace/arsnova-ws-gateway",
+  "workspaceFolder": "/workspace/websocket",
   "customizations": {
     "vscode": {
       "extensions": [

@@ -1,10 +1,10 @@
 {
-  "name": "Auth Service",
-  "service": "arsnova-auth-service",
+  "name": "Server: Authz",
+  "service": "arsnova-server-authz",
   "dockerComposeFile": [
-    "../../.compose.yaml"
+    "../../.docker/compose/development/.compose.yaml"
   ],
-  "workspaceFolder": "/workspace/arsnova-auth-service",
+  "workspaceFolder": "/workspace/authz",
   "customizations": {
     "vscode": {
       "extensions": [

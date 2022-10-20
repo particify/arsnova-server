@@ -1,10 +1,10 @@
 {
-  "name": "HTTP Gateway",
-  "service": "arsnova-http-gateway",
+  "name": "Server: Gateway",
+  "service": "arsnova-server-gateway",
   "dockerComposeFile": [
-    "../../.compose.yaml"
+    "../../.docker/compose/development/.compose.yaml"
   ],
-  "workspaceFolder": "/workspace/arsnova-http-gateway",
+  "workspaceFolder": "/workspace/arsnova-server-gateway",
   "customizations": {
     "vscode": {
       "extensions": [

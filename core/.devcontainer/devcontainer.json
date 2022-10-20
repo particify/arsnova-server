@@ -1,10 +1,10 @@
 {
-  "name": "Backend Core",
-  "service": "arsnova-backend-core",
+  "name": "Server: Core",
+  "service": "arsnova-server-core",
   "dockerComposeFile": [
-    "../../.compose.yaml"
+    "../../.docker/compose/development/.compose.yaml"
   ],
-  "workspaceFolder": "/workspace/arsnova-backend",
+  "workspaceFolder": "/workspace/core",
   "customizations": {
     "vscode": {
       "extensions": [

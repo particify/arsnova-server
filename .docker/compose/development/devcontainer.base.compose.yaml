@@ -8,17 +8,17 @@ services:
   arsnova-webclient:
     image: devcontainer-arsnova-webclient:$WEBCLIENT_TAG
     build:
-      context: arsnova-webclient/.devcontainer
+      context: ../../../webclient/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEBCLIENT_TAG
     command: /bin/sh -c "while sleep 1000; do :; done"
     volumes:
       - ./.git:/workspace/.git
-      - ./arsnova-webclient:/workspace/arsnova-webclient
+      - ../../../webclient:/workspace/webclient
   arsnova-server-core:
     image: devcontainer-arsnova-server-core:$CORE_TAG
     build:
-      context: arsnova-backend/.devcontainer
+      context: ../../../core/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/core:$CORE_TAG
         INSTALL_MAVEN: "true"
@@ -29,13 +29,12 @@ services:
       SECURITY_CORSORIGINS_0: http://localhost
       SECURITY_CORSORIGINS_1: http://localhost:4200
     volumes:
-      - ./.git:/workspace/.git
-      - ./arsnova-backend:/workspace/arsnova-backend
-      - maven-cache:/home/dev/.m2
+      - ../../..:/workspace
+      - gradle-dependency-cache:/home/dev/.gradle/caches/modules-2
   arsnova-server-gateway:
     image: devcontainer-arsnova-server-gateway:$GATEWAY_TAG
     build:
-      context: arsnova-http-gateway/.devcontainer
+      context: ../../../gateway/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/gateway:$GATEWAY_TAG
         INSTALL_MAVEN: "true"
@@ -44,13 +43,12 @@ services:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
     volumes:
-      - ./.git:/workspace/.git
-      - ./arsnova-http-gateway:/workspace/arsnova-http-gateway
-      - maven-cache:/home/dev/.m2
+      - ../../..:/workspace
+      - gradle-dependency-cache:/home/dev/.gradle/caches/modules-2
   arsnova-server-websocket:
     image: devcontainer-arsnova-server-websocket:$WEBSOCKET_TAG
     build:
-      context: arsnova-ws-gateway/.devcontainer
+      context: ../../../websocket/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/websocket:$WEBSOCKET_TAG
         INSTALL_MAVEN: "true"
@@ -59,13 +57,12 @@ services:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
     volumes:
-      - ./.git:/workspace/.git
-      - ./arsnova-ws-gateway:/workspace/arsnova-ws-gateway
-      - maven-cache:/home/dev/.m2
+      - ../../..:/workspace
+      - gradle-dependency-cache:/home/dev/.gradle/caches/modules-2
   arsnova-server-authz:
     image: devcontainer-arsnova-server-authz:$AUTHZ_TAG
     build:
-      context: arsnova-auth-service/.devcontainer
+      context: ../../../authz/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/authz:$AUTHZ_TAG
         INSTALL_MAVEN: "true"
@@ -78,13 +75,12 @@ services:
       PGUSER: arsnovaauth
       PGPASSWORD: arsnovaauth
     volumes:
-      - ./.git:/workspace/.git
-      - ./arsnova-auth-service:/workspace/arsnova-auth-service
-      - maven-cache:/home/dev/.m2
+      - ../../..:/workspace
+      - gradle-dependency-cache:/home/dev/.gradle/caches/modules-2
   arsnova-server-comments:
     image: devcontainer-arsnova-server-comments:$COMMENTS_TAG
     build:
-      context: arsnova-comment-service/.devcontainer
+      context: ../../../comments/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/comments:$COMMENTS_TAG
         INSTALL_MAVEN: "true"
@@ -97,20 +93,18 @@ services:
       PGUSER: arsnovacomment
       PGPASSWORD: arsnovacomment
     volumes:
-      - ./.git:/workspace/.git
-      - ./arsnova-comment-service:/workspace/arsnova-comment-service
-      - maven-cache:/home/dev/.m2
+      - ../../..:/workspace
+      - gradle-dependency-cache:/home/dev/.gradle/caches/modules-2
   arsnova-server-formatting:
     image: devcontainer-arsnova-server-formatting:$FORMATTING_TAG
     build:
-      context: arsnova-formatting-service/.devcontainer
+      context: ../../../formatting/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/formatting:$FORMATTING_TAG
     environment:
       PORT: 3000
     volumes:
-      - ./.git:/workspace/.git
-      - ./arsnova-formatting-service:/workspace/arsnova-formatting-service
+      - ../../..:/workspace
 
 volumes:
-  gradle-cache:
+  gradle-dependency-cache:

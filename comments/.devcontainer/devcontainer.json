@@ -1,10 +1,10 @@
 {
-  "name": "Comment Service",
-  "service": "arsnova-comment-service",
+  "name": "Server: Comments",
+  "service": "arsnova-server-comments",
   "dockerComposeFile": [
-    "../../.compose.yaml"
+    "../../.docker/compose/development/.compose.yaml"
   ],
-  "workspaceFolder": "/workspace/arsnova-comment-service",
+  "workspaceFolder": "/workspace/comments",
   "customizations": {
     "vscode": {
       "extensions": [

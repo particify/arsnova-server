@@ -1,10 +1,10 @@
 {
-  "name": "Formatting Service",
-  "service": "arsnova-formatting-service",
+  "name": "Server: Formatting",
+  "service": "arsnova-server-formatting",
   "dockerComposeFile": [
-    "../../.compose.yaml"
+    "../../.docker/compose/development/.compose.yaml"
   ],
-  "workspaceFolder": "/workspace/arsnova-formatting-service",
+  "workspaceFolder": "/workspace/formatting",
   "customizations": {
     "vscode": {
       "extensions": [
