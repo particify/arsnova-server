@@ -1,0 +1,83 @@
+= Particify Docker Orchestration
+
+This repository contains files to integrate all of the Particify services and service dependencies using Docker:
+
+* Configuration for Docker Compose
+* Dockerfiles (and additional assets) to create modified versions of thirdparty images
+
+== Requirements
+
+=== Hardware
+
+* CPU: 4 Cores or vCPU
+* RAM: 8 GiB
+* Storage: 10 GiB for Docker images and containers, additional storage for volumes containing user data depends on usage
+
+=== Software
+
+* Linux is the recommended OS, but basically any OS that is supported by Docker Engine and runs shell scripts should work.
+* https://docs.docker.com/engine/install/[Docker Engine] >= 20.10 (older versions might work but are not tested for compatibility)
+* https://docs.docker.com/compose/install/compose-plugin/[Docker Compose] >= 2.0
+
+== Usage
+
+=== Preparations
+
+. Clone this repository.
+. Switch to the repository's root directory and run `./particifyctl update`.
+. Run `./particifyctl` to list all available commands.
+
+=== Running
+
+. Run `PORT=<port> ./particifyctl run`. Append `-d` to run in detached mode for production.
+. Run `./particifyctl compose down` stop and remove the containers.
+. Run `./particifyctl update` to update the Git repository and Docker images.
+
+=== Configuration
+
+The default configuration can be adjusted via environment variables:
+
+|=======
+|Variable |Default value |Description
+|PORT |80 |Port used for the frontend proxy
+|JWT_SECRET |secret |Encryption token for authentication (MUST be changed for production)
+|JWT_DOMAIN |example.com |A domain usable as server ID (used for the JWT issuer/audience claim)
+|ARSNOVA_HOSTNAME |app.particify.de |Hostname for the application
+|MAIL_HOST | |Hostname of the mail server
+|MAIL_PORT |25 |Port of the mail server
+|MAIL_USERNAME | |Username for SMTP authentication
+|MAIL_PASSWORD | |Password for SMTP authentication
+|MAIL_SENDERNAME |ARSnova |Sender name for mails
+|MAIL_SENDERADDRESS | |Sender address for mails
+|MAIL_IMPLICITTLS |`false` |Enable implicit TLS (instead of `STARTSSL`) for SMTP
+|LDAP_ENABLED |`false` |Enable LDAP authentication
+|LDAP_TITLE |LDAP |Title for LDAP authentication shown in the webclient
+|LDAP_HOSTURL |ldaps://example.com:636/dc=example,dc=com |LDAP connection URL
+|LDAP_USERDNPATTERN |uid={0},ou=arsnova |LDAP user DN pattern
+|LDAP_USERIDATTRIBUTE |uid |Name of the LDAP attribute which contains the user ID
+|LDAP_USERSEARCHFILTER |(uid={0}) |LDAP user search filter
+|LDAP_USERSEARCHBASE |ou=people |LDAP user search base
+|LDAP_MANAGERUSERDN| cn=arsnova-manager,dc=example,dc=com |LDAP DN of manager user
+|LDAP_MANAGERPASSWORD| |LDAP password of manager user
+|CORE_TAG |master |Docker tag (repository branch) for Core Backend
+|WSGW_TAG |master |Docker tag (repository branch) for WebSocket Gateway
+|HTTPGW_TAG |master |Docker tag (repository branch) for HTTP Gateway
+|AUTH_TAG |master |Docker tag (repository branch) for Auth Service
+|COMMENT_TAG |master |Docker tag (repository branch) for Comment Service
+|WEB_TAG |master |Docker tag (repository branch) for Webclient
+|WEB_LEGACY_TAG |master |Docker tag (repository branch) for Webclient (legacy)
+|FORMATTING_TAG| master |Docker tag (repository branch) for Formatting Service
+|=======
+
+Example: `PORT=8100 WEB_TAG=my-dev-branch ./particifyctl run`
+
+To persist the configuration, add those variable assignments to `local.env` (one assignment per line).
+
+NOTE: Docker images are not automatically created for development branches.
+Make sure to trigger the `docker_image_dev` job in GitLab's pipeline view and delete the image from the registry once it is no longer needed.
+
+=== PostgreSQL updates
+
+When the PostgreSQL image was updated to a new major version, `pg_upgrade.sh` needs to be run to perform a database migration.
+The script expects the service name, the old and the new PostgreSQL version as parameters.
+There is no rollback support, so backups for the PostgreSQL volumes should be created before running the script.

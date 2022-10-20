@@ -1,0 +1,22 @@
+services:
+  postgresql-auth:
+    image: postgres:$POSTGRESQL_TAG
+  postgresql-comment:
+    image: postgres:$POSTGRESQL_TAG
+  arsnova-http-gateway:
+    command: /jetty/start.jar --module=http-forwarded
+  arsnova-ws-gateway:
+    command: /jetty/start.jar --module=http-forwarded
+  arsnova-auth-service:
+    command: /jetty/start.jar --module=http-forwarded
+  arsnova-comment-service:
+    command: /jetty/start.jar --module=http-forwarded
+  arsnova-proxy:
+    ports:
+      - $PORT:80
+      - $HTTPS_PORT:443
+    volumes:
+      - tls_certs:/mnt/tls-certs:ro
+
+volumes:
+  tls_certs:
