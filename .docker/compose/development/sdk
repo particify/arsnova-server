@@ -1,0 +1,194 @@
+#!/bin/bash
+PATH=$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin/:$PATH
+COMMAND=$1
+PROJECT=$2
+
+cd `dirname $0`
+
+source project-mapping-vars.sh
+
+# Load environment variables from file without replacing existing values.
+merge_env() {
+  VAR_FILTER=`cat .env | grep -v ^# | sed -E 's/=.*$//g' | sed -E -z -e "s/\n*$//g" -e "s/\n+/|/g"`
+  CURRENT_ENV=`env | grep -E "$VAR_FILTER"`
+  set -a
+  . ./.env
+  set +a
+  # Restore env (priortize passed env vars over loaded env vars)
+  export $CURRENT_ENV >/dev/null
+}
+
+# Determine the image tags using the following priority:
+# 1. *_TAG environment variables (shell env -> local.env -> *.env)
+# 2. Checked out repository branch name
+# 3. master
+determine_image_tags() {
+  echo Image tags:
+  for project in "${!TAG_VARS[@]}"; do
+    if [ -z "${!TAG_VARS[$project]}" ]; then
+      project_dir=$project
+      if [ -v 'PROJECT_DIRS[$project]' ]; then
+        project_dir=${PROJECT_DIRS[$project]}
+      fi
+      cd "$project_dir"
+      branch=`git rev-parse --abbrev-ref HEAD`
+      if [ "$branch" = HEAD ]; then
+        branch=
+      fi
+      img_tag=`echo $branch | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' -`
+      if [ -z "$img_tag" ]; then
+        img_tag=master
+      fi
+      export ${TAG_VARS[$project]}=$img_tag
+      cd ..
+    fi
+    echo "$project -> ${!TAG_VARS[$project]}"
+  done
+}
+
+update_config() {
+  echo Updating configuration for Docker Compose...
+  if [ ! -f local.env ]; then
+    echo "# Custom environment configuration overrides" > local.env
+  fi
+  if [ ! -f local.compose.yaml ]; then
+    echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > local.compose.yaml
+  fi
+  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .env
+  cat $ENV_FILES devcontainer.env local.env | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
+  merge_env
+  determine_image_tags
+  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .compose.yaml
+  docker compose --project-directory `dirname $0` \
+    $COMPOSE_FILE_ARGS \
+    -f local.compose.yaml \
+    config >> .compose.yaml
+}
+
+build() {
+  if [ ! -f .compose.yaml ]; then
+    update_config
+  fi
+  echo Building Devcontainers...
+  shift 1
+  docker compose -f .compose.yaml build $@
+}
+
+if ! command -v git &> /dev/null; then
+  echo ERROR: Git is not installed.
+  exit 1
+fi
+
+if ! command -v docker &> /dev/null; then
+  echo ERROR: Docker Engine is not installed.
+  echo
+  echo https://docs.docker.com/engine/install/
+  exit 1
+fi
+
+if ! docker compose &> /dev/null; then
+  echo ERROR: Docker Compose v2 is not installed.
+  echo
+  echo https://docs.docker.com/compose/install/compose-plugin/
+  echo
+  echo On Debian-based systems:
+  echo apt install docker-compose-plugin
+  exit 1
+fi
+
+if command docker-compose &> /dev/null && docker-compose --version | grep "docker-compose version" &> /dev/null; then
+  echo ERROR: Legacy Docker Compose v1 is installed.
+  echo
+  echo Please remove this version to avoid issues.
+  exit 1
+fi
+
+if ! command -v code &> /dev/null; then
+  echo ERROR: Visual Studio Code is not installed.
+  echo
+  echo https://code.visualstudio.com
+  exit 1
+fi
+
+if ! code --list-extensions | grep ms-vscode-remote.remote-containers &> /dev/null; then
+  code --install-extension ms-vscode-remote.remote-containers
+fi
+
+ENV_FILES=""
+BASE_COMPOSE_FILE_ARGS=""
+while read config_name; do
+  if [ -f "docker-orchestration/$config_name.env" ]; then
+    ENV_FILES="$ENV_FILES docker-orchestration/$config_name.env"
+  fi
+  BASE_COMPOSE_FILE_ARGS="$BASE_COMPOSE_FILE_ARGS -f docker-orchestration/$config_name.compose.yaml"
+done <config-list
+COMPOSE_FILE_ARGS=$BASE_COMPOSE_FILE_ARGS
+while read config_name; do
+  if [ -f "$config_name.env" ]; then
+    ENV_FILES="$ENV_FILES $config_name.env"
+  fi
+  COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f devcontainer.$config_name.compose.yaml"
+done <config-list
+
+case $COMMAND in
+  update|u)
+    shift 1
+    if [ -z "$1" ]; then
+      echo Updating Git repository...
+      git pull
+      git submodule init
+      git submodule update docker-orchestration
+    fi
+    update_config
+    echo Updating base images for Devcontainers...
+    docker compose --project-directory `dirname $0` \
+      $BASE_COMPOSE_FILE_ARGS \
+      pull $@
+    build $@
+    ;;
+  update-config)
+    update_config
+    ;;
+  open|o)
+    if [ -d "$PROJECT" ]; then
+      devcontainer open "$PROJECT"
+    else
+      echo ERROR: Invalid project
+      exit 1
+    fi
+    ;;
+  run|r)
+    update_config
+    echo Starting Devcontainers...
+    shift 1
+    docker compose -f .compose.yaml up $@
+    ;;
+  build|b)
+    update_config
+    build
+    ;;
+  logs|l)
+    if [ ! -f .compose.yaml ]; then
+      update_config
+    fi
+    shift 1
+    docker compose -f .compose.yaml logs $@
+    ;;
+  compose|c)
+    if [ ! -f .compose.yaml ]; then
+      update_config
+    fi
+    shift 1
+    docker compose -f .compose.yaml $@
+    ;;
+  *)
+    echo Usage:
+    echo "    $0 update           Update Git repositories, Docker Compose configuration and Devcontainers"
+    echo "    $0 update-config    Update the configuration for Docker Compose"
+    echo "    $0 open <project>   Open project in Devcontainer with Visual Studio Code"
+    echo "    $0 run              Start Devcontainers for all services"
+    echo "    $0 build            (Re-)build Devcontainers"
+    echo "    $0 logs             Show logs or the log for a specific service"
+    echo "    $0 compose          Execute a Docker Compose command"
+    ;;
+esac
