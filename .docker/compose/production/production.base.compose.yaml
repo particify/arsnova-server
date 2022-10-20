@@ -1,15 +1,15 @@
 services:
-  postgresql-auth:
+  postgresql-authz:
     image: postgres:$POSTGRESQL_TAG
-  postgresql-comment:
+  postgresql-comments:
     image: postgres:$POSTGRESQL_TAG
-  arsnova-http-gateway:
+  arsnova-server-gateway:
     command: /jetty/start.jar --module=http-forwarded
-  arsnova-ws-gateway:
+  arsnova-server-websocket:
     command: /jetty/start.jar --module=http-forwarded
-  arsnova-auth-service:
+  arsnova-server-authz:
     command: /jetty/start.jar --module=http-forwarded
-  arsnova-comment-service:
+  arsnova-server-comments:
     command: /jetty/start.jar --module=http-forwarded
   arsnova-proxy:
     ports:

@@ -21,7 +21,7 @@ merge_env() {
 # Determine the image tags using the following priority:
 # 1. *_TAG environment variables (shell env -> local.env -> *.env)
 # 2. Checked out repository branch name
-# 3. master
+# 3. next
 determine_image_tags() {
   echo Image tags:
   for project in "${!TAG_VARS[@]}"; do
@@ -32,13 +32,12 @@ determine_image_tags() {
       fi
       cd "$project_dir"
       branch=`git rev-parse --abbrev-ref HEAD`
-      if [ "$branch" = HEAD ]; then
-        branch=
+      if [ "$branch" = HEAD ] || [ "$branch" = master ]; then
+        img_tag=next
+      else
+        img_tag=dev-$branch
       fi
-      img_tag=`echo $branch | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' -`
-      if [ -z "$img_tag" ]; then
-        img_tag=master
-      fi
+      img_tag=`echo $img_tag | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' -`
       export ${TAG_VARS[$project]}=$img_tag
       cd ..
     fi

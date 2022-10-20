@@ -5,22 +5,22 @@ services:
   arsnova-proxy:
     ports:
       - 127.0.0.1:${PORT:-8080}:80
-  arsnova-web:
-    image: devcontainer-arsnova-webclient:$WEB_TAG
+  arsnova-webclient:
+    image: devcontainer-arsnova-webclient:$WEBCLIENT_TAG
     build:
       context: arsnova-webclient/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEB_TAG
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEBCLIENT_TAG
     command: /bin/sh -c "while sleep 1000; do :; done"
     volumes:
       - ./.git:/workspace/.git
       - ./arsnova-webclient:/workspace/arsnova-webclient
-  arsnova-backend-core:
-    image: devcontainer-arsnova-backend-core:$CORE_TAG
+  arsnova-server-core:
+    image: devcontainer-arsnova-server-core:$CORE_TAG
     build:
       context: arsnova-backend/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-backend:$CORE_TAG
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/core:$CORE_TAG
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
@@ -32,12 +32,12 @@ services:
       - ./.git:/workspace/.git
       - ./arsnova-backend:/workspace/arsnova-backend
       - maven-cache:/home/dev/.m2
-  arsnova-http-gateway:
-    image: devcontainer-arsnova-http-gateway:$HTTPGW_TAG
+  arsnova-server-gateway:
+    image: devcontainer-arsnova-server-gateway:$GATEWAY_TAG
     build:
       context: arsnova-http-gateway/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-http-gateway:$HTTPGW_TAG
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/gateway:$GATEWAY_TAG
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
@@ -47,12 +47,12 @@ services:
       - ./.git:/workspace/.git
       - ./arsnova-http-gateway:/workspace/arsnova-http-gateway
       - maven-cache:/home/dev/.m2
-  arsnova-ws-gateway:
-    image: devcontainer-arsnova-ws-gateway:$WSGW_TAG
+  arsnova-server-websocket:
+    image: devcontainer-arsnova-server-websocket:$WEBSOCKET_TAG
     build:
       context: arsnova-ws-gateway/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-ws-gateway:$WSGW_TAG
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/websocket:$WEBSOCKET_TAG
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
@@ -62,18 +62,18 @@ services:
       - ./.git:/workspace/.git
       - ./arsnova-ws-gateway:/workspace/arsnova-ws-gateway
       - maven-cache:/home/dev/.m2
-  arsnova-auth-service:
-    image: devcontainer-arsnova-auth-service:$AUTH_TAG
+  arsnova-server-authz:
+    image: devcontainer-arsnova-server-authz:$AUTHZ_TAG
     build:
       context: arsnova-auth-service/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-auth-service:$AUTH_TAG
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/authz:$AUTHZ_TAG
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
-      PGHOST: postgresql-auth
+      PGHOST: postgresql-authz
       PGDATABASE: arsnovaauth
       PGUSER: arsnovaauth
       PGPASSWORD: arsnovaauth
@@ -81,18 +81,18 @@ services:
       - ./.git:/workspace/.git
       - ./arsnova-auth-service:/workspace/arsnova-auth-service
       - maven-cache:/home/dev/.m2
-  arsnova-comment-service:
-    image: devcontainer-arsnova-comment-service:$COMMENT_TAG
+  arsnova-server-comments:
+    image: devcontainer-arsnova-server-comments:$COMMENTS_TAG
     build:
       context: arsnova-comment-service/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-comment-service:$COMMENT_TAG
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/comments:$COMMENTS_TAG
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
-      PGHOST: postgresql-comment
+      PGHOST: postgresql-comments
       PGDATABASE: arsnovacomment
       PGUSER: arsnovacomment
       PGPASSWORD: arsnovacomment
@@ -100,12 +100,12 @@ services:
       - ./.git:/workspace/.git
       - ./arsnova-comment-service:/workspace/arsnova-comment-service
       - maven-cache:/home/dev/.m2
-  arsnova-formatting-service:
-    image: devcontainer-arsnova-formatting-service:$FORMATTING_TAG
+  arsnova-server-formatting:
+    image: devcontainer-arsnova-server-formatting:$FORMATTING_TAG
     build:
       context: arsnova-formatting-service/.devcontainer
       args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/formatting-service:$FORMATTING_TAG
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/formatting:$FORMATTING_TAG
     environment:
       PORT: 3000
     volumes:
@@ -113,4 +113,4 @@ services:
       - ./arsnova-formatting-service:/workspace/arsnova-formatting-service
 
 volumes:
-  maven-cache:
+  gradle-cache:
