@@ -18,3 +18,5 @@ build_project:
   trigger:
     include: "$PROJECT/.gitlab-ci.yml"
     strategy: depend
+
+include: .docker/images/.gitlab-ci.yml

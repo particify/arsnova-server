@@ -1,5 +1,4 @@
-ARG IMAGE_BASETAG=latest
-FROM nginx:${IMAGE_BASETAG}
+FROM nginx:1.23-alpine
 
 ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
 

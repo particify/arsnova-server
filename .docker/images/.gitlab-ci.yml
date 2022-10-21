@@ -1,35 +1,41 @@
-build_docker_images:
+build_docker_image:
+  stage: deploy
+  needs: []
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
+  parallel:
+    matrix:
+      - IMAGE_NAME: arsnova-proxy
+      - IMAGE_NAME: rabbitmq-stomp
+        IMAGE_VARIANT:
+          - ""
+          - "management"
+      - IMAGE_NAME: couchdb
   rules:
-    - if: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME != $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - ".docker/images/*"
+        - ".docker/images/$IMAGE_NAME/*"
       when: manual
       variables:
-        IMAGE_VARIANT_SUFFIX: -$CI_COMMIT_REF_NAME
+        IMAGE_TAG_SUFFIX: -$CI_COMMIT_REF_NAME
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      changes:
+        - ".docker/images/*"
+        - ".docker/images/$IMAGE_NAME/*"
       when: always
   variables:
-    IMAGE1_NAME: nginx-proxy
-    IMAGE1_BASETAG: stable-alpine
-    IMAGE1_VERSION: $IMAGE1_BASETAG
-    IMAGE2_NAME: rabbitmq-stomp
-    IMAGE2_BASETAG: "3.10-alpine"
-    IMAGE2_VERSION: $IMAGE2_BASETAG
-    IMAGE3_NAME: rabbitmq-stomp
-    IMAGE3_BASETAG: "3.10-management-alpine"
-    IMAGE3_VERSION: $IMAGE3_BASETAG
-    IMAGE4_NAME: couchdb
-    IMAGE4_BASETAG: "3.2"
-    IMAGE4_VERSION: "3.2"
-  parallel: 4
+    KANIKO_CONTEXT: $CI_PROJECT_DIR/.docker/images/$IMAGE_NAME
+    KANIKO_DOCKERFILE: $CI_PROJECT_DIR/.docker/images/$IMAGE_NAME/Dockerfile
+  allow_failure: true
   script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - eval export IMAGE_NAME=\$IMAGE${CI_NODE_INDEX}_NAME
-    - eval export IMAGE_BASETAG=\$IMAGE${CI_NODE_INDEX}_BASETAG
-    - eval export VERSION=\$IMAGE${CI_NODE_INDEX}_VERSION
-    - export KANIKO_CONTEXT=$CI_PROJECT_DIR/$IMAGE_NAME
-    - export KANIKO_DOCKERFILE=$KANIKO_CONTEXT/Dockerfile
-    - export KANIKO_DESTINATION=$CI_REGISTRY/$CI_PROJECT_PATH/$IMAGE_NAME:$VERSION$IMAGE_VARIANT_SUFFIX
+    - VERSION=$(./.docker/images/version.sh $IMAGE_NAME $IMAGE_VARIANT)
+    - if [ -n "$IMAGE_VARIANT" ]; then KANIKO_DOCKERFILE=$KANIKO_CONTEXT/$IMAGE_VARIANT.Dockerfile; fi
+    - KANIKO_DESTINATION=$CI_REGISTRY/$CI_PROJECT_PATH/$IMAGE_NAME:$VERSION$IMAGE_TAG_SUFFIX
     - env | grep -E 'IMAGE|KANIKO'
-    - /kaniko/executor --context "$KANIKO_CONTEXT" --dockerfile "$KANIKO_DOCKERFILE" --destination "$KANIKO_DESTINATION" --build-arg "IMAGE_BASETAG=$IMAGE_BASETAG" --build-arg "VERSION=$VERSION"
+    - /kaniko/executor
+      --context "$KANIKO_CONTEXT"
+      --dockerfile "$KANIKO_DOCKERFILE"
+      --destination "$KANIKO_DESTINATION"
