@@ -1,6 +1,6 @@
 services:
   couchdb:
-    image: particify/couchdb:3.2
+    image: $IMAGE_NAMESPACE/${IMAGE_DEPENDENCY_PREFIX}couchdb:3.2
     restart: $RESTART_MODE
     environment:
       COUCHDB_USER: arsnova
@@ -26,14 +26,14 @@ services:
     volumes:
       - postgresql_data_comment:/var/lib/postgresql/data
   rabbitmq:
-    image: particify/rabbitmq-stomp:3.10-alpine
+    image: $IMAGE_NAMESPACE/${IMAGE_DEPENDENCY_PREFIX}rabbitmq-stomp:3.10-alpine
     restart: $RESTART_MODE
     environment:
       RABBITMQ_NODENAME: rabbit@localhost
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
   arsnova-server-core:
-    image: particify/arsnova-server-core:$CORE_TAG
+    image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}core:$CORE_TAG
     restart: $RESTART_MODE
     depends_on:
       - couchdb
@@ -57,7 +57,7 @@ services:
       SECURITY_JWT_SECRET: $JWT_SECRET
       SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
   arsnova-server-gateway:
-    image: particify/arsnova-server-gateway:$GATEWAY_TAG
+    image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}gateway:$GATEWAY_TAG
     restart: $RESTART_MODE
     depends_on:
       - rabbitmq
@@ -77,7 +77,7 @@ services:
       SECURITY_JWT_INTERNAL_SECRET: $JWT_SECRET
       SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
   arsnova-server-websocket:
-    image: particify/arsnova-server-websocket:$WEBSOCKET_TAG
+    image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}websocket:$WEBSOCKET_TAG
     restart: $RESTART_MODE
     depends_on:
       - rabbitmq
@@ -93,7 +93,7 @@ services:
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
   arsnova-server-authz:
-    image: particify/arsnova-server-authz:$AUTHZ_TAG
+    image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}authz:$AUTHZ_TAG
     restart: $RESTART_MODE
     depends_on:
       - postgresql-authz
@@ -108,7 +108,7 @@ services:
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
   arsnova-server-comments:
-    image: particify/arsnova-server-comments:$COMMENTS_TAG
+    image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}comments:$COMMENTS_TAG
     restart: $RESTART_MODE
     depends_on:
       - postgresql-comments
@@ -124,15 +124,15 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
       SECURITY_JWT_SECRET: $JWT_SECRET
   arsnova-webclient:
-    image: particify/arsnova-webclient:$WEBCLIENT_TAG
+    image: $IMAGE_NAMESPACE/arsnova-webclient:$WEBCLIENT_TAG
     restart: $RESTART_MODE
   arsnova-server-formatting:
-    image: particify/arsnova-server-formatting:$FORMATTING_TAG
+    image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}formatting:$FORMATTING_TAG
     restart: $RESTART_MODE
     environment:
       SERVER_PORT: 3000
   arsnova-proxy:
-    image: particify/arsnova-proxy:$PROXY_TAG
+    image: $IMAGE_NAMESPACE/${IMAGE_DEPENDENCY_PREFIX}arsnova-proxy:$PROXY_TAG
     restart: $RESTART_MODE
     depends_on:
       - arsnova-server-core
