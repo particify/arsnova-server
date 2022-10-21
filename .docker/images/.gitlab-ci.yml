@@ -19,7 +19,7 @@ build_docker_image:
         - ".docker/images/$IMAGE_NAME/*"
       when: manual
       variables:
-        IMAGE_TAG_SUFFIX: -$CI_COMMIT_REF_NAME
+        IMAGE_TAG_AFFIX: $CI_COMMIT_REF_NAME
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       changes:
         - ".docker/images/*"
@@ -31,9 +31,9 @@ build_docker_image:
   allow_failure: true
   script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - VERSION=$(./.docker/images/version.sh $IMAGE_NAME $IMAGE_VARIANT)
+    - IMAGE_TAG=$(./.docker/images/determine-tag.sh "$IMAGE_NAME" "$IMAGE_VARIANT" "$IMAGE_TAG_AFFIX")
     - if [ -n "$IMAGE_VARIANT" ]; then KANIKO_DOCKERFILE=$KANIKO_CONTEXT/$IMAGE_VARIANT.Dockerfile; fi
-    - KANIKO_DESTINATION=$CI_REGISTRY/$CI_PROJECT_PATH/$IMAGE_NAME:$VERSION$IMAGE_TAG_SUFFIX
+    - KANIKO_DESTINATION=$CI_REGISTRY/$CI_PROJECT_PATH/$IMAGE_NAME:$IMAGE_TAG
     - env | grep -E 'IMAGE|KANIKO'
     - /kaniko/executor
       --context "$KANIKO_CONTEXT"
