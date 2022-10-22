@@ -151,8 +151,9 @@ case $COMMAND in
     update_config
     ;;
   open|o)
-    if [ -d "$PROJECT" ]; then
-      devcontainer open "$PROJECT"
+    if [ -d "$ROOT_DIR/$PROJECT" ]; then
+      update_config
+      devcontainer open "$ROOT_DIR/$PROJECT"
     else
       echo ERROR: Invalid project
       exit 1
