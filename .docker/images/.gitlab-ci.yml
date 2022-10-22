@@ -1,41 +1,53 @@
+# Override rules from parent CI config
+workflow:
+  rules:
+    - when: always
+
+default:
+  before_script:
+    - date
+    - env | grep -E "^IMAGE_"
+  after_script:
+    - date
+
+.dynamic_image_vars: &dynamic_image_vars
+  - IMAGE_TAG=$(sh ./.docker/images/determine-tag.sh "$IMAGE_NAME" "$IMAGE_VARIANT" "$IMAGE_TAG_AFFIX")
+  - if [ -n "$IMAGE_VARIANT" ]; then IMAGE_DOCKERFILE="$IMAGE_CONTEXT/$IMAGE_VARIANT.Dockerfile"; fi
+  - IMAGE_PATH="$CI_REGISTRY/$CI_PROJECT_PATH/$IMAGE_NAME:$IMAGE_TAG"
+
 build_docker_image:
-  stage: deploy
-  needs: []
+  stage: build
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
-  parallel:
-    matrix:
-      - IMAGE_NAME: arsnova-proxy
-      - IMAGE_NAME: rabbitmq-stomp
-        IMAGE_VARIANT:
-          - ""
-          - "management"
-      - IMAGE_NAME: couchdb
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
-      changes:
-        - ".docker/images/*"
-        - ".docker/images/$IMAGE_NAME/*"
-      when: manual
-      variables:
-        IMAGE_TAG_AFFIX: $CI_COMMIT_REF_NAME
-    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
-      changes:
-        - ".docker/images/*"
-        - ".docker/images/$IMAGE_NAME/*"
-      when: always
   variables:
-    KANIKO_CONTEXT: $CI_PROJECT_DIR/.docker/images/$IMAGE_NAME
-    KANIKO_DOCKERFILE: $CI_PROJECT_DIR/.docker/images/$IMAGE_NAME/Dockerfile
+    IMAGE_CONTEXT: $CI_PROJECT_DIR/.docker/images/$IMAGE_NAME
+    IMAGE_DOCKERFILE: $CI_PROJECT_DIR/.docker/images/$IMAGE_NAME/Dockerfile
   allow_failure: true
   script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - IMAGE_TAG=$(./.docker/images/determine-tag.sh "$IMAGE_NAME" "$IMAGE_VARIANT" "$IMAGE_TAG_AFFIX")
-    - if [ -n "$IMAGE_VARIANT" ]; then KANIKO_DOCKERFILE=$KANIKO_CONTEXT/$IMAGE_VARIANT.Dockerfile; fi
-    - KANIKO_DESTINATION=$CI_REGISTRY/$CI_PROJECT_PATH/$IMAGE_NAME:$IMAGE_TAG
+    - *dynamic_image_vars
     - env | grep -E 'IMAGE|KANIKO'
     - /kaniko/executor
-      --context "$KANIKO_CONTEXT"
-      --dockerfile "$KANIKO_DOCKERFILE"
-      --destination "$KANIKO_DESTINATION"
+      --context "$IMAGE_CONTEXT"
+      --dockerfile "$IMAGE_DOCKERFILE"
+      --destination "$IMAGE_PATH"
+
+tag_docker_image:
+  stage: deploy
+  needs:
+    - build_docker_image
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      when: on_success
+      variables:
+        IMAGE_TAG_ALIAS: next
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [""]
+  allow_failure: true
+  script:
+    - crane auth login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - *dynamic_image_vars
+    - if [ -n "$IMAGE_VARIANT" ]; then IMAGE_TAG_ALIAS="$IMAGE_TAG_ALIAS-$IMAGE_VARIANT"; fi
+    - crane tag "$IMAGE_PATH" "$IMAGE_TAG_ALIAS"

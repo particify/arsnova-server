@@ -19,4 +19,30 @@ build_project:
     include: "$PROJECT/.gitlab-ci.yml"
     strategy: depend
 
-include: .docker/images/.gitlab-ci.yml
+build_dependency_image:
+  stage: deploy
+  needs: []
+  parallel:
+    matrix:
+      - IMAGE_NAME: arsnova-proxy
+      - IMAGE_NAME: rabbitmq-stomp
+        IMAGE_VARIANT:
+          - ""
+          - "management"
+      - IMAGE_NAME: couchdb
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - ".docker/images/*"
+        - ".docker/images/$IMAGE_NAME/*"
+      when: manual
+      variables:
+        IMAGE_TAG_AFFIX: $CI_COMMIT_REF_NAME
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      changes:
+        - ".docker/images/*"
+        - ".docker/images/$IMAGE_NAME/*"
+      when: on_success
+  trigger:
+    include: ".docker/images/.gitlab-ci.yml"
+    strategy: depend
