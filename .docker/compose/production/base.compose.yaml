@@ -1,6 +1,6 @@
 services:
   couchdb:
-    image: $IMAGE_NAMESPACE/${IMAGE_DEPENDENCY_PREFIX}couchdb:3.2
+    image: $IMAGE_NAMESPACE/${IMAGE_DEPENDENCY_PREFIX}couchdb:$COUCHDB_TAG
     restart: $RESTART_MODE
     environment:
       COUCHDB_USER: arsnova
@@ -26,7 +26,7 @@ services:
     volumes:
       - postgresql_data_comment:/var/lib/postgresql/data
   rabbitmq:
-    image: $IMAGE_NAMESPACE/${IMAGE_DEPENDENCY_PREFIX}rabbitmq-stomp:3.10-alpine
+    image: $IMAGE_NAMESPACE/${IMAGE_DEPENDENCY_PREFIX}rabbitmq-stomp:$RABBITMQ_TAG
     restart: $RESTART_MODE
     environment:
       RABBITMQ_NODENAME: rabbit@localhost
