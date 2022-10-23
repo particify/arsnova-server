@@ -75,6 +75,21 @@ build() {
   docker compose -f .compose.yaml build $@
 }
 
+pull_devcontainer_base_images() {
+  echo Pulling base images for Devcontainers...
+  for project in "${PROJECT_DIRS[@]}"; do
+    dev_dockerfile="$ROOT_DIR/$project/.devcontainer/Dockerfile"
+    if [ -f "$dev_dockerfile" ]; then
+      devimg=$(cat "$dev_dockerfile" | grep -E "^FROM" | grep "devcontainer" | sed -E "s/^FROM //")
+      devimgs=$(printf "$devimgs\n$devimg" | uniq -u)
+    fi
+  done
+  devimgs=($devimgs)
+  for devimg in "${devimgs[@]}"; do
+    docker pull "$devimg"
+  done
+}
+
 if ! command -v git &> /dev/null; then
   echo ERROR: Git is not installed.
   exit 1
@@ -167,6 +182,7 @@ case $COMMAND in
     ;;
   build|b)
     update_config
+    pull_devcontainer_base_images
     build
     ;;
   logs|l)
