@@ -33,6 +33,19 @@ determine_image_tags() {
   done
 }
 
+prompt_image_tags() {
+  echo Prompting for tag names to use with Docker Compose...
+  for project in "${!TAG_VARS[@]}"; do
+    if [ -z "${!TAG_VARS[$project]}" ]; then
+      export ${TAG_VARS[$project]}=next
+    fi
+    read -p "$project: [${!TAG_VARS[$project]}] " tag
+    if [ -n "$tag" ]; then
+      sed -i -n -e "/^${TAG_VARS[$project]}=/!p" -e '$a'"${TAG_VARS[$project]}=$tag" "$COMPOSE_DIR/local.env"
+    fi
+  done
+}
+
 update_config() {
   echo Updating configuration for Docker Compose...
   if [ ! -f local.env ]; then
@@ -151,6 +164,10 @@ case $COMMAND in
   update-config)
     update_config
     ;;
+  tags|t)
+    update_config
+    prompt_image_tags
+    ;;
   open|o)
     if [ -d "$ROOT_DIR/$PROJECT" ]; then
       update_config
@@ -189,6 +206,7 @@ case $COMMAND in
     echo Usage:
     echo "    $0 update           Update Git repositories, Docker Compose configuration and Devcontainers"
     echo "    $0 update-config    Update the configuration for Docker Compose"
+    echo "    $0 tags             Set the image tags of projects to use with Docker Compose"
     echo "    $0 open <project>   Open project in Devcontainer with Visual Studio Code"
     echo "    $0 run              Start Devcontainers for all services"
     echo "    $0 build            (Re-)build Devcontainers"
