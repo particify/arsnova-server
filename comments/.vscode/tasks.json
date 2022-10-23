@@ -28,15 +28,6 @@
         "kind": "build",
         "isDefault": true
       }
-    },
-    {
-      "command": "../gradlew bootRun -Dorg.gradle.debug=true",
-      "label": "Debug project",
-      "type": "shell",
-      "group": {
-        "kind": "build"
-      },
-      "isBackground": true
     }
   ]
 }

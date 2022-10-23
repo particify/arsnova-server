@@ -2,11 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "mainClass": "de.thm.arsnova.service.authservice.ArsnovaAuthServiceApplicationKt",
-      "name": "Run Auth Service",
+      "name": "Run Server Authz",
+      "preLaunchTask": "Debug project",
       "projectRoot": "${workspaceFolder}",
-      "request": "launch",
-      "type": "kotlin"
+      "request": "attach",
+      "type": "kotlin",
+      "hostName": "localhost",
+      "port": 5005,
+      "timeout": 5000
     }
   ]
 }

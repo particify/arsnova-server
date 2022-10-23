@@ -2,13 +2,41 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build application",
+      "command": "../gradlew classes",
+      "label": "Build classes",
+      "type": "shell"
+    },
+    {
+      "command": "../gradlew test",
+      "label": "Run tests",
       "type": "shell",
-      "command": "mvn compile",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "command": "../gradlew clean",
+      "label": "Clean project",
+      "type": "shell"
+    },
+    {
+      "command": "../gradlew build",
+      "label": "Build project",
+      "type": "shell",
       "group": {
         "kind": "build",
         "isDefault": true
       }
+    },
+    {
+      "command": "../gradlew bootRun -Dorg.gradle.debug=true",
+      "label": "Debug project",
+      "type": "shell",
+      "group": {
+        "kind": "build"
+      },
+      "isBackground": true
     }
   ]
 }

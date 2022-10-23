@@ -3,8 +3,9 @@
   "configurations": [
     {
       "mainClass": "de.thm.arsnova.ArsnovaApplication",
-      "name": "Run Backend Core",
-      "projectName": "arsnova-backend",
+      "name": "Run Server Core",
+      "preLaunchTask": "Build classes",
+      "projectName": "core",
       "request": "launch",
       "type": "java"
     }

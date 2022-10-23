@@ -3,8 +3,9 @@
   "configurations": [
     {
       "mainClass": "de.thm.arsnova.service.comment.CommentWebService",
-      "name": "Run Comment Service",
-      "projectName": "arsnova-comment-service",
+      "name": "Run Server Comments",
+      "preLaunchTask": "Build classes",
+      "projectName": "comments",
       "request": "launch",
       "type": "java"
     }
