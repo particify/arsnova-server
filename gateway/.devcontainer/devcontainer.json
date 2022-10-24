@@ -4,7 +4,7 @@
   "dockerComposeFile": [
     "../../.docker/compose/development/.compose.yaml"
   ],
-  "workspaceFolder": "/workspace/arsnova-server-gateway",
+  "workspaceFolder": "/workspace/gateway",
   "customizations": {
     "vscode": {
       "extensions": [
