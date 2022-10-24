@@ -1,0 +1,33 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "command": "../gradlew classes",
+      "label": "Build classes",
+      "type": "shell"
+    },
+    {
+      "command": "../gradlew test",
+      "label": "Run tests",
+      "type": "shell",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "command": "../gradlew clean",
+      "label": "Clean project",
+      "type": "shell"
+    },
+    {
+      "command": "../gradlew build",
+      "label": "Build project",
+      "type": "shell",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}

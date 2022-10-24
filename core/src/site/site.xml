@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="ARSnova" xmlns="http://maven.apache.org/DECORATION/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd">
+
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+    <version>1.7</version>
+  </skin>
+
+  <custom>
+    <fluidoSkin>
+      <topBarEnabled>false</topBarEnabled>
+      <topBar>
+
+      </topBar>
+      <sideBarEnabled>true</sideBarEnabled>
+      <profile>release</profile>
+      <ohloh>
+        <projectId>arsnova</projectId>
+        <widget>stats</widget>
+      </ohloh>
+    </fluidoSkin>
+  </custom>
+
+  <bannerLeft>
+    <name>ARSnova</name>
+    <src>arsnova.png</src>
+    <href>https://arsnova.thm.de/</href>
+  </bannerLeft>
+
+  <bannerRight>
+    <src>thm_logo.png</src>
+  </bannerRight>
+
+  <body>
+    <head>
+      <![CDATA[
+      <link rel="stylesheet" type="text/css" href="css/thm-theme.css" />
+      ]]>
+    </head>
+    <links>
+      <item name="THM" href="https://www.thm.de/" />
+    </links>
+    <menu name="Overview">
+      <item name="Introduction" href="index.html" />
+      <item name="License" href="licenses.html" />
+      <item name="The Team" href="team.html" />
+    </menu>
+    <menu name="Documentation">
+      <item name="Installation" href="installation.html" />
+      <item name="Upgrading" href="upgrade.html" />
+      <item name="Development" href="development.html" />
+      <item name="Dependencies" href="dependencies.html" />
+      <item name="API Docs" href="apidocs/index.html" />
+    </menu>
+    <menu name="Further Information">
+      <item name="Source Repository" href="scm.html" />
+      <item name="Issue Tracking" href="issue-management.html" />
+      <item name="SonarQube Metrics" href="https://scm.thm.de/sonar/dashboard/index/de.thm.arsnova:arsnova-backend" />
+      <item name="Continuous Integration" href="ci-management.html" />
+    </menu>
+  </body>
+</project>

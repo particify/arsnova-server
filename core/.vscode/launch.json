@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "mainClass": "de.thm.arsnova.ArsnovaApplication",
+      "name": "Run Server Core",
+      "preLaunchTask": "Build classes",
+      "projectName": "core",
+      "request": "launch",
+      "type": "java"
+    }
+  ]
+}

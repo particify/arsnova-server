@@ -1,0 +1,113 @@
+variables:
+  OUTPUT_DIR: $PROJECT/build
+  GRADLE_USER_HOME: .gradle-user-home
+  GRADLE_OPTS: -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false
+  GRADLE_CLI_OPTS: --no-daemon --console=plain
+
+# Override rules from parent CI config
+workflow:
+  rules:
+    - when: always
+
+default:
+  interruptible: true
+  before_script:
+    - date
+    - echo "$PROJECT"
+  after_script:
+    - date
+
+.gradle:
+  image: gradle:7.5-jdk17
+  cache:
+    key: gradle-global-cache
+    paths:
+      - $GRADLE_USER_HOME/caches
+
+compile:
+  extends: .gradle
+  stage: build
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - $OUTPUT_DIR
+  script:
+    - gradle $GRADLE_CLI_OPTS :$PROJECT:classes
+
+unit_test:
+  extends: .gradle
+  stage: test
+  needs:
+    - compile
+  artifacts:
+    expire_in: 1 month
+    paths:
+      - $OUTPUT_DIR/jacoco
+      - $OUTPUT_DIR/reports
+      - $OUTPUT_DIR/test-results
+    reports:
+      junit: $OUTPUT_DIR/test-results/test/TEST-*.xml
+  coverage: '/Code coverage: \d+\.\d+/'
+  script:
+    - gradle $GRADLE_CLI_OPTS :$PROJECT:test :$PROJECT:jacocoTestReport -x classes
+    - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' $OUTPUT_DIR/reports/jacoco/test/jacocoTestReport.csv
+
+ktlint:
+  extends: .gradle
+  stage: test
+  rules:
+    ## GitLab does not yet support variables for exists rules
+    #- exists:
+    #    - $PROJECT/src/main/kotlin/**/*.kt
+    #    - $PROJECT/src/test/kotlin/**/*.kt
+    #  when: on_success
+    - changes:
+        - $PROJECT/*.kts
+      when: on_success
+    ## Workaround
+    - if: $ENABLE_KTLINT
+      when: on_success
+  script:
+    - gradle $GRADLE_CLI_OPTS :$PROJECT:ktlintCheck
+
+checkstyle:
+  extends: .gradle
+  stage: test
+  needs:
+    - compile
+  rules:
+    ## GitLab does not yet support variables for exists rules
+    #- exists:
+    #    - $PROJECT/checkstyle.xml
+    ## Workaround
+    - if: $ENABLE_CHECKSTYLE
+      when: on_success
+  script:
+    - gradle $GRADLE_CLI_OPTS :$PROJECT:checkstyleMain :$PROJECT:checkstyleTest -x classes
+
+docker_image:
+  extends: .gradle
+  stage: deploy
+  dependencies:
+    - compile
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      when: on_success
+      variables:
+        DOCKER_TAG: next
+    - when: manual
+      variables:
+        DOCKER_TAG: dev-$CI_COMMIT_REF_SLUG
+  variables:
+    DOCKER_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH/$PROJECT
+  allow_failure: true
+  interruptible: false
+  script:
+    - "echo Creation time for image: `git log -1 --format=%cI`"
+    - "echo Tag for image: $DOCKER_TAG"
+    - gradle $GRADLE_CLI_OPTS :$PROJECT:jib -x classes
+      -Djib.to.auth.username="$CI_REGISTRY_USER"
+      -Djib.to.auth.password="$CI_REGISTRY_PASSWORD"
+      -Djib.to.image="$DOCKER_IMAGE:$DOCKER_TAG"
+      -Djib.container.creationTime="`git log -1 --format=%cI`"
+      $GRADLE_JIB_OPTS

@@ -1,0 +1,14 @@
+services:
+  postgresql-authz:
+    image: postgres:$POSTGRESQL_TAG
+  postgresql-comments:
+    image: postgres:$POSTGRESQL_TAG
+  arsnova-proxy:
+    ports:
+      - $PORT:80
+      - $HTTPS_PORT:443
+    volumes:
+      - tls_certs:/mnt/tls-certs:ro
+
+volumes:
+  tls_certs:

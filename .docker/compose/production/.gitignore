@@ -1,0 +1,6 @@
+/.compose.yaml
+/.env
+/.version
+/docker-compose.override.yml
+/local.compose.yaml
+/local.env

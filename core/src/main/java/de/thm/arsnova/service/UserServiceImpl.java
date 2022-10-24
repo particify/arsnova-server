@@ -1,0 +1,673 @@
+/*
+ * This file is part of ARSnova Backend.
+ * Copyright (C) 2012-2019 The ARSnova Team and Contributors
+ *
+ * ARSnova Backend is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ARSnova Backend is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package de.thm.arsnova.service;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.commons.lang.StringUtils;
+import org.ektorp.DbAccessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.Validator;
+
+import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
+import de.thm.arsnova.config.properties.SecurityProperties;
+import de.thm.arsnova.config.properties.SystemProperties;
+import de.thm.arsnova.model.ClientAuthentication;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.persistence.UserRepository;
+import de.thm.arsnova.security.GuestUserDetailsService;
+import de.thm.arsnova.security.PasswordUtils;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.security.jwt.JwtService;
+import de.thm.arsnova.security.jwt.JwtToken;
+import de.thm.arsnova.service.exceptions.UserAlreadyExistsException;
+import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+
+/**
+ * Performs all user related operations.
+ */
+@Service
+@Primary
+public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> implements UserService {
+
+  private static final int LOGIN_TRY_RESET_DELAY_MS = 30 * 1000;
+
+  private static final int LOGIN_BAN_RESET_DELAY_MS = 2 * 60 * 1000;
+
+  private static final int MAIL_RESEND_TRY_RESET_DELAY_MS = 30 * 1000;
+
+  private static final int MAIL_RESEND_BAN_RESET_DELAY_MS = 2 * 60 * 1000;
+
+  private static final int REPEATED_PASSWORD_RESET_DELAY_MS = 3 * 60 * 1000;
+
+  private static final int PASSWORD_RESET_KEY_DURABILITY_MS = 2 * 60 * 60 * 1000;
+
+  private static final long ACTIVATION_KEY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
+  private static final long ACTIVATION_KEY_DURABILITY_MS = 5 * 24 * 60 * 60 * 1000L;
+
+  private static final int VERIFICATION_CODE_LENGTH = 6;
+  private static final int MAX_VERIFICATION_CODE_ATTEMPTS = 10;
+
+  /* Password constraint statics */
+  private static final int PASSWORD_CONSTRAINT_MIN_LENGTH = 8;
+  // When a password is extra long, it contributes to the security level
+  private static final int PASSWORD_CONSTRAINT_EXTRA_LENGTH = 20;
+  private static final Pattern PASSWORD_CONSTRAINT_NUMBERS_PATTERN = Pattern.compile("\\d");
+  private static final Pattern PASSWORD_CONSTRAINT_LOWER_CASE_PATTERN = Pattern.compile("[\\p{Ll}]");
+  private static final Pattern PASSWORD_CONSTRAINT_UPPER_CASE_PATTERN = Pattern.compile("[\\p{Lu}]");
+  private static final Pattern PASSWORD_CONSTRAINT_SPECIAL_CHAR_PATTERN = Pattern.compile("[\\p{P}\\p{S}\\p{Z}]");
+
+  private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
+  /* for the new STOMP over ws functionality */
+  private static final ConcurrentHashMap<String, String> wsSessionIdToJwt = new ConcurrentHashMap<>();
+
+  private UserRepository userRepository;
+  private JwtService jwtService;
+  private PasswordUtils passwordUtils;
+  private EmailService emailService;
+
+  private SecurityProperties securityProperties;
+  private AuthenticationProviderProperties.Registered registeredProperties;
+
+  @Autowired(required = false)
+  private GuestUserDetailsService guestUserDetailsService;
+
+  @Autowired(required = false)
+  private DaoAuthenticationProvider daoProvider;
+
+  @Autowired(required = false)
+  private LdapAuthenticationProvider ldapAuthenticationProvider;
+
+  private String rootUrl;
+
+  private Pattern mailPattern;
+  private ConcurrentHashMap<String, Byte> loginTries;
+  private Set<String> loginBans;
+  private ConcurrentHashMap<String, Byte> resentMailCount;
+  private Set<String> resendMailBans;
+
+  {
+    loginTries = new ConcurrentHashMap<>();
+    loginBans = Collections.synchronizedSet(new HashSet<String>());
+    resentMailCount = new ConcurrentHashMap<>();
+    resendMailBans = Collections.synchronizedSet(new HashSet<String>());
+  }
+
+  public UserServiceImpl(
+      final UserRepository repository,
+      final SystemProperties systemProperties,
+      final SecurityProperties securityProperties,
+      final AuthenticationProviderProperties authenticationProviderProperties,
+      final EmailService emailService,
+      @Qualifier("defaultJsonMessageConverter")
+      final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+      final Validator validator,
+      final PasswordUtils passwordUtils) {
+    super(UserProfile.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
+    this.userRepository = repository;
+    this.securityProperties = securityProperties;
+    this.registeredProperties = authenticationProviderProperties.getRegistered();
+    this.passwordUtils = passwordUtils;
+    this.emailService = emailService;
+    this.rootUrl = systemProperties.getRootUrl();
+  }
+
+  @Scheduled(fixedDelay = LOGIN_TRY_RESET_DELAY_MS)
+  public void resetLoginTries() {
+    if (!loginTries.isEmpty()) {
+      logger.debug("Resetting counters for failed logins.");
+      loginTries.clear();
+    }
+  }
+
+  @Scheduled(fixedDelay = LOGIN_BAN_RESET_DELAY_MS)
+  public void resetLoginBans() {
+    if (!loginBans.isEmpty()) {
+      logger.info("Clearing temporary bans for failed logins ({}).", loginBans.size());
+      loginBans.clear();
+    }
+  }
+
+  @Scheduled(fixedDelay = MAIL_RESEND_TRY_RESET_DELAY_MS)
+  public void resetResendingActivationTries() {
+    if (!resentMailCount.isEmpty()) {
+      logger.debug("Resetting counters for resent activation mails.");
+      resentMailCount.clear();
+    }
+  }
+
+  @Scheduled(fixedDelay = MAIL_RESEND_BAN_RESET_DELAY_MS)
+  public void resetResendingActivationBan() {
+    if (!resendMailBans.isEmpty()) {
+      logger.info("Clearing temporary bans for resent activation mails ({}).", loginBans.size());
+      resendMailBans.clear();
+    }
+  }
+
+  @Scheduled(fixedDelay = ACTIVATION_KEY_CHECK_INTERVAL_MS)
+  public void deleteInactiveUsers() {
+    logger.debug("Deleting non-activated user accounts.");
+    final long unixTime = System.currentTimeMillis();
+    final long lastActivityBefore = unixTime - ACTIVATION_KEY_DURABILITY_MS;
+    userRepository.deleteInactiveUsers(lastActivityBefore);
+  }
+
+  @Override
+  protected void prepareCreate(final UserProfile userProfile) {
+    if (userProfile.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA) {
+      userProfile.setLoginId(userProfile.getLoginId().toLowerCase());
+    }
+    if (null != userRepository.findByAuthProviderAndLoginId(
+        userProfile.getAuthProvider(), userProfile.getLoginId())) {
+      logger.info("User registration failed. {} already exists.", userProfile.getLoginId());
+      throw new UserAlreadyExistsException();
+    }
+  }
+
+  @Override
+  public User getCurrentUser() {
+    final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
+      return null;
+    }
+
+    return (User) authentication.getPrincipal();
+  }
+
+  @Override
+  public de.thm.arsnova.model.ClientAuthentication getCurrentClientAuthentication(final boolean refresh) {
+    final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
+      return null;
+    }
+    final User user = (User) authentication.getPrincipal();
+    final String jwt = !refresh && authentication instanceof JwtToken
+        ? (String) authentication.getCredentials() : jwtService.createSignedToken(user, false);
+
+    final ClientAuthentication clientAuthentication =
+        new ClientAuthentication(user.getId(), user.getUsername(),
+            user.getAuthProvider(), jwt);
+
+    return clientAuthentication;
+  }
+
+  @Override
+  public boolean isAdmin(final String loginId, final UserProfile.AuthProvider authProvider) {
+    return securityProperties.getAdminAccounts().contains(
+        new SecurityProperties.AdminAccount(loginId, authProvider));
+  }
+
+  private boolean isBannedFromLogin(final String addr) {
+    return loginBans.contains(addr);
+  }
+
+  private boolean isBannedFromSendingActivationMail(final String addr) {
+    return resendMailBans.contains(addr);
+  }
+
+  private void increaseFailedLoginCount(final String addr) {
+    Byte tries = loginTries.get(addr);
+    if (null == tries) {
+      tries = 0;
+    }
+    if (tries < securityProperties.getLoginTryLimit()) {
+      loginTries.put(addr, ++tries);
+      if (securityProperties.getLoginTryLimit() == tries) {
+        logger.info("Temporarily banned {} from login.", addr);
+        loginBans.add(addr);
+      }
+    }
+  }
+
+  private void increaseSentMailCount(final String addr) {
+    Byte tries = resentMailCount.get(addr);
+    if (null == tries) {
+      tries = 0;
+    }
+    if (tries < securityProperties.getResendMailLimit()) {
+      resentMailCount.put(addr, ++tries);
+      if (securityProperties.getResendMailLimit() == tries) {
+        logger.info("Temporarily banned {} from resending activation"
+            + " mails in due to too many resent activation mails.", addr);
+        resendMailBans.add(addr);
+      }
+    }
+  }
+
+  @Override
+  public void authenticate(final UsernamePasswordAuthenticationToken token,
+      final UserProfile.AuthProvider authProvider, final String clientAddress) {
+    if (isBannedFromLogin(clientAddress)) {
+      throw new BadRequestException();
+    }
+
+    final Authentication auth;
+    switch (authProvider) {
+      case LDAP:
+        auth = ldapAuthenticationProvider.authenticate(token);
+        break;
+      case ARSNOVA:
+        auth = daoProvider.authenticate(token);
+        break;
+      case ARSNOVA_GUEST:
+        String id = token.getName();
+        boolean autoCreate = false;
+        if (id == null || id.isEmpty()) {
+          id = generateGuestId();
+          autoCreate = true;
+        }
+        final UserDetails userDetails = guestUserDetailsService.loadUserByUsername(id, autoCreate);
+        if (userDetails == null) {
+          throw new UsernameNotFoundException("Guest user does not exist");
+        }
+        auth = new UsernamePasswordAuthenticationToken(
+            userDetails, null, userDetails.getAuthorities());
+
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported authentication provider");
+    }
+
+    if (!auth.isAuthenticated()) {
+      increaseFailedLoginCount(clientAddress);
+      throw new BadRequestException();
+    }
+    SecurityContextHolder.getContext().setAuthentication(auth);
+  }
+
+  @Override
+  public User loadUser(final UserProfile.AuthProvider authProvider, final String loginId,
+      final Collection<GrantedAuthority> grantedAuthorities, final boolean autoCreate)
+      throws UsernameNotFoundException {
+    logger.debug("Load user: LoginId: {}, AuthProvider: {}", loginId, authProvider);
+    UserProfile userProfile = userRepository.findByAuthProviderAndLoginId(authProvider, loginId);
+    if (userProfile == null) {
+      if (autoCreate) {
+        userProfile = new UserProfile(authProvider, loginId);
+        final SecurityContext securityContext = SecurityContextHolder.getContext();
+        final Authentication oldAuth = securityContext.getAuthentication();
+        final Authentication overrideAuth = new AnonymousAuthenticationToken("anonymous", loginId, grantedAuthorities);
+        securityContext.setAuthentication(overrideAuth);
+        create(userProfile);
+        securityContext.setAuthentication(oldAuth);
+      } else {
+        throw new UsernameNotFoundException("User does not exist.");
+      }
+    }
+
+    return new User(userProfile, grantedAuthorities);
+  }
+
+  @Override
+  public User loadUser(final String userId, final Collection<GrantedAuthority> grantedAuthorities)
+      throws UsernameNotFoundException {
+    logger.debug("Load user: UserId: {}", userId);
+    final UserProfile userProfile = get(userId, true);
+    if (userProfile == null) {
+      throw new UsernameNotFoundException("User does not exist.");
+    }
+
+    return new User(userProfile, grantedAuthorities);
+  }
+
+  @Override
+  public UserProfile getByAuthProviderAndLoginId(final UserProfile.AuthProvider authProvider, final String loginId) {
+    return userRepository.findByAuthProviderAndLoginId(authProvider, loginId);
+  }
+
+  @Override
+  public List<UserProfile> getByLoginId(final String loginId) {
+    return userRepository.findByLoginId(loginId);
+  }
+
+  @Override
+  public UserProfile getByUsername(final String username) {
+    return userRepository.findByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA, username.toLowerCase());
+  }
+
+  @Override
+  public UserProfile create(final String username, final String password) {
+    final String lcUsername = username.toLowerCase();
+
+    if (null == mailPattern) {
+      parseMailAddressPattern();
+    }
+
+    if (null == mailPattern || !mailPattern.matcher(lcUsername).matches()) {
+      logger.info("User registration failed. {} does not match pattern.", lcUsername);
+
+      return null;
+    }
+
+    if (password.length() < PASSWORD_CONSTRAINT_MIN_LENGTH) {
+      logger.debug("User registration failed. Password is shorter than 8 characters.");
+
+      return null;
+    }
+
+    if (getPasswordStrength(password) < securityProperties.getPasswordStrictnessLevel()) {
+      logger.debug("User registration failed. Password is not strong enough.");
+
+      return null;
+    }
+
+    final UserProfile userProfile = new UserProfile();
+    final UserProfile.Account account = new UserProfile.Account();
+    userProfile.setAccount(account);
+    userProfile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA);
+    userProfile.setLoginId(lcUsername);
+    account.setPassword(encodePassword(password));
+    account.setActivationKey(generateVerificationCode());
+    userProfile.setCreationTimestamp(new Date());
+
+    final UserProfile result = create(userProfile);
+    if (null != result) {
+      logger.debug("Activation key for user '{}': {}",
+          userProfile.getLoginId(),
+          account.getActivationKey());
+      sendActivationEmail(result);
+    } else {
+      logger.error("User registration failed. {} could not be created.", lcUsername);
+    }
+
+    return result;
+  }
+
+  @Override
+  public UserProfile createAnonymizedGuestUser() {
+    final UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.ANONYMIZED, generateGuestId());
+    create(userProfile);
+    return userProfile;
+  }
+
+  private int getPasswordStrength(final String password) {
+    int passwordStrength = 0;
+
+    if (password.length() >= PASSWORD_CONSTRAINT_EXTRA_LENGTH) {
+      passwordStrength++;
+    }
+
+    final Matcher numbersMatcher = PASSWORD_CONSTRAINT_NUMBERS_PATTERN.matcher(password);
+    if (numbersMatcher.find()) {
+      passwordStrength++;
+    }
+
+    final Matcher lowerCaseMatcher = PASSWORD_CONSTRAINT_LOWER_CASE_PATTERN.matcher(password);
+    if (lowerCaseMatcher.find()) {
+      passwordStrength++;
+    }
+
+    final Matcher upperCaseMatcher = PASSWORD_CONSTRAINT_UPPER_CASE_PATTERN.matcher(password);
+    if (upperCaseMatcher.find()) {
+      passwordStrength++;
+    }
+
+    final Matcher specialCharMatcher = PASSWORD_CONSTRAINT_SPECIAL_CHAR_PATTERN.matcher(password);
+    if (specialCharMatcher.find()) {
+      passwordStrength++;
+    }
+
+    return passwordStrength;
+  }
+
+  private String encodePassword(final String password) {
+    return passwordUtils.encode(password);
+  }
+
+  private void sendActivationEmail(final UserProfile userProfile) {
+    final String activationKey = userProfile.getAccount().getActivationKey();
+
+    sendEmail(userProfile,
+        MessageFormat.format(
+            registeredProperties.getRegistrationMailSubject(), activationKey),
+        MessageFormat.format(
+            registeredProperties.getRegistrationMailBody(), activationKey, rootUrl));
+  }
+
+  private void parseMailAddressPattern() {
+    /* TODO: Add Unicode support */
+
+    if (!registeredProperties.getAllowedEmailDomains().isEmpty()) {
+      final List<String> patterns = new ArrayList<>();
+      if (registeredProperties.getAllowedEmailDomains().contains("*")) {
+        patterns.add("([a-z0-9-]+\\.)+[a-z0-9-]+");
+      } else {
+        final Pattern patternPattern = Pattern.compile("[a-z0-9.*-]+", Pattern.CASE_INSENSITIVE);
+        for (final String patternStr : registeredProperties.getAllowedEmailDomains()) {
+          if (patternPattern.matcher(patternStr).matches()) {
+            patterns.add(
+                patternStr.replaceAll("[.]", "[.]").replaceAll("[*]", "[a-z0-9-]+?"));
+          }
+        }
+      }
+
+      mailPattern = Pattern.compile("[a-z0-9._-]+?@(" + StringUtils.join(patterns, "|") + ")",
+          Pattern.CASE_INSENSITIVE);
+      logger.info("Allowed e-mail addresses (pattern) for registration: '{}'.", mailPattern.pattern());
+    }
+  }
+
+  @Override
+  public UserProfile resetActivation(final String id, final String clientAddress) {
+    if (isBannedFromSendingActivationMail(clientAddress)) {
+      return null;
+    }
+    final UserProfile userProfile = get(id, true);
+    if (null == userProfile) {
+      logger.info("Reset of account activation failed. User {} does not exist.", id);
+      increaseFailedLoginCount(clientAddress);
+
+      throw new NotFoundException();
+    }
+    sendActivationEmail(userProfile);
+
+    return userProfile;
+  }
+
+  @Override
+  public boolean activateAccount(final String id, final String key, final String clientAddress) {
+    if (isBannedFromLogin(clientAddress)) {
+      return false;
+    }
+    final UserProfile userProfile = get(id, true);
+    if (userProfile == null || !key.equals(userProfile.getAccount().getActivationKey())) {
+      increaseSentMailCount(clientAddress);
+
+      if (userProfile != null) {
+        final int failedVerifications = userProfile.getAccount().getFailedVerifications() + 1;
+        userProfile.getAccount().setFailedVerifications(failedVerifications);
+        if (failedVerifications >= MAX_VERIFICATION_CODE_ATTEMPTS) {
+          logger.info("Resetting activation verification code because of too many failed attempts for {}.",
+              userProfile.getLoginId());
+          userProfile.getAccount().setActivationKey(generateVerificationCode());
+          userProfile.getAccount().setFailedVerifications(0);
+        }
+        update(userProfile);
+      }
+
+      return false;
+    }
+
+    userProfile.getAccount().setActivationKey(null);
+    userProfile.getAccount().setFailedVerifications(0);
+    update(userProfile);
+
+    return true;
+  }
+
+  @Override
+  public void activateAccount(final String id) {
+    final UserProfile userProfile = get(id, true);
+    userProfile.getAccount().setActivationKey(null);
+    userProfile.getAccount().setFailedVerifications(0);
+    update(userProfile);
+  }
+
+  @Override
+  public void initiatePasswordReset(final String id) {
+    final UserProfile userProfile = get(id);
+    if (null == userProfile) {
+      logger.info("Password reset failed. User does not exist.");
+
+      throw new NotFoundException();
+    }
+    final UserProfile.Account account = userProfile.getAccount();
+    // checks if a password reset process in in progress
+    if ((account.getPasswordResetTime() != null)
+        && (System.currentTimeMillis()
+            < account.getPasswordResetTime().getTime() + REPEATED_PASSWORD_RESET_DELAY_MS)) {
+
+      logger.info("Password reset failed. The reset delay for User {} is still active.", userProfile.getLoginId());
+
+      throw new BadRequestException();
+    }
+
+    account.setPasswordResetKey(generateVerificationCode());
+    account.setPasswordResetTime(new Date());
+    account.setFailedVerifications(0);
+    try {
+      update(userProfile);
+      logger.debug("Password reset key for user '{}': {}",
+          userProfile.getLoginId(),
+          account.getPasswordResetKey());
+    } catch (final DbAccessException e) {
+      logger.error("Password reset failed. {} could not be updated.", userProfile.getLoginId());
+      throw e;
+    }
+
+    sendEmail(userProfile,
+        MessageFormat.format(
+            registeredProperties.getResetPasswordMailSubject(), account.getPasswordResetKey()),
+        MessageFormat.format(
+            registeredProperties.getResetPasswordMailBody(), account.getPasswordResetKey(), rootUrl));
+  }
+
+  @Override
+  public boolean resetPassword(final String id, final String key, final String password) {
+    final UserProfile userProfile = get(id);
+    if (userProfile == null || userProfile.getAccount() == null) {
+      return false;
+    }
+    final UserProfile.Account account = userProfile.getAccount();
+    if (null == key || "".equals(key) || !key.equals(account.getPasswordResetKey())) {
+      logger.info("Password reset failed. Invalid key provided for User {}.", userProfile.getLoginId());
+
+      if (key != null && !key.equals(account.getPasswordResetKey())) {
+        final int failedVerifications = userProfile.getAccount().getFailedVerifications() + 1;
+        userProfile.getAccount().setFailedVerifications(failedVerifications);
+        if (failedVerifications >= MAX_VERIFICATION_CODE_ATTEMPTS) {
+          logger.info(
+              "Resetting password reset verification code because of too many failed attempts for {}.",
+              userProfile.getLoginId());
+          userProfile.getAccount().setPasswordResetKey(null);
+          account.setPasswordResetTime(new Date(0));
+          account.setFailedVerifications(0);
+        }
+        update(userProfile);
+      }
+
+      return false;
+    }
+    if (System.currentTimeMillis() > account.getPasswordResetTime().getTime() + PASSWORD_RESET_KEY_DURABILITY_MS) {
+      logger.info("Password reset failed. Key provided for User {} is no longer valid.", userProfile.getLoginId());
+
+      account.setPasswordResetKey(null);
+      account.setPasswordResetTime(new Date(0));
+      account.setFailedVerifications(0);
+      update(userProfile);
+
+      return false;
+    }
+
+    account.setPassword(encodePassword(password));
+    account.setPasswordResetKey(null);
+    try {
+      update(userProfile);
+    } catch (final DbAccessException e) {
+      logger.error("Password reset failed. {} could not be updated.", userProfile.getLoginId());
+      throw e;
+    }
+
+    return true;
+  }
+
+  private void sendEmail(final UserProfile userProfile, final String subject, final String body) {
+    emailService.sendEmail(userProfile.getLoginId(), subject, body);
+  }
+
+  private String generateGuestId() {
+    return passwordUtils.generateKey();
+  }
+
+  private String generateVerificationCode() {
+    return passwordUtils.generateFixedLengthNumericCode(VERIFICATION_CODE_LENGTH);
+  }
+
+  @Autowired
+  @Lazy
+  public void setJwtService(final JwtService jwtService) {
+    this.jwtService = jwtService;
+  }
+
+  public void addWsSessionToJwtMapping(final String wsSessionId, final String jwt) {
+    wsSessionIdToJwt.put(wsSessionId, jwt);
+  }
+
+  public User getAuthenticatedUserByWsSession(final String wsSessionId) {
+    final String jwt = wsSessionIdToJwt.getOrDefault(wsSessionId, null);
+    if (jwt == null) {
+      return null;
+    }
+    final User u = jwtService.verifyToken(jwt);
+    if (u == null) {
+      return null;
+    }
+
+    return u;
+  }
+}

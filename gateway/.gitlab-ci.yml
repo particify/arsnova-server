@@ -1,0 +1,4 @@
+variables:
+  ENABLE_KTLINT: 1
+
+include: .gitlab/ci/gradle.yml

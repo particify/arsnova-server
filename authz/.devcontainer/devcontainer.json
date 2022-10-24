@@ -1,0 +1,22 @@
+{
+  "name": "Server: Authz",
+  "service": "arsnova-server-authz",
+  "dockerComposeFile": [
+    "../../.docker/compose/development/.compose.yaml"
+  ],
+  "workspaceFolder": "/workspace/authz",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "asciidoctor.asciidoctor-vscode",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig",
+        "fwcd.kotlin",
+        "pivotal.vscode-spring-boot"
+      ]
+    }
+  },
+  "shutdownAction": "none",
+  "remoteUser": "dev",
+  "postAttachCommand": "/post-attach.sh"
+}

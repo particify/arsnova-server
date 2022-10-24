@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Server Authz",
+      "preLaunchTask": "Debug project",
+      "projectRoot": "${workspaceFolder}",
+      "request": "attach",
+      "type": "kotlin",
+      "hostName": "localhost",
+      "port": 5005,
+      "timeout": 5000
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "Server: Gateway",
+  "service": "arsnova-server-gateway",
+  "dockerComposeFile": [
+    "../../.docker/compose/development/.compose.yaml"
+  ],
+  "workspaceFolder": "/workspace/arsnova-server-gateway",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "asciidoctor.asciidoctor-vscode",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig",
+        "fwcd.kotlin",
+        "pivotal.vscode-spring-boot"
+      ]
+    }
+  },
+  "shutdownAction": "none",
+  "remoteUser": "dev",
+  "postAttachCommand": "/post-attach.sh"
+}

@@ -1,0 +1,12 @@
+package de.thm.arsnova.service.wsgateway
+
+import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
+
+@SpringBootTest
+class ArsnovaWsGatewayServiceApplicationTests {
+
+  @Test
+  fun contextLoads() {
+  }
+}

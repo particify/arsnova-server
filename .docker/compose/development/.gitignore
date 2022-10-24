@@ -1,0 +1,4 @@
+/.compose.yaml
+/.env
+/local.compose.yaml
+/local.env

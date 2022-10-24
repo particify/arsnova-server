@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aspectj>
+  <weaver options="-verbose -showWeaveInfo">
+    <include within="de.thm.arsnova..*"/>
+    <include within="com.corundumstudio.socketio.listener.*"/>
+  </weaver>
+
+  <aspects>
+    <aspect name="de.thm.arsnova.security.SystemAuthenticationAspect"/>
+    <aspect name="de.thm.arsnova.web.RangeAspect"/>
+    <aspect name="de.thm.arsnova.web.InternalEntityAspect"/>
+    <aspect name="de.thm.arsnova.websocket.WebsocketAuthenticationAspect"/>
+    <!-- Micrometer does not have a aop.xml config for its aspects. -->
+    <!-- Disabled for now, see https://github.com/micrometer-metrics/micrometer/issues/1149.
+    <aspect name="io.micrometer.core.aop.TimedAspect"/>
+    -->
+  </aspects>
+</aspectj>

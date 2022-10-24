@@ -1,25 +1,46 @@
+# https://git-scm.com/docs/gitignore
+# This .gitignore file contains patterns for ignorable files that appear
+# frequently for our development environments. Less common patterns which are
+# specific to the local environment should be added to the local Git config
+# instead.
+
+# JVM/Gradle
 *.class
-.checkstyle
-/target/
+.classpath
+.gradle/
+build/
+
+# Node.js/NPM/Yarn
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Visual Studio Code
 .vscode/*
 !.vscode/launch.json
 !.vscode/tasks.json
+bin/
+*.cpuprofile
 
-# Environment specific files
-*~
-*.bak
+# IntelliJ IDEA
 *.iml
-*.log
-*.orig
+*.iws
+.idea/
+out/
+
+# Vim
 .*.sw?
-.classpath
+
+# OS-specific files
 .directory
 .DS_Store
-.idea/
-.project
-.settings/
-desktop.ini
-nbproject/
-/.metadata/
+[Dd]esktop.ini
+Thumbs.db
+
+# Common log/temporary file extensions
+*~
+*.bak
+*.log
+*.orig
+*.tmp
