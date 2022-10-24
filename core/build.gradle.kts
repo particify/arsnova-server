@@ -53,7 +53,7 @@ dependencies {
   implementation("org.ektorp:org.ektorp:1.5.0")
   implementation("org.ektorp:org.ektorp.spring:1.5.0")
   implementation("org.graalvm.js:js:22.3.0")
-  implementation("org.graalvm.js:js-scriptengine:22.2.0.1")
+  implementation("org.graalvm.js:js-scriptengine:22.3.0")
   implementation("net.particify.arsnova.integrations:connector-client:1.0.2")
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
