@@ -1,8 +1,0 @@
-*.log
-*.orig
-node_modules
-
-# Visual Studio Code
-.vscode/*
-!.vscode/launch.json
-!.vscode/tasks.json
