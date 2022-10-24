@@ -9,7 +9,7 @@ build_project:
       - PROJECT: gateway
       - PROJECT: websocket
   rules:
-    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH || $CI_COMMIT_REF_NAME =~ /^v[0-9]+/ || $CI_COMMIT_REF_NAME =~ /^[0-9]+\.[0-9]+$/
+    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_TAG =~ /^v[0-9]+/ || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_BRANCH =~ /^renovate\/(patch-.*|-x$)/
       changes:
         - "*"
         - ".gitlab/ci/**/*"
@@ -37,8 +37,8 @@ build_dependency_image:
         - ".docker/images/$IMAGE_NAME/*"
       when: manual
       variables:
-        IMAGE_TAG_AFFIX: $CI_COMMIT_REF_NAME
-    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+        IMAGE_TAG_AFFIX: $CI_COMMIT_REF_SLUG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
         - ".docker/images/*"
         - ".docker/images/$IMAGE_NAME/*"
