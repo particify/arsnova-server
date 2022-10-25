@@ -1,4 +1,4 @@
 logging:
   exception-conversion-word: "%wEx{${logging.exception-depth:full}}"
   level:
-    de.thm.arsnova: DEBUG
+    net.particify.arsnova.core: DEBUG

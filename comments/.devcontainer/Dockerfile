@@ -7,4 +7,4 @@ FROM registry.gitlab.com/particify/dev/foss/devcontainers/java-postgresql:0-17-b
 COPY --from=build /app/libs/ /app/libs/
 COPY --from=build /app/ /app/
 
-CMD /run.sh de.thm.arsnova.service.comment.CommentWebService
+CMD /run.sh net.particify.arsnova.comments.CommentsApplication

@@ -28,7 +28,7 @@ The default port this service runs on is `8099` (can be changed in the `applicat
 ----
 |--- doc
 |    |--- <documentation files>
-|--- src/main/kotlin/de/thm/arsnova/service/wsgateway
+|--- src/main/kotlin/net/particify/arsnova/websocket
 |    |--- config
      |    |--- <Spring configuration files>
      |--- controller
@@ -47,6 +47,6 @@ The default port this service runs on is `8099` (can be changed in the `applicat
      |    |--- <classes that aggregate data being used by the controllers>
 |--- src/main/resources
 |    |--- application.yml: default config file
-|--- src/test/kotlin/de/thm/arsnova/service/wsgateway
+|--- src/test/kotlin/net/particify/arsnova/websocket
 |    |--- <test structure>
 ----

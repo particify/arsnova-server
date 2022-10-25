@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "mainClass": "de.thm.arsnova.ArsnovaApplication",
+      "mainClass": "net.particify.arsnova.core.CoreApplication",
       "name": "Run Server Core",
       "preLaunchTask": "Build classes",
       "projectName": "core",
