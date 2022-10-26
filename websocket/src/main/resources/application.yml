@@ -1,0 +1,58 @@
+server:
+  port: 8099
+  use-forward-headers: true
+  forward-headers-strategy: NATIVE
+spring:
+  main:
+    allow-circular-references: true
+logging:
+  level:
+    org.springframework.web.socket.server.support.DefaultHandshakeHandler: OFF
+management:
+  endpoints:
+    web:
+      base-path: /management
+      exposure:
+        include:
+          - health
+          - prometheus
+          - room-stats
+          - websocket-stats
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    web:
+      server:
+        auto-time-requests: true
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+  virtual-host: /
+messaging-prefix: /backend
+stomp:
+  relay:
+    host: localhost
+    port: 61613
+    user: guest
+    password: guest
+  destination-prefix:
+    - /exchange
+    - /topic
+    - /queue
+  user-registry-broadcast: /topic/log-user-registry
+  user-destination-broadcast: /queue/log-unresolved-user
+security:
+  jwt:
+    secret: "secret"
+http-client:
+  auth-service: "http://127.0.0.1:8092"
+gateway:
+  event-rate-limit:
+    # If threshold is exceeded, rate limiting applies
+    threshold: 30
+    duration: 2s
+    tokens-per-timeframe: 4
+    burst-capacity: 4
