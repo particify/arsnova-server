@@ -58,14 +58,13 @@ The default configuration can be adjusted via environment variables:
 |LDAP_USERSEARCHBASE |ou=people |LDAP user search base
 |LDAP_MANAGERUSERDN| cn=arsnova-manager,dc=example,dc=com |LDAP DN of manager user
 |LDAP_MANAGERPASSWORD| |LDAP password of manager user
-|CORE_TAG |master |Docker tag (repository branch) for Core Backend
-|WSGW_TAG |master |Docker tag (repository branch) for WebSocket Gateway
-|HTTPGW_TAG |master |Docker tag (repository branch) for HTTP Gateway
-|AUTH_TAG |master |Docker tag (repository branch) for Auth Service
-|COMMENT_TAG |master |Docker tag (repository branch) for Comment Service
-|WEB_TAG |master |Docker tag (repository branch) for Webclient
-|WEB_LEGACY_TAG |master |Docker tag (repository branch) for Webclient (legacy)
-|FORMATTING_TAG| master |Docker tag (repository branch) for Formatting Service
+|CORE_TAG |3.7.20221021 |Docker tag (repository branch) for Core Backend
+|WSGW_TAG |3.7.20220831 |Docker tag (repository branch) for WebSocket Gateway
+|HTTPGW_TAG |3.7.20220902 |Docker tag (repository branch) for HTTP Gateway
+|AUTH_TAG |3.7.20220902 |Docker tag (repository branch) for Auth Service
+|COMMENT_TAG |3.7.20220831 |Docker tag (repository branch) for Comment Service
+|WEB_TAG |3.7.20221015 |Docker tag (repository branch) for Webclient
+|FORMATTING_TAG|3.7.20220902 |Docker tag (repository branch) for Formatting Service
 |=======
 
 Example: `PORT=8100 WEB_TAG=my-dev-branch docker-compose up`
