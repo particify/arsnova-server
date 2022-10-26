@@ -1,0 +1,45 @@
+server.port=8088
+
+management.endpoints.web.base-path=/management
+management.endpoints.web.exposure.include=health,prometheus
+management.endpoint.health.show-details=always
+management.metrics.web.server.auto-time-requests=true
+
+spring.rabbitmq.host=localhost
+spring.rabbitmq.username=guest
+spring.rabbitmq.password=guest
+spring.rabbitmq.vhost=/
+spring.rabbitmq.port=5672
+
+spring.datasource.url=jdbc:postgresql://localhost:5433/arsnovacomment
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.platform=postgres
+spring.datasource.username=arsnovacomment
+spring.datasource.password=arsnovacomment
+
+# validate: validate the schema, makes no changes to the database.
+# update: update the schema.
+# create: creates the schema, destroying previous data.
+# create-drop: drop the schema at the end of the session.
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.PostgreSQLDialect
+# Disable feature detection by this undocumented parameter.
+# Check the org.hibernate.engine.jdbc.internal.JdbcServiceImpl.configure method for more details.
+spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=false
+
+# Because detection is disabled you have to set correct dialect by hand.
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL9Dialect
+
+security.jwt.secret=secret
+
+flyway.url=${spring.r2dbc.url}
+flyway.user=${spring.r2dbc.username}
+flyway.password=${spring.r2dbc.password}
+spring.flyway.baselineOnMigrate=true
+
+# RabbitMQ DLQ config
+spring.rabbitmq.listener.simple.retry.enabled=true
+spring.rabbitmq.listener.simple.retry.initial-interval=3s
+spring.rabbitmq.listener.simple.retry.max-attempts=3
+spring.rabbitmq.listener.simple.retry.max-interval=10s
+spring.rabbitmq.listener.simple.retry.multiplier=2
