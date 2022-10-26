@@ -1,0 +1,22 @@
+{
+  "name": "Auth Service",
+  "service": "arsnova-auth-service",
+  "dockerComposeFile": [
+    "../../.compose.yaml"
+  ],
+  "workspaceFolder": "/workspace/arsnova-auth-service",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "asciidoctor.asciidoctor-vscode",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig",
+        "fwcd.kotlin",
+        "pivotal.vscode-spring-boot"
+      ]
+    }
+  },
+  "shutdownAction": "none",
+  "remoteUser": "dev",
+  "postAttachCommand": "/post-attach.sh"
+}
