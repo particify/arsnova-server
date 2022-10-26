@@ -1,0 +1,91 @@
+variables:
+  OUTPUT_DIR: target
+  JAR_FILE: $OUTPUT_DIR/arsnova-http-gateway-service-*.jar
+
+stages:
+  - build
+  - test
+  - package
+  - deploy
+
+.maven:
+  image: maven:3-openjdk-17
+  variables:
+    MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss.SSS -Djava.awt.headless=true"
+    MAVEN_CLI_OPTS: "--batch-mode --fail-at-end --show-version"
+  cache:
+    key: maven-repository
+    paths:
+      - .m2/repository
+
+compile:
+  extends: .maven
+  stage: build
+  artifacts:
+    paths:
+      - $OUTPUT_DIR
+  script:
+    - mvn $MAVEN_CLI_OPTS test-compile
+
+ktlint:
+  extends: .maven
+  stage: test
+  needs:
+    - compile
+  script:
+    - mvn $MAVEN_CLI_OPTS antrun:run@ktlint
+
+unit_test:
+  extends: .maven
+  stage: test
+  needs:
+    - compile
+  artifacts:
+    paths:
+      - $OUTPUT_DIR
+    reports:
+      junit: $OUTPUT_DIR/surefire-reports/TEST-*.xml
+  coverage: '/Code coverage: \d+\.\d+/'
+  script:
+    - mvn $MAVEN_CLI_OPTS jacoco:prepare-agent surefire:test jacoco:report
+    - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' "$OUTPUT_DIR/site/jacoco/jacoco.csv"
+
+package:
+  extends: .maven
+  stage: package
+  needs:
+    - compile
+  artifacts:
+    name: package
+    paths:
+      - $JAR_FILE
+  script:
+    - mvn $MAVEN_CLI_OPTS jar:jar spring-boot:repackage
+
+docker_image:
+  extends: .maven
+  stage: deploy
+  needs:
+    - compile
+    - job: unit_test
+      artifacts: false
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: never
+    - if: $CI_COMMIT_REF_NAME == "master"
+      when: on_success
+    - if: $CI_COMMIT_REF_NAME == "latest" || $CI_COMMIT_REF_NAME =~ /^v[0-9]+/ || $CI_COMMIT_REF_NAME =~ /^[0-9]+\.[0-9]+$/
+      when: never
+    - when: manual
+  variables:
+    DOCKER_IMAGE_NAME: $CI_PROJECT_PATH
+  allow_failure: true
+  script:
+    - "echo Creation time for image: `git log -1 --format=%cI`"
+    - mvn $MAVEN_CLI_OPTS jib:build
+      -Djib.to.auth.username="$CI_REGISTRY_USER"
+      -Djib.to.auth.password="$CI_REGISTRY_PASSWORD"
+      -Ddocker.registry="$CI_REGISTRY"
+      -Ddocker.image="$DOCKER_IMAGE_NAME"
+      -Ddocker.tag="$CI_COMMIT_REF_SLUG"
+      -Ddocker.time="`git log -1 --format=%cI`"
