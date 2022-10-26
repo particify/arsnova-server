@@ -1,0 +1,22 @@
+server:
+  port: 8080
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: arsnova
+  password: arsnova
+  virtual-host: /
+spring:
+  datasource:
+    url: jdbc:h2:mem:arsnovaauth;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    platform: h2
+    username: arsnovaauth
+    password: arsnovaauth
+  flyway:
+    user: arsnovaauth
+    password: arsnovaauth
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties.hibernate.dialect: org.hibernate.dialect.H2Dialect

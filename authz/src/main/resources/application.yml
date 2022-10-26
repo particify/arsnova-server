@@ -1,0 +1,46 @@
+server:
+  port: 8092
+management:
+  endpoints:
+    web:
+      base-path: /management
+      exposure:
+        include:
+          - health
+          - prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    web:
+      server:
+        auto-time-requests: true
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+  virtual-host: /
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/arsnovaauth
+    driver-class-name: org.postgresql.Driver
+    platform: postgres
+    username: arsnovaauth
+    password: arsnovaauth
+  flyway:
+    user: arsnovaauth
+    password: arsnovaauth
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+  rabbitmq:
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 3s
+          max-attempts: 3
+          max-interval: 10s
+          multiplier: 2
