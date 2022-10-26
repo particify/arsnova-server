@@ -1,0 +1,57 @@
+= ARSnova HTTP Gateway
+Particify <arsnova@particify.de>
+
+This service provides the HTTP API for clients.
+
+== Get started
+
+It uses the Spring Framework, specifically the Spring Cloud Gateway project:
+
+* https://spring.io/projects/spring-cloud-gateway
+* https://cloud.spring.io/spring-cloud-gateway/reference/html/
+
+== Local development
+
+=== Requirements
+
+* https://maven.apache.org/[Maven]
+* https://openjdk.java.net/projects/jdk/11/[OpenJDK 11]
+
+Run this server with:
+----
+mvn spring-boot:run
+----
+
+The default port this service runs on is `9090` (can be changed in the `application.yml`).
+
+== Project structure
+
+----
+|--- doc
+|    |--- <documentation files>
+|--- src/main/kotlin/de/thm/arsnova/service/httpgateway
+|    |--- config
+     |    |--- GatewayConfig: definition of the API, forwardings and use of filters
+     |    |--- <Spring configuration files>
+     |--- controller
+     |    |--- <API endpoints handled by the gateway itself>
+     |--- exception
+     |    |--- <Implementation of ResponsStatus for exceptions given to clients>
+     |--- filter
+     |    |--- <HTTP filter, used by the GatewayConfig>
+     |--- model
+     |    |--- <domain models>
+     |--- security
+     |    |--- JwtTokenUtil: class to handle de-/coding of JWT
+     |    |--- AuthProcessor: handles authorization logic for e.g. endpoints exposed by the GW itself
+     |    |--- SecurityContextRepository: user management based on the JWT
+     |--- service
+     |    |--- <classes that handle communication with downstream services>
+     |--- view
+     |    |--- <classes that aggregate data being used by the controllers>
+|--- src/main/resources
+|    |--- application.yml: default config file
+|--- src/test/kotlin/de/thm/arsnova/service/httpgateway
+|    |--- view
+     |    |--- <tests for the view classes>
+----
