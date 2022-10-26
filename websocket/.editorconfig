@@ -1,0 +1,17 @@
+# editorconfig.org
+# end_of_line: handled by Git
+# indent_size: let the developer decide as long as tabs are used
+root = true
+
+[*]
+charset = utf-8
+indent_style = tab
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.yml]
+indent_size = 2
+indent_style = space
