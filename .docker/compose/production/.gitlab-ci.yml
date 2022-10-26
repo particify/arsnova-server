@@ -1,0 +1,30 @@
+build_docker_images:
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  only:
+    - master
+  variables:
+    IMAGE1_NAME: nginx-proxy
+    IMAGE1_BASETAG: stable-alpine
+    IMAGE1_VERSION: $IMAGE1_BASETAG
+    IMAGE2_NAME: rabbitmq-stomp
+    IMAGE2_BASETAG: "3.9-alpine"
+    IMAGE2_VERSION: $IMAGE2_BASETAG
+    IMAGE3_NAME: rabbitmq-stomp
+    IMAGE3_BASETAG: "3.9-management-alpine"
+    IMAGE3_VERSION: $IMAGE3_BASETAG
+    IMAGE4_NAME: couchdb
+    IMAGE4_BASETAG: "3.1"
+    IMAGE4_VERSION: "3.1"
+  parallel: 4
+  script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - eval export IMAGE_NAME=\$IMAGE${CI_NODE_INDEX}_NAME
+    - eval export IMAGE_BASETAG=\$IMAGE${CI_NODE_INDEX}_BASETAG
+    - eval export VERSION=\$IMAGE${CI_NODE_INDEX}_VERSION
+    - export KANIKO_CONTEXT=$CI_PROJECT_DIR/$IMAGE_NAME
+    - export KANIKO_DOCKERFILE=$KANIKO_CONTEXT/Dockerfile
+    - export KANIKO_DESTINATION=$CI_REGISTRY/$CI_PROJECT_PATH/$IMAGE_NAME:$VERSION
+    - env | grep -E 'IMAGE|KANIKO'
+    - /kaniko/executor --context "$KANIKO_CONTEXT" --dockerfile "$KANIKO_DOCKERFILE" --destination "$KANIKO_DESTINATION" --build-arg "IMAGE_BASETAG=$IMAGE_BASETAG" --build-arg "VERSION=$VERSION"

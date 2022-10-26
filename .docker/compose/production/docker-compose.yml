@@ -1,0 +1,138 @@
+version: "3"
+services:
+  couchdb:
+    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/couchdb:3.1
+    environment:
+      COUCHDB_USER: arsnova
+      COUCHDB_PASSWORD: arsnova
+    volumes:
+      - couchdb_data:/opt/couchdb/data
+  postgresql_auth:
+    image: postgres:13.3-alpine
+    environment:
+      POSTGRES_DB: arsnovaauth
+      POSTGRES_USER: arsnovaauth
+      POSTGRES_PASSWORD: arsnovaauth
+    volumes:
+      - postgresql_data_auth:/var/lib/postgresql/data
+  postgresql_comment:
+    image: postgres:13.3-alpine
+    environment:
+      POSTGRES_DB: arsnovacomment
+      POSTGRES_USER: arsnovacomment
+      POSTGRES_PASSWORD: arsnovacomment
+    volumes:
+      - postgresql_data_comment:/var/lib/postgresql/data
+  rabbitmq:
+    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/rabbitmq-stomp:3.9-alpine
+    environment:
+      RABBITMQ_NODENAME: rabbit@localhost
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+  arsnova-backend-core:
+    image: registry.gitlab.com/particify/dev/foss/arsnova-backend:$CORE_TAG
+    depends_on:
+      - couchdb
+      - rabbitmq
+    environment:
+      SYSTEM_API_PROXYPATH: /api
+      SYSTEM_SOCKETIO_BINDADDRESS: 0.0.0.0
+      SYSTEM_COUCHDB_HOST: couchdb
+      SYSTEM_COUCHDB_USERNAME: arsnova
+      SYSTEM_COUCHDB_PASSWORD: arsnova
+      SYSTEM_COUCHDB_CREATEDB: "true"
+      SYSTEM_MESSAGE_BROKER_RABBITMQ_ENABLED: "true"
+      SYSTEM_MESSAGE_BROKER_RABBITMQ_HOST: rabbitmq
+      SYSTEM_MESSAGE_BROKER_RABBITMQ_USERNAME: guest
+      SYSTEM_MESSAGE_BROKER_RABBITMQ_PASSWORD: guest
+      SYSTEM_MESSAGE_BROKER_RABBITMQ_VIRTUAL_HOST: /
+      SYSTEM_FORMATTING_SERVICE_HOST_URL: http://arsnova-formatting-service:3000
+      SECURITY_JWT_SECRET: $JWT_SECRET
+      SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
+      UI_SLOGAN: powered by particify.de
+    command: /jetty/start.jar --module=http-forwarded
+  arsnova-http-gateway:
+    image: registry.gitlab.com/particify/dev/foss/arsnova-http-gateway:$HTTPGW_TAG
+    depends_on:
+      - rabbitmq
+      - arsnova-auth-service
+    environment:
+      SERVER_PORT: 8080
+      ROUTING_ENDPOINTS_CORE: http://arsnova-backend-core:8080
+      ROUTING_ENDPOINTS_WS_GATEWAY: http://arsnova-ws-gateway:8080
+      ROUTING_ENDPOINTS_COMMENT_SERVICE: http://arsnova-comment-service:8080
+      ROUTING_ENDPOINTS_ROOMACCESS_SERVICE: http://arsnova-auth-service:8080
+      ROUTING_ENDPOINTS_FORMATTING_SERVICE: http://arsnova-formatting-service:3000
+      HTTP_CLIENT_AUTH_SERVICE: http://arsnova-auth-service:8080
+      HTTP_CLIENT_CORE: http://arsnova-backend-core:8080
+      HTTP_CLIENT_WS_GATEWAY: http://arsnova-ws-gateway:8080
+      HTTP_CLIENT_COMMENT_SERVICE: http://arsnova-comment-service:8080
+      SECURITY_JWT_PUBLIC_SECRET: $JWT_SECRET
+      SECURITY_JWT_INTERNAL_SECRET: $JWT_SECRET
+      SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
+    command: /jetty/start.jar --module=http-forwarded
+  arsnova-ws-gateway:
+    image: registry.gitlab.com/particify/dev/foss/arsnova-ws-gateway:$WSGW_TAG
+    depends_on:
+      - rabbitmq
+      - arsnova-auth-service
+    environment:
+      SERVER_PORT: 8080
+      STOMP_RELAY_HOST: rabbitmq
+      STOMP_RELAY_USER: guest
+      STOMP_RELAY_PASSWORD: guest
+      HTTP_CLIENT_AUTH_SERVICE: http://arsnova-auth-service:8080
+      SECURITY_JWT_SECRET: $JWT_SECRET
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+    command: /jetty/start.jar --module=http-forwarded
+  arsnova-auth-service:
+    image: registry.gitlab.com/particify/dev/foss/arsnova-auth-service:$AUTH_TAG
+    depends_on:
+      - postgresql_auth
+      - rabbitmq
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql_auth:5432/arsnovaauth
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+    command: /jetty/start.jar --module=http-forwarded
+  arsnova-comment-service:
+    image: registry.gitlab.com/particify/dev/foss/arsnova-comment-service:$COMMENT_TAG
+    depends_on:
+      - postgresql_comment
+      - rabbitmq
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql_comment:5432/arsnovacomment
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SECURITY_JWT_SECRET: $JWT_SECRET
+    command: /jetty/start.jar --module=http-forwarded
+  arsnova-web:
+    image: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEB_TAG
+  arsnova-formatting-service:
+    image: registry.gitlab.com/particify/dev/foss/formatting-service:$FORMATTING_TAG
+    environment:
+      SERVER_PORT: 3000
+  arsnova-proxy:
+    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/nginx-proxy:stable-alpine
+    depends_on:
+      - arsnova-backend-core
+      - arsnova-auth-service
+      - arsnova-ws-gateway
+      - arsnova-http-gateway
+      - arsnova-comment-service
+      - arsnova-web
+    environment:
+      ARSNOVA_HOSTNAME: $ARSNOVA_HOSTNAME
+volumes:
+  couchdb_data:
+  postgresql_data_auth:
+  postgresql_data_comment:
+  rabbitmq_data:

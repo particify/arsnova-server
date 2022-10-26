@@ -1,0 +1,33 @@
+version: "3"
+services:
+  couchdb:
+    restart: unless-stopped
+  postgresql_auth:
+    restart: unless-stopped
+  postgresql_comment:
+    restart: unless-stopped
+  rabbitmq:
+    restart: unless-stopped
+  arsnova-backend-core:
+    restart: unless-stopped
+  arsnova-ws-gateway:
+    restart: unless-stopped
+  arsnova-http-gateway:
+    restart: unless-stopped
+  arsnova-auth-service:
+    restart: unless-stopped
+  arsnova-comment-service:
+    restart: unless-stopped
+  arsnova-web:
+    restart: unless-stopped
+  arsnova-formatting-service:
+    restart: unless-stopped
+  arsnova-proxy:
+    ports:
+      - $PORT:80
+      - $HTTPS_PORT:443
+    volumes:
+      - tls-certs:/mnt/tls-certs:ro
+    restart: unless-stopped
+volumes:
+  tls-certs:
