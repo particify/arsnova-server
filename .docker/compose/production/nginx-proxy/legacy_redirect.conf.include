@@ -1,0 +1,4 @@
+# Redirect legacy endpoint to /
+location /mobile/ {
+  return 307 /;
+}
