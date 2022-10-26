@@ -1,0 +1,55 @@
+version: "3"
+services:
+  couchdb:
+    ports:
+      - 127.0.0.1:5984:5984
+  postgresql_auth:
+    ports:
+      - 127.0.0.1:5432:5432
+  postgresql_comment:
+    ports:
+      - 127.0.0.1:5433:5432
+  rabbitmq:
+    #build: ./rabbitmq-stomp
+    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/rabbitmq-stomp:3.9-management-alpine
+    ports:
+      - 127.0.0.1:5672:5672
+      - 127.0.0.1:15672:15672
+      - 127.0.0.1:61613:61613
+  arsnova-backend-core:
+    ports:
+      - 127.0.0.1:8080:8080
+      - 127.0.0.1:8090:8090
+  arsnova-ws-gateway:
+    ports:
+      - 127.0.0.1:8099:8080
+  arsnova-http-gateway:
+    ports:
+      - 127.0.0.1:9090:8080
+    environment:
+      GATEWAY_RATE_LIMIT_QUERY_TOKENS_PER_TIMEFRAME: 100000
+      GATEWAY_RATE_LIMIT_QUERY_BURST_CAPACITY: 100000
+      GATEWAY_RATE_LIMIT_COMMAND_TOKENS_PER_TIMEFRAME: 100000
+      GATEWAY_RATE_LIMIT_COMMAND_BURST_CAPACITY: 100000
+  arsnova-auth-service:
+    ports:
+      - 127.0.0.1:8092:8080
+  arsnova-comment-service:
+    ports:
+      - 127.0.0.1:8088:8080
+  arsnova-web:
+    ports:
+      - 127.0.0.1:8081:80
+  arsnova-formatting-service:
+    ports:
+      - 127.0.0.1:3020:3000
+  arsnova-proxy:
+    #image: nginx:stable
+    ports:
+      - 127.0.0.1:$PORT:80
+    environment:
+      NGINX_LISTEN: "80"
+      NGINX_TLS_INCLUDE: "#include"
+      ARSNOVA_HOSTNAME: localhost
+    volumes:
+      - ./nginx-proxy/templates:/etc/nginx/templates
