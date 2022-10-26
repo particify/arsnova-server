@@ -1,0 +1,52 @@
+= ARSnova WebSocket Gateway
+Particify <arsnova@particify.de>
+
+This service provides the WS endpoint for clients.
+It also provides some HTTP endpoints to query WS informations.
+
+== Get started
+
+It uses the Spring Boot framework:
+
+* https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/
+
+== Local development
+
+=== Requirements
+
+* https://maven.apache.org/[Maven]
+
+Run this server with:
+----
+mvn spring-boot:run
+----
+
+The default port this service runs on is `8099` (can be changed in the `application.yml`).
+
+== Project structure
+
+----
+|--- doc
+|    |--- <documentation files>
+|--- src/main/kotlin/de/thm/arsnova/service/wsgateway
+|    |--- config
+     |    |--- <Spring configuration files>
+     |--- controller
+     |    |--- <API endpoints handled by the gateway itself>
+     |--- event
+     |    |--- <WebSocket events published by this gateway>
+     |--- handler
+     |    |--- <Classes providing functionality outside the usual controller/service scope>
+     |--- model
+     |    |--- <domain models>
+     |--- security
+     |    |--- JwtTokenUtil: class to handle de-/coding of JWT
+     |--- service
+     |    |--- <classes that handle communication with downstream services>
+     |--- view
+     |    |--- <classes that aggregate data being used by the controllers>
+|--- src/main/resources
+|    |--- application.yml: default config file
+|--- src/test/kotlin/de/thm/arsnova/service/wsgateway
+|    |--- <test structure>
+----
