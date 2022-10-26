@@ -1,0 +1,11 @@
+= Particify Formatting Service for ARSnova
+
+This service provides server-side rendering of Markdown and LaTeX.
+
+== Usage
+
+Start the Node.js-based server application with the following command:
+
+    yarn start
+
+The service is accessible at port 3020.

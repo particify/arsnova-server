@@ -1,0 +1,27 @@
+{
+  "name": "formatting-service",
+  "version": "1.0.0",
+  "description": "Particify/ARSnova service which handles Markdown and LaTeX formatting.",
+  "main": "lib/index.js",
+  "author": "Particify - Gerhardt, Mauß, Käsler GbR",
+  "private": true,
+  "scripts": {
+    "start": "node lib/index.js"
+  },
+  "dependencies": {
+    "@iktakahiro/markdown-it-katex": "4.0.1",
+    "express": "4.18.1",
+    "markdown-it": "13.0.1",
+    "markdown-it-link-attributes": "4.0.1",
+    "markdown-it-prism": "2.3.0"
+  },
+  "devDependencies": {
+    "eslint": "8.23.0",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-promise": "6.0.1"
+  },
+  "resolutions": {
+    "katex": "^0.16.0"
+  }
+}
