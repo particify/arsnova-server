@@ -20,8 +20,6 @@ services:
     restart: unless-stopped
   arsnova-web:
     restart: unless-stopped
-  arsnova-web-legacy:
-    restart: unless-stopped
   arsnova-formatting-service:
     restart: unless-stopped
   arsnova-proxy:
