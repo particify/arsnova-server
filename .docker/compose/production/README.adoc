@@ -24,7 +24,7 @@ This repository contains files to integrate all of the Particify services and se
 === Preparations
 
 . Clone this repository.
-. Inside the repositories root directory run `./set-env.sh <env>`. env can be `prod` or `dev`.
+. Inside the repositories root directory run `./set-env.sh prod`.
 
 === Running
 
