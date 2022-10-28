@@ -1,14 +1,14 @@
 version: "3"
 services:
   couchdb:
-    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/couchdb:3.1
+    image: particify/couchdb:3.2
     environment:
       COUCHDB_USER: arsnova
       COUCHDB_PASSWORD: arsnova
     volumes:
       - couchdb_data:/opt/couchdb/data
   postgresql_auth:
-    image: postgres:13.3-alpine
+    image: postgres:13.8-alpine
     environment:
       POSTGRES_DB: arsnovaauth
       POSTGRES_USER: arsnovaauth
@@ -16,7 +16,7 @@ services:
     volumes:
       - postgresql_data_auth:/var/lib/postgresql/data
   postgresql_comment:
-    image: postgres:13.3-alpine
+    image: postgres:13.8-alpine
     environment:
       POSTGRES_DB: arsnovacomment
       POSTGRES_USER: arsnovacomment
@@ -24,13 +24,13 @@ services:
     volumes:
       - postgresql_data_comment:/var/lib/postgresql/data
   rabbitmq:
-    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/rabbitmq-stomp:3.9-alpine
+    image: particify/rabbitmq-stomp:3.11-alpine
     environment:
       RABBITMQ_NODENAME: rabbit@localhost
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
   arsnova-backend-core:
-    image: registry.gitlab.com/particify/dev/foss/arsnova-backend:$CORE_TAG
+    image: particify/arsnova-server-core:$CORE_TAG
     depends_on:
       - couchdb
       - rabbitmq
@@ -52,7 +52,7 @@ services:
       UI_SLOGAN: powered by particify.de
     command: --module=http-forwarded
   arsnova-http-gateway:
-    image: registry.gitlab.com/particify/dev/foss/arsnova-http-gateway:$HTTPGW_TAG
+    image: particify/arsnova-server-gateway:$HTTPGW_TAG
     depends_on:
       - rabbitmq
       - arsnova-auth-service
@@ -72,7 +72,7 @@ services:
       SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
     command: /jetty/start.jar --module=http-forwarded
   arsnova-ws-gateway:
-    image: registry.gitlab.com/particify/dev/foss/arsnova-ws-gateway:$WSGW_TAG
+    image: particify/arsnova-server-websocket:$WSGW_TAG
     depends_on:
       - rabbitmq
       - arsnova-auth-service
@@ -88,7 +88,7 @@ services:
       RABBITMQ_PASSWORD: guest
     command: /jetty/start.jar --module=http-forwarded
   arsnova-auth-service:
-    image: registry.gitlab.com/particify/dev/foss/arsnova-auth-service:$AUTH_TAG
+    image: particify/arsnova-server-authz:$AUTH_TAG
     depends_on:
       - postgresql_auth
       - rabbitmq
@@ -101,7 +101,7 @@ services:
       RABBITMQ_PASSWORD: guest
     command: /jetty/start.jar --module=http-forwarded
   arsnova-comment-service:
-    image: registry.gitlab.com/particify/dev/foss/arsnova-comment-service:$COMMENT_TAG
+    image: particify/arsnova-server-comments:$COMMENT_TAG
     depends_on:
       - postgresql_comment
       - rabbitmq
@@ -115,13 +115,13 @@ services:
       SECURITY_JWT_SECRET: $JWT_SECRET
     command: /jetty/start.jar --module=http-forwarded
   arsnova-web:
-    image: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEB_TAG
+    image: particify/arsnova-webclient:$WEB_TAG
   arsnova-formatting-service:
-    image: registry.gitlab.com/particify/dev/foss/formatting-service:$FORMATTING_TAG
+    image: particify/arsnova-server-formatting:$FORMATTING_TAG
     environment:
       SERVER_PORT: 3000
   arsnova-proxy:
-    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/nginx-proxy:stable-alpine
+    image: particify/arsnova-proxy:3
     depends_on:
       - arsnova-backend-core
       - arsnova-auth-service
