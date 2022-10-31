@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   jacoco
-  id("com.google.cloud.tools.jib") version "3.3.0"
+  id("com.google.cloud.tools.jib") version "3.3.1"
   id("io.spring.dependency-management") version "1.1.0"
   id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
   id("org.springframework.boot") version "2.7.5"
