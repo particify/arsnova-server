@@ -7,4 +7,4 @@ FROM registry.gitlab.com/particify/dev/foss/devcontainers/java:0-17-bullseye
 COPY --from=build /app/libs/ /app/libs/
 COPY --from=build /app/ /app/
 
-CMD /run.sh de.thm.arsnova.service.httpgateway.ArsnovaHttpGatewayServiceApplicationKt
+CMD /run.sh net.particify.arsnova.gateway.GatewayApplicationKt

@@ -29,7 +29,7 @@ The default port this service runs on is `9090` (can be changed in the `applicat
 ----
 |--- doc
 |    |--- <documentation files>
-|--- src/main/kotlin/de/thm/arsnova/service/httpgateway
+|--- src/main/kotlin/net/particify/arsnova/gateway
 |    |--- config
      |    |--- GatewayConfig: definition of the API, forwardings and use of filters
      |    |--- <Spring configuration files>
@@ -51,7 +51,7 @@ The default port this service runs on is `9090` (can be changed in the `applicat
      |    |--- <classes that aggregate data being used by the controllers>
 |--- src/main/resources
 |    |--- application.yml: default config file
-|--- src/test/kotlin/de/thm/arsnova/service/httpgateway
+|--- src/test/kotlin/dnet/particify/arsnova/gateway
 |    |--- view
      |    |--- <tests for the view classes>
 ----

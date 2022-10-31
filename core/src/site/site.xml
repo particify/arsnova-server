@@ -59,7 +59,7 @@
     <menu name="Further Information">
       <item name="Source Repository" href="scm.html" />
       <item name="Issue Tracking" href="issue-management.html" />
-      <item name="SonarQube Metrics" href="https://scm.thm.de/sonar/dashboard/index/de.thm.arsnova:arsnova-backend" />
+      <item name="SonarQube Metrics" href="https://scm.thm.de/sonar/dashboard/index/net.particify.arsnova.core:arsnova-backend" />
       <item name="Continuous Integration" href="ci-management.html" />
     </menu>
   </body>
