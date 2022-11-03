@@ -89,6 +89,24 @@ pull_devcontainer_base_images() {
   done
 }
 
+seed_gradle_ro_cache() {
+  echo Seeding Gradle read-only dependency cache...
+  GRADLE_TAG=`cat $ROOT_DIR/.gitlab/ci/gradle.yml | grep -m 1 -E "image: [\"']?gradle:" | cut -d : -f 3 | tr -d "\"'"`
+  docker run --rm \
+    -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache:/home/gradle/.gradle-ro-dep-cache" \
+    busybox \
+    sh -c "chown `id -u`:`id -g` /home/gradle/.gradle-ro-dep-cache"
+  docker run --rm -u gradle \
+    -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache:/home/gradle/.gradle-ro-dep-cache" \
+    -v "$ROOT_DIR:/home/gradle/project" \
+    -w /home/gradle/project \
+    -e GRADLE_RO_DEP_CACHE=/home/gradle/.gradle-ro-dep-cache \
+    -e GRADLE_OPTS=-Dorg.gradle.internal.launcher.welcomeMessageEnabled=false \
+    -it \
+    "gradle:$GRADLE_TAG" \
+    sh -c 'gradle testClasses --continue --no-daemon --console=plain && cp -a /home/gradle/.gradle/caches/modules-2 /home/gradle/.gradle-ro-dep-cache/ && rm -f /home/gradle/.gradle-ro-dep-cache/modules-2/modules-2.lock /home/gradle/.gradle-ro-dep-cache/modules-2/gc.properties'
+}
+
 migrate_postgresql_data() {
   set -e
   postgresql_migration_image=tianon/postgres-upgrade
@@ -193,6 +211,7 @@ case $COMMAND in
       $BASE_COMPOSE_FILE_ARGS \
       pull $@
     build $@
+    seed_gradle_ro_cache
     migrate_postgresql_data
     ;;
   update-config)
