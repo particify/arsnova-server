@@ -15,6 +15,7 @@ services:
     volumes:
       - ./.git:/workspace/.git
       - ../../../webclient:/workspace/webclient
+      - vscode-extensions-webclient:/home/dev/.vscode-server/extensions
   arsnova-server-core:
     image: devcontainer-arsnova-server-core:$CORE_TAG
     build:
@@ -35,6 +36,7 @@ services:
       - gradle-cache-core:/home/dev/.gradle/caches
       - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
       - gradle-wrapper:/home/dev/.gradle/wrapper
+      - vscode-extensions-core:/home/dev/.vscode-server/extensions
   arsnova-server-gateway:
     image: devcontainer-arsnova-server-gateway:$GATEWAY_TAG
     build:
@@ -53,6 +55,7 @@ services:
       - gradle-cache-gateway:/home/dev/.gradle/caches
       - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
       - gradle-wrapper:/home/dev/.gradle/wrapper
+      - vscode-extensions-gateway:/home/dev/.vscode-server/extensions
   arsnova-server-websocket:
     image: devcontainer-arsnova-server-websocket:$WEBSOCKET_TAG
     build:
@@ -71,6 +74,7 @@ services:
       - gradle-cache-websocket:/home/dev/.gradle/caches
       - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
       - gradle-wrapper:/home/dev/.gradle/wrapper
+      - vscode-extensions-websocket:/home/dev/.vscode-server/extensions
   arsnova-server-authz:
     image: devcontainer-arsnova-server-authz:$AUTHZ_TAG
     build:
@@ -93,6 +97,7 @@ services:
       - gradle-cache-authz:/home/dev/.gradle/caches
       - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
       - gradle-wrapper:/home/dev/.gradle/wrapper
+      - vscode-extensions-authz:/home/dev/.vscode-server/extensions
   arsnova-server-comments:
     image: devcontainer-arsnova-server-comments:$COMMENTS_TAG
     build:
@@ -115,6 +120,7 @@ services:
       - gradle-cache-comments:/home/dev/.gradle/caches
       - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
       - gradle-wrapper:/home/dev/.gradle/wrapper
+      - vscode-extensions-comments:/home/dev/.vscode-server/extensions
   arsnova-server-formatting:
     image: devcontainer-arsnova-server-formatting:$FORMATTING_TAG
     build:
@@ -125,6 +131,7 @@ services:
       PORT: 3000
     volumes:
       - ../../..:/workspace
+      - vscode-extensions-formatting:/home/dev/.vscode-server/extensions
 
 volumes:
   gradle-cache-authz:
@@ -139,3 +146,10 @@ volumes:
   gradle-workspace-gateway:
   gradle-workspace-websocket:
   gradle-wrapper:
+  vscode-extensions-authz:
+  vscode-extensions-comments:
+  vscode-extensions-core:
+  vscode-extensions-formatting:
+  vscode-extensions-gateway:
+  vscode-extensions-webclient:
+  vscode-extensions-websocket:
