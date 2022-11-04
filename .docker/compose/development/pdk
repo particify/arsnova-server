@@ -90,6 +90,39 @@ pull_devcontainer_base_images() {
   done
 }
 
+migrate_postgresql_data() {
+  set -e
+  postgresql_migration_image=tianon/postgres-upgrade
+  postgresql_path=/var/lib/postgresql
+  postgresql_volume_prefix="${COMPOSE_PROJECT_NAME}_postgresql_data_"
+  postgresql_target_version=$(echo $POSTGRESQL_TAG | cut -d . -f 1)
+  if [ -z "$postgresql_target_version" ]; then
+    return
+  fi
+  for postgresql_volume in $(docker volume ls -q | grep $postgresql_volume_prefix); do
+    postgresql_version=$(docker run --rm -v "$postgresql_volume:/mnt" busybox cat /mnt/PG_VERSION)
+    if [ -z "$postgresql_version" ]; then
+      echo "Failed to detect current PostgreSQL version for volume $postgresql_volume."
+      exit 1
+    fi
+    if [ "$postgresql_version" = "$postgresql_target_version" ]; then
+      continue
+    fi
+    docker compose -f .compose.yaml down
+    postgresql_user=arsnova${postgresql_volume#"$postgresql_volume_prefix"}
+    echo "Running migration for volume $postgresql_volume..."
+    docker compose pull "$postgresql_migration_image:$postgresql_version-to-$postgresql_target_version"
+    echo Adjusting directory layout for migration...
+    docker run --rm -v $postgresql_volume:$postgresql_path -w $postgresql_path alpine sh -c "export src=\`echo *\` && mkdir -p $postgresql_version/data && echo mv \$src $postgresql_version/data && mv \$src $postgresql_version/data && mkdir -p $postgresql_target_version/data"
+    echo Running migration...
+    docker run --rm -v $postgresql_volume:$postgresql_path -e PGUSER="$postgresql_user" -e POSTGRES_INITDB_ARGS="-U $postgresql_user" "$postgresql_migration_image:$postgresql_version-to-$postgresql_target_version" --link
+    echo Restoring directory layout...
+    docker run --rm -v $postgresql_volume:$postgresql_path -w $postgresql_path alpine sh -c "mv $postgresql_target_version/data/* ./ && rm -rf $postgresql_version $postgresql_target_version && printf \"\\nhost all all all md5\\n\" >> pg_hba.conf"
+    echo "Migration for volume $postgresql_volume completed."
+  done
+  set +e
+}
+
 if ! command -v git &> /dev/null; then
   echo ERROR: Git is not installed.
   exit 1
@@ -161,6 +194,7 @@ case $COMMAND in
       $BASE_COMPOSE_FILE_ARGS \
       pull $@
     build $@
+    migrate_postgresql_data
     ;;
   update-config)
     update_config
