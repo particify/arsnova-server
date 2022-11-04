@@ -69,6 +69,7 @@ build() {
   if [ ! -f .compose.yaml ]; then
     update_config
   fi
+  pull_devcontainer_base_images
   echo Building Devcontainers...
   shift 1
   docker compose -f .compose.yaml build $@
@@ -185,7 +186,6 @@ case $COMMAND in
     ;;
   build|b)
     update_config
-    pull_devcontainer_base_images
     build
     ;;
   logs|l)
