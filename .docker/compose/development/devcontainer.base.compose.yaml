@@ -28,9 +28,13 @@ services:
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
       SECURITY_CORSORIGINS_0: http://localhost
       SECURITY_CORSORIGINS_1: http://localhost:4200
+      GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
     volumes:
       - ../../..:/workspace
-      - gradle-dependency-cache:/home/dev/.gradle/caches/modules-2
+      - gradle-workspace-core:/workspace/.gradle
+      - gradle-cache-core:/home/dev/.gradle/caches
+      - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
+      - gradle-wrapper:/home/dev/.gradle/wrapper
   arsnova-server-gateway:
     image: devcontainer-arsnova-server-gateway:$GATEWAY_TAG
     build:
@@ -42,9 +46,13 @@ services:
     environment:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
+      GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
     volumes:
       - ../../..:/workspace
-      - gradle-dependency-cache:/home/dev/.gradle/caches/modules-2
+      - gradle-workspace-gateway:/workspace/.gradle
+      - gradle-cache-gateway:/home/dev/.gradle/caches
+      - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
+      - gradle-wrapper:/home/dev/.gradle/wrapper
   arsnova-server-websocket:
     image: devcontainer-arsnova-server-websocket:$WEBSOCKET_TAG
     build:
@@ -56,9 +64,13 @@ services:
     environment:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
+      GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
     volumes:
       - ../../..:/workspace
-      - gradle-dependency-cache:/home/dev/.gradle/caches/modules-2
+      - gradle-workspace-websocket:/workspace/.gradle
+      - gradle-cache-websocket:/home/dev/.gradle/caches
+      - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
+      - gradle-wrapper:/home/dev/.gradle/wrapper
   arsnova-server-authz:
     image: devcontainer-arsnova-server-authz:$AUTHZ_TAG
     build:
@@ -70,13 +82,17 @@ services:
     environment:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
+      GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
       PGHOST: postgresql-authz
       PGDATABASE: arsnovaauth
       PGUSER: arsnovaauth
       PGPASSWORD: arsnovaauth
     volumes:
       - ../../..:/workspace
-      - gradle-dependency-cache:/home/dev/.gradle/caches/modules-2
+      - gradle-workspace-authz:/workspace/.gradle
+      - gradle-cache-authz:/home/dev/.gradle/caches
+      - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
+      - gradle-wrapper:/home/dev/.gradle/wrapper
   arsnova-server-comments:
     image: devcontainer-arsnova-server-comments:$COMMENTS_TAG
     build:
@@ -88,13 +104,17 @@ services:
     environment:
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
+      GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
       PGHOST: postgresql-comments
       PGDATABASE: arsnovacomment
       PGUSER: arsnovacomment
       PGPASSWORD: arsnovacomment
     volumes:
       - ../../..:/workspace
-      - gradle-dependency-cache:/home/dev/.gradle/caches/modules-2
+      - gradle-workspace-comments:/workspace/.gradle
+      - gradle-cache-comments:/home/dev/.gradle/caches
+      - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
+      - gradle-wrapper:/home/dev/.gradle/wrapper
   arsnova-server-formatting:
     image: devcontainer-arsnova-server-formatting:$FORMATTING_TAG
     build:
@@ -107,4 +127,15 @@ services:
       - ../../..:/workspace
 
 volumes:
-  gradle-dependency-cache:
+  gradle-cache-authz:
+  gradle-cache-comments:
+  gradle-cache-core:
+  gradle-cache-gateway:
+  gradle-cache-websocket:
+  gradle-ro-dep-cache:
+  gradle-workspace-authz:
+  gradle-workspace-comments:
+  gradle-workspace-core:
+  gradle-workspace-gateway:
+  gradle-workspace-websocket:
+  gradle-wrapper:
