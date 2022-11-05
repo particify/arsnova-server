@@ -1,10 +1,10 @@
 package net.particify.arsnova.comments.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 import java.util.Objects;
 import java.util.Set;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Transient;
 
 @Entity
 public class Archive {

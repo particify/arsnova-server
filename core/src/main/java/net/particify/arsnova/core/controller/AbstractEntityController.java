@@ -18,6 +18,9 @@
 
 package net.particify.arsnova.core.controller;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -27,9 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.naming.OperationNotSupportedException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -210,7 +210,8 @@ public abstract class AbstractEntityController<E extends Entity> {
         (String) httpServletRequest.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)),
         StandardCharsets.UTF_8);
     final String targetPath = String.format(
-        "%s/%s%s", getMapping(), resolveAlias(alias), subPath != null ? "/" + subPath : "");
+        "%s/%s%s", getMapping(), resolveAlias(alias), !subPath.isEmpty() ? "/" + subPath : "");
+    logger.debug("Forwarding, subpath {}, getMapping {}, resolveAlias {}", subPath, getMapping(), resolveAlias(alias));
     logger.debug("Forwarding alias request to {}", targetPath);
     httpServletRequest.getRequestDispatcher(targetPath)
         .forward(httpServletRequest, httpServletResponse);

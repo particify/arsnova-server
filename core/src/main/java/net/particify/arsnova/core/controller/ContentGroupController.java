@@ -1,8 +1,8 @@
 package net.particify.arsnova.core.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,7 +25,7 @@ import net.particify.arsnova.core.service.ContentGroupService;
 @EntityRequestMapping(ContentGroupController.REQUEST_MAPPING)
 public class ContentGroupController extends AbstractEntityController<ContentGroup> {
   protected static final String REQUEST_MAPPING = "/contentgroup";
-  private static final String ADD_CONTENT_MAPPING = "/-/content";
+  private static final String ADD_CONTENT_MAPPING = "/-/content/";
   private static final String REMOVE_CONTENT_MAPPING = DEFAULT_ID_MAPPING + "/content/{contentId}";
   private static final String IMPORT_MAPPING = DEFAULT_ID_MAPPING + "/import";
   private static final String ANSWER_STATISTICS_USER_SUMMARY_MAPPING = DEFAULT_ID_MAPPING + "/stats/user/{userId}";

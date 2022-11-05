@@ -1,8 +1,8 @@
 package net.particify.arsnova.comments.service.persistence;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Set;
-import javax.transaction.Transactional;
 import org.springframework.data.repository.CrudRepository;
 
 import net.particify.arsnova.comments.model.Comment;

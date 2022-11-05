@@ -19,8 +19,8 @@
 package net.particify.arsnova.core.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.validation.constraints.Size;
 import java.util.Date;
-import javax.validation.constraints.Size;
 import org.springframework.core.style.ToStringCreator;
 
 import net.particify.arsnova.core.model.serialization.View;

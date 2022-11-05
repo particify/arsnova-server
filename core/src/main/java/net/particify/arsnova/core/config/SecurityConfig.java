@@ -18,13 +18,13 @@
 
 package net.particify.arsnova.core.config;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletResponse;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
@@ -83,11 +83,8 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.header.writers.HstsHeaderWriter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
@@ -216,7 +213,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain statelessFilterChain(final HttpSecurity http) throws Exception {
       super.configureFilterChain(http);
-      http.antMatcher("/**");
+      http.securityMatcher("/**");
       http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
       return http.build();
@@ -240,10 +237,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain managementFilterChain(final HttpSecurity http) throws Exception {
       super.configureFilterChain(http);
-      http.antMatcher(managementPath + "/**");
-      http.authorizeRequests()
-          .antMatchers(managementPath + "/health", managementPath + "/info").permitAll()
-          .antMatchers(
+      http.securityMatcher(managementPath + "/**");
+      http.authorizeHttpRequests()
+          .requestMatchers(managementPath + "/health", managementPath + "/info").permitAll()
+          .requestMatchers(
             managementPath + "/health/**",
             managementPath + "/metrics",
             managementPath + "/metrics/**",

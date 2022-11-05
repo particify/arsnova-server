@@ -40,10 +40,10 @@ class AddMembershipFilter(
         .filter { e ->
           e.response.statusCode != null &&
             e.response.statusCode!!.is2xxSuccessful &&
-            e.request.method != null
+            e.request.method !== null
         }
         .filter { e ->
-          e.request.method == HttpMethod.POST
+          e.request.method === HttpMethod.POST
         }
         .flatMap { e ->
           val roomId = e.response.headers.getFirst(ENTITY_ID_HEADER)!!

@@ -18,7 +18,7 @@
 
 package net.particify.arsnova.core.service;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Allows access to the {@link HttpServletResponse} outside of Controllers.

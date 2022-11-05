@@ -20,11 +20,11 @@ package net.particify.arsnova.core.persistence.couchdb.migrations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
 import org.ektorp.ViewQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

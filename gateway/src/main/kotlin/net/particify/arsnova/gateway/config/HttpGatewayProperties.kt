@@ -1,11 +1,9 @@
 package net.particify.arsnova.gateway.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 import java.time.Duration
 
 @ConfigurationProperties
-@ConstructorBinding
 data class HttpGatewayProperties(
   val security: Security,
   val httpClient: HttpClient,

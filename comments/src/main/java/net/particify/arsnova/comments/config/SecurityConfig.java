@@ -31,14 +31,13 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-    // We don't need CSRF for this example
     httpSecurity.csrf().disable();
-    //httpSecurity.authorizeRequests().anyRequest().authenticated();
     httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     // Add a filter to validate the tokens with every request
     httpSecurity.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-    httpSecurity.authorizeRequests()
-        .antMatchers(managementPath + "/**").hasAnyRole("ADMIN", "MONITORING");
+    httpSecurity.authorizeHttpRequests()
+        .requestMatchers(managementPath + "/**").hasAnyRole("ADMIN", "MONITORING")
+        .anyRequest().authenticated();
 
       return httpSecurity.build();
   }

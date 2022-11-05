@@ -19,11 +19,11 @@
 package net.particify.arsnova.core.persistence.couchdb.migrations;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.annotation.PostConstruct;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
 import org.ektorp.ViewQuery;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;

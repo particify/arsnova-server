@@ -1,10 +1,10 @@
 package net.particify.arsnova.comments.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import java.util.Date;
 import java.util.Objects;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
 
 @Entity
 @IdClass(BonusTokenPK.class)

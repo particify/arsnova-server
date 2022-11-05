@@ -2,9 +2,9 @@ package net.particify.arsnova.core.persistence.couchdb.migrations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.PostConstruct;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 

@@ -65,13 +65,13 @@ class UpdateRoomAccessFilter(
 
       Mono.just(exchange.request)
         .filter { r: ServerHttpRequest ->
-          r.method == HttpMethod.POST ||
-            r.method == HttpMethod.PUT ||
-            r.method == HttpMethod.PATCH ||
-            r.method == HttpMethod.DELETE
+          r.method === HttpMethod.POST ||
+            r.method === HttpMethod.PUT ||
+            r.method === HttpMethod.PATCH ||
+            r.method === HttpMethod.DELETE
         }
         .map {
-          if (path.matches(ROOM_MODERATOR_REGEX) && method == HttpMethod.PUT) {
+          if (path.matches(ROOM_MODERATOR_REGEX) && method === HttpMethod.PUT) {
             val moderatorId = path.substringAfter("/moderator/")
             if (moderatorId == userId) {
               throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot change own access level")
@@ -85,7 +85,7 @@ class UpdateRoomAccessFilter(
                 AccessLevel.EXECUTIVE_MODERATOR
               )
             )
-          } else if (path.matches(ROOM_MODERATOR_REGEX) && method == HttpMethod.DELETE) {
+          } else if (path.matches(ROOM_MODERATOR_REGEX) && method === HttpMethod.DELETE) {
             val moderatorId = path.substringAfter("/moderator/")
             if (moderatorId == userId) {
               throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot change own access level")
@@ -102,7 +102,7 @@ class UpdateRoomAccessFilter(
           } else if (
             path.matches(ROOM_TRANSFER_REGEX) &&
             request.queryParams.containsKey(ROOM_TRANSFER_BY_ID_QUERY_PARAMETER) &&
-            method == HttpMethod.POST
+            method === HttpMethod.POST
           ) {
             val newOwnerId = request.queryParams[ROOM_TRANSFER_BY_ID_QUERY_PARAMETER]!!.first()
             listOf(
@@ -117,7 +117,7 @@ class UpdateRoomAccessFilter(
           } else if (
             path.matches(ROOM_TRANSFER_REGEX) &&
             request.queryParams.containsKey(ROOM_TRANSFER_BY_TOKEN_QUERY_PARAMETER) &&
-            method == HttpMethod.POST
+            method === HttpMethod.POST
           ) {
             val newOwnerToken = request.queryParams[ROOM_TRANSFER_BY_TOKEN_QUERY_PARAMETER]!!.first()
             val newOwnerId = jwtTokenUtil.getUserIdFromPublicToken(newOwnerToken)

@@ -18,7 +18,7 @@
 
 package net.particify.arsnova.core.config;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 import org.pac4j.core.config.Config;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.TwitterClient;

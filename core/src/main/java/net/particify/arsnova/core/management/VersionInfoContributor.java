@@ -18,10 +18,10 @@
 
 package net.particify.arsnova.core.management;
 
+import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import javax.annotation.Resource;
 import org.springframework.boot.actuate.info.Info;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.stereotype.Component;

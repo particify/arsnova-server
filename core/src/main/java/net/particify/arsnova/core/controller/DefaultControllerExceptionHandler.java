@@ -18,8 +18,8 @@
 
 package net.particify.arsnova.core.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
 import org.slf4j.event.Level;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpStatus;

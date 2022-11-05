@@ -48,7 +48,7 @@ dependencies {
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.github.ben-manes.caffeine:caffeine")
   implementation("com.auth0:java-jwt:4.2.1")
-  implementation("org.pac4j:pac4j-javaee:5.6.1")
+  implementation("org.pac4j:pac4j-jakartaee:5.6.1")
   implementation("org.pac4j:pac4j-oauth:5.6.1")
   implementation("org.pac4j:pac4j-oidc:5.6.1")
   implementation("org.pac4j:pac4j-saml:5.6.1")
