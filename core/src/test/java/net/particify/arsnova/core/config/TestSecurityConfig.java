@@ -36,7 +36,6 @@ import org.springframework.security.cas.authentication.CasAuthenticationProvider
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.cas.web.CasAuthenticationFilter;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
@@ -56,9 +55,6 @@ public class TestSecurityConfig extends SecurityConfig {
       final ServletContext servletContext) {
     super(systemProperties, authenticationProviderProperties, servletContext);
   }
-
-  @Override
-  protected void configure(final HttpSecurity http) {}
 
   @Override
   @Bean

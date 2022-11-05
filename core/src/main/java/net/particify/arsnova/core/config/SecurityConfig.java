@@ -57,17 +57,18 @@ import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.access.intercept.RunAsManager;
 import org.springframework.security.access.intercept.RunAsManagerImpl;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.cas.web.CasAuthenticationFilter;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
@@ -84,6 +85,7 @@ import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -116,7 +118,7 @@ import net.particify.arsnova.core.security.pac4j.SsoCallbackFilter;
     AuthenticationProviderProperties.class,
     SecurityProperties.class})
 @Profile("!test")
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig {
   public static final String AUTH_CALLBACK_PATH = "/auth/callback";
   public static final String OAUTH_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/oauth";
   public static final String SAML_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/saml";
@@ -182,7 +184,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     this.ssoAuthenticationProvider = ssoAuthenticationProvider;
   }
 
-  public class HttpSecurityConfig extends WebSecurityConfigurerAdapter {
+  public class HttpSecurityConfig {
     protected AuthenticationEntryPoint authenticationEntryPoint;
     protected AccessDeniedHandler accessDeniedHandler;
 
@@ -192,8 +194,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       this.accessDeniedHandler = accessDeniedHandler;
     }
 
-    @Override
-    protected void configure(final HttpSecurity http) throws Exception {
+    protected HttpSecurity configureFilterChain(final HttpSecurity http) throws Exception {
       http.exceptionHandling()
           .authenticationEntryPoint(authenticationEntryPoint)
           .accessDeniedHandler(accessDeniedHandler);
@@ -212,6 +213,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
           || providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
         http.addFilterAfter(oauthCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
       }
+
+      return http;
     }
   }
 
@@ -225,11 +228,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       super(authenticationEntryPoint, accessDeniedHandler);
     }
 
-    @Override
-    protected void configure(final HttpSecurity http) throws Exception {
-      super.configure(http);
+    @Bean
+    public SecurityFilterChain statelessFilterChain(final HttpSecurity http) throws Exception {
+      super.configureFilterChain(http);
       http.antMatcher("/**");
       http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+      return http.build();
     }
   }
 
@@ -247,9 +252,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       this.managementPath = webEndpointProperties.getBasePath();
     }
 
-    @Override
-    protected void configure(final HttpSecurity http) throws Exception {
-      super.configure(http);
+    @Bean
+    public SecurityFilterChain managementFilterChain(final HttpSecurity http) throws Exception {
+      super.configureFilterChain(http);
       http.antMatcher(managementPath + "/**");
       http.authorizeRequests()
           .antMatchers(managementPath + "/health", managementPath + "/info").permitAll()
@@ -262,6 +267,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
           ).hasAnyRole("ADMIN", "MONITORING")
           .anyRequest().hasRole("ADMIN");
       http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+      return http.build();
     }
   }
 
@@ -279,51 +286,54 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
   }
 
-  @Override
-  protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-    final List<String> providers = new ArrayList<>();
-    auth.authenticationProvider(jwtAuthenticationProvider);
+  @Bean
+  public AuthenticationManager authenticationManager() {
+    final List<AuthenticationProvider> providers = new ArrayList<>();
+    final List<String> providerIds = new ArrayList<>();
+    providers.add(jwtAuthenticationProvider);
     logger.info("oauthProps: {}", providerProperties.getOauth());
     if (providerProperties.getLdap().stream().anyMatch(p -> p.isEnabled())) {
-      providers.add(LDAP_PROVIDER_ID);
-      auth.authenticationProvider(ldapAuthenticationProvider());
+      providerIds.add(LDAP_PROVIDER_ID);
+      providers.add(ldapAuthenticationProvider());
     }
     if (providerProperties.getCas().isEnabled()) {
-      providers.add(CAS_PROVIDER_ID);
-      auth.authenticationProvider(casAuthenticationProvider());
+      providerIds.add(CAS_PROVIDER_ID);
+      providers.add(casAuthenticationProvider());
     }
     if (providerProperties.getRegistered().isEnabled()) {
-      providers.add(INTERNAL_PROVIDER_ID);
-      auth.authenticationProvider(daoAuthenticationProvider());
+      providerIds.add(INTERNAL_PROVIDER_ID);
+      providers.add(daoAuthenticationProvider());
     }
     boolean ssoProvider = false;
     if (providerProperties.getSaml().isEnabled()) {
       ssoProvider = true;
-      providers.add(SAML_PROVIDER_ID);
+      providerIds.add(SAML_PROVIDER_ID);
     }
     if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
       ssoProvider = true;
-      providers.add(OIDC_PROVIDER_ID);
+      providerIds.add(OIDC_PROVIDER_ID);
     }
     if (providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
       ssoProvider = true;
       if (providerProperties.getOauth().containsKey(GOOGLE_PROVIDER_ID)
           && providerProperties.getOauth().get(GOOGLE_PROVIDER_ID).isEnabled()) {
-        providers.add(GOOGLE_PROVIDER_ID);
+        providerIds.add(GOOGLE_PROVIDER_ID);
       }
       if (providerProperties.getOauth().containsKey(FACEBOOK_PROVIDER_ID)
           && providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID).isEnabled()) {
-        providers.add(FACEBOOK_PROVIDER_ID);
+        providerIds.add(FACEBOOK_PROVIDER_ID);
       }
       if (providerProperties.getOauth().containsKey(TWITTER_PROVIDER_ID)
           && providerProperties.getOauth().get(TWITTER_PROVIDER_ID).isEnabled()) {
-        providers.add(TWITTER_PROVIDER_ID);
+        providerIds.add(TWITTER_PROVIDER_ID);
       }
     }
     if (ssoProvider) {
-      auth.authenticationProvider(ssoAuthenticationProvider);
+      providers.add(ssoAuthenticationProvider);
     }
-    logger.info("Enabled authentication providers: {}", providers);
+    logger.info("Enabled authentication providers: {}", providerIds);
+
+    return new ProviderManager(providers);
   }
 
   @Bean
