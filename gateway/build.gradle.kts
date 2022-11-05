@@ -5,7 +5,7 @@ plugins {
   id("com.google.cloud.tools.jib") version "3.3.1"
   id("io.spring.dependency-management") version "1.1.0"
   id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
-  id("org.springframework.boot") version "2.7.5"
+  id("org.springframework.boot") version "3.0.0-RC1"
   kotlin("jvm") version "1.7.20"
   kotlin("plugin.spring") version "1.7.20"
 }
@@ -16,9 +16,12 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
   mavenCentral()
+  maven {
+    url = uri("https://repo.spring.io/milestone")
+  }
 }
 
-extra["springCloudVersion"] = "2021.0.4"
+extra["springCloudVersion"] = "2022.0.0-RC1"
 
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")

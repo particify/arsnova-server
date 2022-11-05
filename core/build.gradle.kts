@@ -6,7 +6,7 @@ plugins {
   id("io.freefair.aspectj.post-compile-weaving") version "6.5.1"
   id("io.spring.dependency-management") version "1.1.0"
   id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
-  id("org.springframework.boot") version "2.7.5"
+  id("org.springframework.boot") version "3.0.0-RC1"
 }
 
 group = "net.particify.arsnova"
@@ -17,6 +17,9 @@ extra["gitlabHost"] = "gitlab.com"
 
 repositories {
   mavenCentral()
+  maven {
+    url = uri("https://repo.spring.io/milestone")
+  }
   maven {
     url = uri("https://build.shibboleth.net/nexus/content/repositories/releases/")
   }
