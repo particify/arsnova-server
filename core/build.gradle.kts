@@ -39,7 +39,6 @@ dependencies {
   implementation("org.springframework:spring-aspects")
   implementation("org.springframework.data:spring-data-commons")
   implementation("org.springframework.security:spring-security-aspects")
-  implementation("org.springframework.security:spring-security-cas")
   implementation("org.springframework.security:spring-security-ldap")
   implementation("org.aspectj:aspectjrt:1.9.9.1")
   implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")

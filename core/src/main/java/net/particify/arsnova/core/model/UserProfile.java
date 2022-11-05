@@ -38,7 +38,6 @@ public class UserProfile extends Entity {
     ARSNOVA_GUEST,
     LDAP,
     SAML,
-    CAS,
     OIDC,
     GOOGLE,
     FACEBOOK,

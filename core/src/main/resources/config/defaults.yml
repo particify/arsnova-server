@@ -222,16 +222,6 @@ arsnova:
         assertion-consumer-service-index: 0
         max-authentication-lifetime: 3600
 
-      # CAS authentication
-      cas:
-        enabled: false
-        allowed-roles:
-          - moderator
-          - participant
-        title: CAS
-        order: 0
-        host-url: https://example.com/cas
-
       # OpenID Connect authentication
       oidc:
         - enabled: false

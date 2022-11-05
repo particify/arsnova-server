@@ -38,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -63,7 +62,6 @@ public class AuthenticationController {
   private UserService userService;
   private OidcClient oidcClient;
   private SAML2Client saml2Client;
-  private CasAuthenticationEntryPoint casEntryPoint;
   private Config oauthConfig;
   private Config samlConfig;
   private String apiPath;
@@ -89,11 +87,6 @@ public class AuthenticationController {
   @Autowired(required = false)
   public void setSaml2Client(final SAML2Client saml2Client) {
     this.saml2Client = saml2Client;
-  }
-
-  @Autowired(required = false)
-  public void setCasEntryPoint(final CasAuthenticationEntryPoint casEntryPoint) {
-    this.casEntryPoint = casEntryPoint;
   }
 
   @PostMapping("/login")
@@ -172,12 +165,6 @@ public class AuthenticationController {
           throw new IllegalArgumentException("Invalid provider ID.");
         }
         return buildSsoRedirectView(saml2Client, samlConfig, request, response);
-      case SecurityConfig.CAS_PROVIDER_ID:
-        if (casEntryPoint == null) {
-          throw new IllegalArgumentException("Invalid provider ID.");
-        }
-        casEntryPoint.commence(request, response, null);
-        return null;
       default:
         throw new IllegalArgumentException("Invalid provider ID.");
     }
