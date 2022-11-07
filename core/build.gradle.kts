@@ -6,7 +6,7 @@ plugins {
   id("io.freefair.aspectj.post-compile-weaving") version "6.5.1"
   id("io.spring.dependency-management") version "1.1.0"
   id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
-  id("org.springframework.boot") version "2.7.5"
+  id("org.springframework.boot") version "3.0.0-RC1"
 }
 
 group = "net.particify.arsnova"
@@ -17,6 +17,9 @@ extra["gitlabHost"] = "gitlab.com"
 
 repositories {
   mavenCentral()
+  maven {
+    url = uri("https://repo.spring.io/milestone")
+  }
   maven {
     url = uri("https://build.shibboleth.net/nexus/content/repositories/releases/")
   }
@@ -39,14 +42,13 @@ dependencies {
   implementation("org.springframework:spring-aspects")
   implementation("org.springframework.data:spring-data-commons")
   implementation("org.springframework.security:spring-security-aspects")
-  implementation("org.springframework.security:spring-security-cas")
   implementation("org.springframework.security:spring-security-ldap")
   implementation("org.aspectj:aspectjrt:1.9.9.1")
   implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.github.ben-manes.caffeine:caffeine")
   implementation("com.auth0:java-jwt:4.2.1")
-  implementation("org.pac4j:pac4j-javaee:5.6.1")
+  implementation("org.pac4j:pac4j-jakartaee:5.6.1")
   implementation("org.pac4j:pac4j-oauth:5.6.1")
   implementation("org.pac4j:pac4j-oidc:5.6.1")
   implementation("org.pac4j:pac4j-saml:5.6.1")

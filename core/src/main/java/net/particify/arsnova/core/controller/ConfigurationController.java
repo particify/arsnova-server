@@ -78,9 +78,5 @@ public class ConfigurationController {
       authenticationProviders.add(new AuthenticationProvider(
           SecurityConfig.SAML_PROVIDER_ID, providerProperties.getSaml()));
     }
-    if (providerProperties.getCas().isEnabled()) {
-      authenticationProviders.add(new AuthenticationProvider(
-          SecurityConfig.CAS_PROVIDER_ID, providerProperties.getCas()));
-    }
   }
 }

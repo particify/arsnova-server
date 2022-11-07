@@ -23,7 +23,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.boot.convert.DurationUnit;
 
 import net.particify.arsnova.core.model.UserProfile;
@@ -82,7 +81,6 @@ public class SecurityProperties {
     }
   }
 
-  @ConstructorBinding
   public static class AdminAccount {
     private String loginId;
     private UserProfile.AuthProvider authProvider;

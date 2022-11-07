@@ -1,11 +1,11 @@
 package net.particify.arsnova.authz.model
 
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
+import jakarta.persistence.IdClass
+import jakarta.persistence.Temporal
+import jakarta.persistence.TemporalType
 import java.util.Date
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.IdClass
-import javax.persistence.Temporal
-import javax.persistence.TemporalType
 
 @Entity
 @IdClass(RoomAccessPK::class)

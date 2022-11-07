@@ -18,7 +18,7 @@
 
 package net.particify.arsnova.core.model;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 import org.springframework.validation.Errors;
 
 public class EntityValidationException extends ValidationException {

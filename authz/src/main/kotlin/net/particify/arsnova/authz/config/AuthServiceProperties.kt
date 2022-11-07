@@ -1,10 +1,8 @@
 package net.particify.arsnova.authz.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConfigurationProperties
-@ConstructorBinding
 data class AuthServiceProperties(
   val server: Server,
   val rabbitmq: Rabbitmq,

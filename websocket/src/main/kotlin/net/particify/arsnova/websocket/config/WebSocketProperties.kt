@@ -1,11 +1,9 @@
 package net.particify.arsnova.websocket.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 import java.time.Duration
 
 @ConfigurationProperties
-@ConstructorBinding
 data class WebSocketProperties(
   val server: Server,
   val rabbitmq: Rabbitmq,

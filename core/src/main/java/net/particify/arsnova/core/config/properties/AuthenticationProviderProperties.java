@@ -378,18 +378,6 @@ public class AuthenticationProviderProperties {
     }
   }
 
-  public static class Cas extends Provider {
-    private String hostUrl;
-
-    public String getHostUrl() {
-      return hostUrl;
-    }
-
-    public void setHostUrl(final String hostUrl) {
-      this.hostUrl = hostUrl;
-    }
-  }
-
   public static class Oauth extends Provider {
     private String key;
     private String secret;
@@ -421,7 +409,6 @@ public class AuthenticationProviderProperties {
   private List<Ldap> ldap;
   private List<Oidc> oidc;
   private Saml saml;
-  private Cas cas;
   private Map<String, Oauth> oauth;
 
   public Registered getRegistered() {
@@ -462,14 +449,6 @@ public class AuthenticationProviderProperties {
 
   public void setSaml(final Saml saml) {
     this.saml = saml;
-  }
-
-  public Cas getCas() {
-    return cas;
-  }
-
-  public void setCas(final Cas cas) {
-    this.cas = cas;
   }
 
   public Map<String, Oauth> getOauth() {

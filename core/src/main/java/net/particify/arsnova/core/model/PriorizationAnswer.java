@@ -1,10 +1,10 @@
 package net.particify.arsnova.core.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
 import java.util.List;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
 
 import net.particify.arsnova.core.model.serialization.View;
 

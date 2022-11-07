@@ -19,11 +19,11 @@
 package net.particify.arsnova.core.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
-import javax.validation.constraints.NotBlank;
 import org.springframework.core.style.ToStringCreator;
 
 import net.particify.arsnova.core.model.serialization.View;

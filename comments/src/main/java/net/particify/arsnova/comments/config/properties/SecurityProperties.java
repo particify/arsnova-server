@@ -1,10 +1,8 @@
 package net.particify.arsnova.comments.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
 @ConfigurationProperties(prefix = SecurityProperties.PREFIX)
-@ConstructorBinding
 public class SecurityProperties {
   public static final String PREFIX = "security";
 

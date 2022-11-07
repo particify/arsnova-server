@@ -19,8 +19,8 @@
 package net.particify.arsnova.core.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Optional;
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

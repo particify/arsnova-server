@@ -19,9 +19,9 @@
 package net.particify.arsnova.core.persistence.couchdb.migrations;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.model.serialization.View;

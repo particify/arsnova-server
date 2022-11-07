@@ -44,7 +44,7 @@ class AddRoomCreatorAccessFilter(
             .filter { e: ServerWebExchange ->
               e.response.statusCode != null &&
                 e.response.statusCode!!.is2xxSuccessful &&
-                e.request.method == HttpMethod.POST
+                e.request.method === HttpMethod.POST
             }
             .map { e: ServerWebExchange ->
               val path = e.request.path.toString()
@@ -54,7 +54,7 @@ class AddRoomCreatorAccessFilter(
               val token = e.request.headers.getFirst(HttpHeaders.AUTHORIZATION)!!.removePrefix(BEARER_HEADER)
               val userId = jwtTokenUtil.getUserIdFromPublicToken(token)
 
-              if (path == ROOM_POST_PATH && method == HttpMethod.POST) {
+              if (path == ROOM_POST_PATH && method === HttpMethod.POST) {
                 listOf(
                   AccessChangeRequest(
                     AccessChangeRequestType.CREATE,

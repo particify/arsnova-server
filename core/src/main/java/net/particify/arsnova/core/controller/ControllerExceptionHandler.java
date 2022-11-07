@@ -18,14 +18,15 @@
 
 package net.particify.arsnova.core.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 import javax.naming.OperationNotSupportedException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.event.Level;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -177,7 +178,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Override
   protected ResponseEntity<Object> handleExceptionInternal(final Exception ex, final Object body,
-      final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+      final HttpHeaders headers, final HttpStatusCode status, final WebRequest request) {
     return new ResponseEntity<>(helper.handleException(ex, Level.TRACE), headers, status);
   }
 }

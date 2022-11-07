@@ -18,26 +18,25 @@
 
 package net.particify.arsnova.core.web;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 /**
  * Adds caching headers to a HTTP request based on {@link CacheControl} annotation.
  */
 @Component
-public class CacheControlInterceptorHandler extends HandlerInterceptorAdapter {
+public class CacheControlInterceptorHandler implements AsyncHandlerInterceptor {
 
   @Override
   public boolean preHandle(
       final HttpServletRequest request,
       final HttpServletResponse response,
       final Object handler) throws Exception {
-
     setCacheControlResponseHeader(response, handler);
-    return super.preHandle(request, response, handler);
+    return true;
   }
 
   private void setCacheControlResponseHeader(
