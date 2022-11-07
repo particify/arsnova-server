@@ -13,7 +13,7 @@ services:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEBCLIENT_TAG
     command: /bin/sh -c "while sleep 1000; do :; done"
     volumes:
-      - ./.git:/workspace/.git
+      - ../../../.git:/workspace/.git
       - ../../../webclient:/workspace/webclient
       - vscode-extensions-webclient:/home/dev/.vscode-server/extensions
   arsnova-server-core:
