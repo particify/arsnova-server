@@ -2,7 +2,7 @@
   "name": "Server: Gateway",
   "service": "arsnova-server-gateway",
   "dockerComposeFile": [
-    "../../.docker/compose/development/.compose.yaml"
+    "${localEnv:PDK_COMPOSE_FILE}"
   ],
   "workspaceFolder": "/workspace/gateway",
   "customizations": {

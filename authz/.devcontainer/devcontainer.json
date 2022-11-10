@@ -2,7 +2,7 @@
   "name": "Server: Authz",
   "service": "arsnova-server-authz",
   "dockerComposeFile": [
-    "../../.docker/compose/development/.compose.yaml"
+    "${localEnv:PDK_COMPOSE_FILE}"
   ],
   "workspaceFolder": "/workspace/authz",
   "customizations": {

@@ -4,17 +4,48 @@ COMMAND=$1
 PROJECT=$2
 
 COMPOSE_DIR=$(dirname $(readlink -f $0))
+LOCAL_COMPOSE_DIR=$COMPOSE_DIR
 ROOT_DIR=$(readlink -f $COMPOSE_DIR/../../..)
+ENV_FILES=""
+BASE_COMPOSE_FILE_ARGS=""
 cd "$COMPOSE_DIR"
 
+if [ -z "$PDK_COMPOSE_FILE" ]; then
+  export PDK_COMPOSE_FILE="$COMPOSE_DIR/.compose.yaml"
+fi
+
 source project-mapping-vars.sh
+if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
+  if [ ! -d "$ADDITIONAL_COMPOSE_DIR" ]; then
+    echo "ADDITIONAL_COMPOSE_DIR=$ADDITIONAL_COMPOSE_DIR is not a directory."
+    exit 1
+  fi
+  LOCAL_COMPOSE_DIR=$ADDITIONAL_COMPOSE_DIR
+  source "$ADDITIONAL_COMPOSE_DIR/project-mapping-vars.sh"
+fi
+
+load_config() {
+  while read config_name; do
+    if [ -f "../production/$config_name.env" ]; then
+      ENV_FILES="$ENV_FILES `pwd`/../production/$config_name.env"
+    fi
+    BASE_COMPOSE_FILE_ARGS="$BASE_COMPOSE_FILE_ARGS -f `pwd`/../production/$config_name.compose.yaml"
+  done <config-list
+  COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS $BASE_COMPOSE_FILE_ARGS"
+  while read config_name; do
+    if [ -f "$config_name.env" ]; then
+      ENV_FILES="$ENV_FILES `pwd`/$config_name.env"
+    fi
+    COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f `pwd`/devcontainer.$config_name.compose.yaml"
+  done <config-list
+}
 
 # Load environment variables from file without replacing existing values.
 merge_env() {
-  VAR_FILTER=`cat .env | grep -v ^# | sed -E 's/=.*$//g' | sed -E -z -e "s/\n*$//g" -e "s/\n+/|/g"`
+  VAR_FILTER=`cat "$LOCAL_COMPOSE_DIR/.env" | grep -v ^# | sed -E 's/=.*$//g' | sed -E -z -e "s/\n*$//g" -e "s/\n+/|/g"`
   CURRENT_ENV=`env | grep -E "$VAR_FILTER"`
   set -a
-  . ./.env
+  . "$LOCAL_COMPOSE_DIR/.env"
   set +a
   # Restore env (priortize passed env vars over loaded env vars)
   export $CURRENT_ENV >/dev/null
@@ -41,38 +72,38 @@ prompt_image_tags() {
     fi
     read -p "$project: [${!TAG_VARS[$project]}] " tag
     if [ -n "$tag" ]; then
-      sed -i -n -e "/^${TAG_VARS[$project]}=/!p" -e '$a'"${TAG_VARS[$project]}=$tag" "$COMPOSE_DIR/local.env"
+      sed -i -n -e "/^${TAG_VARS[$project]}=/!p" -e '$a'"${TAG_VARS[$project]}=$tag" "$LOCAL_COMPOSE_DIR/local.env"
     fi
   done
 }
 
 update_config() {
   echo Updating configuration for Docker Compose...
-  if [ ! -f local.env ]; then
-    echo "# Custom environment configuration overrides" > local.env
+  if [ ! -f "$LOCAL_COMPOSE_DIR/local.env" ]; then
+    echo "# Custom environment configuration overrides" > "$LOCAL_COMPOSE_DIR/local.env"
   fi
-  if [ ! -f local.compose.yaml ]; then
-    echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > local.compose.yaml
+  if [ ! -f "$LOCAL_COMPOSE_DIR/local.compose.yaml" ]; then
+    echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > "$LOCAL_COMPOSE_DIR/local.compose.yaml"
   fi
-  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .env
-  cat $ENV_FILES devcontainer.env local.env | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
+  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > "$LOCAL_COMPOSE_DIR/.env"
+  cat $ENV_FILES devcontainer.env "$LOCAL_COMPOSE_DIR/local.env" | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> "$LOCAL_COMPOSE_DIR/.env"
   merge_env
   determine_image_tags
-  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .compose.yaml
+  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > "$PDK_COMPOSE_FILE"
   docker compose --project-directory "$COMPOSE_DIR" \
     $COMPOSE_FILE_ARGS \
-    -f local.compose.yaml \
-    config >> .compose.yaml
+    -f "$LOCAL_COMPOSE_DIR/local.compose.yaml" \
+    config >> "$PDK_COMPOSE_FILE"
 }
 
 build() {
-  if [ ! -f .compose.yaml ]; then
+  if [ ! -f "$PDK_COMPOSE_FILE" ]; then
     update_config
   fi
   pull_devcontainer_base_images
   echo Building Devcontainers...
   shift 1
-  docker compose -f .compose.yaml build $@
+  docker compose -f "$PDK_COMPOSE_FILE" build $@
 }
 
 pull_devcontainer_base_images() {
@@ -126,7 +157,7 @@ migrate_postgresql_data() {
     if [ "$postgresql_version" = "$postgresql_target_version" ]; then
       continue
     fi
-    docker compose -f .compose.yaml down
+    docker compose -f "$PDK_COMPOSE_FILE" down
     postgresql_user=arsnova${postgresql_volume#"$postgresql_volume_prefix"}
     echo "Running migration for volume $postgresql_volume..."
     docker compose pull "$postgresql_migration_image:$postgresql_version-to-$postgresql_target_version"
@@ -181,21 +212,12 @@ if ! code --list-extensions | grep ms-vscode-remote.remote-containers &> /dev/nu
   code --install-extension ms-vscode-remote.remote-containers
 fi
 
-ENV_FILES=""
-BASE_COMPOSE_FILE_ARGS=""
-while read config_name; do
-  if [ -f "../production/$config_name.env" ]; then
-    ENV_FILES="$ENV_FILES ../production/$config_name.env"
-  fi
-  BASE_COMPOSE_FILE_ARGS="$BASE_COMPOSE_FILE_ARGS -f ../production/$config_name.compose.yaml"
-done <config-list
-COMPOSE_FILE_ARGS=$BASE_COMPOSE_FILE_ARGS
-while read config_name; do
-  if [ -f "$config_name.env" ]; then
-    ENV_FILES="$ENV_FILES $config_name.env"
-  fi
-  COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f devcontainer.$config_name.compose.yaml"
-done <config-list
+load_config
+if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
+  cd "$ADDITIONAL_COMPOSE_DIR"
+  load_config "$ADDITIONAL_COMPOSE_DIR"
+  cd "$COMPOSE_DIR"
+fi
 
 case $COMMAND in
   update|u)
@@ -235,35 +257,39 @@ case $COMMAND in
     update_config
     echo Starting Devcontainers...
     shift 1
-    docker compose -f .compose.yaml up $@
+    docker compose -f "$PDK_COMPOSE_FILE" up $@
     ;;
   build|b)
     update_config
     build
     ;;
   logs|l)
-    if [ ! -f .compose.yaml ]; then
+    if [ ! -f "$PDK_COMPOSE_FILE" ]; then
       update_config
     fi
     shift 1
-    docker compose -f .compose.yaml logs $@
+    docker compose -f "$PDK_COMPOSE_FILE" logs $@
     ;;
   compose|c)
-    if [ ! -f .compose.yaml ]; then
+    if [ ! -f "$PDK_COMPOSE_FILE" ]; then
       update_config
     fi
     shift 1
-    docker compose -f .compose.yaml $@
+    docker compose -f "$PDK_COMPOSE_FILE" $@
     ;;
   *)
     echo Usage:
-    echo "    $0 update           Update Git repositories, Docker Compose configuration and Devcontainers"
-    echo "    $0 update-config    Update the configuration for Docker Compose"
-    echo "    $0 tags             Set the image tags of projects to use with Docker Compose"
-    echo "    $0 open <project>   Open project in Devcontainer with Visual Studio Code"
-    echo "    $0 run              Start Devcontainers for all services"
-    echo "    $0 build            (Re-)build Devcontainers"
-    echo "    $0 logs             Show logs or the log for a specific service"
-    echo "    $0 compose          Execute a Docker Compose command"
+    # PDK_CMD can be set by a wrapper script
+    if [ -z "$PDK_CMD" ]; then
+      PDK_CMD=$0
+    fi
+    echo "    $PDK_CMD update           Update Git repositories, Docker Compose configuration and Devcontainers"
+    echo "    $PDK_CMD update-config    Update the configuration for Docker Compose"
+    echo "    $PDK_CMD tags             Set the image tags of projects to use with Docker Compose"
+    echo "    $PDK_CMD open <project>   Open project in Devcontainer with Visual Studio Code"
+    echo "    $PDK_CMD run              Start Devcontainers for all services"
+    echo "    $PDK_CMD build            (Re-)build Devcontainers"
+    echo "    $PDK_CMD logs             Show logs or the log for a specific service"
+    echo "    $PDK_CMD compose          Execute a Docker Compose command"
     ;;
 esac

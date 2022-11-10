@@ -2,7 +2,7 @@
   "name": "Server: Core",
   "service": "arsnova-server-core",
   "dockerComposeFile": [
-    "../../.docker/compose/development/.compose.yaml"
+    "${localEnv:PDK_COMPOSE_FILE}"
   ],
   "workspaceFolder": "/workspace/core",
   "customizations": {

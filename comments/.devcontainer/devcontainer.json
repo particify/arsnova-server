@@ -2,7 +2,7 @@
   "name": "Server: Comments",
   "service": "arsnova-server-comments",
   "dockerComposeFile": [
-    "../../.docker/compose/development/.compose.yaml"
+    "${localEnv:PDK_COMPOSE_FILE}"
   ],
   "workspaceFolder": "/workspace/comments",
   "customizations": {
