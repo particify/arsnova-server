@@ -5,9 +5,34 @@ PROJECT=$2
 
 COMPOSE_DIR=$(dirname $(readlink -f $0))
 ROOT_DIR=$(readlink -f $COMPOSE_DIR/../../..)
+ENV_FILES=""
+BASE_COMPOSE_FILE_ARGS=""
 cd "$COMPOSE_DIR"
 
 source project-mapping-vars.sh
+if [ -n "$ADDITIONAL_CONFIG_DIR" ]; then
+  if [ ! -d "$ADDITIONAL_CONFIG_DIR" ]; then
+    echo "ADDITIONAL_CONFIG_DIR=$ADDITIONAL_CONFIG_DIR is not a directory."
+    exit 1
+  fi
+  source "$ADDITIONAL_CONFIG_DIR/project-mapping-vars.sh"
+fi
+
+load_config() {
+  while read config_name; do
+    if [ -f "../production/$config_name.env" ]; then
+      ENV_FILES="$ENV_FILES `pwd`/../production/$config_name.env"
+    fi
+    BASE_COMPOSE_FILE_ARGS="$BASE_COMPOSE_FILE_ARGS -f `pwd`/../production/$config_name.compose.yaml"
+  done <config-list
+  COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS $BASE_COMPOSE_FILE_ARGS"
+  while read config_name; do
+    if [ -f "$config_name.env" ]; then
+      ENV_FILES="$ENV_FILES `pwd`/$config_name.env"
+    fi
+    COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f `pwd`/devcontainer.$config_name.compose.yaml"
+  done <config-list
+}
 
 # Load environment variables from file without replacing existing values.
 merge_env() {
@@ -181,21 +206,12 @@ if ! code --list-extensions | grep ms-vscode-remote.remote-containers &> /dev/nu
   code --install-extension ms-vscode-remote.remote-containers
 fi
 
-ENV_FILES=""
-BASE_COMPOSE_FILE_ARGS=""
-while read config_name; do
-  if [ -f "../production/$config_name.env" ]; then
-    ENV_FILES="$ENV_FILES ../production/$config_name.env"
-  fi
-  BASE_COMPOSE_FILE_ARGS="$BASE_COMPOSE_FILE_ARGS -f ../production/$config_name.compose.yaml"
-done <config-list
-COMPOSE_FILE_ARGS=$BASE_COMPOSE_FILE_ARGS
-while read config_name; do
-  if [ -f "$config_name.env" ]; then
-    ENV_FILES="$ENV_FILES $config_name.env"
-  fi
-  COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f devcontainer.$config_name.compose.yaml"
-done <config-list
+load_config
+if [ -n "$ADDITIONAL_CONFIG_DIR" ]; then
+  cd "$ADDITIONAL_CONFIG_DIR"
+  load_config "$ADDITIONAL_CONFIG_DIR"
+  cd "$COMPOSE_DIR"
+fi
 
 case $COMMAND in
   update|u)
@@ -257,13 +273,17 @@ case $COMMAND in
     ;;
   *)
     echo Usage:
-    echo "    $0 update           Update Git repositories, Docker Compose configuration and Devcontainers"
-    echo "    $0 update-config    Update the configuration for Docker Compose"
-    echo "    $0 tags             Set the image tags of projects to use with Docker Compose"
-    echo "    $0 open <project>   Open project in Devcontainer with Visual Studio Code"
-    echo "    $0 run              Start Devcontainers for all services"
-    echo "    $0 build            (Re-)build Devcontainers"
-    echo "    $0 logs             Show logs or the log for a specific service"
-    echo "    $0 compose          Execute a Docker Compose command"
+    # PDK_CMD can be set by a wrapper script
+    if [ -z "$PDK_CMD" ]; then
+      PDK_CMD=$0
+    fi
+    echo "    $PDK_CMD update           Update Git repositories, Docker Compose configuration and Devcontainers"
+    echo "    $PDK_CMD update-config    Update the configuration for Docker Compose"
+    echo "    $PDK_CMD tags             Set the image tags of projects to use with Docker Compose"
+    echo "    $PDK_CMD open <project>   Open project in Devcontainer with Visual Studio Code"
+    echo "    $PDK_CMD run              Start Devcontainers for all services"
+    echo "    $PDK_CMD build            (Re-)build Devcontainers"
+    echo "    $PDK_CMD logs             Show logs or the log for a specific service"
+    echo "    $PDK_CMD compose          Execute a Docker Compose command"
     ;;
 esac
