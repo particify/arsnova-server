@@ -2,7 +2,7 @@
   "name": "Server: Websocket",
   "service": "arsnova-server-websocket",
   "dockerComposeFile": [
-    "../../.compose.yaml"
+    "${localEnv:PDK_COMPOSE_FILE}"
   ],
   "workspaceFolder": "/workspace/websocket",
   "customizations": {

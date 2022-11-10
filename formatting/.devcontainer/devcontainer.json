@@ -2,7 +2,7 @@
   "name": "Server: Formatting",
   "service": "arsnova-server-formatting",
   "dockerComposeFile": [
-    "../../.docker/compose/development/.compose.yaml"
+    "${localEnv:PDK_COMPOSE_FILE}"
   ],
   "workspaceFolder": "/workspace/formatting",
   "customizations": {
