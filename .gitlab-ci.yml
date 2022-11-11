@@ -9,7 +9,10 @@ build_project:
       - PROJECT: gateway
       - PROJECT: websocket
   rules:
-    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_TAG =~ /^v[0-9]+/ || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_BRANCH =~ /^renovate\/(patch-.*|-x$)/
+    # Create pipeline for either the MR or the branch/tag but not both
+    - if: '$CI_MERGE_REQUEST_ID && ($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_TAG =~ /^v[0-9]+/ || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_BRANCH =~ /^renovate\//)'
+      when: never
+    - if: '$CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_TAG =~ /^v[0-9]+/ || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_BRANCH =~ /^renovate\//'
       changes:
         - "*"
         - ".gitlab/ci/**/*"
