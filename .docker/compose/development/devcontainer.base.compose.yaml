@@ -8,18 +8,18 @@ services:
   arsnova-webclient:
     image: devcontainer-arsnova-webclient:$WEBCLIENT_TAG
     build:
-      context: ../../../webclient/.devcontainer
+      context: $ROOT_DIR/webclient/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEBCLIENT_TAG
     command: /bin/sh -c "while sleep 1000; do :; done"
     volumes:
-      - ../../../.git:/workspace/.git
-      - ../../../webclient:/workspace/webclient
+      - $ROOT_DIR/.git:/workspace/.git
+      - $ROOT_DIR/webclient:/workspace/webclient
       - vscode-extensions-webclient:/home/dev/.vscode-server/extensions
   arsnova-server-core:
     image: devcontainer-arsnova-server-core:$CORE_TAG
     build:
-      context: ../../../core/.devcontainer
+      context: $ROOT_DIR/core/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/core:$CORE_TAG
         INSTALL_MAVEN: "true"
@@ -31,7 +31,7 @@ services:
       SECURITY_CORSORIGINS_1: http://localhost:4200
       GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
     volumes:
-      - ../../..:/workspace
+      - $ROOT_DIR:/workspace
       - gradle-workspace-core:/workspace/.gradle
       - gradle-cache-core:/home/dev/.gradle/caches
       - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
@@ -40,7 +40,7 @@ services:
   arsnova-server-gateway:
     image: devcontainer-arsnova-server-gateway:$GATEWAY_TAG
     build:
-      context: ../../../gateway/.devcontainer
+      context: $ROOT_DIR/gateway/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/gateway:$GATEWAY_TAG
         INSTALL_MAVEN: "true"
@@ -50,7 +50,7 @@ services:
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
       GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
     volumes:
-      - ../../..:/workspace
+      - $ROOT_DIR:/workspace
       - gradle-workspace-gateway:/workspace/.gradle
       - gradle-cache-gateway:/home/dev/.gradle/caches
       - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
@@ -59,7 +59,7 @@ services:
   arsnova-server-websocket:
     image: devcontainer-arsnova-server-websocket:$WEBSOCKET_TAG
     build:
-      context: ../../../websocket/.devcontainer
+      context: $ROOT_DIR/websocket/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/websocket:$WEBSOCKET_TAG
         INSTALL_MAVEN: "true"
@@ -69,7 +69,7 @@ services:
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
       GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
     volumes:
-      - ../../..:/workspace
+      - $ROOT_DIR:/workspace
       - gradle-workspace-websocket:/workspace/.gradle
       - gradle-cache-websocket:/home/dev/.gradle/caches
       - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
@@ -78,7 +78,7 @@ services:
   arsnova-server-authz:
     image: devcontainer-arsnova-server-authz:$AUTHZ_TAG
     build:
-      context: ../../../authz/.devcontainer
+      context: $ROOT_DIR/authz/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/authz:$AUTHZ_TAG
         INSTALL_MAVEN: "true"
@@ -92,7 +92,7 @@ services:
       PGUSER: arsnovaauth
       PGPASSWORD: arsnovaauth
     volumes:
-      - ../../..:/workspace
+      - $ROOT_DIR:/workspace
       - gradle-workspace-authz:/workspace/.gradle
       - gradle-cache-authz:/home/dev/.gradle/caches
       - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
@@ -101,7 +101,7 @@ services:
   arsnova-server-comments:
     image: devcontainer-arsnova-server-comments:$COMMENTS_TAG
     build:
-      context: ../../../comments/.devcontainer
+      context: $ROOT_DIR/comments/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/comments:$COMMENTS_TAG
         INSTALL_MAVEN: "true"
@@ -115,7 +115,7 @@ services:
       PGUSER: arsnovacomment
       PGPASSWORD: arsnovacomment
     volumes:
-      - ../../..:/workspace
+      - $ROOT_DIR:/workspace
       - gradle-workspace-comments:/workspace/.gradle
       - gradle-cache-comments:/home/dev/.gradle/caches
       - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
@@ -124,13 +124,13 @@ services:
   arsnova-server-formatting:
     image: devcontainer-arsnova-server-formatting:$FORMATTING_TAG
     build:
-      context: ../../../formatting/.devcontainer
+      context: $ROOT_DIR/formatting/.devcontainer
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/formatting:$FORMATTING_TAG
     environment:
       PORT: 3000
     volumes:
-      - ../../..:/workspace
+      - $ROOT_DIR:/workspace
       - vscode-extensions-formatting:/home/dev/.vscode-server/extensions
 
 volumes:
