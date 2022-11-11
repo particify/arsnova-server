@@ -54,35 +54,12 @@ class GatewayConfig(
     ): RouteLocator? {
         val routes = builder.routes()
 
-        routes.route("roomaccess") { p ->
-            p
-                .path("/roomaccess/**")
-                .filters { f ->
-                    f.requestRateLimiter { r ->
-                        r.rateLimiter = requestRateLimiter
-                    }
-                }
-                .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
-        }
-
         routes.route("comment-service") { p ->
             p
-                .path("/room/{roomId}/comment/**", "/room/{roomId}/settings/**")
-                .filters { f ->
-                    f.filter(authFilter.apply(AuthFilter.Config()))
-                    f.requestRateLimiter { r ->
-                        r.rateLimiter = requestRateLimiter
-                    }
-                }
-                .uri(httpGatewayProperties.routing.endpoints.commentService)
-        }
-
-        routes.route("comment-service-todo") { p ->
-            p
                 .path(
-                    "/room/{roomId}/bonustoken/**",
-                    "/room/{roomId}/vote/**",
-                    "/room/{roomId}/settings/**"
+                    "/room/{roomId}/comment/**",
+                    "/room/{roomId}/settings/**",
+                    "/room/{roomId}/vote/**"
                 )
                 .filters { f ->
                     f.filter(authFilter.apply(AuthFilter.Config()))
@@ -91,20 +68,6 @@ class GatewayConfig(
                     }
                 }
                 .uri(httpGatewayProperties.routing.endpoints.commentService)
-        }
-
-        if (httpGatewayProperties.routing.endpoints.importService != null) {
-            routes.route("import-service") { p ->
-                p
-                    .path("/import/**")
-                    .filters { f ->
-                        f.filter(jwtUserIdFilter.apply(JwtUserIdFilter.Config()))
-                        f.requestRateLimiter { r ->
-                            r.rateLimiter = requestRateLimiter
-                        }
-                    }
-                    .uri(httpGatewayProperties.routing.endpoints.importService)
-            }
         }
 
         routes.route("formatting-service") { p ->
@@ -117,54 +80,6 @@ class GatewayConfig(
                     }
                 }
                 .uri(httpGatewayProperties.routing.endpoints.formattingService)
-        }
-
-        if (httpGatewayProperties.routing.endpoints.attachmentService != null) {
-            routes.route("attachment-service") { p ->
-                p
-                    .path(
-                        "/room/{roomId}/filemetadata/**",
-                        "/room/{roomId}/file/**"
-                    )
-                    .filters { f ->
-                        f.filter(authFilter.apply(AuthFilter.Config()))
-                        f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
-                        f.requestRateLimiter { r ->
-                            r.rateLimiter = requestRateLimiter
-                        }
-                    }
-                    .uri(httpGatewayProperties.routing.endpoints.attachmentService)
-            }
-            routes.route("attachment-service") { p ->
-                p
-                    .path(
-                        "/quota/**"
-                    )
-                    .filters { f ->
-                        f.requestRateLimiter { r ->
-                            r.rateLimiter = requestRateLimiter
-                        }
-                    }
-                    .uri(httpGatewayProperties.routing.endpoints.attachmentService)
-            }
-        }
-
-        if (httpGatewayProperties.routing.endpoints.subscriptionService != null) {
-            routes.route("subscription-service") { p ->
-                p
-                    .path(
-                        "/feature/**",
-                        "/featuresettings/**",
-                        "/subscription/**",
-                        "/tier/**"
-                    )
-                    .filters { f ->
-                        f.requestRateLimiter { r ->
-                            r.rateLimiter = requestRateLimiter
-                        }
-                    }
-                    .uri(httpGatewayProperties.routing.endpoints.subscriptionService)
-            }
         }
 
         routes.route("management-core") { p ->
@@ -209,32 +124,6 @@ class GatewayConfig(
                     f.rewritePath("^/management/auth-service", "/management")
                 }
                 .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
-        }
-
-        if (httpGatewayProperties.routing.endpoints.importService != null) {
-            routes.route("management-import-service") { p ->
-                p
-                    .path(
-                        "/management/import-service/**"
-                    )
-                    .filters { f ->
-                        f.rewritePath("^/management/import-service", "/management")
-                    }
-                    .uri(httpGatewayProperties.routing.endpoints.importService)
-            }
-        }
-
-        if (httpGatewayProperties.routing.endpoints.proxyMetrics != null) {
-            routes.route("metrics-proxy") { p ->
-                p
-                    .path(
-                        "/management/proxy/prometheus"
-                    )
-                    .filters { f ->
-                        f.rewritePath("^/management/proxy", "")
-                    }
-                    .uri(httpGatewayProperties.routing.endpoints.proxyMetrics)
-            }
         }
 
         routes.route("request-membership") { p ->
