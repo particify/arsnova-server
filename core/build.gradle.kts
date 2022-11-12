@@ -6,7 +6,7 @@ plugins {
   id("io.freefair.aspectj.post-compile-weaving") version "6.5.1"
   id("io.spring.dependency-management") version "1.1.0"
   id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
-  id("org.springframework.boot") version "3.0.0-RC1"
+  id("org.springframework.boot") version "3.0.0-RC2"
 }
 
 group = "net.particify.arsnova"
@@ -29,11 +29,11 @@ repositories {
 }
 
 dependencies {
-  implementation("com.sun.mail:jakarta.mail")
   implementation("commons-lang:commons-lang:2.6")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-amqp")
   implementation("org.springframework.boot:spring-boot-starter-cache")
+  implementation("org.springframework.boot:spring-boot-starter-mail")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-validation")
   implementation("org.springframework.boot:spring-boot-starter-web")
