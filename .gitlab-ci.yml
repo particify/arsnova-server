@@ -9,14 +9,21 @@ build_project:
       - PROJECT: gateway
       - PROJECT: websocket
   rules:
-    # Create pipeline for either the MR or the branch/tag but not both
-    - if: '$CI_MERGE_REQUEST_ID && ($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_TAG =~ /^v[0-9]+/ || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_BRANCH =~ /^renovate\//)'
-      when: never
-    - if: '$CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_TAG =~ /^v[0-9]+/ || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_BRANCH =~ /^renovate\//'
+    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/
       changes:
         - "*"
         - ".gitlab/ci/**/*"
         - "$PROJECT/**/*"
+      when: on_success
+    - if: $CI_COMMIT_BRANCH =~ /^renovate\//
+      changes:
+        paths:
+          - "*"
+          - ".gitlab/ci/**/*"
+          - "$PROJECT/**/*"
+        # GitLab does not support variables in compare_to (tested against 15.5)
+        #compare_to: $CI_DEFAULT_BRANCH
+        compare_to: master
       when: on_success
   trigger:
     include: "$PROJECT/.gitlab-ci.yml"
