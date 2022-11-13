@@ -10,10 +10,10 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<spring-boot-version>2.7.3</spring-boot-version>
-		<spring-cloud.version>2021.0.3</spring-cloud.version>
-		<io.netty-version>4.1.80.Final</io.netty-version>
-		<kotlin.version>1.7.10</kotlin.version>
+		<spring-boot-version>2.7.5</spring-boot-version>
+		<spring-cloud.version>2021.0.5</spring-cloud.version>
+		<io.netty-version>4.1.85.Final</io.netty-version>
+		<kotlin.version>1.7.21</kotlin.version>
 		<kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<docker.registry>local-dev</docker.registry>
