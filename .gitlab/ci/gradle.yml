@@ -53,6 +53,14 @@ unit_test:
     - gradle $GRADLE_CLI_OPTS test jacocoTestReport -x classes
     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' build/reports/jacoco/test/jacocoTestReport.csv
 
+spotbugs:
+  extends: .gradle
+  stage: test
+  needs:
+    - compile
+  script:
+    - gradle $GRADLE_CLI_OPTS spotbugsMain -x classes
+
 ktlint:
   extends: .gradle
   stage: test

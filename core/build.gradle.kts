@@ -2,6 +2,7 @@ plugins {
   java
   jacoco
   checkstyle
+  id("com.github.spotbugs") version "5.0.13"
   id("com.google.cloud.tools.jib") version "3.3.1"
   id("io.freefair.aspectj.post-compile-weaving") version "6.5.1"
   id("io.spring.dependency-management") version "1.1.0"
@@ -58,6 +59,8 @@ dependencies {
   compileOnly("org.springframework.boot:spring-boot-devtools")
   aspect("org.springframework:spring-aspects")
   aspect("org.springframework.security:spring-security-aspects")
+  compileOnly("com.github.spotbugs:spotbugs-annotations:4.7.3")
+  spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.12.0")
 }
 
 tasks.withType<Test> {
@@ -85,4 +88,12 @@ checkstyle {
     "checkstyle.missing-javadoc.severity" to "info"
   )
   maxWarnings = 0
+}
+
+spotbugs {
+  excludeFilter.set(file("../spotbugs-exclude.xml"))
+}
+
+tasks.spotbugsTest {
+  enabled = false
 }
