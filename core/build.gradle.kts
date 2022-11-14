@@ -51,7 +51,7 @@ dependencies {
   implementation("org.pac4j:pac4j-jakartaee:5.7.0")
   implementation("org.pac4j:pac4j-oauth:5.7.0")
   implementation("org.pac4j:pac4j-oidc:5.7.0")
-  implementation("org.pac4j:pac4j-saml:5.6.1")
+  implementation("org.pac4j:pac4j-saml:5.7.0")
   implementation("org.ektorp:org.ektorp:1.5.0")
   implementation("org.ektorp:org.ektorp.spring:1.5.0")
   implementation("org.graalvm.js:js:22.3.0")
