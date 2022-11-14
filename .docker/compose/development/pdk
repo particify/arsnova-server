@@ -25,6 +25,22 @@ if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
 fi
 export LOCAL_ROOT_DIR=$(readlink -f $LOCAL_COMPOSE_DIR/../../..)
 
+init_gitmodules() {
+  REPLY=
+  gitmodules=$(cat "$ROOT_DIR/.gitmodules" | grep -E '^\s+path' | sed -E 's/^\s+path\s+=\s+//')
+  for gitmodule in $gitmodules; do
+    if [ ! -e "$ROOT_DIR/$gitmodule/.git" ]; then
+      if [ -z "$REPLY" ]; then
+        read -p "Some Git submodules have not been initialized. Initialize now? (Y/n) "
+      fi
+      if [ -n "$REPLY" ] && [ "$REPLY" != "y" ] && [ "$REPLY" != "Y" ]; then
+        return
+      fi
+      git submodule update --init --recursive "$ROOT_DIR/$gitmodule"
+    fi
+  done
+}
+
 load_config() {
   while read config_name; do
     if [ -f "../production/$config_name.env" ]; then
@@ -220,14 +236,14 @@ if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
   cd "$COMPOSE_DIR"
 fi
 
+init_gitmodules
+
 case $COMMAND in
   update|u)
     shift 1
     if [ -z "$1" ]; then
       echo Updating Git repository...
       git pull
-      git submodule init
-      git submodule update webclient
     fi
     update_config
     echo Updating base images for Devcontainers...
