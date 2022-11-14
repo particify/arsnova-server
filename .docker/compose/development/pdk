@@ -5,7 +5,7 @@ PROJECT=$2
 
 COMPOSE_DIR=$(dirname $(readlink -f $0))
 LOCAL_COMPOSE_DIR=$COMPOSE_DIR
-ROOT_DIR=$(readlink -f $COMPOSE_DIR/../../..)
+export ROOT_DIR=$(readlink -f $COMPOSE_DIR/../../..)
 ENV_FILES=""
 BASE_COMPOSE_FILE_ARGS=""
 cd "$COMPOSE_DIR"
@@ -23,6 +23,7 @@ if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
   LOCAL_COMPOSE_DIR=$ADDITIONAL_COMPOSE_DIR
   source "$ADDITIONAL_COMPOSE_DIR/project-mapping-vars.sh"
 fi
+export LOCAL_ROOT_DIR=$(readlink -f $LOCAL_COMPOSE_DIR/../../..)
 
 load_config() {
   while read config_name; do
@@ -90,7 +91,7 @@ update_config() {
   merge_env
   determine_image_tags
   echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > "$PDK_COMPOSE_FILE"
-  docker compose --project-directory "$COMPOSE_DIR" \
+  docker compose --project-directory "$LOCAL_COMPOSE_DIR" \
     $COMPOSE_FILE_ARGS \
     -f "$LOCAL_COMPOSE_DIR/local.compose.yaml" \
     config >> "$PDK_COMPOSE_FILE"
@@ -109,7 +110,7 @@ build() {
 pull_devcontainer_base_images() {
   echo Pulling base images for Devcontainers...
   for project in "${PROJECT_DIRS[@]}"; do
-    dev_dockerfile="$ROOT_DIR/$project/.devcontainer/Dockerfile"
+    dev_dockerfile="$LOCAL_ROOT_DIR/$project/.devcontainer/Dockerfile"
     if [ -f "$dev_dockerfile" ]; then
       devimg=$(cat "$dev_dockerfile" | grep -E "^FROM" | grep "devcontainer" | sed -E "s/^FROM //")
       devimgs=$(printf "$devimgs\n$devimg" | uniq -u)
@@ -230,7 +231,7 @@ case $COMMAND in
     fi
     update_config
     echo Updating base images for Devcontainers...
-    docker compose --project-directory "$COMPOSE_DIR" \
+    docker compose --project-directory "$LOCAL_COMPOSE_DIR" \
       $BASE_COMPOSE_FILE_ARGS \
       pull $@
     build $@
@@ -245,9 +246,9 @@ case $COMMAND in
     prompt_image_tags
     ;;
   open|o)
-    if [ -d "$ROOT_DIR/$PROJECT" ]; then
+    if [ -d "$LOCAL_ROOT_DIR/$PROJECT" ]; then
       update_config
-      devcontainer open "$ROOT_DIR/$PROJECT"
+      devcontainer open "$LOCAL_ROOT_DIR/$PROJECT"
     else
       echo ERROR: Invalid project
       exit 1
