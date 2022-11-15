@@ -41,20 +41,29 @@ init_gitmodules() {
   done
 }
 
-load_config() {
+load_prod_config() {
+  config_dir=$(readlink -f "$1")
   while read config_name; do
-    if [ -f "../production/$config_name.env" ]; then
-      ENV_FILES="$ENV_FILES `pwd`/../production/$config_name.env"
+    if [ -f "$config_dir/../production/$config_name.env" ]; then
+      ENV_FILES="$ENV_FILES $config_dir/../production/$config_name.env"
     fi
-    BASE_COMPOSE_FILE_ARGS="$BASE_COMPOSE_FILE_ARGS -f `pwd`/../production/$config_name.compose.yaml"
-  done <config-list
+    if [ -f "$config_dir/../production/$config_name.compose.yaml" ]; then
+      BASE_COMPOSE_FILE_ARGS="$BASE_COMPOSE_FILE_ARGS -f $config_dir/../production/$config_name.compose.yaml"
+    fi
+  done <"$config_dir/config-list"
   COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS $BASE_COMPOSE_FILE_ARGS"
+}
+
+load_dev_config() {
+  config_dir=$(readlink -f "$1")
   while read config_name; do
-    if [ -f "$config_name.env" ]; then
-      ENV_FILES="$ENV_FILES `pwd`/$config_name.env"
+    if [ -f "$config_dir/$config_name.env" ]; then
+      ENV_FILES="$ENV_FILES $config_dir/$config_name.env"
     fi
-    COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f `pwd`/devcontainer.$config_name.compose.yaml"
-  done <config-list
+    if [ -f "$config_dir/devcontainer.$config_name.compose.yaml" ]; then
+      COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f $config_dir/devcontainer.$config_name.compose.yaml"
+    fi
+  done <"$config_dir/config-list"
 }
 
 # Load environment variables from file without replacing existing values.
@@ -234,11 +243,13 @@ if ! code --list-extensions | grep ms-vscode-remote.remote-containers &> /dev/nu
   code --install-extension ms-vscode-remote.remote-containers
 fi
 
-load_config
+load_prod_config "$COMPOSE_DIR"
 if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
-  cd "$ADDITIONAL_COMPOSE_DIR"
-  load_config "$ADDITIONAL_COMPOSE_DIR"
-  cd "$COMPOSE_DIR"
+  load_prod_config "$ADDITIONAL_COMPOSE_DIR"
+fi
+load_dev_config "$COMPOSE_DIR"
+if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
+  load_dev_config "$ADDITIONAL_COMPOSE_DIR"
 fi
 
 init_gitmodules
