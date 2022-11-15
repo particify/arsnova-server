@@ -1,5 +1,6 @@
 package net.particify.arsnova.core.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +45,10 @@ public class DataGenerationServiceImpl implements DataGenerationService {
 
   private final ContentService contentService;
   private final AnswerService answerService;
+
+  @SuppressFBWarnings(
+      value = "PREDICTABLE_RANDOM",
+      justification = "This instance is not used in a security-sensitive context.")
   private final Random random = new Random();
 
   public DataGenerationServiceImpl(final ContentService contentService, final AnswerService answerService) {
@@ -85,7 +90,7 @@ public class DataGenerationServiceImpl implements DataGenerationService {
 
   private int randomizeAnswerCount(final int avgCount) {
     return avgCount + (int) Math.round(
-        avgCount * (Math.random() * 2 * ANSWER_COUNT_RANDOM_FACTOR - ANSWER_COUNT_RANDOM_FACTOR));
+        avgCount * (random.nextDouble() * 2 * ANSWER_COUNT_RANDOM_FACTOR - ANSWER_COUNT_RANDOM_FACTOR));
   }
 
   private List<Answer> generateRandomizedChoiceAnswers(

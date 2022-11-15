@@ -44,6 +44,7 @@ import net.particify.arsnova.core.model.RoomMembership;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.persistence.RoomRepository;
 import net.particify.arsnova.core.security.AuthenticationService;
+import net.particify.arsnova.core.security.PasswordUtils;
 import net.particify.arsnova.core.security.RoomRole;
 import net.particify.arsnova.core.web.exceptions.NotFoundException;
 
@@ -53,6 +54,7 @@ import net.particify.arsnova.core.web.exceptions.NotFoundException;
 @Service
 @Primary
 public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements RoomService {
+  private static final int SHORT_ID_LENGTH = 8;
   private static final long DELETE_SCHEDULED_ROOMS_INTERVAL_MS = 30 * 60 * 1000L;
 
   private static final Logger logger = LoggerFactory.getLogger(RoomServiceImpl.class);
@@ -63,6 +65,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
   private AccessTokenService accessTokenService;
 
+  private PasswordUtils passwordUtils;
+
   private ConnectorClient connectorClient;
 
   @Value("${system.inactivity-thresholds.delete-inactive-guest-rooms:0}")
@@ -72,6 +76,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
       final RoomRepository repository,
       final AuthenticationService authenticationService,
       final AccessTokenService accessTokenService,
+      final PasswordUtils passwordUtils,
       @Qualifier("defaultJsonMessageConverter")
       final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
       final Validator validator) {
@@ -79,6 +84,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
     this.roomRepository = repository;
     this.authenticationService = authenticationService;
     this.accessTokenService = accessTokenService;
+    this.passwordUtils = passwordUtils;
   }
 
   public static class RoomNameComparator implements Comparator<Room>, Serializable {
@@ -155,13 +161,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
   }
 
   public String generateShortId() {
-    final int low = 10000000;
-    final int high = 100000000;
-    final String keyword = String
-        .valueOf((int) (Math.random() * (high - low) + low));
-
-    if (isShortIdAvailable(keyword)) {
-      return keyword;
+    final String shortId = passwordUtils.generateFixedLengthNumericCode(SHORT_ID_LENGTH);
+    if (isShortIdAvailable(shortId)) {
+      return shortId;
     }
     return generateShortId();
   }

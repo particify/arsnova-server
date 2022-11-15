@@ -28,7 +28,10 @@ public class PasswordUtils {
   }
 
   public String generateFixedLengthNumericCode(final int length) {
-    final long code = Math.abs(secureRandom.nextLong());
-    return String.format("%0" + length + "d", code).substring(0, length);
+    final long code = secureRandom.nextLong(Long.MAX_VALUE);
+    // Reverse the string (the first digits have less randomness) and prepend
+    // zeros if code is shorter than length.
+    return new StringBuilder(String.format("%0" + length + "d", code))
+        .reverse().substring(0, length);
   }
 }
