@@ -107,7 +107,9 @@ public class CsvService {
 
   private char detectSeparator(final byte[] bytes) {
     final String firstLine =
-        new String(Arrays.copyOfRange(bytes, 0, Math.min(MAX_SEARCH_BYTES, bytes.length)))
+        new String(
+            Arrays.copyOfRange(bytes, 0, Math.min(MAX_SEARCH_BYTES, bytes.length)),
+            StandardCharsets.UTF_8)
             .lines().findFirst().orElse("");
     return firstLine.contains("\t") ? '\t' : (firstLine.contains(";") ? ';' : ',');
   }

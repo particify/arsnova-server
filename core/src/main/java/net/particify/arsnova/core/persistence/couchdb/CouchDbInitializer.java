@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,13 +87,16 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware {
 
   protected void loadDesignDocFiles() throws IOException, ScriptException {
     final ScriptEngine engine = new ScriptEngineManager().getEngineByMimeType("application/javascript");
-    engine.eval(new InputStreamReader(new ClassPathResource("couchdb/jsToJson.js").getInputStream()));
+    engine.eval(new InputStreamReader(
+        new ClassPathResource("couchdb/jsToJson.js").getInputStream(),
+        StandardCharsets.UTF_8));
 
     final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
     final Resource[] resources = resolver.getResources("classpath:couchdb/*.design.js");
     for (final Resource resource : resources) {
       logger.debug("Loading CouchDB design doc: {}", resource.getFilename());
-      final String js = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
+      final String js = FileCopyUtils.copyToString(
+          new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
       /* Reset designDoc before parsing a new one. */
       engine.eval("var designDoc = null;" + js);
       final Map<String, Object> jsonObject = (Map<String, Object>) engine.eval("jsToJson(designDoc)");
