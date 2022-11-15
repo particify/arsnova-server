@@ -151,7 +151,6 @@ public class CommentCommandHandler {
     }
 
     boolean wasAck = c.isAck();
-    boolean wasFavorited = c.isFavorite();
 
     if (c.getId() != null) {
       try {

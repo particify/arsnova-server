@@ -347,11 +347,7 @@ public class SecurityConfig {
 
   @Bean
   LoginAuthenticationSucessHandler successHandler() {
-    final LoginAuthenticationSucessHandler successHandler =
-        new LoginAuthenticationSucessHandler(systemProperties, servletContext);
-    successHandler.setTargetUrl(rootUrl);
-
-    return successHandler;
+    return new LoginAuthenticationSucessHandler(systemProperties, servletContext);
   }
 
   @Bean

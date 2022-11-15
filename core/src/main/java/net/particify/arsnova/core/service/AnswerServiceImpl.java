@@ -455,10 +455,5 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     update(answer);
   }
 
-  private static class TextStatEntry {
-    private List<String> variants;
-    private int count;
-  }
-
   private record AnswerUniqueKey(String userId, String contentId) { }
 }
