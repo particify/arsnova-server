@@ -86,7 +86,7 @@ public class LmsCourseController {
   }
 
   @JsonView(View.Public.class)
-  private class LmsCourseMembership {
+  private static class LmsCourseMembership {
     private String id;
     private String fullname;
     private Instant startdate;

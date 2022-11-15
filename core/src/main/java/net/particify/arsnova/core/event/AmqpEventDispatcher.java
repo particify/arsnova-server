@@ -111,7 +111,7 @@ public class AmqpEventDispatcher {
     return mapper;
   }
 
-  private class RoomDuplicationMessage {
+  private static class RoomDuplicationMessage {
     private String originalRoomId;
     private String duplicatedRoomId;
 

@@ -8,7 +8,7 @@ public class TextAnswerCreated extends WebSocketMessage<TextAnswerCreated.TextAn
     this.setPayload(new TextAnswerCreatedPayload(textAnswer));
   }
 
-  public class TextAnswerCreatedPayload implements WebSocketPayload {
+  public static class TextAnswerCreatedPayload implements WebSocketPayload {
     private String id;
     private String body;
 
