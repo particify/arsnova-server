@@ -187,6 +187,15 @@ seed_gradle_ro_cache() {
     sh -c 'gradle getDeps -x compileJava -x compileKotlin --continue --no-daemon && cp -a /home/gradle/.gradle/caches/modules-2 /home/gradle/.gradle-ro-dep-cache/ && rm -f /home/gradle/.gradle-ro-dep-cache/modules-2/modules-2.lock /home/gradle/.gradle-ro-dep-cache/modules-2/gc.properties'
 }
 
+start_dev_server() {
+  if [ -f "$LOCAL_ROOT_DIR/$PROJECT/build.gradle.kts" ]; then
+    docker compose -f "$PDK_COMPOSE_FILE" restart "$SERVICE"
+    docker compose -f "$PDK_COMPOSE_FILE" exec -it -u dev "$SERVICE" sh -c "/post-attach.sh && trap '{ echo; echo \"Starting production server...\"; }' INT && cd /workspace/$PROJECT && ../gradlew bootRun $@; exit"
+  else
+    echo "Service $SERVICE is not supported."
+  fi
+}
+
 migrate_postgresql_data() {
   set -e
   postgresql_migration_image=tianon/postgres-upgrade
@@ -330,6 +339,17 @@ case $COMMAND in
     shift 1
     docker compose -f "$PDK_COMPOSE_FILE" $@
     ;;
+  dev-server|d)
+    if [ -z "$SERVICE" ]; then
+      echo Missing or invalid service arg.
+      exit 1
+    fi
+    if [ ! -f "$PDK_COMPOSE_FILE" ]; then
+      update_config
+    fi
+    shift 2
+    start_dev_server $@
+    ;;
   *)
     echo Usage:
     # PDK_CMD can be set by a wrapper script
@@ -344,5 +364,6 @@ case $COMMAND in
     echo "    $PDK_CMD build            (Re-)build Devcontainers"
     echo "    $PDK_CMD logs             Show logs or the log for a specific service"
     echo "    $PDK_CMD compose          Execute a Docker Compose command"
+    echo "    $PDK_CMD dev-server       Starts a development server"
     ;;
 esac
