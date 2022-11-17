@@ -117,6 +117,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	@Override
 	public List<T> get(final Iterable<String> ids) {
 		final Map<String, Optional<T>> cachedEntities = StreamSupport.stream(ids.spliterator(), false)
+				.distinct()
 				.map(id -> Map.entry(id, Optional.ofNullable(getCachedOrNull(id))))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		final List<String> missingIds = cachedEntities.entrySet().stream()
