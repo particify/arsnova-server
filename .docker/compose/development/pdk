@@ -1,7 +1,6 @@
 #!/bin/bash
 PATH=$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin/:$PATH
 COMMAND=$1
-PROJECT=$2
 
 COMPOSE_DIR=$(dirname $(readlink -f $0))
 LOCAL_COMPOSE_DIR=$COMPOSE_DIR
@@ -75,6 +74,24 @@ merge_env() {
   set +a
   # Restore env (priortize passed env vars over loaded env vars)
   export $CURRENT_ENV >/dev/null
+}
+
+# Expects argument to be either a project path or service name. Determines path
+# from service name and vice versa. Sets PROJECT and SERVICE variables
+# accordingly.
+set_project_variables() {
+  project_or_service=${1%/}
+  if [ -n "${PROJECT_DIRS[$project_or_service]}" ]; then
+    PROJECT=${PROJECT_DIRS[$project_or_service]}
+    SERVICE=$project_or_service
+  else
+    for svc in "${!PROJECT_DIRS[@]}"; do
+      if [ "$project_or_service" = "${PROJECT_DIRS[$svc]}" ]; then
+        PROJECT=$project_or_service
+        SERVICE=$svc
+      fi
+    done
+  fi
 }
 
 # Determine the image tags using the following priority:
@@ -253,6 +270,9 @@ if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
 fi
 
 init_gitmodules
+if [ -n "$2" ]; then
+  set_project_variables "$2"
+fi
 
 case $COMMAND in
   update|u)
@@ -278,11 +298,11 @@ case $COMMAND in
     prompt_image_tags
     ;;
   open|o)
-    if [ -d "$LOCAL_ROOT_DIR/$PROJECT" ]; then
+    if [ -n "$PROJECT" ] && [ -d "$LOCAL_ROOT_DIR/$PROJECT" ]; then
       update_config
       devcontainer open "$LOCAL_ROOT_DIR/$PROJECT"
     else
-      echo ERROR: Invalid project
+      echo ERROR: Invalid project path or service name
       exit 1
     fi
     ;;
