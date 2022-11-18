@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import net.particify.arsnova.comments.config.RabbitConfig;
 import net.particify.arsnova.comments.exception.BadRequestException;
 import net.particify.arsnova.comments.exception.ForbiddenException;
-import net.particify.arsnova.comments.model.BonusToken;
 import net.particify.arsnova.comments.model.Comment;
 import net.particify.arsnova.comments.model.CommentStats;
 import net.particify.arsnova.comments.model.Settings;
@@ -40,7 +39,6 @@ import net.particify.arsnova.comments.model.event.CommentPatchedPayload;
 import net.particify.arsnova.comments.model.event.CommentUpdated;
 import net.particify.arsnova.comments.model.event.CommentUpdatedPayload;
 import net.particify.arsnova.comments.security.PermissionEvaluator;
-import net.particify.arsnova.comments.service.BonusTokenService;
 import net.particify.arsnova.comments.service.CommentService;
 import net.particify.arsnova.comments.service.SettingsService;
 
@@ -50,7 +48,6 @@ public class CommentCommandHandler {
 
   private final AmqpTemplate messagingTemplate;
   private final CommentService service;
-  private final BonusTokenService bonusTokenService;
   private final SettingsService settingsService;
   private final PermissionEvaluator permissionEvaluator;
 
@@ -58,13 +55,11 @@ public class CommentCommandHandler {
   public CommentCommandHandler(
       AmqpTemplate messagingTemplate,
       CommentService service,
-      BonusTokenService bonusTokenService,
       SettingsService settingsService,
       PermissionEvaluator permissionEvaluator
   ) {
     this.messagingTemplate = messagingTemplate;
     this.service = service;
-    this.bonusTokenService = bonusTokenService;
     this.settingsService = settingsService;
     this.permissionEvaluator = permissionEvaluator;
   }
@@ -164,22 +159,6 @@ public class CommentCommandHandler {
 
         CommentPatchedPayload payload = new CommentPatchedPayload(patched.getId(), p.getChanges());
         CommentPatched event = new CommentPatched(payload, patched.getRoomId());
-
-        if (!wasFavorited && patched.isFavorite()) {
-          BonusToken bt = new BonusToken();
-          Date now = new Date();
-          bt.setRoomId(patched.getRoomId());
-          bt.setCommentId(patched.getId());
-          bt.setUserId(patched.getCreatorId());
-          bt.setTimestamp(now);
-
-          logger.debug("Creating token as a side effect: {}", bt);
-
-          bonusTokenService.create(bt);
-
-        } else if (wasFavorited && !patched.isFavorite()) {
-          bonusTokenService.deleteByPK(patched.getRoomId(), patched.getId(), patched.getCreatorId());
-        }
 
         if (!wasAck && patched.isAck()) {
           CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(patched);
