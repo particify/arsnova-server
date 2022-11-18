@@ -9,11 +9,7 @@ plugins {
   id("org.springframework.boot") version "3.0.0-RC2"
 }
 
-group = "net.particify.arsnova"
-version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
-
-extra["gitlabHost"] = "gitlab.com"
 
 repositories {
   mavenCentral()

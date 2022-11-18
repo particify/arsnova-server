@@ -10,16 +10,7 @@ plugins {
   kotlin("plugin.spring") version "1.7.21"
 }
 
-group = "net.particify.arsnova"
-version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
-
-repositories {
-  mavenCentral()
-  maven {
-    url = uri("https://repo.spring.io/milestone")
-  }
-}
 
 extra["springCloudVersion"] = "2022.0.0-RC1"
 
