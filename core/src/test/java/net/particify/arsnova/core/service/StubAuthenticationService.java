@@ -21,35 +21,22 @@ package net.particify.arsnova.core.service;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.validation.Validator;
 
-import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
-import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.model.UserProfile;
-import net.particify.arsnova.core.persistence.UserRepository;
-import net.particify.arsnova.core.security.PasswordUtils;
+import net.particify.arsnova.core.security.AuthenticationService;
 import net.particify.arsnova.core.security.User;
+import net.particify.arsnova.core.security.jwt.JwtService;
 
-public class StubUserService extends UserServiceImpl {
+public class StubAuthenticationService extends AuthenticationService {
   private final Set<GrantedAuthority> grantedAuthorities;
   private User stubUser = null;
 
-  public StubUserService(
-      final UserRepository repository,
-      final SystemProperties systemProperties,
+  public StubAuthenticationService(
       final SecurityProperties securityProperties,
-      final AuthenticationProviderProperties authenticationProviderProperties,
-      final EmailService emailService,
-      @Qualifier("defaultJsonMessageConverter")
-      final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
-      final Validator validator,
-      final PasswordUtils passwordUtils) {
-    super(repository, systemProperties, securityProperties, authenticationProviderProperties,
-        emailService, jackson2HttpMessageConverter, validator, passwordUtils);
+      final JwtService jwtService) {
+    super(securityProperties, jwtService);
     grantedAuthorities = new HashSet<>();
     grantedAuthorities.add(User.ROLE_USER);
   }

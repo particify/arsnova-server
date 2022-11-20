@@ -18,6 +18,7 @@ import net.particify.arsnova.core.config.properties.TemplateProperties;
 import net.particify.arsnova.core.model.AccessToken;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.persistence.AccessTokenRepository;
+import net.particify.arsnova.core.security.AuthenticationService;
 import net.particify.arsnova.core.security.PasswordUtils;
 import net.particify.arsnova.core.security.RoomRole;
 import net.particify.arsnova.core.security.User;
@@ -30,7 +31,7 @@ public class AccessTokenServiceImpl extends DefaultEntityServiceImpl<AccessToken
   private final AccessTokenRepository accessTokenRepository;
   private final PasswordUtils passwordUtils;
   private final EmailService emailService;
-  private final UserService userService;
+  private final AuthenticationService authenticationService;
   private final TemplateProperties templateProperties;
   private final SystemProperties systemProperties;
 
@@ -43,14 +44,14 @@ public class AccessTokenServiceImpl extends DefaultEntityServiceImpl<AccessToken
       final Validator validator,
       final PasswordUtils passwordUtils,
       final EmailService emailService,
-      final UserService userService,
+      final AuthenticationService authenticationService,
       final TemplateProperties templateProperties,
       final SystemProperties systemProperties) {
     super(AccessToken.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
     this.accessTokenRepository = repository;
     this.passwordUtils = passwordUtils;
     this.emailService = emailService;
-    this.userService = userService;
+    this.authenticationService = authenticationService;
     this.templateProperties = templateProperties;
     this.systemProperties = systemProperties;
   }
@@ -79,7 +80,7 @@ public class AccessTokenServiceImpl extends DefaultEntityServiceImpl<AccessToken
 
   @Override
   public Optional<RoomRole> redeemToken(final String roomId, final String token) {
-    final User user = userService.getCurrentUser();
+    final User user = authenticationService.getCurrentUser();
     final Optional<AccessToken> accessToken = accessTokenRepository.findByRoomIdAndToken(roomId, token)
         .filter(t -> t.getUserId() == null || t.getUserId().equals(user.getId()));
     accessToken.ifPresent(t -> {

@@ -43,6 +43,7 @@ import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.RoomMembership;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.persistence.RoomRepository;
+import net.particify.arsnova.core.security.AuthenticationService;
 import net.particify.arsnova.core.security.RoomRole;
 import net.particify.arsnova.core.web.exceptions.NotFoundException;
 
@@ -58,7 +59,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
   private RoomRepository roomRepository;
 
-  private UserService userService;
+  private AuthenticationService authenticationService;
 
   private AccessTokenService accessTokenService;
 
@@ -69,14 +70,14 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
   public RoomServiceImpl(
       final RoomRepository repository,
-      final UserService userService,
+      final AuthenticationService authenticationService,
       final AccessTokenService accessTokenService,
       @Qualifier("defaultJsonMessageConverter")
       final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
       final Validator validator) {
     super(Room.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
     this.roomRepository = repository;
-    this.userService = userService;
+    this.authenticationService = authenticationService;
     this.accessTokenService = accessTokenService;
   }
 
@@ -140,7 +141,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
     room.setShortId(generateShortId());
     if (room.getOwnerId() == null) {
-      room.setOwnerId(userService.getCurrentUser().getId());
+      room.setOwnerId(authenticationService.getCurrentUser().getId());
     }
     room.setClosed(false);
   }
@@ -205,7 +206,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
           room.getLmsCourseId());
       return Optional.empty();
     }
-    final String loginId = userService.getCurrentUser().getUsername();
+    final String loginId = authenticationService.getCurrentUser().getUsername();
     final Membership lmsMembership = connectorClient.getMembership(loginId, room.getLmsCourseId());
     return lmsMembership.isMember()
         ? Optional.of(new RoomMembership(room, RoomRole.PARTICIPANT))

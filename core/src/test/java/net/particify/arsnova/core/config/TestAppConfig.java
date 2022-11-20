@@ -24,7 +24,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -35,20 +34,15 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.SimpleThreadScope;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.validation.Validator;
 
 import net.particify.arsnova.core.CoreApplication;
-import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
 import net.particify.arsnova.core.config.properties.MessageBrokerProperties;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
-import net.particify.arsnova.core.persistence.UserRepository;
-import net.particify.arsnova.core.security.PasswordUtils;
-import net.particify.arsnova.core.service.EmailService;
-import net.particify.arsnova.core.service.StubUserService;
+import net.particify.arsnova.core.security.jwt.JwtService;
+import net.particify.arsnova.core.service.StubAuthenticationService;
 
 @TestConfiguration
 @ComponentScan({
@@ -88,20 +82,12 @@ public class TestAppConfig {
     return configurer;
   }
 
-  @Bean("userServiceImpl")
+  @Bean("authenticationService")
   @Primary
-  public StubUserService stubUserService(
-      final UserRepository repository,
-      final SystemProperties systemProperties,
+  public StubAuthenticationService stubAuthenticationService(
       final SecurityProperties securityProperties,
-      final AuthenticationProviderProperties authenticationProviderProperties,
-      final EmailService emailService,
-      @Qualifier("defaultJsonMessageConverter")
-      final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
-      final Validator validator,
-      final PasswordUtils passwordUtils) {
-    return new StubUserService(repository, systemProperties, securityProperties, authenticationProviderProperties,
-        emailService, jackson2HttpMessageConverter, validator, passwordUtils);
+      final JwtService jwtService) {
+    return new StubAuthenticationService(securityProperties, jwtService);
   }
 
   @Bean

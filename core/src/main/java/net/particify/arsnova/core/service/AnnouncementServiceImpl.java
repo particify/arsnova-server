@@ -9,22 +9,23 @@ import org.springframework.validation.Validator;
 
 import net.particify.arsnova.core.model.Announcement;
 import net.particify.arsnova.core.persistence.AnnouncementRepository;
+import net.particify.arsnova.core.security.AuthenticationService;
 
 @Service
 @Primary
 public class AnnouncementServiceImpl extends DefaultEntityServiceImpl<Announcement> implements AnnouncementService {
   private AnnouncementRepository announcementRepository;
-  private UserService userService;
+  private AuthenticationService authenticationService;
 
   public AnnouncementServiceImpl(
       final AnnouncementRepository repository,
       @Qualifier("defaultJsonMessageConverter")
       final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
       final Validator validator,
-      final UserService userService) {
+      final AuthenticationService authenticationService) {
     super(Announcement.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
     this.announcementRepository = repository;
-    this.userService = userService;
+    this.authenticationService = authenticationService;
   }
 
   @Override
@@ -41,7 +42,7 @@ public class AnnouncementServiceImpl extends DefaultEntityServiceImpl<Announceme
 
   @Override
   protected void prepareCreate(final Announcement announcement) {
-    final String creatorId = userService.getCurrentUser().getId();
+    final String creatorId = authenticationService.getCurrentUser().getId();
     announcement.setCreatorId(creatorId);
   }
 }

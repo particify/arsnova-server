@@ -33,36 +33,26 @@ import org.apache.commons.lang.StringUtils;
 import org.ektorp.DbAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
 import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
-import net.particify.arsnova.core.model.ClientAuthentication;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.persistence.UserRepository;
-import net.particify.arsnova.core.security.GuestUserDetailsService;
 import net.particify.arsnova.core.security.PasswordUtils;
 import net.particify.arsnova.core.security.User;
-import net.particify.arsnova.core.security.jwt.JwtService;
-import net.particify.arsnova.core.security.jwt.JwtToken;
 import net.particify.arsnova.core.service.exceptions.UserAlreadyExistsException;
 import net.particify.arsnova.core.web.exceptions.BadRequestException;
 import net.particify.arsnova.core.web.exceptions.NotFoundException;
@@ -73,11 +63,6 @@ import net.particify.arsnova.core.web.exceptions.NotFoundException;
 @Service
 @Primary
 public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> implements UserService {
-
-  private static final int LOGIN_TRY_RESET_DELAY_MS = 30 * 1000;
-
-  private static final int LOGIN_BAN_RESET_DELAY_MS = 2 * 60 * 1000;
-
   private static final int MAIL_RESEND_TRY_RESET_DELAY_MS = 30 * 1000;
 
   private static final int MAIL_RESEND_BAN_RESET_DELAY_MS = 2 * 60 * 1000;
@@ -103,37 +88,20 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
   private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-  /* for the new STOMP over ws functionality */
-  private static final ConcurrentHashMap<String, String> wsSessionIdToJwt = new ConcurrentHashMap<>();
-
   private UserRepository userRepository;
-  private JwtService jwtService;
   private PasswordUtils passwordUtils;
   private EmailService emailService;
 
   private SecurityProperties securityProperties;
   private AuthenticationProviderProperties.Registered registeredProperties;
 
-  @Autowired(required = false)
-  private GuestUserDetailsService guestUserDetailsService;
-
-  @Autowired(required = false)
-  private DaoAuthenticationProvider daoProvider;
-
-  @Autowired(required = false)
-  private LdapAuthenticationProvider ldapAuthenticationProvider;
-
   private String rootUrl;
 
   private Pattern mailPattern;
-  private ConcurrentHashMap<String, Byte> loginTries;
-  private Set<String> loginBans;
   private ConcurrentHashMap<String, Byte> resentMailCount;
   private Set<String> resendMailBans;
 
   {
-    loginTries = new ConcurrentHashMap<>();
-    loginBans = Collections.synchronizedSet(new HashSet<String>());
     resentMailCount = new ConcurrentHashMap<>();
     resendMailBans = Collections.synchronizedSet(new HashSet<String>());
   }
@@ -155,22 +123,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
     this.passwordUtils = passwordUtils;
     this.emailService = emailService;
     this.rootUrl = systemProperties.getRootUrl();
-  }
-
-  @Scheduled(fixedDelay = LOGIN_TRY_RESET_DELAY_MS)
-  public void resetLoginTries() {
-    if (!loginTries.isEmpty()) {
-      logger.debug("Resetting counters for failed logins.");
-      loginTries.clear();
-    }
-  }
-
-  @Scheduled(fixedDelay = LOGIN_BAN_RESET_DELAY_MS)
-  public void resetLoginBans() {
-    if (!loginBans.isEmpty()) {
-      logger.info("Clearing temporary bans for failed logins ({}).", loginBans.size());
-      loginBans.clear();
-    }
   }
 
   @Scheduled(fixedDelay = MAIL_RESEND_TRY_RESET_DELAY_MS)
@@ -210,58 +162,13 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
   }
 
   @Override
-  public User getCurrentUser() {
-    final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
-      return null;
-    }
-
-    return (User) authentication.getPrincipal();
-  }
-
-  @Override
-  public net.particify.arsnova.core.model.ClientAuthentication getCurrentClientAuthentication(final boolean refresh) {
-    final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
-      return null;
-    }
-    final User user = (User) authentication.getPrincipal();
-    final String jwt = !refresh && authentication instanceof JwtToken
-        ? (String) authentication.getCredentials() : jwtService.createSignedToken(user, false);
-
-    final ClientAuthentication clientAuthentication =
-        new ClientAuthentication(user.getId(), user.getUsername(),
-            user.getAuthProvider(), jwt);
-
-    return clientAuthentication;
-  }
-
-  @Override
   public boolean isAdmin(final String loginId, final UserProfile.AuthProvider authProvider) {
     return securityProperties.getAdminAccounts().contains(
         new SecurityProperties.AdminAccount(loginId, authProvider));
   }
 
-  private boolean isBannedFromLogin(final String addr) {
-    return loginBans.contains(addr);
-  }
-
   private boolean isBannedFromSendingActivationMail(final String addr) {
     return resendMailBans.contains(addr);
-  }
-
-  private void increaseFailedLoginCount(final String addr) {
-    Byte tries = loginTries.get(addr);
-    if (null == tries) {
-      tries = 0;
-    }
-    if (tries < securityProperties.getLoginTryLimit()) {
-      loginTries.put(addr, ++tries);
-      if (securityProperties.getLoginTryLimit() == tries) {
-        logger.info("Temporarily banned {} from login.", addr);
-        loginBans.add(addr);
-      }
-    }
   }
 
   private void increaseSentMailCount(final String addr) {
@@ -277,47 +184,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
         resendMailBans.add(addr);
       }
     }
-  }
-
-  @Override
-  public void authenticate(final UsernamePasswordAuthenticationToken token,
-      final UserProfile.AuthProvider authProvider, final String clientAddress) {
-    if (isBannedFromLogin(clientAddress)) {
-      throw new BadRequestException();
-    }
-
-    final Authentication auth;
-    switch (authProvider) {
-      case LDAP:
-        auth = ldapAuthenticationProvider.authenticate(token);
-        break;
-      case ARSNOVA:
-        auth = daoProvider.authenticate(token);
-        break;
-      case ARSNOVA_GUEST:
-        String id = token.getName();
-        boolean autoCreate = false;
-        if (id == null || id.isEmpty()) {
-          id = generateGuestId();
-          autoCreate = true;
-        }
-        final UserDetails userDetails = guestUserDetailsService.loadUserByUsername(id, autoCreate);
-        if (userDetails == null) {
-          throw new UsernameNotFoundException("Guest user does not exist");
-        }
-        auth = new UsernamePasswordAuthenticationToken(
-            userDetails, null, userDetails.getAuthorities());
-
-        break;
-      default:
-        throw new IllegalArgumentException("Unsupported authentication provider");
-    }
-
-    if (!auth.isAuthenticated()) {
-      increaseFailedLoginCount(clientAddress);
-      throw new BadRequestException();
-    }
-    SecurityContextHolder.getContext().setAuthentication(auth);
   }
 
   @Override
@@ -633,38 +499,15 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
     return true;
   }
 
+  public String generateGuestId() {
+    return passwordUtils.generateKey();
+  }
+
   private void sendEmail(final UserProfile userProfile, final String subject, final String body) {
     emailService.sendEmail(userProfile.getLoginId(), subject, body);
   }
 
-  private String generateGuestId() {
-    return passwordUtils.generateKey();
-  }
-
   private String generateVerificationCode() {
     return passwordUtils.generateFixedLengthNumericCode(VERIFICATION_CODE_LENGTH);
-  }
-
-  @Autowired
-  @Lazy
-  public void setJwtService(final JwtService jwtService) {
-    this.jwtService = jwtService;
-  }
-
-  public void addWsSessionToJwtMapping(final String wsSessionId, final String jwt) {
-    wsSessionIdToJwt.put(wsSessionId, jwt);
-  }
-
-  public User getAuthenticatedUserByWsSession(final String wsSessionId) {
-    final String jwt = wsSessionIdToJwt.getOrDefault(wsSessionId, null);
-    if (jwt == null) {
-      return null;
-    }
-    final User u = jwtService.verifyToken(jwt);
-    if (u == null) {
-      return null;
-    }
-
-    return u;
   }
 }

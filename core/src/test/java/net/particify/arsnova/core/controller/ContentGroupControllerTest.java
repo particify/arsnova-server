@@ -45,7 +45,7 @@ import net.particify.arsnova.core.persistence.ContentRepository;
 import net.particify.arsnova.core.persistence.RoomRepository;
 import net.particify.arsnova.core.security.User;
 import net.particify.arsnova.core.service.ContentGroupService;
-import net.particify.arsnova.core.service.StubUserService;
+import net.particify.arsnova.core.service.StubAuthenticationService;
 import net.particify.arsnova.core.test.context.support.WithMockUser;
 
 @SpringBootTest
@@ -61,7 +61,7 @@ public class ContentGroupControllerTest {
   private WebApplicationContext webApplicationContext;
 
   @Autowired
-  private StubUserService stubUserService;
+  private StubAuthenticationService stubAuthenticationService;
 
   @Autowired
   private ContentGroupService contentGroupService;
@@ -84,8 +84,8 @@ public class ContentGroupControllerTest {
     Mockito.reset(roomRepository, contentRepository);
 
     // Name and user need to match @WithMockUser annotation
-    stubUserService.setUserAuthenticated(true, "TestUser", "1234");
-    user = stubUserService.getCurrentUser();
+    stubAuthenticationService.setUserAuthenticated(true, "TestUser", "1234");
+    user = stubAuthenticationService.getCurrentUser();
   }
 
   @Test

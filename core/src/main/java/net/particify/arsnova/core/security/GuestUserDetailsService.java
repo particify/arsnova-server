@@ -55,7 +55,10 @@ public class GuestUserDetailsService implements UserDetailsService {
     return loadUserByUsername(loginId, false);
   }
 
-  public UserDetails loadUserByUsername(final String loginId, final boolean autoCreate) {
+  public UserDetails loadUserByUsername(String loginId, final boolean autoCreate) {
+    if (autoCreate) {
+      loginId = userService.generateGuestId();
+    }
     return userService.loadUser(UserProfile.AuthProvider.ARSNOVA_GUEST, loginId,
         defaultGrantedAuthorities, autoCreate);
   }
