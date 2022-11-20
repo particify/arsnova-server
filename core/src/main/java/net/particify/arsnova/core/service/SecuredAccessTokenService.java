@@ -5,6 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.model.AccessToken;
+import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.security.RoomRole;
 
 @Service
@@ -26,12 +27,12 @@ public class SecuredAccessTokenService extends AbstractSecuredEntityServiceImpl<
   }
 
   @Override
-  @PreAuthorize("hasPermission(#roomId, 'room', 'owner')")
+  @PreAuthorize("hasPermission(#room, 'owner')")
   public AccessToken generateAndSendInvite(
-      final String roomId,
+      final Room room,
       final RoomRole roomRole,
       final String emailAddress) {
-    return accessTokenService.generateAndSendInvite(roomId, roomRole, emailAddress);
+    return accessTokenService.generateAndSendInvite(room, roomRole, emailAddress);
   }
 
   @Override

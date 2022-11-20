@@ -6,7 +6,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -35,8 +34,6 @@ public class AccessTokenServiceImpl extends DefaultEntityServiceImpl<AccessToken
   private final TemplateProperties templateProperties;
   private final SystemProperties systemProperties;
 
-  private RoomService roomService;
-
   public AccessTokenServiceImpl(
       final AccessTokenRepository repository,
       @Qualifier("defaultJsonMessageConverter")
@@ -56,11 +53,6 @@ public class AccessTokenServiceImpl extends DefaultEntityServiceImpl<AccessToken
     this.systemProperties = systemProperties;
   }
 
-  @Autowired
-  public void setRoomService(final RoomService roomService) {
-    this.roomService = roomService;
-  }
-
   public AccessToken generate(final String roomId, final RoomRole roomRole) {
     final AccessToken accessToken = new AccessToken();
     accessToken.setRoomId(roomId);
@@ -72,9 +64,9 @@ public class AccessTokenServiceImpl extends DefaultEntityServiceImpl<AccessToken
   }
 
   @Override
-  public AccessToken generateAndSendInvite(final String roomId, final RoomRole roomRole, final String emailAddress) {
-    final AccessToken accessToken = generate(roomId, roomRole);
-    sendInvite(accessToken, emailAddress);
+  public AccessToken generateAndSendInvite(final Room room, final RoomRole roomRole, final String emailAddress) {
+    final AccessToken accessToken = generate(room.getId(), roomRole);
+    sendInvite(room, accessToken, emailAddress);
     return accessToken;
   }
 
@@ -91,9 +83,8 @@ public class AccessTokenServiceImpl extends DefaultEntityServiceImpl<AccessToken
     return accessToken.map(t -> t.getRole());
   }
 
-  private void sendInvite(final AccessToken accessToken, final String emailAddress) {
+  private void sendInvite(final Room room, final AccessToken accessToken, final String emailAddress) {
     logger.debug("Sending invitation with token to {}: {}", emailAddress, accessToken);
-    final Room room = roomService.get(accessToken.getRoomId());
     final String url = MessageFormat.format(templateProperties.getRoomInvitationUrl(),
         room.getShortId(), accessToken.getToken(), systemProperties.getRootUrl());
     final String subject = MessageFormat.format(templateProperties.getRoomInvitationMailSubject(),
