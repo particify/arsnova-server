@@ -21,6 +21,7 @@ package net.particify.arsnova.core.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,6 +31,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
+import net.particify.arsnova.core.event.AfterDeletionEvent;
 import net.particify.arsnova.core.event.BeforeDeletionEvent;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.ContentGroup;
@@ -152,6 +154,30 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
       createOrUpdateContentGroup(contentGroup);
     } catch (final IOException e) {
       throw new BadRequestException("Could not import contents from CSV.", e);
+    }
+  }
+
+  @EventListener
+  public void handleContentGroupDeletion(final AfterDeletionEvent<ContentGroup> event) {
+    // Delete contents which were part of the deleted group and are not in
+    // any other group
+    final Set<String> idsWithGroup = getByRoomId(event.getEntity().getRoomId()).stream()
+            .flatMap(cg -> cg.getContentIds().stream()).collect(Collectors.toSet());
+    final List<String> idsForDeletion = event.getEntity().getContentIds().stream()
+            .filter(id -> !idsWithGroup.contains(id)).toList();
+    delete(get(idsForDeletion));
+  }
+
+  @EventListener
+  public void handleContentDeletion(final BeforeDeletionEvent<Content> event) {
+    final Content content = event.getEntity();
+    final List<ContentGroup> contentGroups = getByRoomId(content.getRoomId());
+    for (final ContentGroup contentGroup : contentGroups) {
+      final List<String> ids = contentGroup.getContentIds();
+      if (ids.contains(content.getId())) {
+        ids.remove(content.getId());
+        update(contentGroup);
+      }
     }
   }
 
