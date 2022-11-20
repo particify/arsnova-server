@@ -32,7 +32,6 @@ import net.particify.arsnova.comments.model.event.CommentDeletedPayload;
 import net.particify.arsnova.comments.model.event.CommentHighlighted;
 import net.particify.arsnova.comments.model.event.CommentHighlightedPayload;
 import net.particify.arsnova.comments.security.PermissionEvaluator;
-import net.particify.arsnova.comments.service.BonusTokenService;
 import net.particify.arsnova.comments.service.CommentService;
 import net.particify.arsnova.comments.service.SettingsService;
 
@@ -44,9 +43,6 @@ public class CommentCommandHandlerTest {
 
   @Mock
   private CommentService commentService;
-
-  @Mock
-  private BonusTokenService bonusTokenService;
 
   @Mock
   private SettingsService settingsService;
@@ -61,7 +57,6 @@ public class CommentCommandHandlerTest {
     commandHandler = new CommentCommandHandler(
         messagingTemplate,
         commentService,
-        bonusTokenService,
         settingsService,
         permissionEvaluator
     );
