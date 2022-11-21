@@ -184,7 +184,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
   @Scheduled(fixedDelay = MAIL_RESEND_BAN_RESET_DELAY_MS)
   public void resetResendingActivationBan() {
     if (!resendMailBans.isEmpty()) {
-      logger.info("Clearing temporary bans for resent activation mails ({}).", loginBans.size());
+      logger.info("Clearing temporary bans for resent activation mails ({}).", resendMailBans.size());
       resendMailBans.clear();
     }
   }
@@ -498,12 +498,14 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
       return null;
     }
     final UserProfile userProfile = get(id, true);
-    if (null == userProfile) {
-      logger.info("Reset of account activation failed. User {} does not exist.", id);
-      increaseFailedLoginCount(clientAddress);
+    if (userProfile == null || userProfile.getAccount().isActivated()) {
+      logger.info("Reset of account activation failed. No key exists for user {}.", id);
+      // No mail is sent, but we can use the same counter here.
+      increaseSentMailCount(clientAddress);
 
       throw new NotFoundException();
     }
+    increaseSentMailCount(clientAddress);
     sendActivationEmail(userProfile);
 
     return userProfile;
@@ -511,13 +513,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
   @Override
   public boolean activateAccount(final String id, final String key, final String clientAddress) {
-    if (isBannedFromLogin(clientAddress)) {
-      return false;
-    }
     final UserProfile userProfile = get(id, true);
     if (userProfile == null || !key.equals(userProfile.getAccount().getActivationKey())) {
-      increaseSentMailCount(clientAddress);
-
       if (userProfile != null) {
         final int failedVerifications = userProfile.getAccount().getFailedVerifications() + 1;
         userProfile.getAccount().setFailedVerifications(failedVerifications);
