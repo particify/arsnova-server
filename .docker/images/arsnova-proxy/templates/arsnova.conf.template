@@ -44,8 +44,8 @@ server {
     proxy_set_header X-Forwarded-Port $forwarded_port;
   }
 
-  # Include legacy config if it exists
-  include conf.d/legacy_redirect.conf.include*;
+  # Include additional route configs if available
+  include conf.d/*.app-routes.conf.include;
 }
 
 # Set server's scheme as fallback if request was not already forwarded.
