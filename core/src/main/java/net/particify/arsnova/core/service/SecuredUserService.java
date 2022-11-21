@@ -4,12 +4,10 @@ import java.util.Collection;
 import java.util.List;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import net.particify.arsnova.core.model.ClientAuthentication;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.security.User;
 
@@ -24,29 +22,9 @@ public class SecuredUserService extends AbstractSecuredEntityServiceImpl<UserPro
   }
 
   @Override
-  @PreAuthorize("denyAll")
-  public User getCurrentUser() {
-    return userService.getCurrentUser();
-  }
-
-  @Override
-  // @PreAuthorize("permitAll")
-  public ClientAuthentication getCurrentClientAuthentication(final boolean refresh) {
-    return userService.getCurrentClientAuthentication(refresh);
-  }
-
-  @Override
   @PreAuthorize("isAuthenticated")
   public boolean isAdmin(final String loginId, final UserProfile.AuthProvider authProvider) {
     return userService.isAdmin(loginId, authProvider);
-  }
-
-  @Override
-  // @PreAuthorize("permitAll")
-  public void authenticate(
-      final UsernamePasswordAuthenticationToken token,
-      final UserProfile.AuthProvider authProvider, final String clientAddress) {
-    userService.authenticate(token, authProvider, clientAddress);
   }
 
   @Override
@@ -125,5 +103,11 @@ public class SecuredUserService extends AbstractSecuredEntityServiceImpl<UserPro
   @Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
   public UserProfile resetActivation(final String id, final String clientAddress) {
     return userService.resetActivation(id, clientAddress);
+  }
+
+  @Override
+  @PreAuthorize("denyAll")
+  public String generateGuestId() {
+    return userService.generateGuestId();
   }
 }

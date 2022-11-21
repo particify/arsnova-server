@@ -32,7 +32,7 @@ import net.particify.arsnova.core.config.AppConfig;
 import net.particify.arsnova.core.config.TestAppConfig;
 import net.particify.arsnova.core.config.TestPersistanceConfig;
 import net.particify.arsnova.core.config.TestSecurityConfig;
-import net.particify.arsnova.core.service.StubUserService;
+import net.particify.arsnova.core.service.StubAuthenticationService;
 
 @SpringJUnitWebConfig({
     AppConfig.class,
@@ -42,7 +42,7 @@ import net.particify.arsnova.core.service.StubUserService;
 @ActiveProfiles("test")
 public abstract class AbstractControllerTest {
 
-  @Autowired protected StubUserService userService;
+  @Autowired protected StubAuthenticationService authenticationService;
 
   public AbstractControllerTest() {
     super();
@@ -53,16 +53,16 @@ public abstract class AbstractControllerTest {
     if (isAuthenticated) {
       final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
       SecurityContextHolder.getContext().setAuthentication(token);
-      userService.setUserAuthenticated(isAuthenticated, username);
+      authenticationService.setUserAuthenticated(isAuthenticated, username);
     } else {
-      userService.setUserAuthenticated(isAuthenticated);
+      authenticationService.setUserAuthenticated(isAuthenticated);
     }
   }
 
   @AfterEach
   public void cleanup() {
     SecurityContextHolder.clearContext();
-    userService.setUserAuthenticated(false);
+    authenticationService.setUserAuthenticated(false);
   }
 
 }

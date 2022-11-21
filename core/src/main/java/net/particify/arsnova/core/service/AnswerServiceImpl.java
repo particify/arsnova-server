@@ -66,6 +66,7 @@ import net.particify.arsnova.core.model.TextAnswerStatistics;
 import net.particify.arsnova.core.model.TextAnswerStatistics.TextRoundStatistics;
 import net.particify.arsnova.core.model.WordcloudContent;
 import net.particify.arsnova.core.persistence.AnswerRepository;
+import net.particify.arsnova.core.security.AuthenticationService;
 import net.particify.arsnova.core.security.User;
 import net.particify.arsnova.core.service.exceptions.AlreadyAnsweredContentException;
 import net.particify.arsnova.core.web.exceptions.NotFoundException;
@@ -86,11 +87,13 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   private ContentService contentService;
   private AnswerRepository answerRepository;
   private UserService userService;
+  private AuthenticationService authenticationService;
 
   public AnswerServiceImpl(
       final AnswerRepository repository,
       final RoomService roomService,
       final UserService userService,
+      final AuthenticationService authenticationService,
       @Qualifier("defaultJsonMessageConverter") final
       MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
       final Validator validator) {
@@ -98,6 +101,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     this.answerRepository = repository;
     this.roomService = roomService;
     this.userService = userService;
+    this.authenticationService = authenticationService;
   }
 
   @Autowired
@@ -156,7 +160,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       throw new NotFoundException();
     }
     return answerRepository.findByContentIdUserIdPiRound(
-        contentId, Answer.class, userService.getCurrentUser().getId(), content.getState().getRound());
+        contentId, Answer.class, authenticationService.getCurrentUser().getId(), content.getState().getRound());
   }
 
   @Override
@@ -387,7 +391,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
   @Override
   protected void prepareCreate(final Answer answer) {
-    final User user = userService.getCurrentUser();
+    final User user = authenticationService.getCurrentUser();
     final Content content = contentService.get(answer.getContentId());
     if (content == null) {
       throw new NotFoundException();

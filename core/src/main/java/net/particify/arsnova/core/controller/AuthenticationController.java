@@ -52,14 +52,14 @@ import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.model.ClientAuthentication;
 import net.particify.arsnova.core.model.LoginCredentials;
 import net.particify.arsnova.core.model.UserProfile;
+import net.particify.arsnova.core.security.AuthenticationService;
 import net.particify.arsnova.core.security.LoginAuthenticationSucessHandler;
-import net.particify.arsnova.core.service.UserService;
 import net.particify.arsnova.core.web.exceptions.NotImplementedException;
 
 @RestController
 @EntityRequestMapping("/auth")
 public class AuthenticationController {
-  private UserService userService;
+  private AuthenticationService authenticationService;
   private OidcClient oidcClient;
   private SAML2Client saml2Client;
   private Config oauthConfig;
@@ -67,12 +67,12 @@ public class AuthenticationController {
   private String apiPath;
 
   public AuthenticationController(
-      @Qualifier("securedUserService") final UserService userService,
+      final AuthenticationService authenticationService,
       final SystemProperties systemProperties,
       final ServletContext servletContext,
       @Qualifier("oauthConfig") final Config oauthConfig,
       @Autowired(required = false) @Qualifier("samlConfig") final Config samlConfig) {
-    this.userService = userService;
+    this.authenticationService = authenticationService;
     this.oauthConfig = oauthConfig;
     this.samlConfig = samlConfig;
     final String proxyPath = systemProperties.getApi().getProxyPath();
@@ -101,7 +101,7 @@ public class AuthenticationController {
       response.addCookie(cookie);
     }
 
-    final ClientAuthentication authentication = userService.getCurrentClientAuthentication(refresh);
+    final ClientAuthentication authentication = authenticationService.getCurrentClientAuthentication(refresh);
     if (authentication == null) {
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
@@ -114,16 +114,16 @@ public class AuthenticationController {
       @RequestBody(required = false) final LoginCredentials loginCredentials) {
     final String guestId = loginCredentials != null ? loginCredentials.getLoginId() : null;
     if (guestId == null) {
-      final ClientAuthentication currentAuthentication = userService.getCurrentClientAuthentication(false);
+      final ClientAuthentication currentAuthentication = authenticationService.getCurrentClientAuthentication(false);
       if (currentAuthentication != null
           && currentAuthentication.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA_GUEST) {
         return currentAuthentication;
       }
     }
-    userService.authenticate(new UsernamePasswordAuthenticationToken(guestId, null),
+    authenticationService.authenticate(new UsernamePasswordAuthenticationToken(guestId, null),
         UserProfile.AuthProvider.ARSNOVA_GUEST, request.getRemoteAddr());
 
-    return userService.getCurrentClientAuthentication(false);
+    return authenticationService.getCurrentClientAuthentication(false);
   }
 
   @PostMapping("/login/{providerId}")
@@ -134,17 +134,17 @@ public class AuthenticationController {
     switch (providerId) {
       case "registered":
         final String loginId = loginCredentials.getLoginId().toLowerCase();
-        userService.authenticate(new UsernamePasswordAuthenticationToken(
+        authenticationService.authenticate(new UsernamePasswordAuthenticationToken(
             loginId, loginCredentials.getPassword()),
             UserProfile.AuthProvider.ARSNOVA, request.getRemoteAddr());
 
-        return userService.getCurrentClientAuthentication(false);
+        return authenticationService.getCurrentClientAuthentication(false);
       case SecurityConfig.LDAP_PROVIDER_ID:
-        userService.authenticate(new UsernamePasswordAuthenticationToken(
+        authenticationService.authenticate(new UsernamePasswordAuthenticationToken(
             loginCredentials.getLoginId(), loginCredentials.getPassword()),
             UserProfile.AuthProvider.LDAP, request.getRemoteAddr());
 
-        return userService.getCurrentClientAuthentication(false);
+        return authenticationService.getCurrentClientAuthentication(false);
       default:
         throw new IllegalArgumentException("Invalid provider ID.");
     }

@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import net.particify.arsnova.core.model.AccessToken;
+import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.serialization.View;
 import net.particify.arsnova.core.security.RoomRole;
 import net.particify.arsnova.core.service.AccessTokenService;
+import net.particify.arsnova.core.service.RoomService;
 
 @RestController
 @RequestMapping(AccessTokenController.REQUEST_MAPPING)
@@ -21,11 +23,14 @@ public class AccessTokenController extends AbstractEntityController<AccessToken>
   public static final String INVITE_MAPPING = "/invite";
 
   private AccessTokenService accessTokenService;
+  private RoomService roomService;
 
   protected AccessTokenController(
-      @Qualifier("securedAccessTokenService") final AccessTokenService accessTokenService) {
+      @Qualifier("securedAccessTokenService") final AccessTokenService accessTokenService,
+      @Qualifier("securedRoomService") final RoomService roomService) {
     super(accessTokenService);
     this.accessTokenService = accessTokenService;
+    this.roomService = roomService;
   }
 
   @Override
@@ -46,8 +51,9 @@ public class AccessTokenController extends AbstractEntityController<AccessToken>
   public void generateAndSendInvite(
       @PathVariable final String roomId,
       @RequestBody final AccessTokenRequestEntity accessTokenRequestEntity) {
+    final Room room = roomService.get(roomId);
     accessTokenService.generateAndSendInvite(
-        roomId,
+        room,
         accessTokenRequestEntity.role,
         accessTokenRequestEntity.emailAddress);
   }

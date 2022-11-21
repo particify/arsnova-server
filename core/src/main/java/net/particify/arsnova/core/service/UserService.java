@@ -20,7 +20,6 @@ package net.particify.arsnova.core.service;
 
 import java.util.Collection;
 import java.util.List;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -31,14 +30,7 @@ import net.particify.arsnova.core.security.User;
  * The functionality the user service should provide.
  */
 public interface UserService extends EntityService<UserProfile> {
-  User getCurrentUser();
-
-  net.particify.arsnova.core.model.ClientAuthentication getCurrentClientAuthentication(boolean refresh);
-
   boolean isAdmin(String loginId, UserProfile.AuthProvider authProvider);
-
-  void authenticate(UsernamePasswordAuthenticationToken token, UserProfile.AuthProvider authProvider,
-      String clientAddress);
 
   User loadUser(UserProfile.AuthProvider authProvider, String loginId,
       Collection<GrantedAuthority> grantedAuthorities, boolean autoCreate) throws UsernameNotFoundException;
@@ -64,4 +56,6 @@ public interface UserService extends EntityService<UserProfile> {
   boolean resetPassword(String id, String key, String password);
 
   UserProfile resetActivation(String id, String clientAddress);
+
+  String generateGuestId();
 }

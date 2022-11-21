@@ -23,9 +23,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.EventListener;
@@ -33,11 +31,9 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
-import net.particify.arsnova.core.event.AfterDeletionEvent;
 import net.particify.arsnova.core.event.BeforeDeletionEvent;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
-import net.particify.arsnova.core.model.ContentGroup;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.WordcloudContent;
 import net.particify.arsnova.core.model.export.ContentExport;
@@ -54,8 +50,6 @@ import net.particify.arsnova.core.web.exceptions.NotFoundException;
 public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implements ContentService {
   private ContentRepository contentRepository;
 
-  private ContentGroupServiceImpl contentGroupService;
-
   private CsvService csvService;
 
   public ContentServiceImpl(
@@ -68,11 +62,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
     super(Content.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
     this.contentRepository = repository;
     this.csvService = csvService;
-  }
-
-  @Autowired
-  public void setContentGroupService(final ContentGroupServiceImpl contentGroupService) {
-    this.contentGroupService = contentGroupService;
   }
 
   @Override
@@ -129,18 +118,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
   }
 
   @Override
-  protected void prepareDelete(final Content content) {
-    final List<ContentGroup> contentGroups = contentGroupService.getByRoomId(content.getRoomId());
-    for (final ContentGroup contentGroup : contentGroups) {
-      final List<String> ids = contentGroup.getContentIds();
-      if (ids.contains(content.getId())) {
-        ids.remove(content.getId());
-        contentGroupService.update(contentGroup);
-      }
-    }
-  }
-
-  @Override
   public List<Integer> getCorrectChoiceIndexes(final String contentId) {
     final Content content = get(contentId);
     if (content instanceof ChoiceQuestionContent) {
@@ -173,17 +150,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
   public void handleRoomDeletion(final BeforeDeletionEvent<Room> event) {
     final Iterable<Content> contents = contentRepository.findStubsByRoomId(event.getEntity().getId());
     delete(contents);
-  }
-
-  @EventListener
-  public void handleContentGroupDeletion(final AfterDeletionEvent<ContentGroup> event) {
-    // Delete contents which were part of the deleted group and are not in
-    // any other group
-    final Set<String> idsWithGroup = contentGroupService.getByRoomId(event.getEntity().getRoomId()).stream()
-        .flatMap(cg -> cg.getContentIds().stream()).collect(Collectors.toSet());
-    final List<String> idsForDeletion = event.getEntity().getContentIds().stream()
-        .filter(id -> !idsWithGroup.contains(id)).toList();
-    delete(get(idsForDeletion));
   }
 
   @Override
