@@ -43,15 +43,15 @@ build_dependency_image:
   rules:
     - if: $CI_MERGE_REQUEST_ID
       changes:
-        - ".docker/images/*"
-        - ".docker/images/$IMAGE_NAME/*"
+        - ".docker/images/**/*"
+        - ".docker/images/$IMAGE_NAME/**/*"
       when: manual
       variables:
         IMAGE_TAG_AFFIX: $CI_COMMIT_REF_SLUG
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
-        - ".docker/images/*"
-        - ".docker/images/$IMAGE_NAME/*"
+        - ".docker/images/**/*"
+        - ".docker/images/$IMAGE_NAME/**/*"
       when: on_success
   trigger:
     include: ".docker/images/.gitlab-ci.yml"
