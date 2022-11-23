@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang.StringUtils;
+import java.util.stream.Collectors;
 import org.ektorp.DbAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -352,7 +352,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
         }
       }
 
-      mailPattern = Pattern.compile("[a-z0-9._-]+?@(" + StringUtils.join(patterns, "|") + ")",
+      mailPattern = Pattern.compile(
+          "[a-z0-9._-]+?@(" + patterns.stream().collect(Collectors.joining("|")) + ")",
           Pattern.CASE_INSENSITIVE);
       logger.info("Allowed e-mail addresses (pattern) for registration: '{}'.", mailPattern.pattern());
     }

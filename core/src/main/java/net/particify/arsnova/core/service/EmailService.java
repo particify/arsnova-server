@@ -3,7 +3,6 @@ package net.particify.arsnova.core.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
-import org.apache.commons.lang.CharEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
@@ -31,7 +30,7 @@ public class EmailService {
 
   public void sendEmail(final String address, final String subject, final String body) {
     final MimeMessage msg = mailSender.createMimeMessage();
-    final MimeMessageHelper helper = new MimeMessageHelper(msg, CharEncoding.UTF_8);
+    final MimeMessageHelper helper = new MimeMessageHelper(msg, "UTF-8");
     try {
       msg.setHeader("Auto-Submitted", "auto-generated");
       helper.setFrom(mailSenderAddress, mailSenderName);
