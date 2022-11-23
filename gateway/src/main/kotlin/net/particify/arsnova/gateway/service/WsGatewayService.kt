@@ -27,11 +27,7 @@ class WsGatewayService(
       .flatMapMany { userCounts: List<Int?> ->
         Flux.fromIterable(
           userCounts.map { entry ->
-            if (entry != null) {
-              Optional.of(entry)
-            } else {
-              Optional.empty()
-            }
+            Optional.ofNullable(entry)
           }
         )
       }

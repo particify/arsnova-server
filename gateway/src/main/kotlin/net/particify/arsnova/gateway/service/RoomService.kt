@@ -40,11 +40,7 @@ class RoomService(
       .flatMapMany { roomList: List<Room?> ->
         Flux.fromIterable(
           roomList.map { entry ->
-            if (entry != null) {
-              Optional.of(Room(entry.id, entry.shortId, entry.name))
-            } else {
-              Optional.empty()
-            }
+            Optional.ofNullable(entry)
           }
         )
       }

@@ -40,12 +40,7 @@ class RoomAccessController(
   ): Flux<Optional<RoomAccess>> {
     return Flux.fromIterable(
       ids.map { id ->
-        val maybeAccess = handler.getOwnerRoomAccessByRoomId(id)
-        if (maybeAccess != null) {
-          Optional.of(maybeAccess)
-        } else {
-          Optional.empty()
-        }
+        Optional.ofNullable(handler.getOwnerRoomAccessByRoomId(id))
       }
     )
   }
