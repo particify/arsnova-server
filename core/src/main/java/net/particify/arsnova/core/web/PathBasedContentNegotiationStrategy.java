@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -58,7 +59,7 @@ public class PathBasedContentNegotiationStrategy implements ContentNegotiationSt
       throws HttpMediaTypeNotAcceptableException {
     final HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
     final List<MediaType> mediaTypes = new ArrayList<>();
-    if (servletRequest.getServletPath().startsWith(managementPath)) {
+    if (Objects.requireNonNull(servletRequest).getServletPath().startsWith(managementPath)) {
       logger.trace("Negotiating content based on path for management API");
       mediaTypes.add(ACTUATOR_MEDIA_TYPE);
       mediaTypes.add(MediaType.TEXT_PLAIN);

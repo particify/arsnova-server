@@ -2,6 +2,7 @@ package net.particify.arsnova.core.config;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Properties;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -14,12 +15,14 @@ public class YamlPropertySourceFactory extends DefaultPropertySourceFactory {
   public PropertySource<?> createPropertySource(final String name, final EncodedResource resource)
       throws IOException {
     try {
+      final String filename = name != null ? name : resource.getResource().getFilename();
+      Objects.requireNonNull(filename);
       final YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new PrefixedYamlPropertiesFactoryBean();
       yamlPropertiesFactoryBean.setResources(resource.getResource());
       yamlPropertiesFactoryBean.afterPropertiesSet();
       final Properties properties = yamlPropertiesFactoryBean.getObject();
 
-      return new PropertiesPropertySource(name != null ? name : resource.getResource().getFilename(), properties);
+      return new PropertiesPropertySource(filename, Objects.requireNonNull(properties));
     } catch (final IllegalStateException e) {
       if (e.getCause() instanceof FileNotFoundException) {
         throw (FileNotFoundException) e.getCause();

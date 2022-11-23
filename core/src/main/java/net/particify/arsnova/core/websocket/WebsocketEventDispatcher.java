@@ -18,6 +18,7 @@
 
 package net.particify.arsnova.core.websocket;
 
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -74,7 +75,7 @@ public class WebsocketEventDispatcher {
 
   @EventListener
   public <T extends Entity> void handleCrudEvent(final CrudEvent<T> event) {
-    if (event.getResolvableType().isAssignableFrom(Answer.class)) {
+    if (Objects.requireNonNull(event.getResolvableType()).isAssignableFrom(Answer.class)) {
       // Answer events are skipped here for multiple reasons:
       // * Events for individual answer changes are not relevant.
       // * Answers are stored in bulk which would lead to spikes of events.

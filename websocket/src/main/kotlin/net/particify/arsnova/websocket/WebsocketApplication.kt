@@ -9,7 +9,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 class WebsocketApplication : SpringBootServletInitializer() {
 
   override fun configure(application: SpringApplicationBuilder): SpringApplicationBuilder {
-    return application.sources(WebsocketApplication::class.java!!)
+    return application.sources(WebsocketApplication::class.java)
   }
 }
 

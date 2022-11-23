@@ -51,9 +51,9 @@ public class User implements org.springframework.security.core.userdetails.UserD
     id = profile.getId();
     loginId = profile.getLoginId();
     authProvider = profile.getAuthProvider();
-    password = profile.getAccount() == null ? null : profile.getAccount().getPassword();
+    password = profile.getAccount().getPassword();
     this.authorities = authorities;
-    enabled = profile.getAccount() == null || profile.getAccount().getActivationKey() == null;
+    enabled = profile.getAccount().getActivationKey() == null;
   }
 
   public User(final UserProfile profile, final Collection<? extends GrantedAuthority> authorities,
