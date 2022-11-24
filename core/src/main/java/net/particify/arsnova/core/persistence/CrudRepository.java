@@ -18,6 +18,7 @@
 
 package net.particify.arsnova.core.persistence;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 
 /**
@@ -28,6 +29,9 @@ import java.util.List;
  *
  * @author Daniel Gerhardt
  */
+@SuppressFBWarnings(
+    value = "NM_SAME_SIMPLE_NAME_AS_INTERFACE",
+    justification = "The base class will be used directly in the future.")
 public interface CrudRepository<T, I> extends org.springframework.data.repository.CrudRepository<T, I> {
   /**
    * Retrieve a single entity by ID.
