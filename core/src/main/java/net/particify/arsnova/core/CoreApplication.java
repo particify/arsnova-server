@@ -1,6 +1,5 @@
 package net.particify.arsnova.core;
 
-import org.apache.commons.lang.CharEncoding;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -25,7 +24,7 @@ import net.particify.arsnova.core.config.YamlPropertySourceFactory;
         "file:${arsnova.config-dir:.}/secrets.yml",
         "file:${arsnova.config-dir:.}/ui.yml"},
     ignoreResourceNotFound = true,
-    encoding = CharEncoding.UTF_8,
+    encoding = "UTF-8",
     factory = YamlPropertySourceFactory.class)
 public class CoreApplication {
   public static void main(final String[] args) {

@@ -25,7 +25,6 @@ repositories {
 }
 
 dependencies {
-  implementation("commons-lang:commons-lang:2.6")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-amqp")
   implementation("org.springframework.boot:spring-boot-starter-cache")
