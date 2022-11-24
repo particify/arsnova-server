@@ -7,7 +7,6 @@
 
   <aspects>
     <aspect name="net.particify.arsnova.core.security.SystemAuthenticationAspect"/>
-    <aspect name="net.particify.arsnova.core.web.RangeAspect"/>
     <aspect name="net.particify.arsnova.core.web.InternalEntityAspect"/>
     <aspect name="net.particify.arsnova.core.websocket.WebsocketAuthenticationAspect"/>
     <!-- Micrometer does not have a aop.xml config for its aspects. -->
