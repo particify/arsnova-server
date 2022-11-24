@@ -133,17 +133,7 @@ public class WebsocketEventDispatcher {
     return "";
   }
 
-  private static class ChangeEvent {
-    public ChangeType changeType;
-    public String entityType;
-    public String entityId;
-
-    private ChangeEvent(final ChangeType changeType, final String entityType, final String entityId) {
-      this.changeType = changeType;
-      this.entityType = entityType;
-      this.entityId = entityId;
-    }
-
+  private record ChangeEvent(ChangeType changeType, String entityType, String entityId) {
     private enum ChangeType {
       CREATE,
       UPDATE,
