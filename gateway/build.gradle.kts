@@ -33,7 +33,6 @@ dependencies {
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("io.projectreactor:reactor-test")
   compileOnly("com.github.spotbugs:spotbugs-annotations:4.7.3")
-  spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.12.0")
 }
 
 dependencyManagement {

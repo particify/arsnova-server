@@ -22,7 +22,6 @@ dependencies {
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   compileOnly("com.github.spotbugs:spotbugs-annotations:4.7.3")
-  spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.12.0")
 }
 
 tasks.withType<Test> {
