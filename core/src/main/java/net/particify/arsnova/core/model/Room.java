@@ -44,11 +44,6 @@ public class Room extends Entity implements RoomIdAware {
     }
 
     @Override
-    public int hashCode() {
-      return Objects.hash(feedbackLocked);
-    }
-
-    @Override
     public boolean equals(final Object o) {
       if (this == o) {
         return true;
@@ -59,6 +54,11 @@ public class Room extends Entity implements RoomIdAware {
       final Settings settings = (Settings) o;
 
       return feedbackLocked == settings.feedbackLocked;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(feedbackLocked);
     }
 
     @Override
@@ -324,6 +324,11 @@ public class Room extends Entity implements RoomIdAware {
         && Objects.equals(ownerId, room.ownerId)
         && Objects.equals(name, room.name)
         && Objects.equals(description, room.description);
+  }
+
+  @Override
+  public int hashCode() {
+    return hashCode(super.hashCode(), closed, shortId, ownerId, name, description);
   }
 
   @Override

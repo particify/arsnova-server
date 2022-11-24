@@ -99,11 +99,6 @@ public class Content extends Entity implements RoomIdAware {
     }
 
     @Override
-    public int hashCode() {
-      return Objects.hash(round, answeringEndTime);
-    }
-
-    @Override
     public boolean equals(final Object o) {
       if (this == o) {
         return true;
@@ -115,6 +110,11 @@ public class Content extends Entity implements RoomIdAware {
 
       return round == state.round
           && Objects.equals(answeringEndTime, state.answeringEndTime);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(round, answeringEndTime);
     }
 
     @Override
@@ -365,6 +365,11 @@ public class Content extends Entity implements RoomIdAware {
         && format == content.format
         && Objects.equals(groups, content.groups)
         && Objects.equals(timestamp, content.timestamp);
+  }
+
+  @Override
+  public int hashCode() {
+    return hashCode(super.hashCode(), roomId, subject, body, format, groups, timestamp);
   }
 
   @Override

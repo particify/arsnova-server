@@ -110,11 +110,6 @@ public class UserProfile extends Entity {
     }
 
     @Override
-    public int hashCode() {
-      return Objects.hash(password, activationKey, passwordResetKey, passwordResetTime);
-    }
-
-    @Override
     public boolean equals(final Object o) {
       if (this == o) {
         return true;
@@ -128,6 +123,11 @@ public class UserProfile extends Entity {
           && Objects.equals(activationKey, account.activationKey)
           && Objects.equals(passwordResetKey, account.passwordResetKey)
           && Objects.equals(passwordResetTime, account.passwordResetTime);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(password, activationKey, passwordResetKey, passwordResetTime);
     }
 
     @Override
@@ -347,6 +347,11 @@ public class UserProfile extends Entity {
     return authProvider == that.authProvider
         && Objects.equals(loginId, that.loginId)
         && Objects.equals(lastLoginTimestamp, that.lastLoginTimestamp);
+  }
+
+  @Override
+  public int hashCode() {
+    return hashCode(super.hashCode(), authProvider, loginId, lastLoginTimestamp);
   }
 
   @Override

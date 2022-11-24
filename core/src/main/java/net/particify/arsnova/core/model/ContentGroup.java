@@ -167,11 +167,6 @@ public class ContentGroup extends Entity implements RoomIdAware {
   }
 
   @Override
-  public int hashCode() {
-    return Objects.hash(name, contentIds);
-  }
-
-  @Override
   public boolean equals(final Object o) {
     if (this == o) {
       return true;
@@ -183,6 +178,11 @@ public class ContentGroup extends Entity implements RoomIdAware {
 
     return Objects.equals(name, that.name)
       && Objects.equals(contentIds, that.contentIds);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, contentIds);
   }
 
   @Override

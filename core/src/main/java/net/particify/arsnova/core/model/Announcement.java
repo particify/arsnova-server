@@ -135,6 +135,11 @@ public class Announcement extends Entity implements RoomIdAware {
   }
 
   @Override
+  public int hashCode() {
+    return hashCode(super.hashCode(), roomId, title, body);
+  }
+
+  @Override
   protected ToStringCreator buildToString() {
     return super.buildToString()
         .append("roomId", roomId)

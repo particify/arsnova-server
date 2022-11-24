@@ -9,12 +9,4 @@ public class HighlightComment extends WebSocketCommand<HighlightCommentPayload> 
     super(DeleteComment.class.getSimpleName());
     this.payload = p;
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    HighlightComment that = (HighlightComment) o;
-    return this.getPayload().equals(that.getPayload());
-  }
 }

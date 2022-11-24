@@ -63,11 +63,6 @@ public class ChoiceQuestionContent extends Content {
     }
 
     @Override
-    public int hashCode() {
-      return Objects.hash(label);
-    }
-
-    @Override
     public boolean equals(final Object o) {
       if (this == o) {
         return true;
@@ -78,6 +73,11 @@ public class ChoiceQuestionContent extends Content {
       final AnswerOption that = (AnswerOption) o;
 
       return Objects.equals(label, that.label);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(label);
     }
 
     @Override
@@ -205,6 +205,36 @@ public class ChoiceQuestionContent extends Content {
     return Math.max(0, selectedChoiceIndexes.stream()
         .mapToDouble(i -> (correctOptionIndexes.contains(i) ? pointsPerOption : -pointsPerOption))
         .sum());
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * All fields of <tt>ChoiceQuestionContent</tt> are included in equality checks.
+   * </p>
+   */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    final ChoiceQuestionContent that = (ChoiceQuestionContent) o;
+
+    return multiple == that.multiple && Objects.equals(options, that.options) && Objects.equals(
+            correctOptionIndexes,
+            that.correctOptionIndexes);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), options, correctOptionIndexes, multiple);
   }
 
   @Override

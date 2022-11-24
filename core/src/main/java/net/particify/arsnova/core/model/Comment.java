@@ -132,6 +132,11 @@ public class Comment extends Entity implements RoomIdAware {
   }
 
   @Override
+  public int hashCode() {
+    return hashCode(super.hashCode(), read, roomId, creatorId, body, timestamp, extensions);
+  }
+
+  @Override
   protected ToStringCreator buildToString() {
     return super.buildToString()
         .append("roomId", roomId)

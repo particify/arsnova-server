@@ -23,6 +23,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.core.style.ToStringCreator;
 
 import net.particify.arsnova.core.model.serialization.View;
@@ -51,6 +52,34 @@ public class ChoiceAnswer extends Answer {
   @Override
   public boolean isAbstention() {
     return selectedChoiceIndexes.isEmpty();
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * All fields of <tt>ChoiceAnswer</tt> are included in equality checks.
+   * </p>
+   */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    final ChoiceAnswer that = (ChoiceAnswer) o;
+
+    return Objects.equals(selectedChoiceIndexes, that.selectedChoiceIndexes);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), selectedChoiceIndexes);
   }
 
   @Override

@@ -11,12 +11,4 @@ public class CreateComment extends WebSocketCommand<CreateCommentPayload> implem
     super(CreateComment.class.getSimpleName());
     this.payload = p;
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    CreateComment that = (CreateComment) o;
-    return this.getPayload().equals(that.getPayload());
-  }
 }

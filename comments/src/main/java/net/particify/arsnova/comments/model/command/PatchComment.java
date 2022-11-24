@@ -9,12 +9,4 @@ public class PatchComment extends WebSocketCommand<PatchCommentPayload> {
     super(PatchComment.class.getSimpleName());
     this.payload = p;
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    PatchComment that = (PatchComment) o;
-    return this.getPayload().equals(that.getPayload());
-  }
 }

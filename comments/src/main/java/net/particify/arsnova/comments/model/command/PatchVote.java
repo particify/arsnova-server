@@ -9,12 +9,4 @@ public class PatchVote extends WebSocketCommand<PatchVotePayload> {
     super(PatchVote.class.getSimpleName());
     this.payload = p;
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    PatchVote that = (PatchVote) o;
-    return this.getPayload().equals(that.getPayload());
-  }
 }
