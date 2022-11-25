@@ -5,9 +5,9 @@ import java.util.List;
 
 import net.particify.arsnova.core.model.serialization.View;
 
-public class PriorizationAnswerStatistics extends AnswerStatistics {
+public class PrioritizationAnswerStatistics extends AnswerStatistics {
 
-  public static class PriorizationRoundStatistics extends RoundStatistics {
+  public static class PrioritizationRoundStatistics extends RoundStatistics {
     private List<Integer> assignedPoints;
 
     @JsonView(View.Public.class)
@@ -21,14 +21,14 @@ public class PriorizationAnswerStatistics extends AnswerStatistics {
     }
   }
 
-  private List<PriorizationRoundStatistics> roundStatistics;
+  private List<PrioritizationRoundStatistics> roundStatistics;
 
   @JsonView(View.Public.class)
-  public List<PriorizationRoundStatistics> getRoundStatistics() {
+  public List<PrioritizationRoundStatistics> getRoundStatistics() {
     return roundStatistics;
   }
 
-  public void setRoundStatistics(final List<PriorizationRoundStatistics> roundStatistics) {
+  public void setRoundStatistics(final List<PrioritizationRoundStatistics> roundStatistics) {
     this.roundStatistics = roundStatistics;
   }
 }

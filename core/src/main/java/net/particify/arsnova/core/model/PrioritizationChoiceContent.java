@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import net.particify.arsnova.core.model.serialization.View;
 
-public class PriorizationChoiceContent extends ChoiceQuestionContent {
+public class PrioritizationChoiceContent extends ChoiceQuestionContent {
   private int assignablePoints = 100;
 
-  public PriorizationChoiceContent() {
+  public PrioritizationChoiceContent() {
 
   }
 
-  public PriorizationChoiceContent(final PriorizationChoiceContent content) {
+  public PrioritizationChoiceContent(final PrioritizationChoiceContent content) {
     super(content);
   }
 

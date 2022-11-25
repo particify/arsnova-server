@@ -35,9 +35,9 @@ import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics.ChoiceRoundStatistics;
 import net.particify.arsnova.core.model.MultipleTextsAnswer;
-import net.particify.arsnova.core.model.PriorizationAnswer;
-import net.particify.arsnova.core.model.PriorizationAnswerStatistics;
-import net.particify.arsnova.core.model.PriorizationAnswerStatistics.PriorizationRoundStatistics;
+import net.particify.arsnova.core.model.PrioritizationAnswer;
+import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
+import net.particify.arsnova.core.model.PrioritizationAnswerStatistics.PrioritizationRoundStatistics;
 import net.particify.arsnova.core.persistence.AnswerRepository;
 
 public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
@@ -160,20 +160,20 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
   }
 
   @Override
-  public PriorizationAnswerStatistics findByContentIdRoundForPriorization(
+  public PrioritizationAnswerStatistics findByContentIdRoundForPrioritization(
       final String contentId, final int optionCount) {
-    final List<PriorizationAnswer> answers = db.queryView(createQuery("by_contentid_hidden")
+    final List<PrioritizationAnswer> answers = db.queryView(createQuery("by_contentid_hidden")
             .reduce(false)
             .includeDocs(true)
             .startKey(ComplexKey.of(contentId, false))
-            .endKey(ComplexKey.of(contentId, false, ComplexKey.emptyObject())), PriorizationAnswer.class);
-    final PriorizationAnswerStatistics stats = new PriorizationAnswerStatistics();
+            .endKey(ComplexKey.of(contentId, false, ComplexKey.emptyObject())), PrioritizationAnswer.class);
+    final PrioritizationAnswerStatistics stats = new PrioritizationAnswerStatistics();
     stats.setContentId(contentId);
-    final PriorizationRoundStatistics roundStats = new PriorizationRoundStatistics();
+    final PrioritizationRoundStatistics roundStats = new PrioritizationRoundStatistics();
     roundStats.setRound(1);
     roundStats.setAbstentionCount(0);
     final List<Integer> assignedPoints = new ArrayList<>(Collections.nCopies(optionCount, 0));
-    for (final PriorizationAnswer answer : answers) {
+    for (final PrioritizationAnswer answer : answers) {
       final List<Integer> points = answer.getAssignedPoints();
       if (points.size() == 0) {
         roundStats.setAbstentionCount(roundStats.getAbstentionCount() + 1);
@@ -185,7 +185,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
     }
     roundStats.setAnswerCount(answers.size());
     roundStats.setAssignedPoints(assignedPoints);
-    final List<PriorizationRoundStatistics> roundStatisticsList = new ArrayList<>(Collections.nCopies(1, null));
+    final List<PrioritizationRoundStatistics> roundStatisticsList = new ArrayList<>(Collections.nCopies(1, null));
     roundStatisticsList.set(0, roundStats);
     stats.setRoundStatistics(roundStatisticsList);
 

@@ -23,7 +23,7 @@ import java.util.List;
 import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
 import net.particify.arsnova.core.model.MultipleTextsAnswer;
-import net.particify.arsnova.core.model.PriorizationAnswerStatistics;
+import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
 
 public interface AnswerRepository extends CrudRepository<Answer, String> {
   <T extends Answer> T findByContentIdUserIdPiRound(String contentId, Class<T> type, String userId, int piRound);
@@ -42,5 +42,5 @@ public interface AnswerRepository extends CrudRepository<Answer, String> {
 
   List<MultipleTextsAnswer> findByContentIdRoundForText(String contentId, int round);
 
-  PriorizationAnswerStatistics findByContentIdRoundForPriorization(String contentId, int optionCount);
+  PrioritizationAnswerStatistics findByContentIdRoundForPrioritization(String contentId, int optionCount);
 }

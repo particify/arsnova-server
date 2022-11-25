@@ -28,7 +28,7 @@ import java.io.IOException;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.GridImageContent;
-import net.particify.arsnova.core.model.PriorizationChoiceContent;
+import net.particify.arsnova.core.model.PrioritizationChoiceContent;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
 import net.particify.arsnova.core.model.WordcloudContent;
 
@@ -72,8 +72,8 @@ public class FormatContentTypeIdResolver extends TypeIdResolverBase {
         return TypeFactory.defaultInstance().constructType(GridImageContent.class);
       case WORDCLOUD:
         return TypeFactory.defaultInstance().constructType(WordcloudContent.class);
-      case PRIORIZATION:
-        return TypeFactory.defaultInstance().constructType(PriorizationChoiceContent.class);
+      case PRIORITIZATION:
+        return TypeFactory.defaultInstance().constructType(PrioritizationChoiceContent.class);
       default:
         throw new IllegalArgumentException("Unsupported type ID.");
     }
