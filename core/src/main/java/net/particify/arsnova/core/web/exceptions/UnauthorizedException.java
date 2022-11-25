@@ -1,9 +1,12 @@
 package net.particify.arsnova.core.web.exceptions;
 
+import java.io.Serial;
+
 /**
  * Unauthorized means status code 401.
  */
 public class UnauthorizedException extends RuntimeException {
+  @Serial
   private static final long serialVersionUID = 1L;
 
   public UnauthorizedException() {

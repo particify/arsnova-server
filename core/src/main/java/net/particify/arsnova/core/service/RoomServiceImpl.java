@@ -18,6 +18,7 @@
 
 package net.particify.arsnova.core.service;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
@@ -88,6 +89,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
   }
 
   public static class RoomNameComparator implements Comparator<Room>, Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Override

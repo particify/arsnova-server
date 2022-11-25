@@ -1,9 +1,12 @@
 package net.particify.arsnova.core.web.exceptions;
 
+import java.io.Serial;
+
 /**
  * Forbidden means status code 403.
  */
 public class ForbiddenException extends RuntimeException {
+  @Serial
   private static final long serialVersionUID = 1L;
 
   public ForbiddenException() {

@@ -18,11 +18,14 @@
 
 package net.particify.arsnova.core.event;
 
+import java.io.Serial;
+
 /**
  * Base class for all {@link ArsnovaEvent}s that are related to a room.
  */
 public abstract class RoomEvent extends ArsnovaEvent {
 
+  @Serial
   private static final long serialVersionUID = 1L;
 
   private final String roomId;

@@ -18,11 +18,14 @@
 
 package net.particify.arsnova.core.event;
 
+import java.io.Serial;
+
 /**
  * Fires whenever the feedback changes.
  */
 public class NewFeedbackEvent extends RoomEvent {
 
+  @Serial
   private static final long serialVersionUID = 1L;
 
   public NewFeedbackEvent(final Object source, final String roomId) {
