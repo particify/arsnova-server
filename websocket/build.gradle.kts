@@ -29,7 +29,7 @@ dependencies {
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("io.projectreactor:reactor-test")
-  testImplementation("com.ninja-squad:springmockk:3.1.1")
+  testImplementation("com.ninja-squad:springmockk:3.1.2")
 }
 
 tasks.withType<KotlinCompile> {
