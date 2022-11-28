@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import net.particify.arsnova.core.model.serialization.View;
 
@@ -213,5 +214,35 @@ public class GridImageContent extends Content {
   @JsonView({View.Persistence.class, View.Public.class})
   public void setCorrectOptionIndexes(final List<Integer> correctOptionIndexes) {
     this.correctOptionIndexes = correctOptionIndexes;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * All fields of <tt>GridImageContent</tt> are included in equality checks.
+   * </p>
+   */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    final GridImageContent that = (GridImageContent) o;
+
+    return Objects.equals(grid, that.grid) && Objects.equals(
+            image,
+            that.image) && Objects.equals(correctOptionIndexes, that.correctOptionIndexes);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), grid, image, correctOptionIndexes);
   }
 }

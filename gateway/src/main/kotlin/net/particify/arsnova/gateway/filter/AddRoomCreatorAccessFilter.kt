@@ -48,7 +48,7 @@ class AddRoomCreatorAccessFilter(
             }
             .map { e: ServerWebExchange ->
               val path = e.request.path.toString()
-              val method = e.request.method!!
+              val method = e.request.method
               val roomId = e.response.headers.getFirst(ENTITY_ID_HEADER)!!
               val revId = e.response.headers.getFirst(ENTITY_REVISION_HEADER)!!
               val token = e.request.headers.getFirst(HttpHeaders.AUTHORIZATION)!!.removePrefix(BEARER_HEADER)

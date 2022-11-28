@@ -9,12 +9,4 @@ public class VoteCreated extends WebSocketEvent<VoteCreatedPayload> {
     super(VoteCreated.class.getSimpleName(), id);
     this.payload = p;
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    VoteCreated that = (VoteCreated) o;
-    return this.getPayload().equals(that.getPayload());
-  }
 }

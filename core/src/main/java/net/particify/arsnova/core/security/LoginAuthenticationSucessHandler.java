@@ -42,7 +42,6 @@ public class LoginAuthenticationSucessHandler extends
   public static final String URL_ATTRIBUTE = "ars-login-success-url";
 
   private JwtService jwtService;
-  private String targetUrl;
   private String apiPath;
 
   public LoginAuthenticationSucessHandler(
@@ -85,9 +84,5 @@ public class LoginAuthenticationSucessHandler extends
       return;
     }
     super.onAuthenticationSuccess(request, response, authentication);
-  }
-
-  public void setTargetUrl(final String url) {
-    targetUrl = url;
   }
 }

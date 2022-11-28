@@ -8,12 +8,4 @@ public class UpdateSettings extends WebSocketCommand<UpdateSettingsPayload> {
     super(UpdateSettings.class.getSimpleName());
     this.payload = p;
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    UpdateSettings that = (UpdateSettings) o;
-    return this.getPayload().equals(that.getPayload());
-  }
 }

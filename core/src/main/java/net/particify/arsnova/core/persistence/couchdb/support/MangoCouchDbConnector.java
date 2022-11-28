@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentOperationResult;
@@ -419,6 +420,27 @@ public class MangoCouchDbConnector extends StdCouchDbConnector implements Applic
     @JsonCreator
     public DbInfo(@JsonProperty("db_name") final String dbName) {
       super(dbName);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      if (!super.equals(o)) {
+        return false;
+      }
+      final DbInfo dbInfo = (DbInfo) o;
+
+      return Objects.equals(purgeSeq, dbInfo.purgeSeq);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(super.hashCode(), purgeSeq);
     }
   }
 }

@@ -30,8 +30,6 @@ public class JwtTokenFilter extends GenericFilterBean {
       final FilterChain filterChain)
       throws IOException, ServletException {
     final HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
-    final HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
-
 
     JwtToken token = null;
     final String jwtHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
@@ -47,12 +45,8 @@ public class JwtTokenFilter extends GenericFilterBean {
     if (token != null) {
       try {
         final Authentication authenticatedToken = jwtAuthenticationProvider.authenticate(token);
-        if (authenticatedToken != null) {
-          logger.debug("Storing JWT to SecurityContext: {}", authenticatedToken);
-          SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
-        } else {
-          logger.debug("Could not authenticate JWT.");
-        }
+        logger.debug("Storing JWT to SecurityContext: {}", authenticatedToken);
+        SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
       } catch (final Exception e) {
         logger.debug("JWT authentication failed", e);
       }

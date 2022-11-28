@@ -9,13 +9,4 @@ public class CommentDeleted extends WebSocketEvent<CommentDeletedPayload> {
     super(CommentDeleted.class.getSimpleName(), roomId);
     this.payload = p;
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    CommentDeleted that = (CommentDeleted) o;
-    if (this.getRoomId() != that.getRoomId());
-    return (this.getPayload().equals(that.getPayload()));
-  }
 }

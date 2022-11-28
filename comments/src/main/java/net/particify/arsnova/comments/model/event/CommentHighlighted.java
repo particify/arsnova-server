@@ -9,12 +9,4 @@ public class CommentHighlighted extends WebSocketEvent<CommentHighlightedPayload
     super(CommentHighlighted.class.getSimpleName(), id);
     this.payload = p;
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    CommentHighlighted that = (CommentHighlighted) o;
-    return this.getPayload().equals(that.getPayload());
-  }
 }

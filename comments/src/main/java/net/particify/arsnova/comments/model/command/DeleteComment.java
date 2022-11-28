@@ -9,12 +9,4 @@ public class DeleteComment extends WebSocketCommand<DeleteCommentPayload> {
     super(DeleteComment.class.getSimpleName());
     this.payload = p;
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    DeleteComment that = (DeleteComment) o;
-    return this.getPayload().equals(that.getPayload());
-  }
 }

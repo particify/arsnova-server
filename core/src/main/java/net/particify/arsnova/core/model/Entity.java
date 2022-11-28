@@ -139,6 +139,22 @@ public abstract class Entity {
   }
 
   @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final Entity entity = (Entity) o;
+
+    return Objects.equals(id, entity.id)
+        && Objects.equals(rev, entity.rev)
+        && Objects.equals(creationTimestamp, entity.creationTimestamp)
+        && Objects.equals(updateTimestamp, entity.updateTimestamp);
+  }
+
+  @Override
   public int hashCode() {
     return Objects.hash(id, rev, creationTimestamp, updateTimestamp);
   }
@@ -161,22 +177,6 @@ public abstract class Entity {
     }
 
     return result;
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    final Entity entity = (Entity) o;
-
-    return Objects.equals(id, entity.id)
-        && Objects.equals(rev, entity.rev)
-        && Objects.equals(creationTimestamp, entity.creationTimestamp)
-        && Objects.equals(updateTimestamp, entity.updateTimestamp);
   }
 
   @Override

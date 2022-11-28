@@ -1,9 +1,12 @@
 package net.particify.arsnova.core.web.exceptions;
 
+import java.io.Serial;
+
 /**
  * Precondition Failed means status code 412.
  */
 public class PreconditionFailedException extends RuntimeException {
+  @Serial
   private static final long serialVersionUID = 1L;
 
   public PreconditionFailedException() {

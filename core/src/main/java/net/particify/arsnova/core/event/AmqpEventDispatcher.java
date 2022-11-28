@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class AmqpEventDispatcher {
       try {
         final ObjectMapper mapper = createOrGetObjectMapper(exchangeName, properties);
         final byte[] jsonPayload = mapper.writeValueAsBytes(event.getEntity());
-        logger.debug("AMQP event payload: {}", new String(jsonPayload));
+        logger.debug("AMQP event payload: {}", new String(jsonPayload, StandardCharsets.UTF_8));
         final Message message = MessageBuilder
             .withBody(jsonPayload)
             .setContentType(MediaType.APPLICATION_JSON_VALUE)
@@ -110,7 +111,7 @@ public class AmqpEventDispatcher {
     return mapper;
   }
 
-  private class RoomDuplicationMessage {
+  private static class RoomDuplicationMessage {
     private String originalRoomId;
     private String duplicatedRoomId;
 

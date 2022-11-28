@@ -41,10 +41,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class CsvService {
   private static final int MAX_SEARCH_BYTES = 500;
+  private static final String unicodeBom = "\ufeff";
   private final CsvMapper mapper = new CsvMapper();
   private final ConcurrentHashMap<Class<?>, CsvSchema> csvSchemas = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<Class<?>, CsvSchema> tsvSchemas = new ConcurrentHashMap<>();
-  private final String unicodeBom = "\ufeff";
 
   /**
    * Serializes a list of objects as comma-separated values.
@@ -107,7 +107,9 @@ public class CsvService {
 
   private char detectSeparator(final byte[] bytes) {
     final String firstLine =
-        new String(Arrays.copyOfRange(bytes, 0, Math.min(MAX_SEARCH_BYTES, bytes.length)))
+        new String(
+            Arrays.copyOfRange(bytes, 0, Math.min(MAX_SEARCH_BYTES, bytes.length)),
+            StandardCharsets.UTF_8)
             .lines().findFirst().orElse("");
     return firstLine.contains("\t") ? '\t' : (firstLine.contains(";") ? ';' : ',');
   }

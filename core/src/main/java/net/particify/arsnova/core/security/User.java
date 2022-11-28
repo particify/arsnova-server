@@ -18,6 +18,7 @@
 
 package net.particify.arsnova.core.security;
 
+import java.io.Serial;
 import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,6 +34,7 @@ public class User implements org.springframework.security.core.userdetails.UserD
   public static final GrantedAuthority ROLE_USER = new SimpleGrantedAuthority("ROLE_USER");
   public static final GrantedAuthority ROLE_ADMIN = new SimpleGrantedAuthority("ROLE_ADMIN");
 
+  @Serial
   private static final long serialVersionUID = 1L;
 
   private String id;
@@ -51,9 +53,9 @@ public class User implements org.springframework.security.core.userdetails.UserD
     id = profile.getId();
     loginId = profile.getLoginId();
     authProvider = profile.getAuthProvider();
-    password = profile.getAccount() == null ? null : profile.getAccount().getPassword();
+    password = profile.getAccount().getPassword();
     this.authorities = authorities;
-    enabled = profile.getAccount() == null || profile.getAccount().getActivationKey() == null;
+    enabled = profile.getAccount().getActivationKey() == null;
   }
 
   public User(final UserProfile profile, final Collection<? extends GrantedAuthority> authorities,

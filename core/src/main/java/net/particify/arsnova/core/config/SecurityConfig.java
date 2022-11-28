@@ -256,7 +256,7 @@ public class SecurityConfig {
 
   @Configuration
   @EnableGlobalMethodSecurity(mode = AdviceMode.ASPECTJ, prePostEnabled = true, securedEnabled = true)
-  public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
+  public static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
     @Override
     protected RunAsManager runAsManager() {
       final StringKeyGenerator keyGenerator = new Base64StringKeyGenerator();
@@ -347,11 +347,7 @@ public class SecurityConfig {
 
   @Bean
   LoginAuthenticationSucessHandler successHandler() {
-    final LoginAuthenticationSucessHandler successHandler =
-        new LoginAuthenticationSucessHandler(systemProperties, servletContext);
-    successHandler.setTargetUrl(rootUrl);
-
-    return successHandler;
+    return new LoginAuthenticationSucessHandler(systemProperties, servletContext);
   }
 
   @Bean

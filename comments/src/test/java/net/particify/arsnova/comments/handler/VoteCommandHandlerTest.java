@@ -59,7 +59,7 @@ public class VoteCommandHandlerTest {
 
     ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
 
-    verify(commentEventSource, times(1)).ScoreChanged(commentIdCaptor.capture());
+    verify(commentEventSource, times(1)).scoreChanged(commentIdCaptor.capture());
     assertThat(returned).isEqualTo(expectedVote);
     assertThat(commentIdCaptor.getValue()).isEqualTo(commentId);
   }
@@ -82,7 +82,7 @@ public class VoteCommandHandlerTest {
 
     ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
 
-    verify(commentEventSource, times(1)).ScoreChanged(commentIdCaptor.capture());
+    verify(commentEventSource, times(1)).scoreChanged(commentIdCaptor.capture());
     assertThat(returned).isEqualTo(expectedVote);
     assertThat(commentIdCaptor.getValue()).isEqualTo(commentId);
   }
@@ -105,7 +105,7 @@ public class VoteCommandHandlerTest {
 
     ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
 
-    verify(commentEventSource, times(1)).ScoreChanged(commentIdCaptor.capture());
+    verify(commentEventSource, times(1)).scoreChanged(commentIdCaptor.capture());
     assertThat(commentIdCaptor.getValue()).isEqualTo(commentId);
   }
 
@@ -123,6 +123,6 @@ public class VoteCommandHandlerTest {
 
     ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
 
-    verify(commentEventSource, never()).ScoreChanged(commentIdCaptor.capture());
+    verify(commentEventSource, never()).scoreChanged(commentIdCaptor.capture());
   }
 }

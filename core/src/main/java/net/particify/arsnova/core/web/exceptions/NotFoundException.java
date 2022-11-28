@@ -1,9 +1,12 @@
 package net.particify.arsnova.core.web.exceptions;
 
+import java.io.Serial;
+
 /**
  * Not Found means status code 404.
  */
 public class NotFoundException extends RuntimeException {
+  @Serial
   private static final long serialVersionUID = 1L;
 
   public NotFoundException() {

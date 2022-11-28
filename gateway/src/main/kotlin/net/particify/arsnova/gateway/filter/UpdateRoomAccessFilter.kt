@@ -48,7 +48,7 @@ class UpdateRoomAccessFilter(
     return GatewayFilter { exchange: ServerWebExchange, _ ->
       val request = exchange.request
       val path = request.path.toString()
-      val method = request.method!!
+      val method = request.method
       val token = request.headers.getFirst(HttpHeaders.AUTHORIZATION)!!.removePrefix(BEARER_HEADER)
       val userId = jwtTokenUtil.getUserIdFromPublicToken(token)
       val uriVariables = ServerWebExchangeUtils.getUriTemplateVariables(exchange)

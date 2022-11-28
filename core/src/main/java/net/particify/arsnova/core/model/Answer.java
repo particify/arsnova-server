@@ -149,6 +149,11 @@ public class Answer extends Entity implements RoomIdAware {
   }
 
   @Override
+  public int hashCode() {
+    return hashCode(super.hashCode(), round, contentId, roomId, creatorId);
+  }
+
+  @Override
   protected ToStringCreator buildToString() {
     return super.buildToString()
         .append("contentId", contentId)

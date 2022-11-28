@@ -39,8 +39,7 @@ class AddMembershipFilter(
         .then(Mono.just(exchange))
         .filter { e ->
           e.response.statusCode != null &&
-            e.response.statusCode!!.is2xxSuccessful &&
-            e.request.method !== null
+            e.response.statusCode!!.is2xxSuccessful
         }
         .filter { e ->
           e.request.method === HttpMethod.POST

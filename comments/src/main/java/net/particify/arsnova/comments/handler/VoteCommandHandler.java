@@ -49,7 +49,7 @@ public class VoteCommandHandler {
 
     Vote saved = service.create(v);
 
-    eventer.ScoreChanged(p.getCommentId());
+    eventer.scoreChanged(p.getCommentId());
 
     return saved;
   }
@@ -69,7 +69,7 @@ public class VoteCommandHandler {
 
     Vote saved = service.create(v);
 
-    eventer.ScoreChanged(p.getCommentId());
+    eventer.scoreChanged(p.getCommentId());
 
     return saved;
   }
@@ -92,7 +92,7 @@ public class VoteCommandHandler {
       logger.trace("No vote to reset");
     } else {
       logger.trace("Initialize sending the new score");
-      eventer.ScoreChanged(p.getCommentId());
+      eventer.scoreChanged(p.getCommentId());
     }
   }
 }

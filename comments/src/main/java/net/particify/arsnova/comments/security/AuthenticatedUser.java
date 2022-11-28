@@ -1,9 +1,13 @@
 package net.particify.arsnova.comments.security;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 
-public class AuthenticatedUser {
+public class AuthenticatedUser implements Serializable {
+  @Serial
+  private static final long serialVersionUID = 1L;
 
   private String id;
   private Collection<? extends GrantedAuthority> authorities;

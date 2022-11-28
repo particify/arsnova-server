@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   jacoco
+  id("com.github.spotbugs") version "5.0.13"
   id("com.google.cloud.tools.jib") version "3.3.1"
   id("io.spring.dependency-management") version "1.1.0"
   id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
@@ -30,6 +31,7 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("io.projectreactor:reactor-test")
   testImplementation("com.ninja-squad:springmockk:3.1.2")
+  compileOnly("com.github.spotbugs:spotbugs-annotations:4.7.3")
 }
 
 tasks.withType<KotlinCompile> {
@@ -55,4 +57,12 @@ tasks.jacocoTestReport {
   reports {
     csv.isEnabled = true
   }
+}
+
+spotbugs {
+  excludeFilter.set(file("../spotbugs-exclude.xml"))
+}
+
+tasks.spotbugsTest {
+  enabled = false
 }

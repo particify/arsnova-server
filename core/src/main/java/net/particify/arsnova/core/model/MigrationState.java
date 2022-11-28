@@ -164,6 +164,11 @@ public class MigrationState extends Entity {
   }
 
   @Override
+  public int hashCode() {
+    return hashCode(super.hashCode(), active, completed);
+  }
+
+  @Override
   protected ToStringCreator buildToString() {
     return super.buildToString()
         .append("active", active)

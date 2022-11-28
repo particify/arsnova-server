@@ -58,13 +58,13 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
   protected Filter[] getServletFilters() {
     final CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter("UTF-8");
     final DelegatingFilterProxy webMvcMetricsFilter = new DelegatingFilterProxy("webMvcMetricsFilterOverride");
-    final DelegatingFilterProxy corsFilter = new DelegatingFilterProxy("corsFilter");
+    final DelegatingFilterProxy customCorsFilter = new DelegatingFilterProxy("customCorsFilter");
     final DelegatingFilterProxy maintenanceModeFilter = new DelegatingFilterProxy("maintenanceModeFilter");
 
     return new Filter[] {
         webMvcMetricsFilter,
         characterEncodingFilter,
-        corsFilter,
+        customCorsFilter,
         maintenanceModeFilter
     };
   }

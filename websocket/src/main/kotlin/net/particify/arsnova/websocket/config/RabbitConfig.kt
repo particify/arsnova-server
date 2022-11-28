@@ -19,7 +19,7 @@ class RabbitConfig(
   @Bean
   @Autowired
   fun connectionFactory(
-    @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor?
+    @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor
   ): ConnectionFactory? {
     val connectionFactory = CachingConnectionFactory(
       webSocketProperties.rabbitmq.host,
@@ -28,14 +28,14 @@ class RabbitConfig(
     connectionFactory.username = webSocketProperties.rabbitmq.username
     connectionFactory.setPassword(webSocketProperties.rabbitmq.password)
     connectionFactory.virtualHost = webSocketProperties.rabbitmq.virtualHost
-    connectionFactory.setExecutor(executor!!)
+    connectionFactory.setExecutor(executor)
     return connectionFactory
   }
 
   @Bean
   @Autowired
-  fun rabbitTemplate(connectionFactory: ConnectionFactory?): RabbitTemplate? {
-    val rabbitTemplate = RabbitTemplate(connectionFactory!!)
+  fun rabbitTemplate(connectionFactory: ConnectionFactory): RabbitTemplate? {
+    val rabbitTemplate = RabbitTemplate(connectionFactory)
     rabbitTemplate.messageConverter = jsonMessageConverter()
     return rabbitTemplate
   }

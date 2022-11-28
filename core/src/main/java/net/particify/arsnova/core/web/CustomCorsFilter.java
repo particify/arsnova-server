@@ -26,14 +26,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-public class CorsFilter extends org.springframework.web.filter.CorsFilter {
+public class CustomCorsFilter extends org.springframework.web.filter.CorsFilter {
   private static final String X_REQUESTED_WITH = "X-Requested-With";
-  private static final String TOKEN_HEADER_NAME = "Arsnova-Auth-Token";
-  private final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
+  private final Logger logger = LoggerFactory.getLogger(CustomCorsFilter.class);
 
-  public CorsFilter(final List<String> origins) {
+  public CustomCorsFilter(final List<String> origins) {
     super(configurationSource(origins));
-    logger.info("CorsFilter initialized. Allowed origins: {}", origins);
+    logger.info("CustomCorsFilter initialized. Allowed origins: {}", origins);
   }
 
   private static UrlBasedCorsConfigurationSource configurationSource(final List<String> origins) {

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Objects;
 
 import net.particify.arsnova.core.model.serialization.View;
 
@@ -89,5 +90,33 @@ public class ScaleChoiceContent extends ChoiceQuestionContent {
       throw new IllegalArgumentException("Options must be an empty list for this format.");
     }
     // The actual field will not be updated
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * All fields of <tt>ScaleChoiceContent</tt> are included in equality checks.
+   * </p>
+   */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    final ScaleChoiceContent that = (ScaleChoiceContent) o;
+
+    return optionCount == that.optionCount && optionTemplate == that.optionTemplate;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), optionTemplate, optionCount);
   }
 }

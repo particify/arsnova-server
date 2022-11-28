@@ -17,7 +17,7 @@ public class DeleteCommentsByRoomPayload implements WebSocketPayload {
     return roomId;
   }
 
-  public void setRoomId(String id) {
+  public void setRoomId(String roomId) {
     this.roomId = roomId;
   }
 

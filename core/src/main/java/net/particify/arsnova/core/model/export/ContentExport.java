@@ -165,7 +165,7 @@ public class ContentExport {
       throw new InputMismatchException();
     }
     try {
-      maxAnswers = Integer.valueOf(this.getOptions().get(0));
+      maxAnswers = Integer.parseInt(this.getOptions().get(0));
     } catch (final NumberFormatException e) {
       throw new InputMismatchException();
     }

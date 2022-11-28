@@ -78,12 +78,8 @@ public class JwtTokenFilter extends GenericFilterBean {
     if (token != null) {
       try {
         final Authentication authenticatedToken = jwtAuthenticationProvider.authenticate(token);
-        if (authenticatedToken != null) {
-          logger.debug("Storing JWT to SecurityContext: {}", authenticatedToken);
-          SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
-        } else {
-          logger.debug("Could not authenticate JWT.");
-        }
+        logger.debug("Storing JWT to SecurityContext: {}", authenticatedToken);
+        SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
       } catch (final Exception e) {
         logger.debug("JWT authentication failed", e);
       }

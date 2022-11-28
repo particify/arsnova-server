@@ -60,7 +60,7 @@ import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties.Mail;
 import net.particify.arsnova.core.config.properties.TemplateProperties;
 import net.particify.arsnova.core.model.serialization.View;
-import net.particify.arsnova.core.web.CorsFilter;
+import net.particify.arsnova.core.web.CustomCorsFilter;
 import net.particify.arsnova.core.web.PathBasedContentNegotiationStrategy;
 
 /**
@@ -185,8 +185,8 @@ public class AppConfig implements WebMvcConfigurer {
   }
 
   @Bean
-  public CorsFilter corsFilter() {
-    return new CorsFilter(securityProperties.getCorsOrigins());
+  public CustomCorsFilter customCorsFilter() {
+    return new CustomCorsFilter(securityProperties.getCorsOrigins());
   }
 
   @Bean(name = LMS_CONNECTOR_BEAN_NAME)

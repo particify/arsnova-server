@@ -1,9 +1,12 @@
 package net.particify.arsnova.core.web.exceptions;
 
+import java.io.Serial;
+
 /**
  * No Content means status code 204.
  */
 public class NoContentException extends RuntimeException {
+  @Serial
   private static final long serialVersionUID = 1L;
 
   public NoContentException() {

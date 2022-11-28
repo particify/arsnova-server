@@ -9,12 +9,4 @@ public class CommentCreated extends WebSocketEvent<CommentCreatedPayload> {
     super(CommentCreated.class.getSimpleName(), id);
     this.payload = p;
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    CommentCreated that = (CommentCreated) o;
-    return this.getPayload().equals(that.getPayload());
-  }
 }

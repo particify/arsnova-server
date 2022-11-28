@@ -33,7 +33,7 @@ public class CommentEventSource {
     this.voteService = voteService;
   }
 
-  public void ScoreChanged(String id) {
+  public void scoreChanged(String id) {
     Comment c = service.getWithScore(id);
     int score = c.getScore();
 

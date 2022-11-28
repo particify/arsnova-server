@@ -68,8 +68,9 @@ public class AnswerHandler {
         .collect(Collectors.groupingBy(Answer::getContentId));
     final Set<String> ids = groupedAnswers.keySet();
     logger.debug("Sending events to topic with key answers-changed for contents: {}", ids);
-    for (final String contentId : ids) {
-      final Answer anyAnswer = groupedAnswers.get(contentId).get(0);
+    for (final Map.Entry<String, List<Answer>> entry : groupedAnswers.entrySet()) {
+      final String contentId = entry.getKey();
+      final Answer anyAnswer = entry.getValue().get(0);
       final String roomId = anyAnswer.getRoomId();
       final List<String> answerIds = groupedAnswers.get(contentId).stream()
           .map(Answer::getId).collect(Collectors.toList());

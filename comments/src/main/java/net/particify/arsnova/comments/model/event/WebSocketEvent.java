@@ -1,6 +1,7 @@
 package net.particify.arsnova.comments.model.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 
 import net.particify.arsnova.comments.model.WebSocketMessage;
 import net.particify.arsnova.comments.model.WebSocketPayload;
@@ -36,6 +37,27 @@ public class WebSocketEvent<P extends WebSocketPayload> extends WebSocketMessage
   @JsonProperty("roomId")
   public void setRoomId(String roomId) {
     this.roomId = roomId;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    final WebSocketEvent<?> that = (WebSocketEvent<?>) o;
+
+    return Objects.equals(roomId, that.roomId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), roomId);
   }
 
   @Override

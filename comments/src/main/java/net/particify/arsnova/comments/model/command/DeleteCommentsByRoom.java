@@ -9,13 +9,5 @@ public class DeleteCommentsByRoom extends WebSocketCommand<DeleteCommentsByRoomP
     super(DeleteCommentsByRoom.class.getSimpleName());
     this.payload = p;
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    DeleteCommentsByRoom that = (DeleteCommentsByRoom) o;
-    return this.getPayload().equals(that.getPayload());
-  }
 }
 

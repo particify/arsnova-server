@@ -44,8 +44,8 @@ class RabbitConfig(
   @Bean
   @Autowired
   fun connectionFactory(
-    @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor?
-  ): ConnectionFactory? {
+    @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor
+  ): ConnectionFactory {
     val connectionFactory = CachingConnectionFactory(
       authServiceProperties.rabbitmq.host,
       authServiceProperties.rabbitmq.port
@@ -53,22 +53,22 @@ class RabbitConfig(
     connectionFactory.username = authServiceProperties.rabbitmq.username
     connectionFactory.setPassword(authServiceProperties.rabbitmq.password)
     connectionFactory.virtualHost = authServiceProperties.rabbitmq.virtualHost
-    connectionFactory.setExecutor(executor!!)
+    connectionFactory.setExecutor(executor)
     return connectionFactory
   }
 
   @Bean
   @Autowired
-  fun rabbitTemplate(connectionFactory: ConnectionFactory?): RabbitTemplate? {
-    val rabbitTemplate = RabbitTemplate(connectionFactory!!)
+  fun rabbitTemplate(connectionFactory: ConnectionFactory): RabbitTemplate {
+    val rabbitTemplate = RabbitTemplate(connectionFactory)
     rabbitTemplate.messageConverter = jsonMessageConverter()
     return rabbitTemplate
   }
 
   @Bean
   @Autowired
-  fun rabbitAdmin(connectionFactory: ConnectionFactory?): RabbitAdmin? {
-    return RabbitAdmin(connectionFactory!!)
+  fun rabbitAdmin(connectionFactory: ConnectionFactory): RabbitAdmin {
+    return RabbitAdmin(connectionFactory)
   }
 
   @Bean
@@ -158,18 +158,18 @@ class RabbitConfig(
   }
 
   @Bean
-  fun jackson2Converter(): MappingJackson2MessageConverter? {
+  fun jackson2Converter(): MappingJackson2MessageConverter {
     return MappingJackson2MessageConverter()
   }
 
   @Bean
-  fun myHandlerMethodFactory(): DefaultMessageHandlerMethodFactory? {
+  fun myHandlerMethodFactory(): DefaultMessageHandlerMethodFactory {
     val factory = DefaultMessageHandlerMethodFactory()
-    factory.setMessageConverter(jackson2Converter()!!)
+    factory.setMessageConverter(jackson2Converter())
     return factory
   }
 
   override fun configureRabbitListeners(registrar: RabbitListenerEndpointRegistrar) {
-    registrar.messageHandlerMethodFactory = myHandlerMethodFactory()!!
+    registrar.messageHandlerMethodFactory = myHandlerMethodFactory()
   }
 }

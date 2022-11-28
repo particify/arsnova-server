@@ -272,14 +272,10 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
     userProfile.setCreationTimestamp(new Date());
 
     final UserProfile result = create(userProfile);
-    if (null != result) {
-      logger.debug("Activation key for user '{}': {}",
-          userProfile.getLoginId(),
-          account.getActivationKey());
-      sendActivationEmail(result);
-    } else {
-      logger.error("User registration failed. {} could not be created.", lcUsername);
-    }
+    logger.debug("Activation key for user '{}': {}",
+        userProfile.getLoginId(),
+        account.getActivationKey());
+    sendActivationEmail(result);
 
     return result;
   }
