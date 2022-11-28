@@ -29,7 +29,7 @@ import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.ChoiceAnswer;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.MultipleTextsAnswer;
-import net.particify.arsnova.core.model.PriorizationAnswer;
+import net.particify.arsnova.core.model.PrioritizationAnswer;
 import net.particify.arsnova.core.model.TextAnswer;
 
 public class FormatAnswerTypeIdResolver extends TypeIdResolverBase {
@@ -68,8 +68,8 @@ public class FormatAnswerTypeIdResolver extends TypeIdResolverBase {
         return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
       case WORDCLOUD:
         return TypeFactory.defaultInstance().constructType(MultipleTextsAnswer.class);
-      case PRIORIZATION:
-        return TypeFactory.defaultInstance().constructType(PriorizationAnswer.class);
+      case PRIORITIZATION:
+        return TypeFactory.defaultInstance().constructType(PrioritizationAnswer.class);
       default:
         throw new IllegalArgumentException("Unsupported type ID.");
     }

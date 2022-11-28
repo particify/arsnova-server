@@ -8,14 +8,14 @@ import java.util.List;
 
 import net.particify.arsnova.core.model.serialization.View;
 
-public class PriorizationAnswer extends Answer {
+public class PrioritizationAnswer extends Answer {
   private List<@NotNull @PositiveOrZero Integer> assignedPoints = new ArrayList<>();
 
-  public PriorizationAnswer() {
+  public PrioritizationAnswer() {
 
   }
 
-  public PriorizationAnswer(final PriorizationChoiceContent content, final String creatorId) {
+  public PrioritizationAnswer(final PrioritizationChoiceContent content, final String creatorId) {
     super(content, creatorId);
   }
 

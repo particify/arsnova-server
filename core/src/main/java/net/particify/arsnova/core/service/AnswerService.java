@@ -24,7 +24,7 @@ import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.AnswerStatistics;
 import net.particify.arsnova.core.model.AnswerStatisticsUserSummary;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
-import net.particify.arsnova.core.model.PriorizationAnswerStatistics;
+import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
 import net.particify.arsnova.core.model.TextAnswer;
 import net.particify.arsnova.core.model.TextAnswerStatistics;
 
@@ -41,7 +41,7 @@ public interface AnswerService extends EntityService<Answer> {
 
   TextAnswerStatistics getTextStatistics(String contentId);
 
-  PriorizationAnswerStatistics getPriorizationStatistics(String contentId);
+  PrioritizationAnswerStatistics getPrioritizationStatistics(String contentId);
 
   AnswerStatisticsUserSummary getStatisticsByUserIdAndContentIds(String userId, List<String> contentIds);
 

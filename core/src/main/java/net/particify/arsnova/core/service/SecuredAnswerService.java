@@ -8,7 +8,7 @@ import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.AnswerStatistics;
 import net.particify.arsnova.core.model.AnswerStatisticsUserSummary;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
-import net.particify.arsnova.core.model.PriorizationAnswerStatistics;
+import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
 import net.particify.arsnova.core.model.TextAnswer;
 import net.particify.arsnova.core.model.TextAnswerStatistics;
 
@@ -54,8 +54,8 @@ public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answe
 
   @Override
   @PreAuthorize("hasPermission(#contentId, 'content', 'read')")
-  public PriorizationAnswerStatistics getPriorizationStatistics(final String contentId) {
-    return answerService.getPriorizationStatistics(contentId);
+  public PrioritizationAnswerStatistics getPrioritizationStatistics(final String contentId) {
+    return answerService.getPrioritizationStatistics(contentId);
   }
 
   @Override

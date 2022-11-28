@@ -54,7 +54,7 @@ public class Content extends Entity implements RoomIdAware {
     SORT,
     FLASHCARD,
     WORDCLOUD,
-    PRIORIZATION
+    PRIORITIZATION
   }
 
   public static class State {

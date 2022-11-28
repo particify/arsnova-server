@@ -57,8 +57,8 @@ import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.GridImageContent;
 import net.particify.arsnova.core.model.MultipleTextsAnswer;
-import net.particify.arsnova.core.model.PriorizationAnswerStatistics;
-import net.particify.arsnova.core.model.PriorizationChoiceContent;
+import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
+import net.particify.arsnova.core.model.PrioritizationChoiceContent;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
 import net.particify.arsnova.core.model.TextAnswer;
@@ -219,8 +219,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       final TextAnswerStatistics textStats2 = getTextStatistics(content.getId(), 2);
       textStats.getRoundStatistics().add(textStats2.getRoundStatistics().get(1));
       stats = textStats;
-    } else if (content.getFormat() == Content.Format.PRIORIZATION) {
-      stats = getPriorizationStatistics(content.getId());
+    } else if (content.getFormat() == Content.Format.PRIORITIZATION) {
+      stats = getPrioritizationStatistics(content.getId());
     } else {
       final ChoiceAnswerStatistics choiceStats = getChoiceStatistics(content.getId(), 1);
       final ChoiceAnswerStatistics choiceStats2 = getChoiceStatistics(content.getId(), 2);
@@ -325,14 +325,14 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   }
 
   @Override
-  public PriorizationAnswerStatistics getPriorizationStatistics(final String contentId) {
+  public PrioritizationAnswerStatistics getPrioritizationStatistics(final String contentId) {
     final Content content = contentService.get(contentId);
     if (content == null) {
       throw new NotFoundException();
     }
-    final Integer optionCount = ((PriorizationChoiceContent) content).getOptions().size();
-    final PriorizationAnswerStatistics stats =
-        answerRepository.findByContentIdRoundForPriorization(contentId, optionCount);
+    final Integer optionCount = ((PrioritizationChoiceContent) content).getOptions().size();
+    final PrioritizationAnswerStatistics stats =
+        answerRepository.findByContentIdRoundForPrioritization(contentId, optionCount);
     return stats;
   }
 
