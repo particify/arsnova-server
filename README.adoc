@@ -1,32 +1,31 @@
 = ARSnova
-Particify <arsnova@particify.de>
 
 ARSnova is a modern, web-based approach to Audience Response Systems (ARS).
 It is the basis for the https://particify.de[online service Particify] and released under an open-source license.
 
 image::https://gitlab.com/particify/dev/foss/arsnova/-/raw/master/assets/showcase.png[A showcase of ARSnova's quiz feature,700]
 
-The ARSnova software is composed of multiple components:
+The ARSnova software is composed of multiple modules:
 the https://gitlab.com/particify/dev/foss/arsnova-webclient[web client] and multiple backend services.
-This repository contains the core backend service, a single component of the ARSnova software, and is mainly of interest to developers.
-Information about the software in general is available in the https://gitlab.com/particify/dev/foss/arsnova[ARSnova repository].
+This repository contains the code for all the backend services.
+It is the main repository which also contains scripts and configurations to run the software with Docker Compose.
 
 
-== Get started
+== Getting started
 
-A good starting point to run ARSnova yourself is the https://gitlab.com/particify/dev/foss/docker-orchestration[Docker Orchestration repository].
+If you are new to ARSnova, you might first want to have a look at our
+https://particify.de/en/features/[feature overview] and
+https://particify.de/manual/[end-user documentation (German only, an English version is planned)].
 
-Documentation for end-users, administrators and developers is available:
+To run ARSnova yourself, see our documentation regarding a link:.docker/compose/production/README.adoc[Docker Compose production setup].
 
-* https://particify.de/manual/[End-user documentation] (German only, an English version is planned)
-* https://gitlab.com/particify/dev/foss/docker-orchestration[Installation guide]
-* link:src/site/markdown/development.md[Developer documentation]
+You want to work with the codebase? Great!
+Learn how to link:.docker/compose/development/README.adoc[setup a development environment for ARSnova].
 
 
 == Releases
 
-Starting from version 3, we are using a rolling release model for ARSnova development.
-We provide container images for all services which are continuously updated.
+We provide container images with a Docker Compose configuration for our https://github.com/particify/arsnova-server/releases[software releases].
 
 
 == Support
@@ -44,6 +43,7 @@ Discuss ARSnova-related questions with other ARSnova users:
 If you need professional support with quick response times, we've got you covered.
 We offer https://particify.de/arsnova/dienstleistungen[support services around ARSnova] (German website) through Particify which include:
 
+* general technical support
 * installation and integration
 * updates and data migration
 * customization

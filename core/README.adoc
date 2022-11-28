@@ -1,0 +1,18 @@
+= Core service
+
+This service handles the core functionality of ARSnova which includes:
+
+* user accounts including authentication and registration
+* rooms
+* room announcements
+* question series including contents and answers
+* live feedback
+
+== Technology
+
+This service is written in Java and uses the
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/[Spring Boot] framework.
+It uses AspectJ with compile-time weaving.
+Therefore, the code needs to be compiled by `ajc` (this is handled by Gradle).
+For persistence, Apache CouchDB is used.
+RabbitMQ is used for inter-service communication.

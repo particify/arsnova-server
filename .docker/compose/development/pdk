@@ -356,14 +356,14 @@ case $COMMAND in
     if [ -z "$PDK_CMD" ]; then
       PDK_CMD=$0
     fi
-    echo "    $PDK_CMD update           Update Git repositories, Docker Compose configuration and Devcontainers"
-    echo "    $PDK_CMD update-config    Update the configuration for Docker Compose"
-    echo "    $PDK_CMD tags             Set the image tags of projects to use with Docker Compose"
-    echo "    $PDK_CMD open <project>   Open project in Devcontainer with Visual Studio Code"
     echo "    $PDK_CMD run              Start Devcontainers for all services"
-    echo "    $PDK_CMD build            (Re-)build Devcontainers"
+    echo "    $PDK_CMD dev-server       Start a development server"
+    echo "    $PDK_CMD open <project>   Open project in Devcontainer with Visual Studio Code"
+    echo "    $PDK_CMD tags             Set the image tags of projects to use with Docker Compose"
     echo "    $PDK_CMD logs             Show logs or the log for a specific service"
     echo "    $PDK_CMD compose          Execute a Docker Compose command"
-    echo "    $PDK_CMD dev-server       Starts a development server"
+    echo "    $PDK_CMD update           Update Git repositories, Docker Compose configuration, Devcontainers and the Gradle dependency cache"
+    echo "    $PDK_CMD update-config    Update the configuration for Docker Compose"
+    echo "    $PDK_CMD build            (Re-)build Devcontainers"
     ;;
 esac

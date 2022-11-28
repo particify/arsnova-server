@@ -1,0 +1,98 @@
+= Containerized development environment
+
+ARSnova is a microservice-based system which usually would not be easy to setup for development.
+To simplify the setup, `pdk` is available, a script which generates a Docker Compose configuration based on templates.
+Furthermore, `pdk` is used to manage the containerized services.
+
+== Requirements
+
+=== Hardware
+
+* CPU: 6 Cores or vCPU
+* RAM: 16 GiB
+* Storage: 10 GiB for Docker images and containers, additional storage for volumes containing user data depends on usage
+
+=== Software
+
+* Linux (see https://docs.docker.com/engine/install/#server for availability of official Docker packages)
+* https://docs.docker.com/engine/install/[Docker Engine] >= 20.10 (older versions might work but are not tested for compatibility)
+* https://docs.docker.com/compose/install/linux/[Docker Compose] >= 2.0
+* Visual Studio Code
+
+== Usage
+
+=== Preparations
+
+. Clone this repository.
+. Switch to the repository’s root directory and run `./pdk update`.
+. Run `./pdk` to list all available commands.
+
+=== Using the environment
+
+To work with the development environment you first need to start it:
+
+ ./pdk run -d
+
+This starts all service containers.
+On the first run, it will create Devcontainer images for the services of this repository.
+
+The images use the prebuilt versions of the application from a base image.
+This allows way, you have a completely functional system without building services which you are not working on.
+The version of the base image for each service can be changed:
+
+ ./pdk tags
+
+For development, the prebuilt service needs to replaced with a development server.
+When you open the subproject in Visual Studio Code (`./pdk open <project>`), the prebuild service is stopped automatically.
+You can then launch the application from VS Code.
+
+If you prefer to use another IDE, you can launch a development server independently from VS Code:
+
+ ./pdk dev-server <project>
+
+This also stops the prebuild service and runs the `bootRun` Gradle task for Spring projects.
+Non-Spring-based projects are currently not supported by the `dev-server` command.
+
+
+=== Commands
+
+The `pdk` script supports the following commands:
+
+[cols="1,4"]
+|===
+|`run`
+|Start Devcontainers for all services.
+
+|`dev-server`
+|Starts a development server.
+
+|`open <project>`
+|Open project in Devcontainer with Visual Studio Code.
+
+|`tags`
+|Set the image tags of projects to use with Docker Compose.
+
+|`logs`
+|Show logs or the log for a specific service.
+
+|`compose`
+|Execute a Docker Compose command.
+
+|`update`
+|Update Git repositories, Docker Compose configuration, Devcontainers and the Gradle dependency cache.
+
+|`update-config`
+|Update the configuration for Docker Compose. This command is automatically run when needed.
+
+|`build`
+|(Re-)build Devcontainers. This command is automatically run when needed.
+|===
+
+=== Known issues
+
+* No prebuilt version of the webclient is launched when running `./pdk run`.
+  It currently needs to be launched from VS Code.
+* At this time, there is no mature VS Code plugin for Kotlin support.
+  The plugin currently used for the devcontainers of Kotlin-based services has grave performance issues.
+  Therefore, the use of another IDE is recommended for Kotlin development.
+  A development server can be started with the `dev-server` command.
