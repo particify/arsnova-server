@@ -1,0 +1,11 @@
+= WebSocket service
+
+This service provides WebSocket/STOMP client connection handling.
+It serves as a gateway between client and upstream services.
+Furthermore, authorization handling is delegated to the authz service.
+
+== Technology
+
+This service is written in Kotlin and uses the
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/[Spring Boot] framework.
+RabbitMQ is used for inter-service communication.

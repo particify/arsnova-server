@@ -1,11 +1,14 @@
-= Particify Formatting Service for ARSnova
+= Formatting service
 
-This service provides server-side rendering of Markdown and LaTeX.
+This service provides server-side rendering of Markdown and LaTeX and source code highlighting.
+It generates plain HTML with CSS classes, so the client only needs to provide CSS and math fonts.
 
-== Usage
+== Technology
 
-Start the Node.js-based server application with the following command:
+This service is written in JavaScript (for Node.js) and uses the
+https://expressjs.com/[Express] framework.
+It uses the following libraries to perform rendering:
 
-    yarn start
-
-The service is accessible at port 3020.
+* markdown-it for Markdown
+* KaTeX for LaTeX
+* Prism.js for source code highlighting

@@ -1,0 +1,12 @@
+= Gateway service
+
+This service provides an HTTP-based API gateway.
+In the most simple case, it just proxies requests to upstream services.
+In more complex cases, it transforms requests and responses or interacts with multiple services and creates its own composed response.
+Furthermore, authorization handling is delegated to the authz service.
+
+== Technology
+
+This service is written in Kotlin and uses the
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/[Spring Boot] and
+https://cloud.spring.io/spring-cloud-gateway/reference/html/[Spring Cloud Gateway] frameworks.

@@ -1,0 +1,10 @@
+= Comments service
+
+This service handles comments (posts) for the Q&A feature.
+
+== Technology
+
+This service is written in Java and uses the
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/[Spring Boot] framework.
+For persistence, PostgreSQL is used.
+RabbitMQ is used for inter-service communication.

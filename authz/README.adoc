@@ -1,0 +1,10 @@
+= Authz service
+
+This service handles room authorization for the gateway and WebSocket services.
+
+== Technology
+
+This service is written in Kotlin and uses the
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/[Spring Boot] framework.
+For persistence, PostgreSQL is used.
+RabbitMQ is used for inter-service communication.
