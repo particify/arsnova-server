@@ -30,7 +30,7 @@ dependencies {
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("io.projectreactor:reactor-test")
-  testImplementation("com.ninja-squad:springmockk:3.1.2")
+  testImplementation("com.ninja-squad:springmockk:4.0.0")
   compileOnly("com.github.spotbugs:spotbugs-annotations:4.7.3")
 }
 
