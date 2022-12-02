@@ -13,7 +13,7 @@ plugins {
 
 java.sourceCompatibility = JavaVersion.VERSION_17
 
-extra["springCloudVersion"] = "2022.0.0-RC2"
+extra["springCloudVersion"] = "2022.0.0-RC3"
 
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
