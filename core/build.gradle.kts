@@ -39,7 +39,7 @@ dependencies {
   implementation("org.springframework.data:spring-data-commons")
   implementation("org.springframework.security:spring-security-aspects")
   implementation("org.springframework.security:spring-security-ldap")
-  implementation("org.aspectj:aspectjrt:1.9.9.1")
+  implementation("org.aspectj:aspectjrt:1.9.19")
   implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.github.ben-manes.caffeine:caffeine")
