@@ -19,6 +19,8 @@
 package net.particify.arsnova.core.service;
 
 import java.text.MessageFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -35,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -45,10 +49,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
+import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.persistence.UserRepository;
@@ -74,6 +80,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
   private static final long ACTIVATION_KEY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
   private static final long ACTIVATION_KEY_DURABILITY_MS = 5 * 24 * 60 * 60 * 1000L;
+  private static final long INACTIVE_USERS_CHECK_INTERVAL_MS = 60 * 60 * 1000L;
 
   private static final int VERIFICATION_CODE_LENGTH = 6;
   private static final int MAX_VERIFICATION_CODE_ATTEMPTS = 10;
@@ -97,10 +104,13 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
   private AuthenticationProviderProperties.Registered registeredProperties;
 
   private String rootUrl;
+  private Duration userInactivityPeriod;
+  private int userInactivityLimit;
 
   private Pattern mailPattern;
   private ConcurrentHashMap<String, Byte> resentMailCount;
   private Set<String> resendMailBans;
+  private WebClient authzWebClient;
 
   {
     resentMailCount = new ConcurrentHashMap<>();
@@ -125,6 +135,10 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
     this.passwordUtils = passwordUtils;
     this.emailService = emailService;
     this.rootUrl = systemProperties.getRootUrl();
+    final String authzUrl = systemProperties.getAuthzServiceUrl();
+    this.userInactivityPeriod = systemProperties.getAutoDeletionThresholds().getUserInactivityPeriod();
+    this.userInactivityLimit = systemProperties.getAutoDeletionThresholds().getUserInactivityLimit();
+    this.authzWebClient = WebClient.create(authzUrl);
   }
 
   @Scheduled(fixedDelay = MAIL_RESEND_TRY_RESET_DELAY_MS)
@@ -149,6 +163,40 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
     final long unixTime = System.currentTimeMillis();
     final long creationBefore = unixTime - ACTIVATION_KEY_DURABILITY_MS;
     userRepository.deleteNonActivatedUsers(creationBefore);
+  }
+
+  @Scheduled(fixedDelay = INACTIVE_USERS_CHECK_INTERVAL_MS)
+  public void deleteInactiveUsers() {
+    if (userInactivityPeriod.isZero()) {
+      logger.trace("Skipping deletion of inactive user accounts.");
+      return;
+    }
+    final Instant lastActiveBefore = Instant.now().minus(userInactivityPeriod);
+    final String lastActiveBeforeParam = lastActiveBefore.toString();
+    logger.debug("Retrieving IDs of inactive (since {}) user accounts.", lastActiveBeforeParam);
+    final List<String> userIds = authzWebClient
+        .get()
+        .uri(uriBuilder -> uriBuilder
+            .path("/roomaccess/inactive-user-ids")
+            .queryParam("lastActiveBefore", lastActiveBeforeParam)
+            .build())
+        .retrieve()
+        .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+        .block();
+    if (userIds.size() > userInactivityLimit) {
+      logger.warn("Number of inactive users ({}) is over the threshold of {}. Accounts will not be deleted.",
+          userIds.size(), userInactivityLimit);
+      return;
+    }
+    logger.info("Deleting {} inactive (since {}) user accounts.", userIds.size(), lastActiveBeforeParam);
+    final AtomicInteger count = new AtomicInteger();
+    final Collection<List<String>> groupedUserIds = userIds.stream()
+        .collect(Collectors.groupingBy(uid -> count.getAndIncrement() / 20))
+        .values();
+    for (final List<String> userIdList : groupedUserIds) {
+      final List<UserProfile> userProfiles = get(userIdList);
+      delete(userProfiles, Initiator.SYSTEM);
+    }
   }
 
   @Override

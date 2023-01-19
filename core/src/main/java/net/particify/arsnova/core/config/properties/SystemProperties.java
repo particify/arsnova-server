@@ -206,12 +206,37 @@ public class SystemProperties {
     }
   }
 
+  public static class AutoDeletionThresholds {
+    @DurationUnit(ChronoUnit.DAYS)
+    private Duration userInactivityPeriod;
+
+    private int userInactivityLimit;
+
+    public Duration getUserInactivityPeriod() {
+      return userInactivityPeriod;
+    }
+
+    public void setUserInactivityPeriod(final Duration userInactivityPeriod) {
+      this.userInactivityPeriod = userInactivityPeriod;
+    }
+
+    public int getUserInactivityLimit() {
+      return userInactivityLimit;
+    }
+
+    public void setUserInactivityLimit(final int userInactivityLimit) {
+      this.userInactivityLimit = userInactivityLimit;
+    }
+  }
+
   private String rootUrl;
   private Api api;
   private Mail mail;
   private Caching caching;
+  private String authzServiceUrl;
   private FormattingService formattingService;
   private LmsConnector lmsConnector;
+  private AutoDeletionThresholds autoDeletionThresholds;
 
   public String getRootUrl() {
     return rootUrl;
@@ -245,6 +270,14 @@ public class SystemProperties {
     this.caching = caching;
   }
 
+  public String getAuthzServiceUrl() {
+    return authzServiceUrl;
+  }
+
+  public void setAuthzServiceUrl(final String authzServiceUrl) {
+    this.authzServiceUrl = authzServiceUrl;
+  }
+
   public FormattingService getFormattingService() {
     return formattingService;
   }
@@ -259,5 +292,13 @@ public class SystemProperties {
 
   public void setLmsConnector(final LmsConnector lmsConnector) {
     this.lmsConnector = lmsConnector;
+  }
+
+  public AutoDeletionThresholds getAutoDeletionThresholds() {
+    return autoDeletionThresholds;
+  }
+
+  public void setAutoDeletionThresholds(final AutoDeletionThresholds autoDeletionThresholds) {
+    this.autoDeletionThresholds = autoDeletionThresholds;
   }
 }

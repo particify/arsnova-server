@@ -21,6 +21,16 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
 
   @Query(
     """
+    SELECT ra.userId
+    FROM RoomAccess ra
+    GROUP BY ra.userId
+    HAVING MIN(ra.lastAccess) < :lastAccessBefore
+    """
+  )
+  fun findUserIdsByLastAccessBefore(lastAccessBefore: Date): Iterable<String>
+
+  @Query(
+    """
     UPDATE room_access
       SET last_access = :lastAccess
       WHERE room_id = :roomId
