@@ -67,6 +67,8 @@ public class SettingsCommandHandler {
     settings.setRoomId(roomId);
     settings.setDirectSend(payload.getDirectSend());
     settings.setFileUploadEnabled(payload.isFileUploadEnabled());
+    settings.setReadonly(payload.isReadonly());
+    settings.setDisabled(payload.isDisabled());
 
     Settings updated = service.update(settings);
 
