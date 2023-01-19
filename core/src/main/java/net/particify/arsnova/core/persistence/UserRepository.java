@@ -27,5 +27,5 @@ public interface UserRepository extends CrudRepository<UserProfile, String> {
 
   List<UserProfile> findByLoginId(String loginId);
 
-  int deleteInactiveUsers(long lastActivityBefore);
+  int deleteNonActivatedUsers(long lastActivityBefore);
 }

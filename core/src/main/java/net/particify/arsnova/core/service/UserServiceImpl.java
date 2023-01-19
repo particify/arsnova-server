@@ -144,11 +144,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
   }
 
   @Scheduled(fixedDelay = ACTIVATION_KEY_CHECK_INTERVAL_MS)
-  public void deleteInactiveUsers() {
+  public void deleteNonActivatedUsers() {
     logger.debug("Deleting non-activated user accounts.");
     final long unixTime = System.currentTimeMillis();
-    final long lastActivityBefore = unixTime - ACTIVATION_KEY_DURABILITY_MS;
-    userRepository.deleteInactiveUsers(lastActivityBefore);
+    final long creationBefore = unixTime - ACTIVATION_KEY_DURABILITY_MS;
+    userRepository.deleteNonActivatedUsers(creationBefore);
   }
 
   @Override

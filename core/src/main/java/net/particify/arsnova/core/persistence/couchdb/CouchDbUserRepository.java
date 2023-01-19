@@ -73,8 +73,8 @@ public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> im
   }
 
   @Override
-  public int deleteInactiveUsers(final long lastActivityBefore) {
-    final ViewQuery q = createQuery("by_creationtimestamp_for_inactive").endKey(lastActivityBefore);
+  public int deleteNonActivatedUsers(final long creationBefore) {
+    final ViewQuery q = createQuery("by_creationtimestamp_for_inactive").endKey(creationBefore);
     final List<ViewResult.Row> rows = db.queryView(q).getRows();
 
     int count = 0;
