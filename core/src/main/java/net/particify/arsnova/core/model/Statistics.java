@@ -29,6 +29,7 @@ public class Statistics {
   @JsonView(View.Admin.class)
   public static class UserProfileStats {
     private int totalCount;
+    private int deleted;
     private int accountCount;
     private Map<String, Integer> countByAuthProvider = new HashMap<>();
     private int activationsPending;
@@ -39,6 +40,14 @@ public class Statistics {
 
     public void setTotalCount(final int totalCount) {
       this.totalCount = totalCount;
+    }
+
+    public int getDeleted() {
+      return deleted;
+    }
+
+    public void setDeleted(final int deleted) {
+      this.deleted = deleted;
     }
 
     public int getAccountCount() {
@@ -69,6 +78,7 @@ public class Statistics {
   @JsonView(View.Admin.class)
   public static class RoomStats {
     private int totalCount;
+    private int deleted;
     private int closed;
 
     public int getTotalCount() {
@@ -77,6 +87,14 @@ public class Statistics {
 
     public void setTotalCount(final int totalCount) {
       this.totalCount = totalCount;
+    }
+
+    public int getDeleted() {
+      return deleted;
+    }
+
+    public void setDeleted(final int deleted) {
+      this.deleted = deleted;
     }
 
     public int getClosed() {
@@ -91,6 +109,7 @@ public class Statistics {
   @JsonView(View.Admin.class)
   public static class ContentGroupStats {
     private int totalCount;
+    private int deleted;
     private int published;
     private int usingPublishingRange;
 
@@ -100,6 +119,14 @@ public class Statistics {
 
     public void setTotalCount(final int totalCount) {
       this.totalCount = totalCount;
+    }
+
+    public int getDeleted() {
+      return deleted;
+    }
+
+    public void setDeleted(final int deleted) {
+      this.deleted = deleted;
     }
 
     public int getPublished() {
@@ -122,6 +149,7 @@ public class Statistics {
   @JsonView(View.Admin.class)
   public static class ContentStats {
     private int totalCount;
+    private int deleted;
     private Map<String, Integer> countByFormat = new HashMap<>();
 
     public int getTotalCount() {
@@ -130,6 +158,14 @@ public class Statistics {
 
     public void setTotalCount(final int totalCount) {
       this.totalCount = totalCount;
+    }
+
+    public int getDeleted() {
+      return deleted;
+    }
+
+    public void setDeleted(final int deleted) {
+      this.deleted = deleted;
     }
 
     public Map<String, Integer> getCountByFormat() {
@@ -144,6 +180,7 @@ public class Statistics {
   @JsonView(View.Admin.class)
   public static class AnswerStats {
     private int totalCount;
+    private int deleted;
     private Map<String, Integer> countByFormat = new HashMap<>();
 
     public int getTotalCount() {
@@ -152,6 +189,14 @@ public class Statistics {
 
     public void setTotalCount(final int totalCount) {
       this.totalCount = totalCount;
+    }
+
+    public int getDeleted() {
+      return deleted;
+    }
+
+    public void setDeleted(final int deleted) {
+      this.deleted = deleted;
     }
 
     public Map<String, Integer> getCountByFormat() {
@@ -166,6 +211,7 @@ public class Statistics {
   @JsonView(View.Admin.class)
   public static class AnnouncementStats {
     private int totalCount;
+    private int deleted;
 
     public int getTotalCount() {
       return totalCount;
@@ -173,6 +219,14 @@ public class Statistics {
 
     public void setTotalCount(final int totalCount) {
       this.totalCount = totalCount;
+    }
+
+    public int getDeleted() {
+      return deleted;
+    }
+
+    public void setDeleted(final int deleted) {
+      this.deleted = deleted;
     }
   }
 

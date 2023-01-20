@@ -55,6 +55,7 @@ import net.particify.arsnova.core.model.AnswerStatisticsUserSummary;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
+import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.GridImageContent;
 import net.particify.arsnova.core.model.MultipleTextsAnswer;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
@@ -66,6 +67,7 @@ import net.particify.arsnova.core.model.TextAnswerStatistics;
 import net.particify.arsnova.core.model.TextAnswerStatistics.TextRoundStatistics;
 import net.particify.arsnova.core.model.WordcloudContent;
 import net.particify.arsnova.core.persistence.AnswerRepository;
+import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.security.AuthenticationService;
 import net.particify.arsnova.core.security.User;
 import net.particify.arsnova.core.service.exceptions.AlreadyAnsweredContentException;
@@ -91,13 +93,14 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
   public AnswerServiceImpl(
       final AnswerRepository repository,
+      final DeletionRepository deletionRepository,
       final RoomService roomService,
       final UserService userService,
       final AuthenticationService authenticationService,
       @Qualifier("defaultJsonMessageConverter") final
       MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
       final Validator validator) {
-    super(Answer.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
+    super(Answer.class, repository, deletionRepository, jackson2HttpMessageConverter.getObjectMapper(), validator);
     this.answerRepository = repository;
     this.roomService = roomService;
     this.userService = userService;
@@ -150,7 +153,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     contentService.update(content);
     final Iterable<Answer> answers = answerRepository.findStubsByContentIdAndHidden(content.getId(), false);
     answers.forEach(a -> a.setRoomId(content.getRoomId()));
-    delete(answers);
+    delete(answers, Initiator.USER);
   }
 
   @Override
@@ -446,7 +449,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   public void handleContentDeletion(final BeforeDeletionEvent<Content> event) {
     final Iterable<Answer> answers = answerRepository.findStubsByContentIdAndHidden(event.getEntity().getId(), false);
     answers.forEach(a -> a.setRoomId(event.getEntity().getRoomId()));
-    delete(answers);
+    delete(answers, Initiator.CASCADE);
   }
 
   @Override

@@ -35,6 +35,7 @@ import net.particify.arsnova.core.persistence.AnnouncementRepository;
 import net.particify.arsnova.core.persistence.AnswerRepository;
 import net.particify.arsnova.core.persistence.ContentGroupRepository;
 import net.particify.arsnova.core.persistence.ContentRepository;
+import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.persistence.RoomRepository;
 import net.particify.arsnova.core.persistence.StatisticsRepository;
 import net.particify.arsnova.core.persistence.UserRepository;
@@ -43,6 +44,7 @@ import net.particify.arsnova.core.persistence.couchdb.CouchDbAnnouncementReposit
 import net.particify.arsnova.core.persistence.couchdb.CouchDbAnswerRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbContentGroupRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbContentRepository;
+import net.particify.arsnova.core.persistence.couchdb.CouchDbDeletionRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbRoomRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbStatisticsRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbUserRepository;
@@ -139,5 +141,10 @@ public class PersistenceConfig {
   @Bean
   public StatisticsRepository statisticsRepository() throws Exception {
     return new CouchDbStatisticsRepository(couchDbConnector(), false);
+  }
+
+  @Bean
+  public DeletionRepository deletionRepository() throws Exception {
+    return new CouchDbDeletionRepository(couchDbConnector(), false);
   }
 }

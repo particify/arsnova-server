@@ -34,11 +34,13 @@ import org.springframework.validation.Validator;
 import net.particify.arsnova.core.event.BeforeDeletionEvent;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
+import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.WordcloudContent;
 import net.particify.arsnova.core.model.export.ContentExport;
 import net.particify.arsnova.core.persistence.AnswerRepository;
 import net.particify.arsnova.core.persistence.ContentRepository;
+import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.web.exceptions.BadRequestException;
 import net.particify.arsnova.core.web.exceptions.NotFoundException;
 
@@ -55,11 +57,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
   public ContentServiceImpl(
       final ContentRepository repository,
       final AnswerRepository answerRepository,
+      final DeletionRepository deletionRepository,
       final CsvService csvService,
       @Qualifier("defaultJsonMessageConverter")
       final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
       final Validator validator) {
-    super(Content.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
+    super(Content.class, repository, deletionRepository, jackson2HttpMessageConverter.getObjectMapper(), validator);
     this.contentRepository = repository;
     this.csvService = csvService;
   }
@@ -149,7 +152,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
   @EventListener
   public void handleRoomDeletion(final BeforeDeletionEvent<Room> event) {
     final Iterable<Content> contents = contentRepository.findStubsByRoomId(event.getEntity().getId());
-    delete(contents);
+    delete(contents, Initiator.CASCADE);
   }
 
   @Override

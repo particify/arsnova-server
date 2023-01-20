@@ -7,6 +7,7 @@ import java.util.function.Function;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.access.prepost.PreFilter;
 
+import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.Entity;
 
 public abstract class AbstractSecuredEntityServiceImpl<E extends Entity> implements EntityService<E> {
@@ -138,8 +139,8 @@ public abstract class AbstractSecuredEntityServiceImpl<E extends Entity> impleme
 
   @Override
   @PreFilter(value = "hasPermission(filterObject, 'delete')", filterTarget = "entities")
-  public void delete(final Iterable<E> entities) {
-    entityService.delete(entities);
+  public void delete(final Iterable<E> entities, final Initiator initiator) {
+    entityService.delete(entities, initiator);
   }
 
   public String getTypeName() {

@@ -46,6 +46,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.util.Streamable;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
@@ -61,10 +62,13 @@ import net.particify.arsnova.core.event.BeforeDeletionEvent;
 import net.particify.arsnova.core.event.BeforeFullUpdateEvent;
 import net.particify.arsnova.core.event.BeforePatchEvent;
 import net.particify.arsnova.core.event.BulkChangeEvent;
+import net.particify.arsnova.core.model.Deletion;
+import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.Entity;
 import net.particify.arsnova.core.model.EntityValidationException;
 import net.particify.arsnova.core.model.serialization.View;
 import net.particify.arsnova.core.persistence.CrudRepository;
+import net.particify.arsnova.core.persistence.DeletionRepository;
 
 /**
  * Default implementation of {@link EntityService} which provides CRUD operations for entities independently from the
@@ -78,6 +82,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 
   protected Class<T> type;
   protected CrudRepository<T, String> repository;
+  protected DeletionRepository deletionRepository;
   protected ApplicationEventPublisher eventPublisher;
   private ObjectMapper objectMapper;
   private ObjectMapper objectMapperForPatchTree;
@@ -86,10 +91,12 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
   public DefaultEntityServiceImpl(
       final Class<T> type,
       final CrudRepository<T, String> repository,
+      final DeletionRepository deletionRepository,
       final ObjectMapper objectMapper,
       final Validator validator) {
     this.type = type;
     this.repository = repository;
+    this.deletionRepository = deletionRepository;
     this.objectMapper = objectMapper;
     this.validator = validator;
     objectMapperForPatchTree = new ObjectMapper();
@@ -365,19 +372,27 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
     eventPublisher.publishEvent(new BeforeDeletionEvent<>(this, entity));
     repository.delete(entity);
     eventPublisher.publishEvent(new AfterDeletionEvent<>(this, entity));
+    deletionRepository.save(new Deletion(type, Initiator.USER, 1));
   }
 
   @Override
-  public void delete(final Iterable<T> entities) {
+  public void delete(final Iterable<T> entities, final Initiator initiator) {
+    if (Streamable.of(entities).isEmpty()) {
+      return;
+    }
+
+    int count = 0;
     for (final T entity : entities) {
       prepareDelete(entity);
       eventPublisher.publishEvent(new BeforeDeletionEvent<>(this, entity));
+      count++;
     }
     repository.deleteAll(entities);
     for (final T entity : entities) {
       eventPublisher.publishEvent(new AfterDeletionEvent<>(this, entity));
     }
     eventPublisher.publishEvent(new BulkChangeEvent<>(this, this.type, entities));
+    deletionRepository.save(new Deletion(type, initiator, count));
   }
 
   /**
