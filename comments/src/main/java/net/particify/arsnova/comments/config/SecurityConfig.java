@@ -15,6 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import net.particify.arsnova.comments.config.properties.SecurityProperties;
+import net.particify.arsnova.comments.controller.StatsController;
 import net.particify.arsnova.comments.security.JwtAuthenticationProvider;
 import net.particify.arsnova.comments.security.JwtTokenFilter;
 
@@ -37,6 +38,7 @@ public class SecurityConfig {
     httpSecurity.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
     httpSecurity.authorizeHttpRequests()
         .requestMatchers(managementPath + "/**").hasAnyRole("ADMIN", "MONITORING")
+        .requestMatchers(StatsController.REQUEST_MAPPING).permitAll()
         .anyRequest().authenticated();
 
       return httpSecurity.build();

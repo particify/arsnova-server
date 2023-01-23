@@ -21,7 +21,7 @@ import net.particify.arsnova.comments.service.StatsService;
 public class StatsController extends AbstractEntityController {
   private static final Logger logger = LoggerFactory.getLogger(StatsController.class);
 
-  protected static final String REQUEST_MAPPING = "/stats";
+  public static final String REQUEST_MAPPING = "/stats";
   private static final String COMMENT_STATS_BY_ROOMS_MAPPING = "/comment-stats-by-rooms";
   private static final String STATS_GET_MAPPNIG = "";
 
