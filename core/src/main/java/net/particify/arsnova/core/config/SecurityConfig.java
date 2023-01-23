@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.AdviceMode;
@@ -224,28 +224,20 @@ public class SecurityConfig {
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @Profile("!test")
   public class ManagementHttpSecurityConfig extends HttpSecurityConfig {
-    private final String managementPath;
-
     public ManagementHttpSecurityConfig(
         @Qualifier("restAuthenticationEntryPoint") final AuthenticationEntryPoint authenticationEntryPoint,
-        final AccessDeniedHandler accessDeniedHandler,
-        final WebEndpointProperties webEndpointProperties) {
+        final AccessDeniedHandler accessDeniedHandler) {
       super(authenticationEntryPoint, accessDeniedHandler);
-      this.managementPath = webEndpointProperties.getBasePath();
     }
 
     @Bean
     public SecurityFilterChain managementFilterChain(final HttpSecurity http) throws Exception {
       super.configureFilterChain(http);
-      http.securityMatcher(managementPath + "/**");
+      http.securityMatcher(EndpointRequest.toAnyEndpoint());
       http.authorizeHttpRequests()
-          .requestMatchers(managementPath + "/health", managementPath + "/info").permitAll()
+          .requestMatchers(EndpointRequest.to("health", "info")).permitAll()
           .requestMatchers(
-            managementPath + "/health/**",
-            managementPath + "/metrics",
-            managementPath + "/metrics/**",
-            managementPath + "/prometheus",
-            managementPath + "/stats"
+            EndpointRequest.to("metrics", "prometheus", "stats")
           ).hasAnyRole("ADMIN", "MONITORING")
           .anyRequest().hasRole("ADMIN");
       http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
