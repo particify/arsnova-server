@@ -9,6 +9,7 @@ import org.springframework.validation.Validator;
 
 import net.particify.arsnova.core.model.Announcement;
 import net.particify.arsnova.core.persistence.AnnouncementRepository;
+import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.security.AuthenticationService;
 
 @Service
@@ -19,11 +20,17 @@ public class AnnouncementServiceImpl extends DefaultEntityServiceImpl<Announceme
 
   public AnnouncementServiceImpl(
       final AnnouncementRepository repository,
+      final DeletionRepository deletionRepository,
       @Qualifier("defaultJsonMessageConverter")
       final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
       final Validator validator,
       final AuthenticationService authenticationService) {
-    super(Announcement.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
+    super(
+        Announcement.class,
+        repository,
+        deletionRepository,
+        jackson2HttpMessageConverter.getObjectMapper(),
+        validator);
     this.announcementRepository = repository;
     this.authenticationService = authenticationService;
   }

@@ -50,6 +50,7 @@ import net.particify.arsnova.core.config.properties.AuthenticationProviderProper
 import net.particify.arsnova.core.config.properties.SecurityProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.model.UserProfile;
+import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.persistence.UserRepository;
 import net.particify.arsnova.core.security.PasswordUtils;
 import net.particify.arsnova.core.security.User;
@@ -108,6 +109,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
   public UserServiceImpl(
       final UserRepository repository,
+      final DeletionRepository deletionRepository,
       final SystemProperties systemProperties,
       final SecurityProperties securityProperties,
       final AuthenticationProviderProperties authenticationProviderProperties,
@@ -116,7 +118,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
       final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
       final Validator validator,
       final PasswordUtils passwordUtils) {
-    super(UserProfile.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
+    super(UserProfile.class, repository, deletionRepository, jackson2HttpMessageConverter.getObjectMapper(), validator);
     this.userRepository = repository;
     this.securityProperties = securityProperties;
     this.registeredProperties = authenticationProviderProperties.getRegistered();

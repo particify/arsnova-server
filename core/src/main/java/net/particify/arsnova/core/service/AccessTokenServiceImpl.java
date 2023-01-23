@@ -17,6 +17,7 @@ import net.particify.arsnova.core.config.properties.TemplateProperties;
 import net.particify.arsnova.core.model.AccessToken;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.persistence.AccessTokenRepository;
+import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.security.AuthenticationService;
 import net.particify.arsnova.core.security.PasswordUtils;
 import net.particify.arsnova.core.security.RoomRole;
@@ -36,6 +37,7 @@ public class AccessTokenServiceImpl extends DefaultEntityServiceImpl<AccessToken
 
   public AccessTokenServiceImpl(
       final AccessTokenRepository repository,
+      final DeletionRepository deletionRepository,
       @Qualifier("defaultJsonMessageConverter")
       final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
       final Validator validator,
@@ -44,7 +46,7 @@ public class AccessTokenServiceImpl extends DefaultEntityServiceImpl<AccessToken
       final AuthenticationService authenticationService,
       final TemplateProperties templateProperties,
       final SystemProperties systemProperties) {
-    super(AccessToken.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
+    super(AccessToken.class, repository, deletionRepository, jackson2HttpMessageConverter.getObjectMapper(), validator);
     this.accessTokenRepository = repository;
     this.passwordUtils = passwordUtils;
     this.emailService = emailService;

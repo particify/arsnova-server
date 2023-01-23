@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.Entity;
 
 /**
@@ -74,5 +75,5 @@ public interface EntityService<T extends Entity> {
 
   void delete(T entity);
 
-  void delete(Iterable<T> entities);
+  void delete(Iterable<T> entities, Initiator initiator);
 }

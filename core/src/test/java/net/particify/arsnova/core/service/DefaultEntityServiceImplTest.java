@@ -61,6 +61,7 @@ import net.particify.arsnova.core.model.ContentGroup;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.serialization.View;
 import net.particify.arsnova.core.persistence.ContentGroupRepository;
+import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.persistence.RoomRepository;
 import net.particify.arsnova.core.test.context.support.WithMockUser;
 
@@ -93,6 +94,9 @@ public class DefaultEntityServiceImplTest {
   private ContentGroupRepository contentGroupRepository;
 
   @Autowired
+  private DeletionRepository deletionRepository;
+
+  @Autowired
   private EventListenerConfig eventListenerConfig;
 
   @BeforeEach
@@ -105,7 +109,7 @@ public class DefaultEntityServiceImplTest {
   public void testUpdateRetainsInternalProperties() {
     final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
     final DefaultEntityServiceImpl<Room> entityService =
-        new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
+        new DefaultEntityServiceImpl<>(Room.class, roomRepository, deletionRepository, objectMapper, validator);
     entityService.setApplicationEventPublisher(eventPublisher);
 
     when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
@@ -132,7 +136,7 @@ public class DefaultEntityServiceImplTest {
   public void testPatch() throws IOException {
     final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
     final DefaultEntityServiceImpl<Room> entityService =
-        new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
+        new DefaultEntityServiceImpl<>(Room.class, roomRepository, deletionRepository, objectMapper, validator);
     entityService.setApplicationEventPublisher(eventPublisher);
 
     when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
@@ -173,7 +177,7 @@ public class DefaultEntityServiceImplTest {
   public void testPatchWithList() throws IOException {
     final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
     final DefaultEntityServiceImpl<Room> entityService =
-        new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
+        new DefaultEntityServiceImpl<>(Room.class, roomRepository, deletionRepository, objectMapper, validator);
     entityService.setApplicationEventPublisher(eventPublisher);
 
     when(roomRepository.saveAll(anyList())).then(returnsFirstArg());
@@ -235,7 +239,12 @@ public class DefaultEntityServiceImplTest {
   public void testPatchReplacesLists() throws IOException {
     final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
     final DefaultEntityServiceImpl<ContentGroup> entityService =
-        new DefaultEntityServiceImpl<>(ContentGroup.class, contentGroupRepository, objectMapper, validator);
+        new DefaultEntityServiceImpl<>(
+            ContentGroup.class,
+            contentGroupRepository,
+            deletionRepository,
+            objectMapper,
+            validator);
     entityService.setApplicationEventPublisher(eventPublisher);
 
     when(contentGroupRepository.save(any(ContentGroup.class))).then(returnsFirstArg());
@@ -259,7 +268,12 @@ public class DefaultEntityServiceImplTest {
   public void testPatchUpdatesListElementOrder() throws IOException {
     final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
     final DefaultEntityServiceImpl<ContentGroup> entityService =
-        new DefaultEntityServiceImpl<>(ContentGroup.class, contentGroupRepository, objectMapper, validator);
+        new DefaultEntityServiceImpl<>(
+            ContentGroup.class,
+            contentGroupRepository,
+            deletionRepository,
+            objectMapper,
+            validator);
     entityService.setApplicationEventPublisher(eventPublisher);
 
     when(contentGroupRepository.save(any(ContentGroup.class))).then(returnsFirstArg());
@@ -284,7 +298,7 @@ public class DefaultEntityServiceImplTest {
   public void testCaching() {
     final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
     final DefaultEntityServiceImpl<Room> entityService =
-        new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
+        new DefaultEntityServiceImpl<>(Room.class, roomRepository, deletionRepository, objectMapper, validator);
     entityService.setApplicationEventPublisher(eventPublisher);
 
     final Room room1 = new Room();
@@ -327,7 +341,7 @@ public class DefaultEntityServiceImplTest {
   public void testValidation() {
     final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
     final DefaultEntityServiceImpl<Room> entityService =
-        new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
+        new DefaultEntityServiceImpl<>(Room.class, roomRepository, deletionRepository, objectMapper, validator);
     entityService.setApplicationEventPublisher(eventPublisher);
 
     when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
@@ -343,7 +357,7 @@ public class DefaultEntityServiceImplTest {
   public void testChangeDetection() throws JsonProcessingException {
     final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
     final DefaultEntityServiceImpl<Room> entityService =
-        new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
+        new DefaultEntityServiceImpl<>(Room.class, roomRepository, deletionRepository, objectMapper, validator);
     entityService.setApplicationEventPublisher(eventPublisher);
 
     when(roomRepository.save(any(Room.class))).then(returnsFirstArg());

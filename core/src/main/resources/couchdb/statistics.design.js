@@ -31,23 +31,8 @@ var designDoc = {
 				case "Answer":
 					emit([doc.type, "format", doc.format], 1);
 					break;
-				case "LogEntry":
-					if (doc.event === "delete") {
-						switch (doc.payload.type) {
-						case "UserProfile":
-							emit([doc.payload.type, "deleted"], 1);
-							break;
-						case "Room":
-							emit([doc.payload.type, "deleted"], doc.payload.roomCount || 1);
-							break;
-						case "Content":
-							emit([doc.payload.type, "deleted"], doc.payload.contentCount || 1);
-							break;
-						case "Answer":
-							emit([doc.payload.type, "deleted"], doc.payload.answerCount || 1);
-							break;
-						}
-					}
+				case "Deletion":
+					emit([doc.deletedType, "deleted"], doc.count || 1);
 					break;
 				}
 			},

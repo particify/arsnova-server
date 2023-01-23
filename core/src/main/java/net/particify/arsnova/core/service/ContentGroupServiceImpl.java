@@ -35,9 +35,11 @@ import net.particify.arsnova.core.event.AfterDeletionEvent;
 import net.particify.arsnova.core.event.BeforeDeletionEvent;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.ContentGroup;
+import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.export.ContentExport;
 import net.particify.arsnova.core.persistence.ContentGroupRepository;
+import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.web.exceptions.BadRequestException;
 import net.particify.arsnova.core.web.exceptions.NotFoundException;
 
@@ -51,11 +53,17 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
 
   public ContentGroupServiceImpl(
       final ContentGroupRepository repository,
+      final DeletionRepository deletionRepository,
       final CsvService csvService,
       @Qualifier("defaultJsonMessageConverter")
       final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
       final Validator validator) {
-    super(ContentGroup.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
+    super(
+        ContentGroup.class,
+        repository,
+        deletionRepository,
+        jackson2HttpMessageConverter.getObjectMapper(),
+        validator);
     this.contentGroupRepository = repository;
     this.csvService = csvService;
   }
@@ -165,7 +173,7 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
             .flatMap(cg -> cg.getContentIds().stream()).collect(Collectors.toSet());
     final List<String> idsForDeletion = event.getEntity().getContentIds().stream()
             .filter(id -> !idsWithGroup.contains(id)).toList();
-    delete(get(idsForDeletion));
+    delete(get(idsForDeletion), Initiator.CASCADE);
   }
 
   @EventListener
@@ -184,6 +192,6 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
   @EventListener
   public void handleRoomDeletion(final BeforeDeletionEvent<Room> event) {
     final Iterable<ContentGroup> contentGroups = contentGroupRepository.findByRoomId(event.getEntity().getId());
-    delete(contentGroups);
+    delete(contentGroups, Initiator.CASCADE);
   }
 }

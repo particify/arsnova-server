@@ -40,9 +40,11 @@ import org.springframework.validation.Validator;
 import net.particify.arsnova.connector.client.ConnectorClient;
 import net.particify.arsnova.connector.model.Membership;
 import net.particify.arsnova.core.event.BeforeDeletionEvent;
+import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.RoomMembership;
 import net.particify.arsnova.core.model.UserProfile;
+import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.persistence.RoomRepository;
 import net.particify.arsnova.core.security.AuthenticationService;
 import net.particify.arsnova.core.security.PasswordUtils;
@@ -75,13 +77,14 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
   public RoomServiceImpl(
       final RoomRepository repository,
+      final DeletionRepository deletionRepository,
       final AuthenticationService authenticationService,
       final AccessTokenService accessTokenService,
       final PasswordUtils passwordUtils,
       @Qualifier("defaultJsonMessageConverter")
       final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
       final Validator validator) {
-    super(Room.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
+    super(Room.class, repository, deletionRepository, jackson2HttpMessageConverter.getObjectMapper(), validator);
     this.roomRepository = repository;
     this.authenticationService = authenticationService;
     this.accessTokenService = accessTokenService;
@@ -106,7 +109,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
   @EventListener
   public void handleUserDeletion(final BeforeDeletionEvent<UserProfile> event) {
     final Iterable<Room> rooms = roomRepository.findByOwnerId(event.getEntity().getId(), -1, -1);
-    delete(rooms);
+    delete(rooms, Initiator.CASCADE);
   }
 
   @Scheduled(fixedRate = DELETE_SCHEDULED_ROOMS_INTERVAL_MS)
@@ -114,7 +117,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
     logger.trace("Checking for rooms scheduled for deletion.");
     final List<Room> rooms = roomRepository.findStubsByScheduledDeletionAfter(new Date());
     if (!rooms.isEmpty()) {
-      delete(rooms);
+      delete(rooms, Initiator.SYSTEM);
       logger.info("Deleted {} scheduled rooms.", rooms.size());
     }
   }

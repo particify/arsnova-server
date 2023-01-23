@@ -63,6 +63,9 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
                 userProfileStats.setTotalCount(value);
               } else if (key.size() > 1) {
                 switch (key.get(1).asText()) {
+                  case "deleted":
+                    userProfileStats.setDeleted(value);
+                    break;
                   case "activationPending":
                     userProfileStats.setActivationsPending(value);
                     break;
@@ -79,6 +82,9 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
                 roomStats.setTotalCount(value);
               } else if (key.size() > 1) {
                 switch (key.get(1).asText()) {
+                  case "deleted":
+                    roomStats.setDeleted(value);
+                    break;
                   case "closed":
                     roomStats.setClosed(value);
                     break;
@@ -92,6 +98,9 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
                 contentGroupStats.setTotalCount(value);
               } else if (key.size() > 1) {
                 switch (key.get(1).asText()) {
+                  case "deleted":
+                    contentGroupStats.setDeleted(value);
+                    break;
                   case "published":
                     contentGroupStats.setPublished(value);
                     break;
@@ -108,6 +117,9 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
                 contentStats.setTotalCount(value);
               } else if (key.size() > 1) {
                 switch (key.get(1).asText()) {
+                  case "deleted":
+                    contentStats.setDeleted(value);
+                    break;
                   case "format":
                     contentStats.getCountByFormat().put(key.get(2).asText(), value);
                     break;
@@ -121,6 +133,9 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
                 answerStats.setTotalCount(value);
               } else if (key.size() > 1) {
                 switch (key.get(1).asText()) {
+                  case "deleted":
+                    answerStats.setDeleted(value);
+                    break;
                   case "format":
                     answerStats.getCountByFormat().put(key.get(2).asText(), value);
                     break;
@@ -132,6 +147,14 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
             case "Announcement":
               if (key.size() == 1) {
                 announcementStats.setTotalCount(value);
+              } else if (key.size() > 1) {
+                switch (key.get(1).asText()) {
+                  case "deleted":
+                    announcementStats.setDeleted(value);
+                    break;
+                  default:
+                    break;
+                }
               }
               break;
             default:
