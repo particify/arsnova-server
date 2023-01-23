@@ -58,7 +58,7 @@ class UserService(
   }
 
   fun updateAnnouncementReadTimestamp(userId: String, jwt: String): Mono<ResponseEntity<Void>> {
-    val url = "${httpGatewayProperties.httpClient.core}/user/$userId/"
+    val url = "${httpGatewayProperties.httpClient.core}/user/$userId"
     return webClient.patch()
       .uri(url)
       .header("Authorization", jwt)
