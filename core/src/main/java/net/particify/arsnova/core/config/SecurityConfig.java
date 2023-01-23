@@ -188,6 +188,7 @@ public class SecurityConfig {
       http.csrf().disable();
       http.headers().addHeaderWriter(new HstsHeaderWriter(false));
 
+      http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
       if (providerProperties.getSaml().isEnabled()) {
         http.addFilterAfter(samlCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
       }
