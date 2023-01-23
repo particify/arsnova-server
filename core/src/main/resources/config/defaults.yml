@@ -80,6 +80,8 @@ arsnova:
       max-entries: 100000
       expiry: 12H
 
+    authz-service-url: http://arsnova-server-authz:8080
+
     # Formatting service
     formatting-service:
       enabled: true
@@ -92,12 +94,11 @@ arsnova:
       username: test
       password: test
 
-    inactivity-thresholds:
-      # Anonymize user content for users with X days of inactivity.
-      anonymize-users: 180
-
-      # Delete guest sessions automatically after X days of owner inactivity.
-      delete-guest-rooms: 180
+    auto-deletion-thresholds:
+      # Delete user accounts after X days of inactivity.
+      user-inactivity-period: 0D
+      # If more than X accounts would be affected, deletion is not performed.
+      user-inactivity-limit: 50
 
   ##############################################################################
   # Authentication

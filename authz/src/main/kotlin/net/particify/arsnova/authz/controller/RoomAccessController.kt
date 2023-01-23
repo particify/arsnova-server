@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.time.Instant
+import java.util.Date
 import java.util.Optional
 
 @Controller
@@ -66,6 +68,15 @@ class RoomAccessController(
         Mono.justOrEmpty(optional)
       }
       .switchIfEmpty(Mono.error(NotFoundException()))
+  }
+
+  @GetMapping(path = ["/roomaccess/inactive-user-ids"])
+  @ResponseBody
+  fun getInactiveUserIds(
+    @RequestParam lastActiveBefore: String
+  ): Mono<List<String>> {
+    val lastActiveBeforeInstant = Date.from(Instant.parse(lastActiveBefore))
+    return Mono.just(handler.getUserIdsLastActiveBefore(lastActiveBeforeInstant).toList())
   }
 
   @PostMapping(path = ["/roomaccess/sync/{roomId}/{revNumber}"])
