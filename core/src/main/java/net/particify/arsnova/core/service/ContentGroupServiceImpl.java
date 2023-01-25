@@ -173,11 +173,11 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
             .flatMap(cg -> cg.getContentIds().stream()).collect(Collectors.toSet());
     final List<String> idsForDeletion = event.getEntity().getContentIds().stream()
             .filter(id -> !idsWithGroup.contains(id)).toList();
-    delete(get(idsForDeletion), Initiator.CASCADE);
+    contentService.delete(contentService.get(idsForDeletion), Initiator.CASCADE);
   }
 
   @EventListener
-  public void handleContentDeletion(final BeforeDeletionEvent<Content> event) {
+  public void handleContentDeletion(final BeforeDeletionEvent<? extends Content> event) {
     final Content content = event.getEntity();
     final List<ContentGroup> contentGroups = getByRoomId(content.getRoomId());
     for (final ContentGroup contentGroup : contentGroups) {
