@@ -6,7 +6,7 @@ plugins {
   id("com.google.cloud.tools.jib") version "3.3.1"
   id("io.freefair.aspectj.post-compile-weaving") version "6.6.1"
   id("io.spring.dependency-management") version "1.1.0"
-  id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
+  id("org.jlleitschuh.gradle.ktlint") version "11.1.0"
   id("org.springframework.boot") version "3.0.2"
 }
 
