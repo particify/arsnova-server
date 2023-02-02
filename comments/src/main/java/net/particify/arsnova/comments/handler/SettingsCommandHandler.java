@@ -2,6 +2,7 @@ package net.particify.arsnova.comments.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import net.particify.arsnova.comments.model.command.CreateSettings;
 import net.particify.arsnova.comments.model.command.CreateSettingsPayload;
 import net.particify.arsnova.comments.model.command.UpdateSettings;
 import net.particify.arsnova.comments.model.command.UpdateSettingsPayload;
+import net.particify.arsnova.comments.model.event.SettingsUpdated;
 import net.particify.arsnova.comments.security.PermissionEvaluator;
 import net.particify.arsnova.comments.service.SettingsService;
 
@@ -18,14 +20,17 @@ import net.particify.arsnova.comments.service.SettingsService;
 public class SettingsCommandHandler {
   private static final Logger logger = LoggerFactory.getLogger(SettingsCommandHandler.class);
 
+  private final AmqpTemplate messagingTemplate;
   private final SettingsService service;
   private final PermissionEvaluator permissionEvaluator;
 
   @Autowired
   public SettingsCommandHandler(
+      AmqpTemplate messagingTemplate,
       SettingsService service,
       PermissionEvaluator permissionEvaluator
   ) {
+    this.messagingTemplate = messagingTemplate;
     this.service = service;
     this.permissionEvaluator = permissionEvaluator;
   }
@@ -71,6 +76,14 @@ public class SettingsCommandHandler {
     settings.setDisabled(payload.isDisabled());
 
     Settings updated = service.update(settings);
+
+    SettingsUpdated event = new SettingsUpdated(payload, settings.getRoomId());
+
+    messagingTemplate.convertAndSend(
+        "amq.topic",
+        settings.getRoomId() + ".comment.settings.stream",
+        event
+    );
 
     return updated;
 

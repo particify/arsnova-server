@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.core.AmqpTemplate;
 
 import net.particify.arsnova.comments.model.Settings;
 import net.particify.arsnova.comments.model.command.CreateSettings;
@@ -26,11 +27,14 @@ public class SettingsCommandHandlerTest {
   @Mock
   private PermissionEvaluator permissionEvaluator;
 
+  @Mock
+  private AmqpTemplate messagingTemplate;
+
   SettingsCommandHandler commandHandler;
 
   @BeforeEach
   public void setup() {
-    this.commandHandler = new SettingsCommandHandler(settingsService, permissionEvaluator);
+    this.commandHandler = new SettingsCommandHandler(messagingTemplate, settingsService, permissionEvaluator);
   }
 
   @Test
