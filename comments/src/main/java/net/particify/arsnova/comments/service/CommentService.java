@@ -144,7 +144,7 @@ public class CommentService {
     return repository.findByRoomIdAndArchiveIdNull(roomId);
   }
 
-  public long countByRoomIdAndAck(String roomId, Boolean ack) {
+  public long countByRoomIdAndAck(String roomId, boolean ack) {
     return repository.countByRoomIdAndAckAndArchiveIdNull(roomId, ack);
   }
 

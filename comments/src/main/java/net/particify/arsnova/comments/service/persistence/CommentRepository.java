@@ -13,6 +13,6 @@ public interface CommentRepository extends CrudRepository<Comment, String> {
   long countByArchiveId(String archiveId);
   @Transactional
   List<Comment> deleteByRoomId(String roomId);
-  long countByRoomIdAndAckAndArchiveIdNull(String roomId, Boolean ack);
+  long countByRoomIdAndAckAndArchiveIdNull(String roomId, boolean ack);
   List<Comment> findByArchiveId(String archiveId);
 }

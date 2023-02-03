@@ -7,7 +7,7 @@ import net.particify.arsnova.comments.model.WebSocketPayload;
 
 public class HighlightCommentPayload implements WebSocketPayload {
   private String id;
-  private Boolean lights;
+  private boolean lights;
 
   public HighlightCommentPayload() {
   }
@@ -27,12 +27,12 @@ public class HighlightCommentPayload implements WebSocketPayload {
   }
 
   @JsonProperty("lights")
-  public Boolean getLights() {
+  public boolean getLights() {
     return lights;
   }
 
   @JsonProperty("lights")
-  public void setLights(Boolean lights) {
+  public void setLights(boolean lights) {
     this.lights = lights;
   }
 

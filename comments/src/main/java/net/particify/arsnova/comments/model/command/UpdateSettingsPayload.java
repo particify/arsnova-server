@@ -7,10 +7,10 @@ import net.particify.arsnova.comments.model.WebSocketPayload;
 
 public class UpdateSettingsPayload implements WebSocketPayload {
   private String roomId;
-  private Boolean directSend;
-  private Boolean fileUploadEnabled;
-  private Boolean readonly;
-  private Boolean disabled;
+  private boolean directSend;
+  private boolean fileUploadEnabled;
+  private boolean readonly;
+  private boolean disabled;
 
   public UpdateSettingsPayload() {
   }
@@ -23,7 +23,7 @@ public class UpdateSettingsPayload implements WebSocketPayload {
     disabled = settings.isDisabled();
   }
 
-  public UpdateSettingsPayload(String roomId, Boolean directSend) {
+  public UpdateSettingsPayload(String roomId, boolean directSend) {
     this.roomId = roomId;
     this.directSend = directSend;
   }
@@ -36,35 +36,35 @@ public class UpdateSettingsPayload implements WebSocketPayload {
     this.roomId = roomId;
   }
 
-  public Boolean getDirectSend() {
+  public boolean getDirectSend() {
     return directSend;
   }
 
-  public void setDirectSend(Boolean directSend) {
+  public void setDirectSend(boolean directSend) {
     this.directSend = directSend;
   }
 
-  public Boolean isFileUploadEnabled() {
+  public boolean isFileUploadEnabled() {
     return fileUploadEnabled;
   }
 
-  public void setFileUploadEnabled(final Boolean fileUploadEnabled) {
+  public void setFileUploadEnabled(final boolean fileUploadEnabled) {
     this.fileUploadEnabled = fileUploadEnabled;
   }
 
-  public Boolean isReadonly() {
+  public boolean isReadonly() {
     return readonly;
   }
 
-  public void setReadonly(Boolean readonly) {
+  public void setReadonly(boolean readonly) {
     this.readonly = readonly;
   }
 
-  public Boolean isDisabled() {
+  public boolean isDisabled() {
     return disabled;
   }
 
-  public void setDisabled(Boolean disabled) {
+  public void setDisabled(boolean disabled) {
     this.disabled = disabled;
   }
 

@@ -24,7 +24,6 @@ public class SettingsService {
   public Settings get(String id) {
     Settings defaults = new Settings();
     defaults.setRoomId(id);
-    defaults.setDirectSend(true);
     Settings s = repository.findById(id).orElse(defaults);
 
     return s;
