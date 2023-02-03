@@ -102,6 +102,10 @@ public class CommentCommandHandler {
 
     Settings settings = settingsService.get(payload.getRoomId());
 
+    if (settings.isReadonly() || settings.isDisabled()) {
+      throw new ForbiddenException();
+    }
+
     newComment.setRoomId(payload.getRoomId());
     newComment.setCreatorId(payload.getCreatorId());
     newComment.setBody(payload.getBody());

@@ -10,6 +10,8 @@ public class Settings {
   private String roomId;
   private Boolean directSend;
   private Boolean fileUploadEnabled;
+  private Boolean readonly;
+  private Boolean disabled;
 
   public Settings() {
   }
@@ -38,12 +40,30 @@ public class Settings {
     this.fileUploadEnabled = fileUploadEnabled;
   }
 
+  public Boolean isReadonly() {
+    return readonly;
+  }
+
+  public void setReadonly(Boolean readonly) {
+    this.readonly = readonly;
+  }
+
+  public Boolean isDisabled() {
+    return disabled;
+  }
+
+  public void setDisabled(Boolean disabled) {
+    this.disabled = disabled;
+  }
+
   @Override
   public String toString() {
     return "Settings{" +
         "roomId='" + roomId + '\'' +
         ", directSend=" + directSend +
         ", fileUploadEnabled=" + fileUploadEnabled +
+        ", readonly=" + readonly +
+        ", disabled" + disabled +
         '}';
   }
 
@@ -52,13 +72,16 @@ public class Settings {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     final Settings settings = (Settings) o;
-    return Objects.equals(roomId, settings.roomId) && Objects.equals(
-        directSend,
-        settings.directSend) && Objects.equals(fileUploadEnabled, settings.fileUploadEnabled);
+    return
+        Objects.equals(roomId, settings.roomId)
+        && Objects.equals(directSend, settings.directSend)
+        && Objects.equals(fileUploadEnabled, settings.fileUploadEnabled)
+        && Objects.equals(readonly, settings.readonly)
+        && Objects.equals(disabled, settings.disabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(roomId, directSend, fileUploadEnabled);
+    return Objects.hash(roomId, directSend, fileUploadEnabled, readonly, disabled);
   }
 }

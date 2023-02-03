@@ -84,6 +84,8 @@ public class CommentCommandHandlerTest {
     Settings settings = new Settings();
     settings.setRoomId(roomId);
     settings.setDirectSend(true);
+    settings.setReadonly(false);
+    settings.setDisabled(false);
 
     when(settingsService.get(roomId)).thenReturn(settings);
     when(commentService.create(any(Comment.class))).thenReturn(newComment);
@@ -120,6 +122,8 @@ public class CommentCommandHandlerTest {
     Settings settings = new Settings();
     settings.setRoomId(roomId);
     settings.setDirectSend(false);
+    settings.setReadonly(false);
+    settings.setDisabled(false);
 
     when(settingsService.get(roomId)).thenReturn(settings);
     when(commentService.create(any(Comment.class))).thenReturn(newComment);

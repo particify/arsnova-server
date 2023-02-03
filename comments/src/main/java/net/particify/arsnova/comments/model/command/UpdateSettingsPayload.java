@@ -9,6 +9,8 @@ public class UpdateSettingsPayload implements WebSocketPayload {
   private String roomId;
   private Boolean directSend;
   private Boolean fileUploadEnabled;
+  private Boolean readonly;
+  private Boolean disabled;
 
   public UpdateSettingsPayload() {
   }
@@ -17,6 +19,8 @@ public class UpdateSettingsPayload implements WebSocketPayload {
     roomId = settings.getRoomId();
     directSend = settings.getDirectSend();
     fileUploadEnabled = settings.isFileUploadEnabled();
+    readonly = settings.isReadonly();
+    disabled = settings.isDisabled();
   }
 
   public UpdateSettingsPayload(String roomId, Boolean directSend) {
@@ -48,12 +52,30 @@ public class UpdateSettingsPayload implements WebSocketPayload {
     this.fileUploadEnabled = fileUploadEnabled;
   }
 
+  public Boolean isReadonly() {
+    return readonly;
+  }
+
+  public void setReadonly(Boolean readonly) {
+    this.readonly = readonly;
+  }
+
+  public Boolean isDisabled() {
+    return disabled;
+  }
+
+  public void setDisabled(Boolean disabled) {
+    this.disabled = disabled;
+  }
+
   @Override
   public String toString() {
     return "UpdateSettingsPayload{" +
         "roomId='" + roomId + '\'' +
         ", directSend=" + directSend +
         ", fileUploadEnabled=" + fileUploadEnabled +
+        ", readonly=" + readonly +
+        ", disabled=" + disabled +
         '}';
   }
 
@@ -62,13 +84,16 @@ public class UpdateSettingsPayload implements WebSocketPayload {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     final UpdateSettingsPayload that = (UpdateSettingsPayload) o;
-    return Objects.equals(roomId, that.roomId) && Objects.equals(
-        directSend,
-        that.directSend) && Objects.equals(fileUploadEnabled, that.fileUploadEnabled);
+    return
+        Objects.equals(roomId, that.roomId)
+        && Objects.equals(directSend, that.directSend)
+        && Objects.equals(fileUploadEnabled, that.fileUploadEnabled)
+        && Objects.equals(readonly, that.readonly)
+        && Objects.equals(disabled, that.disabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(roomId, directSend, fileUploadEnabled);
+    return Objects.hash(roomId, directSend, fileUploadEnabled, readonly, disabled);
   }
 }
