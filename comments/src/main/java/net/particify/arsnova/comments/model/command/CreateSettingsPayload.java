@@ -7,7 +7,7 @@ import net.particify.arsnova.comments.model.WebSocketPayload;
 
 public class CreateSettingsPayload implements WebSocketPayload {
   private String roomId;
-  private Boolean directSend;
+  private boolean directSend;
 
   public CreateSettingsPayload() {
   }
@@ -17,7 +17,7 @@ public class CreateSettingsPayload implements WebSocketPayload {
     directSend = settings.getDirectSend();
   }
 
-  public CreateSettingsPayload(String roomId, Boolean directSend) {
+  public CreateSettingsPayload(String roomId, boolean directSend) {
     this.roomId = roomId;
     this.directSend = directSend;
   }
@@ -30,11 +30,11 @@ public class CreateSettingsPayload implements WebSocketPayload {
     this.roomId = roomId;
   }
 
-  public Boolean getDirectSend() {
+  public boolean getDirectSend() {
     return directSend;
   }
 
-  public void setDirectSend(Boolean directSend) {
+  public void setDirectSend(boolean directSend) {
     this.directSend = directSend;
   }
 

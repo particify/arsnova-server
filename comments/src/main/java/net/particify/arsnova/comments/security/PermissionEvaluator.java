@@ -14,7 +14,7 @@ public class PermissionEvaluator {
   final static String EDITING_MODERATOR_ROLE_STRING = "ROLE_EDITING_MODERATOR";
   final static String EXECUTIVE_MODERATOR_ROLE_STRING = "ROLE_EXECUTIVE_MODERATOR";
 
-  public Boolean isOwnerOrAnyTypeOfModeratorForRoom(
+  public boolean isOwnerOrAnyTypeOfModeratorForRoom(
       final String roomId
   ) {
     final AuthenticatedUser authenticatedUser =
@@ -25,7 +25,7 @@ public class PermissionEvaluator {
         authority.equals(new SimpleGrantedAuthority(EXECUTIVE_MODERATOR_ROLE_STRING + "-" + roomId)));
   }
 
-  public Boolean isOwnerOrEditingModeratorForRoom(
+  public boolean isOwnerOrEditingModeratorForRoom(
       final String roomId
   ) {
     final AuthenticatedUser authenticatedUser =
@@ -35,7 +35,7 @@ public class PermissionEvaluator {
         authority.equals(new SimpleGrantedAuthority(EDITING_MODERATOR_ROLE_STRING + "-" + roomId)));
   }
 
-  public Boolean checkCommentOwnerPermission(
+  public boolean checkCommentOwnerPermission(
       final Comment comment
   ) {
     final AuthenticatedUser authenticatedUser =
@@ -43,7 +43,7 @@ public class PermissionEvaluator {
     return authenticatedUser.getId().equals(comment.getCreatorId());
   }
 
-  public Boolean checkCommentUpdatePermission(
+  public boolean checkCommentUpdatePermission(
       final Comment comment,
       final Comment oldComment
   ) {
@@ -60,11 +60,11 @@ public class PermissionEvaluator {
     }
   }
 
-  public Boolean checkCommentPatchPermission(
+  public boolean checkCommentPatchPermission(
       final Comment comment,
       final Map<String, Object> changes
   ) {
-    final Boolean needsModerator = changes.keySet().stream().anyMatch(changeKey -> changeKey.equals("favorite") ||
+    final boolean needsModerator = changes.keySet().stream().anyMatch(changeKey -> changeKey.equals("favorite") ||
           changeKey.equals("read") ||
           changeKey.equals("correct") ||
           changeKey.equals("answer") ||
@@ -77,14 +77,14 @@ public class PermissionEvaluator {
     }
   }
 
-  public Boolean checkCommentDeletePermission(
+  public boolean checkCommentDeletePermission(
       final Comment comment
   ) {
     return checkCommentOwnerPermission(comment) ||
         isOwnerOrEditingModeratorForRoom(comment.getRoomId());
   }
 
-  public Boolean checkVoteOwnerPermission(
+  public boolean checkVoteOwnerPermission(
       final Vote v
   ) {
     final AuthenticatedUser authenticatedUser =

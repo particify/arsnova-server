@@ -7,12 +7,12 @@ import net.particify.arsnova.comments.model.WebSocketPayload;
 
 public class CommentHighlightedPayload implements WebSocketPayload {
   private String id;
-  private Boolean lights;
+  private boolean lights;
 
   public CommentHighlightedPayload() {
   }
 
-  public CommentHighlightedPayload(Comment c, Boolean lights) {
+  public CommentHighlightedPayload(Comment c, boolean lights) {
     if (c != null) {
       id = c.getId();
       this.lights = lights;
@@ -27,11 +27,11 @@ public class CommentHighlightedPayload implements WebSocketPayload {
     this.id = id;
   }
 
-  public Boolean getLights() {
+  public boolean getLights() {
     return lights;
   }
 
-  public void setLights(Boolean lights) {
+  public void setLights(boolean lights) {
     this.lights = lights;
   }
 

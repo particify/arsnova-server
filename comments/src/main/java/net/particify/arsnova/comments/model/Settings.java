@@ -8,19 +8,19 @@ import java.util.Objects;
 public class Settings {
   @Id
   private String roomId;
-  private Boolean directSend;
-  private Boolean fileUploadEnabled;
-  private Boolean readonly;
-  private Boolean disabled;
+  private boolean directSend = true;
+  private boolean fileUploadEnabled;
+  private boolean readonly;
+  private boolean disabled;
 
   public Settings() {
   }
 
-  public Boolean getDirectSend() {
+  public boolean getDirectSend() {
     return directSend;
   }
 
-  public void setDirectSend(Boolean directSend) {
+  public void setDirectSend(boolean directSend) {
     this.directSend = directSend;
   }
 
@@ -32,27 +32,27 @@ public class Settings {
     this.roomId = roomId;
   }
 
-  public Boolean isFileUploadEnabled() {
+  public boolean isFileUploadEnabled() {
     return fileUploadEnabled;
   }
 
-  public void setFileUploadEnabled(final Boolean fileUploadEnabled) {
+  public void setFileUploadEnabled(final boolean fileUploadEnabled) {
     this.fileUploadEnabled = fileUploadEnabled;
   }
 
-  public Boolean isReadonly() {
+  public boolean isReadonly() {
     return readonly;
   }
 
-  public void setReadonly(Boolean readonly) {
+  public void setReadonly(boolean readonly) {
     this.readonly = readonly;
   }
 
-  public Boolean isDisabled() {
+  public boolean isDisabled() {
     return disabled;
   }
 
-  public void setDisabled(Boolean disabled) {
+  public void setDisabled(boolean disabled) {
     this.disabled = disabled;
   }
 
