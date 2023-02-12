@@ -1,9 +1,9 @@
 upstream gateway {
-  server arsnova-server-gateway:8080;
+  server arsnova-http-gateway:8080;
 }
 
 upstream websocket {
-  server arsnova-server-websocket:8080;
+  server arsnova-ws-gateway:8080;
 }
 
 server {
@@ -15,7 +15,7 @@ server {
 
   # Modern client
   location / {
-    proxy_pass http://arsnova-webclient;
+    proxy_pass http://arsnova-web;
     proxy_http_version 1.1;
     gzip on;
     gzip_types application/javascript text/css image/svg+xml;
