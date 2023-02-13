@@ -43,7 +43,7 @@ dependencies {
   implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.github.ben-manes.caffeine:caffeine")
-  implementation("com.auth0:java-jwt:4.2.2")
+  implementation("com.auth0:java-jwt:4.3.0")
   implementation("org.pac4j:pac4j-jakartaee:5.7.0")
   implementation("org.pac4j:pac4j-oauth:5.7.0")
   implementation("org.pac4j:pac4j-oidc:5.7.0")
