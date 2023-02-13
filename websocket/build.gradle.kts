@@ -26,7 +26,7 @@ dependencies {
   implementation("io.projectreactor:reactor-tools")
   implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
   implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0")
-  implementation("com.auth0:java-jwt:4.2.2")
+  implementation("com.auth0:java-jwt:4.3.0")
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("io.projectreactor:reactor-test")
