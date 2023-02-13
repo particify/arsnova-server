@@ -16,6 +16,7 @@ import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.ContentGroup;
 import net.particify.arsnova.core.model.GridImageContent;
+import net.particify.arsnova.core.model.PrioritizationChoiceContent;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
 import net.particify.arsnova.core.model.WordcloudContent;
@@ -106,8 +107,11 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
   }
 
   private Content duplicateContentInstance(final Content content) {
+    // Make sure to add logic for specialized classes before more generic ones.
     if (content instanceof ScaleChoiceContent) {
       return new ScaleChoiceContent((ScaleChoiceContent) content);
+    } else if (content instanceof PrioritizationChoiceContent) {
+      return new PrioritizationChoiceContent((PrioritizationChoiceContent) content);
     } else if (content instanceof ChoiceQuestionContent) {
       return new ChoiceQuestionContent((ChoiceQuestionContent) content);
     } else if (content instanceof WordcloudContent) {
