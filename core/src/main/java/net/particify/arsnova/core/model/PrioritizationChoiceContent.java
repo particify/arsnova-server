@@ -14,6 +14,7 @@ public class PrioritizationChoiceContent extends ChoiceQuestionContent {
 
   public PrioritizationChoiceContent(final PrioritizationChoiceContent content) {
     super(content);
+    this.assignablePoints = content.assignablePoints;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
