@@ -12,6 +12,7 @@ import net.particify.arsnova.gateway.service.CoreStatsService
 import net.particify.arsnova.gateway.service.WsGatewayService
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
+import org.springframework.util.MultiValueMap
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.util.function.component1
 import reactor.kotlin.core.util.function.component2
@@ -24,7 +25,7 @@ class SystemView(
   private val coreStatsService: CoreStatsService,
   private val commentService: CommentService
 ) {
-  fun getServiceStats(): Mono<Stats> {
+  fun getServiceStats(params: MultiValueMap<String, String>): Mono<Stats> {
     return authProcessor.getAuthentication()
       .filter { authentication: Authentication ->
         authProcessor.isAdminOrMonitoring(authentication)
@@ -37,7 +38,7 @@ class SystemView(
       .flatMap { jwt ->
         Mono.zip(
           wsGatewayService.getGatewayStats(),
-          coreStatsService.getServiceStats(jwt),
+          coreStatsService.getServiceStats(jwt, params),
           commentService.getServiceStats()
         )
           .map { (wsGatewayStats: WsGatewayStats, coreServiceStats: Map<String, Any>, commentServiceStats: CommentServiceStats) ->
@@ -46,7 +47,7 @@ class SystemView(
       }
   }
 
-  fun getSummarizedStats(): Mono<SummarizedStats> {
+  fun getSummarizedStats(params: MultiValueMap<String, String>): Mono<SummarizedStats> {
     return authProcessor.getAuthentication()
       .filter { authentication: Authentication ->
         authProcessor.isAdminOrMonitoring(authentication)
@@ -59,7 +60,7 @@ class SystemView(
       .flatMap { jwt ->
         Mono.zip(
           wsGatewayService.getGatewayStats(),
-          coreStatsService.getSummarizedStats(jwt),
+          coreStatsService.getSummarizedStats(jwt, params),
           commentService.getServiceStats()
         )
           .map { (wsGatewayStats: WsGatewayStats, coreStats: CoreStats, commentServiceStats: CommentServiceStats) ->

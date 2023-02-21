@@ -43,6 +43,9 @@ public abstract class Entity {
   private boolean internal;
   private List<EntityRenderingMapping<?>> renderingMapping;
 
+  // Used by extensions
+  private String tenantId;
+
   @JsonView({View.Persistence.class, View.Public.class})
   public String getId() {
     return id;
@@ -81,6 +84,16 @@ public abstract class Entity {
   @JsonView(View.Persistence.class)
   public void setUpdateTimestamp(final Date updateTimestamp) {
     this.updateTimestamp = updateTimestamp;
+  }
+
+  @JsonView(View.Persistence.class)
+  public String getTenantId() {
+    return tenantId;
+  }
+
+  @JsonView(View.Persistence.class)
+  public void setTenantId(final String tenantId) {
+    this.tenantId = tenantId;
   }
 
   @JsonView(View.Persistence.class)
