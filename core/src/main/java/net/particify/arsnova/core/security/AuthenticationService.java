@@ -138,23 +138,6 @@ public class AuthenticationService {
     SecurityContextHolder.getContext().setAuthentication(auth);
   }
 
-  public void addWsSessionToJwtMapping(final String wsSessionId, final String jwt) {
-    wsSessionIdToJwt.put(wsSessionId, jwt);
-  }
-
-  public User getAuthenticatedUserByWsSession(final String wsSessionId) {
-    final String jwt = wsSessionIdToJwt.getOrDefault(wsSessionId, null);
-    if (jwt == null) {
-      return null;
-    }
-    final User u = jwtService.verifyToken(jwt);
-    if (u == null) {
-      return null;
-    }
-
-    return u;
-  }
-
   private void increaseFailedLoginCount(final String addr) {
     Byte tries = loginTries.get(addr);
     if (null == tries) {
