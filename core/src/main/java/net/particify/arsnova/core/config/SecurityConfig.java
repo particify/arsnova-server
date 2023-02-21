@@ -29,9 +29,6 @@ import org.opensaml.saml.common.xml.SAMLConstants;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.http.callback.PathParameterCallbackUrlResolver;
-import org.pac4j.oauth.client.FacebookClient;
-import org.pac4j.oauth.client.TwitterClient;
-import org.pac4j.oidc.client.GoogleOidcClient;
 import org.pac4j.oidc.client.OidcClient;
 import org.pac4j.oidc.config.OidcConfiguration;
 import org.pac4j.saml.client.SAML2Client;
@@ -117,9 +114,6 @@ public class SecurityConfig {
   public static final String LDAP_PROVIDER_ID = "ldap";
   public static final String OIDC_PROVIDER_ID = "oidc";
   public static final String SAML_PROVIDER_ID = "saml";
-  public static final String GOOGLE_PROVIDER_ID = "google";
-  public static final String TWITTER_PROVIDER_ID = "twitter";
-  public static final String FACEBOOK_PROVIDER_ID = "facebook";
   private static final String OIDC_DISCOVERY_PATH = "/.well-known/openid-configuration";
   private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
@@ -283,21 +277,6 @@ public class SecurityConfig {
     if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
       ssoProvider = true;
       providerIds.add(OIDC_PROVIDER_ID);
-    }
-    if (providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
-      ssoProvider = true;
-      if (providerProperties.getOauth().containsKey(GOOGLE_PROVIDER_ID)
-          && providerProperties.getOauth().get(GOOGLE_PROVIDER_ID).isEnabled()) {
-        providerIds.add(GOOGLE_PROVIDER_ID);
-      }
-      if (providerProperties.getOauth().containsKey(FACEBOOK_PROVIDER_ID)
-          && providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID).isEnabled()) {
-        providerIds.add(FACEBOOK_PROVIDER_ID);
-      }
-      if (providerProperties.getOauth().containsKey(TWITTER_PROVIDER_ID)
-          && providerProperties.getOauth().get(TWITTER_PROVIDER_ID).isEnabled()) {
-        providerIds.add(TWITTER_PROVIDER_ID);
-      }
     }
     if (ssoProvider) {
       providers.add(ssoAuthenticationProvider);
@@ -533,18 +512,6 @@ public class SecurityConfig {
     if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
       clients.add(oidcClient());
     }
-    if (providerProperties.getOauth().containsKey(FACEBOOK_PROVIDER_ID)
-        && providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID).isEnabled()) {
-      clients.add(facebookClient());
-    }
-    if (providerProperties.getOauth().containsKey(GOOGLE_PROVIDER_ID)
-        && providerProperties.getOauth().get(GOOGLE_PROVIDER_ID).isEnabled()) {
-      clients.add(googleClient());
-    }
-    if (providerProperties.getOauth().containsKey(TWITTER_PROVIDER_ID)
-        && providerProperties.getOauth().get(TWITTER_PROVIDER_ID).isEnabled()) {
-      clients.add(twitterClient());
-    }
 
     return new Config(rootUrl + apiPath + OAUTH_CALLBACK_PATH, clients);
   }
@@ -578,58 +545,6 @@ public class SecurityConfig {
     config.setScope("openid");
     final OidcClient client = new OidcClient(config);
     client.setName(OIDC_PROVIDER_ID);
-    client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
-    client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
-
-    return client;
-  }
-
-  @Bean
-  @ConditionalOnProperty(
-      name = "oauth.facebook.enabled",
-      prefix = AuthenticationProviderProperties.PREFIX,
-      havingValue = "true")
-  public FacebookClient facebookClient() {
-    final AuthenticationProviderProperties.Oauth oauthProperties =
-        providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID);
-    final FacebookClient client = new FacebookClient(oauthProperties.getKey(), oauthProperties.getSecret());
-    client.setName(FACEBOOK_PROVIDER_ID);
-    client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
-    client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
-
-    return client;
-  }
-
-  @Bean
-  @ConditionalOnProperty(
-      name = "oauth.twitter.enabled",
-      prefix = AuthenticationProviderProperties.PREFIX,
-      havingValue = "true")
-  public TwitterClient twitterClient() {
-    final AuthenticationProviderProperties.Oauth oauthProperties =
-        providerProperties.getOauth().get(TWITTER_PROVIDER_ID);
-    final TwitterClient client = new TwitterClient(oauthProperties.getKey(), oauthProperties.getSecret());
-    client.setName(TWITTER_PROVIDER_ID);
-    client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
-    client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
-
-    return client;
-  }
-
-  @Bean
-  @ConditionalOnProperty(
-      name = "oauth.google.enabled",
-      prefix = AuthenticationProviderProperties.PREFIX,
-      havingValue = "true")
-  public GoogleOidcClient googleClient() {
-    final AuthenticationProviderProperties.Oauth oauthProperties =
-        providerProperties.getOauth().get(GOOGLE_PROVIDER_ID);
-    final OidcConfiguration config = new OidcConfiguration();
-    config.setClientId(oauthProperties.getKey());
-    config.setSecret(oauthProperties.getSecret());
-    config.setScope("openid email");
-    final GoogleOidcClient client = new GoogleOidcClient(config);
-    client.setName(GOOGLE_PROVIDER_ID);
     client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
     client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
 

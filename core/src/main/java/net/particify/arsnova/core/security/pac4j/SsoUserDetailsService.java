@@ -22,10 +22,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.pac4j.oauth.profile.facebook.FacebookProfile;
-import org.pac4j.oauth.profile.twitter.TwitterProfile;
 import org.pac4j.oidc.profile.OidcProfile;
-import org.pac4j.oidc.profile.google.GoogleOidcProfile;
 import org.pac4j.saml.profile.SAML2Profile;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -39,7 +36,7 @@ import net.particify.arsnova.core.security.User;
 import net.particify.arsnova.core.service.UserService;
 
 /**
- * Loads UserDetails for an Pac4j SSO user (e.g. {@link UserProfile.AuthProvider#GOOGLE}) based on an unique identifier
+ * Loads UserDetails for an Pac4j SSO user (e.g. {@link UserProfile.AuthProvider#OIDC}) based on an unique identifier
  * extracted from the Pac4j profile.
  *
  * @author Daniel Gerhardt
@@ -65,22 +62,7 @@ public class SsoUserDetailsService implements AuthenticationUserDetailsService<S
       throws UsernameNotFoundException {
     final User user;
     final Set<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
-    if (token.getDetails() instanceof GoogleOidcProfile) {
-      final GoogleOidcProfile profile = (GoogleOidcProfile) token.getDetails();
-      if (!profile.getEmailVerified()) {
-        throw new IllegalArgumentException("Email is not verified.");
-      }
-      user = userService.loadUser(UserProfile.AuthProvider.GOOGLE, profile.getEmail(),
-          grantedAuthorities, true);
-    } else if (token.getDetails() instanceof TwitterProfile) {
-      final TwitterProfile profile = (TwitterProfile) token.getDetails();
-      user = userService.loadUser(UserProfile.AuthProvider.TWITTER, profile.getUsername(),
-          grantedAuthorities, true);
-    } else if (token.getDetails() instanceof FacebookProfile) {
-      final FacebookProfile profile = (FacebookProfile) token.getDetails();
-      user = userService.loadUser(UserProfile.AuthProvider.FACEBOOK, profile.getId(),
-          grantedAuthorities, true);
-    } else if (token.getDetails() instanceof OidcProfile) {
+    if (token.getDetails() instanceof OidcProfile) {
       final OidcProfile profile = (OidcProfile) token.getDetails();
       if (userService.isAdmin(profile.getId(), UserProfile.AuthProvider.OIDC)) {
         grantedAuthorities.add(User.ROLE_ADMIN);
