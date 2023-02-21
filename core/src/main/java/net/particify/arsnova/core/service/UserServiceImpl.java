@@ -41,11 +41,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
@@ -245,12 +241,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
     if (userProfile == null) {
       if (autoCreate) {
         userProfile = new UserProfile(authProvider, loginId);
-        final SecurityContext securityContext = SecurityContextHolder.getContext();
-        final Authentication oldAuth = securityContext.getAuthentication();
-        final Authentication overrideAuth = new AnonymousAuthenticationToken("anonymous", loginId, grantedAuthorities);
-        securityContext.setAuthentication(overrideAuth);
         create(userProfile);
-        securityContext.setAuthentication(oldAuth);
       } else {
         throw new UsernameNotFoundException("User does not exist.");
       }
