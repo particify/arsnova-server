@@ -21,6 +21,7 @@ package net.particify.arsnova.core.security.pac4j;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.pac4j.oidc.profile.OidcProfile;
 import org.pac4j.saml.profile.SAML2Profile;
@@ -60,15 +61,19 @@ public class SsoUserDetailsService implements AuthenticationUserDetailsService<S
 
   public User loadUserDetails(final SsoAuthenticationToken token)
       throws UsernameNotFoundException {
-    final User user;
     final Set<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
     if (token.getDetails() instanceof OidcProfile) {
       final OidcProfile profile = (OidcProfile) token.getDetails();
       if (userService.isAdmin(profile.getId(), UserProfile.AuthProvider.OIDC)) {
         grantedAuthorities.add(User.ROLE_ADMIN);
       }
-      user = userService.loadUser(UserProfile.AuthProvider.OIDC, profile.getId(),
-          grantedAuthorities, true);
+      final Optional<UserProfile> userProfile = Optional.ofNullable(
+          userService.getByAuthProviderAndLoginId(UserProfile.AuthProvider.OIDC, profile.getId()));
+      return new User(
+          userProfile.orElse(
+              userService.create(
+                  new UserProfile(UserProfile.AuthProvider.OIDC, profile.getId()))),
+          grantedAuthorities);
     } else if (token.getDetails() instanceof SAML2Profile) {
       final SAML2Profile profile = (SAML2Profile) token.getDetails();
       final String uidAttr = samlProperties.getUserIdAttribute();
@@ -81,12 +86,15 @@ public class SsoUserDetailsService implements AuthenticationUserDetailsService<S
       if (userService.isAdmin(uid, UserProfile.AuthProvider.SAML)) {
         grantedAuthorities.add(User.ROLE_ADMIN);
       }
-      user = userService.loadUser(UserProfile.AuthProvider.SAML, uid,
-          grantedAuthorities, true);
+      final Optional<UserProfile> userProfile = Optional.ofNullable(
+          userService.getByAuthProviderAndLoginId(UserProfile.AuthProvider.SAML, uid));
+      return new User(
+          userProfile.orElse(
+              userService.create(
+                  new UserProfile(UserProfile.AuthProvider.SAML, uid))),
+          grantedAuthorities);
     } else {
       throw new IllegalArgumentException("AuthenticationToken not supported");
     }
-
-    return user;
   }
 }

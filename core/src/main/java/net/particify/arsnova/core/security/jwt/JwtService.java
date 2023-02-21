@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.config.properties.SecurityProperties;
@@ -115,7 +116,12 @@ public class JwtService {
           .map(role -> role.replaceFirst("^CREATOR__", "OWNER__"))
           .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role)).collect(Collectors.toList());
 
-      return userService.loadUser(userId, authorities);
+      final UserProfile userProfile = userService.get(userId);
+      if (userProfile == null) {
+        throw new UsernameNotFoundException("User does not exist.");
+      }
+
+      return new User(userProfile, authorities);
     } catch (final JWTVerificationException e) {
       if (legacyVerifier == null) {
         throw e;
@@ -145,6 +151,11 @@ public class JwtService {
       return null;
     }
 
-    return userService.loadUser(userId, legacyAllowedAuthorities);
+    final UserProfile userProfile = userService.get(userId);
+    if (userProfile == null) {
+      throw new UsernameNotFoundException("User does not exist.");
+    }
+
+    return new User(userProfile, legacyAllowedAuthorities);
   }
 }

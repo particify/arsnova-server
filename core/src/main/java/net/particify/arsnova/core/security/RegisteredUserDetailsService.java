@@ -20,6 +20,7 @@ package net.particify.arsnova.core.security;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -54,8 +55,11 @@ public class RegisteredUserDetailsService implements UserDetailsService {
     if (userService.isAdmin(loginId, UserProfile.AuthProvider.ARSNOVA)) {
       grantedAuthorities.add(User.ROLE_ADMIN);
     }
-    return userService.loadUser(UserProfile.AuthProvider.ARSNOVA, loginId,
-        grantedAuthorities, false);
+
+    return new User(
+        Optional.ofNullable(userService.getByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA, loginId))
+            .orElseThrow(() -> new UsernameNotFoundException("User does not exist.")),
+        grantedAuthorities);
   }
 
   @Autowired

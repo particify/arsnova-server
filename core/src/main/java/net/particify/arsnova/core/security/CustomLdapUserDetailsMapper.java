@@ -20,6 +20,7 @@ package net.particify.arsnova.core.security;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,8 +71,14 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
       grantedAuthorities.add(User.ROLE_ADMIN);
     }
 
-    return userService.loadUser(UserProfile.AuthProvider.LDAP, ldapUsername,
-        grantedAuthorities, true);
+    final Optional<UserProfile> userProfile =
+        Optional.ofNullable(
+            userService.getByAuthProviderAndLoginId(UserProfile.AuthProvider.LDAP, ldapUsername));
+    return new User(
+        userProfile.orElse(
+            userService.create(
+                new UserProfile(UserProfile.AuthProvider.LDAP, ldapUsername))),
+        grantedAuthorities);
   }
 
   @Autowired

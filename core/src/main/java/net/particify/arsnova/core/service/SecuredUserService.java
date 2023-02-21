@@ -1,15 +1,11 @@
 package net.particify.arsnova.core.service;
 
-import java.util.Collection;
 import java.util.List;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.model.UserProfile;
-import net.particify.arsnova.core.security.User;
 
 @Service
 public class SecuredUserService extends AbstractSecuredEntityServiceImpl<UserProfile>
@@ -25,24 +21,6 @@ public class SecuredUserService extends AbstractSecuredEntityServiceImpl<UserPro
   @PreAuthorize("isAuthenticated")
   public boolean isAdmin(final String loginId, final UserProfile.AuthProvider authProvider) {
     return userService.isAdmin(loginId, authProvider);
-  }
-
-  @Override
-  @PreAuthorize("denyAll")
-  public User loadUser(
-      final UserProfile.AuthProvider authProvider,
-      final String loginId,
-      final Collection<GrantedAuthority> grantedAuthorities,
-      final boolean autoCreate) throws UsernameNotFoundException {
-    return userService.loadUser(authProvider, loginId, grantedAuthorities, autoCreate);
-  }
-
-  @Override
-  @PreAuthorize("denyAll")
-  public User loadUser(
-      final String userId,
-      final Collection<GrantedAuthority> grantedAuthorities) {
-    return userService.loadUser(userId, grantedAuthorities);
   }
 
   @Override

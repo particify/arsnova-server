@@ -19,6 +19,7 @@
 package net.particify.arsnova.core.security;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -59,7 +60,15 @@ public class GuestUserDetailsService implements UserDetailsService {
     if (autoCreate) {
       loginId = userService.generateGuestId();
     }
-    return userService.loadUser(UserProfile.AuthProvider.ARSNOVA_GUEST, loginId,
-        defaultGrantedAuthorities, autoCreate);
+
+    final Optional<UserProfile> userProfile = Optional.ofNullable(
+        userService.getByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA_GUEST, loginId));
+    if (!autoCreate) {
+      userProfile.orElseThrow(() -> new UsernameNotFoundException("User does not exist."));
+    }
+
+    return new User(
+        userProfile.orElse(userService.create(new UserProfile(UserProfile.AuthProvider.ARSNOVA_GUEST, loginId))),
+        defaultGrantedAuthorities);
   }
 }
