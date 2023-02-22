@@ -5,7 +5,6 @@ plugins {
   id("com.github.spotbugs")
   id("com.google.cloud.tools.jib")
   id("io.freefair.aspectj.post-compile-weaving")
-  id("io.spring.dependency-management")
   id("org.jlleitschuh.gradle.ktlint")
   id("org.springframework.boot")
 }
@@ -26,6 +25,7 @@ repositories {
 }
 
 dependencies {
+  implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-amqp")
   implementation("org.springframework.boot:spring-boot-starter-cache")
@@ -57,9 +57,10 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.security:spring-security-test")
   compileOnly("org.springframework.boot:spring-boot-devtools")
+  compileOnly("com.github.spotbugs:spotbugs-annotations:${property("spotbugsAnnotationsVersion")}")
+  aspect(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   aspect("org.springframework:spring-aspects")
   aspect("org.springframework.security:spring-security-aspects")
-  compileOnly("com.github.spotbugs:spotbugs-annotations:${property("spotbugsAnnotationsVersion")}")
 }
 
 tasks.withType<Test> {

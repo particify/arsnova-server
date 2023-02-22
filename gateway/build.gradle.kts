@@ -4,7 +4,6 @@ plugins {
   jacoco
   id("com.github.spotbugs")
   id("com.google.cloud.tools.jib")
-  id("io.spring.dependency-management")
   id("org.jlleitschuh.gradle.ktlint")
   id("org.springframework.boot")
   kotlin("jvm")
@@ -14,6 +13,8 @@ plugins {
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 dependencies {
+  implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
+  implementation(platform("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}"))
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
   implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
@@ -31,12 +32,6 @@ dependencies {
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("io.projectreactor:reactor-test")
   compileOnly("com.github.spotbugs:spotbugs-annotations:${property("spotbugsAnnotationsVersion")}")
-}
-
-dependencyManagement {
-  imports {
-    mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
-  }
 }
 
 tasks.withType<KotlinCompile> {

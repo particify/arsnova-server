@@ -3,7 +3,6 @@ plugins {
   jacoco
   id("com.github.spotbugs")
   id("com.google.cloud.tools.jib")
-  id("io.spring.dependency-management")
   id("org.jlleitschuh.gradle.ktlint")
   id("org.springframework.boot")
 }
@@ -11,6 +10,7 @@ plugins {
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 dependencies {
+  implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-amqp")
