@@ -2,13 +2,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   jacoco
-  id("com.github.spotbugs") version "5.0.13"
-  id("com.google.cloud.tools.jib") version "3.3.1"
-  id("io.spring.dependency-management") version "1.1.0"
-  id("org.jlleitschuh.gradle.ktlint") version "11.1.0"
-  id("org.springframework.boot") version "3.0.2"
-  kotlin("jvm") version "1.8.10"
-  kotlin("plugin.spring") version "1.8.10"
+  id("com.github.spotbugs")
+  id("com.google.cloud.tools.jib")
+  id("io.spring.dependency-management")
+  id("org.jlleitschuh.gradle.ktlint")
+  id("org.springframework.boot")
+  kotlin("jvm")
+  kotlin("plugin.spring")
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_17
