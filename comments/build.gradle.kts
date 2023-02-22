@@ -16,12 +16,12 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-amqp")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
-  implementation("com.auth0:java-jwt:4.3.0")
+  implementation("com.auth0:java-jwt:${property("javaJwtVersion")}")
   implementation("org.postgresql:postgresql")
   implementation("org.flywaydb:flyway-core")
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
-  compileOnly("com.github.spotbugs:spotbugs-annotations:4.7.3")
+  compileOnly("com.github.spotbugs:spotbugs-annotations:${property("spotbugsAnnotationsVersion")}")
 }
 
 tasks.withType<Test> {

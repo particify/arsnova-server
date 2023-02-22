@@ -32,7 +32,7 @@ dependencies {
   testImplementation("org.springframework.amqp:spring-rabbit-test")
   testImplementation("io.projectreactor:reactor-test")
   testImplementation("com.h2database:h2")
-  compileOnly("com.github.spotbugs:spotbugs-annotations:4.7.3")
+  compileOnly("com.github.spotbugs:spotbugs-annotations:${property("spotbugsAnnotationsVersion")}")
 }
 
 tasks.withType<KotlinCompile> {

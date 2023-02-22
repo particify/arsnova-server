@@ -25,13 +25,13 @@ dependencies {
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("io.projectreactor:reactor-tools")
   implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-  implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0")
-  implementation("com.auth0:java-jwt:4.3.0")
+  implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:${property("bucket4jVersion")}")
+  implementation("com.auth0:java-jwt:${property("javaJwtVersion")}")
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("io.projectreactor:reactor-test")
-  testImplementation("com.ninja-squad:springmockk:4.0.0")
-  compileOnly("com.github.spotbugs:spotbugs-annotations:4.7.3")
+  testImplementation("com.ninja-squad:springmockk:${property("springmockkVersion")}")
+  compileOnly("com.github.spotbugs:spotbugs-annotations:${property("spotbugsAnnotationsVersion")}")
 }
 
 tasks.withType<KotlinCompile> {
