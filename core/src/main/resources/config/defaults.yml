@@ -235,36 +235,6 @@ arsnova:
           client-id: ""
           secret: ""
 
-      # OAuth authentication with third party services
-      # Specific parameters:
-      # key: OAuth key/id provided by a third party auth service
-      # secret: OAuth secret provided by a third party auth service
-      oauth:
-        facebook:
-          enabled: false
-          allowed-roles:
-            - moderator
-            - participant
-          order: 0
-          key: ""
-          secret: ""
-        twitter:
-          enabled: false
-          allowed-roles:
-            - moderator
-            - participant
-          order: 0
-          key: ""
-          secret: ""
-        google:
-          enabled: false
-          allowed-roles:
-            - moderator
-            - participant
-          order: 0
-          key: ""
-          secret: ""
-
   ##############################################################################
   # Templates
   ##############################################################################
