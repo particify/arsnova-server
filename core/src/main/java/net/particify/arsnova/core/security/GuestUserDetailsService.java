@@ -19,6 +19,7 @@
 package net.particify.arsnova.core.security;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -37,17 +38,17 @@ import net.particify.arsnova.core.service.UserService;
  * @author Daniel Gerhardt
  */
 @Service
-public class GuestUserDetailsService implements UserDetailsService {
+public class GuestUserDetailsService extends AbstractUserDetailsService
+    implements UserDetailsService {
   public static final GrantedAuthority ROLE_GUEST_USER = new SimpleGrantedAuthority("ROLE_GUEST_USER");
 
   private final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
       User.ROLE_USER,
       ROLE_GUEST_USER
   );
-  private final UserService userService;
 
   public GuestUserDetailsService(final UserService userService) {
-    this.userService = userService;
+    super(UserProfile.AuthProvider.ARSNOVA_GUEST, userService);
   }
 
   @Override
@@ -58,8 +59,9 @@ public class GuestUserDetailsService implements UserDetailsService {
   public UserDetails loadUserByUsername(String loginId, final boolean autoCreate) {
     if (autoCreate) {
       loginId = userService.generateGuestId();
+      return getOrCreate(loginId, defaultGrantedAuthorities, Collections.emptyMap());
     }
-    return userService.loadUser(UserProfile.AuthProvider.ARSNOVA_GUEST, loginId,
-        defaultGrantedAuthorities, autoCreate);
+
+    return get(loginId, defaultGrantedAuthorities);
   }
 }

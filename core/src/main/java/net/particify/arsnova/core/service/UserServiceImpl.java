@@ -41,12 +41,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -59,7 +53,6 @@ import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.persistence.UserRepository;
 import net.particify.arsnova.core.security.PasswordUtils;
-import net.particify.arsnova.core.security.User;
 import net.particify.arsnova.core.service.exceptions.UserAlreadyExistsException;
 import net.particify.arsnova.core.web.exceptions.BadRequestException;
 import net.particify.arsnova.core.web.exceptions.NotFoundException;
@@ -234,41 +227,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
         resendMailBans.add(addr);
       }
     }
-  }
-
-  @Override
-  public User loadUser(final UserProfile.AuthProvider authProvider, final String loginId,
-      final Collection<GrantedAuthority> grantedAuthorities, final boolean autoCreate)
-      throws UsernameNotFoundException {
-    logger.debug("Load user: LoginId: {}, AuthProvider: {}", loginId, authProvider);
-    UserProfile userProfile = userRepository.findByAuthProviderAndLoginId(authProvider, loginId);
-    if (userProfile == null) {
-      if (autoCreate) {
-        userProfile = new UserProfile(authProvider, loginId);
-        final SecurityContext securityContext = SecurityContextHolder.getContext();
-        final Authentication oldAuth = securityContext.getAuthentication();
-        final Authentication overrideAuth = new AnonymousAuthenticationToken("anonymous", loginId, grantedAuthorities);
-        securityContext.setAuthentication(overrideAuth);
-        create(userProfile);
-        securityContext.setAuthentication(oldAuth);
-      } else {
-        throw new UsernameNotFoundException("User does not exist.");
-      }
-    }
-
-    return new User(userProfile, grantedAuthorities);
-  }
-
-  @Override
-  public User loadUser(final String userId, final Collection<GrantedAuthority> grantedAuthorities)
-      throws UsernameNotFoundException {
-    logger.debug("Load user: UserId: {}", userId);
-    final UserProfile userProfile = get(userId, true);
-    if (userProfile == null) {
-      throw new UsernameNotFoundException("User does not exist.");
-    }
-
-    return new User(userProfile, grantedAuthorities);
   }
 
   @Override

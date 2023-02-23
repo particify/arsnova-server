@@ -19,17 +19,22 @@
 package net.particify.arsnova.core.security;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 
+import net.particify.arsnova.core.event.BeforeUserProfileAutoCreationEvent;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.service.UserService;
 
@@ -37,7 +42,7 @@ import net.particify.arsnova.core.service.UserService;
  * Replaces the user ID provided by the authenticating user with the one that is part of LDAP object. This is necessary
  * to get a consistent ID despite case insensitivity.
  */
-public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
+public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper implements ApplicationEventPublisherAware {
   public static final GrantedAuthority ROLE_LDAP_USER = new SimpleGrantedAuthority("ROLE_LDAP_USER");
 
   private static final Logger logger = LoggerFactory.getLogger(CustomLdapUserDetailsMapper.class);
@@ -47,6 +52,7 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
       User.ROLE_USER,
       ROLE_LDAP_USER
   );
+  private ApplicationEventPublisher applicationEventPublisher;
 
   private UserService userService;
 
@@ -54,12 +60,21 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
     this.userIdAttr = ldapUserIdAttr;
   }
 
+  @Override
+  @Autowired
+  public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+    this.applicationEventPublisher = applicationEventPublisher;
+  }
+
   public UserDetails mapUserFromContext(
       final DirContextOperations ctx,
       final String username,
       final Collection<? extends GrantedAuthority> authorities) {
-    String ldapUsername = ctx.getStringAttribute(userIdAttr);
-    if (ldapUsername == null) {
+    final String ctxLdapUsername = ctx.getStringAttribute(userIdAttr);
+    final String ldapUsername;
+    if (ctxLdapUsername != null) {
+      ldapUsername = ctxLdapUsername;
+    } else {
       logger.warn("LDAP attribute {} not set. Falling back to lowercased user provided username.", userIdAttr);
       ldapUsername = username.toLowerCase();
     }
@@ -70,8 +85,17 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
       grantedAuthorities.add(User.ROLE_ADMIN);
     }
 
-    return userService.loadUser(UserProfile.AuthProvider.LDAP, ldapUsername,
-        grantedAuthorities, true);
+    final Optional<UserProfile> userProfile =
+        Optional.ofNullable(
+            userService.getByAuthProviderAndLoginId(UserProfile.AuthProvider.LDAP, ldapUsername));
+    return new User(
+        userProfile.orElseGet(() -> {
+          final UserProfile newUserProfile = new UserProfile(UserProfile.AuthProvider.LDAP, ldapUsername);
+          applicationEventPublisher.publishEvent(
+              new BeforeUserProfileAutoCreationEvent(this, newUserProfile, Collections.emptyMap()));
+          return userService.create(newUserProfile);
+        }),
+        grantedAuthorities);
   }
 
   @Autowired
