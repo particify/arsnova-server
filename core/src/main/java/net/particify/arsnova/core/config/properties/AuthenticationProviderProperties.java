@@ -19,10 +19,8 @@
 package net.particify.arsnova.core.config.properties;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.core.style.ToStringCreator;
 
 @ConfigurationProperties(AuthenticationProviderProperties.PREFIX)
 public class AuthenticationProviderProperties {
@@ -378,38 +376,11 @@ public class AuthenticationProviderProperties {
     }
   }
 
-  public static class Oauth extends Provider {
-    private String key;
-    private String secret;
-
-    public String getKey() {
-      return key;
-    }
-
-    public void setKey(final String key) {
-      this.key = key;
-    }
-
-    public String getSecret() {
-      return secret;
-    }
-
-    public void setSecret(final String secret) {
-      this.secret = secret;
-    }
-
-    @Override
-    public String toString() {
-      return new ToStringCreator(this).append("enabled", isEnabled()).append("key", key).toString();
-    }
-  }
-
   private Registered registered;
   private Guest guest;
   private List<Ldap> ldap;
   private List<Oidc> oidc;
   private Saml saml;
-  private Map<String, Oauth> oauth;
 
   public Registered getRegistered() {
     return registered;
@@ -449,13 +420,5 @@ public class AuthenticationProviderProperties {
 
   public void setSaml(final Saml saml) {
     this.saml = saml;
-  }
-
-  public Map<String, Oauth> getOauth() {
-    return oauth;
-  }
-
-  public void setOauth(final Map<String, Oauth> oauth) {
-    this.oauth = oauth;
   }
 }

@@ -186,8 +186,7 @@ public class SecurityConfig {
       if (providerProperties.getSaml().isEnabled()) {
         http.addFilterAfter(samlCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
       }
-      if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())
-          || providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
+      if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
         http.addFilterAfter(oauthCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
       }
 
@@ -260,7 +259,6 @@ public class SecurityConfig {
     final List<AuthenticationProvider> providers = new ArrayList<>();
     final List<String> providerIds = new ArrayList<>();
     providers.add(jwtAuthenticationProvider);
-    logger.info("oauthProps: {}", providerProperties.getOauth());
     if (providerProperties.getLdap().stream().anyMatch(p -> p.isEnabled())) {
       providerIds.add(LDAP_PROVIDER_ID);
       providers.add(ldapAuthenticationProvider());
