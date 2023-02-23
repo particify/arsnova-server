@@ -21,7 +21,6 @@ package net.particify.arsnova.core.security.pac4j;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import org.pac4j.oidc.profile.OidcProfile;
 import org.pac4j.saml.profile.SAML2Profile;
@@ -33,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
 import net.particify.arsnova.core.model.UserProfile;
+import net.particify.arsnova.core.security.AbstractUserDetailsService;
 import net.particify.arsnova.core.security.User;
 import net.particify.arsnova.core.service.UserService;
 
@@ -43,7 +43,8 @@ import net.particify.arsnova.core.service.UserService;
  * @author Daniel Gerhardt
  */
 @Service
-public class SsoUserDetailsService implements AuthenticationUserDetailsService<SsoAuthenticationToken> {
+public class SsoUserDetailsService extends AbstractUserDetailsService
+    implements AuthenticationUserDetailsService<SsoAuthenticationToken> {
   public static final GrantedAuthority ROLE_OAUTH_USER = new SimpleGrantedAuthority("ROLE_OAUTH_USER");
 
   protected final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
@@ -51,50 +52,47 @@ public class SsoUserDetailsService implements AuthenticationUserDetailsService<S
       ROLE_OAUTH_USER
   );
   private final AuthenticationProviderProperties.Saml samlProperties;
-  private final UserService userService;
 
   public SsoUserDetailsService(final UserService userService,
       final AuthenticationProviderProperties authenticationProviderProperties) {
-    this.userService = userService;
+    super(UserProfile.AuthProvider.NONE, userService);
     this.samlProperties = authenticationProviderProperties.getSaml();
   }
 
   public User loadUserDetails(final SsoAuthenticationToken token)
       throws UsernameNotFoundException {
-    final Set<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
-    if (token.getDetails() instanceof OidcProfile) {
-      final OidcProfile profile = (OidcProfile) token.getDetails();
-      if (userService.isAdmin(profile.getId(), UserProfile.AuthProvider.OIDC)) {
-        grantedAuthorities.add(User.ROLE_ADMIN);
-      }
-      final Optional<UserProfile> userProfile = Optional.ofNullable(
-          userService.getByAuthProviderAndLoginId(UserProfile.AuthProvider.OIDC, profile.getId()));
-      return new User(
-          userProfile.orElse(
-              userService.create(
-                  new UserProfile(UserProfile.AuthProvider.OIDC, profile.getId()))),
-          grantedAuthorities);
-    } else if (token.getDetails() instanceof SAML2Profile) {
-      final SAML2Profile profile = (SAML2Profile) token.getDetails();
-      final String uidAttr = samlProperties.getUserIdAttribute();
-      final String uid;
-      if (uidAttr == null || "".equals(uidAttr)) {
-        uid = profile.getId();
-      } else {
-        uid = profile.getAttribute(uidAttr, List.class).get(0).toString();
-      }
-      if (userService.isAdmin(uid, UserProfile.AuthProvider.SAML)) {
-        grantedAuthorities.add(User.ROLE_ADMIN);
-      }
-      final Optional<UserProfile> userProfile = Optional.ofNullable(
-          userService.getByAuthProviderAndLoginId(UserProfile.AuthProvider.SAML, uid));
-      return new User(
-          userProfile.orElse(
-              userService.create(
-                  new UserProfile(UserProfile.AuthProvider.SAML, uid))),
-          grantedAuthorities);
+    if (token.getDetails() instanceof OidcProfile oidcProfile) {
+      return loadOidcUserDetails(oidcProfile);
+    } else if (token.getDetails() instanceof SAML2Profile saml2Profile) {
+      return loadSamlUserDetails(saml2Profile);
     } else {
       throw new IllegalArgumentException("AuthenticationToken not supported");
     }
+  }
+
+  private User loadOidcUserDetails(final OidcProfile profile) {
+    final Set<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
+    if (userService.isAdmin(profile.getId(), UserProfile.AuthProvider.OIDC)) {
+      grantedAuthorities.add(User.ROLE_ADMIN);
+    }
+
+    return getOrCreate(profile.getId(), UserProfile.AuthProvider.OIDC, grantedAuthorities);
+  }
+
+  private User loadSamlUserDetails(final SAML2Profile profile) {
+    final Set<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
+    final String uidAttr = samlProperties.getUserIdAttribute();
+    final String uid;
+
+    if (uidAttr == null || "".equals(uidAttr)) {
+      uid = profile.getId();
+    } else {
+      uid = profile.getAttribute(uidAttr, List.class).get(0).toString();
+    }
+    if (userService.isAdmin(uid, UserProfile.AuthProvider.SAML)) {
+      grantedAuthorities.add(User.ROLE_ADMIN);
+    }
+
+    return getOrCreate(uid, UserProfile.AuthProvider.SAML, grantedAuthorities);
   }
 }

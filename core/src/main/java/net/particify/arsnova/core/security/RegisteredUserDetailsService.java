@@ -20,9 +20,7 @@ package net.particify.arsnova.core.security;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,14 +37,18 @@ import net.particify.arsnova.core.service.UserService;
  * @author Daniel Gerhardt
  */
 @Service
-public class RegisteredUserDetailsService implements UserDetailsService {
+public class RegisteredUserDetailsService extends AbstractUserDetailsService
+    implements UserDetailsService {
   public static final GrantedAuthority ROLE_REGISTERED_USER = new SimpleGrantedAuthority("ROLE_REGISTERED_USER");
 
   private final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
       User.ROLE_USER,
       ROLE_REGISTERED_USER
   );
-  private UserService userService;
+
+  public RegisteredUserDetailsService(final UserService userService) {
+    super(UserProfile.AuthProvider.ARSNOVA, userService);
+  }
 
   @Override
   public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
@@ -56,14 +58,6 @@ public class RegisteredUserDetailsService implements UserDetailsService {
       grantedAuthorities.add(User.ROLE_ADMIN);
     }
 
-    return new User(
-        Optional.ofNullable(userService.getByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA, loginId))
-            .orElseThrow(() -> new UsernameNotFoundException("User does not exist.")),
-        grantedAuthorities);
-  }
-
-  @Autowired
-  public void setUserService(final UserService userService) {
-    this.userService = userService;
+    return get(loginId, grantedAuthorities);
   }
 }
