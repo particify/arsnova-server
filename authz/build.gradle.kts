@@ -2,18 +2,18 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   jacoco
-  id("com.github.spotbugs") version "5.0.13"
-  id("com.google.cloud.tools.jib") version "3.3.1"
-  id("io.spring.dependency-management") version "1.1.0"
-  id("org.jlleitschuh.gradle.ktlint") version "11.1.0"
-  id("org.springframework.boot") version "3.0.2"
-  kotlin("jvm") version "1.8.10"
-  kotlin("plugin.spring") version "1.8.10"
+  id("com.github.spotbugs")
+  id("com.google.cloud.tools.jib")
+  id("org.jlleitschuh.gradle.ktlint")
+  id("org.springframework.boot")
+  kotlin("jvm")
+  kotlin("plugin.spring")
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 dependencies {
+  implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
   implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
@@ -32,7 +32,7 @@ dependencies {
   testImplementation("org.springframework.amqp:spring-rabbit-test")
   testImplementation("io.projectreactor:reactor-test")
   testImplementation("com.h2database:h2")
-  compileOnly("com.github.spotbugs:spotbugs-annotations:4.7.3")
+  compileOnly("com.github.spotbugs:spotbugs-annotations:${property("spotbugsAnnotationsVersion")}")
 }
 
 tasks.withType<KotlinCompile> {
