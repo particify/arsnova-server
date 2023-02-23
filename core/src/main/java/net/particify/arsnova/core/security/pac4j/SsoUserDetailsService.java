@@ -76,7 +76,7 @@ public class SsoUserDetailsService extends AbstractUserDetailsService
       grantedAuthorities.add(User.ROLE_ADMIN);
     }
 
-    return getOrCreate(profile.getId(), UserProfile.AuthProvider.OIDC, grantedAuthorities);
+    return getOrCreate(profile.getId(), UserProfile.AuthProvider.OIDC, grantedAuthorities, profile.getAttributes());
   }
 
   private User loadSamlUserDetails(final SAML2Profile profile) {
@@ -93,6 +93,6 @@ public class SsoUserDetailsService extends AbstractUserDetailsService
       grantedAuthorities.add(User.ROLE_ADMIN);
     }
 
-    return getOrCreate(uid, UserProfile.AuthProvider.SAML, grantedAuthorities);
+    return getOrCreate(uid, UserProfile.AuthProvider.SAML, grantedAuthorities, profile.getAttributes());
   }
 }

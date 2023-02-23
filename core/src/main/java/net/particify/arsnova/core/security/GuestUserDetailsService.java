@@ -19,6 +19,7 @@
 package net.particify.arsnova.core.security;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -58,7 +59,7 @@ public class GuestUserDetailsService extends AbstractUserDetailsService
   public UserDetails loadUserByUsername(String loginId, final boolean autoCreate) {
     if (autoCreate) {
       loginId = userService.generateGuestId();
-      return getOrCreate(loginId, defaultGrantedAuthorities);
+      return getOrCreate(loginId, defaultGrantedAuthorities, Collections.emptyMap());
     }
 
     return get(loginId, defaultGrantedAuthorities);

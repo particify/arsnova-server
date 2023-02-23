@@ -1,10 +1,15 @@
 package net.particify.arsnova.core.security;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import net.particify.arsnova.core.event.BeforeUserProfileAutoCreationEvent;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.service.UserService;
 
@@ -15,15 +20,22 @@ import net.particify.arsnova.core.service.UserService;
  * necessary. Keep in mind that not all UserDetails services extend this class
  * and changes made here might need to be replicated for them.
  */
-public abstract class AbstractUserDetailsService {
+public abstract class AbstractUserDetailsService implements ApplicationEventPublisherAware {
   protected final UserProfile.AuthProvider defaultAuthProvider;
   protected final UserService userService;
+  private ApplicationEventPublisher applicationEventPublisher;
 
   public AbstractUserDetailsService(
       final UserProfile.AuthProvider defaultAuthProvider,
       final UserService userService) {
     this.defaultAuthProvider = defaultAuthProvider;
     this.userService = userService;
+  }
+
+  @Override
+  @Autowired
+  public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+    this.applicationEventPublisher = applicationEventPublisher;
   }
 
   /**
@@ -53,8 +65,9 @@ public abstract class AbstractUserDetailsService {
    */
   protected User getOrCreate(
       final String loginId,
-      final Collection<GrantedAuthority> grantedAuthorities) {
-    return getOrCreate(loginId, defaultAuthProvider, grantedAuthorities);
+      final Collection<GrantedAuthority> grantedAuthorities,
+      final Map<String, Object> userAttributes) {
+    return getOrCreate(loginId, defaultAuthProvider, grantedAuthorities, userAttributes);
   }
 
   /**
@@ -64,10 +77,15 @@ public abstract class AbstractUserDetailsService {
   protected User getOrCreate(
       final String loginId,
       final UserProfile.AuthProvider authProvider,
-      final Collection<GrantedAuthority> grantedAuthorities) {
+      final Collection<GrantedAuthority> grantedAuthorities,
+      final Map<String, Object> userAttributes) {
     return new User(
-      getUserProfile(loginId, authProvider).orElse(
-        userService.create(new UserProfile(authProvider, loginId))),
+      getUserProfile(loginId, authProvider).orElseGet(() -> {
+        final UserProfile userProfile = new UserProfile(authProvider, loginId);
+        applicationEventPublisher.publishEvent(
+            new BeforeUserProfileAutoCreationEvent(this, userProfile, userAttributes));
+        return userService.create(userProfile);
+      }),
       grantedAuthorities);
   }
 
