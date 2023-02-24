@@ -38,7 +38,7 @@ tasks.jib {
 
 tasks.jacocoTestReport {
   reports {
-    csv.isEnabled = true
+    csv.required.set(true)
   }
 }
 
