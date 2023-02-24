@@ -1,6 +1,7 @@
 variables:
   OUTPUT_DIR: $PROJECT/build
-  GRADLE_USER_HOME: .gradle-user-home
+  GRADLE_USER_HOME_DIR: .gradle-user-home
+  GRADLE_USER_HOME: $CI_PROJECT_DIR/$GRADLE_USER_HOME_DIR
   GRADLE_OPTS: -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false
   GRADLE_CLI_OPTS: --no-daemon --console=plain
 
@@ -23,7 +24,7 @@ default:
   cache:
     key: gradle-global-cache
     paths:
-      - $GRADLE_USER_HOME/caches
+      - $GRADLE_USER_HOME_DIR/caches
 
 compile:
   extends: .gradle
