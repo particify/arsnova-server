@@ -20,7 +20,7 @@ default:
     - date
 
 .gradle:
-  image: gradle:7.6-jdk17
+  image: gradle:8.0-jdk17
   cache:
     key: gradle-global-cache
     paths:
