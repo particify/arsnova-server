@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono
 
 @RestController("StatsController")
 class StatsController(
-  private val roomSubscriptionEventDispatcher: RoomSubscriptionEventDispatcher,
+  private val roomSubscriptionEventDispatcher: RoomSubscriptionEventDispatcher
 ) {
   companion object {
     const val STATS_MAPPING = "/stats"

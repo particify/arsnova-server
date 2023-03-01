@@ -26,7 +26,8 @@ class RoomAccessService(
     logger.trace("Querying auth service for room access with url: {}", url)
     try {
       return restTemplate.getForObject(
-        url, RoomAccess::class.java,
+        url,
+        RoomAccess::class.java,
         mapOf(
           "roomId" to roomId,
           "userId" to userId
