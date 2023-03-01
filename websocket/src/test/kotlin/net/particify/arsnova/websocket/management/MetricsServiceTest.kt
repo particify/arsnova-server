@@ -63,7 +63,8 @@ class MetricsServiceTest {
         continue
       }
       assertEquals(
-        i, metricsService.activeRooms[roomId]?.maxUserCount,
+        i,
+        metricsService.activeRooms[roomId]?.maxUserCount,
         "'maxUserCount' does not have the expected value."
       )
       assertNotNull(
@@ -79,7 +80,8 @@ class MetricsServiceTest {
         "'sessionStart' is not in expected time range."
       )
       assertEquals(
-        -1, metricsService.activeRooms[roomId]?.decliningMinUserCount,
+        -1,
+        metricsService.activeRooms[roomId]?.decliningMinUserCount,
         "'decliningMinUserCount' does not have the expected value."
       )
     }
@@ -89,10 +91,10 @@ class MetricsServiceTest {
     }
 
     for (
-      i in maxUserCount downTo max(
-        floor(maxUserCount * MetricsService.SESSION_END_USER_FACTOR),
-        floor(MetricsService.ACTIVE_ROOM_MIN_USERS * MetricsService.ACTIVE_ROOM_MIN_USERS_TOLERANCE_FACTOR)
-      ).roundToInt()
+    i in maxUserCount downTo max(
+      floor(maxUserCount * MetricsService.SESSION_END_USER_FACTOR),
+      floor(MetricsService.ACTIVE_ROOM_MIN_USERS * MetricsService.ACTIVE_ROOM_MIN_USERS_TOLERANCE_FACTOR)
+    ).roundToInt()
     ) {
       applicationEventPublisher.publishEvent(
         RoomUserCountChangedEvent(
@@ -106,11 +108,13 @@ class MetricsServiceTest {
         verify(exactly = 1) { metricsService["trackSessionEnd"](any<MetricsService.ActiveRoomMetrics>()) }
       } else {
         assertEquals(
-          maxUserCount, metricsService.activeRooms[roomId]?.maxUserCount,
+          maxUserCount,
+          metricsService.activeRooms[roomId]?.maxUserCount,
           "'maxUserCount' does not have the expected value."
         )
         assertEquals(
-          -1, metricsService.activeRooms[roomId]?.decliningMinUserCount,
+          -1,
+          metricsService.activeRooms[roomId]?.decliningMinUserCount,
           "'decliningMinUserCount' does not have the expected value."
         )
       }

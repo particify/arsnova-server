@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
 class RoomSubscriptionService(
   private val rabbitTemplate: RabbitTemplate,
   private val webSocketProperties: WebSocketProperties,
-  private val applicationEventPublisher: ApplicationEventPublisher,
+  private val applicationEventPublisher: ApplicationEventPublisher
 ) {
   private val logger = LoggerFactory.getLogger(RoomSubscriptionService::class.java)
 

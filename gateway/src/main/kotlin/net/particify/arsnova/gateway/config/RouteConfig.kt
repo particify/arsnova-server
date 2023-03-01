@@ -61,7 +61,7 @@ class RouteConfig(
           .path(
             "/room/{roomId}/comment/**",
             "/room/{roomId}/settings/**",
-            "/room/{roomId}/vote/**",
+            "/room/{roomId}/vote/**"
           )
           .filters { f ->
             f.filter(authFilter.apply(AuthFilter.Config()))

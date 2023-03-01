@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
 @Service
 class MetricsService(
   meterRegistry: MeterRegistry,
-  private val roomSubscriptionService: RoomSubscriptionService,
+  private val roomSubscriptionService: RoomSubscriptionService
 ) {
   companion object {
     const val GATHERING_INTERVAL = 60 * 1000L
@@ -153,6 +153,6 @@ class MetricsService(
   data class ActiveRoomMetrics(
     val maxUserCount: Int,
     val sessionStart: LocalDateTime,
-    val decliningMinUserCount: Int = -1,
+    val decliningMinUserCount: Int = -1
   )
 }

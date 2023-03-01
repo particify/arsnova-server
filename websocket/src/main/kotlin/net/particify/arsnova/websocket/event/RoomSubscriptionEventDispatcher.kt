@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class RoomSubscriptionEventDispatcher(
-  private val applicationEventPublisher: ApplicationEventPublisher,
+  private val applicationEventPublisher: ApplicationEventPublisher
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
   private val roomTopicPattern = Regex("^/topic/([0-9a-f]{32})\\.stream$")
@@ -38,13 +38,13 @@ class RoomSubscriptionEventDispatcher(
           RoomLeaveEvent(
             wsSessionId = accessor.sessionId!!,
             userId = userId,
-            roomId = oldRoomSubscription.roomId,
+            roomId = oldRoomSubscription.roomId
           )
         )
       }
       roomSubscription = RoomSubscription(
         subscriptionId = accessor.subscriptionId!!,
-        roomId = roomId,
+        roomId = roomId
       )
       logger.debug("Adding WS session -> subscription mapping: {} -> {}, ", accessor.sessionId, roomSubscription)
       wsSessionIdToSubscriptionMapping[accessor.sessionId!!] = roomSubscription
@@ -52,7 +52,7 @@ class RoomSubscriptionEventDispatcher(
         RoomJoinEvent(
           wsSessionId = accessor.sessionId!!,
           userId = userId,
-          roomId = roomSubscription.roomId,
+          roomId = roomSubscription.roomId
         )
       )
     }
@@ -74,7 +74,7 @@ class RoomSubscriptionEventDispatcher(
         RoomLeaveEvent(
           wsSessionId = accessor.sessionId!!,
           userId = userId,
-          roomId = roomSubscription.roomId,
+          roomId = roomSubscription.roomId
         )
       )
     }
@@ -93,7 +93,7 @@ class RoomSubscriptionEventDispatcher(
         RoomLeaveEvent(
           wsSessionId = accessor.sessionId!!,
           userId = userId,
-          roomId = roomSubscription.roomId,
+          roomId = roomSubscription.roomId
         )
       )
     }

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 @Component
 class AuthChannelInterceptorAdapter(
   private val jwtTokenUtil: JwtTokenUtil,
-  private val roomAccessService: RoomAccessService,
+  private val roomAccessService: RoomAccessService
 ) : ChannelInterceptor {
 
   companion object {
