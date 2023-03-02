@@ -38,6 +38,7 @@ init_gitmodules() {
       git submodule update --init --recursive "$ROOT_DIR/$gitmodule"
     fi
   done
+  git submodule foreach 'if [ -f .pre-commit-config.yaml ]; then pre-commit install; fi' >/dev/null
 }
 
 load_prod_config() {
@@ -267,6 +268,22 @@ fi
 
 if ! code --list-extensions | grep ms-vscode-remote.remote-containers &> /dev/null; then
   code --install-extension ms-vscode-remote.remote-containers
+fi
+
+if ! command -v pip &> /dev/null; then
+  echo ERROR: pip is not installed.
+  echo
+  echo On Debian-based systems:
+  echo apt install pip
+  exit 1
+fi
+
+if ! command -v pre-commit &> /dev/null; then
+  pip install pre-commit
+fi
+
+if [ -f .pre-commit-config.yaml ]; then
+  pre-commit install >/dev/null
 fi
 
 load_prod_config "$COMPOSE_DIR"
