@@ -43,12 +43,8 @@ The default configuration can be adjusted via environment variables:
 |JWT_DOMAIN |example.com |A domain usable as server ID (used for the JWT issuer/audience claim)
 |ARSNOVA_HOSTNAME |app.particify.de |Hostname for the application
 |MAIL_HOST | |Hostname of the mail server
-|MAIL_PORT |25 |Port of the mail server
-|MAIL_USERNAME | |Username for SMTP authentication
-|MAIL_PASSWORD | |Password for SMTP authentication
 |MAIL_SENDERNAME |ARSnova |Sender name for mails
 |MAIL_SENDERADDRESS | |Sender address for mails
-|MAIL_IMPLICITTLS |`false` |Enable implicit TLS (instead of `STARTSSL`) for SMTP
 |LDAP_ENABLED |`false` |Enable LDAP authentication
 |LDAP_TITLE |LDAP |Title for LDAP authentication shown in the webclient
 |LDAP_HOSTURL |ldaps://example.com:636/dc=example,dc=com |LDAP connection URL
