@@ -1,0 +1,31 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      # Generic checks/fixes
+      - id: no-commit-to-branch
+      - id: check-added-large-files
+        args: [--maxkb=512]
+      - id: check-merge-conflict
+      - id: destroyed-symlinks
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+      # File-type-specific checks/fixes
+      - id: check-yaml
+  - repo: local
+    hooks:
+      - id: checkstyle
+        name: Checkstyle
+        files: \.java$
+        language: system
+        entry: ./gradlew
+        args: [checkstyleMain, checkstyleTest]
+        pass_filenames: false
+      - id: ktlint
+        name: Ktlint
+        files: \.kts?$
+        language: system
+        entry: ./gradlew
+        args: [ktlintCheck]
+        pass_filenames: false
