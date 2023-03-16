@@ -16,6 +16,7 @@ services:
       - $ROOT_DIR/.git:/workspace/.git
       - $ROOT_DIR/webclient:/workspace/webclient
       - vscode-extensions-webclient:/home/dev/.vscode-server/extensions
+      - yarn-global-webclient:/home/dev/.yarn
   arsnova-server-core:
     image: devcontainer-arsnova-server-core:$CORE_TAG
     build:
@@ -153,3 +154,4 @@ volumes:
   vscode-extensions-gateway:
   vscode-extensions-webclient:
   vscode-extensions-websocket:
+  yarn-global-webclient:
