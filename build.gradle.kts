@@ -4,7 +4,7 @@ version = "0.0.1-SNAPSHOT"
 extra["gitlabHost"] = "gitlab.com"
 
 plugins {
-  id("com.github.spotbugs") version "5.0.13" apply false
+  id("com.github.spotbugs") version "5.0.14" apply false
   id("com.google.cloud.tools.jib") version "3.3.1" apply false
   id("io.freefair.aspectj.post-compile-weaving") version "6.6.3" apply false
   id("org.jlleitschuh.gradle.ktlint") version "11.3.1" apply false
