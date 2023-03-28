@@ -25,6 +25,9 @@ public class RabbitConfig {
   public static final String BACKEND_ROOM_DUPLICATED_FANOUT_NAME = "backend.event.room.duplicated";
   public static final String BACKEND_ROOM_DUPLICATED_QUEUE_NAME = "backend.event.room.duplicated.consumer.comment-service";
   public static final String COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME = "commentservice.event.comment.deleted";
+  public static final String ROOM_CREATED_FANOUT_NAME = "backend.event.room.aftercreation";
+  public static final String ROOM_CREATED_QUEUE_NAME = ROOM_CREATED_FANOUT_NAME + ".consumer.comment-service";
+  public static final String ROOM_CREATED_DLQ_NAME = ROOM_CREATED_QUEUE_NAME + ".dlq";
   public static final String ROOM_DELETED_FANOUT_NAME = "backend.event.room.afterdeletion";
   public static final String ROOM_DELETED_QUEUE_NAME = ROOM_DELETED_FANOUT_NAME + ".consumer.comment-service";
   public static final String ROOM_DELETED_DLQ_NAME = ROOM_DELETED_QUEUE_NAME + ".dlq";
@@ -71,6 +74,15 @@ public class RabbitConfig {
     final Queue roomDuplicatedQueue =  new Queue(BACKEND_ROOM_DUPLICATED_QUEUE_NAME, true, false, false);
     final Binding roomDuplicatedBinding = BindingBuilder.bind(roomDuplicatedQueue).to(roomDuplicatedFanoutExchange);
 
+    final FanoutExchange roomCreatedFanoutExchange = new FanoutExchange(ROOM_CREATED_FANOUT_NAME);
+    final Queue roomCreatedDlq = new Queue(ROOM_CREATED_DLQ_NAME, true, false, false);
+    final Queue roomCreatedQueue = QueueBuilder
+      .durable(ROOM_CREATED_QUEUE_NAME)
+      .deadLetterExchange("")
+      .deadLetterRoutingKey(ROOM_CREATED_DLQ_NAME)
+      .build();
+    final Binding roomCreatedBinding = BindingBuilder.bind(roomCreatedQueue).to(roomCreatedFanoutExchange);
+
     final FanoutExchange roomDeletedFanoutExchange = new FanoutExchange(ROOM_DELETED_FANOUT_NAME);
     final Queue roomDeletedDlq = new Queue(ROOM_DELETED_DLQ_NAME, true, false, false);
     final Queue roomDeletedQueue = QueueBuilder
@@ -87,6 +99,10 @@ public class RabbitConfig {
         commentQueue,
         commentBinding,
         deleteFanoutExchange,
+        roomCreatedFanoutExchange,
+        roomCreatedDlq,
+        roomCreatedQueue,
+        roomCreatedBinding,
         roomDeletedFanoutExchange,
         roomDeletedDlq,
         roomDeletedQueue,

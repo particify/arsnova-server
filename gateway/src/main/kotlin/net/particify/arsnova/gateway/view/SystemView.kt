@@ -39,7 +39,7 @@ class SystemView(
         Mono.zip(
           wsGatewayService.getGatewayStats(),
           coreStatsService.getServiceStats(jwt, params),
-          commentService.getServiceStats()
+          commentService.getServiceStats(params)
         )
           .map { (wsGatewayStats: WsGatewayStats, coreServiceStats: Map<String, Any>, commentServiceStats: CommentServiceStats) ->
             Stats(wsGatewayStats, coreServiceStats, commentServiceStats)
@@ -61,7 +61,7 @@ class SystemView(
         Mono.zip(
           wsGatewayService.getGatewayStats(),
           coreStatsService.getSummarizedStats(jwt, params),
-          commentService.getServiceStats()
+          commentService.getServiceStats(params)
         )
           .map { (wsGatewayStats: WsGatewayStats, coreStats: CoreStats, commentServiceStats: CommentServiceStats) ->
             SummarizedStats(

@@ -6,5 +6,6 @@ import java.util.UUID
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class RoomCreatedEvent(
   val id: UUID,
-  val ownerId: UUID
+  val ownerId: UUID,
+  val tenantId: UUID?
 )
