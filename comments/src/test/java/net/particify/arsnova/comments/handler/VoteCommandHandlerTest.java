@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,8 +44,8 @@ public class VoteCommandHandlerTest {
 
   @Test
   public void testHandleUpvote() {
-    String commentId = "52f08e8314aba247c50faacef600254c";
-    String creatorId = "52f08e8314aba247c50faacef600254c";
+    UUID commentId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
+    UUID creatorId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
     VotePayload payload = new VotePayload(creatorId, commentId);
     Upvote command = new Upvote(payload);
     Vote expectedVote = new Vote();
@@ -57,7 +58,7 @@ public class VoteCommandHandlerTest {
 
     Vote returned = commandHandler.handle(command);
 
-    ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<UUID> commentIdCaptor = ArgumentCaptor.forClass(UUID.class);
 
     verify(commentEventSource, times(1)).scoreChanged(commentIdCaptor.capture());
     assertThat(returned).isEqualTo(expectedVote);
@@ -66,8 +67,8 @@ public class VoteCommandHandlerTest {
 
   @Test
   public void testHandleDownvote() {
-    String commentId = "52f08e8314aba247c50faacef600254c";
-    String creatorId = "52f08e8314aba247c50faacef600254c";
+    UUID commentId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
+    UUID creatorId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
     VotePayload payload = new VotePayload(creatorId, commentId);
     Downvote command = new Downvote(payload);
     Vote expectedVote = new Vote();
@@ -80,7 +81,7 @@ public class VoteCommandHandlerTest {
 
     Vote returned = commandHandler.handle(command);
 
-    ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<UUID> commentIdCaptor = ArgumentCaptor.forClass(UUID.class);
 
     verify(commentEventSource, times(1)).scoreChanged(commentIdCaptor.capture());
     assertThat(returned).isEqualTo(expectedVote);
@@ -89,8 +90,8 @@ public class VoteCommandHandlerTest {
 
   @Test
   public void testHandleResetVote() {
-    String commentId = "52f08e8314aba247c50faacef600254c";
-    String creatorId = "52f08e8314aba247c50faacef600254c";
+    UUID commentId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
+    UUID creatorId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
     VotePayload payload = new VotePayload(creatorId, commentId);
     ResetVote command = new ResetVote(payload);
     Vote currentVote = new Vote();
@@ -103,7 +104,7 @@ public class VoteCommandHandlerTest {
 
     commandHandler.handle(command);
 
-    ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<UUID> commentIdCaptor = ArgumentCaptor.forClass(UUID.class);
 
     verify(commentEventSource, times(1)).scoreChanged(commentIdCaptor.capture());
     assertThat(commentIdCaptor.getValue()).isEqualTo(commentId);
@@ -111,8 +112,8 @@ public class VoteCommandHandlerTest {
 
   @Test
   public void testHandleResetVoteWithoutCurrentVote() {
-    String commentId = "52f08e8314aba247c50faacef600254c";
-    String creatorId = "52f08e8314aba247c50faacef600254c";
+    UUID commentId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
+    UUID creatorId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
     VotePayload payload = new VotePayload(creatorId, commentId);
     ResetVote command = new ResetVote(payload);
 
@@ -121,7 +122,7 @@ public class VoteCommandHandlerTest {
 
     commandHandler.handle(command);
 
-    ArgumentCaptor<String> commentIdCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<UUID> commentIdCaptor = ArgumentCaptor.forClass(UUID.class);
 
     verify(commentEventSource, never()).scoreChanged(commentIdCaptor.capture());
   }

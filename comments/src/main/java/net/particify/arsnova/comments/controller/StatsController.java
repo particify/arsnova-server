@@ -1,6 +1,7 @@
 package net.particify.arsnova.comments.controller;
 
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ public class StatsController extends AbstractEntityController {
 
   @GetMapping(COMMENT_STATS_BY_ROOMS_MAPPING)
   public List<CommentStats> statsByRoom(
-      @RequestParam final List<String> roomIds
+      @RequestParam final List<UUID> roomIds
   ) {
     CalculateStatsPayload p = new CalculateStatsPayload(roomIds);
     CalculateStats command = new CalculateStats(p);

@@ -2,15 +2,16 @@ package net.particify.arsnova.comments.model;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 public class VotePK implements Serializable {
-  protected String userId;
-  protected String commentId;
+  protected UUID userId;
+  protected UUID commentId;
 
   public VotePK() {
   }
 
-  public VotePK(final String userId, final String commentId) {
+  public VotePK(final UUID userId, final UUID commentId) {
     this.userId = userId;
     this.commentId = commentId;
   }

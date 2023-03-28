@@ -1,34 +1,35 @@
 package net.particify.arsnova.comments.model.command;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import net.particify.arsnova.comments.model.WebSocketPayload;
 
 public class VotePayload implements WebSocketPayload {
-  private String userId;
-  private String commentId;
+  private UUID userId;
+  private UUID commentId;
 
   public VotePayload() {
   }
 
-  public VotePayload(String userId, String commentId) {
+  public VotePayload(UUID userId, UUID commentId) {
     this.userId = userId;
     this.commentId = commentId;
   }
 
-  public String getUserId() {
+  public UUID getUserId() {
     return userId;
   }
 
-  public void setUserId(String userId) {
+  public void setUserId(UUID userId) {
     this.userId = userId;
   }
 
-  public String getCommentId() {
+  public UUID getCommentId() {
     return commentId;
   }
 
-  public void setCommentId(String commentId) {
+  public void setCommentId(UUID commentId) {
     this.commentId = commentId;
   }
 

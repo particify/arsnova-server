@@ -3,6 +3,7 @@ package net.particify.arsnova.comments.model.event;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import net.particify.arsnova.comments.model.WebSocketPayload;
 
@@ -14,14 +15,14 @@ public class RoomCreatedPayload implements WebSocketPayload {
       EXECUTIVE_MODERATOR
     }
 
-    private String userId;
+    private UUID userId;
     private Set<Role> roles;
 
-    public String getUserId() {
+    public UUID getUserId() {
       return userId;
     }
 
-    public void setUserId(final String userId) {
+    public void setUserId(final UUID userId) {
       this.userId = userId;
     }
 

@@ -1,16 +1,17 @@
 package net.particify.arsnova.comments.model.command;
 
 import java.util.Set;
+import java.util.UUID;
 
 public class CreateArchiveCommand {
   private String name;
-  private String roomId;
+  private UUID roomId;
   private Set<String> commentIds;
 
   public CreateArchiveCommand() {
   }
 
-  public CreateArchiveCommand(final String name, final String roomId, final Set<String> commentIds) {
+  public CreateArchiveCommand(final String name, final UUID roomId, final Set<String> commentIds) {
     this.name = name;
     this.roomId = roomId;
     this.commentIds = commentIds;
@@ -24,11 +25,11 @@ public class CreateArchiveCommand {
     this.name = name;
   }
 
-  public String getRoomId() {
+  public UUID getRoomId() {
     return roomId;
   }
 
-  public void setRoomId(final String roomId) {
+  public void setRoomId(final UUID roomId) {
     this.roomId = roomId;
   }
 

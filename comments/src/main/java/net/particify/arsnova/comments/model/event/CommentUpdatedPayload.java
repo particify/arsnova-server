@@ -2,12 +2,13 @@ package net.particify.arsnova.comments.model.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
+import java.util.UUID;
 
 import net.particify.arsnova.comments.model.Comment;
 import net.particify.arsnova.comments.model.WebSocketPayload;
 
 public class CommentUpdatedPayload implements WebSocketPayload {
-  private String id;
+  private UUID id;
   private String body;
   private boolean read;
   private boolean favorite;
@@ -29,12 +30,12 @@ public class CommentUpdatedPayload implements WebSocketPayload {
   }
 
   @JsonProperty("roomId")
-  public String getId() {
+  public UUID getId() {
     return id;
   }
 
   @JsonProperty("roomId")
-  public void setId(String id) {
+  public void setId(UUID id) {
     this.id = id;
   }
 

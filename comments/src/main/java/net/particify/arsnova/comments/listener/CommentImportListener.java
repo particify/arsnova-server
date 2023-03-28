@@ -1,6 +1,7 @@
 package net.particify.arsnova.comments.listener;
 
 import java.util.Date;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -15,25 +16,25 @@ import net.particify.arsnova.comments.model.command.ImportCommentPayload;
 @Service
 public class CommentImportListener {
   static class CommentMessageEntity {
-    private String roomId;
-    private String creatorId;
+    private UUID roomId;
+    private UUID creatorId;
     private String body;
     private Date timestamp;
     private boolean read;
 
-    public String getRoomId() {
+    public UUID getRoomId() {
       return roomId;
     }
 
-    public void setRoomId(String roomId) {
+    public void setRoomId(UUID roomId) {
       this.roomId = roomId;
     }
 
-    public String getCreatorId() {
+    public UUID getCreatorId() {
       return creatorId;
     }
 
-    public void setCreatorId(String creatorId) {
+    public void setCreatorId(UUID creatorId) {
       this.creatorId = creatorId;
     }
 

@@ -1,12 +1,13 @@
 package net.particify.arsnova.comments.model.command;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import net.particify.arsnova.comments.model.Settings;
 import net.particify.arsnova.comments.model.WebSocketPayload;
 
 public class UpdateSettingsPayload implements WebSocketPayload {
-  private String roomId;
+  private UUID roomId;
   private boolean directSend;
   private boolean fileUploadEnabled;
   private boolean readonly;
@@ -23,16 +24,16 @@ public class UpdateSettingsPayload implements WebSocketPayload {
     disabled = settings.isDisabled();
   }
 
-  public UpdateSettingsPayload(String roomId, boolean directSend) {
+  public UpdateSettingsPayload(UUID roomId, boolean directSend) {
     this.roomId = roomId;
     this.directSend = directSend;
   }
 
-  public String getRoomId() {
+  public UUID getRoomId() {
     return roomId;
   }
 
-  public void setRoomId(String roomId) {
+  public void setRoomId(UUID roomId) {
     this.roomId = roomId;
   }
 

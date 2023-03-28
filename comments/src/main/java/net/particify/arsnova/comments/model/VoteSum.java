@@ -1,15 +1,17 @@
 package net.particify.arsnova.comments.model;
 
+import java.util.UUID;
+
 public class VoteSum {
-  private String commentId;
+  private UUID commentId;
   private int sum;
 
-  public VoteSum(final String commentId, final long sum) {
+  public VoteSum(final UUID commentId, final long sum) {
     this.commentId = commentId;
     this.sum = (int) sum;
   }
 
-  public String getCommentId() {
+  public UUID getCommentId() {
     return commentId;
   }
 

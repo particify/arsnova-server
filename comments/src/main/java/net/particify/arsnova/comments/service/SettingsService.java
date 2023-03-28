@@ -1,6 +1,7 @@
 package net.particify.arsnova.comments.service;
 
 import java.util.Optional;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class SettingsService {
     this.repository = repository;
   }
 
-  public Settings get(String id) {
+  public Settings get(UUID id) {
     Settings defaults = new Settings();
     defaults.setRoomId(id);
     Settings s = repository.findById(id).orElse(defaults);
@@ -39,7 +40,7 @@ public class SettingsService {
     return repository.save(s);
   }
 
-  public void delete(final String roomId) {
+  public void delete(final UUID roomId) {
     Optional<Settings> maybeSettings = repository.findById(roomId);
     maybeSettings.ifPresent(repository::delete);
   }

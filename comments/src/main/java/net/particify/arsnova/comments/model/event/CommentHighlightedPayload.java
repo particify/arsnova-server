@@ -1,12 +1,13 @@
 package net.particify.arsnova.comments.model.event;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import net.particify.arsnova.comments.model.Comment;
 import net.particify.arsnova.comments.model.WebSocketPayload;
 
 public class CommentHighlightedPayload implements WebSocketPayload {
-  private String id;
+  private UUID id;
   private boolean lights;
 
   public CommentHighlightedPayload() {
@@ -19,11 +20,11 @@ public class CommentHighlightedPayload implements WebSocketPayload {
     }
   }
 
-  public String getId() {
+  public UUID getId() {
     return id;
   }
 
-  public void setId(String id) {
+  public void setId(UUID id) {
     this.id = id;
   }
 

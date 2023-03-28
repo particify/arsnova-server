@@ -4,38 +4,39 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @IdClass(VotePK.class)
 public class Vote {
   @Id
-  private String userId;
+  private UUID userId;
   @Id
-  private String commentId;
+  private UUID commentId;
   private int vote;
 
   public Vote() {
   }
 
-  public Vote(final String userId, final String commentId, final int vote) {
+  public Vote(final UUID userId, final UUID commentId, final int vote) {
     this.userId = userId;
     this.commentId = commentId;
     this.vote = vote;
   }
 
-  public String getUserId() {
+  public UUID getUserId() {
     return userId;
   }
 
-  public void setUserId(String userId) {
+  public void setUserId(UUID userId) {
     this.userId = userId;
   }
 
-  public String getCommentId() {
+  public UUID getCommentId() {
     return commentId;
   }
 
-  public void setCommentId(String commentId) {
+  public void setCommentId(UUID commentId) {
     this.commentId = commentId;
   }
 

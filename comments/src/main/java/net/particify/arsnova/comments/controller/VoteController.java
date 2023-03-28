@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,8 +92,8 @@ public class VoteController extends AbstractEntityController {
 
   @DeleteMapping(DELETE_MAPPING)
   public void delete(
-      @PathVariable final String commentId,
-      @PathVariable final String userId
+      @PathVariable final UUID commentId,
+      @PathVariable final UUID userId
   ) {
     logger.debug("Resolving delete request with commentId: {}, userId: {}", commentId, userId);
     final VotePayload payload = new VotePayload(userId, commentId);

@@ -1,12 +1,15 @@
 package net.particify.arsnova.comments.security;
 
 import java.util.Map;
+import java.util.UUID;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import net.particify.arsnova.comments.model.Comment;
 import net.particify.arsnova.comments.model.Vote;
+import net.particify.arsnova.comments.model.serialization.UuidHelper;
 
 @Component
 public class PermissionEvaluator {
@@ -15,24 +18,24 @@ public class PermissionEvaluator {
   final static String EXECUTIVE_MODERATOR_ROLE_STRING = "ROLE_EXECUTIVE_MODERATOR";
 
   public boolean isOwnerOrAnyTypeOfModeratorForRoom(
-      final String roomId
+      final UUID roomId
   ) {
     final AuthenticatedUser authenticatedUser =
         (AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    return authenticatedUser.getAuthorities().stream().anyMatch(authority -> authority.equals(
-        new SimpleGrantedAuthority(OWNER_ROLE_STRING + "-" + roomId)) ||
-        authority.equals(new SimpleGrantedAuthority(EDITING_MODERATOR_ROLE_STRING + "-" + roomId)) ||
-        authority.equals(new SimpleGrantedAuthority(EXECUTIVE_MODERATOR_ROLE_STRING + "-" + roomId)));
+    return authenticatedUser.getAuthorities().stream().anyMatch(authority ->
+        authority.equals(buildRoomAuthority(OWNER_ROLE_STRING, roomId)) ||
+        authority.equals(buildRoomAuthority(EDITING_MODERATOR_ROLE_STRING, roomId)) ||
+        authority.equals(buildRoomAuthority(EXECUTIVE_MODERATOR_ROLE_STRING, roomId)));
   }
 
   public boolean isOwnerOrEditingModeratorForRoom(
-      final String roomId
+      final UUID roomId
   ) {
     final AuthenticatedUser authenticatedUser =
         (AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    return authenticatedUser.getAuthorities().stream().anyMatch(authority -> authority.equals(
-        new SimpleGrantedAuthority(OWNER_ROLE_STRING + "-" + roomId)) ||
-        authority.equals(new SimpleGrantedAuthority(EDITING_MODERATOR_ROLE_STRING + "-" + roomId)));
+    return authenticatedUser.getAuthorities().stream().anyMatch(authority ->
+        authority.equals(buildRoomAuthority(OWNER_ROLE_STRING , roomId)) ||
+        authority.equals(buildRoomAuthority(EDITING_MODERATOR_ROLE_STRING, roomId)));
   }
 
   public boolean checkCommentOwnerPermission(
@@ -90,5 +93,9 @@ public class PermissionEvaluator {
     final AuthenticatedUser authenticatedUser =
         (AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     return authenticatedUser.getId().equals(v.getUserId());
+  }
+
+  private GrantedAuthority buildRoomAuthority(final String role, final UUID roomId) {
+    return new SimpleGrantedAuthority(role + "-" + UuidHelper.uuidToString(roomId));
   }
 }

@@ -1,6 +1,7 @@
 package net.particify.arsnova.comments.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import net.particify.arsnova.comments.model.command.CreateSettings;
 import net.particify.arsnova.comments.model.command.CreateSettingsPayload;
 import net.particify.arsnova.comments.model.command.UpdateSettings;
 import net.particify.arsnova.comments.model.command.UpdateSettingsPayload;
+import net.particify.arsnova.comments.model.serialization.UuidHelper;
 import net.particify.arsnova.comments.service.SettingsService;
 
 @RestController("SettingsController")
@@ -44,14 +46,14 @@ public class SettingsController extends AbstractEntityController {
   }
 
   @GetMapping(GET_MAPPING)
-  public Settings get(@PathVariable String id) {
+  public Settings get(@PathVariable UUID id) {
     return service.get(id);
   }
 
   @PostMapping(POST_MAPPING)
   @ResponseStatus(HttpStatus.CREATED)
   public Settings post(
-      @PathVariable final String roomId,
+      @PathVariable final UUID roomId,
       @RequestBody final Settings settings,
       final HttpServletResponse httpServletResponse
   ) {
@@ -63,14 +65,14 @@ public class SettingsController extends AbstractEntityController {
     final String uri = UriComponentsBuilder.fromPath(REQUEST_MAPPING).path(GET_MAPPING)
         .buildAndExpand(s.getRoomId()).toUriString();
     httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
-    httpServletResponse.setHeader(ENTITY_ID_HEADER, s.getRoomId());
+    httpServletResponse.setHeader(ENTITY_ID_HEADER, UuidHelper.uuidToString(s.getRoomId()));
 
     return s;
   }
 
   @PutMapping(PUT_MAPPING)
   public Settings put(
-      @PathVariable final String roomId,
+      @PathVariable final UUID roomId,
       @RequestBody final Settings entity,
       final HttpServletResponse httpServletResponse
   ) {
@@ -79,7 +81,7 @@ public class SettingsController extends AbstractEntityController {
 
     Settings s = this.commandHandler.handle(roomId, command);
 
-    httpServletResponse.setHeader(ENTITY_ID_HEADER, s.getRoomId());
+    httpServletResponse.setHeader(ENTITY_ID_HEADER, UuidHelper.uuidToString(s.getRoomId()));
 
     return s;
   }

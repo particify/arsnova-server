@@ -26,7 +26,7 @@ import net.particify.arsnova.comments.service.persistence.VoteRepository;
 
 @Service
 public class CommentService {
-  private static final String NIL_UUID = "00000000-0000-0000-0000-000000000000";
+  private static final UUID NIL_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
   private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
 
   final CommentRepository repository;
@@ -39,19 +39,19 @@ public class CommentService {
       CommentRepository repository,
       VoteRepository voteRepository,
       VoteService voteService,
-      MappingJackson2MessageConverter jackson2Converter) {
+      ObjectMapper objectMapper) {
     this.repository = repository;
     this.voteRepository = voteRepository;
     this.voteService = voteService;
-    this.objectMapper = jackson2Converter.getObjectMapper();
+    this.objectMapper = objectMapper;
   }
 
-  public Comment get(String id) {
+  public Comment get(UUID id) {
     // ToDo: error handling
     return repository.findById(id).orElse(new Comment());
   }
 
-  public Comment getWithScore(String id) {
+  public Comment getWithScore(UUID id) {
     // ToDo: error handling
     Comment c = repository.findById(id).orElse(new Comment());
     c.setScore(voteService.getSumByCommentId(id));
@@ -59,9 +59,9 @@ public class CommentService {
     return c;
   }
 
-  public List<Comment> getWithScore(final List<String> ids) {
+  public List<Comment> getWithScore(final List<UUID> ids) {
     final List<Comment> list = new ArrayList<>();
-    final Map<String, Integer> voteSums = voteService.getSumsByCommentIds(ids);
+    final Map<UUID, Integer> voteSums = voteService.getSumsByCommentIds(ids);
     repository.findAllById(ids).forEach(c -> {
       c.setScore(voteSums.getOrDefault(c.getId(), 0));
       list.add(c);
@@ -140,26 +140,26 @@ public class CommentService {
     return updatedEntity;
   }
 
-  public List<Comment> getByRoomIdAndArchiveIdNull(String roomId) {
+  public List<Comment> getByRoomIdAndArchiveIdNull(UUID roomId) {
     return repository.findByRoomIdAndArchiveIdNull(roomId);
   }
 
-  public long countByRoomIdAndAck(String roomId, boolean ack) {
+  public long countByRoomIdAndAck(UUID roomId, boolean ack) {
     return repository.countByRoomIdAndAckAndArchiveIdNull(roomId, ack);
   }
 
-  public void delete(String id) {
+  public void delete(UUID id) {
     List<Vote> voteList = voteRepository.findByCommentId(id);
     voteRepository.deleteAll(voteList);
     repository.deleteById(id);
   }
 
-  public List<Comment> deleteByRoomId(String roomId) {
+  public List<Comment> deleteByRoomId(UUID roomId) {
     return repository.deleteByRoomId(roomId);
   }
 
-  public Map<String, Comment> duplicateComments(final String originalRoomId, final String duplicatedRoomId) {
-    final Map<String, Comment> commentMapping = new HashMap<>();
+  public Map<UUID, Comment> duplicateComments(final UUID originalRoomId, final UUID duplicatedRoomId) {
+    final Map<UUID, Comment> commentMapping = new HashMap<>();
     final List<Comment> comments = getByRoomIdAndArchiveIdNull(originalRoomId);
     final List<Comment> commentCopies = comments.stream().map(c -> {
       final Comment commentCopy = new Comment(c);
@@ -173,8 +173,8 @@ public class CommentService {
     return commentMapping;
   }
 
-  private String generateUuidStringForDb() {
-    return UUID.randomUUID().toString().replace("-", "");
+  private UUID generateUuidStringForDb() {
+    return UUID.randomUUID();
   }
 
 }
