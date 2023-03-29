@@ -18,6 +18,7 @@
 
 package net.particify.arsnova.core.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.Instant;
@@ -383,20 +384,23 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
   }
 
   @Override
+  @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
   public boolean activateAccount(final String id, final String key, final String clientAddress) {
     final UserProfile userProfile = get(id, true);
-    if (userProfile == null || !key.equals(userProfile.getAccount().getActivationKey())) {
-      if (userProfile != null) {
-        final int failedVerifications = userProfile.getAccount().getFailedVerifications() + 1;
-        userProfile.getAccount().setFailedVerifications(failedVerifications);
-        if (failedVerifications >= MAX_VERIFICATION_CODE_ATTEMPTS) {
-          logger.info("Resetting activation verification code because of too many failed attempts for {}.",
-              userProfile.getLoginId());
-          userProfile.getAccount().setActivationKey(generateVerificationCode());
-          userProfile.getAccount().setFailedVerifications(0);
-        }
-        update(userProfile);
+    if (userProfile == null) {
+      return false;
+    }
+
+    if (!key.equals(userProfile.getAccount().getActivationKey())) {
+      final int failedVerifications = userProfile.getAccount().getFailedVerifications() + 1;
+      userProfile.getAccount().setFailedVerifications(failedVerifications);
+      if (failedVerifications >= MAX_VERIFICATION_CODE_ATTEMPTS) {
+        logger.info("Resetting activation verification code because of too many failed attempts for {}.",
+            userProfile.getLoginId());
+        userProfile.getAccount().setActivationKey(generateVerificationCode());
+        userProfile.getAccount().setFailedVerifications(0);
       }
+      update(userProfile);
 
       return false;
     }

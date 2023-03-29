@@ -159,10 +159,12 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
   public boolean isShortIdAvailable(final String shortId) {
     try {
-      return getIdByShortId(shortId) == null;
+      getIdByShortId(shortId);
     } catch (final NotFoundException e) {
       return true;
     }
+
+    return false;
   }
 
   public String generateShortId() {
