@@ -8,16 +8,17 @@ import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import java.util.Date
 import java.util.Optional
+import java.util.UUID
 
 @Repository
 interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
-  fun findByRoomId(roomId: String): Iterable<RoomAccess>
+  fun findByRoomId(roomId: UUID): Iterable<RoomAccess>
 
-  fun findByRoomIdAndRole(roomId: String, role: String): Iterable<RoomAccess>
+  fun findByRoomIdAndRole(roomId: UUID, role: String): Iterable<RoomAccess>
 
-  fun findByRoomIdAndRoleNot(roomId: String, role: String): Iterable<RoomAccess>
+  fun findByRoomIdAndRoleNot(roomId: UUID, role: String): Iterable<RoomAccess>
 
-  fun findByUserId(userId: String): Iterable<RoomAccess>
+  fun findByUserId(userId: UUID): Iterable<RoomAccess>
 
   @Query(
     """
@@ -39,17 +40,17 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     """,
     nativeQuery = true
   )
-  fun updateLastAccessAndGetByRoomIdAndUserId(roomId: String, userId: String, lastAccess: Date): Optional<RoomAccess>
+  fun updateLastAccessAndGetByRoomIdAndUserId(roomId: UUID, userId: UUID, lastAccess: Date): Optional<RoomAccess>
 
   // This is needed to not have hibernate check if any rows should be deleted
   @Query("DELETE FROM room_access WHERE room_id = :roomId RETURNING *;", nativeQuery = true)
-  fun deleteByRoomIdWithoutChecking(@Param("roomId") roomId: String): Iterable<RoomAccess>
+  fun deleteByRoomIdWithoutChecking(@Param("roomId") roomId: UUID): Iterable<RoomAccess>
 
   // This is needed to not have hibernate check if any rows should be deleted
   @Query("DELETE FROM room_access WHERE room_id = :roomId and user_id = :userId RETURNING *;", nativeQuery = true)
   fun deleteByRoomIdAndUserIdWithoutChecking(
-    @Param("roomId") roomId: String,
-    @Param("userId") userId: String
+    @Param("roomId") roomId: UUID,
+    @Param("userId") userId: UUID
   ): Iterable<RoomAccess>
 
   // This sets the role to owner even if the entry was already present
@@ -66,8 +67,8 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     nativeQuery = true
   )
   fun createOrUpdateAccess(
-    @Param("roomId") roomId: String,
-    @Param("userId") userId: String,
+    @Param("roomId") roomId: UUID,
+    @Param("userId") userId: UUID,
     @Param("rev") rev: String,
     @Param("role") role: String,
     @Param("updateRole") updateRole: String
@@ -84,8 +85,8 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     nativeQuery = true
   )
   fun createAccess(
-    @Param("roomId") roomId: String,
-    @Param("userId") userId: String,
+    @Param("roomId") roomId: UUID,
+    @Param("userId") userId: UUID,
     @Param("rev") rev: String,
     @Param("role") role: String
   ): RoomAccess
@@ -103,8 +104,8 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     nativeQuery = true
   )
   fun createParticipantAccess(
-    @Param("roomId") roomId: String,
-    @Param("userId") userId: String,
+    @Param("roomId") roomId: UUID,
+    @Param("userId") userId: UUID,
     @Param("rev") rev: String
   ): RoomAccess
 
@@ -119,7 +120,7 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
   )
   fun countByLastAccessAfterAndGroupByRoomId(lastAccess: Date): List<Int>
 
-  fun countByRoomIdAndRole(roomId: String, role: String): Long
+  fun countByRoomIdAndRole(roomId: UUID, role: String): Long
 
   fun countDistinctUserIdByLastAccessAfter(lastAccess: Date): Long
 

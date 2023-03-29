@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 import java.util.Date
 import java.util.Optional
+import java.util.UUID
 
 @Component
 class RoomAccessHandler(
@@ -100,7 +101,7 @@ class RoomAccessHandler(
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun getByRoomIdAndUserId(roomId: String, userId: String): Optional<RoomAccess> {
+  fun getByRoomIdAndUserId(roomId: UUID, userId: UUID): Optional<RoomAccess> {
     logger.debug("Handling room access request with roomId: {} and userId: {}", roomId, userId)
     val lastAccess = Date()
     return roomAccessRepository.updateLastAccessAndGetByRoomIdAndUserId(roomId, userId, lastAccess)
@@ -108,7 +109,7 @@ class RoomAccessHandler(
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun getByRoomIdAndRole(roomId: String, roleParam: String?): List<RoomAccess> {
+  fun getByRoomIdAndRole(roomId: UUID, roleParam: String?): List<RoomAccess> {
     logger.debug("Handling room access request with roomId: {}", roomId)
     if (roleParam != null) {
       if (roleParam.startsWith("!")) {
@@ -121,14 +122,14 @@ class RoomAccessHandler(
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun getOwnerRoomAccessByRoomId(roomId: String): RoomAccess? {
+  fun getOwnerRoomAccessByRoomId(roomId: UUID): RoomAccess? {
     logger.debug("Handling room access request with roomId: {}", roomId)
     return roomAccessRepository.findByRoomIdAndRole(roomId, ROLE_CREATOR_STRING).firstOrNull()
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun getByUserId(userId: String): Iterable<RoomAccess> {
+  fun getByUserId(userId: UUID): Iterable<RoomAccess> {
     logger.debug("Handling room access request by userId: {}", userId)
     return roomAccessRepository.findByUserId(userId)
   }
@@ -151,15 +152,15 @@ class RoomAccessHandler(
     return try {
       if (roomAccess.role == ROLE_CREATOR_STRING) {
         val existingOwnerPks = roomAccessRepository
-          .findByRoomIdAndRole(roomAccess.roomId!!, ROLE_CREATOR_STRING).map { roomAccess ->
+          .findByRoomIdAndRole(roomAccess.roomId, ROLE_CREATOR_STRING).map { roomAccess ->
             RoomAccessPK(roomAccess.roomId, roomAccess.userId)
           }
         val otherOwnerPks = existingOwnerPks.filter { pk -> pk.userId != roomAccess.userId }
         roomAccessRepository.deleteAllById(otherOwnerPks)
       }
       roomAccessRepository.createOrUpdateAccess(
-        roomAccess.roomId!!,
-        roomAccess.userId!!,
+        roomAccess.roomId,
+        roomAccess.userId,
         roomAccess.rev,
         roomAccess.role!!,
         roomAccess.role!!
@@ -170,7 +171,7 @@ class RoomAccessHandler(
       // I don't know of any scenario where there would not be an existing creator role
       val lastAccess = Date()
       roomAccessRepository
-        .updateLastAccessAndGetByRoomIdAndUserId(roomAccess.roomId!!, roomAccess.userId!!, lastAccess)
+        .updateLastAccessAndGetByRoomIdAndUserId(roomAccess.roomId, roomAccess.userId, lastAccess)
         .orElseThrow {
           InternalServerErrorException("Tried fetching the room access but could not obtain any")
         }
@@ -180,10 +181,10 @@ class RoomAccessHandler(
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
   fun createParticipantAccessWithLimit(roomAccess: RoomAccess, limit: Int): RoomAccess {
-    if (roomAccessRepository.countByRoomIdAndRole(roomAccess.roomId!!, ROLE_PARTICIPANT_STRING) < limit) {
+    if (roomAccessRepository.countByRoomIdAndRole(roomAccess.roomId, ROLE_PARTICIPANT_STRING) < limit) {
       return roomAccessRepository.createParticipantAccess(
-        roomAccess.roomId!!,
-        roomAccess.userId!!,
+        roomAccess.roomId,
+        roomAccess.userId,
         roomAccess.rev
       )
     } else {
@@ -193,7 +194,7 @@ class RoomAccessHandler(
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun migrateParticipantAccess(userId: String, roomIds: List<String>) {
+  fun migrateParticipantAccess(userId: UUID, roomIds: List<UUID>) {
     val newRoomAccessList: List<RoomAccess> = roomIds.map { roomId ->
       roomAccessRepository.createParticipantAccess(
         roomId,
@@ -205,12 +206,12 @@ class RoomAccessHandler(
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  fun delete(roomId: String, userId: String) {
+  fun delete(roomId: UUID, userId: UUID) {
     roomAccessRepository.deleteByRoomIdAndUserIdWithoutChecking(roomId, userId)
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  fun deleteByRoomId(roomId: String): List<RoomAccess> {
+  fun deleteByRoomId(roomId: UUID): List<RoomAccess> {
     return roomAccessRepository.deleteByRoomIdWithoutChecking(roomId).toList()
   }
 }

@@ -1,6 +1,8 @@
 package net.particify.arsnova.authz.model
 
+import java.util.UUID
+
 data class RoomAccessEntry(
-  val userId: String = "",
+  val userId: UUID,
   val role: String = ""
 )

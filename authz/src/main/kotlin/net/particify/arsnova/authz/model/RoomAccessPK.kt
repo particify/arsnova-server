@@ -1,8 +1,11 @@
 package net.particify.arsnova.authz.model
 
+import jakarta.persistence.Embeddable
 import java.io.Serializable
+import java.util.UUID
 
+@Embeddable
 data class RoomAccessPK(
-  var roomId: String? = "",
-  var userId: String? = ""
+  var roomId: UUID,
+  var userId: UUID
 ) : Serializable
