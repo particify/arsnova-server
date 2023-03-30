@@ -19,6 +19,7 @@
 package net.particify.arsnova.core.config;
 
 import jakarta.servlet.ServletContext;
+import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.core.config.Config;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.TwitterClient;
@@ -30,6 +31,10 @@ import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.cas.ServiceProperties;
+import org.springframework.security.cas.authentication.CasAuthenticationProvider;
+import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
+import org.springframework.security.cas.web.CasAuthenticationFilter;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.session.SessionRegistry;
@@ -37,6 +42,7 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 
 import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
+import net.particify.arsnova.core.security.CasUserDetailsService;
 
 @TestConfiguration
 @EnableGlobalMethodSecurity(mode = AdviceMode.ASPECTJ, prePostEnabled = true)
@@ -61,6 +67,24 @@ public class TestSecurityConfig extends SecurityConfig {
 
   @MockBean
   public DaoAuthenticationProvider daoAuthenticationProvider;
+
+  @MockBean
+  public CasAuthenticationProvider casAuthenticationProvider;
+
+  @MockBean
+  public CasUserDetailsService casUserDetailsService;
+
+  @MockBean
+  public ServiceProperties casServiceProperties;
+
+  @MockBean
+  public Cas20ProxyTicketValidator casTicketValidator;
+
+  @MockBean
+  public CasAuthenticationEntryPoint casAuthenticationEntryPoint;
+
+  @MockBean
+  public CasAuthenticationFilter casAuthenticationFilter;
 
   @MockBean
   public FacebookClient facebookClient;
