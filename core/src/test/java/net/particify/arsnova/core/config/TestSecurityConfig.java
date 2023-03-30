@@ -19,7 +19,7 @@
 package net.particify.arsnova.core.config;
 
 import jakarta.servlet.ServletContext;
-import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
+import org.apereo.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.core.config.Config;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.TwitterClient;

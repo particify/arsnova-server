@@ -18,10 +18,9 @@
 
 package net.particify.arsnova.core.security;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -46,7 +45,7 @@ public class CasLogoutSuccessHandler implements LogoutSuccessHandler {
       final HttpServletRequest request,
       final HttpServletResponse response,
       final Authentication authentication
-  ) throws IOException, ServletException {
+  ) throws IOException {
     /* Typo in "referer" intended. It is in the spec. */
     final String referrer = request.getHeader("referer");
     if (response.isCommitted()) {

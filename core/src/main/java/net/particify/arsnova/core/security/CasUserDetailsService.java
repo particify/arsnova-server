@@ -19,22 +19,29 @@
 package net.particify.arsnova.core.security;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
-import org.jasig.cas.client.validation.Assertion;
+import org.apereo.cas.client.validation.Assertion;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.security.cas.userdetails.AbstractCasAssertionUserDetailsService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import net.particify.arsnova.core.event.BeforeUserProfileAutoCreationEvent;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.service.UserService;
 
 /**
  * Class to load a user based on the results from CAS.
  */
-public class CasUserDetailsService extends AbstractCasAssertionUserDetailsService {
+public class CasUserDetailsService
+    extends AbstractCasAssertionUserDetailsService
+    implements ApplicationEventPublisherAware {
   public static final GrantedAuthority ROLE_CAS_USER = new SimpleGrantedAuthority("ROLE_CAS_USER");
 
   private final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
@@ -43,6 +50,18 @@ public class CasUserDetailsService extends AbstractCasAssertionUserDetailsServic
   );
 
   private UserService userService;
+  private ApplicationEventPublisher applicationEventPublisher;
+
+  @Override
+  @Autowired
+  public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+    this.applicationEventPublisher = applicationEventPublisher;
+  }
+
+  @Autowired
+  public void setUserService(final UserService userService) {
+    this.userService = userService;
+  }
 
   @Override
   protected UserDetails loadUserDetails(final Assertion assertion) {
@@ -52,12 +71,17 @@ public class CasUserDetailsService extends AbstractCasAssertionUserDetailsServic
       grantedAuthorities.add(User.ROLE_ADMIN);
     }
 
-    return userService.loadUser(UserProfile.AuthProvider.CAS, assertion.getPrincipal().getName(),
-        grantedAuthorities, true);
-  }
-
-  @Autowired
-  public void setUserService(final UserService userService) {
-    this.userService = userService;
+    final Optional<UserProfile> userProfile =
+        Optional.ofNullable(
+            userService.getByAuthProviderAndLoginId(UserProfile.AuthProvider.CAS, assertion.getPrincipal().getName()));
+    return new User(
+        userProfile.orElseGet(() -> {
+          final UserProfile newUserProfile =
+              new UserProfile(UserProfile.AuthProvider.CAS, assertion.getPrincipal().getName());
+          applicationEventPublisher.publishEvent(
+              new BeforeUserProfileAutoCreationEvent(this, newUserProfile, Collections.emptyMap()));
+          return userService.create(newUserProfile);
+        }),
+        grantedAuthorities);
   }
 }
