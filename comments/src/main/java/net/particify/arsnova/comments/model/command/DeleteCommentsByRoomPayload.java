@@ -1,23 +1,24 @@
 package net.particify.arsnova.comments.model.command;
 import java.util.Objects;
+import java.util.UUID;
 
 import net.particify.arsnova.comments.model.WebSocketPayload;
 
 public class DeleteCommentsByRoomPayload implements WebSocketPayload {
-  private String roomId;
+  private UUID roomId;
 
   public DeleteCommentsByRoomPayload() {
   }
 
-  public DeleteCommentsByRoomPayload(String roomId) {
+  public DeleteCommentsByRoomPayload(UUID roomId) {
     this.roomId = roomId;
   }
 
-  public String getRoomId() {
+  public UUID getRoomId() {
     return roomId;
   }
 
-  public void setRoomId(String roomId) {
+  public void setRoomId(UUID roomId) {
     this.roomId = roomId;
   }
 

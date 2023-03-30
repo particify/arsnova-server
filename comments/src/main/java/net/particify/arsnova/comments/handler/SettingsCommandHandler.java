@@ -1,5 +1,6 @@
 package net.particify.arsnova.comments.handler;
 
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -13,6 +14,7 @@ import net.particify.arsnova.comments.model.command.CreateSettingsPayload;
 import net.particify.arsnova.comments.model.command.UpdateSettings;
 import net.particify.arsnova.comments.model.command.UpdateSettingsPayload;
 import net.particify.arsnova.comments.model.event.SettingsUpdated;
+import net.particify.arsnova.comments.model.serialization.UuidHelper;
 import net.particify.arsnova.comments.security.PermissionEvaluator;
 import net.particify.arsnova.comments.service.SettingsService;
 
@@ -36,7 +38,7 @@ public class SettingsCommandHandler {
   }
 
   public Settings handle(
-      final String roomId,
+      final UUID roomId,
       CreateSettings command
   ) {
     logger.debug("Got new command: {}", command);
@@ -57,7 +59,7 @@ public class SettingsCommandHandler {
   }
 
   public Settings handle(
-      final String roomId,
+      final UUID roomId,
       UpdateSettings command
   ) {
     logger.debug("Got new command: {}", command);
@@ -81,7 +83,7 @@ public class SettingsCommandHandler {
 
     messagingTemplate.convertAndSend(
         "amq.topic",
-        settings.getRoomId() + ".comment.settings.stream",
+        UuidHelper.uuidToString(settings.getRoomId()) + ".comment.settings.stream",
         event
     );
 

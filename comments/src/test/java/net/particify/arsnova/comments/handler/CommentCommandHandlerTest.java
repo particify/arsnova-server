@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,8 +67,8 @@ public class CommentCommandHandlerTest {
   public void testShouldHandleCreateComment() {
 
     // Arrange
-    String roomId = "52f08e8314aba247c50faacef600254c";
-    String creatorId = "52f08e8314aba247c50faacef600254c";
+    UUID roomId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
+    UUID creatorId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
     Comment newComment = new Comment();
     newComment.setCreatorId(creatorId);
     newComment.setRoomId(roomId);
@@ -97,15 +98,16 @@ public class CommentCommandHandlerTest {
     //Assert
     verify(commentService, times(1)).create(commentCaptor.capture());
     verify(messagingTemplate, times(1)).convertAndSend(keyCaptor.capture(), topicCaptor.capture(), messageCaptor.capture());
-    assertThat(topicCaptor.getValue()).isEqualTo(roomId + ".comment.stream");
+    assertThat(topicCaptor.getValue()).isEqualTo(
+        roomId.toString().replace("-", "") + ".comment.stream");
   }
 
   @Test
   public void testShouldHandleCreateCommentForNonDirectSend() {
 
     // Arrange
-    String roomId = "52f08e8314aba247c50faacef600254c";
-    String creatorId = "52f08e8314aba247c50faacef600254c";
+    UUID roomId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
+    UUID creatorId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
     Comment newComment = new Comment();
     newComment.setCreatorId(creatorId);
     newComment.setRoomId(roomId);
@@ -135,13 +137,14 @@ public class CommentCommandHandlerTest {
     //Assert
     verify(commentService, times(1)).create(commentCaptor.capture());
     verify(messagingTemplate, times(1)).convertAndSend(keyCaptor.capture(), topicCaptor.capture(), messageCaptor.capture());
-    assertThat(topicCaptor.getValue()).isEqualTo(roomId + ".comment.moderator.stream");
+    assertThat(topicCaptor.getValue()).isEqualTo(
+        roomId.toString().replace("-", "") + ".comment.moderator.stream");
   }
 
   @Test
   public void testShouldHandleDeleteComment() {
-    String id = "52f08e8314aba247c50faacef60025ff";
-    String roomId = "52f08e8314aba247c50faacef600254c";
+    UUID id = UUID.fromString("52f08e83-14ab-a247-c50f-aacef60025ff");
+    UUID roomId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
     Comment c = new Comment();
     c.setId(id);
     c.setRoomId(roomId);
@@ -171,7 +174,8 @@ public class CommentCommandHandlerTest {
 
     List<String> capturedTopics = topicCaptor.getAllValues();
     List<String> capturedKeys = keyCaptor.getAllValues();
-    assertThat(capturedTopics.get(0)).isEqualTo(roomId + ".comment.stream");
+    assertThat(capturedTopics.get(0)).isEqualTo(
+        roomId.toString().replace("-", "") + ".comment.stream");
     assertThat(capturedKeys.get(1)).isEqualTo(RabbitConfig.COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME);
     List<CommentDeleted> capturedEvents = eventCaptor.getAllValues();
     assertThat(capturedEvents.get(0)).isEqualTo(expectedEvent);
@@ -180,8 +184,8 @@ public class CommentCommandHandlerTest {
 
   @Test
   public void testShouldHandleHighlightComment() {
-    String id = "52f08e8314aba247c50faacef60025ff";
-    String roomId = "52f08e8314aba247c50faacef600254c";
+    UUID id = UUID.fromString("52f08e83-14ab-a247-c50f-aacef60025ff");
+    UUID roomId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
     Comment c = new Comment();
     c.setId(id);
     c.setRoomId(roomId);
@@ -209,15 +213,16 @@ public class CommentCommandHandlerTest {
         eventCaptor.capture()
     );
 
-    assertThat(topicCaptor.getValue()).isEqualTo(roomId + ".comment.stream");
+    assertThat(topicCaptor.getValue()).isEqualTo(
+        roomId.toString().replace("-", "") + ".comment.stream");
     assertThat(eventCaptor.getValue()).isEqualTo(expectedEvent);
   }
 
   @Test
   public void handleDeleteCommentsByRoom() {
-    String roomId = "52f08e8314aba247c50faacef600254c";
-    String firstCommentId = "52f08e8314aba247c50faacef60025ff";
-    String secondCommentId = "52f08e8314aba247c50faacef60025fe";
+    UUID roomId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
+    UUID firstCommentId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef60025ff");
+    UUID secondCommentId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef60025fe");
     DeleteCommentsByRoomPayload payload = new DeleteCommentsByRoomPayload(roomId);
     DeleteCommentsByRoom command = new DeleteCommentsByRoom(payload);
     List<Comment> commentList = new ArrayList<>();
@@ -255,8 +260,10 @@ public class CommentCommandHandlerTest {
     );
 
     List<String> capturedTopics = topicCaptor.getAllValues();
-    assertThat(capturedTopics.get(0)).isEqualTo(roomId + ".comment.stream");
-    assertThat(capturedTopics.get(2)).isEqualTo(roomId + ".comment.stream");
+    assertThat(capturedTopics.get(0)).isEqualTo(
+        roomId.toString().replace("-", "") + ".comment.stream");
+    assertThat(capturedTopics.get(2)).isEqualTo(
+        roomId.toString().replace("-", "") + ".comment.stream");
     List<CommentDeleted> capturedEvents = eventCaptor.getAllValues();
     assertThat(capturedEvents.get(0)).isEqualTo(e1);
     assertThat(capturedEvents.get(2)).isEqualTo(e2);

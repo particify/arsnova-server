@@ -2,19 +2,20 @@ package net.particify.arsnova.comments.model.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
+import java.util.UUID;
 
 import net.particify.arsnova.comments.model.WebSocketMessage;
 import net.particify.arsnova.comments.model.WebSocketPayload;
 
 public class WebSocketEvent<P extends WebSocketPayload> extends WebSocketMessage<P> {
   // roomId of the entity the event is based on
-  protected String roomId;
+  protected UUID roomId;
 
   public WebSocketEvent(String type) {
     super(type);
   }
 
-  public WebSocketEvent(String type, String roomId) {
+  public WebSocketEvent(String type, UUID roomId) {
     super(type);
     this.roomId = roomId;
   }
@@ -30,12 +31,12 @@ public class WebSocketEvent<P extends WebSocketPayload> extends WebSocketMessage
   }
 
   @JsonProperty("roomId")
-  public String getRoomId() {
+  public UUID getRoomId() {
     return roomId;
   }
 
   @JsonProperty("roomId")
-  public void setRoomId(String roomId) {
+  public void setRoomId(UUID roomId) {
     this.roomId = roomId;
   }
 

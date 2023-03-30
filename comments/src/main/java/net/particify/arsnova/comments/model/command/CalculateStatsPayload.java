@@ -2,24 +2,25 @@ package net.particify.arsnova.comments.model.command;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import net.particify.arsnova.comments.model.WebSocketPayload;
 
 public class CalculateStatsPayload implements WebSocketPayload {
-  private List<String> roomIds;
+  private List<UUID> roomIds;
 
   public CalculateStatsPayload() {
   }
 
-  public CalculateStatsPayload(final List<String> roomIds) {
+  public CalculateStatsPayload(final List<UUID> roomIds) {
     this.roomIds = roomIds;
   }
 
-  public List<String> getRoomIds() {
+  public List<UUID> getRoomIds() {
     return roomIds;
   }
 
-  public void setRoomIds(final List<String> roomIds) {
+  public void setRoomIds(final List<UUID> roomIds) {
     this.roomIds = roomIds;
   }
 

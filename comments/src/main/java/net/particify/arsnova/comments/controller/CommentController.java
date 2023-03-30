@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ import net.particify.arsnova.comments.model.command.PatchComment;
 import net.particify.arsnova.comments.model.command.PatchCommentPayload;
 import net.particify.arsnova.comments.model.command.UpdateComment;
 import net.particify.arsnova.comments.model.command.UpdateCommentPayload;
+import net.particify.arsnova.comments.model.serialization.UuidHelper;
 import net.particify.arsnova.comments.service.CommentFindQueryService;
 import net.particify.arsnova.comments.service.CommentService;
 import net.particify.arsnova.comments.service.FindQuery;
@@ -70,7 +72,7 @@ public class CommentController extends AbstractEntityController {
   }
 
   @GetMapping(GET_MAPPING)
-  public Comment get(@PathVariable String id) {
+  public Comment get(@PathVariable UUID id) {
     return service.getWithScore(id);
   }
 
@@ -89,7 +91,7 @@ public class CommentController extends AbstractEntityController {
     final String uri = UriComponentsBuilder.fromPath(REQUEST_MAPPING).path(GET_MAPPING)
         .buildAndExpand(c.getRoomId(), c.getId()).toUriString();
     httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
-    httpServletResponse.setHeader(ENTITY_ID_HEADER, c.getId());
+    httpServletResponse.setHeader(ENTITY_ID_HEADER, UuidHelper.uuidToString(c.getId()));
 
     return c;
   }
@@ -101,7 +103,7 @@ public class CommentController extends AbstractEntityController {
 
     Comment c = this.commandHandler.handle(command);
 
-    httpServletResponse.setHeader(ENTITY_ID_HEADER, c.getId());
+    httpServletResponse.setHeader(ENTITY_ID_HEADER, UuidHelper.uuidToString(c.getId()));
 
     return c;
   }
@@ -110,7 +112,7 @@ public class CommentController extends AbstractEntityController {
   public List<Comment> find(@RequestBody final FindQuery<Comment> findQuery) {
     logger.debug("Resolving find query: {}", findQuery);
 
-    Set<String> ids = findQueryService.resolveQuery(findQuery);
+    Set<UUID> ids = findQueryService.resolveQuery(findQuery);
 
     logger.debug("Resolved find query to IDs: {}", ids);
 
@@ -121,7 +123,7 @@ public class CommentController extends AbstractEntityController {
   public int findAndCount(@RequestBody final FindQuery<Comment> findQuery) {
     logger.debug("Resolving find query: {}", findQuery);
 
-    Set<String> ids = findQueryService.resolveQuery(findQuery);
+    Set<UUID> ids = findQueryService.resolveQuery(findQuery);
 
     logger.debug("Resolved find query to IDs: {}", ids);
 
@@ -129,20 +131,20 @@ public class CommentController extends AbstractEntityController {
   }
 
   @PatchMapping(PATCH_MAPPING)
-  public Comment patch(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
+  public Comment patch(@PathVariable final UUID id, @RequestBody final Map<String, Object> changes,
            final HttpServletResponse httpServletResponse) throws IOException {
     PatchCommentPayload p = new PatchCommentPayload(id, changes);
     PatchComment command = new PatchComment(p);
 
     Comment c = this.commandHandler.handle(command);
 
-    httpServletResponse.setHeader(ENTITY_ID_HEADER, c.getId());
+    httpServletResponse.setHeader(ENTITY_ID_HEADER, UuidHelper.uuidToString(c.getId()));
 
     return c;
   }
 
   @DeleteMapping(DELETE_MAPPING)
-  public void delete(@PathVariable String id) {
+  public void delete(@PathVariable UUID id) {
     DeleteCommentPayload p = new DeleteCommentPayload(id);
     DeleteComment command = new DeleteComment(p);
 
@@ -151,9 +153,9 @@ public class CommentController extends AbstractEntityController {
 
   @PostMapping(BULK_DELETE_MAPPING)
   public void bulkDelete(
-      @RequestBody final String[] ids
+      @RequestBody final UUID[] ids
   ) {
-    for (String id : ids) {
+    for (UUID id : ids) {
       DeleteCommentPayload p = new DeleteCommentPayload(id);
       DeleteComment command = new DeleteComment(p);
 
@@ -163,7 +165,7 @@ public class CommentController extends AbstractEntityController {
 
   @DeleteMapping(DELETE_BY_ROOM_MAPPING)
   public void deleteByRoom(
-      @RequestParam final String roomId
+      @RequestParam final UUID roomId
   ) {
     DeleteCommentsByRoomPayload p = new DeleteCommentsByRoomPayload(roomId);
     DeleteCommentsByRoom command = new DeleteCommentsByRoom(p);
@@ -173,7 +175,7 @@ public class CommentController extends AbstractEntityController {
 
   @PostMapping(HIGHLIGHT_COMMAND_MAPPING)
   public void highlight(
-      @PathVariable final String id
+      @PathVariable final UUID id
   ) {
     HighlightCommentPayload p = new HighlightCommentPayload(id);
     p.setLights(true);
@@ -184,7 +186,7 @@ public class CommentController extends AbstractEntityController {
 
   @PostMapping(LOWLIGHT_COMMAND_MAPPING)
   public void lowlight(
-      @PathVariable final String id
+      @PathVariable final UUID id
   ) {
     HighlightCommentPayload p = new HighlightCommentPayload(id);
     p.setLights(false);

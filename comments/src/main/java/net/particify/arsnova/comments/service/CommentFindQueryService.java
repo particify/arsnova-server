@@ -3,6 +3,7 @@ package net.particify.arsnova.comments.service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,8 @@ public class CommentFindQueryService {
     this.commentService = commentService;
   }
 
-  public Set<String> resolveQuery(final FindQuery<Comment> findQuery) {
-    Set<String> commentIds = new HashSet<>();
+  public Set<UUID> resolveQuery(final FindQuery<Comment> findQuery) {
+    Set<UUID> commentIds = new HashSet<>();
     if (findQuery.getProperties().getRoomId() != null) {
       List<Comment> contentList = commentService.getByRoomIdAndArchiveIdNull(findQuery.getProperties().getRoomId());
       for (Comment c : contentList) {

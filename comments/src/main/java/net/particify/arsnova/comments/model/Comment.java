@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Transient;
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 public class Comment {
@@ -14,11 +15,11 @@ public class Comment {
   public static final int MAX_ANSWER_LENGTH = 500;
 
   @Id
-  private String id;
-  private String roomId;
+  private UUID id;
+  private UUID roomId;
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-  private String creatorId;
-  private String archiveId;
+  private UUID creatorId;
+  private UUID archiveId;
   @Column(columnDefinition = "TEXT")
   private String body;
   private Date timestamp;
@@ -52,35 +53,35 @@ public class Comment {
     this.answer = comment.answer;
   }
 
-  public String getId() {
+  public UUID getId() {
     return id;
   }
 
-  public void setId(String id) {
+  public void setId(UUID id) {
     this.id = id;
   }
 
-  public String getRoomId() {
+  public UUID getRoomId() {
     return roomId;
   }
 
-  public void setRoomId(String roomId) {
+  public void setRoomId(UUID roomId) {
     this.roomId = roomId;
   }
 
-  public String getCreatorId() {
+  public UUID getCreatorId() {
     return creatorId;
   }
 
-  public void setCreatorId(String creatorId) {
+  public void setCreatorId(UUID creatorId) {
     this.creatorId = creatorId;
   }
 
-  public String getArchiveId() {
+  public UUID getArchiveId() {
     return archiveId;
   }
 
-  public void setArchiveId(final String archiveId) {
+  public void setArchiveId(final UUID archiveId) {
     this.archiveId = archiveId;
   }
 

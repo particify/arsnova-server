@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +40,7 @@ public class SettingsCommandHandlerTest {
 
   @Test
   public void testCreateSettings() {
-    String roomId = "52f08e8314aba247c50faacef600254c";
+    UUID roomId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
     CreateSettingsPayload payload = new CreateSettingsPayload();
     payload.setRoomId(roomId);
     payload.setDirectSend(true);
@@ -59,7 +60,7 @@ public class SettingsCommandHandlerTest {
 
   @Test
   public void testUpdateSettings() {
-    String roomId = "52f08e8314aba247c50faacef600254c";
+    UUID roomId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
     UpdateSettingsPayload payload = new UpdateSettingsPayload();
     payload.setRoomId(roomId);
     payload.setDirectSend(true);

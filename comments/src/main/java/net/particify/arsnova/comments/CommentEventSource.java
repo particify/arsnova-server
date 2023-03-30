@@ -2,6 +2,7 @@ package net.particify.arsnova.comments;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import net.particify.arsnova.comments.model.Comment;
 import net.particify.arsnova.comments.model.event.CommentPatched;
 import net.particify.arsnova.comments.model.event.CommentPatchedPayload;
+import net.particify.arsnova.comments.model.serialization.UuidHelper;
 import net.particify.arsnova.comments.service.CommentService;
 import net.particify.arsnova.comments.service.VoteService;
 
@@ -33,7 +35,7 @@ public class CommentEventSource {
     this.voteService = voteService;
   }
 
-  public void scoreChanged(String id) {
+  public void scoreChanged(UUID id) {
     Comment c = service.getWithScore(id);
     int score = c.getScore();
 
@@ -47,7 +49,7 @@ public class CommentEventSource {
 
     messagingTemplate.convertAndSend(
         "amq.topic",
-        event.getRoomId() + ".comment.stream",
+        UuidHelper.uuidToString(event.getRoomId()) + ".comment.stream",
         event
     );
   }

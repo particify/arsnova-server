@@ -3,18 +3,21 @@ package net.particify.arsnova.comments.security;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
+
+import net.particify.arsnova.comments.model.serialization.UuidHelper;
 
 public class AuthenticatedUser implements Serializable {
   @Serial
   private static final long serialVersionUID = 1L;
 
-  private String id;
+  private UUID id;
   private Collection<? extends GrantedAuthority> authorities;
   private String token;
 
   public AuthenticatedUser(
-      final String userId,
+      final UUID userId,
       final Collection<? extends GrantedAuthority> authorities,
       final String token
   ) {
@@ -23,11 +26,19 @@ public class AuthenticatedUser implements Serializable {
     this.token = token;
   }
 
+  public AuthenticatedUser(
+    final String userId,
+    final Collection<? extends GrantedAuthority> authorities,
+    final String token
+  ) {
+    this(UuidHelper.stringToUuid(userId), authorities, token);
+  }
+
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return authorities;
   }
 
-  public String getId() {
+  public UUID getId() {
     return id;
   }
 

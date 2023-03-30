@@ -3,6 +3,7 @@ package net.particify.arsnova.comments.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ import net.particify.arsnova.comments.service.persistence.VoteRepository;
 
 @Service
 public class VoteService {
-  private static final String NIL_UUID = "00000000-0000-0000-0000-000000000000";
+  private static final UUID NIL_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
   final VoteRepository repository;
 
@@ -48,7 +49,7 @@ public class VoteService {
   }
 
   @Transactional(isolation = Isolation.SERIALIZABLE)
-  public Vote delete(String commentId, String userId) {
+  public Vote delete(UUID commentId, UUID userId) {
     Vote v = repository.findById(new VotePK(userId, commentId)).orElse(null);
 
     if (v != null) {
@@ -58,7 +59,7 @@ public class VoteService {
     return v;
   }
 
-  public List<Vote> getForCommentsAndUser(List<String> commentIds, String userId) {
+  public List<Vote> getForCommentsAndUser(List<UUID> commentIds, UUID userId) {
     List<Vote> voteList = new ArrayList<>();
 
     commentIds.forEach((id) -> {
@@ -71,22 +72,22 @@ public class VoteService {
     return voteList;
   }
 
-  public Vote getForCommentAndUser(String commentId, String userId) {
+  public Vote getForCommentAndUser(UUID commentId, UUID userId) {
     return repository.findById(new VotePK(commentId, userId)).orElse(null);
   }
 
-  public int getSumByCommentId(final String commentId) {
+  public int getSumByCommentId(final UUID commentId) {
     return repository.sumByCommentId(commentId);
   }
 
-  public Map<String, Integer> getSumsByCommentIds(final List<String> commentIds) {
+  public Map<UUID, Integer> getSumsByCommentIds(final List<UUID> commentIds) {
     return repository.sumByCommentIdFindByCommentIdAndArchiveIdNull(commentIds).stream().collect(Collectors.toMap(
         voteSum -> voteSum.getCommentId(),
         voteSum -> voteSum.getSum()
     ));
   }
 
-  public Map<String, Integer> getSumByCommentForRoom(final String roomId) {
+  public Map<UUID, Integer> getSumByCommentForRoom(final UUID roomId) {
     return repository.sumByCommentIdFindByRoomIdAndArchiveIdNull(roomId).stream().collect(Collectors.toMap(
         voteSum -> voteSum.getCommentId(),
         voteSum -> voteSum.getSum()
@@ -94,7 +95,7 @@ public class VoteService {
   }
 
   @Transactional(isolation = Isolation.SERIALIZABLE)
-  public Vote resetVote(String commentId, String userId) {
+  public Vote resetVote(UUID commentId, UUID userId) {
     Vote v = repository.findById(new VotePK(userId, commentId)).orElse(null);
 
     if (v != null) {
@@ -104,9 +105,9 @@ public class VoteService {
     return v;
   }
 
-  public void duplicateVotes(final String originalRoomId, Map<String, Comment> commentMapping) {
-    final Map<String, Integer> voteSums = getSumByCommentForRoom(originalRoomId);
-    for (final Map.Entry<String, Integer> voteSum : voteSums.entrySet()) {
+  public void duplicateVotes(final UUID originalRoomId, Map<UUID, Comment> commentMapping) {
+    final Map<UUID, Integer> voteSums = getSumByCommentForRoom(originalRoomId);
+    for (final Map.Entry<UUID, Integer> voteSum : voteSums.entrySet()) {
       if (!commentMapping.containsKey(voteSum.getKey())) {
         continue;
       }

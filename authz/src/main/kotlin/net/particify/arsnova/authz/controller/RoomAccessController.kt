@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono
 import java.time.Instant
 import java.util.Date
 import java.util.Optional
+import java.util.UUID
 
 @Controller
 class RoomAccessController(
@@ -30,7 +31,7 @@ class RoomAccessController(
   @GetMapping(path = ["/roomaccess/by-user/{userId}"])
   @ResponseBody
   fun getRoomAccessByUser(
-    @PathVariable userId: String
+    @PathVariable userId: UUID
   ): Flux<RoomAccess> {
     return Flux.fromIterable(handler.getByUserId(userId))
   }
@@ -38,7 +39,7 @@ class RoomAccessController(
   @GetMapping(path = ["/roomaccess/owner/by-room"])
   @ResponseBody
   fun getOwnerByRoomIds(
-    @RequestParam ids: List<String>
+    @RequestParam ids: List<UUID>
   ): Flux<Optional<RoomAccess>> {
     return Flux.fromIterable(
       ids.map { id ->
@@ -50,7 +51,7 @@ class RoomAccessController(
   @GetMapping(path = ["/roomaccess/by-room/{roomId}"])
   @ResponseBody
   fun getByRoomId(
-    @PathVariable roomId: String,
+    @PathVariable roomId: UUID,
     @RequestParam role: String?
   ): Flux<RoomAccess> {
     val roomAccess = handler.getByRoomIdAndRole(roomId, role)
@@ -60,8 +61,8 @@ class RoomAccessController(
   @GetMapping(path = ["/roomaccess/{roomId}/{userId}"])
   @ResponseBody
   fun getRoomAccess(
-    @PathVariable roomId: String,
-    @PathVariable userId: String
+    @PathVariable roomId: UUID,
+    @PathVariable userId: UUID
   ): Mono<RoomAccess> {
     return Mono.just(handler.getByRoomIdAndUserId(roomId, userId))
       .flatMap { optional ->
@@ -82,7 +83,7 @@ class RoomAccessController(
   @PostMapping(path = ["/roomaccess/sync/{roomId}/{revNumber}"])
   @ResponseBody
   fun postRequestSync(
-    @PathVariable roomId: String,
+    @PathVariable roomId: UUID,
     @PathVariable revNumber: Int
   ): Mono<RoomAccessSyncTracker> {
     return Mono.just(handler.handleRequestRoomAccessSyncCommand(RequestRoomAccessSyncCommand(roomId, revNumber)))
@@ -104,8 +105,8 @@ class RoomAccessController(
   @DeleteMapping(path = ["/roomaccess/{roomId}/{userId}"])
   @ResponseBody
   fun delete(
-    @PathVariable roomId: String,
-    @PathVariable userId: String
+    @PathVariable roomId: UUID,
+    @PathVariable userId: UUID
   ): Mono<Unit> {
     return Mono.just(handler.delete(roomId, userId))
   }
@@ -113,7 +114,7 @@ class RoomAccessController(
   @DeleteMapping(path = ["/roomaccess/{roomId}"])
   @ResponseBody
   fun deleteByRoomId(
-    @PathVariable roomId: String
+    @PathVariable roomId: UUID
   ): Flux<RoomAccess> {
     return Flux.fromIterable(handler.deleteByRoomId(roomId))
   }

@@ -1,7 +1,9 @@
 package net.particify.arsnova.authz.model.command
 
+import java.util.UUID
+
 class DeleteRoomAccessCommand(
   val rev: String,
-  val roomId: String,
-  val userId: String
+  val roomId: UUID,
+  val userId: UUID
 )

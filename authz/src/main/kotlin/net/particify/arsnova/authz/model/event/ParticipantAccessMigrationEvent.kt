@@ -1,6 +1,8 @@
 package net.particify.arsnova.authz.model.event
 
+import java.util.UUID
+
 data class ParticipantAccessMigrationEvent(
-  val userId: String = "",
-  val roomIds: List<String> = emptyList()
+  val userId: UUID,
+  val roomIds: List<UUID> = emptyList()
 )

@@ -7,6 +7,7 @@ plugins {
   id("org.jlleitschuh.gradle.ktlint")
   id("org.springframework.boot")
   kotlin("jvm")
+  kotlin("plugin.jpa")
   kotlin("plugin.spring")
 }
 

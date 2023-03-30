@@ -3,16 +3,17 @@ package net.particify.arsnova.comments.service.persistence;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.springframework.data.repository.CrudRepository;
 
 import net.particify.arsnova.comments.model.Comment;
 
-public interface CommentRepository extends CrudRepository<Comment, String> {
-  List<Comment> findByRoomIdAndArchiveIdNull(String roomId);
-  List<Comment> findByIdInAndRoomIdAndArchiveIdNull(Set<String> ids, String roomId);
-  long countByArchiveId(String archiveId);
+public interface CommentRepository extends CrudRepository<Comment, UUID> {
+  List<Comment> findByRoomIdAndArchiveIdNull(UUID roomId);
+  List<Comment> findByIdInAndRoomIdAndArchiveIdNull(Set<String> ids, UUID roomId);
+  long countByArchiveId(UUID archiveId);
   @Transactional
-  List<Comment> deleteByRoomId(String roomId);
-  long countByRoomIdAndAckAndArchiveIdNull(String roomId, boolean ack);
-  List<Comment> findByArchiveId(String archiveId);
+  List<Comment> deleteByRoomId(UUID roomId);
+  long countByRoomIdAndAckAndArchiveIdNull(UUID roomId, boolean ack);
+  List<Comment> findByArchiveId(UUID archiveId);
 }

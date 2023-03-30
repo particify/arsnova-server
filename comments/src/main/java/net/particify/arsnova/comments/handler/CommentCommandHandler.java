@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -38,6 +39,7 @@ import net.particify.arsnova.comments.model.event.CommentPatched;
 import net.particify.arsnova.comments.model.event.CommentPatchedPayload;
 import net.particify.arsnova.comments.model.event.CommentUpdated;
 import net.particify.arsnova.comments.model.event.CommentUpdatedPayload;
+import net.particify.arsnova.comments.model.serialization.UuidHelper;
 import net.particify.arsnova.comments.security.PermissionEvaluator;
 import net.particify.arsnova.comments.service.CommentService;
 import net.particify.arsnova.comments.service.SettingsService;
@@ -77,14 +79,14 @@ public class CommentCommandHandler {
 
       messagingTemplate.convertAndSend(
           "amq.topic",
-          comment.getRoomId() + ".comment.stream",
+          UuidHelper.uuidToString(comment.getRoomId()) + ".comment.stream",
           event
       );
     } else {
       logger.debug("Sending event to moderated stream: {}", event);
       messagingTemplate.convertAndSend(
           "amq.topic",
-          comment.getRoomId() + ".comment.moderator.stream",
+          UuidHelper.uuidToString(comment.getRoomId()) + ".comment.moderator.stream",
           event
       );
     }
@@ -172,7 +174,7 @@ public class CommentCommandHandler {
 
           messagingTemplate.convertAndSend(
               "amq.topic",
-              c.getRoomId() + ".comment.stream",
+              UuidHelper.uuidToString(c.getRoomId()) + ".comment.stream",
               quoteOnQuoteNew
           );
         } else if (wasAck && !patched.isAck()) {
@@ -184,7 +186,7 @@ public class CommentCommandHandler {
 
           messagingTemplate.convertAndSend(
               "amq.topic",
-              c.getRoomId() + ".comment.moderator.stream",
+              UuidHelper.uuidToString(c.getRoomId()) + ".comment.moderator.stream",
               quoteOnQuoteNew
           );
         }
@@ -193,7 +195,7 @@ public class CommentCommandHandler {
 
         messagingTemplate.convertAndSend(
             "amq.topic",
-            c.getRoomId() + ".comment.stream",
+            UuidHelper.uuidToString(c.getRoomId()) + ".comment.stream",
             event
         );
 
@@ -238,7 +240,7 @@ public class CommentCommandHandler {
 
       messagingTemplate.convertAndSend(
           "amq.topic",
-          old.getRoomId() + ".comment.stream",
+          UuidHelper.uuidToString(old.getRoomId()) + ".comment.stream",
           quoteOnQuoteNew
       );
     } else if (old.isAck() && !updated.isAck()) {
@@ -250,7 +252,7 @@ public class CommentCommandHandler {
 
       messagingTemplate.convertAndSend(
           "amq.topic",
-          old.getRoomId() + ".comment.moderator.stream",
+          UuidHelper.uuidToString(old.getRoomId()) + ".comment.moderator.stream",
           quoteOnQuoteNew
       );
     }
@@ -259,7 +261,7 @@ public class CommentCommandHandler {
 
     messagingTemplate.convertAndSend(
         "amq.topic",
-        old.getRoomId() + ".comment.stream",
+        UuidHelper.uuidToString(old.getRoomId()) + ".comment.stream",
         event
     );
 
@@ -269,7 +271,7 @@ public class CommentCommandHandler {
   public void handle(DeleteComment command) {
     logger.debug("Got new command: {}", command);
 
-    String id = command.getPayload().getId();
+    UUID id = command.getPayload().getId();
     Comment c = service.get(id);
 
     if (!permissionEvaluator.checkCommentDeletePermission(c)) {
@@ -287,7 +289,7 @@ public class CommentCommandHandler {
 
       messagingTemplate.convertAndSend(
           "amq.topic",
-          c.getRoomId() + ".comment.stream",
+        UuidHelper.uuidToString(c.getRoomId()) + ".comment.stream",
           event
       );
 
@@ -302,7 +304,7 @@ public class CommentCommandHandler {
   public void handle(HighlightComment command) {
     logger.debug("Got new command: {}", command);
 
-    String id = command.getPayload().getId();
+    UUID id = command.getPayload().getId();
     Comment c = service.get(id);
 
     if (!permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(c.getRoomId())) {
@@ -317,7 +319,7 @@ public class CommentCommandHandler {
 
       messagingTemplate.convertAndSend(
           "amq.topic",
-          c.getRoomId() + ".comment.stream",
+          UuidHelper.uuidToString(c.getRoomId()) + ".comment.stream",
           event
       );
     }
@@ -326,7 +328,7 @@ public class CommentCommandHandler {
   public void handle(DeleteCommentsByRoom command) {
     logger.debug("Got new command: {}", command);
 
-    String roomId = command.getPayload().getRoomId();
+    UUID roomId = command.getPayload().getRoomId();
 
     if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(roomId)) {
       throw new ForbiddenException();
@@ -342,7 +344,7 @@ public class CommentCommandHandler {
 
       messagingTemplate.convertAndSend(
           "amq.topic",
-          c.getRoomId() + ".comment.stream",
+          UuidHelper.uuidToString(c.getRoomId()) + ".comment.stream",
           event
       );
 
@@ -357,10 +359,10 @@ public class CommentCommandHandler {
   public List<CommentStats> handle(CalculateStats command) {
     logger.debug("Got new command: {}", command);
 
-    final List<String> roomIds = command.getPayload().getRoomIds();
+    final List<UUID> roomIds = command.getPayload().getRoomIds();
     final List<CommentStats> stats = new ArrayList<>();
 
-    for (final String roomId : roomIds) {
+    for (final UUID roomId : roomIds) {
       CommentStats roomStatistics = new CommentStats();
       int ackCommentcount = (int) service.countByRoomIdAndAck(roomId, true);
       // ToDo: Implement view to show unacknowledge counter to owner / moderators

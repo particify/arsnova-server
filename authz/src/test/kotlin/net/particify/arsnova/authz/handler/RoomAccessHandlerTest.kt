@@ -20,6 +20,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import java.util.Optional
+import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class RoomAccessHandlerTest {
@@ -34,13 +35,13 @@ class RoomAccessHandlerTest {
 
   private lateinit var roomAccessHandler: RoomAccessHandler
 
-  val SOME_ROOM_ID = "23e7c082c533e49963b96d7a0500105f"
+  val SOME_ROOM_ID = UUID.fromString("23e7c082-c533-e499-63b9-6d7a0500105f")
   val SOME_REV = "1-93b09a4699769e6abd3bf5b2ff341e5d"
   val SOME_NEWER_REV = "2-93b09a4699769e6abd3bf5b2ff341e5e"
   val SOME_EVEN_NEWER_REV = "3-93b09a4699769e6abd3bf5b2ff341e5f"
-  val SOME_USER_ID = "23e7c082c533e49963b96d7a05000d0e"
-  val SOME_OTHER_USER_ID = "aaaac082c533e49963b96d7a05000d0f"
-  val SOME_MODERATOR_ID = "bbbbc082c533e49963b96d7a05000d0f"
+  val SOME_USER_ID = UUID.fromString("23e7c082-c533-e499-63b9-6d7a05000d0e")
+  val SOME_OTHER_USER_ID = UUID.fromString("aaaac082-c533-e499-63b9-6d7a05000d0f")
+  val SOME_MODERATOR_ID = UUID.fromString("bbbbc082-c533-e499-63b9-6d7a05000d0f")
   val CREATOR_STRING = "CREATOR"
   val EXECUTIVE_MODERATOR_STRING = "EXECUTIVE_MODERATOR"
 

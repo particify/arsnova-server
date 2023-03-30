@@ -3,11 +3,12 @@ package net.particify.arsnova.comments.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 public class Settings {
   @Id
-  private String roomId;
+  private UUID roomId;
   private boolean directSend = true;
   private boolean fileUploadEnabled;
   private boolean readonly;
@@ -24,11 +25,11 @@ public class Settings {
     this.directSend = directSend;
   }
 
-  public String getRoomId() {
+  public UUID getRoomId() {
     return roomId;
   }
 
-  public void setRoomId(String roomId) {
+  public void setRoomId(UUID roomId) {
     this.roomId = roomId;
   }
 

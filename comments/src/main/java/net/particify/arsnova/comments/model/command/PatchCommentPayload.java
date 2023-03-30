@@ -3,18 +3,19 @@ package net.particify.arsnova.comments.model.command;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import net.particify.arsnova.comments.model.WebSocketPayload;
 
 public class PatchCommentPayload implements WebSocketPayload {
-  private String id;
+  private UUID id;
   private Map<String, Object> changes;
 
   public PatchCommentPayload() {
   }
 
   public PatchCommentPayload(
-      final String id,
+      final UUID id,
       final Map<String, Object> changes
   ) {
     this.id = id;
@@ -23,12 +24,12 @@ public class PatchCommentPayload implements WebSocketPayload {
 
 
   @JsonProperty("id")
-  public String getId() {
+  public UUID getId() {
     return id;
   }
 
   @JsonProperty("id")
-  public void setId(String id) {
+  public void setId(UUID id) {
     this.id = id;
   }
 

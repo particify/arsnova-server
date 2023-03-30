@@ -2,27 +2,28 @@ package net.particify.arsnova.comments.model.command;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
+import java.util.UUID;
 
 import net.particify.arsnova.comments.model.WebSocketPayload;
 
 public class HighlightCommentPayload implements WebSocketPayload {
-  private String id;
+  private UUID id;
   private boolean lights;
 
   public HighlightCommentPayload() {
   }
 
-  public HighlightCommentPayload(String id) {
+  public HighlightCommentPayload(UUID id) {
     this.id = id;
   }
 
   @JsonProperty("id")
-  public String getId() {
+  public UUID getId() {
     return id;
   }
 
   @JsonProperty("id")
-  public void setId(String id) {
+  public void setId(UUID id) {
     this.id = id;
   }
 

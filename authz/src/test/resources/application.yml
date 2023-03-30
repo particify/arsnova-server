@@ -15,5 +15,7 @@ spring:
     password: arsnovaauth
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
     properties.hibernate.dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false

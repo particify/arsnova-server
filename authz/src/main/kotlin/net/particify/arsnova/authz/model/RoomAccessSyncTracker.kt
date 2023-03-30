@@ -2,11 +2,12 @@ package net.particify.arsnova.authz.model
 
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
+import java.util.UUID
 
 @Entity
 class RoomAccessSyncTracker(
   @Id
-  var roomId: String = "",
+  var roomId: UUID,
   var rev: String = ""
 ) {
   override fun equals(other: Any?): Boolean {

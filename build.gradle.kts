@@ -10,6 +10,7 @@ plugins {
   id("org.jlleitschuh.gradle.ktlint") version "11.3.1" apply false
   id("org.springframework.boot") version "3.0.4" apply false
   kotlin("jvm") version "1.8.10" apply false
+  kotlin("plugin.jpa") version "1.8.10" apply false
   kotlin("plugin.spring") version "1.8.10" apply false
 }
 

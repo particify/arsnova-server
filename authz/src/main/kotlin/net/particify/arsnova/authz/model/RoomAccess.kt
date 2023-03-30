@@ -6,14 +6,15 @@ import jakarta.persistence.IdClass
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
 import java.util.Date
+import java.util.UUID
 
 @Entity
 @IdClass(RoomAccessPK::class)
 class RoomAccess(
   @Id
-  var roomId: String? = "",
+  var roomId: UUID,
   @Id
-  var userId: String? = "",
+  var userId: UUID,
   val rev: String = "",
   var role: String? = "",
   @Temporal(TemporalType.TIMESTAMP)
@@ -38,8 +39,8 @@ class RoomAccess(
   }
 
   override fun hashCode(): Int {
-    var result = roomId?.hashCode() ?: 0
-    result = 31 * result + (userId?.hashCode() ?: 0)
+    var result = roomId.hashCode()
+    result = 31 * result + userId.hashCode()
     result = 31 * result + rev.hashCode()
     result = 31 * result + (role?.hashCode() ?: 0)
     result = 31 * result + creationTimestamp.hashCode()

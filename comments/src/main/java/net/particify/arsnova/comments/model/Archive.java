@@ -5,31 +5,32 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Transient;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 public class Archive {
   @Id
-  private String id;
-  private String roomId;
+  private UUID id;
+  private UUID roomId;
   private String name;
   @Transient
   private Set<Comment> comments;
   @Transient
   private long count;
 
-  public String getId() {
+  public UUID getId() {
     return id;
   }
 
-  public void setId(final String id) {
+  public void setId(final UUID id) {
     this.id = id;
   }
 
-  public String getRoomId() {
+  public UUID getRoomId() {
     return roomId;
   }
 
-  public void setRoomId(final String roomId) {
+  public void setRoomId(final UUID roomId) {
     this.roomId = roomId;
   }
 

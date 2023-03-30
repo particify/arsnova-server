@@ -1,6 +1,7 @@
 package net.particify.arsnova.comments.listener;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -15,13 +16,13 @@ import net.particify.arsnova.comments.service.SettingsService;
 public class RoomDeletedListener {
   @JsonIgnoreProperties(ignoreUnknown = true)
   static class RoomDeletedEvent {
-    private String id;
+    private UUID id;
 
-    public String getId() {
+    public UUID getId() {
       return id;
     }
 
-    public void setId(final String id) {
+    public void setId(final UUID id) {
       this.id = id;
     }
 

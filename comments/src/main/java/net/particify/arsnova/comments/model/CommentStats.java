@@ -1,26 +1,27 @@
 package net.particify.arsnova.comments.model;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class CommentStats {
-  private String roomId;
+  private UUID roomId;
   private int ackCommentCount;
   private int unackCommentCount;
 
   public CommentStats() {
   }
 
-  public CommentStats(final String roomId, final int ackCommentCount, final int unackCommentCount) {
+  public CommentStats(final UUID roomId, final int ackCommentCount, final int unackCommentCount) {
     this.roomId = roomId;
     this.ackCommentCount = ackCommentCount;
     this.unackCommentCount = unackCommentCount;
   }
 
-  public String getRoomId() {
+  public UUID getRoomId() {
     return roomId;
   }
 
-  public void setRoomId(final String roomId) {
+  public void setRoomId(final UUID roomId) {
     this.roomId = roomId;
   }
 

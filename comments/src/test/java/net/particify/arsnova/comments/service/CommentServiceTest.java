@@ -7,9 +7,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,19 +38,19 @@ public class CommentServiceTest {
   VoteService voteService;
 
   @Mock
-  MappingJackson2MessageConverter converter;
+  ObjectMapper objectMapper;
 
   private CommentService service;
 
   @BeforeEach
   public void setup() {
-    service = new CommentService(repository, voteRepository, voteService, converter);
+    service = new CommentService(repository, voteRepository, voteService, objectMapper);
   }
 
   @Test
   public void testShouldCreateComment() {
-    String roomId = "52f08e8314aba247c50faacef600254c";
-    String creatorId = "52f08e8314aba247c50faacef600254c";
+    UUID roomId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
+    UUID creatorId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
 
     Comment c = new Comment();
     c.setRoomId(roomId);
@@ -62,9 +64,9 @@ public class CommentServiceTest {
 
   @Test
   public void testShouldGetCommentById() {
-    String id = "52f08e8314aba247c50faacef60025ff";
-    String roomId = "52f08e8314aba247c50faacef600254c";
-    String creatorId = "52f08e8314aba247c50faacef600254c";
+    UUID id = UUID.fromString("52f08e83-14ab-a247-c50f-aacef60025ff");
+    UUID roomId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
+    UUID creatorId = UUID.fromString("52f08e83-14ab-a247-c50f-aacef600254c");
     Comment c = new Comment();
     c.setId(id);
     c.setRoomId(roomId);
@@ -81,7 +83,7 @@ public class CommentServiceTest {
 
   @Test
   public void testShouldDelete() {
-    String id = "52f08e8314aba247c50faacef60025ff";
+    UUID id = UUID.fromString("52f08e83-14ab-a247-c50f-aacef60025ff");
 
     Vote v1 = new Vote();
     Vote v2 = new Vote();

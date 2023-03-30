@@ -40,7 +40,7 @@ public class ArchiveService {
     this.permissionEvaluator = permissionEvaluator;
   }
 
-  public Optional<Archive> get(final String id) {
+  public Optional<Archive> get(final UUID id) {
     final Optional<Archive> archive = repository.findById(id);
     if (archive.isPresent()) {
       if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(archive.get().getRoomId())) {
@@ -72,7 +72,7 @@ public class ArchiveService {
     }
   }
 
-  public List<Archive> getByRoomId(final String roomId) {
+  public List<Archive> getByRoomId(final UUID roomId) {
     if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(roomId)) {
       throw new ForbiddenException();
     }
@@ -104,7 +104,7 @@ public class ArchiveService {
       ).collect(Collectors.toSet());
     }
 
-    String newId = UUID.randomUUID().toString().replace("-", "");
+    UUID newId = UUID.randomUUID();
     final Archive archive = new Archive();
     archive.setId(newId);
     archive.setRoomId(cmd.getRoomId());
@@ -125,7 +125,7 @@ public class ArchiveService {
     return savedArchive;
   }
 
-  public void delete(final String id) {
+  public void delete(final UUID id) {
     final Optional<Archive> archive = repository.findById(id);
     if (archive.isPresent()) {
       if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(archive.get().getRoomId())) {

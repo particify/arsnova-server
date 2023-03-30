@@ -1,6 +1,7 @@
 package net.particify.arsnova.comments.listener;
 
 import java.util.Map;
+import java.util.UUID;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,29 +26,29 @@ public class RoomDuplicatedListener {
   @RabbitListener(queues = RabbitConfig.BACKEND_ROOM_DUPLICATED_QUEUE_NAME)
   @Transactional
   public void receiveMessage(final RoomDuplicatedMessage message) {
-    Map<String, Comment> commentMapping = commentService.duplicateComments(
+    Map<UUID, Comment> commentMapping = commentService.duplicateComments(
         message.originalRoomId,
         message.duplicatedRoomId);
     voteService.duplicateVotes(message.originalRoomId, commentMapping);
   }
 
   private static class RoomDuplicatedMessage {
-    private String originalRoomId;
-    private String duplicatedRoomId;
+    private UUID originalRoomId;
+    private UUID duplicatedRoomId;
 
-    public String getOriginalRoomId() {
+    public UUID getOriginalRoomId() {
       return originalRoomId;
     }
 
-    public void setOriginalRoomId(final String originalRoomId) {
+    public void setOriginalRoomId(final UUID originalRoomId) {
       this.originalRoomId = originalRoomId;
     }
 
-    public String getDuplicatedRoomId() {
+    public UUID getDuplicatedRoomId() {
       return duplicatedRoomId;
     }
 
-    public void setDuplicatedRoomId(final String duplicatedRoomId) {
+    public void setDuplicatedRoomId(final UUID duplicatedRoomId) {
       this.duplicatedRoomId = duplicatedRoomId;
     }
   }
