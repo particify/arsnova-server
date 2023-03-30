@@ -176,6 +176,7 @@ public class Content extends Entity implements RoomIdAware {
    * properties which are not used to store relations to other data.
    */
   public Content(final Content content) {
+    super(content);
     this.body = content.body;
     this.format = content.format;
     this.abstentionsAllowed = content.abstentionsAllowed;

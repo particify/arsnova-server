@@ -142,6 +142,7 @@ public class Room extends Entity implements RoomIdAware {
    * which are not used to store relations to other data.
    */
   public Room(final Room room) {
+    super(room);
     this.name = room.name;
     this.description = room.description;
     this.closed = room.closed;

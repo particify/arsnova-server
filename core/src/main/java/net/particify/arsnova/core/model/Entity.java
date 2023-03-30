@@ -46,6 +46,13 @@ public abstract class Entity {
   // Used by extensions
   private String tenantId;
 
+  public Entity() {
+  }
+
+  public Entity(final Entity entity) {
+    this.tenantId = entity.tenantId;
+  }
+
   @JsonView({View.Persistence.class, View.Public.class})
   public String getId() {
     return id;
