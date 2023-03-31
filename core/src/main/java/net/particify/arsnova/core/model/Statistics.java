@@ -18,6 +18,7 @@
 
 package net.particify.arsnova.core.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,12 @@ public class Statistics {
   @JsonView(View.Admin.class)
   public static class UserProfileStats {
     private int totalCount;
+
+    // Exclude if value is 0 because it can also mean N/A for deleted when multi
+    // tenancy is active
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int deleted;
+
     private int accountCount;
     private Map<String, Integer> countByAuthProvider = new HashMap<>();
     private int activationsPending;
@@ -78,7 +84,12 @@ public class Statistics {
   @JsonView(View.Admin.class)
   public static class RoomStats {
     private int totalCount;
+
+    // Exclude if value is 0 because it can also mean N/A for deleted when multi
+    // tenancy is active
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int deleted;
+
     private int closed;
 
     public int getTotalCount() {
@@ -109,7 +120,12 @@ public class Statistics {
   @JsonView(View.Admin.class)
   public static class ContentGroupStats {
     private int totalCount;
+
+    // Exclude if value is 0 because it can also mean N/A for deleted when multi
+    // tenancy is active
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int deleted;
+
     private int published;
     private int usingPublishingRange;
 
@@ -149,7 +165,12 @@ public class Statistics {
   @JsonView(View.Admin.class)
   public static class ContentStats {
     private int totalCount;
+
+    // Exclude if value is 0 because it can also mean N/A for deleted when multi
+    // tenancy is active
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int deleted;
+
     private Map<String, Integer> countByFormat = new HashMap<>();
 
     public int getTotalCount() {
@@ -180,7 +201,12 @@ public class Statistics {
   @JsonView(View.Admin.class)
   public static class AnswerStats {
     private int totalCount;
+
+    // Exclude if value is 0 because it can also mean N/A for deleted when multi
+    // tenancy is active
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int deleted;
+
     private Map<String, Integer> countByFormat = new HashMap<>();
 
     public int getTotalCount() {
@@ -211,7 +237,12 @@ public class Statistics {
   @JsonView(View.Admin.class)
   public static class AnnouncementStats {
     private int totalCount;
+
+    // Exclude if value is 0 because it can also mean N/A for deleted when multi
+    // tenancy is active
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int deleted;
+
 
     public int getTotalCount() {
       return totalCount;

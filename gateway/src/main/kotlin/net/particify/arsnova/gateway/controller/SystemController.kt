@@ -5,7 +5,9 @@ import net.particify.arsnova.gateway.model.SummarizedStats
 import net.particify.arsnova.gateway.view.SystemView
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Controller
+import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import reactor.core.publisher.Mono
 
@@ -23,15 +25,15 @@ class SystemController(
 
   @GetMapping(path = [serviceStatsMapping])
   @ResponseBody
-  fun getServiceStats(): Mono<Stats> {
+  fun getServiceStats(@RequestParam params: MultiValueMap<String, String>): Mono<Stats> {
     logger.trace("Getting stats")
-    return systemView.getServiceStats()
+    return systemView.getServiceStats(params)
   }
 
   @GetMapping(path = [summarizedStatsMapping])
   @ResponseBody
-  fun getSummarizedStats(): Mono<SummarizedStats> {
+  fun getSummarizedStats(@RequestParam params: MultiValueMap<String, String>): Mono<SummarizedStats> {
     logger.trace("Getting summarized stats")
-    return systemView.getSummarizedStats()
+    return systemView.getSummarizedStats(params)
   }
 }

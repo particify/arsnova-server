@@ -33,12 +33,37 @@ import net.particify.arsnova.core.persistence.StatisticsRepository;
 public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implements StatisticsRepository {
   private static final Logger logger = LoggerFactory.getLogger(CouchDbStatisticsRepository.class);
 
+  protected final int keyOffset;
+
   public CouchDbStatisticsRepository(final CouchDbConnector db, final boolean createIfNotExists) {
     super(Object.class, db, "statistics", createIfNotExists);
+    this.keyOffset = 0;
+  }
+
+  public CouchDbStatisticsRepository(
+      final CouchDbConnector db,
+      final boolean createIfNotExists,
+      final int keyOffset) {
+    super(Object.class, db, "statistics", createIfNotExists);
+    this.keyOffset = keyOffset;
   }
 
   @Override
   public Statistics getStatistics() {
+    try {
+      final ViewResult viewResult = fetchStatistics();
+      return parseStatistics(viewResult);
+    } catch (final DbAccessException e) {
+      logger.error("Could not retrieve statistics.", e);
+      return new Statistics();
+    }
+  }
+
+  protected ViewResult fetchStatistics() {
+    return db.queryView(createQuery("statistics").group(true));
+  }
+
+  protected Statistics parseStatistics(final ViewResult viewResult) {
     final Statistics stats = new Statistics();
     final Statistics.UserProfileStats userProfileStats = stats.getUserProfile();
     final Statistics.RoomStats roomStats = stats.getRoom();
@@ -47,131 +72,128 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
     final Statistics.AnswerStats answerStats = stats.getAnswer();
     final Statistics.AnnouncementStats announcementStats = stats.getAnnouncement();
 
-    try {
-      final ViewResult statsResult = db.queryView(createQuery("statistics").group(true));
-
-      if (!statsResult.isEmpty()) {
-        for (final ViewResult.Row row : statsResult.getRows()) {
-          final JsonNode key = row.getKeyAsNode();
-          final int value = row.getValueAsInt();
-          if (!key.isArray()) {
-            throw new DbAccessException("Invalid key for statistics item.");
-          }
-          switch (key.get(0).asText()) {
-            case "UserProfile":
-              if (key.size() == 1) {
-                userProfileStats.setTotalCount(value);
-              } else if (key.size() > 1) {
-                switch (key.get(1).asText()) {
-                  case "deleted":
-                    userProfileStats.setDeleted(value);
-                    break;
-                  case "activationPending":
-                    userProfileStats.setActivationsPending(value);
-                    break;
-                  case "authProvider":
-                    userProfileStats.getCountByAuthProvider().put(key.get(2).asText(), value);
-                    break;
-                  default:
-                    break;
-                }
-              }
-              break;
-            case "Room":
-              if (key.size() == 1) {
-                roomStats.setTotalCount(value);
-              } else if (key.size() > 1) {
-                switch (key.get(1).asText()) {
-                  case "deleted":
-                    roomStats.setDeleted(value);
-                    break;
-                  case "closed":
-                    roomStats.setClosed(value);
-                    break;
-                  default:
-                    break;
-                }
-              }
-              break;
-            case "ContentGroup":
-              if (key.size() == 1) {
-                contentGroupStats.setTotalCount(value);
-              } else if (key.size() > 1) {
-                switch (key.get(1).asText()) {
-                  case "deleted":
-                    contentGroupStats.setDeleted(value);
-                    break;
-                  case "published":
-                    contentGroupStats.setPublished(value);
-                    break;
-                  case "usingPublishingRange":
-                    contentGroupStats.setUsingPublishingRange(value);
-                    break;
-                  default:
-                    break;
-                }
-              }
-              break;
-            case "Content":
-              if (key.size() == 1) {
-                contentStats.setTotalCount(value);
-              } else if (key.size() > 1) {
-                switch (key.get(1).asText()) {
-                  case "deleted":
-                    contentStats.setDeleted(value);
-                    break;
-                  case "format":
-                    contentStats.getCountByFormat().put(key.get(2).asText(), value);
-                    break;
-                  default:
-                    break;
-                }
-              }
-              break;
-            case "Answer":
-              if (key.size() == 1) {
-                answerStats.setTotalCount(value);
-              } else if (key.size() > 1) {
-                switch (key.get(1).asText()) {
-                  case "deleted":
-                    answerStats.setDeleted(value);
-                    break;
-                  case "format":
-                    answerStats.getCountByFormat().put(key.get(2).asText(), value);
-                    break;
-                  default:
-                    break;
-                }
-              }
-              break;
-            case "Announcement":
-              if (key.size() == 1) {
-                announcementStats.setTotalCount(value);
-              } else if (key.size() > 1) {
-                switch (key.get(1).asText()) {
-                  case "deleted":
-                    announcementStats.setDeleted(value);
-                    break;
-                  default:
-                    break;
-                }
-              }
-              break;
-            default:
-              break;
-          }
-        }
-        userProfileStats.setAccountCount(
-            userProfileStats.getTotalCount()
-                - userProfileStats.getCountByAuthProvider()
-                .getOrDefault(UserProfile.AuthProvider.ARSNOVA_GUEST.toString(), 0)
-                - userProfileStats.getActivationsPending());
-      }
-
+    if (viewResult.isEmpty()) {
       return stats;
-    } catch (final DbAccessException e) {
-      logger.error("Could not retrieve statistics.", e);
     }
+
+    for (final ViewResult.Row row : viewResult.getRows()) {
+      final JsonNode key = row.getKeyAsNode();
+      final int value = row.getValueAsInt();
+      if (!key.isArray()) {
+        throw new DbAccessException("Invalid key for statistics item.");
+      }
+      final int offsetKeySize = key.size() - keyOffset;
+
+      switch (key.get(keyOffset + 0).asText()) {
+        case "UserProfile":
+          if (offsetKeySize == 1) {
+            userProfileStats.setTotalCount(value);
+          } else if (offsetKeySize > 1) {
+            switch (key.get(keyOffset + 1).asText()) {
+              case "deleted":
+                userProfileStats.setDeleted(value);
+                break;
+              case "activationPending":
+                userProfileStats.setActivationsPending(value);
+                break;
+              case "authProvider":
+                userProfileStats.getCountByAuthProvider().put(key.get(keyOffset + 2).asText(), value);
+                break;
+              default:
+                break;
+            }
+          }
+          break;
+        case "Room":
+          if (offsetKeySize == 1) {
+            roomStats.setTotalCount(value);
+          } else if (offsetKeySize > 1) {
+            switch (key.get(keyOffset + 1).asText()) {
+              case "deleted":
+                roomStats.setDeleted(value);
+                break;
+              case "closed":
+                roomStats.setClosed(value);
+                break;
+              default:
+                break;
+            }
+          }
+          break;
+        case "ContentGroup":
+          if (offsetKeySize == 1) {
+            contentGroupStats.setTotalCount(value);
+          } else if (offsetKeySize > 1) {
+            switch (key.get(keyOffset + 1).asText()) {
+              case "deleted":
+                contentGroupStats.setDeleted(value);
+                break;
+              case "published":
+                contentGroupStats.setPublished(value);
+                break;
+              case "usingPublishingRange":
+                contentGroupStats.setUsingPublishingRange(value);
+                break;
+              default:
+                break;
+            }
+          }
+          break;
+        case "Content":
+          if (offsetKeySize == 1) {
+            contentStats.setTotalCount(value);
+          } else if (offsetKeySize > 1) {
+            switch (key.get(keyOffset + 1).asText()) {
+              case "deleted":
+                contentStats.setDeleted(value);
+                break;
+              case "format":
+                contentStats.getCountByFormat().put(key.get(keyOffset + 2).asText(), value);
+                break;
+              default:
+                break;
+            }
+          }
+          break;
+        case "Answer":
+          if (offsetKeySize == 1) {
+            answerStats.setTotalCount(value);
+          } else if (offsetKeySize > 1) {
+            switch (key.get(keyOffset + 1).asText()) {
+              case "deleted":
+                answerStats.setDeleted(value);
+                break;
+              case "format":
+                answerStats.getCountByFormat().put(key.get(keyOffset + 2).asText(), value);
+                break;
+              default:
+                break;
+            }
+          }
+          break;
+        case "Announcement":
+          if (offsetKeySize == 1) {
+            announcementStats.setTotalCount(value);
+          } else if (offsetKeySize > 1) {
+            switch (key.get(keyOffset + 1).asText()) {
+              case "deleted":
+                announcementStats.setDeleted(value);
+                break;
+              default:
+                break;
+            }
+          }
+          break;
+        default:
+          break;
+      }
+    }
+
+    userProfileStats.setAccountCount(
+        userProfileStats.getTotalCount()
+        - userProfileStats.getCountByAuthProvider()
+        .getOrDefault(UserProfile.AuthProvider.ARSNOVA_GUEST.toString(), 0)
+        - userProfileStats.getActivationsPending());
 
     return stats;
   }

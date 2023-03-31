@@ -63,6 +63,7 @@ public class ContentGroup extends Entity implements RoomIdAware {
    * properties which are not used to store relations to other data.
    */
   public ContentGroup(final ContentGroup contentGroup) {
+    super(contentGroup);
     this.name = contentGroup.name;
     this.contentIds = contentGroup.contentIds;
     this.published = contentGroup.published;

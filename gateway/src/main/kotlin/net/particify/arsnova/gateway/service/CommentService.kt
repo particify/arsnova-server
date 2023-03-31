@@ -5,9 +5,11 @@ import net.particify.arsnova.gateway.model.CommentServiceStats
 import net.particify.arsnova.gateway.model.CommentStats
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.net.URI
 
 @Service
 class CommentService(
@@ -37,11 +39,19 @@ class CommentService(
       }
   }
 
-  fun getServiceStats(): Mono<CommentServiceStats> {
-    val url = "${httpGatewayProperties.httpClient.commentService}/stats"
+  fun getServiceStats(params: MultiValueMap<String, String>): Mono<CommentServiceStats> {
+    val url = URI("${httpGatewayProperties.httpClient.commentService}/stats")
     logger.trace("Querying comment service for stats with url: {}", url)
     return webClient.get()
-      .uri(url)
+      .uri {
+        it
+          .scheme(url.scheme)
+          .host(url.host)
+          .port(url.port)
+          .path(url.path)
+          .replaceQueryParams(params)
+          .build()
+      }
       .retrieve().bodyToMono(CommentServiceStats::class.java)
       .checkpoint("Request failed in ${this::class.simpleName}::${::getServiceStats.name}.")
   }
