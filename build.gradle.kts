@@ -18,17 +18,14 @@ subprojects {
   repositories {
     mavenCentral()
   }
+}
 
-  tasks.register<Copy>("getDeps") {
-    from(project.the<SourceSetContainer>()["main"].runtimeClasspath)
-    into(layout.buildDirectory.dir("get-deps"))
-
-    doFirst {
-      delete(layout.buildDirectory.dir("get-deps"))
-    }
-
-    doLast {
-      delete(layout.buildDirectory.dir("get-deps"))
+tasks.register<Task>(name = "getDeps") {
+  description = "Resolve and prefetch dependencies"
+  doLast {
+    rootProject.allprojects.forEach {
+      it.buildscript.configurations.filter(Configuration::isCanBeResolved).forEach { it.resolve() }
+      it.configurations.filter(Configuration::isCanBeResolved).forEach { it.resolve() }
     }
   }
 }
