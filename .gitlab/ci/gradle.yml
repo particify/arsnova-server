@@ -6,7 +6,7 @@ variables:
   GRADLE_USER_HOME: $CI_PROJECT_DIR/$GRADLE_USER_HOME_DIR
   GRADLE_RO_DEP_CACHE: /root/.gradle-ro-cache
   GRADLE_OPTS: -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false
-  GRADLE_CLI_OPTS: --no-daemon --console=plain
+  GRADLE_CLI_OPTS: --no-daemon --console=plain --build-cache
 
 # Override rules from parent CI config
 workflow:
@@ -25,9 +25,11 @@ default:
 .gradle:
   image: $DEPENDENCY_CACHE_IMAGE:$OPENJDK_IMAGE_TAG
   cache:
-    key: gradle-global-cache
+    key:
+      files:
+        - $GRADLE_USER_HOME_DIR/wrapper/gradle-wrapper.properties
     paths:
-      - $GRADLE_USER_HOME_DIR/caches
+      - $GRADLE_USER_HOME_DIR
 
 compile:
   extends: .gradle
