@@ -1,0 +1,49 @@
+variables:
+  OPENJDK_IMAGE_TAG: 17-jdk-alpine
+  DEPENDENCY_CACHE_IMAGE: $CI_REGISTRY/particify/dev/foss/arsnova-server/dependency-cache-gradle
+  GRADLE_USER_HOME_DIR: .gradle-user-home
+  GRADLE_DEPENDENCY_DIR: caches/modules-2
+  GRADLE_USER_HOME: $CI_PROJECT_DIR/$GRADLE_USER_HOME_DIR
+  GRADLE_OPTS: -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false
+  GRADLE_CLI_OPTS: --no-daemon --console=plain
+
+prepare_dependency_cache:
+  stage: .pre
+  image: eclipse-temurin:$OPENJDK_IMAGE_TAG
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  artifacts:
+    expire_in: 2 hours
+    paths:
+      - $GRADLE_USER_HOME_DIR/$GRADLE_DEPENDENCY_DIR
+  script:
+    - ./gradlew getDeps
+
+dependency_cache:
+  stage: build
+  needs:
+    - prepare_dependency_cache
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: ['']
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  variables:
+    DOCKER_IMAGE: $DEPENDENCY_CACHE_IMAGE
+    DOCKER_TAG: $OPENJDK_IMAGE_TAG
+    KANIKO_CONTEXT: $CI_PROJECT_DIR
+    KANIKO_DOCKERFILE: $CI_PROJECT_DIR/.docker/images/dependency-cache-gradle/Dockerfile
+    YARN_GLOBAL_FOLDER: .yarn-global
+  allow_failure: true
+  interruptible: false
+  before_script:
+    - date
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --context "$KANIKO_CONTEXT"
+      --dockerfile "$KANIKO_DOCKERFILE"
+      --destination "$DOCKER_IMAGE:$DOCKER_TAG"
+      --build-arg "BASE_TAG=`echo $DOCKER_TAG`"
+      --build-arg "GRADLE_DEPENDENCY_DIR=`echo $GRADLE_USER_HOME_DIR/$GRADLE_DEPENDENCY_DIR`"

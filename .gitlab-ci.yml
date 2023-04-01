@@ -1,9 +1,11 @@
 workflow:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
     - if: $CI_COMMIT_BRANCH
+
+include: .gitlab/ci/gradle-dependency-cache.yml
 
 build_project:
   stage: build
@@ -32,6 +34,9 @@ build_project:
         #compare_to: $CI_DEFAULT_BRANCH
         compare_to: master
       when: on_success
+  inherit:
+    # Some predefined CI variables are not set for the child pipeline if variables are inherited
+    variables: false
   trigger:
     include: "$PROJECT/.gitlab-ci.yml"
     strategy: depend
