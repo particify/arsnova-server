@@ -39,7 +39,7 @@ compile:
     paths:
       - $OUTPUT_DIR
   script:
-    - ../gradlew $GRADLE_CLI_OPTS classes
+    - ../gradlew $GRADLE_CLI_OPTS testClasses
 
 unit_test:
   extends: .gradle
