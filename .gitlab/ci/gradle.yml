@@ -1,9 +1,12 @@
 variables:
   OUTPUT_DIR: $PROJECT/build
+  OPENJDK_IMAGE_TAG: 17-jdk-alpine
+  DEPENDENCY_CACHE_IMAGE: $CI_REGISTRY/particify/dev/foss/arsnova-server/dependency-cache-gradle
   GRADLE_USER_HOME_DIR: .gradle-user-home
   GRADLE_USER_HOME: $CI_PROJECT_DIR/$GRADLE_USER_HOME_DIR
+  GRADLE_RO_DEP_CACHE: /root/.gradle-ro-cache
   GRADLE_OPTS: -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false
-  GRADLE_CLI_OPTS: --no-daemon --console=plain
+  GRADLE_CLI_OPTS: --no-daemon --console=plain --build-cache
 
 # Override rules from parent CI config
 workflow:
@@ -20,11 +23,13 @@ default:
     - date
 
 .gradle:
-  image: gradle:8.0-jdk17
+  image: $DEPENDENCY_CACHE_IMAGE:$OPENJDK_IMAGE_TAG
   cache:
-    key: gradle-global-cache
+    key:
+      files:
+        - $GRADLE_USER_HOME_DIR/wrapper/gradle-wrapper.properties
     paths:
-      - $GRADLE_USER_HOME_DIR/caches
+      - $GRADLE_USER_HOME_DIR
 
 compile:
   extends: .gradle
@@ -34,7 +39,7 @@ compile:
     paths:
       - $OUTPUT_DIR
   script:
-    - gradle $GRADLE_CLI_OPTS classes
+    - ../gradlew $GRADLE_CLI_OPTS testClasses
 
 unit_test:
   extends: .gradle
@@ -51,7 +56,7 @@ unit_test:
       junit: $OUTPUT_DIR/test-results/test/TEST-*.xml
   coverage: '/Code coverage: \d+\.\d+/'
   script:
-    - gradle $GRADLE_CLI_OPTS test jacocoTestReport -x classes
+    - ../gradlew $GRADLE_CLI_OPTS test jacocoTestReport -x classes
     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' build/reports/jacoco/test/jacocoTestReport.csv
 
 spotbugs:
@@ -60,7 +65,7 @@ spotbugs:
   needs:
     - compile
   script:
-    - gradle $GRADLE_CLI_OPTS spotbugsMain -x classes
+    - ../gradlew $GRADLE_CLI_OPTS spotbugsMain -x classes
 
 ktlint:
   extends: .gradle
@@ -78,7 +83,7 @@ ktlint:
     - if: $ENABLE_KTLINT
       when: on_success
   script:
-    - gradle $GRADLE_CLI_OPTS ktlintCheck
+    - ../gradlew $GRADLE_CLI_OPTS ktlintCheck
 
 checkstyle:
   extends: .gradle
@@ -93,7 +98,7 @@ checkstyle:
     - if: $ENABLE_CHECKSTYLE
       when: on_success
   script:
-    - gradle $GRADLE_CLI_OPTS checkstyleMain checkstyleTest -x classes
+    - ../gradlew $GRADLE_CLI_OPTS checkstyleMain checkstyleTest -x classes
 
 docker_image:
   extends: .gradle
@@ -115,7 +120,7 @@ docker_image:
   script:
     - "echo Creation time for image: `git log -1 --format=%cI`"
     - "echo Tag for image: $DOCKER_TAG"
-    - gradle $GRADLE_CLI_OPTS jib -x classes
+    - ../gradlew $GRADLE_CLI_OPTS jib -x classes
       -Djib.to.auth.username="$CI_REGISTRY_USER"
       -Djib.to.auth.password="$CI_REGISTRY_PASSWORD"
       -Djib.to.image="$DOCKER_IMAGE:$DOCKER_TAG"

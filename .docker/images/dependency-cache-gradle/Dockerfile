@@ -1,0 +1,6 @@
+ARG BASE_TAG
+FROM eclipse-temurin:$BASE_TAG
+
+ARG GRADLE_DEPENDENCY_DIR
+
+COPY $GRADLE_DEPENDENCY_DIR /root/.gradle-ro-cache/modules-2
