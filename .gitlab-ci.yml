@@ -18,6 +18,8 @@ build_project:
       - PROJECT: gateway
       - PROJECT: websocket
   rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
     - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/
       changes:
         - "*"
@@ -53,6 +55,8 @@ build_dependency_image:
           - "management"
       - IMAGE_NAME: couchdb
   rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
     - if: $CI_MERGE_REQUEST_ID
       changes:
         - ".docker/images/**/*"
