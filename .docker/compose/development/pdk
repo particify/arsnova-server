@@ -167,25 +167,21 @@ pull_devcontainer_base_images() {
 
 seed_gradle_ro_cache() {
   echo Seeding Gradle read-only dependency cache...
-  GRADLE_TAG=`cat $ROOT_DIR/.gitlab/ci/gradle.yml | grep -m 1 -E "image: [\"']?gradle:" | cut -d : -f 3 | tr -d "\"'"`
   mkdir -p "$LOCAL_ROOT_DIR/.gradle"
+  echo debug gradle line 1
+  echo debug gradle line 2
   docker run --rm \
-    -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache:/home/gradle/.gradle-ro-dep-cache" \
-    -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache-home:/home/gradle/.gradle" \
-    -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache-local:/home/gradle/project/.gradle" \
-    "gradle:$GRADLE_TAG" \
-    sh -c "chown -R gradle:gradle /home/gradle"
-  docker run --rm -u gradle \
-    -v "$LOCAL_ROOT_DIR:/home/gradle/project" \
-    -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache:/home/gradle/.gradle-ro-dep-cache" \
-    -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache-home:/home/gradle/.gradle" \
-    -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache-local:/home/gradle/project/.gradle" \
-    -w /home/gradle/project \
-    -e GRADLE_RO_DEP_CACHE=/home/gradle/.gradle-ro-dep-cache \
+    -v "$LOCAL_ROOT_DIR:/project" \
+    -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache:/root/.gradle-ro-dep-cache" \
+    -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache-home:/root/.gradle" \
+    -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache-local:/project/.gradle" \
+    -w /project \
+    -e GRADLE_RO_DEP_CACHE=/root/.gradle-ro-dep-cache \
     -e GRADLE_OPTS=-Dorg.gradle.internal.launcher.welcomeMessageEnabled=false \
     -it \
-    "gradle:$GRADLE_TAG" \
-    sh -c 'gradle getDeps -x compileJava -x compileKotlin --continue --no-daemon && cp -a /home/gradle/.gradle/caches/modules-2 /home/gradle/.gradle-ro-dep-cache/ && rm -f /home/gradle/.gradle-ro-dep-cache/modules-2/modules-2.lock /home/gradle/.gradle-ro-dep-cache/modules-2/gc.properties'
+    eclipse-temurin:17-jdk-alpine \
+    sh -c './gradlew getDeps --continue --no-daemon && cp -a /root/.gradle/caches/modules-2 /root/.gradle-ro-dep-cache/ && rm -f /root/.gradle-ro-dep-cache/modules-2/modules-2.lock /root/.gradle-ro-dep-cache/modules-2/gc.properties'
+  echo debug gradle line 3
 }
 
 start_dev_server() {
