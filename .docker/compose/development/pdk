@@ -168,8 +168,6 @@ pull_devcontainer_base_images() {
 seed_gradle_ro_cache() {
   echo Seeding Gradle read-only dependency cache...
   mkdir -p "$LOCAL_ROOT_DIR/.gradle"
-  echo debug gradle line 1
-  echo debug gradle line 2
   docker run --rm \
     -v "$LOCAL_ROOT_DIR:/project" \
     -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache:/root/.gradle-ro-dep-cache" \
@@ -181,7 +179,6 @@ seed_gradle_ro_cache() {
     -it \
     eclipse-temurin:17-jdk-alpine \
     sh -c './gradlew getDeps --continue --no-daemon && cp -a /root/.gradle/caches/modules-2 /root/.gradle-ro-dep-cache/ && rm -f /root/.gradle-ro-dep-cache/modules-2/modules-2.lock /root/.gradle-ro-dep-cache/modules-2/gc.properties'
-  echo debug gradle line 3
 }
 
 start_dev_server() {
