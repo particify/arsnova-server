@@ -61,7 +61,7 @@ public class RoomAccessEventDispatcherTest {
         "1",
         testRoom.getRevision(),
         testRoom.getId(),
-        Arrays.asList(new RoomAccessSyncEvent.RoomAccessEntry(testRoom.getOwnerId(), "CREATOR"))
+        Arrays.asList(new RoomAccessSyncEvent.RoomAccessEntry(testRoom.getOwnerId(), "OWNER"))
     );
 
     final RoomAccessSyncEvent response = roomAccessEventDispatcher.answerRoomAccessSyncRequest(request);

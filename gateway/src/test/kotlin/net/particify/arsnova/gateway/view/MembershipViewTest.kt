@@ -35,7 +35,7 @@ class MembershipViewTest(
     val ownedRoomId = UUID.randomUUID().toString().replace("-", "")
     val visitedRoomId = UUID.randomUUID().toString().replace("-", "")
     val roomAccessList = listOf(
-      RoomAccess(ownedRoomId, "22222222", "0-0", "CREATOR", Date()),
+      RoomAccess(ownedRoomId, "22222222", "0-0", "OWNER", Date()),
       RoomAccess(visitedRoomId, "22223333", "0-0", "PARTICIPANT", Date())
     )
     val ownedRoom = Room(ownedRoomId, "22222222", "A name")

@@ -32,7 +32,7 @@ class RoomAccessHandler(
   private val roomAccessSyncTrackerRepository: RoomAccessSyncTrackerRepository
 ) {
   companion object {
-    const val ROLE_CREATOR_STRING = "CREATOR"
+    const val ROLE_OWNER_STRING = "OWNER"
     const val ROLE_PARTICIPANT_STRING = "PARTICIPANT"
   }
 
@@ -124,7 +124,7 @@ class RoomAccessHandler(
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
   fun getOwnerRoomAccessByRoomId(roomId: UUID): RoomAccess? {
     logger.debug("Handling room access request with roomId: {}", roomId)
-    return roomAccessRepository.findByRoomIdAndRole(roomId, ROLE_CREATOR_STRING).firstOrNull()
+    return roomAccessRepository.findByRoomIdAndRole(roomId, ROLE_OWNER_STRING).firstOrNull()
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -150,9 +150,9 @@ class RoomAccessHandler(
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
   fun create(roomAccess: RoomAccess): RoomAccess {
     return try {
-      if (roomAccess.role == ROLE_CREATOR_STRING) {
+      if (roomAccess.role == ROLE_OWNER_STRING) {
         val existingOwnerPks = roomAccessRepository
-          .findByRoomIdAndRole(roomAccess.roomId, ROLE_CREATOR_STRING).map { roomAccess ->
+          .findByRoomIdAndRole(roomAccess.roomId, ROLE_OWNER_STRING).map { roomAccess ->
             RoomAccessPK(roomAccess.roomId, roomAccess.userId)
           }
         val otherOwnerPks = existingOwnerPks.filter { pk -> pk.userId != roomAccess.userId }

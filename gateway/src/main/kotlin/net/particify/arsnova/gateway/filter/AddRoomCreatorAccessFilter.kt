@@ -61,7 +61,7 @@ class AddRoomCreatorAccessFilter(
                     roomId,
                     revId,
                     userId,
-                    AccessLevel.CREATOR
+                    AccessLevel.OWNER
                   )
                 )
               } else {

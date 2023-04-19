@@ -61,7 +61,7 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     INSERT INTO room_access
       (room_id, user_id, rev, role)
       VALUES (:roomId, :userId, :rev, :role)
-      ON CONFLICT ON CONSTRAINT room_access_pkey DO UPDATE SET role = :updateRole WHERE room_access.role != 'CREATOR'
+      ON CONFLICT ON CONSTRAINT room_access_pkey DO UPDATE SET role = :updateRole WHERE room_access.role != 'OWNER'
       RETURNING *;
     """,
     nativeQuery = true

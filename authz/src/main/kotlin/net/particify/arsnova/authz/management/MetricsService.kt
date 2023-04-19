@@ -97,7 +97,7 @@ class MetricsService(
       Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC))
     )
     val ownerCount = roomAccessRepository.countDistinctUserIdByRoleAndLastAccessAfter(
-      "CREATOR",
+      "OWNER",
       Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC))
     )
     when (unit) {
