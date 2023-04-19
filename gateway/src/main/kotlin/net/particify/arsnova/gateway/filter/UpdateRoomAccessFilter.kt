@@ -53,6 +53,7 @@ class UpdateRoomAccessFilter(
       val userId = jwtTokenUtil.getUserIdFromPublicToken(token)
       val uriVariables = ServerWebExchangeUtils.getUriTemplateVariables(exchange)
       val roomId = uriVariables["roomId"]!!
+      val roleString = request.queryParams.getFirst("role")
 
       val accessLevels = jwtTokenUtil.getAccessLevelsFromInternalTokenForRoom(token, roomId)
       if (!accessLevels.contains(AccessLevel.CREATOR) && !jwtTokenUtil.isAdmin(token)) {
@@ -76,13 +77,19 @@ class UpdateRoomAccessFilter(
             if (moderatorId == userId) {
               throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot change own access level")
             }
+            val accessLevel =
+              if (roleString != null) {
+                AccessLevel.valueOf(roleString)
+              } else {
+                AccessLevel.EXECUTIVE_MODERATOR
+              }
             listOf(
               AccessChangeRequest(
                 AccessChangeRequestType.CREATE,
                 roomId,
                 REV_ID_FALLBACK,
                 moderatorId,
-                AccessLevel.EXECUTIVE_MODERATOR
+                accessLevel
               )
             )
           } else if (path.matches(ROOM_MODERATOR_REGEX) && method === HttpMethod.DELETE) {

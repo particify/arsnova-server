@@ -205,7 +205,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
       case CREATE_PERMISSION:
         return !getUserId(auth).isEmpty();
       case UPDATE_PERMISSION:
-        return hasAuthenticationRoomRole(auth, targetRoom, RoomRole.EDITING_MODERATOR);
+        return hasAuthenticationRoomRole(auth, targetRoom, RoomRole.EDITOR);
       case OWNER_PERMISSION:
       case DELETE_PERMISSION:
         return hasAuthenticationRoomRole(auth, targetRoom, RoomRole.OWNER);
@@ -251,7 +251,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
       case OWNER_PERMISSION:
       case DUPLICATE_PERMISSION:
         /* TODO: Remove owner permission for content. Use create/update/delete instead. */
-        return hasAuthenticationRoomRole(auth, room, RoomRole.EDITING_MODERATOR);
+        return hasAuthenticationRoomRole(auth, room, RoomRole.EDITOR);
       default:
         return false;
     }
@@ -273,7 +273,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
       case "create":
       case "update":
       case "delete":
-        return hasAuthenticationRoomRole(auth, room, RoomRole.EDITING_MODERATOR);
+        return hasAuthenticationRoomRole(auth, room, RoomRole.EDITOR);
       default:
         return false;
     }
@@ -307,7 +307,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
         return room != null && hasAuthenticationRoomModeratingRole(auth, room);
       case DELETE_PERMISSION:
         room = roomService.get(targetAnswer.getRoomId());
-        return room != null && hasAuthenticationRoomRole(auth, room, RoomRole.EDITING_MODERATOR);
+        return room != null && hasAuthenticationRoomRole(auth, room, RoomRole.EDITOR);
       default:
         return false;
     }
@@ -330,7 +330,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
           return false;
         }
 
-        return hasAuthenticationRoomRole(auth, room, RoomRole.EDITING_MODERATOR);
+        return hasAuthenticationRoomRole(auth, room, RoomRole.EDITOR);
       case READ_PERMISSION:
         room = roomService.get(targetAnnouncement.getRoomId());
 
@@ -378,8 +378,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
     }
 
     roles.add(
-        String.format(ROOM_ROLE_PATTERN, RoomRole.EDITING_MODERATOR, room.getId()));
-    if (role == RoomRole.EDITING_MODERATOR) {
+        String.format(ROOM_ROLE_PATTERN, RoomRole.EDITOR, room.getId()));
+    if (role == RoomRole.EDITOR) {
       return roles;
     }
 
