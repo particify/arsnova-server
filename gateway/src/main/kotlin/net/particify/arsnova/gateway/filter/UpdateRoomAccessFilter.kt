@@ -56,11 +56,11 @@ class UpdateRoomAccessFilter(
       val roleString = request.queryParams.getFirst("role")
 
       val accessLevels = jwtTokenUtil.getAccessLevelsFromInternalTokenForRoom(token, roomId)
-      if (!accessLevels.contains(AccessLevel.CREATOR) && !jwtTokenUtil.isAdmin(token)) {
+      if (!accessLevels.contains(AccessLevel.OWNER) && !jwtTokenUtil.isAdmin(token)) {
         logger.trace("User's access levels for room {}: {}", roomId, accessLevels)
         throw ResponseStatusException(
           HttpStatus.FORBIDDEN,
-          "'CREATOR' access level required to update room roles."
+          "'OWNER' access level required to update room roles."
         )
       }
 
@@ -81,7 +81,7 @@ class UpdateRoomAccessFilter(
               if (roleString != null) {
                 AccessLevel.valueOf(roleString)
               } else {
-                AccessLevel.EXECUTIVE_MODERATOR
+                AccessLevel.MODERATOR
               }
             listOf(
               AccessChangeRequest(
@@ -103,7 +103,7 @@ class UpdateRoomAccessFilter(
                 roomId,
                 REV_ID_FALLBACK,
                 moderatorId,
-                AccessLevel.EXECUTIVE_MODERATOR
+                AccessLevel.MODERATOR
               )
             )
           } else if (
@@ -118,7 +118,7 @@ class UpdateRoomAccessFilter(
                 roomId,
                 REV_ID_FALLBACK,
                 newOwnerId,
-                AccessLevel.CREATOR
+                AccessLevel.OWNER
               )
             )
           } else if (
@@ -134,7 +134,7 @@ class UpdateRoomAccessFilter(
                 roomId,
                 REV_ID_FALLBACK,
                 newOwnerId,
-                AccessLevel.CREATOR
+                AccessLevel.OWNER
               )
             )
           } else {

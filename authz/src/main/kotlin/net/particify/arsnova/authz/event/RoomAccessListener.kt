@@ -16,7 +16,7 @@ class RoomAccessListener(
 ) {
   @EventListener
   fun handleRoomCreatedEvent(event: RoomCreatedEvent) {
-    handler.create(RoomAccess(event.id, event.ownerId, "1-0", "CREATOR", null, null))
+    handler.create(RoomAccess(event.id, event.ownerId, "1-0", "OWNER", null, null))
   }
 
   @EventListener

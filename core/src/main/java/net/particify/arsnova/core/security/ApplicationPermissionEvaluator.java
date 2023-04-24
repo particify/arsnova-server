@@ -345,7 +345,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
    * the room.
    */
   private boolean hasAuthenticationRoomModeratingRole(final Authentication auth, final Room room) {
-    return hasAuthenticationRoomRole(auth, room, RoomRole.EXECUTIVE_MODERATOR);
+    return hasAuthenticationRoomRole(auth, room, RoomRole.MODERATOR);
   }
 
   /**
@@ -384,8 +384,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
     }
 
     roles.add(
-        String.format(ROOM_ROLE_PATTERN, RoomRole.EXECUTIVE_MODERATOR, room.getId()));
-    if (role == RoomRole.EXECUTIVE_MODERATOR) {
+        String.format(ROOM_ROLE_PATTERN, RoomRole.MODERATOR, room.getId()));
+    if (role == RoomRole.MODERATOR) {
       return roles;
     }
 

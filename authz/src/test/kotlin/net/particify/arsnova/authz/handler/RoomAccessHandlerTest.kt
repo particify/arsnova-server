@@ -42,8 +42,8 @@ class RoomAccessHandlerTest {
   val SOME_USER_ID = UUID.fromString("23e7c082-c533-e499-63b9-6d7a05000d0e")
   val SOME_OTHER_USER_ID = UUID.fromString("aaaac082-c533-e499-63b9-6d7a05000d0f")
   val SOME_MODERATOR_ID = UUID.fromString("bbbbc082-c533-e499-63b9-6d7a05000d0f")
-  val CREATOR_STRING = "CREATOR"
-  val EXECUTIVE_MODERATOR_STRING = "EXECUTIVE_MODERATOR"
+  val OWNER_STRING = "OWNER"
+  val MODERATOR_STRING = "MODERATOR"
 
   @BeforeEach
   fun setUp() {
@@ -87,14 +87,14 @@ class RoomAccessHandlerTest {
       SOME_NEWER_REV,
       SOME_ROOM_ID,
       listOf(
-        RoomAccessEntry(SOME_OTHER_USER_ID, CREATOR_STRING)
+        RoomAccessEntry(SOME_OTHER_USER_ID, OWNER_STRING)
       )
     )
     val expectedDelete = RoomAccess(
       SOME_ROOM_ID,
       SOME_USER_ID,
       SOME_REV,
-      CREATOR_STRING,
+      OWNER_STRING,
       null,
       null
     )
@@ -102,7 +102,7 @@ class RoomAccessHandlerTest {
       SOME_ROOM_ID,
       SOME_OTHER_USER_ID,
       SOME_NEWER_REV,
-      CREATOR_STRING,
+      OWNER_STRING,
       null,
       null
     )
@@ -130,7 +130,7 @@ class RoomAccessHandlerTest {
             SOME_ROOM_ID,
             SOME_MODERATOR_ID,
             SOME_EVEN_NEWER_REV,
-            EXECUTIVE_MODERATOR_STRING,
+            MODERATOR_STRING,
             null,
             null
           ),
@@ -152,7 +152,7 @@ class RoomAccessHandlerTest {
       SOME_REV,
       SOME_ROOM_ID,
       listOf(
-        RoomAccessEntry(SOME_USER_ID, CREATOR_STRING)
+        RoomAccessEntry(SOME_USER_ID, OWNER_STRING)
       )
     )
     val trackerCaptor = ArgumentCaptor.forClass(RoomAccessSyncTracker::class.java)

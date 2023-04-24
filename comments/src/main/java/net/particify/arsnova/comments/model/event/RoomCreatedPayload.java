@@ -12,7 +12,7 @@ public class RoomCreatedPayload implements WebSocketPayload {
   public static class Moderator {
     public enum Role {
       EDITOR,
-      EXECUTIVE_MODERATOR
+      MODERATOR
     }
 
     private UUID userId;

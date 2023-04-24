@@ -34,7 +34,7 @@ public class RoomAccessEventDispatcher {
   private static final Logger logger = LoggerFactory.getLogger(RoomAccessEventDispatcher.class);
 
   private static final String EVENT_VERSION = "1";
-  private static final String CREATOR_ROLE_STRING = "CREATOR";
+  private static final String OWNER_ROLE_STRING = "OWNER";
 
   public static final String ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME = "backend.event.room.access.sync.request";
   public static final String ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME = "backend.event.room.access.sync.response";
@@ -62,7 +62,7 @@ public class RoomAccessEventDispatcher {
 
       final List<RoomAccessSyncEvent.RoomAccessEntry> accessEntries = new ArrayList<>();
 
-      accessEntries.add(new RoomAccessSyncEvent.RoomAccessEntry(room.getOwnerId(), CREATOR_ROLE_STRING));
+      accessEntries.add(new RoomAccessSyncEvent.RoomAccessEntry(room.getOwnerId(), OWNER_ROLE_STRING));
 
       final RoomAccessSyncEvent roomAccessSyncEvent = new RoomAccessSyncEvent(
           EVENT_VERSION,

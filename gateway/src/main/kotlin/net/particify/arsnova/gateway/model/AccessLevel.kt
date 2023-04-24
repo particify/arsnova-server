@@ -1,9 +1,9 @@
 package net.particify.arsnova.gateway.model
 
 enum class AccessLevel {
-  CREATOR,
+  OWNER,
   EDITOR,
-  EXECUTIVE_MODERATOR,
+  MODERATOR,
   PARTICIPANT,
   NONE
 }
