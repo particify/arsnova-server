@@ -43,7 +43,7 @@ public class ArchiveService {
   public Optional<Archive> get(final UUID id) {
     final Optional<Archive> archive = repository.findById(id);
     if (archive.isPresent()) {
-      if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(archive.get().getRoomId())) {
+      if (!permissionEvaluator.isOwnerOrEditorForRoom(archive.get().getRoomId())) {
         throw new ForbiddenException();
       }
     }
@@ -63,7 +63,7 @@ public class ArchiveService {
       return Optional.empty();
     } else {
       final Archive archive = list.iterator().next();
-      if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(archive.getRoomId())) {
+      if (!permissionEvaluator.isOwnerOrEditorForRoom(archive.getRoomId())) {
         throw new ForbiddenException();
       }
       archive.setCount(commentRepository.countByArchiveId(archive.getId()));
@@ -73,7 +73,7 @@ public class ArchiveService {
   }
 
   public List<Archive> getByRoomId(final UUID roomId) {
-    if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(roomId)) {
+    if (!permissionEvaluator.isOwnerOrEditorForRoom(roomId)) {
       throw new ForbiddenException();
     }
     List<Archive> archives = repository.findByRoomId(roomId);
@@ -84,7 +84,7 @@ public class ArchiveService {
   }
 
   public Archive create(final CreateArchiveCommand cmd) {
-    if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(cmd.getRoomId())) {
+    if (!permissionEvaluator.isOwnerOrEditorForRoom(cmd.getRoomId())) {
       throw new ForbiddenException();
     }
 
@@ -128,7 +128,7 @@ public class ArchiveService {
   public void delete(final UUID id) {
     final Optional<Archive> archive = repository.findById(id);
     if (archive.isPresent()) {
-      if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(archive.get().getRoomId())) {
+      if (!permissionEvaluator.isOwnerOrEditorForRoom(archive.get().getRoomId())) {
         throw new ForbiddenException();
       }
       repository.delete(archive.get());

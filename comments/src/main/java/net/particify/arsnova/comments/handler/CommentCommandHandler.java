@@ -330,7 +330,7 @@ public class CommentCommandHandler {
 
     UUID roomId = command.getPayload().getRoomId();
 
-    if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(roomId)) {
+    if (!permissionEvaluator.isOwnerOrEditorForRoom(roomId)) {
       throw new ForbiddenException();
     }
 

@@ -14,7 +14,7 @@ import net.particify.arsnova.comments.model.serialization.UuidHelper;
 @Component
 public class PermissionEvaluator {
   final static String OWNER_ROLE_STRING = "ROLE_CREATOR";
-  final static String EDITING_MODERATOR_ROLE_STRING = "ROLE_EDITING_MODERATOR";
+  final static String EDITOR_ROLE_STRING = "ROLE_EDITOR";
   final static String EXECUTIVE_MODERATOR_ROLE_STRING = "ROLE_EXECUTIVE_MODERATOR";
 
   public boolean isOwnerOrAnyTypeOfModeratorForRoom(
@@ -24,18 +24,18 @@ public class PermissionEvaluator {
         (AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     return authenticatedUser.getAuthorities().stream().anyMatch(authority ->
         authority.equals(buildRoomAuthority(OWNER_ROLE_STRING, roomId)) ||
-        authority.equals(buildRoomAuthority(EDITING_MODERATOR_ROLE_STRING, roomId)) ||
+        authority.equals(buildRoomAuthority(EDITOR_ROLE_STRING, roomId)) ||
         authority.equals(buildRoomAuthority(EXECUTIVE_MODERATOR_ROLE_STRING, roomId)));
   }
 
-  public boolean isOwnerOrEditingModeratorForRoom(
+  public boolean isOwnerOrEditorForRoom(
       final UUID roomId
   ) {
     final AuthenticatedUser authenticatedUser =
         (AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     return authenticatedUser.getAuthorities().stream().anyMatch(authority ->
         authority.equals(buildRoomAuthority(OWNER_ROLE_STRING , roomId)) ||
-        authority.equals(buildRoomAuthority(EDITING_MODERATOR_ROLE_STRING, roomId)));
+        authority.equals(buildRoomAuthority(EDITOR_ROLE_STRING, roomId)));
   }
 
   public boolean checkCommentOwnerPermission(
@@ -84,7 +84,7 @@ public class PermissionEvaluator {
       final Comment comment
   ) {
     return checkCommentOwnerPermission(comment) ||
-        isOwnerOrEditingModeratorForRoom(comment.getRoomId());
+        isOwnerOrEditorForRoom(comment.getRoomId());
   }
 
   public boolean checkVoteOwnerPermission(

@@ -11,7 +11,7 @@ public class RoomCreatedPayload implements WebSocketPayload {
 
   public static class Moderator {
     public enum Role {
-      EDITING_MODERATOR,
+      EDITOR,
       EXECUTIVE_MODERATOR
     }
 

@@ -241,7 +241,7 @@ public class CommentCommandHandlerTest {
         ArgumentCaptor.forClass(CommentDeleted.class);
 
     when(commentService.deleteByRoomId(roomId)).thenReturn(commentList);
-    when(permissionEvaluator.isOwnerOrEditingModeratorForRoom(any())).thenReturn(true);
+    when(permissionEvaluator.isOwnerOrEditorForRoom(any())).thenReturn(true);
 
     commandHandler.handle(command);
 
