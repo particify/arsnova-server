@@ -1,11 +1,11 @@
 plugins {
   java
   jacoco
-  id("com.github.spotbugs") version "5.0.13"
+  id("com.github.spotbugs") version "5.0.14"
   id("com.google.cloud.tools.jib") version "3.3.1"
   id("io.spring.dependency-management") version "1.1.0"
   id("org.jlleitschuh.gradle.ktlint") version "11.1.0"
-  id("org.springframework.boot") version "3.0.2"
+  id("org.springframework.boot") version "3.0.6"
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_17
@@ -16,7 +16,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-amqp")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
-  implementation("com.auth0:java-jwt:4.2.2")
+  implementation("com.auth0:java-jwt:4.3.0")
   implementation("org.postgresql:postgresql")
   implementation("org.flywaydb:flyway-core")
   implementation("io.micrometer:micrometer-registry-prometheus")
