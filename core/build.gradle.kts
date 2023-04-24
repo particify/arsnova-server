@@ -2,12 +2,12 @@ plugins {
   java
   jacoco
   checkstyle
-  id("com.github.spotbugs") version "5.0.13"
+  id("com.github.spotbugs") version "5.0.14"
   id("com.google.cloud.tools.jib") version "3.3.1"
-  id("io.freefair.aspectj.post-compile-weaving") version "6.6.1"
+  id("io.freefair.aspectj.post-compile-weaving") version "8.0.1"
   id("io.spring.dependency-management") version "1.1.0"
   id("org.jlleitschuh.gradle.ktlint") version "11.1.0"
-  id("org.springframework.boot") version "3.0.2"
+  id("org.springframework.boot") version "3.0.6"
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_17
@@ -43,7 +43,7 @@ dependencies {
   implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.github.ben-manes.caffeine:caffeine")
-  implementation("com.auth0:java-jwt:4.2.2")
+  implementation("com.auth0:java-jwt:4.3.0")
   implementation("org.pac4j:pac4j-jakartaee:5.7.0")
   implementation("org.pac4j:pac4j-oauth:5.7.0")
   implementation("org.pac4j:pac4j-oidc:5.7.0")
@@ -81,7 +81,7 @@ tasks.jacocoTestReport {
 }
 
 checkstyle {
-  toolVersion = "10.7.0"
+  toolVersion = "10.9.3"
   configFile = file("$projectDir/checkstyle.xml")
   configProperties = mapOf(
     "checkstyle.missing-javadoc.severity" to "info"
