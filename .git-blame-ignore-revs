@@ -1,0 +1,23 @@
+# Add commits which apply new formatting on a large scale to this file.
+# Do not add commits which contain any code changes even if they are minor.
+
+# 2015-05-25 - Remove trailing white space and add trailing LF
+ac7c168ed87bca28d499c629b7ef85dc0e375dc0
+
+# 2016-02-05 - Fix whitespace errors reported by Checkstyle
+ab215208560ad8b4222b1cb7446cb0ba827fe7f8
+
+# 2019-06-24 - Adjust whitespace to conform with style conventions
+775382d131d4f6c8d8b840240efd2288567444af
+
+# 2019-06-25 - Break long lines to conform with style conventions
+10bb84c2f21031d141aa42d032e53cff5b64c7c7
+
+# 2022-10-13 - Consistently use two spaces for indentation
+2e603a5960b9aa73e79b3b9f3d0d1877db9c7e77
+
+# 2022-10-14 - Fix codestyle issues reported by ktlint
+2da6d9edac1562071242c54c3b37d60a0ef1b509
+
+# 2022-10-14 - Fix codestyle issues reported by Checkstyle
+11fdc60abfec6b7b6e304821ffa921dff431b923
