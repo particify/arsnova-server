@@ -446,7 +446,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   }
 
   @EventListener
-  public void handleContentDeletion(final BeforeDeletionEvent<Content> event) {
+  public void handleContentDeletion(final BeforeDeletionEvent<? extends Content> event) {
     final Iterable<Answer> answers = answerRepository.findStubsByContentIdAndHidden(event.getEntity().getId(), false);
     answers.forEach(a -> a.setRoomId(event.getEntity().getRoomId()));
     delete(answers, Initiator.CASCADE);
