@@ -36,6 +36,7 @@ build_project:
         #compare_to: $CI_DEFAULT_BRANCH
         compare_to: master
       when: on_success
+    - when: manual
   inherit:
     # Some predefined CI variables are not set for the child pipeline if variables are inherited
     variables: false
