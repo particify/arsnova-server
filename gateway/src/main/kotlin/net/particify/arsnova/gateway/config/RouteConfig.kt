@@ -11,6 +11,7 @@ import net.particify.arsnova.gateway.filter.RoomShortIdFilter
 import net.particify.arsnova.gateway.filter.UpdateRoomAccessFilter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.cloud.gateway.handler.predicate.RemoteAddrRoutePredicateFactory
 import org.springframework.cloud.gateway.route.RouteLocator
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder
 import org.springframework.context.annotation.Bean
@@ -56,6 +57,23 @@ class RouteConfig(
     jwtUserIdFilter: JwtUserIdFilter
   ): List<RouteBuilderSpec> {
     var routes = listOf(
+      RouteBuilderSpec("healthz") { p ->
+        p
+          .path("/healthz")
+          .and()
+          .predicate(
+            RemoteAddrRoutePredicateFactory().apply(
+              RemoteAddrRoutePredicateFactory.Config().setSources(
+                httpGatewayProperties.gateway.healthzAllowedIpAddresses
+              )
+            )
+          )
+          .filters { f ->
+            f.rewritePath("^/healthz", "/management/health")
+          }
+          .uri(httpGatewayProperties.routing.endpoints.core)
+      },
+
       RouteBuilderSpec("comments") { p ->
         p
           .path(
