@@ -7,6 +7,7 @@ services:
       - 127.0.0.1:${PORT:-8080}:80
   arsnova-webclient:
     image: devcontainer-arsnova-webclient:$WEBCLIENT_TAG
+    init: true
     build:
       context: $ROOT_DIR/webclient/.devcontainer
       args:
@@ -19,6 +20,7 @@ services:
       - yarn-global-webclient:/home/dev/.yarn
   arsnova-server-core:
     image: devcontainer-arsnova-server-core:$CORE_TAG
+    init: true
     build:
       context: $ROOT_DIR/core/.devcontainer
       args:
@@ -40,6 +42,7 @@ services:
       - vscode-extensions-core:/home/dev/.vscode-server/extensions
   arsnova-server-gateway:
     image: devcontainer-arsnova-server-gateway:$GATEWAY_TAG
+    init: true
     build:
       context: $ROOT_DIR/gateway/.devcontainer
       args:
@@ -59,6 +62,7 @@ services:
       - vscode-extensions-gateway:/home/dev/.vscode-server/extensions
   arsnova-server-websocket:
     image: devcontainer-arsnova-server-websocket:$WEBSOCKET_TAG
+    init: true
     build:
       context: $ROOT_DIR/websocket/.devcontainer
       args:
@@ -78,6 +82,7 @@ services:
       - vscode-extensions-websocket:/home/dev/.vscode-server/extensions
   arsnova-server-authz:
     image: devcontainer-arsnova-server-authz:$AUTHZ_TAG
+    init: true
     build:
       context: $ROOT_DIR/authz/.devcontainer
       args:
@@ -101,6 +106,7 @@ services:
       - vscode-extensions-authz:/home/dev/.vscode-server/extensions
   arsnova-server-comments:
     image: devcontainer-arsnova-server-comments:$COMMENTS_TAG
+    init: true
     build:
       context: $ROOT_DIR/comments/.devcontainer
       args:
@@ -124,6 +130,7 @@ services:
       - vscode-extensions-comments:/home/dev/.vscode-server/extensions
   arsnova-server-formatting:
     image: devcontainer-arsnova-server-formatting:$FORMATTING_TAG
+    init: true
     build:
       context: $ROOT_DIR/formatting/.devcontainer
       args:
