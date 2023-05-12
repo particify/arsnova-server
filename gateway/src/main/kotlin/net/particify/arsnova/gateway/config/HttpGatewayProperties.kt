@@ -48,7 +48,8 @@ data class Endpoints(
 
 data class Gateway(
   val rateLimit: RateLimit,
-  val requireMembership: Boolean
+  val requireMembership: Boolean,
+  val healthzAllowedIpAddresses: List<String>
 )
 
 data class RateLimit(
