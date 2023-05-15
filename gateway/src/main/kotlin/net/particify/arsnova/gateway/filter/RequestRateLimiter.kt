@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.cloud.gateway.filter.ratelimit.AbstractRateLimiter
 import org.springframework.cloud.gateway.filter.ratelimit.RateLimiter
 import org.springframework.cloud.gateway.support.ConfigurationService
+import org.springframework.security.web.util.matcher.IpAddressMatcher
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import java.time.Duration
@@ -32,6 +33,8 @@ class RequestRateLimiter(
   private val logger: Logger = LoggerFactory.getLogger(this::class.java)
   private val defaultConfig = Config(httpGatewayProperties)
   private val ipBucketMap: MutableMap<String, Bucket> = ConcurrentHashMap()
+  private val allowedIpAddresses = httpGatewayProperties
+    .gateway.rateLimit.whitelistedIps.map { IpAddressMatcher(it) }
 
   /*
   The id is the key extracted from the KeyResolver configured in GatewayConfig.
@@ -50,7 +53,7 @@ class RequestRateLimiter(
     val ipAddr = id.split(",")[1]
     val isQuery = queryMethods.any { it == httpMethod }
 
-    if (ipAddr in httpGatewayProperties.gateway.rateLimit.whitelistedIps) {
+    if (allowedIpAddresses.any { it.matches(ipAddr) }) {
       return Mono.just(RateLimiter.Response(true, mapOf("RateLimit-Remaining" to "infinite")))
     }
 
