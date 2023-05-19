@@ -8,7 +8,7 @@ plugins {
   id("com.google.cloud.tools.jib") version "3.3.2" apply false
   id("io.freefair.aspectj.post-compile-weaving") version "8.0.1" apply false
   id("org.jlleitschuh.gradle.ktlint") version "11.3.2" apply false
-  id("org.springframework.boot") version "3.0.6" apply false
+  id("org.springframework.boot") version "3.0.7" apply false
   kotlin("jvm") version "1.8.21" apply false
   kotlin("plugin.jpa") version "1.8.21" apply false
   kotlin("plugin.spring") version "1.8.21" apply false
