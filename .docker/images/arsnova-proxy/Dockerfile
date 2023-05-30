@@ -1,4 +1,4 @@
-FROM nginx:1.24-alpine
+FROM nginx:1.25-alpine
 
 ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
 
