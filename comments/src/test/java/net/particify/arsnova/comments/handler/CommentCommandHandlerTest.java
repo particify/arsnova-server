@@ -28,6 +28,7 @@ import net.particify.arsnova.comments.model.command.DeleteCommentsByRoom;
 import net.particify.arsnova.comments.model.command.DeleteCommentsByRoomPayload;
 import net.particify.arsnova.comments.model.command.HighlightComment;
 import net.particify.arsnova.comments.model.command.HighlightCommentPayload;
+import net.particify.arsnova.comments.model.event.CommentCreated;
 import net.particify.arsnova.comments.model.event.CommentDeleted;
 import net.particify.arsnova.comments.model.event.CommentDeletedPayload;
 import net.particify.arsnova.comments.model.event.CommentHighlighted;
@@ -78,8 +79,8 @@ public class CommentCommandHandlerTest {
 
     ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<CreateComment> messageCaptor =
-        ArgumentCaptor.forClass(CreateComment.class);
+    ArgumentCaptor<CommentCreated> messageCaptor =
+        ArgumentCaptor.forClass(CommentCreated.class);
     ArgumentCaptor<Comment> commentCaptor = ArgumentCaptor.forClass(Comment.class);
 
     Settings settings = new Settings();
@@ -117,8 +118,8 @@ public class CommentCommandHandlerTest {
 
     ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<CreateComment> messageCaptor =
-        ArgumentCaptor.forClass(CreateComment.class);
+    ArgumentCaptor<CommentCreated> messageCaptor =
+        ArgumentCaptor.forClass(CommentCreated.class);
     ArgumentCaptor<Comment> commentCaptor = ArgumentCaptor.forClass(Comment.class);
 
     Settings settings = new Settings();
