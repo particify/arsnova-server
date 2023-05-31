@@ -38,7 +38,8 @@ public class UserProfile extends Entity {
     ARSNOVA_GUEST,
     LDAP,
     SAML,
-    OIDC
+    OIDC,
+    CAS
   }
 
   public static class Account {

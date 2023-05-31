@@ -376,11 +376,24 @@ public class AuthenticationProviderProperties {
     }
   }
 
+  public static class Cas extends Provider {
+    private String hostUrl;
+
+    public String getHostUrl() {
+      return hostUrl;
+    }
+
+    public void setHostUrl(final String hostUrl) {
+      this.hostUrl = hostUrl;
+    }
+  }
+
   private Registered registered;
   private Guest guest;
   private List<Ldap> ldap;
   private List<Oidc> oidc;
   private Saml saml;
+  private Cas cas;
 
   public Registered getRegistered() {
     return registered;
@@ -420,5 +433,13 @@ public class AuthenticationProviderProperties {
 
   public void setSaml(final Saml saml) {
     this.saml = saml;
+  }
+
+  public Cas getCas() {
+    return cas;
+  }
+
+  public void setCas(final Cas cas) {
+    this.cas = cas;
   }
 }

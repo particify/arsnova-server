@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+import org.apereo.cas.client.validation.Cas20ProxyTicketValidator;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
@@ -57,6 +58,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.cas.ServiceProperties;
+import org.springframework.security.cas.authentication.CasAuthenticationProvider;
+import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
+import org.springframework.security.cas.web.CasAuthenticationFilter;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -80,13 +85,18 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.header.writers.HstsHeaderWriter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.controller.ControllerExceptionHelper;
+import net.particify.arsnova.core.security.CasLogoutSuccessHandler;
+import net.particify.arsnova.core.security.CasUserDetailsService;
 import net.particify.arsnova.core.security.CustomLdapUserDetailsMapper;
 import net.particify.arsnova.core.security.LoginAuthenticationFailureHandler;
 import net.particify.arsnova.core.security.LoginAuthenticationSucessHandler;
@@ -109,11 +119,14 @@ public class SecurityConfig {
   public static final String AUTH_CALLBACK_PATH = "/auth/callback";
   public static final String OAUTH_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/oauth";
   public static final String SAML_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/saml";
+  public static final String CAS_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/cas";
+  public static final String CAS_LOGOUT_PATH = "/auth/logout/cas";
   public static final String RUN_AS_KEY_PREFIX = "RUN_AS_KEY";
   public static final String INTERNAL_PROVIDER_ID = "user-db";
   public static final String LDAP_PROVIDER_ID = "ldap";
   public static final String OIDC_PROVIDER_ID = "oidc";
   public static final String SAML_PROVIDER_ID = "saml";
+  public static final String CAS_PROVIDER_ID = "cas";
   private static final String OIDC_DISCOVERY_PATH = "/.well-known/openid-configuration";
   private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
@@ -183,6 +196,10 @@ public class SecurityConfig {
       http.headers().addHeaderWriter(new HstsHeaderWriter(false));
 
       http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+      if (providerProperties.getCas().isEnabled()) {
+        http.addFilter(casAuthenticationFilter());
+        http.addFilter(casLogoutFilter());
+      }
       if (providerProperties.getSaml().isEnabled()) {
         http.addFilterAfter(samlCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
       }
@@ -262,6 +279,10 @@ public class SecurityConfig {
     if (providerProperties.getLdap().stream().anyMatch(p -> p.isEnabled())) {
       providerIds.add(LDAP_PROVIDER_ID);
       providers.add(ldapAuthenticationProvider());
+    }
+    if (providerProperties.getCas().isEnabled()) {
+      providerIds.add(CAS_PROVIDER_ID);
+      providers.add(casAuthenticationProvider());
     }
     if (providerProperties.getRegistered().isEnabled()) {
       providerIds.add(INTERNAL_PROVIDER_ID);
@@ -434,6 +455,108 @@ public class SecurityConfig {
       havingValue = "true")
   public LdapTemplate ldapTemplate() {
     return new LdapTemplate(ldapContextSource());
+  }
+
+  // CAS Authentication Configuration
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public CasAuthenticationProvider casAuthenticationProvider() {
+    final CasAuthenticationProvider authProvider = new CasAuthenticationProvider();
+    authProvider.setAuthenticationUserDetailsService(casUserDetailsService());
+    authProvider.setServiceProperties(casServiceProperties());
+    authProvider.setTicketValidator(casTicketValidator());
+    authProvider.setKey("casAuthProviderKey");
+
+    return authProvider;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public CasUserDetailsService casUserDetailsService() {
+    return new CasUserDetailsService();
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public ServiceProperties casServiceProperties() {
+    final ServiceProperties properties = new ServiceProperties();
+    properties.setService(rootUrl + apiPath + CAS_CALLBACK_PATH);
+    properties.setSendRenew(false);
+
+    return properties;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public Cas20ProxyTicketValidator casTicketValidator() {
+    return new Cas20ProxyTicketValidator(providerProperties.getCas().getHostUrl());
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
+    final CasAuthenticationEntryPoint entryPoint = new CasAuthenticationEntryPoint();
+    entryPoint.setLoginUrl(providerProperties.getCas().getHostUrl() + "/login");
+    entryPoint.setServiceProperties(casServiceProperties());
+
+    return entryPoint;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
+    final CasAuthenticationFilter filter = new CasAuthenticationFilter();
+    filter.setAuthenticationManager(authenticationManager());
+    filter.setServiceProperties(casServiceProperties());
+    filter.setFilterProcessesUrl("/**" + CAS_CALLBACK_PATH);
+    filter.setAuthenticationSuccessHandler(successHandler());
+    filter.setAuthenticationFailureHandler(failureHandler());
+
+    return filter;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public LogoutFilter casLogoutFilter() {
+    final LogoutFilter filter = new LogoutFilter(casLogoutSuccessHandler(), logoutHandler());
+    filter.setLogoutRequestMatcher(new AntPathRequestMatcher("/**" + CAS_LOGOUT_PATH));
+
+    return filter;
+  }
+
+  @Bean
+  @ConditionalOnProperty(
+      name = "cas.enabled",
+      prefix = AuthenticationProviderProperties.PREFIX,
+      havingValue = "true")
+  public LogoutSuccessHandler casLogoutSuccessHandler() {
+    final CasLogoutSuccessHandler handler = new CasLogoutSuccessHandler();
+    handler.setCasUrl(providerProperties.getCas().getHostUrl());
+    handler.setDefaultTarget(rootUrl);
+
+    return handler;
   }
 
   // SAML Authentication Configuration
