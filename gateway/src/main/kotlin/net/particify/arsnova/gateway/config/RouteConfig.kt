@@ -175,6 +175,18 @@ class RouteConfig(
           .uri(httpGatewayProperties.routing.endpoints.core)
       },
 
+      RouteBuilderSpec("focus-event") { p ->
+        p
+          .path("/room/{roomId}/focus-event")
+          .filters { f ->
+            f.filter(authFilter.apply(AuthFilter.Config()))
+            f.requestRateLimiter { r ->
+              r.rateLimiter = requestRateLimiter
+            }
+          }
+          .uri(httpGatewayProperties.routing.endpoints.wsGateway)
+      },
+
       RouteBuilderSpec("rooms") { p ->
         p
           .path("/room/{roomId}/**")
