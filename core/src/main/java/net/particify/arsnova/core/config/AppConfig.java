@@ -261,6 +261,12 @@ public class AppConfig implements WebMvcConfigurer {
       logger.info("Enabling STARTTLS for mail server connections.");
       mailSender.getJavaMailProperties().setProperty("mail.smtp.starttls.enable", "true");
     }
+    // When run inside a container, the FQDN of the host cannot be detected.
+    // Therefore, it can be overridden manually.
+    if (mailProperties.getLocalhost() != null) {
+      mailSender.getJavaMailProperties().setProperty("mail.smtp.localhost", mailProperties.getLocalhost());
+      mailSender.getJavaMailProperties().setProperty("mail.host", mailProperties.getLocalhost());
+    }
 
     return mailSender;
   }
