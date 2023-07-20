@@ -116,6 +116,7 @@ public class Room extends Entity implements RoomIdAware {
   private String password;
   private String lmsCourseId;
   private Date scheduledDeletion;
+  private boolean focusModeEnabled;
 
   @JsonMerge
   private Settings settings;
@@ -260,6 +261,16 @@ public class Room extends Entity implements RoomIdAware {
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
+  public boolean isFocusModeEnabled() {
+    return focusModeEnabled;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setFocusModeEnabled(final boolean focusModeEnabled) {
+    this.focusModeEnabled = focusModeEnabled;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
   public Settings getSettings() {
     if (settings == null) {
       settings = new Settings();
@@ -342,6 +353,7 @@ public class Room extends Entity implements RoomIdAware {
         .append("closed", closed)
         .append("passwordProtected", isPasswordProtected())
         .append("settings", settings)
-        .append("statistics", statistics);
+        .append("statistics", statistics)
+        .append("focusModeEnabled", focusModeEnabled);
   }
 }
