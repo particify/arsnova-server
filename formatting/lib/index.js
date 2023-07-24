@@ -124,7 +124,7 @@ function render(text, options) {
     text = configureMarkdown(markdown, mdOpts, mdFeatures).render(text);
   }
 
-  return text;
+  return text.trim();
 }
 
 function configureMarkdown(renderer, options, features) {
