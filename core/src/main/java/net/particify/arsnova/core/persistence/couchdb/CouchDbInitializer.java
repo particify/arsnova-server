@@ -24,9 +24,11 @@ import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketException;
+import java.net.URI;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,15 +94,29 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware {
         StandardCharsets.UTF_8));
 
     final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-    final Resource[] resources = resolver.getResources("classpath:couchdb/*.design.js");
-    for (final Resource resource : resources) {
-      logger.debug("Loading CouchDB design doc: {}", resource.getFilename());
+    final Resource[] resources = resolver.getResources("classpath*:couchdb/*.design.js");
+    // Remove duplicates, prioritize file over jar resources
+    final Map<String, Resource> resourceMap = Arrays.stream(resources).collect(Collectors.toMap(
+        r -> r.getFilename(),
+        r -> r,
+        (r1, r2) -> getUri(r2).getScheme().equals("file") ? r2 : r1
+    ));
+    for (final Resource resource : resourceMap.values()) {
+      logger.debug("Loading CouchDB design doc: {} ({})", resource.getFilename(), resource.getURI());
       final String js = FileCopyUtils.copyToString(
           new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
       /* Reset designDoc before parsing a new one. */
       engine.eval("var designDoc = null;" + js);
       final Map<String, Object> jsonObject = (Map<String, Object>) engine.eval("jsToJson(designDoc)");
       docs.add(jsonObject);
+    }
+  }
+
+  private static URI getUri(final Resource resource) {
+    try {
+      return resource.getURI();
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
