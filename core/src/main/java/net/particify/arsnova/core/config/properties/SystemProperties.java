@@ -65,6 +65,7 @@ public class SystemProperties {
     private boolean implicitTls;
     private String username;
     private String password;
+    private String localhost;
 
     public String getSenderName() {
       return senderName;
@@ -120,6 +121,14 @@ public class SystemProperties {
 
     public void setPassword(final String password) {
       this.password = password;
+    }
+
+    public String getLocalhost() {
+      return localhost;
+    }
+
+    public void setLocalhost(final String localhost) {
+      this.localhost = localhost;
     }
   }
 
