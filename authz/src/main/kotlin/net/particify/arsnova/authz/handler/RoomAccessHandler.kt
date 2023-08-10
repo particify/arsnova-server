@@ -166,7 +166,7 @@ class RoomAccessHandler(
         roomAccess.role!!
       )
     } catch (ex: EmptyResultDataAccessException) {
-      logger.info("Could not extract result set, most likely due to an already existing creator room access")
+      logger.debug("Could not extract result set, most likely due to an already existing creator room access")
       // Updating lastAccess and returning the existing creator room access
       // I don't know of any scenario where there would not be an existing creator role
       val lastAccess = Date()
