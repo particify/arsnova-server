@@ -6,7 +6,7 @@ extra["gitlabHost"] = "gitlab.com"
 plugins {
   id("com.github.spotbugs") version "5.1.2" apply false
   id("com.google.cloud.tools.jib") version "3.3.2" apply false
-  id("io.freefair.aspectj.post-compile-weaving") version "8.1.0" apply false
+  id("io.freefair.aspectj.post-compile-weaving") version "8.2.1" apply false
   id("org.jlleitschuh.gradle.ktlint") version "11.5.1" apply false
   id("org.springframework.boot") version "3.1.2" apply false
   kotlin("jvm") version "1.9.0" apply false
