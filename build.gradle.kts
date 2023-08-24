@@ -9,9 +9,9 @@ plugins {
   id("io.freefair.aspectj.post-compile-weaving") version "8.2.2" apply false
   id("org.jlleitschuh.gradle.ktlint") version "11.5.1" apply false
   id("org.springframework.boot") version "3.1.2" apply false
-  kotlin("jvm") version "1.9.0" apply false
-  kotlin("plugin.jpa") version "1.9.0" apply false
-  kotlin("plugin.spring") version "1.9.0" apply false
+  kotlin("jvm") version "1.9.10" apply false
+  kotlin("plugin.jpa") version "1.9.10" apply false
+  kotlin("plugin.spring") version "1.9.10" apply false
 }
 
 subprojects {
