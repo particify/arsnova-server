@@ -71,6 +71,8 @@ build_dependency_image:
         - ".docker/images/**/*"
         - ".docker/images/$IMAGE_NAME/**/*"
       when: on_success
+    - if: $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/
+      when: manual
   trigger:
     include: ".docker/images/.gitlab-ci.yml"
     strategy: depend
