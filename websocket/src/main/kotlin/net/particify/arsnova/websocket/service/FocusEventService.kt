@@ -1,7 +1,7 @@
 package net.particify.arsnova.websocket.service
 
 import net.particify.arsnova.websocket.event.FocusEvent
-import net.particify.arsnova.websocket.exception.UnauthorizedException
+import net.particify.arsnova.websocket.exception.ForbiddenException
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.stereotype.Service
 
@@ -24,7 +24,7 @@ class FocusEventService(
         focusEvent
       )
     } else {
-      throw UnauthorizedException()
+      throw ForbiddenException()
     }
   }
 
