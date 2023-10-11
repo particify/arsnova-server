@@ -7,6 +7,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.model.ContentGroup;
+import net.particify.arsnova.core.model.ContentGroupTemplate;
+import net.particify.arsnova.core.model.ContentTemplate;
 
 @Service
 public class SecuredContentGroupService extends AbstractSecuredEntityServiceImpl<ContentGroup>
@@ -60,5 +62,14 @@ public class SecuredContentGroupService extends AbstractSecuredEntityServiceImpl
   @PreAuthorize("hasPermission(#contentGroup, 'update')")
   public void importFromCsv(final byte[] csv, final ContentGroup contentGroup) {
     contentGroupService.importFromCsv(csv, contentGroup);
+  }
+
+  @PreAuthorize("hasPermission(#roomId, 'room', 'update')")
+  @Override
+  public ContentGroup createFromTemplate(
+      final String roomId,
+      final ContentGroupTemplate template,
+      final List<ContentTemplate> contentTemplates) {
+    return contentGroupService.createFromTemplate(roomId, template, contentTemplates);
   }
 }

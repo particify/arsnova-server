@@ -35,12 +35,16 @@ import net.particify.arsnova.core.model.Announcement;
 import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.ContentGroup;
+import net.particify.arsnova.core.model.ContentGroupTemplate;
+import net.particify.arsnova.core.model.ContentTemplate;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.service.AnnouncementService;
 import net.particify.arsnova.core.service.AnswerService;
 import net.particify.arsnova.core.service.ContentGroupService;
+import net.particify.arsnova.core.service.ContentGroupTemplateService;
 import net.particify.arsnova.core.service.ContentService;
+import net.particify.arsnova.core.service.ContentTemplateService;
 import net.particify.arsnova.core.service.RoomService;
 
 /**
@@ -70,19 +74,25 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
   private final ContentGroupService contentGroupService;
   private final AnswerService answerService;
   private final AnnouncementService announcementService;
+  private final ContentGroupTemplateService contentGroupTemplateService;
+  private final ContentTemplateService contentTemplateService;
 
   public ApplicationPermissionEvaluator(
       final RoomService roomService,
       final ContentService contentService,
       final ContentGroupService contentGroupService,
       final AnswerService answerService,
-      final AnnouncementService announcementService
+      final AnnouncementService announcementService,
+      final ContentGroupTemplateService contentGroupTemplateService,
+      final ContentTemplateService contentTemplateService
   ) {
     this.roomService = roomService;
     this.contentService = contentService;
     this.contentGroupService = contentGroupService;
     this.answerService = answerService;
     this.announcementService = announcementService;
+    this.contentGroupTemplateService = contentGroupTemplateService;
+    this.contentTemplateService = contentTemplateService;
   }
 
   @Override
@@ -118,7 +128,13 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
         ((Answer) targetDomainObject), permission.toString()))
         || (targetDomainObject instanceof Announcement
         && hasAnnouncementPermission(authentication,
-        ((Announcement) targetDomainObject), permission.toString()));
+        ((Announcement) targetDomainObject), permission.toString()))
+        || (targetDomainObject instanceof ContentGroupTemplate
+        && hasContentGroupTemplatePermission(authentication,
+        ((ContentGroupTemplate) targetDomainObject), permission.toString()))
+        || (targetDomainObject instanceof ContentTemplate
+        && hasContentTemplatePermission(authentication,
+        ((ContentTemplate) targetDomainObject), permission.toString()));
   }
 
   @Override
@@ -164,6 +180,14 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
           final Announcement targetAnnouncement = announcementService.get(targetId.toString());
           return targetAnnouncement != null
               && hasAnnouncementPermission(authentication, targetAnnouncement, permission.toString());
+        case "contentgrouptemplate":
+          final ContentGroupTemplate targetContentGroupTemplate = contentGroupTemplateService.get(targetId.toString());
+          return targetContentGroupTemplate != null
+              && hasContentGroupTemplatePermission(authentication, targetContentGroupTemplate, permission.toString());
+        case "contenttemplate":
+          final ContentTemplate targetContentTemplate = contentTemplateService.get(targetId.toString());
+          return targetContentTemplate != null
+              && hasContentTemplatePermission(authentication, targetContentTemplate, permission.toString());
         default:
           return false;
       }
@@ -335,6 +359,38 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
         room = roomService.get(targetAnnouncement.getRoomId());
 
         return room != null && (!room.isClosed() || hasAuthenticationRoomModeratingRole(auth, room));
+      default:
+        return false;
+    }
+  }
+
+  private boolean hasContentGroupTemplatePermission(
+      final Authentication auth,
+      final ContentGroupTemplate contentGroupTemplate,
+      final String permission) {
+    switch (permission) {
+      case READ_PERMISSION:
+        return true;
+      case UPDATE_PERMISSION:
+      case DELETE_PERMISSION:
+        final String userId = getUserId(auth);
+        if (userId.isEmpty()) {
+          return false;
+        }
+
+        return userId.equals(contentGroupTemplate.getCreatorId());
+      default:
+        return false;
+    }
+  }
+
+  private boolean hasContentTemplatePermission(
+      final Authentication auth,
+      final ContentTemplate contentTemplate,
+      final String permission) {
+    switch (permission) {
+      case READ_PERMISSION:
+        return true;
       default:
         return false;
     }

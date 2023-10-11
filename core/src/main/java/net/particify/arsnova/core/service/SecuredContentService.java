@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.model.Content;
+import net.particify.arsnova.core.model.ContentTemplate;
 import net.particify.arsnova.core.model.WordcloudContent;
 
 @Service
@@ -61,5 +62,11 @@ public class SecuredContentService extends AbstractSecuredEntityServiceImpl<Cont
   @PreAuthorize("hasPermission(#wordcloudContent, 'moderate')")
   public void clearBannedKeywords(final WordcloudContent wordcloudContent) {
     contentService.clearBannedKeywords(wordcloudContent);
+  }
+
+  @Override
+  @PreAuthorize("hasPermission(#roomId, 'room', 'update')")
+  public List<Content> createFromTemplates(final String roomId, final List<ContentTemplate> templates) {
+    return contentService.createFromTemplates(roomId, templates);
   }
 }

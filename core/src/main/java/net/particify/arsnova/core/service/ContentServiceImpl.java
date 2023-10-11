@@ -34,6 +34,7 @@ import org.springframework.validation.Validator;
 import net.particify.arsnova.core.event.BeforeDeletionEvent;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
+import net.particify.arsnova.core.model.ContentTemplate;
 import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.WordcloudContent;
@@ -165,5 +166,18 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
   public void clearBannedKeywords(final WordcloudContent wordcloudContent) {
     wordcloudContent.getBannedKeywords().clear();
     update(wordcloudContent);
+  }
+
+  @Override
+  public List<Content> createFromTemplates(final String roomId, final List<ContentTemplate> templates) {
+    final List<Content> contents = templates.stream()
+        .map(t -> {
+          final Content copy = t.getContent().copy();
+          copy.setTemplateId(t.getId());
+          copy.setRoomId(roomId);
+          return copy;
+        })
+        .collect(Collectors.toList());
+    return create(contents);
   }
 }

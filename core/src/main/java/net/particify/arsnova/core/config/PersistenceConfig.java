@@ -34,7 +34,9 @@ import net.particify.arsnova.core.persistence.AccessTokenRepository;
 import net.particify.arsnova.core.persistence.AnnouncementRepository;
 import net.particify.arsnova.core.persistence.AnswerRepository;
 import net.particify.arsnova.core.persistence.ContentGroupRepository;
+import net.particify.arsnova.core.persistence.ContentGroupTemplateRepository;
 import net.particify.arsnova.core.persistence.ContentRepository;
+import net.particify.arsnova.core.persistence.ContentTemplateRepository;
 import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.persistence.RoomRepository;
 import net.particify.arsnova.core.persistence.StatisticsRepository;
@@ -43,7 +45,9 @@ import net.particify.arsnova.core.persistence.couchdb.CouchDbAccessTokenReposito
 import net.particify.arsnova.core.persistence.couchdb.CouchDbAnnouncementRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbAnswerRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbContentGroupRepository;
+import net.particify.arsnova.core.persistence.couchdb.CouchDbContentGroupTemplateRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbContentRepository;
+import net.particify.arsnova.core.persistence.couchdb.CouchDbContentTemplateRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbDeletionRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbRoomRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbStatisticsRepository;
@@ -119,8 +123,18 @@ public class PersistenceConfig {
   }
 
   @Bean
+  public ContentTemplateRepository contentTemplateRepository() throws Exception {
+    return new CouchDbContentTemplateRepository(couchDbConnector(), false);
+  }
+
+  @Bean
   public ContentGroupRepository contentGroupRepository() throws Exception {
     return new CouchDbContentGroupRepository(couchDbConnector(), false);
+  }
+
+  @Bean
+  public ContentGroupTemplateRepository contentGroupTemplateRepository() throws Exception {
+    return new CouchDbContentGroupTemplateRepository(couchDbConnector(), false);
   }
 
   @Bean

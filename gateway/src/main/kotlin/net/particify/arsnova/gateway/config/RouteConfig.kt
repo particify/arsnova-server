@@ -200,6 +200,20 @@ class RouteConfig(
           .uri(httpGatewayProperties.routing.endpoints.core)
       },
 
+      RouteBuilderSpec("content-group-templates") { p ->
+        p
+          .path(
+            "/template/content/**",
+            "/template/contentgroup/**"
+          )
+          .filters { f ->
+            f.requestRateLimiter { r ->
+              r.rateLimiter = requestRateLimiter
+            }
+          }
+          .uri(httpGatewayProperties.routing.endpoints.core)
+      },
+
       RouteBuilderSpec("core-without-room-auth") { p ->
         p
           .path(

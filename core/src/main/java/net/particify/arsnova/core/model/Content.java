@@ -152,6 +152,7 @@ public class Content extends Entity implements RoomIdAware {
   private String additionalText;
   private String renderedAdditionalText;
   private String additionalTextTitle;
+  private String templateId;
 
   private TextRenderingOptions bodyRenderingOptions;
 
@@ -184,6 +185,7 @@ public class Content extends Entity implements RoomIdAware {
     this.timestamp = content.timestamp;
     this.additionalText = content.additionalText;
     this.additionalTextTitle = content.additionalTextTitle;
+    this.templateId = content.templateId;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
@@ -317,6 +319,16 @@ public class Content extends Entity implements RoomIdAware {
   @JsonView({View.Persistence.class, View.Public.class})
   public void setAbstentionsAllowed(final boolean abstentionsAllowed) {
     this.abstentionsAllowed = abstentionsAllowed;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getTemplateId() {
+    return templateId;
+  }
+
+  @JsonView(View.Persistence.class)
+  public void setTemplateId(final String templateId) {
+    this.templateId = templateId;
   }
 
   @JsonView(View.Public.class)

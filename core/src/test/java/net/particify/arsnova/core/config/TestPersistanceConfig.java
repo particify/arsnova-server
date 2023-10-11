@@ -28,7 +28,9 @@ import net.particify.arsnova.core.persistence.AccessTokenRepository;
 import net.particify.arsnova.core.persistence.AnnouncementRepository;
 import net.particify.arsnova.core.persistence.AnswerRepository;
 import net.particify.arsnova.core.persistence.ContentGroupRepository;
+import net.particify.arsnova.core.persistence.ContentGroupTemplateRepository;
 import net.particify.arsnova.core.persistence.ContentRepository;
+import net.particify.arsnova.core.persistence.ContentTemplateRepository;
 import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.persistence.RoomRepository;
 import net.particify.arsnova.core.persistence.StatisticsRepository;
@@ -52,7 +54,13 @@ public class TestPersistanceConfig {
   private ContentRepository contentRepository;
 
   @MockBean
+  private ContentTemplateRepository contentTemplateRepository;
+
+  @MockBean
   private ContentGroupRepository contentGroupRepository;
+
+  @MockBean
+  private ContentGroupTemplateRepository contentGroupTemplateRepository;
 
   @MockBean
   private AnswerRepository answerRepository;
