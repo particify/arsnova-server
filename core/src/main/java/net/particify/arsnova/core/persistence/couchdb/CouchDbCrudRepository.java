@@ -42,7 +42,7 @@ abstract class CouchDbCrudRepository<T extends Entity>
     extends CouchDbRepositorySupport<T> implements CrudRepository<T, String>, ApplicationEventPublisherAware {
   protected ApplicationEventPublisher applicationEventPublisher;
 
-  private final Class<T> type;
+  protected final Class<T> type;
   private String countableAllViewName;
 
   protected CouchDbCrudRepository(
