@@ -336,6 +336,13 @@ public class Content extends Entity implements RoomIdAware {
     return new AnswerResult(this.id, 0, this.getPoints(), state);
   }
 
+  /**
+   * Creates a deep copy of a Content. Some fields for persistence are ignored.
+   */
+  public Content copy() {
+    return new Content(this);
+  }
+
   @JsonView(View.Persistence.class)
   @Override
   public Class<? extends Entity> getType() {

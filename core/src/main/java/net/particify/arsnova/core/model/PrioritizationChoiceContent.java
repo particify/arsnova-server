@@ -27,6 +27,11 @@ public class PrioritizationChoiceContent extends ChoiceQuestionContent {
     this.assignablePoints = assignablePoints;
   }
 
+  @Override
+  public PrioritizationChoiceContent copy() {
+    return new PrioritizationChoiceContent(this);
+  }
+
   /**
    * {@inheritDoc}
    *
