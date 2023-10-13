@@ -22,8 +22,8 @@ public class SecuredContentGroupTemplateService
 
   @Override
   @PreAuthorize("isAuthenticated")
-  public List<ContentGroupTemplate> getByTags(final List<String> tags) {
-    return contentGroupTemplateService.getByTags(tags);
+  public List<ContentGroupTemplate> getByTagIds(final List<String> tags) {
+    return contentGroupTemplateService.getByTagIds(tags);
   }
 
   @Override

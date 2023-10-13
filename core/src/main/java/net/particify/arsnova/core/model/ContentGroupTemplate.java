@@ -21,7 +21,8 @@ public class ContentGroupTemplate extends Entity {
   private String license;
 
   private List<String> templateIds;
-  private List<String> tags;
+  private List<String> tagIds;
+  private List<TemplateTag> tags;
 
   private String creatorId;
 
@@ -75,13 +76,23 @@ public class ContentGroupTemplate extends Entity {
     this.templateIds = templateIds;
   }
 
-  @JsonView({View.Persistence.class, View.Public.class})
-  public List<String> getTags() {
+  @JsonView(View.Persistence.class)
+  public List<String> getTagIds() {
+    return tagIds;
+  }
+
+  @JsonView(View.Persistence.class)
+  public void setTagIds(final List<String> tagIds) {
+    this.tagIds = tagIds;
+  }
+
+  @JsonView(View.Public.class)
+  public List<TemplateTag> getTags() {
     return tags;
   }
 
-  @JsonView({View.Persistence.class, View.Public.class})
-  public void setTags(final List<String> tags) {
+  @JsonView(View.Public.class)
+  public void setTags(final List<TemplateTag> tags) {
     this.tags = tags;
   }
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import net.particify.arsnova.core.model.ContentGroup;
 import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.model.ContentTemplate;
+import net.particify.arsnova.core.model.TemplateTag;
 import net.particify.arsnova.core.service.ContentGroupService;
 import net.particify.arsnova.core.service.ContentGroupTemplateService;
 import net.particify.arsnova.core.service.ContentTemplateService;
@@ -37,9 +38,9 @@ public class TemplateController extends AbstractEntityController<ContentGroupTem
     this.contentGroupService = contentGroupService;
   }
 
-  @GetMapping(value = DEFAULT_ROOT_MAPPING, params = {"tags"})
-  public List<ContentGroupTemplate> getContentGroupTemplates(@RequestParam final List<String> tags) {
-    return contentGroupTemplateService.getByTags(tags);
+  @GetMapping(value = DEFAULT_ROOT_MAPPING, params = {"tagIds"})
+  public List<ContentGroupTemplate> getContentGroupTemplates(@RequestParam final List<String> tagIds) {
+    return contentGroupTemplateService.getByTagIds(tagIds);
   }
 
   @GetMapping(value = DEFAULT_ROOT_MAPPING, params = {"creatorId"})
@@ -79,7 +80,7 @@ public class TemplateController extends AbstractEntityController<ContentGroupTem
       String language,
       String license,
       String contentGroupId,
-      List<String> tags) {
+      List<TemplateTag> tags) {
   }
 
   public record CreateCopyRequestEntity(String roomId) {

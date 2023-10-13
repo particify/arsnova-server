@@ -21,13 +21,13 @@ public class CouchDbContentGroupTemplateRepository
 
   @PostConstruct
   public void createIndexes() {
-    createTagsIndex();
+    createTagIdsIndex();
     createCreatorIdIndex();
   }
 
-  private void createTagsIndex() {
+  private void createTagIdsIndex() {
     final List<MangoCouchDbConnector.MangoQuery.Sort> fields = List.of(
-        new MangoCouchDbConnector.MangoQuery.Sort("tags", false)
+        new MangoCouchDbConnector.MangoQuery.Sort("tagIds", false)
     );
     final Map<String, Object> filterSelector = Map.of(
         "type", type.getSimpleName()
@@ -46,10 +46,10 @@ public class CouchDbContentGroupTemplateRepository
   }
 
   @Override
-  public List<ContentGroupTemplate> findByTags(final List<String> tags) {
+  public List<ContentGroupTemplate> findByTagIds(final List<String> tagIds) {
     final Map<String, Object> querySelector = Map.of(
         "type", type.getSimpleName(),
-        "tags", Map.of("$all", tags)
+        "tagIds", Map.of("$all", tagIds)
     );
     final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(querySelector);
     query.setIndexDocument(TAGS_INDEX_NAME);
