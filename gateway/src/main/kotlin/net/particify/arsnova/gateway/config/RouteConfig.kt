@@ -204,7 +204,8 @@ class RouteConfig(
         p
           .path(
             "/template/content/**",
-            "/template/contentgroup/**"
+            "/template/contentgroup/**",
+            "/template/tag/**"
           )
           .filters { f ->
             f.requestRateLimiter { r ->

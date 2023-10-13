@@ -40,6 +40,7 @@ import net.particify.arsnova.core.persistence.ContentTemplateRepository;
 import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.persistence.RoomRepository;
 import net.particify.arsnova.core.persistence.StatisticsRepository;
+import net.particify.arsnova.core.persistence.TemplateTagRepository;
 import net.particify.arsnova.core.persistence.UserRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbAccessTokenRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbAnnouncementRepository;
@@ -51,6 +52,7 @@ import net.particify.arsnova.core.persistence.couchdb.CouchDbContentTemplateRepo
 import net.particify.arsnova.core.persistence.couchdb.CouchDbDeletionRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbRoomRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbStatisticsRepository;
+import net.particify.arsnova.core.persistence.couchdb.CouchDbTemplateTagRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbUserRepository;
 import net.particify.arsnova.core.persistence.couchdb.support.MangoCouchDbConnector;
 import net.particify.arsnova.core.persistence.couchdb.support.http.PatchedHttpClientFactoryBean;
@@ -150,6 +152,11 @@ public class PersistenceConfig {
   @Bean
   public AccessTokenRepository accessTokenRepository() throws Exception {
     return new CouchDbAccessTokenRepository(couchDbConnector(), false);
+  }
+
+  @Bean
+  public TemplateTagRepository templateTagRepository() throws Exception {
+    return new CouchDbTemplateTagRepository(couchDbConnector(), false);
   }
 
   @Bean

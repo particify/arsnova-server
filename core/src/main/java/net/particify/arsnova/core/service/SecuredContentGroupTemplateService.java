@@ -21,7 +21,7 @@ public class SecuredContentGroupTemplateService
   // been implemented.
 
   @Override
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("isAuthenticated")
   public List<ContentGroupTemplate> getByTags(final List<String> tags) {
     return contentGroupTemplateService.getByTags(tags);
   }

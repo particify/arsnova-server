@@ -34,6 +34,7 @@ import net.particify.arsnova.core.persistence.ContentTemplateRepository;
 import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.persistence.RoomRepository;
 import net.particify.arsnova.core.persistence.StatisticsRepository;
+import net.particify.arsnova.core.persistence.TemplateTagRepository;
 import net.particify.arsnova.core.persistence.UserRepository;
 import net.particify.arsnova.core.persistence.couchdb.support.MangoCouchDbConnector;
 
@@ -67,6 +68,9 @@ public class TestPersistanceConfig {
 
   @MockBean
   private AnnouncementRepository announcementRepository;
+
+  @MockBean
+  private TemplateTagRepository templateTagRepository;
 
   @MockBean
   private StatisticsRepository statisticsRepository;
