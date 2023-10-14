@@ -204,8 +204,9 @@ class RouteConfig(
         p
           .path(
             "/auth/**",
-            "/user/**",
-            "/configuration/**"
+            "/configuration/**",
+            "/language/**",
+            "/user/**"
           )
           .filters { f ->
             f.requestRateLimiter { r ->
