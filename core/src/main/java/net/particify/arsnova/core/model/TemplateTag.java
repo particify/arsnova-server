@@ -4,13 +4,15 @@ import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.constraints.NotBlank;
 
 import net.particify.arsnova.core.model.serialization.View;
+import net.particify.arsnova.core.validation.LanguageIso639;
 
 public class TemplateTag extends Entity {
   @NotBlank
   private String name;
 
   private boolean verified;
-
+  
+  @LanguageIso639
   private String language;
 
   public TemplateTag() {

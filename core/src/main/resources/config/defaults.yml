@@ -265,6 +265,19 @@ arsnova:
       {2}
 
   ##############################################################################
+  # Presets
+  ##############################################################################
+  presets:
+    # Do not change/remove licenses for which templates already exist. Use SPDX
+    # identifiers to reference free and open licenses.
+    template-licenses:
+      - CC0-1.0
+      - CC-BY-4.0
+      - CC-BY-SA-4.0
+      - CC-BY-NC-4.0
+      - CC-BY-NC-SA-4.0
+
+  ##############################################################################
   # User interface
   ##############################################################################
   ui:

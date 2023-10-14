@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 
 import net.particify.arsnova.core.model.serialization.View;
+import net.particify.arsnova.core.validation.LanguageIso639;
+import net.particify.arsnova.core.validation.TemplateLicense;
 
 public class ContentGroupTemplate extends Entity {
   @NotBlank
@@ -15,9 +17,10 @@ public class ContentGroupTemplate extends Entity {
   @Size(max = 250)
   private String description;
 
+  @LanguageIso639
   private String language;
 
-  @NotBlank
+  @TemplateLicense
   private String license;
 
   private List<String> templateIds;

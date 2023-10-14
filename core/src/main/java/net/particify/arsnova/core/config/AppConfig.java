@@ -56,6 +56,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import net.particify.arsnova.connector.client.ConnectorClient;
 import net.particify.arsnova.connector.client.ConnectorClientImpl;
+import net.particify.arsnova.core.config.properties.PresetsProperties;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties.Mail;
@@ -75,6 +76,7 @@ import net.particify.arsnova.core.web.PathBasedContentNegotiationStrategy;
  */
 @Configuration
 @EnableConfigurationProperties({
+    PresetsProperties.class,
     SystemProperties.class,
     TemplateProperties.class})
 public class AppConfig implements WebMvcConfigurer {
