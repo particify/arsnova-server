@@ -14,6 +14,7 @@ plugins {
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 dependencies {
+  implementation(platform(project(":platform")))
   implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
   implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -33,7 +34,7 @@ dependencies {
   testImplementation("org.springframework.amqp:spring-rabbit-test")
   testImplementation("io.projectreactor:reactor-test")
   testImplementation("com.h2database:h2")
-  compileOnly("com.github.spotbugs:spotbugs-annotations:${property("spotbugsAnnotationsVersion")}")
+  compileOnly("com.github.spotbugs:spotbugs-annotations")
 }
 
 tasks.withType<KotlinCompile> {

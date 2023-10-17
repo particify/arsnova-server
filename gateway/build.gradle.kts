@@ -13,8 +13,9 @@ plugins {
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 dependencies {
+  implementation(platform(project(":platform")))
   implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
-  implementation(platform("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}"))
+  implementation(platform(libs.spring.cloud))
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
   implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
@@ -25,13 +26,13 @@ dependencies {
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("io.projectreactor:reactor-tools")
   implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-  implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:${property("bucket4jVersion")}")
-  implementation("com.auth0:java-jwt:${property("javaJwtVersion")}")
+  implementation("com.github.vladimir-bukhtoyarov:bucket4j-core")
+  implementation("com.auth0:java-jwt")
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("io.projectreactor:reactor-test")
-  compileOnly("com.github.spotbugs:spotbugs-annotations:${property("spotbugsAnnotationsVersion")}")
+  compileOnly("com.github.spotbugs:spotbugs-annotations")
 }
 
 tasks.withType<KotlinCompile> {
