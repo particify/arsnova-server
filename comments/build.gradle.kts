@@ -10,18 +10,19 @@ plugins {
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 dependencies {
+  implementation(platform(project(":platform")))
   implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-amqp")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
-  implementation("com.auth0:java-jwt:${property("javaJwtVersion")}")
+  implementation("com.auth0:java-jwt")
   implementation("org.postgresql:postgresql")
   implementation("org.flywaydb:flyway-core")
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
-  compileOnly("com.github.spotbugs:spotbugs-annotations:${property("spotbugsAnnotationsVersion")}")
+  compileOnly("com.github.spotbugs:spotbugs-annotations")
 }
 
 tasks.withType<Test> {

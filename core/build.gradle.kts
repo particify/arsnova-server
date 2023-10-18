@@ -14,9 +14,6 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 repositories {
   mavenCentral()
   maven {
-    url = uri("https://repo.spring.io/milestone")
-  }
-  maven {
     url = uri("https://build.shibboleth.net/nexus/content/repositories/releases/")
   }
   maven {
@@ -25,6 +22,7 @@ repositories {
 }
 
 dependencies {
+  implementation(platform(project(":platform")))
   implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-amqp")
@@ -40,25 +38,25 @@ dependencies {
   implementation("org.springframework.security:spring-security-aspects")
   implementation("org.springframework.security:spring-security-cas")
   implementation("org.springframework.security:spring-security-ldap")
-  implementation("org.aspectj:aspectjrt:${property("aspectjRtVersion")}")
+  implementation("org.aspectj:aspectjrt")
   implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.github.ben-manes.caffeine:caffeine")
-  implementation("com.auth0:java-jwt:${property("javaJwtVersion")}")
-  implementation("org.pac4j:pac4j-jakartaee:${property("pac4jVersion")}")
-  implementation("org.pac4j:pac4j-oauth:${property("pac4jVersion")}")
-  implementation("org.pac4j:pac4j-oidc:${property("pac4jVersion")}")
-  implementation("org.pac4j:pac4j-saml:${property("pac4jVersion")}")
-  implementation("org.ektorp:org.ektorp:${property("ektorpVersion")}")
-  implementation("org.ektorp:org.ektorp.spring:${property("ektorpVersion")}")
-  implementation("org.graalvm.js:js-scriptengine:${property("graalvmVersion")}")
-  implementation("org.graalvm.polyglot:js-community:${property("graalvmVersion")}")
-  implementation("net.particify.arsnova.integrations:connector-client:${property("connectorClientVersion")}")
+  implementation("com.auth0:java-jwt")
+  implementation("org.pac4j:pac4j-jakartaee")
+  implementation("org.pac4j:pac4j-oauth")
+  implementation("org.pac4j:pac4j-oidc")
+  implementation("org.pac4j:pac4j-saml")
+  implementation("org.ektorp:org.ektorp")
+  implementation("org.ektorp:org.ektorp.spring")
+  implementation("org.graalvm.js:js-scriptengine")
+  implementation("org.graalvm.polyglot:js-community")
+  implementation("net.particify.arsnova.integrations:connector-client")
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.security:spring-security-test")
   compileOnly("org.springframework.boot:spring-boot-devtools")
-  compileOnly("com.github.spotbugs:spotbugs-annotations:${property("spotbugsAnnotationsVersion")}")
+  compileOnly("com.github.spotbugs:spotbugs-annotations")
   aspect(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   aspect("org.springframework:spring-aspects")
   aspect("org.springframework.security:spring-security-aspects")
@@ -83,7 +81,7 @@ tasks.jacocoTestReport {
 }
 
 checkstyle {
-  toolVersion = "${property("checkstyleVersion")}"
+  toolVersion = libs.versions.checkstyle.get()
   configFile = file("$projectDir/checkstyle.xml")
   configProperties = mapOf(
     "checkstyle.missing-javadoc.severity" to "info"

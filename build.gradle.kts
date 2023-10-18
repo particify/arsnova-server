@@ -4,14 +4,14 @@ version = "0.0.1-SNAPSHOT"
 extra["gitlabHost"] = "gitlab.com"
 
 plugins {
-  id("com.github.spotbugs") version "5.1.4" apply false
-  id("com.google.cloud.tools.jib") version "3.4.0" apply false
-  id("io.freefair.aspectj.post-compile-weaving") version "8.4" apply false
-  id("org.jlleitschuh.gradle.ktlint") version "11.6.1" apply false
-  id("org.springframework.boot") version "3.1.4" apply false
-  kotlin("jvm") version "1.9.10" apply false
-  kotlin("plugin.jpa") version "1.9.10" apply false
-  kotlin("plugin.spring") version "1.9.10" apply false
+  alias(libs.plugins.spotbugs) apply false
+  alias(libs.plugins.jib) apply false
+  alias(libs.plugins.aspectj) apply false
+  alias(libs.plugins.ktlint) apply false
+  alias(libs.plugins.spring.boot) apply false
+  alias(libs.plugins.kotlin.jvm) apply false
+  alias(libs.plugins.kotlin.jpa) apply false
+  alias(libs.plugins.kotlin.spring) apply false
 }
 
 subprojects {
