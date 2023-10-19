@@ -24,6 +24,7 @@ build_project:
       changes:
         - "*"
         - ".gitlab/ci/**/*"
+        - ".gradle/**"
         - "$PROJECT/**/*"
       when: on_success
     - if: $CI_COMMIT_BRANCH =~ /^renovate\//
@@ -31,6 +32,7 @@ build_project:
         paths:
           - "*"
           - ".gitlab/ci/**/*"
+          - ".gradle/**"
           - "$PROJECT/**/*"
         # GitLab does not support variables in compare_to (tested against 15.5)
         #compare_to: $CI_DEFAULT_BRANCH
