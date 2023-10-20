@@ -53,6 +53,16 @@ public class ContentGroupTemplateServiceImpl
   }
 
   @Override
+  public List<ContentGroupTemplate> getTopByLanguageOrderedByCreationTimestampDesc(
+      final String language,
+      final int topCount) {
+    final List<ContentGroupTemplate> templates =
+        contentGroupTemplateRepository.findTopByLanguageOrderByCreationTimestampDesc(language, topCount);
+    templates.forEach(t -> t.setTags(templateTagService.get(t.getTagIds())));
+    return templates;
+  }
+
+  @Override
   public List<ContentGroupTemplate> getByTagIds(final List<String> tagIds) {
     final List<ContentGroupTemplate> templates = contentGroupTemplateRepository.findByTagIds(tagIds);
     templates.forEach(t -> t.setTags(templateTagService.get(t.getTagIds())));

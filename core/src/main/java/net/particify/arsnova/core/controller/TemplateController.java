@@ -38,6 +38,11 @@ public class TemplateController extends AbstractEntityController<ContentGroupTem
     this.contentGroupService = contentGroupService;
   }
 
+  @GetMapping(value = DEFAULT_ROOT_MAPPING, params = {"language"})
+  public List<ContentGroupTemplate> getContentGroupTemplatesByLanguage(@RequestParam final String language) {
+    return contentGroupTemplateService.getTopByLanguageOrderedByCreationTimestampDesc(language, 50);
+  }
+
   @GetMapping(value = DEFAULT_ROOT_MAPPING, params = {"tagIds"})
   public List<ContentGroupTemplate> getContentGroupTemplates(@RequestParam final List<String> tagIds) {
     return contentGroupTemplateService.getByTagIds(tagIds);

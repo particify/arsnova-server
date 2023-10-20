@@ -21,6 +21,13 @@ public class SecuredContentGroupTemplateService
   // been implemented.
 
   @Override
+  public List<ContentGroupTemplate> getTopByLanguageOrderedByCreationTimestampDesc(
+      final String language,
+      final int topCount) {
+    return contentGroupTemplateService.getTopByLanguageOrderedByCreationTimestampDesc(language, topCount);
+  }
+
+  @Override
   @PreAuthorize("isAuthenticated")
   public List<ContentGroupTemplate> getByTagIds(final List<String> tags) {
     return contentGroupTemplateService.getByTagIds(tags);

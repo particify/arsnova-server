@@ -23,6 +23,7 @@ public class CouchDbContentGroupTemplateRepository
   public void createIndexes() {
     createTagIdsIndex();
     createCreatorIdIndex();
+    createLanguageAndCreationTimestampDescIndex();
   }
 
   private void createTagIdsIndex() {
@@ -43,6 +44,33 @@ public class CouchDbContentGroupTemplateRepository
         "type", type.getSimpleName()
     );
     db.createPartialJsonIndex(TAGS_INDEX_NAME, fields, filterSelector);
+  }
+
+  private void createLanguageAndCreationTimestampDescIndex() {
+    final List<MangoCouchDbConnector.MangoQuery.Sort> fields = List.of(
+        new MangoCouchDbConnector.MangoQuery.Sort("language", true),
+        new MangoCouchDbConnector.MangoQuery.Sort("creationTimestamp", true)
+    );
+    final Map<String, Object> filterSelector = Map.of(
+        "type", type.getSimpleName()
+    );
+    db.createPartialJsonIndex(TAGS_INDEX_NAME, fields, filterSelector);
+  }
+
+  @Override
+  public List<ContentGroupTemplate> findTopByLanguageOrderByCreationTimestampDesc(
+      final String language,
+      final int topCount) {
+    final Map<String, Object> querySelector = Map.of(
+        "type", type.getSimpleName(),
+        "language", language,
+        "creationTimestamp", Map.of("$exists", true)
+    );
+    final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(querySelector);
+    query.setIndexDocument(TAGS_INDEX_NAME);
+    query.setSort(List.of(new MangoCouchDbConnector.MangoQuery.Sort("creationTimestamp", true)));
+    query.setLimit(topCount);
+    return db.query(query, type);
   }
 
   @Override
