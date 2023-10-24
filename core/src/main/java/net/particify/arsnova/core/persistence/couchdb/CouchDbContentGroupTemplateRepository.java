@@ -48,6 +48,7 @@ public class CouchDbContentGroupTemplateRepository
 
   private void createLanguageAndCreationTimestampDescIndex() {
     final List<MangoCouchDbConnector.MangoQuery.Sort> fields = List.of(
+        new MangoCouchDbConnector.MangoQuery.Sort("verified", true),
         new MangoCouchDbConnector.MangoQuery.Sort("language", true),
         new MangoCouchDbConnector.MangoQuery.Sort("creationTimestamp", true)
     );
@@ -58,11 +59,13 @@ public class CouchDbContentGroupTemplateRepository
   }
 
   @Override
-  public List<ContentGroupTemplate> findTopByLanguageOrderByCreationTimestampDesc(
+  public List<ContentGroupTemplate> findTopByVerifiedAndLanguageOrderByCreationTimestampDesc(
+      final boolean verified,
       final String language,
       final int topCount) {
     final Map<String, Object> querySelector = Map.of(
         "type", type.getSimpleName(),
+        "verified", verified,
         "language", language,
         "creationTimestamp", Map.of("$exists", true)
     );
@@ -74,9 +77,10 @@ public class CouchDbContentGroupTemplateRepository
   }
 
   @Override
-  public List<ContentGroupTemplate> findByTagIds(final List<String> tagIds) {
+  public List<ContentGroupTemplate> findByVerifiedAndTagIds(final boolean verified, final List<String> tagIds) {
     final Map<String, Object> querySelector = Map.of(
         "type", type.getSimpleName(),
+        "verified", verified,
         "tagIds", Map.of("$all", tagIds)
     );
     final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(querySelector);

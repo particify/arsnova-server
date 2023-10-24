@@ -5,9 +5,12 @@ import java.util.List;
 import net.particify.arsnova.core.model.ContentGroupTemplate;
 
 public interface ContentGroupTemplateRepository extends CrudRepository<ContentGroupTemplate, String> {
-  List<ContentGroupTemplate> findTopByLanguageOrderByCreationTimestampDesc(String language, int topCount);
+  List<ContentGroupTemplate> findTopByVerifiedAndLanguageOrderByCreationTimestampDesc(
+      boolean verified,
+      String language,
+      int topCount);
 
-  List<ContentGroupTemplate> findByTagIds(List<String> tags);
+  List<ContentGroupTemplate> findByVerifiedAndTagIds(boolean verified, List<String> tags);
 
   List<ContentGroupTemplate> findByCreatorId(String creatorId);
 }

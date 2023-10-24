@@ -21,16 +21,18 @@ public class SecuredContentGroupTemplateService
   // been implemented.
 
   @Override
-  public List<ContentGroupTemplate> getTopByLanguageOrderedByCreationTimestampDesc(
+  public List<ContentGroupTemplate> getTopByVerifiedAndLanguageOrderedByCreationTimestampDesc(
+      final boolean verified,
       final String language,
       final int topCount) {
-    return contentGroupTemplateService.getTopByLanguageOrderedByCreationTimestampDesc(language, topCount);
+    return contentGroupTemplateService
+        .getTopByVerifiedAndLanguageOrderedByCreationTimestampDesc(verified, language, topCount);
   }
 
   @Override
   @PreAuthorize("isAuthenticated")
-  public List<ContentGroupTemplate> getByTagIds(final List<String> tags) {
-    return contentGroupTemplateService.getByTagIds(tags);
+  public List<ContentGroupTemplate> getByVerifiedAndTagIds(final boolean verified, final List<String> tags) {
+    return contentGroupTemplateService.getByVerifiedAndTagIds(verified, tags);
   }
 
   @Override
@@ -43,5 +45,11 @@ public class SecuredContentGroupTemplateService
   @PreAuthorize("!hasRole('GUEST_USER')")
   public ContentGroupTemplate createFromContentGroup(final String id, final ContentGroupTemplate contentGroupTemplate) {
     return contentGroupTemplateService.createFromContentGroup(id, contentGroupTemplate);
+  }
+
+  @Override
+  @PreAuthorize("hasRole('ADMIN')")
+  public ContentGroupTemplate verify(final String id, final boolean verify) {
+    return contentGroupTemplateService.verify(id, verify);
   }
 }
