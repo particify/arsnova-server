@@ -53,20 +53,18 @@ public class ContentGroupTemplateServiceImpl
   }
 
   @Override
-  public List<ContentGroupTemplate> getTopByVerifiedAndLanguageOrderedByCreationTimestampDesc(
-      final boolean verified,
+  public List<ContentGroupTemplate> getTopByLanguageOrderedByCreationTimestampDesc(
       final String language,
       final int topCount) {
-    final List<ContentGroupTemplate> templates = contentGroupTemplateRepository
-        .findTopByVerifiedAndLanguageOrderByCreationTimestampDesc(verified, language, topCount);
+    final List<ContentGroupTemplate> templates =
+        contentGroupTemplateRepository.findTopByLanguageOrderByCreationTimestampDesc(language, topCount);
     templates.forEach(t -> t.setTags(templateTagService.get(t.getTagIds())));
     return templates;
   }
 
   @Override
-  public List<ContentGroupTemplate> getByVerifiedAndTagIds(final boolean verified, final List<String> tagIds) {
-    final List<ContentGroupTemplate> templates = contentGroupTemplateRepository
-        .findByVerifiedAndTagIds(verified, tagIds);
+  public List<ContentGroupTemplate> getByTagIds(final List<String> tagIds) {
+    final List<ContentGroupTemplate> templates = contentGroupTemplateRepository.findByTagIds(tagIds);
     templates.forEach(t -> t.setTags(templateTagService.get(t.getTagIds())));
     return templates;
   }
@@ -91,13 +89,6 @@ public class ContentGroupTemplateServiceImpl
     template.setTemplateIds(ids);
     resolveAndCreateTags(template);
     return create(template);
-  }
-
-  @Override
-  public ContentGroupTemplate verify(final String id, final boolean verify) {
-    final ContentGroupTemplate template = get(id);
-    template.setVerified(verify);
-    return update(template);
   }
 
   private void resolveAndCreateTags(final ContentGroupTemplate template) {

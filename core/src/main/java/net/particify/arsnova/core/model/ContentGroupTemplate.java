@@ -23,8 +23,6 @@ public class ContentGroupTemplate extends Entity {
   @TemplateLicense
   private String license;
 
-  private boolean verified;
-
   private List<String> templateIds;
   private List<String> tagIds;
   private List<TemplateTag> tags;
@@ -69,16 +67,6 @@ public class ContentGroupTemplate extends Entity {
   @JsonView({View.Persistence.class, View.Public.class})
   public void setLicense(final String license) {
     this.license = license;
-  }
-
-  @JsonView({View.Persistence.class, View.Public.class})
-  public boolean isVerified() {
-    return verified;
-  }
-
-  @JsonView(View.Persistence.class)
-  public void setVerified(final boolean verified) {
-    this.verified = verified;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})

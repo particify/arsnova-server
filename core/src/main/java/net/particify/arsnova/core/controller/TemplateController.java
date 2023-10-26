@@ -23,7 +23,6 @@ public class TemplateController extends AbstractEntityController<ContentGroupTem
   public static final String REQUEST_MAPPING = "/template/contentgroup";
   private static final String FROM_EXISTING_MAPPING = "/from-existing";
   private static final String CREATE_COPY_MAPPING = DEFAULT_ID_MAPPING + "/create-copy";
-  private static final String VERIFY_MAPPING = DEFAULT_ID_MAPPING + "/verify";
 
   private final ContentGroupTemplateService contentGroupTemplateService;
   private final ContentTemplateService contentTemplateService;
@@ -40,18 +39,13 @@ public class TemplateController extends AbstractEntityController<ContentGroupTem
   }
 
   @GetMapping(value = DEFAULT_ROOT_MAPPING, params = {"language"})
-  public List<ContentGroupTemplate> getContentGroupTemplatesByLanguage(
-      @RequestParam(defaultValue = "true") final boolean verified,
-      @RequestParam final String language) {
-    return contentGroupTemplateService
-        .getTopByVerifiedAndLanguageOrderedByCreationTimestampDesc(verified, language, 50);
+  public List<ContentGroupTemplate> getContentGroupTemplatesByLanguage(@RequestParam final String language) {
+    return contentGroupTemplateService.getTopByLanguageOrderedByCreationTimestampDesc(language, 50);
   }
 
   @GetMapping(value = DEFAULT_ROOT_MAPPING, params = {"tagIds"})
-  public List<ContentGroupTemplate> getContentGroupTemplates(
-      @RequestParam(defaultValue = "true") final boolean verified,
-      @RequestParam final List<String> tagIds) {
-    return contentGroupTemplateService.getByVerifiedAndTagIds(verified, tagIds);
+  public List<ContentGroupTemplate> getContentGroupTemplates(@RequestParam final List<String> tagIds) {
+    return contentGroupTemplateService.getByTagIds(tagIds);
   }
 
   @GetMapping(value = DEFAULT_ROOT_MAPPING, params = {"creatorId"})
@@ -69,13 +63,6 @@ public class TemplateController extends AbstractEntityController<ContentGroupTem
     contentGroupTemplate.setLicense(requestEntity.license);
     contentGroupTemplate.setTags(requestEntity.tags);
     return contentGroupTemplateService.createFromContentGroup(requestEntity.contentGroupId, contentGroupTemplate);
-  }
-
-  @PostMapping(value = VERIFY_MAPPING)
-  public ContentGroupTemplate verify(
-      @PathVariable final String id,
-      @RequestParam(defaultValue = "true") final boolean verify) {
-    return contentGroupTemplateService.verify(id, verify);
   }
 
   @PostMapping(CREATE_COPY_MAPPING)
