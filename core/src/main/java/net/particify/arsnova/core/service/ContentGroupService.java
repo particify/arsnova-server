@@ -3,6 +3,8 @@ package net.particify.arsnova.core.service;
 import java.util.List;
 
 import net.particify.arsnova.core.model.ContentGroup;
+import net.particify.arsnova.core.model.ContentGroupTemplate;
+import net.particify.arsnova.core.model.ContentTemplate;
 
 public interface ContentGroupService extends EntityService<ContentGroup> {
   ContentGroup getByRoomIdAndName(String roomId, String name);
@@ -18,4 +20,6 @@ public interface ContentGroupService extends EntityService<ContentGroup> {
   ContentGroup createOrUpdateContentGroup(ContentGroup contentGroup);
 
   void importFromCsv(byte[] csv, ContentGroup contentGroup);
+
+  ContentGroup createFromTemplate(String roomId, ContentGroupTemplate template, List<ContentTemplate> contentTemplates);
 }

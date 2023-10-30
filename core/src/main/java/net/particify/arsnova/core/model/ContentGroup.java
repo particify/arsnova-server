@@ -49,6 +49,8 @@ public class ContentGroup extends Entity implements RoomIdAware {
   private boolean statisticsPublished = true;
   private boolean correctOptionsPublished = true;
 
+  private String templateId;
+
   public ContentGroup() {
 
   }
@@ -71,6 +73,7 @@ public class ContentGroup extends Entity implements RoomIdAware {
     this.lastPublishedIndex = contentGroup.lastPublishedIndex;
     this.statisticsPublished = contentGroup.statisticsPublished;
     this.correctOptionsPublished = contentGroup.correctOptionsPublished;
+    this.templateId = contentGroup.templateId;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
@@ -155,6 +158,16 @@ public class ContentGroup extends Entity implements RoomIdAware {
   @JsonView({View.Persistence.class, View.Public.class})
   public void setCorrectOptionsPublished(final boolean correctOptionsPublished) {
     this.correctOptionsPublished = correctOptionsPublished;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getTemplateId() {
+    return templateId;
+  }
+
+  @JsonView(View.Persistence.class)
+  public void setTemplateId(final String templateId) {
+    this.templateId = templateId;
   }
 
   public boolean isContentPublished(final String contentId) {

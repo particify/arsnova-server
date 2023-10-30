@@ -20,6 +20,7 @@ package net.particify.arsnova.core.model.serialization;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.impl.StdObjectMapperFactory;
@@ -28,7 +29,9 @@ public class CouchDbObjectMapperFactory extends StdObjectMapperFactory {
   public ObjectMapper createObjectMapper(final CouchDbConnector connector) {
     final ObjectMapper om = super.createObjectMapper(connector);
     om.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
-    om.setConfig(om.getSerializationConfig().withView(View.Persistence.class));
+    om.setConfig(om.getSerializationConfig()
+        .without(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS)
+        .withView(View.Persistence.class));
     om.registerModule(new JavaTimeModule());
     om.registerModule(new CouchDbDocumentModule());
 

@@ -20,6 +20,7 @@ package net.particify.arsnova.core.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -55,6 +56,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import net.particify.arsnova.connector.client.ConnectorClient;
 import net.particify.arsnova.connector.client.ConnectorClientImpl;
+import net.particify.arsnova.core.config.properties.PresetsProperties;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties.Mail;
@@ -74,6 +76,7 @@ import net.particify.arsnova.core.web.PathBasedContentNegotiationStrategy;
  */
 @Configuration
 @EnableConfigurationProperties({
+    PresetsProperties.class,
     SystemProperties.class,
     TemplateProperties.class})
 public class AppConfig implements WebMvcConfigurer {
@@ -153,7 +156,9 @@ public class AppConfig implements WebMvcConfigurer {
         .indentOutput(systemProperties.getApi().isIndentResponseBody())
         .simpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
     final ObjectMapper mapper = builder.build();
-    mapper.setConfig(mapper.getSerializationConfig().withView(View.Public.class));
+    mapper.setConfig(mapper.getSerializationConfig()
+        .without(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS)
+        .withView(View.Public.class));
     final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
     final List<MediaType> mediaTypes = new ArrayList<>();
     mediaTypes.add(API_V3_MEDIA_TYPE);

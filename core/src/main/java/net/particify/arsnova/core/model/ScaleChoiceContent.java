@@ -92,6 +92,11 @@ public class ScaleChoiceContent extends ChoiceQuestionContent {
     // The actual field will not be updated
   }
 
+  @Override
+  public ScaleChoiceContent copy() {
+    return new ScaleChoiceContent(this);
+  }
+
   /**
    * {@inheritDoc}
    *

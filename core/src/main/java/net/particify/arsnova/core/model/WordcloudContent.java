@@ -65,6 +65,11 @@ public class WordcloudContent extends Content {
   }
 
   @Override
+  public WordcloudContent copy() {
+    return new WordcloudContent(this);
+  }
+
+  @Override
   public boolean equals(final Object o) {
     if (this == o) {
       return true;

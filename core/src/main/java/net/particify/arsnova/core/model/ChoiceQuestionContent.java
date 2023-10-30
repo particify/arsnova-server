@@ -207,6 +207,11 @@ public class ChoiceQuestionContent extends Content {
         .sum());
   }
 
+  @Override
+  public ChoiceQuestionContent copy() {
+    return new ChoiceQuestionContent(this);
+  }
+
   /**
    * {@inheritDoc}
    *

@@ -152,6 +152,7 @@ public class Content extends Entity implements RoomIdAware {
   private String additionalText;
   private String renderedAdditionalText;
   private String additionalTextTitle;
+  private String templateId;
 
   private TextRenderingOptions bodyRenderingOptions;
 
@@ -184,6 +185,7 @@ public class Content extends Entity implements RoomIdAware {
     this.timestamp = content.timestamp;
     this.additionalText = content.additionalText;
     this.additionalTextTitle = content.additionalTextTitle;
+    this.templateId = content.templateId;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
@@ -319,6 +321,16 @@ public class Content extends Entity implements RoomIdAware {
     this.abstentionsAllowed = abstentionsAllowed;
   }
 
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getTemplateId() {
+    return templateId;
+  }
+
+  @JsonView(View.Persistence.class)
+  public void setTemplateId(final String templateId) {
+    this.templateId = templateId;
+  }
+
   @JsonView(View.Public.class)
   public int getPoints() {
     return 0;
@@ -334,6 +346,13 @@ public class Content extends Entity implements RoomIdAware {
         ? AnswerResult.AnswerResultState.ABSTAINED
         : AnswerResult.AnswerResultState.NEUTRAL;
     return new AnswerResult(this.id, 0, this.getPoints(), state);
+  }
+
+  /**
+   * Creates a deep copy of a Content. Some fields for persistence are ignored.
+   */
+  public Content copy() {
+    return new Content(this);
   }
 
   @JsonView(View.Persistence.class)

@@ -35,6 +35,8 @@ import net.particify.arsnova.core.event.AfterDeletionEvent;
 import net.particify.arsnova.core.event.BeforeDeletionEvent;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.ContentGroup;
+import net.particify.arsnova.core.model.ContentGroupTemplate;
+import net.particify.arsnova.core.model.ContentTemplate;
 import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.export.ContentExport;
@@ -145,6 +147,21 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
     } else {
       return create(contentGroup);
     }
+  }
+
+  @Override
+  public ContentGroup createFromTemplate(
+      final String roomId,
+      final ContentGroupTemplate template,
+      final List<ContentTemplate> contentTemplates) {
+    final ContentGroup contentGroup = new ContentGroup();
+    contentGroup.setRoomId(roomId);
+    contentGroup.setName(template.getName());
+    contentGroup.setTemplateId(template.getId());
+    final List<Content> contents = contentService.createFromTemplates(roomId, contentTemplates);
+    contentGroup.setContentIds(contents.stream().map(c -> c.getId()).collect(Collectors.toList()));
+    create(contentGroup);
+    return contentGroup;
   }
 
   @Override

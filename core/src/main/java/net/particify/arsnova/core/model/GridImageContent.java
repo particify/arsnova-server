@@ -216,6 +216,11 @@ public class GridImageContent extends Content {
     this.correctOptionIndexes = correctOptionIndexes;
   }
 
+  @Override
+  public GridImageContent copy() {
+    return new GridImageContent(this);
+  }
+
   /**
    * {@inheritDoc}
    *
