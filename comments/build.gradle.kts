@@ -22,7 +22,7 @@ dependencies {
   implementation("org.flywaydb:flyway-core")
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
-  compileOnly("com.github.spotbugs:spotbugs-annotations")
+  compileOnly(libs.spotbugs.annotations)
 }
 
 tasks.withType<Test> {

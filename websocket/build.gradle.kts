@@ -32,7 +32,7 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("io.projectreactor:reactor-test")
   testImplementation("com.ninja-squad:springmockk")
-  compileOnly("com.github.spotbugs:spotbugs-annotations")
+  compileOnly(libs.spotbugs.annotations)
 }
 
 tasks.withType<KotlinCompile> {

@@ -56,7 +56,7 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.security:spring-security-test")
   compileOnly("org.springframework.boot:spring-boot-devtools")
-  compileOnly("com.github.spotbugs:spotbugs-annotations")
+  compileOnly(libs.spotbugs.annotations)
   aspect(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   aspect("org.springframework:spring-aspects")
   aspect("org.springframework.security:spring-security-aspects")
