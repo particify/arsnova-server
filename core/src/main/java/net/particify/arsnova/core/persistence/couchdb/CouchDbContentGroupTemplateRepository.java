@@ -1,6 +1,5 @@
 package net.particify.arsnova.core.persistence.couchdb;
 
-import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +9,7 @@ import net.particify.arsnova.core.persistence.couchdb.support.MangoCouchDbConnec
 
 public class CouchDbContentGroupTemplateRepository
     extends MangoCouchDbCrudRepository<ContentGroupTemplate>
-    implements ContentGroupTemplateRepository {
+    implements ContentGroupTemplateRepository, MangoIndexInitializer {
   private static final String TAGS_INDEX_NAME = "content-group-template-tags-index";
 
   public CouchDbContentGroupTemplateRepository(
@@ -19,7 +18,7 @@ public class CouchDbContentGroupTemplateRepository
     super(ContentGroupTemplate.class, db, "by_id", createIfNotExists);
   }
 
-  @PostConstruct
+  @Override
   public void createIndexes() {
     createTagIdsIndex();
     createCreatorIdIndex();
