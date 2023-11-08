@@ -177,7 +177,7 @@ seed_gradle_ro_cache() {
     -e GRADLE_RO_DEP_CACHE=/root/.gradle-ro-dep-cache \
     -e GRADLE_OPTS=-Dorg.gradle.internal.launcher.welcomeMessageEnabled=false \
     -it \
-    eclipse-temurin:17-jdk-alpine \
+    eclipse-temurin:21-jdk-alpine \
     sh -c './gradlew getDeps --continue --no-daemon && cp -a /root/.gradle/caches/modules-2 /root/.gradle-ro-dep-cache/ && rm -f /root/.gradle-ro-dep-cache/modules-2/modules-2.lock /root/.gradle-ro-dep-cache/modules-2/gc.properties'
 }
 

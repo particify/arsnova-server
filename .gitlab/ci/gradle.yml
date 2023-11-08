@@ -1,6 +1,6 @@
 variables:
   OUTPUT_DIR: $PROJECT/build
-  OPENJDK_IMAGE_TAG: 17-jdk-alpine
+  OPENJDK_IMAGE_TAG: 21-jdk-alpine
   DEPENDENCY_CACHE_IMAGE: $CI_REGISTRY/particify/dev/foss/arsnova-server/dependency-cache-gradle
   GRADLE_USER_HOME_DIR: .gradle-user-home
   GRADLE_USER_HOME: $CI_PROJECT_DIR/$GRADLE_USER_HOME_DIR
