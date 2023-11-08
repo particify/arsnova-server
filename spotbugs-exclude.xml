@@ -4,6 +4,9 @@
     <Or>
       <!-- Proper handling of CRLF needs to be insured through Logback config. -->
       <Bug pattern="CRLF_INJECTION_LOGS" />
+      <!-- Finalizer attacks are not relevant because we only run trusted code
+          on the same JVM. -->
+      <Bug pattern="CT_CONSTRUCTOR_THROW" />
       <!-- While correct, the high number of matches overshadows other, more
           important issues. -->
       <Bug pattern="EI_EXPOSE_REP" />
@@ -17,7 +20,10 @@
       <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE" />
       <And>
         <!-- Generated class files for aspects contain this null check. -->
-        <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE" />
+        <Or>
+          <Bug pattern="PA_PUBLIC_PRIMITIVE_ATTRIBUTE" />
+          <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE" />
+        </Or>
         <Class name="~.*Aspect" />
       </And>
     </Or>
