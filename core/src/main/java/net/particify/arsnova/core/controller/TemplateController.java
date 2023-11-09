@@ -61,6 +61,8 @@ public class TemplateController extends AbstractEntityController<ContentGroupTem
     contentGroupTemplate.setDescription(requestEntity.description);
     contentGroupTemplate.setLanguage(requestEntity.language);
     contentGroupTemplate.setLicense(requestEntity.license);
+    contentGroupTemplate.setAttribution(requestEntity.attribution);
+    contentGroupTemplate.setAiGenerated(requestEntity.aiGenerated);
     contentGroupTemplate.setTags(requestEntity.tags);
     return contentGroupTemplateService.createFromContentGroup(requestEntity.contentGroupId, contentGroupTemplate);
   }
@@ -84,6 +86,8 @@ public class TemplateController extends AbstractEntityController<ContentGroupTem
       String description,
       String language,
       String license,
+      String attribution,
+      boolean aiGenerated,
       String contentGroupId,
       List<TemplateTag> tags) {
   }

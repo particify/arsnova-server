@@ -23,6 +23,11 @@ public class ContentGroupTemplate extends Entity {
   @TemplateLicense
   private String license;
 
+  @Size(max = 50)
+  private String attribution;
+
+  private boolean aiGenerated;
+
   private List<String> templateIds;
   private List<String> tagIds;
   private List<TemplateTag> tags;
@@ -67,6 +72,26 @@ public class ContentGroupTemplate extends Entity {
   @JsonView({View.Persistence.class, View.Public.class})
   public void setLicense(final String license) {
     this.license = license;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getAttribution() {
+    return attribution;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setAttribution(final String attribution) {
+    this.attribution = attribution;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public boolean isAiGenerated() {
+    return aiGenerated;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setAiGenerated(final boolean aiGenerated) {
+    this.aiGenerated = aiGenerated;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
