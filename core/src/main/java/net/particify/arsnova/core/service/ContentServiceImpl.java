@@ -34,6 +34,7 @@ import org.springframework.validation.Validator;
 import net.particify.arsnova.core.event.BeforeDeletionEvent;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
+import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.model.ContentTemplate;
 import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.Room;
@@ -169,11 +170,15 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
   }
 
   @Override
-  public List<Content> createFromTemplates(final String roomId, final List<ContentTemplate> templates) {
+  public List<Content> createFromTemplates(
+      final String roomId,
+      final ContentGroupTemplate contentGroupTemplate,
+      final List<ContentTemplate> templates) {
     final List<Content> contents = templates.stream()
         .map(t -> {
           final Content copy = t.getContent().copy();
           copy.setTemplateId(t.getId());
+          copy.setGroupTemplateId(contentGroupTemplate.getId());
           copy.setRoomId(roomId);
           return copy;
         })

@@ -2,9 +2,11 @@ package net.particify.arsnova.core.service;
 
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.model.ContentGroupTemplate;
+import net.particify.arsnova.core.model.ContentLicenseAttribution;
 
 @Service
 public class SecuredContentGroupTemplateService
@@ -43,5 +45,11 @@ public class SecuredContentGroupTemplateService
   @PreAuthorize("!hasRole('GUEST_USER')")
   public ContentGroupTemplate createFromContentGroup(final String id, final ContentGroupTemplate contentGroupTemplate) {
     return contentGroupTemplateService.createFromContentGroup(id, contentGroupTemplate);
+  }
+
+  @Override
+  @PreFilter(value = "hasPermission(filterObject, 'content', 'read')", filterTarget = "contentIds")
+  public List<ContentLicenseAttribution> getAttributionsByContentIds(final List<String> contentIds) {
+    return contentGroupTemplateService.getAttributionsByContentIds(contentIds);
   }
 }

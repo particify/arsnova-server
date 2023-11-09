@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 
 import net.particify.arsnova.core.model.Content;
+import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.model.ContentTemplate;
 import net.particify.arsnova.core.model.WordcloudContent;
 
@@ -43,5 +44,8 @@ public interface ContentService extends EntityService<Content> {
 
   void clearBannedKeywords(WordcloudContent wordcloudContent);
 
-  List<Content> createFromTemplates(String roomId, List<ContentTemplate> templates);
+  List<Content> createFromTemplates(
+      String roomId,
+      ContentGroupTemplate contentGroupTemplate,
+      List<ContentTemplate> templates);
 }

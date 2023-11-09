@@ -158,7 +158,7 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
     contentGroup.setRoomId(roomId);
     contentGroup.setName(template.getName());
     contentGroup.setTemplateId(template.getId());
-    final List<Content> contents = contentService.createFromTemplates(roomId, contentTemplates);
+    final List<Content> contents = contentService.createFromTemplates(roomId, template, contentTemplates);
     contentGroup.setContentIds(contents.stream().map(c -> c.getId()).collect(Collectors.toList()));
     create(contentGroup);
     return contentGroup;
