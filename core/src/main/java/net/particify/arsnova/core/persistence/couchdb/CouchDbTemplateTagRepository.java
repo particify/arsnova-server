@@ -1,6 +1,5 @@
 package net.particify.arsnova.core.persistence.couchdb;
 
-import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +9,7 @@ import net.particify.arsnova.core.persistence.couchdb.support.MangoCouchDbConnec
 
 public class CouchDbTemplateTagRepository
     extends MangoCouchDbCrudRepository<TemplateTag>
-    implements TemplateTagRepository {
+    implements TemplateTagRepository, MangoIndexInitializer {
   private static final String NAMES_INDEX_NAME = "template-tag-language-name-index";
 
   public CouchDbTemplateTagRepository(
@@ -19,7 +18,7 @@ public class CouchDbTemplateTagRepository
     super(TemplateTag.class, db, "by_id", createIfNotExists);
   }
 
-  @PostConstruct
+  @Override
   public void createIndexes() {
     createLanguageNameIndex();
   }

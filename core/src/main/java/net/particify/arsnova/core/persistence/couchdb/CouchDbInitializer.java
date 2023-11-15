@@ -73,13 +73,18 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware {
   private CouchDbConnector connector;
   private ObjectMapper objectMapper;
   private StatusService statusService;
+  private List<MangoIndexInitializer> mangoIndexInitializers;
   private boolean initEventHandled = false;
 
-  public CouchDbInitializer(final CouchDbConnector couchDbConnector, final ObjectMapperFactory objectMapperFactory,
-      final StatusService statusService) {
+  public CouchDbInitializer(
+      final CouchDbConnector couchDbConnector,
+      final ObjectMapperFactory objectMapperFactory,
+      final StatusService statusService,
+      final List<MangoIndexInitializer> mangoIndexInitializers) {
     connector = couchDbConnector;
     objectMapper = objectMapperFactory.createObjectMapper(couchDbConnector);
     this.statusService = statusService;
+    this.mangoIndexInitializers = mangoIndexInitializers;
   }
 
   @Override
@@ -109,6 +114,10 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware {
       engine.eval("var designDoc = null;" + js);
       final Map<String, Object> jsonObject = (Map<String, Object>) engine.eval("jsToJson(designDoc)");
       docs.add(jsonObject);
+    }
+    for (final MangoIndexInitializer initializer : mangoIndexInitializers) {
+      logger.debug("Initializing Mango indexes for {}...", initializer.getClass().getSimpleName());
+      initializer.createIndexes();
     }
   }
 
