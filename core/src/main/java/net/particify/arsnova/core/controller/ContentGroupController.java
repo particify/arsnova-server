@@ -3,6 +3,7 @@ package net.particify.arsnova.core.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,9 +18,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import net.particify.arsnova.core.model.AnswerStatisticsUserSummary;
 import net.particify.arsnova.core.model.ContentGroup;
+import net.particify.arsnova.core.model.ContentLicenseAttribution;
 import net.particify.arsnova.core.model.serialization.View;
 import net.particify.arsnova.core.service.AnswerService;
 import net.particify.arsnova.core.service.ContentGroupService;
+import net.particify.arsnova.core.service.ContentGroupTemplateService;
 
 @RestController
 @EntityRequestMapping(ContentGroupController.REQUEST_MAPPING)
@@ -29,16 +32,20 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
   private static final String REMOVE_CONTENT_MAPPING = DEFAULT_ID_MAPPING + "/content/{contentId}";
   private static final String IMPORT_MAPPING = DEFAULT_ID_MAPPING + "/import";
   private static final String ANSWER_STATISTICS_USER_SUMMARY_MAPPING = DEFAULT_ID_MAPPING + "/stats/user/{userId}";
+  private static final String ATTRIBUTIONS_ENDPOINT = DEFAULT_ID_MAPPING + "/attributions";
 
   private ContentGroupService contentGroupService;
   private AnswerService answerService;
+  private ContentGroupTemplateService contentGroupTemplateService;
 
   public ContentGroupController(
       @Qualifier("securedContentGroupService") final ContentGroupService contentGroupService,
-      @Qualifier("securedAnswerService") final AnswerService answerService) {
+      @Qualifier("securedAnswerService") final AnswerService answerService,
+      @Qualifier("securedContentGroupTemplateService") final ContentGroupTemplateService contentGroupTemplateService) {
     super(contentGroupService);
     this.contentGroupService = contentGroupService;
     this.answerService = answerService;
+    this.contentGroupTemplateService = contentGroupTemplateService;
   }
 
   @Override
@@ -102,6 +109,12 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
       @PathVariable final String id, @PathVariable final String userId) {
     return answerService.getStatisticsByUserIdAndContentIds(
         userId, contentGroupService.get(id).getContentIds());
+  }
+
+  @GetMapping(ATTRIBUTIONS_ENDPOINT)
+  public List<ContentLicenseAttribution> getAttributions(@PathVariable final String id) {
+    final ContentGroup contentGroup = get(id);
+    return contentGroupTemplateService.getAttributionsByContentIds(contentGroup.getContentIds());
   }
 
   static class AddContentToGroupRequestEntity {

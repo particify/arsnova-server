@@ -153,6 +153,7 @@ public class Content extends Entity implements RoomIdAware {
   private String renderedAdditionalText;
   private String additionalTextTitle;
   private String templateId;
+  private String groupTemplateId;
 
   private TextRenderingOptions bodyRenderingOptions;
 
@@ -186,6 +187,7 @@ public class Content extends Entity implements RoomIdAware {
     this.additionalText = content.additionalText;
     this.additionalTextTitle = content.additionalTextTitle;
     this.templateId = content.templateId;
+    this.groupTemplateId = content.groupTemplateId;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
@@ -329,6 +331,16 @@ public class Content extends Entity implements RoomIdAware {
   @JsonView(View.Persistence.class)
   public void setTemplateId(final String templateId) {
     this.templateId = templateId;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public String getGroupTemplateId() {
+    return groupTemplateId;
+  }
+
+  @JsonView(View.Persistence.class)
+  public void setGroupTemplateId(final String groupTemplateId) {
+    this.groupTemplateId = groupTemplateId;
   }
 
   @JsonView(View.Public.class)

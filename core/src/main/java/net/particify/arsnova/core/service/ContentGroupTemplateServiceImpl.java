@@ -2,6 +2,9 @@ package net.particify.arsnova.core.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
@@ -10,8 +13,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
+import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.ContentGroup;
 import net.particify.arsnova.core.model.ContentGroupTemplate;
+import net.particify.arsnova.core.model.ContentLicenseAttribution;
 import net.particify.arsnova.core.model.TemplateTag;
 import net.particify.arsnova.core.persistence.ContentGroupTemplateRepository;
 import net.particify.arsnova.core.persistence.DeletionRepository;
@@ -27,6 +32,7 @@ public class ContentGroupTemplateServiceImpl
   private final ContentGroupService contentGroupService;
   private final ContentTemplateService contentTemplateService;
   private final TemplateTagService templateTagService;
+  private final ContentService contentService;
   private final AuthenticationService authenticationService;
 
   public ContentGroupTemplateServiceImpl(
@@ -34,6 +40,7 @@ public class ContentGroupTemplateServiceImpl
       final ContentGroupService contentGroupService,
       final ContentTemplateService contentTemplateService,
       final TemplateTagService templateTagService,
+      final ContentService contentService,
       final AuthenticationService authenticationService,
       final DeletionRepository deletionRepository,
       final ObjectMapper objectMapper,
@@ -43,6 +50,7 @@ public class ContentGroupTemplateServiceImpl
     this.contentGroupService = contentGroupService;
     this.contentTemplateService = contentTemplateService;
     this.templateTagService = templateTagService;
+    this.contentService = contentService;
     this.authenticationService = authenticationService;
   }
 
@@ -89,6 +97,23 @@ public class ContentGroupTemplateServiceImpl
     template.setTemplateIds(ids);
     resolveAndCreateTags(template);
     return create(template);
+  }
+
+  @Override
+  public List<ContentLicenseAttribution> getAttributionsByContentIds(final List<String> contentIds) {
+    final List<Content> templateContents = contentService.get(contentIds).stream()
+        .filter(c -> c.getGroupTemplateId() != null).collect(Collectors.toList());
+    final Set<String> templateIds = templateContents.stream()
+        .map(c -> c.getGroupTemplateId()).collect(Collectors.toSet());
+    final Map<String, ContentGroupTemplate> templates = get(templateIds).stream()
+        .collect(Collectors.toMap(ContentGroupTemplate::getId, Function.identity()));
+
+    return templateContents.stream().map(tc ->
+        new ContentLicenseAttribution(
+            tc.getId(),
+            templates.get(tc.getGroupTemplateId()).getLicense(),
+            templates.get(tc.getGroupTemplateId()).getAttribution()))
+        .collect(Collectors.toList());
   }
 
   private void resolveAndCreateTags(final ContentGroupTemplate template) {
