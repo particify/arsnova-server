@@ -221,7 +221,8 @@ class RouteConfig(
             "/auth/**",
             "/configuration/**",
             "/language/**",
-            "/user/**"
+            "/user/**",
+            "/violationreport/**"
           )
           .filters { f ->
             f.requestRateLimiter { r ->
