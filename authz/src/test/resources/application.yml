@@ -19,3 +19,10 @@ spring:
     properties.hibernate.dialect: org.hibernate.dialect.H2Dialect
   flyway:
     enabled: false
+security:
+  jwt:
+    secret: secret
+    server-id: arsnova.backend.v3:example.com
+    validity-period: 5m
+  authorize-uri-header: X-Forwarded-Uri
+  authorize-uri-prefix: /api

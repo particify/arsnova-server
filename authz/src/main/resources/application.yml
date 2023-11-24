@@ -41,3 +41,8 @@ spring:
           max-attempts: 3
           max-interval: 10s
           multiplier: 2
+security:
+  jwt:
+    validity-period: 5m
+  authorize-uri-header: X-Forwarded-Uri
+  authorize-uri-prefix: /api

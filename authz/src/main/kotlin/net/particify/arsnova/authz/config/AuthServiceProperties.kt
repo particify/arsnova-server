@@ -1,12 +1,14 @@
 package net.particify.arsnova.authz.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
+import java.time.Duration
 
 @ConfigurationProperties
 data class AuthServiceProperties(
   val server: Server,
   val rabbitmq: Rabbitmq,
   val spring: Spring,
+  val security: Security,
 )
 
 data class Server(
@@ -40,4 +42,17 @@ data class Jpa(
 
 data class Hibernate(
   val ddlAuto: String,
+)
+
+data class Security(
+  val jwt: Jwt,
+  val authorizeUriHeader: String,
+  val authorizeUriPrefix: String,
+)
+
+data class Jwt(
+  val idpIssuer: String?,
+  val secret: String,
+  val serverId: String,
+  val validityPeriod: Duration,
 )
