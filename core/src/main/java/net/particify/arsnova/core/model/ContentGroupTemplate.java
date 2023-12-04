@@ -99,7 +99,7 @@ public class ContentGroupTemplate extends Entity {
     return templateIds;
   }
 
-  @JsonView({View.Persistence.class, View.Public.class})
+  @JsonView(View.Persistence.class)
   public void setTemplateIds(final List<String> templateIds) {
     this.templateIds = templateIds;
   }

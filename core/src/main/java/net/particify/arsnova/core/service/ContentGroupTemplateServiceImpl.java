@@ -81,6 +81,13 @@ public class ContentGroupTemplateServiceImpl
   protected void prepareCreate(final ContentGroupTemplate entity) {
     super.prepareCreate(entity);
     entity.setCreatorId(authenticationService.getCurrentUser().getId());
+    resolveAndCreateTags(entity);
+  }
+
+  @Override
+  protected void prepareUpdate(final ContentGroupTemplate entity) {
+    super.prepareUpdate(entity);
+    resolveAndCreateTags(entity);
   }
 
   @Override
@@ -95,7 +102,6 @@ public class ContentGroupTemplateServiceImpl
     final ContentGroup contentGroup = contentGroupService.get(id);
     final List<String> ids = contentTemplateService.createTemplatesFromContents(contentGroup.getContentIds());
     template.setTemplateIds(ids);
-    resolveAndCreateTags(template);
     return create(template);
   }
 
