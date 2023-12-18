@@ -11,9 +11,8 @@ import reactor.core.publisher.Flux
 
 @Controller
 class MembershipController(
-  private val membershipView: MembershipView
+  private val membershipView: MembershipView,
 ) {
-
   companion object {
     const val baseMapping = "/_view/membership"
     const val byUserMapping = "$baseMapping/by-user/{userId}"
@@ -25,7 +24,7 @@ class MembershipController(
   @GetMapping(path = [byUserMapping])
   @ResponseBody
   fun getMembershipByUser(
-    @PathVariable userId: String
+    @PathVariable userId: String,
   ): Flux<Membership> {
     logger.trace("Getting membership by user: {}", userId)
     return membershipView.getByUser(userId)

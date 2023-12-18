@@ -19,7 +19,7 @@ import java.util.Date
 
 @Component
 class JwtTokenUtil(
-  private val httpGatewayProperties: HttpGatewayProperties
+  private val httpGatewayProperties: HttpGatewayProperties,
 ) {
   companion object {
     const val ROLE_AUTHORITY_PREFIX = "ROLE_"
@@ -59,7 +59,10 @@ class JwtTokenUtil(
     }
   }
 
-  fun getAccessLevelsFromInternalTokenForRoom(token: String, roomId: String): List<AccessLevel> {
+  fun getAccessLevelsFromInternalTokenForRoom(
+    token: String,
+    roomId: String,
+  ): List<AccessLevel> {
     val decodedJwt = internalVerifier.verify(token)
     return decodedJwt.getClaim("roles").asList(String::class.java).filter { role ->
       role.endsWith("-$roomId")
@@ -89,7 +92,7 @@ class JwtTokenUtil(
   fun createSignedInternalToken(
     roomAccess: RoomAccess,
     roomFeatures: RoomFeatures,
-    clientAuthorities: List<String>
+    clientAuthorities: List<String>,
   ): String {
     val roomRole = "${roomAccess.role}-${roomAccess.roomId}"
     val generatedRoles = arrayOf(roomRole)
@@ -101,8 +104,8 @@ class JwtTokenUtil(
       .withIssuedAt(Date())
       .withExpiresAt(
         Date.from(
-          LocalDateTime.now().plus(defaultValidityPeriod).atZone(ZoneId.systemDefault()).toInstant()
-        )
+          LocalDateTime.now().plus(defaultValidityPeriod).atZone(ZoneId.systemDefault()).toInstant(),
+        ),
       )
       .withSubject(roomAccess.userId)
       .withArrayClaim(rolesClaimName, roles)

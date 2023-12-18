@@ -5,5 +5,5 @@ data class AccessChangeRequest(
   val roomId: String,
   val revId: String,
   val userId: String,
-  val level: AccessLevel
+  val level: AccessLevel,
 )

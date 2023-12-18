@@ -8,5 +8,5 @@ data class Membership(
   var roomId: String = "",
   var roomShortId: String = "",
   var roles: Set<String> = setOf(),
-  var lastVisit: Date
+  var lastVisit: Date,
 )

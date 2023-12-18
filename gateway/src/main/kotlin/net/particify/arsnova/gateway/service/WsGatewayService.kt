@@ -13,7 +13,7 @@ import java.util.Optional
 @Service
 class WsGatewayService(
   private val webClient: WebClient,
-  private val httpGatewayProperties: HttpGatewayProperties
+  private val httpGatewayProperties: HttpGatewayProperties,
 ) {
   private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -28,7 +28,7 @@ class WsGatewayService(
         Flux.fromIterable(
           userCounts.map { entry ->
             Optional.ofNullable(entry)
-          }
+          },
         )
       }
       .onErrorResume { exception ->
@@ -38,7 +38,7 @@ class WsGatewayService(
             // using a local var for this is needed because otherwise type can't be interfered
             val h: Optional<Int> = Optional.empty()
             h
-          }
+          },
         )
       }
   }

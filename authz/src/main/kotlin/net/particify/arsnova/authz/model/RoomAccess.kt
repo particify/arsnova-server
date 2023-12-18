@@ -20,7 +20,7 @@ class RoomAccess(
   @Temporal(TemporalType.TIMESTAMP)
   var creationTimestamp: Date? = null,
   @Temporal(TemporalType.TIMESTAMP)
-  var lastAccess: Date? = null
+  var lastAccess: Date? = null,
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -50,14 +50,14 @@ class RoomAccess(
 
   override fun toString(): String {
     return """
-         RoomAccess(
-           roomId=$roomId,
-           userId=$userId,
-           rev='$rev',
-           role=$role,
-           creationTimestamp=$creationTimestamp,
-           lastAccess=$lastAccess
-         )
-    """.trimIndent()
+      RoomAccess(
+        roomId=$roomId,
+        userId=$userId,
+        rev='$rev',
+        role=$role,
+        creationTimestamp=$creationTimestamp,
+        lastAccess=$lastAccess
+      )
+      """.trimIndent()
   }
 }

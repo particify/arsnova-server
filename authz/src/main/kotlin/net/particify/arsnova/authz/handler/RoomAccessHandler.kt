@@ -29,7 +29,7 @@ import java.util.UUID
 class RoomAccessHandler(
   private val rabbitTemplate: RabbitTemplate,
   private val roomAccessRepository: RoomAccessRepository,
-  private val roomAccessSyncTrackerRepository: RoomAccessSyncTrackerRepository
+  private val roomAccessSyncTrackerRepository: RoomAccessSyncTrackerRepository,
 ) {
   companion object {
     const val ROLE_OWNER_STRING = "OWNER"
@@ -42,8 +42,9 @@ class RoomAccessHandler(
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
   fun handleRequestRoomAccessSyncCommand(command: RequestRoomAccessSyncCommand): RoomAccessSyncTracker {
     logger.debug("Handling request: {}", command)
-    val syncTracker = roomAccessSyncTrackerRepository.findById(command.roomId)
-      .orElse(RoomAccessSyncTracker(command.roomId, "0"))
+    val syncTracker =
+      roomAccessSyncTrackerRepository.findById(command.roomId)
+        .orElse(RoomAccessSyncTracker(command.roomId, "0"))
     if (syncTracker.rev.substringBefore("-").toInt() < command.revNumber) {
       // if either no sync has happened or the sync is older than the rev the request aims for
       val newTracker = RoomAccessSyncTracker(command.roomId, "0")
@@ -53,7 +54,7 @@ class RoomAccessHandler(
       logger.debug("Sending room access sync request: {}", event)
       rabbitTemplate.convertAndSend(
         RabbitConfig.roomAccessSyncRequestQueueName,
-        event
+        event,
       )
       return newTracker
     } else {
@@ -66,8 +67,9 @@ class RoomAccessHandler(
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
   fun handleSyncRoomAccessCommand(command: SyncRoomAccessCommand) {
     logger.debug("Handling event: {}", command)
-    val syncTracker = roomAccessSyncTrackerRepository.findById(command.roomId)
-      .orElse(RoomAccessSyncTracker(command.roomId, "0"))
+    val syncTracker =
+      roomAccessSyncTrackerRepository.findById(command.roomId)
+        .orElse(RoomAccessSyncTracker(command.roomId, "0"))
     // Check if event has newer information based on the revision
     if (syncTracker.rev.substringBefore("-").toInt() > command.rev.substringBefore("-").toInt()) {
       // This should not happen but may be because of asynchronicity, especially with multiple instances
@@ -78,16 +80,18 @@ class RoomAccessHandler(
       logger.info("Got information from the same revision: {}", command.rev)
     } else {
       val allRoomAccess: Iterable<RoomAccess> = roomAccessRepository.findByRoomId(command.roomId)
-      val toDelete = allRoomAccess.filter { i ->
-        i.rev.substringBefore("-").toInt() < command.rev.substringBefore("-").toInt()
-      }
+      val toDelete =
+        allRoomAccess.filter { i ->
+          i.rev.substringBefore("-").toInt() < command.rev.substringBefore("-").toInt()
+        }
 
       logger.debug("Deleting room access: {}", toDelete)
       roomAccessRepository.deleteAll(toDelete)
 
-      val newAccess = command.access.map { i ->
-        RoomAccess(command.roomId, i.userId, command.rev, i.role, null, null)
-      }
+      val newAccess =
+        command.access.map { i ->
+          RoomAccess(command.roomId, i.userId, command.rev, i.role, null, null)
+        }
 
       logger.debug("Saving new access: {}", newAccess)
       roomAccessRepository.saveAll(newAccess)
@@ -101,7 +105,10 @@ class RoomAccessHandler(
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun getByRoomIdAndUserId(roomId: UUID, userId: UUID): Optional<RoomAccess> {
+  fun getByRoomIdAndUserId(
+    roomId: UUID,
+    userId: UUID,
+  ): Optional<RoomAccess> {
     logger.debug("Handling room access request with roomId: {} and userId: {}", roomId, userId)
     val lastAccess = Date()
     return roomAccessRepository.updateLastAccessAndGetByRoomIdAndUserId(roomId, userId, lastAccess)
@@ -109,7 +116,10 @@ class RoomAccessHandler(
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun getByRoomIdAndRole(roomId: UUID, roleParam: String?): List<RoomAccess> {
+  fun getByRoomIdAndRole(
+    roomId: UUID,
+    roleParam: String?,
+  ): List<RoomAccess> {
     logger.debug("Handling room access request with roomId: {}", roomId)
     if (roleParam != null) {
       if (roleParam.startsWith("!")) {
@@ -151,10 +161,11 @@ class RoomAccessHandler(
   fun create(roomAccess: RoomAccess): RoomAccess {
     return try {
       if (roomAccess.role == ROLE_OWNER_STRING) {
-        val existingOwnerPks = roomAccessRepository
-          .findByRoomIdAndRole(roomAccess.roomId, ROLE_OWNER_STRING).map { roomAccess ->
-            RoomAccessPK(roomAccess.roomId, roomAccess.userId)
-          }
+        val existingOwnerPks =
+          roomAccessRepository
+            .findByRoomIdAndRole(roomAccess.roomId, ROLE_OWNER_STRING).map { roomAccess ->
+              RoomAccessPK(roomAccess.roomId, roomAccess.userId)
+            }
         val otherOwnerPks = existingOwnerPks.filter { pk -> pk.userId != roomAccess.userId }
         roomAccessRepository.deleteAllById(otherOwnerPks)
       }
@@ -163,7 +174,7 @@ class RoomAccessHandler(
         roomAccess.userId,
         roomAccess.rev,
         roomAccess.role!!,
-        roomAccess.role!!
+        roomAccess.role!!,
       )
     } catch (ex: EmptyResultDataAccessException) {
       logger.debug("Could not extract result set, most likely due to an already existing creator room access")
@@ -180,12 +191,15 @@ class RoomAccessHandler(
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun createParticipantAccessWithLimit(roomAccess: RoomAccess, limit: Int): RoomAccess {
+  fun createParticipantAccessWithLimit(
+    roomAccess: RoomAccess,
+    limit: Int,
+  ): RoomAccess {
     if (roomAccessRepository.countByRoomIdAndRole(roomAccess.roomId, ROLE_PARTICIPANT_STRING) < limit) {
       return roomAccessRepository.createParticipantAccess(
         roomAccess.roomId,
         roomAccess.userId,
-        roomAccess.rev
+        roomAccess.rev,
       )
     } else {
       throw ForbiddenException("Participant limit reached")
@@ -194,19 +208,26 @@ class RoomAccessHandler(
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun migrateParticipantAccess(userId: UUID, roomIds: List<UUID>) {
-    val newRoomAccessList: List<RoomAccess> = roomIds.map { roomId ->
-      roomAccessRepository.createParticipantAccess(
-        roomId,
-        userId,
-        "0-0"
-      )
-    }
+  fun migrateParticipantAccess(
+    userId: UUID,
+    roomIds: List<UUID>,
+  ) {
+    val newRoomAccessList: List<RoomAccess> =
+      roomIds.map { roomId ->
+        roomAccessRepository.createParticipantAccess(
+          roomId,
+          userId,
+          "0-0",
+        )
+      }
     logger.debug("Migrated participant room access: {}", newRoomAccessList)
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  fun delete(roomId: UUID, userId: UUID) {
+  fun delete(
+    roomId: UUID,
+    userId: UUID,
+  ) {
     roomAccessRepository.deleteByRoomIdAndUserIdWithoutChecking(roomId, userId)
   }
 

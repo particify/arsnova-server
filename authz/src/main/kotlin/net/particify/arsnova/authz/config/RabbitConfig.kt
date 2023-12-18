@@ -25,9 +25,8 @@ import org.springframework.core.task.TaskExecutor
 @Configuration
 @EnableConfigurationProperties(AuthServiceProperties::class)
 class RabbitConfig(
-  private var authServiceProperties: AuthServiceProperties
+  private var authServiceProperties: AuthServiceProperties,
 ) {
-
   companion object {
     const val roomAccessSyncResponseQueueName: String = "backend.event.room.access.sync.response"
     const val roomAccessSyncRequestQueueName: String = "backend.event.room.access.sync.request"
@@ -41,12 +40,13 @@ class RabbitConfig(
   @Bean
   @Autowired
   fun connectionFactory(
-    @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor
+    @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor,
   ): ConnectionFactory {
-    val connectionFactory = CachingConnectionFactory(
-      authServiceProperties.rabbitmq.host,
-      authServiceProperties.rabbitmq.port
-    )
+    val connectionFactory =
+      CachingConnectionFactory(
+        authServiceProperties.rabbitmq.host,
+        authServiceProperties.rabbitmq.port,
+      )
     connectionFactory.username = authServiceProperties.rabbitmq.username
     connectionFactory.setPassword(authServiceProperties.rabbitmq.password)
     connectionFactory.virtualHost = authServiceProperties.rabbitmq.virtualHost
@@ -56,7 +56,10 @@ class RabbitConfig(
 
   @Bean
   @Autowired
-  fun rabbitTemplate(connectionFactory: ConnectionFactory, messsageConverter: MessageConverter): RabbitTemplate {
+  fun rabbitTemplate(
+    connectionFactory: ConnectionFactory,
+    messsageConverter: MessageConverter,
+  ): RabbitTemplate {
     val rabbitTemplate = RabbitTemplate(connectionFactory)
     rabbitTemplate.messageConverter = messsageConverter
     return rabbitTemplate
@@ -73,48 +76,52 @@ class RabbitConfig(
     val roomCreatedFanoutExchange = FanoutExchange(roomCreatedExchangeName)
     val roomDeletedFanoutExchange = FanoutExchange(roomDeletedExchangeName)
     val participantAccessMigrationDlq = Queue("$participantAccessMigrationQueueName.dlq")
-    val participantAccessMigrationQueue = Queue(
-      participantAccessMigrationQueueName,
-      true,
-      false,
-      false,
-      mapOf(
-        "x-dead-letter-exchange" to "",
-        "x-dead-letter-routing-key" to "$participantAccessMigrationQueueName.dlq"
+    val participantAccessMigrationQueue =
+      Queue(
+        participantAccessMigrationQueueName,
+        true,
+        false,
+        false,
+        mapOf(
+          "x-dead-letter-exchange" to "",
+          "x-dead-letter-routing-key" to "$participantAccessMigrationQueueName.dlq",
+        ),
       )
-    )
-    val roomCreatedQueue = Queue(
-      roomCreatedQueueName,
-      true,
-      true,
-      false,
-      mapOf(
-        "x-dead-letter-exchange" to "",
-        "x-dead-letter-routing-key" to "$roomCreatedQueueName.dlq"
+    val roomCreatedQueue =
+      Queue(
+        roomCreatedQueueName,
+        true,
+        true,
+        false,
+        mapOf(
+          "x-dead-letter-exchange" to "",
+          "x-dead-letter-routing-key" to "$roomCreatedQueueName.dlq",
+        ),
       )
-    )
-    val roomDeletedQueue = Queue(
-      roomDeletedQueueName,
-      true,
-      true,
-      false,
-      mapOf(
-        "x-dead-letter-exchange" to "",
-        "x-dead-letter-routing-key" to "$roomDeletedQueueName.dlq"
+    val roomDeletedQueue =
+      Queue(
+        roomDeletedQueueName,
+        true,
+        true,
+        false,
+        mapOf(
+          "x-dead-letter-exchange" to "",
+          "x-dead-letter-routing-key" to "$roomDeletedQueueName.dlq",
+        ),
       )
-    )
     val roomCreatedDlq = Queue("$roomCreatedQueueName.dlq")
     val roomDeletedDlq = Queue("$roomDeletedQueueName.dlq")
-    val roomAccessSyncResponseQueue = Queue(
-      roomAccessSyncResponseQueueName,
-      true,
-      false,
-      false,
-      mapOf(
-        "x-dead-letter-exchange" to "",
-        "x-dead-letter-routing-key" to "$roomAccessSyncResponseQueueName.dlq"
+    val roomAccessSyncResponseQueue =
+      Queue(
+        roomAccessSyncResponseQueueName,
+        true,
+        false,
+        false,
+        mapOf(
+          "x-dead-letter-exchange" to "",
+          "x-dead-letter-routing-key" to "$roomAccessSyncResponseQueueName.dlq",
+        ),
       )
-    )
     val roomAccessSyncResponseDlq = Queue("$roomAccessSyncResponseQueueName.dlq")
     val roomAccessSyncRequestExchange = DirectExchange(roomAccessSyncRequestQueueName)
 
@@ -132,8 +139,8 @@ class RabbitConfig(
         bind(roomDeletedQueue).to(roomDeletedFanoutExchange),
         roomAccessSyncResponseQueue,
         roomAccessSyncResponseDlq,
-        roomAccessSyncRequestExchange
-      )
+        roomAccessSyncRequestExchange,
+      ),
     )
   }
 

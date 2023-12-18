@@ -11,5 +11,5 @@ data class Announcement(
   val creatorId: String,
   val title: String,
   val body: String,
-  val renderedBody: String
+  val renderedBody: String,
 )

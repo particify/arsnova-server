@@ -16,7 +16,7 @@ import reactor.kotlin.core.util.function.component2
 @Component
 class RemoveMembershipFilter(
   private val jwtTokenUtil: JwtTokenUtil,
-  private val roomAccessService: RoomAccessService
+  private val roomAccessService: RoomAccessService,
 ) : AbstractGatewayFilterFactory<RemoveMembershipFilter.Config>(Config::class.java) {
   override fun apply(config: Config): GatewayFilter {
     return GatewayFilter { exchange, _ ->
@@ -32,7 +32,7 @@ class RemoveMembershipFilter(
           }
           .map { token ->
             jwtTokenUtil.getUserIdFromPublicToken(token)
-          }
+          },
       )
         .map { (token: String, userId: String) ->
           // Can be mostly a dummy object as room access service only needs both the IDs
@@ -41,7 +41,7 @@ class RemoveMembershipFilter(
             userId,
             "",
             "",
-            null
+            null,
           )
         }
         .flatMap { roomAccess ->

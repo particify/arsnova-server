@@ -14,17 +14,18 @@ import org.springframework.core.task.TaskExecutor
 @Configuration
 @EnableConfigurationProperties(WebSocketProperties::class)
 class RabbitConfig(
-  private val webSocketProperties: WebSocketProperties
+  private val webSocketProperties: WebSocketProperties,
 ) {
   @Bean
   @Autowired
   fun connectionFactory(
-    @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor
+    @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor,
   ): ConnectionFactory? {
-    val connectionFactory = CachingConnectionFactory(
-      webSocketProperties.rabbitmq.host,
-      webSocketProperties.rabbitmq.port
-    )
+    val connectionFactory =
+      CachingConnectionFactory(
+        webSocketProperties.rabbitmq.host,
+        webSocketProperties.rabbitmq.port,
+      )
     connectionFactory.username = webSocketProperties.rabbitmq.username
     connectionFactory.setPassword(webSocketProperties.rabbitmq.password)
     connectionFactory.virtualHost = webSocketProperties.rabbitmq.virtualHost

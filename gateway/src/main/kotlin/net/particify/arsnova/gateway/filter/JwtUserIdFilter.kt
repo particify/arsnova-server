@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono
  */
 @Component
 class JwtUserIdFilter(
-  private val jwtTokenUtil: JwtTokenUtil
+  private val jwtTokenUtil: JwtTokenUtil,
 ) : AbstractGatewayFilterFactory<JwtUserIdFilter.Config>(Config::class.java) {
   companion object {
     private const val USER_ID_HEADER = "Arsnova-User-Id"

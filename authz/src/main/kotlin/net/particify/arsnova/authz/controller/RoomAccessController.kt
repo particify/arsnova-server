@@ -24,14 +24,14 @@ import java.util.UUID
 
 @Controller
 class RoomAccessController(
-  private val handler: RoomAccessHandler
+  private val handler: RoomAccessHandler,
 ) {
   private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
   @GetMapping(path = ["/roomaccess/by-user/{userId}"])
   @ResponseBody
   fun getRoomAccessByUser(
-    @PathVariable userId: UUID
+    @PathVariable userId: UUID,
   ): Flux<RoomAccess> {
     return Flux.fromIterable(handler.getByUserId(userId))
   }
@@ -39,12 +39,12 @@ class RoomAccessController(
   @GetMapping(path = ["/roomaccess/owner/by-room"])
   @ResponseBody
   fun getOwnerByRoomIds(
-    @RequestParam ids: List<UUID>
+    @RequestParam ids: List<UUID>,
   ): Flux<Optional<RoomAccess>> {
     return Flux.fromIterable(
       ids.map { id ->
         Optional.ofNullable(handler.getOwnerRoomAccessByRoomId(id))
-      }
+      },
     )
   }
 
@@ -52,7 +52,7 @@ class RoomAccessController(
   @ResponseBody
   fun getByRoomId(
     @PathVariable roomId: UUID,
-    @RequestParam role: String?
+    @RequestParam role: String?,
   ): Flux<RoomAccess> {
     val roomAccess = handler.getByRoomIdAndRole(roomId, role)
     return Flux.fromIterable(roomAccess)
@@ -62,7 +62,7 @@ class RoomAccessController(
   @ResponseBody
   fun getRoomAccess(
     @PathVariable roomId: UUID,
-    @PathVariable userId: UUID
+    @PathVariable userId: UUID,
   ): Mono<RoomAccess> {
     return Mono.just(handler.getByRoomIdAndUserId(roomId, userId))
       .flatMap { optional ->
@@ -74,7 +74,7 @@ class RoomAccessController(
   @GetMapping(path = ["/roomaccess/inactive-user-ids"])
   @ResponseBody
   fun getInactiveUserIds(
-    @RequestParam lastActiveBefore: String
+    @RequestParam lastActiveBefore: String,
   ): Mono<List<String>> {
     val lastActiveBeforeInstant = Date.from(Instant.parse(lastActiveBefore))
     return Mono.just(handler.getUserIdsLastActiveBefore(lastActiveBeforeInstant).toList())
@@ -84,7 +84,7 @@ class RoomAccessController(
   @ResponseBody
   fun postRequestSync(
     @PathVariable roomId: UUID,
-    @PathVariable revNumber: Int
+    @PathVariable revNumber: Int,
   ): Mono<RoomAccessSyncTracker> {
     return Mono.just(handler.handleRequestRoomAccessSyncCommand(RequestRoomAccessSyncCommand(roomId, revNumber)))
   }
@@ -93,7 +93,7 @@ class RoomAccessController(
   @ResponseBody
   fun create(
     @RequestBody roomAccess: RoomAccess,
-    @RequestParam roomParticipantLimit: Int?
+    @RequestParam roomParticipantLimit: Int?,
   ): Mono<RoomAccess> {
     return if (roomParticipantLimit != null && roomAccess.role == "PARTICIPANT") {
       Mono.just(handler.createParticipantAccessWithLimit(roomAccess, roomParticipantLimit))
@@ -106,7 +106,7 @@ class RoomAccessController(
   @ResponseBody
   fun delete(
     @PathVariable roomId: UUID,
-    @PathVariable userId: UUID
+    @PathVariable userId: UUID,
   ): Mono<Unit> {
     return Mono.just(handler.delete(roomId, userId))
   }
@@ -114,7 +114,7 @@ class RoomAccessController(
   @DeleteMapping(path = ["/roomaccess/{roomId}"])
   @ResponseBody
   fun deleteByRoomId(
-    @PathVariable roomId: UUID
+    @PathVariable roomId: UUID,
   ): Flux<RoomAccess> {
     return Flux.fromIterable(handler.deleteByRoomId(roomId))
   }

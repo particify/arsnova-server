@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono
 class UserController(
   private val announcementService: AnnouncementService,
   private val userService: UserService,
-  private val authProcessor: AuthProcessor
+  private val authProcessor: AuthProcessor,
 ) {
   companion object {
     const val baseMapping = "/user/{userId}"
@@ -31,14 +31,18 @@ class UserController(
 
   @GetMapping(path = [announcementMapping])
   @ResponseBody
-  fun getAnnouncements(@PathVariable userId: String): Flux<Announcement> {
+  fun getAnnouncements(
+    @PathVariable userId: String,
+  ): Flux<Announcement> {
     logger.trace("Getting announcements")
     return announcementService.getByUserIdWithRoomName(userId)
   }
 
   @PostMapping(path = [announcementMapping])
   @ResponseBody
-  fun postAnnouncements(@PathVariable userId: String): Flux<Announcement> {
+  fun postAnnouncements(
+    @PathVariable userId: String,
+  ): Flux<Announcement> {
     logger.trace("Getting announcements and updating timestamp")
     return authProcessor.getAuthentication()
       .filter { authentication ->
@@ -55,7 +59,9 @@ class UserController(
 
   @GetMapping(path = [announcementStateMapping])
   @ResponseBody
-  fun getAnnouncementState(@PathVariable userId: String): Mono<AnnouncementState> {
+  fun getAnnouncementState(
+    @PathVariable userId: String,
+  ): Mono<AnnouncementState> {
     logger.trace("Getting announcement state")
     return authProcessor.getAuthentication()
       .filter { authentication ->

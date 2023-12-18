@@ -10,9 +10,8 @@ import reactor.core.publisher.Mono
 
 @Component
 class RoomShortIdFilter(
-  private val roomService: RoomService
+  private val roomService: RoomService,
 ) : AbstractGatewayFilterFactory<RoomShortIdFilter.Config>(Config::class.java) {
-
   companion object {
     const val SHORT_ID_LENGTH = 8
     val shortIdRegex = Regex("~[0-9]{$SHORT_ID_LENGTH}")
@@ -42,11 +41,12 @@ class RoomShortIdFilter(
           val mutableUriVariables = uriVariables.toMutableMap()
           mutableUriVariables["roomId"] = room.id
           ServerWebExchangeUtils.putUriTemplateVariables(exchange, mutableUriVariables)
-          val modifiedRequest = exchange
-            .request
-            .mutate()
-            .path(pathWithRoomId)
-            .build()
+          val modifiedRequest =
+            exchange
+              .request
+              .mutate()
+              .path(pathWithRoomId)
+              .build()
           exchange.mutate().request(modifiedRequest).build()
         }
         .switchIfEmpty(Mono.just(exchange))

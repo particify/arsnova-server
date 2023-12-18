@@ -13,12 +13,15 @@ import java.net.URI
 @Service
 class CoreStatsService(
   private val webClient: WebClient,
-  private val httpGatewayProperties: HttpGatewayProperties
+  private val httpGatewayProperties: HttpGatewayProperties,
 ) {
   private val logger = LoggerFactory.getLogger(javaClass)
   private val url = URI("${httpGatewayProperties.httpClient.core}/management/stats")
 
-  fun getServiceStats(jwt: String, params: MultiValueMap<String, String>): Mono<Map<String, Any>> {
+  fun getServiceStats(
+    jwt: String,
+    params: MultiValueMap<String, String>,
+  ): Mono<Map<String, Any>> {
     logger.trace("Querying core for stats with url: {}", url)
     return webClient.get()
       .uri {
@@ -37,7 +40,10 @@ class CoreStatsService(
       .checkpoint("Request failed in ${this::class.simpleName}::${::getServiceStats.name}.")
   }
 
-  fun getSummarizedStats(jwt: String, params: MultiValueMap<String, String>): Mono<CoreStats> {
+  fun getSummarizedStats(
+    jwt: String,
+    params: MultiValueMap<String, String>,
+  ): Mono<CoreStats> {
     logger.trace("Querying core for stats with url: {}", url)
     return webClient.get()
       .uri {

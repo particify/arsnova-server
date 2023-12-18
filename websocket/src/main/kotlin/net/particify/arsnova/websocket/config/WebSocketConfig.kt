@@ -19,7 +19,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 class WebSocketConfig(
   private val webSocketProperties: WebSocketProperties,
-  private val authChannelInterceptorAdapter: AuthChannelInterceptorAdapter
+  private val authChannelInterceptorAdapter: AuthChannelInterceptorAdapter,
 ) : WebSocketMessageBrokerConfigurer {
   private val logger = LoggerFactory.getLogger(javaClass)
 

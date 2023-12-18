@@ -9,5 +9,5 @@ data class RoomAccess(
   var userId: String = "",
   val rev: String = "",
   var role: String = "",
-  var lastAccess: Date?
+  var lastAccess: Date?,
 )

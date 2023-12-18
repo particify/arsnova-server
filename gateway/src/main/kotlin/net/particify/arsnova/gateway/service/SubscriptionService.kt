@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono
 @Service
 class SubscriptionService(
   private val webClient: WebClient,
-  private val httpGatewayProperties: HttpGatewayProperties
+  private val httpGatewayProperties: HttpGatewayProperties,
 ) {
   companion object {
     const val FREE_TIER_STRING = "free"
@@ -24,7 +24,10 @@ class SubscriptionService(
 
   private val logger = LoggerFactory.getLogger(this::class.java)
 
-  fun getUserSubscription(userId: String, withTierId: Boolean): Mono<UserSubscription> {
+  fun getUserSubscription(
+    userId: String,
+    withTierId: Boolean,
+  ): Mono<UserSubscription> {
     return if (httpGatewayProperties.httpClient.subscriptionService != null) {
       val url = "${httpGatewayProperties.httpClient.subscriptionService}/subscription/by-user?ids=$userId&withTierId=$withTierId"
       logger.trace("Querying subscription service for subscription by user with url: {}", url)
@@ -40,7 +43,10 @@ class SubscriptionService(
     }
   }
 
-  fun getRoomSubscription(roomId: String, withTierId: Boolean): Mono<RoomSubscription> {
+  fun getRoomSubscription(
+    roomId: String,
+    withTierId: Boolean,
+  ): Mono<RoomSubscription> {
     return if (httpGatewayProperties.httpClient.subscriptionService != null) {
       val url = "${httpGatewayProperties.httpClient.subscriptionService}/subscription/by-room?ids=$roomId&withTierId=$withTierId"
       logger.trace("Querying subscription service for subscription by user with url: {}", url)
@@ -56,7 +62,10 @@ class SubscriptionService(
     }
   }
 
-  fun getRoomFeatures(roomId: String, withTierId: Boolean): Mono<RoomFeatures> {
+  fun getRoomFeatures(
+    roomId: String,
+    withTierId: Boolean,
+  ): Mono<RoomFeatures> {
     return if (httpGatewayProperties.httpClient.subscriptionService != null) {
       val url = "${httpGatewayProperties.httpClient.subscriptionService}/feature/by-room?ids=$roomId&withTierId=$withTierId"
       logger.trace("Querying subscription service for features by room with url: {}", url)

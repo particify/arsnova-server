@@ -8,18 +8,18 @@ data class HttpGatewayProperties(
   val security: Security,
   val httpClient: HttpClient,
   val routing: Routing,
-  val gateway: Gateway
+  val gateway: Gateway,
 )
 
 data class Security(
-  val jwt: Jwt
+  val jwt: Jwt,
 )
 
 data class Jwt(
   val publicSecret: String,
   val internalSecret: String,
   val serverId: String,
-  val validityPeriod: Duration
+  val validityPeriod: Duration,
 )
 
 data class HttpClient(
@@ -27,11 +27,11 @@ data class HttpClient(
   val commentService: String,
   val core: String,
   val wsGateway: String,
-  val subscriptionService: String?
+  val subscriptionService: String?,
 )
 
 data class Routing(
-  val endpoints: Endpoints
+  val endpoints: Endpoints,
 )
 
 data class Endpoints(
@@ -43,13 +43,13 @@ data class Endpoints(
   val formattingService: String,
   val attachmentService: String?,
   val subscriptionService: String?,
-  val proxyMetrics: String?
+  val proxyMetrics: String?,
 )
 
 data class Gateway(
   val rateLimit: RateLimit,
   val requireMembership: Boolean,
-  val healthzAllowedIpAddresses: List<String>
+  val healthzAllowedIpAddresses: List<String>,
 )
 
 data class RateLimit(
@@ -58,5 +58,5 @@ data class RateLimit(
   val queryBurstCapacity: Long,
   val commandTokensPerTimeframe: Long,
   val commandBurstCapacity: Long,
-  val whitelistedIps: List<String>
+  val whitelistedIps: List<String>,
 )

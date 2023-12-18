@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono
 
 @Controller
 class SystemController(
-  private val systemView: SystemView
+  private val systemView: SystemView,
 ) {
   companion object {
     const val baseMapping = "/_system"
@@ -25,14 +25,18 @@ class SystemController(
 
   @GetMapping(path = [serviceStatsMapping])
   @ResponseBody
-  fun getServiceStats(@RequestParam params: MultiValueMap<String, String>): Mono<Stats> {
+  fun getServiceStats(
+    @RequestParam params: MultiValueMap<String, String>,
+  ): Mono<Stats> {
     logger.trace("Getting stats")
     return systemView.getServiceStats(params)
   }
 
   @GetMapping(path = [summarizedStatsMapping])
   @ResponseBody
-  fun getSummarizedStats(@RequestParam params: MultiValueMap<String, String>): Mono<SummarizedStats> {
+  fun getSummarizedStats(
+    @RequestParam params: MultiValueMap<String, String>,
+  ): Mono<SummarizedStats> {
     logger.trace("Getting summarized stats")
     return systemView.getSummarizedStats(params)
   }

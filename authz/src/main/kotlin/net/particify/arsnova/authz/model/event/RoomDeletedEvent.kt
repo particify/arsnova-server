@@ -5,5 +5,5 @@ import java.util.UUID
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class RoomDeletedEvent(
-  val id: UUID
+  val id: UUID,
 )

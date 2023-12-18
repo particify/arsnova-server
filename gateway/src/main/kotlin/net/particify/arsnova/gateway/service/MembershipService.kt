@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono
 @Service
 class MembershipService(
   private val authProcessor: AuthProcessor,
-  private val roomAccessService: RoomAccessService
+  private val roomAccessService: RoomAccessService,
 ) {
   fun cancel(roomId: String): Mono<RoomAccess> {
     return authProcessor.getAuthentication()
@@ -19,7 +19,7 @@ class MembershipService(
           authentication.principal.toString(),
           "",
           "",
-          null
+          null,
         )
       }
       .flatMap { roomAccess ->

@@ -19,7 +19,6 @@ import org.springframework.web.server.ServerWebExchange
  */
 @Component
 class RoomIdFilter : AbstractGatewayFilterFactory<RoomIdFilter.Config>(Config::class.java) {
-
   companion object {
     val topicRoomIdLength = 32
     val roomIdRegex: Regex = Regex("[0-9a-f]{$topicRoomIdLength}")
@@ -41,10 +40,11 @@ class RoomIdFilter : AbstractGatewayFilterFactory<RoomIdFilter.Config>(Config::c
 
       // The +1 is for the extra '/' that needs to be cut
       val strippedPath = request.path.value().substring(topicRoomIdLength + 1 + roomPrefix.length)
-      var modifiedRequest: ServerHttpRequest = exchange.request
-        .mutate().path(strippedPath)
-        .header(roomIdHeaderName, roomId)
-        .build()
+      var modifiedRequest: ServerHttpRequest =
+        exchange.request
+          .mutate().path(strippedPath)
+          .header(roomIdHeaderName, roomId)
+          .build()
 
       chain.filter(exchange.mutate().request(modifiedRequest).build())
     }

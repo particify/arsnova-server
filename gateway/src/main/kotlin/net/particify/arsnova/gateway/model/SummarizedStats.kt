@@ -7,5 +7,5 @@ data class SummarizedStats(
   val rooms: Int,
   val contents: Int,
   val answers: Int,
-  val comments: Int
+  val comments: Int,
 )

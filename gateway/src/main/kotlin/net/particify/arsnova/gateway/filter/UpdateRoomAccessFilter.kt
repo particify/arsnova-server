@@ -30,9 +30,8 @@ import reactor.core.publisher.Mono
 class UpdateRoomAccessFilter(
   private val jwtTokenUtil: JwtTokenUtil,
   private val roomAccessService: RoomAccessService,
-  private val userService: UserService
+  private val userService: UserService,
 ) : AbstractGatewayFilterFactory<UpdateRoomAccessFilter.Config>(Config::class.java) {
-
   companion object {
     const val BEARER_HEADER = "Bearer "
     const val REV_ID_FALLBACK = "1-0"
@@ -60,7 +59,7 @@ class UpdateRoomAccessFilter(
         logger.trace("User's access levels for room {}: {}", roomId, accessLevels)
         throw ResponseStatusException(
           HttpStatus.FORBIDDEN,
-          "'OWNER' access level required to update room roles."
+          "'OWNER' access level required to update room roles.",
         )
       }
 
@@ -89,8 +88,8 @@ class UpdateRoomAccessFilter(
                 roomId,
                 REV_ID_FALLBACK,
                 moderatorId,
-                accessLevel
-              )
+                accessLevel,
+              ),
             )
           } else if (path.matches(ROOM_MODERATOR_REGEX) && method === HttpMethod.DELETE) {
             val moderatorId = path.substringAfter("/moderator/")
@@ -103,8 +102,8 @@ class UpdateRoomAccessFilter(
                 roomId,
                 REV_ID_FALLBACK,
                 moderatorId,
-                AccessLevel.MODERATOR
-              )
+                AccessLevel.MODERATOR,
+              ),
             )
           } else if (
             path.matches(ROOM_TRANSFER_REGEX) &&
@@ -118,8 +117,8 @@ class UpdateRoomAccessFilter(
                 roomId,
                 REV_ID_FALLBACK,
                 newOwnerId,
-                AccessLevel.OWNER
-              )
+                AccessLevel.OWNER,
+              ),
             )
           } else if (
             path.matches(ROOM_TRANSFER_REGEX) &&
@@ -134,8 +133,8 @@ class UpdateRoomAccessFilter(
                 roomId,
                 REV_ID_FALLBACK,
                 newOwnerId,
-                AccessLevel.OWNER
-              )
+                AccessLevel.OWNER,
+              ),
             )
           } else {
             listOf()
@@ -156,23 +155,25 @@ class UpdateRoomAccessFilter(
         .flatMap { accessChangeRequest: AccessChangeRequest ->
           when (accessChangeRequest.type) {
             AccessChangeRequestType.CREATE -> {
-              val roomAccess = RoomAccess(
-                accessChangeRequest.roomId,
-                accessChangeRequest.userId,
-                accessChangeRequest.revId,
-                accessChangeRequest.level.name,
-                null
-              )
+              val roomAccess =
+                RoomAccess(
+                  accessChangeRequest.roomId,
+                  accessChangeRequest.userId,
+                  accessChangeRequest.revId,
+                  accessChangeRequest.level.name,
+                  null,
+                )
               roomAccessService.postRoomAccess(roomAccess)
             }
             AccessChangeRequestType.DELETE -> {
-              val roomAccess = RoomAccess(
-                accessChangeRequest.roomId,
-                accessChangeRequest.userId,
-                accessChangeRequest.revId,
-                accessChangeRequest.level.name,
-                null
-              )
+              val roomAccess =
+                RoomAccess(
+                  accessChangeRequest.roomId,
+                  accessChangeRequest.userId,
+                  accessChangeRequest.revId,
+                  accessChangeRequest.level.name,
+                  null,
+                )
               roomAccessService.deleteRoomAccess(roomAccess)
             }
             else -> throw IllegalStateException("Unexpected AccessChangeRequestType")

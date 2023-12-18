@@ -8,9 +8,8 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class RestConfig(
-  private val httpGatewayProperties: HttpGatewayProperties
+  private val httpGatewayProperties: HttpGatewayProperties,
 ) {
-
   @Bean
   fun authServiceWebClient(): WebClient? {
     return WebClient

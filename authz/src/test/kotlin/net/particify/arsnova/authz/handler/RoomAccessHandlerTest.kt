@@ -53,22 +53,24 @@ class RoomAccessHandlerTest {
 
   @Test
   fun testStartSyncOnCommand() {
-    val command = RequestRoomAccessSyncCommand(
-      SOME_ROOM_ID,
-      2
-    )
-    val expected = RoomAccessSyncRequest(
-      SOME_ROOM_ID
-    )
+    val command =
+      RequestRoomAccessSyncCommand(
+        SOME_ROOM_ID,
+        2,
+      )
+    val expected =
+      RoomAccessSyncRequest(
+        SOME_ROOM_ID,
+      )
 
     Mockito.`when`(roomAccessSyncTrackerRepository.findById(command.roomId))
       .thenReturn(
         Optional.of(
           RoomAccessSyncTracker(
             SOME_ROOM_ID,
-            SOME_REV
-          )
-        )
+            SOME_REV,
+          ),
+        ),
       )
     val keyCaptor = ArgumentCaptor.forClass(String::class.java)
     val eventCaptor = ArgumentCaptor.forClass(RoomAccessSyncRequest::class.java)
@@ -83,42 +85,46 @@ class RoomAccessHandlerTest {
 
   @Test
   fun testHandleSyncRoomAccessCommand() {
-    val command = SyncRoomAccessCommand(
-      SOME_NEWER_REV,
-      SOME_ROOM_ID,
-      listOf(
-        RoomAccessEntry(SOME_OTHER_USER_ID, OWNER_STRING)
+    val command =
+      SyncRoomAccessCommand(
+        SOME_NEWER_REV,
+        SOME_ROOM_ID,
+        listOf(
+          RoomAccessEntry(SOME_OTHER_USER_ID, OWNER_STRING),
+        ),
       )
-    )
-    val expectedDelete = RoomAccess(
-      SOME_ROOM_ID,
-      SOME_USER_ID,
-      SOME_REV,
-      OWNER_STRING,
-      null,
-      null
-    )
-    val expectedCreate = RoomAccess(
-      SOME_ROOM_ID,
-      SOME_OTHER_USER_ID,
-      SOME_NEWER_REV,
-      OWNER_STRING,
-      null,
-      null
-    )
-    val expectedTracker = RoomAccessSyncTracker(
-      SOME_ROOM_ID,
-      SOME_NEWER_REV
-    )
+    val expectedDelete =
+      RoomAccess(
+        SOME_ROOM_ID,
+        SOME_USER_ID,
+        SOME_REV,
+        OWNER_STRING,
+        null,
+        null,
+      )
+    val expectedCreate =
+      RoomAccess(
+        SOME_ROOM_ID,
+        SOME_OTHER_USER_ID,
+        SOME_NEWER_REV,
+        OWNER_STRING,
+        null,
+        null,
+      )
+    val expectedTracker =
+      RoomAccessSyncTracker(
+        SOME_ROOM_ID,
+        SOME_NEWER_REV,
+      )
 
     Mockito.`when`(roomAccessSyncTrackerRepository.findById(command.roomId))
       .thenReturn(
         Optional.of(
           RoomAccessSyncTracker(
             SOME_ROOM_ID,
-            SOME_REV
-          )
-        )
+            SOME_REV,
+          ),
+        ),
       )
     Mockito.`when`(roomAccessSyncTrackerRepository.save(expectedTracker))
       .thenReturn(expectedTracker)
@@ -132,11 +138,11 @@ class RoomAccessHandlerTest {
             SOME_EVEN_NEWER_REV,
             MODERATOR_STRING,
             null,
-            null
+            null,
           ),
           // This is old and should get deleted
-          expectedDelete
-        )
+          expectedDelete,
+        ),
       )
 
     roomAccessHandler.handleSyncRoomAccessCommand(command)
@@ -148,13 +154,14 @@ class RoomAccessHandlerTest {
 
   @Test
   fun testDoNotUpdateOnOldInfo() {
-    val command = SyncRoomAccessCommand(
-      SOME_REV,
-      SOME_ROOM_ID,
-      listOf(
-        RoomAccessEntry(SOME_USER_ID, OWNER_STRING)
+    val command =
+      SyncRoomAccessCommand(
+        SOME_REV,
+        SOME_ROOM_ID,
+        listOf(
+          RoomAccessEntry(SOME_USER_ID, OWNER_STRING),
+        ),
       )
-    )
     val trackerCaptor = ArgumentCaptor.forClass(RoomAccessSyncTracker::class.java)
 
     verify(roomAccessSyncTrackerRepository, times(0)).save(trackerCaptor.capture())

@@ -4,5 +4,5 @@ import java.util.UUID
 
 data class RoomAccessEntry(
   val userId: UUID,
-  val role: String = ""
+  val role: String = "",
 )

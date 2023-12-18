@@ -5,5 +5,5 @@ import java.util.UUID
 class DeleteRoomAccessCommand(
   val rev: String,
   val roomId: UUID,
-  val userId: UUID
+  val userId: UUID,
 )

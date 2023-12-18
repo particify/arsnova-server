@@ -16,9 +16,8 @@ import org.springframework.stereotype.Component
 @Component
 class AuthChannelInterceptorAdapter(
   private val jwtTokenUtil: JwtTokenUtil,
-  private val roomAccessService: RoomAccessService
+  private val roomAccessService: RoomAccessService,
 ) : ChannelInterceptor {
-
   companion object {
     val topicStartString: String = "/topic/"
     val topicIndexBeforeRoomId: Int = topicStartString.length
@@ -36,7 +35,10 @@ class AuthChannelInterceptorAdapter(
 
   private val logger = LoggerFactory.getLogger(AuthChannelInterceptorAdapter::class.java)
 
-  override fun preSend(message: Message<*>, channel: MessageChannel): Message<*>? {
+  override fun preSend(
+    message: Message<*>,
+    channel: MessageChannel,
+  ): Message<*>? {
     logger.debug("Inspecting incoming message: {}", message)
 
     val accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor::class.java)!!

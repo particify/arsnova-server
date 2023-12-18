@@ -15,9 +15,9 @@ class GatewayConfig {
       Mono.just(
         listOf(
           exchange.request.method.toString(),
-          exchange.request.remoteAddress!!.address.hostAddress
+          exchange.request.remoteAddress!!.address.hostAddress,
         )
-          .joinToString(",")
+          .joinToString(","),
       )
     }
   }

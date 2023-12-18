@@ -12,9 +12,8 @@ import java.util.Optional
 
 @Controller
 class RoomController(
-  private val roomView: RoomView
+  private val roomView: RoomView,
 ) {
-
   companion object {
     const val baseMapping = "/_view/room"
     const val summaryMapping = "$baseMapping/summary"
@@ -25,7 +24,7 @@ class RoomController(
   @GetMapping(path = [summaryMapping])
   @ResponseBody
   fun getRoomSummaries(
-    @RequestParam ids: List<String>
+    @RequestParam ids: List<String>,
   ): Flux<Optional<RoomSummary>> {
     logger.trace("Getting room summaries by ids: {}", ids)
     return roomView.getSummaries(ids)

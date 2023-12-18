@@ -4,5 +4,5 @@ import java.util.UUID
 
 data class ParticipantAccessMigrationEvent(
   val userId: UUID,
-  val roomIds: List<UUID> = emptyList()
+  val roomIds: List<UUID> = emptyList(),
 )

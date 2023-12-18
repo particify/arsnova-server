@@ -9,7 +9,6 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @SpringBootApplication
 @EnableScheduling
 class AuthzApplication : SpringBootServletInitializer() {
-
   override fun configure(application: SpringApplicationBuilder): SpringApplicationBuilder {
     return application.sources(AuthzApplication::class.java)
   }

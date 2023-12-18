@@ -16,9 +16,8 @@ import reactor.core.publisher.Mono
 @Configuration
 @EnableWebFluxSecurity
 class WebSecurityConfig(
-  private val securityContextRepository: SecurityContextRepository
+  private val securityContextRepository: SecurityContextRepository,
 ) {
-
   @Bean
   fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain? {
     return http

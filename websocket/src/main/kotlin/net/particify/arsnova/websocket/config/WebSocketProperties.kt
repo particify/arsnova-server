@@ -11,11 +11,11 @@ data class WebSocketProperties(
   val stomp: Stomp,
   val security: Security,
   val httpClient: HttpClient,
-  val gateway: Gateway
+  val gateway: Gateway,
 )
 
 data class Server(
-  val port: Int
+  val port: Int,
 )
 
 data class Rabbitmq(
@@ -23,42 +23,42 @@ data class Rabbitmq(
   val port: Int,
   val username: String,
   val password: String,
-  val virtualHost: String
+  val virtualHost: String,
 )
 
 data class Relay(
   val host: String,
   val port: Int,
   val user: String,
-  val password: String
+  val password: String,
 )
 
 data class Stomp(
   val relay: Relay,
   val destinationPrefix: Array<String>,
   val userRegistryBroadcast: String,
-  val userDestinationBroadcast: String
+  val userDestinationBroadcast: String,
 )
 
 data class Security(
-  val jwt: Jwt
+  val jwt: Jwt,
 )
 
 data class Jwt(
-  val secret: String
+  val secret: String,
 )
 
 data class HttpClient(
-  val authService: String
+  val authService: String,
 )
 
 data class Gateway(
-  val eventRateLimit: EventRateLimit
+  val eventRateLimit: EventRateLimit,
 )
 
 data class EventRateLimit(
   val threshold: Long,
   val duration: Duration,
   val tokensPerTimeframe: Long,
-  val burstCapacity: Long
+  val burstCapacity: Long,
 )
