@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController("RoomSubscriptionController")
 class RoomSubscriptionController(
-  private val roomSubscriptionService: RoomSubscriptionService
+  private val roomSubscriptionService: RoomSubscriptionService,
 ) {
   companion object {
     const val ROOM_SUBSCRIPTION_MAPPING = "/roomsubscription"
@@ -19,7 +19,7 @@ class RoomSubscriptionController(
 
   @GetMapping(GET_USER_COUNT_SUBSCRIPTION)
   fun getUserCount(
-    @RequestParam ids: List<String>
+    @RequestParam ids: List<String>,
   ): List<Int?> {
     return ids.map { id -> roomSubscriptionService.getUserCount(id) }
   }

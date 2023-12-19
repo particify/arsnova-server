@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class RoomAccessListener(
-  private val handler: RoomAccessHandler
+  private val handler: RoomAccessHandler,
 ) {
   @EventListener
   fun handleRoomCreatedEvent(event: RoomCreatedEvent) {

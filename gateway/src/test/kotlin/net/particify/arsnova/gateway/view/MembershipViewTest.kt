@@ -24,7 +24,7 @@ class MembershipViewTest(
   @Mock private val authProcessor: AuthProcessor,
   @Mock private val roomAccessService: RoomAccessService,
   @Mock private val roomService: RoomService,
-  @Mock private val userService: UserService
+  @Mock private val userService: UserService,
 ) {
   private val membershipView = MembershipView(authProcessor, roomAccessService, roomService, userService)
 
@@ -34,10 +34,11 @@ class MembershipViewTest(
     val testAuthentication = UsernamePasswordAuthenticationToken(userId, "jwtString", listOf())
     val ownedRoomId = UUID.randomUUID().toString().replace("-", "")
     val visitedRoomId = UUID.randomUUID().toString().replace("-", "")
-    val roomAccessList = listOf(
-      RoomAccess(ownedRoomId, "22222222", "0-0", "OWNER", Date()),
-      RoomAccess(visitedRoomId, "22223333", "0-0", "PARTICIPANT", Date())
-    )
+    val roomAccessList =
+      listOf(
+        RoomAccess(ownedRoomId, "22222222", "0-0", "OWNER", Date()),
+        RoomAccess(visitedRoomId, "22223333", "0-0", "PARTICIPANT", Date()),
+      )
     val ownedRoom = Room(ownedRoomId, "22222222", "A name")
     val visitedRoom = Room(visitedRoomId, "22223333", "A second room")
 

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class JwtTokenUtil(
-  private val webSocketProperties: WebSocketProperties
+  private val webSocketProperties: WebSocketProperties,
 ) {
   private val algorithm = Algorithm.HMAC256(webSocketProperties.security.jwt.secret)
   private val verifier: JWTVerifier = JWT.require(algorithm).build()

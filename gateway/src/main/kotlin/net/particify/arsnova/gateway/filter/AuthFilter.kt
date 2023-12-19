@@ -36,9 +36,8 @@ class AuthFilter(
   private val jwtTokenUtil: JwtTokenUtil,
   private val httpGatewayProperties: HttpGatewayProperties,
   private val roomAccessService: RoomAccessService,
-  private val subscriptionService: SubscriptionService
+  private val subscriptionService: SubscriptionService,
 ) : AbstractGatewayFilterFactory<AuthFilter.Config>(Config::class.java) {
-
   private val logger = LoggerFactory.getLogger(AuthFilter::class.java)
 
   override fun apply(config: Config): GatewayFilter {
@@ -80,7 +79,7 @@ class AuthFilter(
                   }
                 },
               subscriptionService.getRoomFeatures(roomId, true),
-              Mono.just(authorities)
+              Mono.just(authorities),
             )
           }
           .map { (roomAccess: RoomAccess, roomFeatures: RoomFeatures, authorityList: List<String>) ->

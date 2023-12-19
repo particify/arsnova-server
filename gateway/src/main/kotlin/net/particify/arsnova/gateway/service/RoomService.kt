@@ -13,7 +13,7 @@ import java.util.Optional
 @Service
 class RoomService(
   private val webClient: WebClient,
-  private val httpGatewayProperties: HttpGatewayProperties
+  private val httpGatewayProperties: HttpGatewayProperties,
 ) {
   private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -41,7 +41,7 @@ class RoomService(
         Flux.fromIterable(
           roomList.map { entry ->
             Optional.ofNullable(entry)
-          }
+          },
         )
       }
   }

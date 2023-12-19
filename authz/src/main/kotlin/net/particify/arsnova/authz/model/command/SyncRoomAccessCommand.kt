@@ -6,5 +6,5 @@ import java.util.UUID
 class SyncRoomAccessCommand(
   val rev: String = "",
   val roomId: UUID,
-  val access: List<RoomAccessEntry> = emptyList()
+  val access: List<RoomAccessEntry> = emptyList(),
 )

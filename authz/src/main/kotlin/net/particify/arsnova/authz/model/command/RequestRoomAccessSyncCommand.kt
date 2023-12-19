@@ -4,5 +4,5 @@ import java.util.UUID
 
 data class RequestRoomAccessSyncCommand(
   val roomId: UUID,
-  val revNumber: Int = 0
+  val revNumber: Int = 0,
 )

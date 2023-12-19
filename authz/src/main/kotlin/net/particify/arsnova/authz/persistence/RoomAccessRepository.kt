@@ -14,9 +14,15 @@ import java.util.UUID
 interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
   fun findByRoomId(roomId: UUID): Iterable<RoomAccess>
 
-  fun findByRoomIdAndRole(roomId: UUID, role: String): Iterable<RoomAccess>
+  fun findByRoomIdAndRole(
+    roomId: UUID,
+    role: String,
+  ): Iterable<RoomAccess>
 
-  fun findByRoomIdAndRoleNot(roomId: UUID, role: String): Iterable<RoomAccess>
+  fun findByRoomIdAndRoleNot(
+    roomId: UUID,
+    role: String,
+  ): Iterable<RoomAccess>
 
   fun findByUserId(userId: UUID): Iterable<RoomAccess>
 
@@ -26,7 +32,7 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     FROM RoomAccess ra
     GROUP BY ra.userId
     HAVING MIN(ra.lastAccess) < :lastAccessBefore
-    """
+    """,
   )
   fun findUserIdsByLastAccessBefore(lastAccessBefore: Date): Iterable<String>
 
@@ -38,19 +44,25 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
       AND user_id = :userId
       RETURNING *;
     """,
-    nativeQuery = true
+    nativeQuery = true,
   )
-  fun updateLastAccessAndGetByRoomIdAndUserId(roomId: UUID, userId: UUID, lastAccess: Date): Optional<RoomAccess>
+  fun updateLastAccessAndGetByRoomIdAndUserId(
+    roomId: UUID,
+    userId: UUID,
+    lastAccess: Date,
+  ): Optional<RoomAccess>
 
   // This is needed to not have hibernate check if any rows should be deleted
   @Query("DELETE FROM room_access WHERE room_id = :roomId RETURNING *;", nativeQuery = true)
-  fun deleteByRoomIdWithoutChecking(@Param("roomId") roomId: UUID): Iterable<RoomAccess>
+  fun deleteByRoomIdWithoutChecking(
+    @Param("roomId") roomId: UUID,
+  ): Iterable<RoomAccess>
 
   // This is needed to not have hibernate check if any rows should be deleted
   @Query("DELETE FROM room_access WHERE room_id = :roomId and user_id = :userId RETURNING *;", nativeQuery = true)
   fun deleteByRoomIdAndUserIdWithoutChecking(
     @Param("roomId") roomId: UUID,
-    @Param("userId") userId: UUID
+    @Param("userId") userId: UUID,
   ): Iterable<RoomAccess>
 
   // This sets the role to owner even if the entry was already present
@@ -64,14 +76,14 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
       ON CONFLICT ON CONSTRAINT room_access_pkey DO UPDATE SET role = :updateRole WHERE room_access.role != 'OWNER'
       RETURNING *;
     """,
-    nativeQuery = true
+    nativeQuery = true,
   )
   fun createOrUpdateAccess(
     @Param("roomId") roomId: UUID,
     @Param("userId") userId: UUID,
     @Param("rev") rev: String,
     @Param("role") role: String,
-    @Param("updateRole") updateRole: String
+    @Param("updateRole") updateRole: String,
   ): RoomAccess
 
   // This query should not be needed, but since the PK is composed, hibernate tries to update instead of inserting
@@ -82,13 +94,13 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
       VALUES (:roomId, :userId, :rev, :role)
       RETURNING *;
     """,
-    nativeQuery = true
+    nativeQuery = true,
   )
   fun createAccess(
     @Param("roomId") roomId: UUID,
     @Param("userId") userId: UUID,
     @Param("rev") rev: String,
-    @Param("role") role: String
+    @Param("role") role: String,
   ): RoomAccess
 
   // This query is for creating participants and checks for duplicate key,
@@ -101,12 +113,12 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
       ON CONFLICT (room_id, user_id) DO UPDATE SET room_id = :roomId
       RETURNING *;
     """,
-    nativeQuery = true
+    nativeQuery = true,
   )
   fun createParticipantAccess(
     @Param("roomId") roomId: UUID,
     @Param("userId") userId: UUID,
-    @Param("rev") rev: String
+    @Param("rev") rev: String,
   ): RoomAccess
 
   @Query(
@@ -116,13 +128,19 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     WHERE last_access > :lastAccess
     GROUP BY room_id;
     """,
-    nativeQuery = true
+    nativeQuery = true,
   )
   fun countByLastAccessAfterAndGroupByRoomId(lastAccess: Date): List<Int>
 
-  fun countByRoomIdAndRole(roomId: UUID, role: String): Long
+  fun countByRoomIdAndRole(
+    roomId: UUID,
+    role: String,
+  ): Long
 
   fun countDistinctUserIdByLastAccessAfter(lastAccess: Date): Long
 
-  fun countDistinctUserIdByRoleAndLastAccessAfter(role: String, lastAccess: Date): Long
+  fun countDistinctUserIdByRoleAndLastAccessAfter(
+    role: String,
+    lastAccess: Date,
+  ): Long
 }

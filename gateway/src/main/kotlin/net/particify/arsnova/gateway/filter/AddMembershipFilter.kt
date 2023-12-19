@@ -21,9 +21,8 @@ import reactor.kotlin.core.util.function.component2
 class AddMembershipFilter(
   private val jwtTokenUtil: JwtTokenUtil,
   private val roomAccessService: RoomAccessService,
-  private val subscriptionService: SubscriptionService
+  private val subscriptionService: SubscriptionService,
 ) : AbstractGatewayFilterFactory<AddMembershipFilter.Config>(Config::class.java) {
-
   companion object {
     const val ENTITY_ID_HEADER = "Arsnova-Entity-Id"
     const val ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision"
@@ -59,8 +58,8 @@ class AddMembershipFilter(
                 userId,
                 revId,
                 role,
-                null
-              )
+                null,
+              ),
             ),
             subscriptionService
               .getRoomSubscription(roomId, true)
@@ -71,7 +70,7 @@ class AddMembershipFilter(
                 } else {
                   subscriptionService.getRoomParticipantLimit(roomSubscription.tierId)
                 }
-              }
+              },
           )
         }
         .flatMap { (roomAccess: RoomAccess, limit: Int) ->

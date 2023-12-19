@@ -24,9 +24,8 @@ import reactor.core.publisher.Mono
 @Component
 class AddRoomCreatorAccessFilter(
   private val jwtTokenUtil: JwtTokenUtil,
-  private val roomAccessService: RoomAccessService
+  private val roomAccessService: RoomAccessService,
 ) : AbstractGatewayFilterFactory<AddRoomCreatorAccessFilter.Config>(Config::class.java) {
-
   companion object {
     const val ENTITY_ID_HEADER = "Arsnova-Entity-Id"
     const val ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision"
@@ -61,8 +60,8 @@ class AddRoomCreatorAccessFilter(
                     roomId,
                     revId,
                     userId,
-                    AccessLevel.OWNER
-                  )
+                    AccessLevel.OWNER,
+                  ),
                 )
               } else {
                 listOf()
@@ -74,19 +73,20 @@ class AddRoomCreatorAccessFilter(
             .flatMap { accessChangeRequest: AccessChangeRequest ->
               when (accessChangeRequest.type) {
                 AccessChangeRequestType.CREATE -> {
-                  val roomAccess = RoomAccess(
-                    accessChangeRequest.roomId,
-                    accessChangeRequest.userId,
-                    accessChangeRequest.revId,
-                    accessChangeRequest.level.name,
-                    null
-                  )
+                  val roomAccess =
+                    RoomAccess(
+                      accessChangeRequest.roomId,
+                      accessChangeRequest.userId,
+                      accessChangeRequest.revId,
+                      accessChangeRequest.level.name,
+                      null,
+                    )
                   roomAccessService.postRoomAccess(roomAccess)
                 }
                 else -> throw IllegalStateException("Unexpected AccessChangeRequestType")
               }
             }
-            .then()
+            .then(),
         )
     }
   }

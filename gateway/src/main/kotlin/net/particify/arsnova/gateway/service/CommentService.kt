@@ -14,11 +14,14 @@ import java.net.URI
 @Service
 class CommentService(
   private val webClient: WebClient,
-  private val httpGatewayProperties: HttpGatewayProperties
+  private val httpGatewayProperties: HttpGatewayProperties,
 ) {
   private val logger = LoggerFactory.getLogger(javaClass)
 
-  fun getStats(roomIds: List<String>, jwt: String): Flux<CommentStats> {
+  fun getStats(
+    roomIds: List<String>,
+    jwt: String,
+  ): Flux<CommentStats> {
     val url = "${httpGatewayProperties.httpClient.commentService}/stats/comment-stats-by-rooms?roomIds=${roomIds.joinToString(",")}"
     logger.trace("Querying comment service for comment stats with url: {}", url)
     return webClient.get()
@@ -32,9 +35,9 @@ class CommentService(
           roomIds.map { roomId ->
             CommentStats(
               roomId,
-              null
+              null,
             )
-          }
+          },
         )
       }
   }

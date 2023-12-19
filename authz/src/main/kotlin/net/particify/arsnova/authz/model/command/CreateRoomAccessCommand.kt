@@ -6,5 +6,5 @@ data class CreateRoomAccessCommand(
   val rev: String,
   val roomId: UUID,
   val userId: UUID,
-  val role: String
+  val role: String,
 )

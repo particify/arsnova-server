@@ -20,7 +20,7 @@ class StompMetaHandler {
     logger.error(
       simpUserRegistry.findSubscriptions {
         it.destination == "/topic/$roomId.comment.stream"
-      }.count().toString()
+      }.count().toString(),
     )
   }
 }

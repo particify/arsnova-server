@@ -22,7 +22,7 @@ class RoomView(
   private val roomService: RoomService,
   private val contentService: ContentService,
   private val commentService: CommentService,
-  private val wsGatewayService: WsGatewayService
+  private val wsGatewayService: WsGatewayService,
 ) {
   fun getSummaries(roomIds: List<String>): Flux<Optional<RoomSummary>> {
     return authProcessor.getAuthentication()
@@ -34,21 +34,21 @@ class RoomView(
         Flux.zip(
           commentService.getStats(roomIds, jwt),
           contentService.getStats(roomIds, jwt),
-          wsGatewayService.getUsercount(roomIds)
+          wsGatewayService.getUsercount(roomIds),
         )
           .map { (commentStats: CommentStats, contentCount: Int, wsUserCount: Optional<Int>) ->
             wsUserCount.map { userCount ->
               RoomStats(
                 contentCount,
                 commentStats.ackCommentCount,
-                userCount
+                userCount,
               )
             }.orElse(
               RoomStats(
                 contentCount,
                 commentStats.ackCommentCount,
-                null
-              )
+                null,
+              ),
             )
           }
       }
@@ -61,8 +61,8 @@ class RoomView(
                 room.id,
                 room.shortId,
                 room.name,
-                roomStats
-              )
+                roomStats,
+              ),
             )
           }
           .orElse(Optional.empty())

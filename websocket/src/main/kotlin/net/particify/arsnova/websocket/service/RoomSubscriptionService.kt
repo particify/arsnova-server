@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
 class RoomSubscriptionService(
   private val rabbitTemplate: RabbitTemplate,
   private val webSocketProperties: WebSocketProperties,
-  private val applicationEventPublisher: ApplicationEventPublisher
+  private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
   private val logger = LoggerFactory.getLogger(RoomSubscriptionService::class.java)
 
@@ -36,7 +36,10 @@ class RoomSubscriptionService(
 
   private val eventBucketMap: MutableMap<String, Bucket> = ConcurrentHashMap()
 
-  fun addUser(roomId: String, userId: String) = GlobalScope.launch {
+  fun addUser(
+    roomId: String,
+    userId: String,
+  ) = GlobalScope.launch {
     var currentUsers: MutableSet<String>
     synchronized(roomUsers) {
       currentUsers = roomUsers.getOrDefault(roomId, mutableSetOf())
@@ -47,7 +50,10 @@ class RoomSubscriptionService(
     applicationEventPublisher.publishEvent(RoomUserCountChangedEvent(roomId, currentUsers.count()))
   }
 
-  fun removeUser(roomId: String, userId: String) = GlobalScope.launch {
+  fun removeUser(
+    roomId: String,
+    userId: String,
+  ) = GlobalScope.launch {
     var currentUsers: MutableSet<String>
     synchronized(roomUsers) {
       currentUsers = roomUsers.getOrDefault(roomId, mutableSetOf())
@@ -74,14 +80,18 @@ class RoomSubscriptionService(
     return this.roomUsers.mapValues { (roomId, userIds) -> userIds.size }
   }
 
-  fun sendUserCountChangedEvent(roomId: String, currentUserCount: Int) {
+  fun sendUserCountChangedEvent(
+    roomId: String,
+    currentUserCount: Int,
+  ) {
     var canSend = true
     if (currentUserCount > threshold) {
-      val bucket: Bucket = eventBucketMap.computeIfAbsent(roomId) {
-        val refill: Refill = Refill.intervally(tokensPerTimeframe, duration)
-        val limit: Bandwidth = Bandwidth.classic(burstCapacity, refill)
-        Bucket4j.builder().addLimit(limit).build()
-      }
+      val bucket: Bucket =
+        eventBucketMap.computeIfAbsent(roomId) {
+          val refill: Refill = Refill.intervally(tokensPerTimeframe, duration)
+          val limit: Bandwidth = Bandwidth.classic(burstCapacity, refill)
+          Bucket4j.builder().addLimit(limit).build()
+        }
       val probe = bucket.tryConsumeAndReturnRemaining(1)
       if (!probe.isConsumed) {
         canSend = false
@@ -91,7 +101,7 @@ class RoomSubscriptionService(
       rabbitTemplate.convertAndSend(
         "amq.topic",
         "$roomId.stream",
-        UserCountChanged(currentUserCount)
+        UserCountChanged(currentUserCount),
       )
     }
   }

@@ -5,5 +5,5 @@ enum class AccessLevel {
   EDITOR,
   MODERATOR,
   PARTICIPANT,
-  NONE
+  NONE,
 }

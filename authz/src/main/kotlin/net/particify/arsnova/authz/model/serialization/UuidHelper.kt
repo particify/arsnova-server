@@ -13,8 +13,8 @@ object UuidHelper {
     } else {
       UUID.fromString(
         pattern.matcher(
-          uuidString
-        ).replaceFirst(REPLACEMENT_PATTERN)
+          uuidString,
+        ).replaceFirst(REPLACEMENT_PATTERN),
       )
     }
   }

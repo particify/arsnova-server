@@ -7,5 +7,5 @@ data class RoomAccess(
   var roomId: String? = "",
   var userId: String? = "",
   val rev: String = "",
-  var role: String? = ""
+  var role: String? = "",
 )

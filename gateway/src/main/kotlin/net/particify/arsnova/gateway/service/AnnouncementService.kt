@@ -20,7 +20,7 @@ class AnnouncementService(
   private val httpGatewayProperties: HttpGatewayProperties,
   private val authProcessor: AuthProcessor,
   private val roomAccessService: RoomAccessService,
-  private val roomService: RoomService
+  private val roomService: RoomService,
 ) {
   private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -74,7 +74,7 @@ class AnnouncementService(
             user.announcementReadTimestamp == null ||
               (a.updateTimestamp ?: a.creationTimestamp) > user.announcementReadTimestamp
           },
-        user.announcementReadTimestamp
+        user.announcementReadTimestamp,
       )
     }
   }

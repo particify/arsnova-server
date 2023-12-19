@@ -7,11 +7,11 @@ class RoomSummary(
   var id: String,
   var shortId: String,
   var name: String,
-  var stats: RoomStats
+  var stats: RoomStats,
 )
 
 data class RoomStats(
   var contentCount: Int,
   var ackCommentCount: Int?,
-  var roomUserCount: Int?
+  var roomUserCount: Int?,
 )

@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono
 
 @Component
 class SecurityContextRepository(
-  private val jwtTokenUtil: JwtTokenUtil
+  private val jwtTokenUtil: JwtTokenUtil,
 ) : ServerSecurityContextRepository {
   companion object {
     val TOKEN_PREFIX = "Bearer "
@@ -21,7 +21,7 @@ class SecurityContextRepository(
 
   override fun save(
     swe: ServerWebExchange?,
-    sc: SecurityContext?
+    sc: SecurityContext?,
   ): Mono<Void?>? {
     throw UnsupportedOperationException("Not supported yet.")
   }
@@ -50,7 +50,7 @@ class SecurityContextRepository(
         UsernamePasswordAuthenticationToken(
           authPair.first,
           TOKEN_PREFIX + authPair.second,
-          authorities
+          authorities,
         )
       }
       .map { authentication ->

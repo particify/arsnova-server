@@ -7,5 +7,5 @@ data class RoomAccessSyncEvent(
   val version: String = "",
   val rev: String = "",
   val roomId: UUID,
-  val access: List<RoomAccessEntry> = emptyList()
+  val access: List<RoomAccessEntry> = emptyList(),
 )

@@ -7,5 +7,5 @@ import java.util.UUID
 data class RoomCreatedEvent(
   val id: UUID,
   val ownerId: UUID,
-  val tenantId: UUID?
+  val tenantId: UUID?,
 )

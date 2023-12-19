@@ -19,7 +19,7 @@ class MembershipView(
   private val authProcessor: AuthProcessor,
   private val roomAccessService: RoomAccessService,
   private val roomService: RoomService,
-  private val userService: UserService
+  private val userService: UserService,
 ) {
   fun getByUser(userId: String): Flux<Membership> {
     return authProcessor.getAuthentication()
@@ -37,14 +37,14 @@ class MembershipView(
         Flux
           .zip(
             Mono.just(roomAccess),
-            roomService.get(roomAccess.roomId)
+            roomService.get(roomAccess.roomId),
           )
           .map { (roomAccess: RoomAccess, room: Room) ->
             Membership(
               roomAccess.roomId,
               room.shortId,
               setOf(roomAccess.role),
-              roomAccess.lastAccess!!
+              roomAccess.lastAccess!!,
             )
           }
       }
@@ -53,7 +53,7 @@ class MembershipView(
       }
       .flatMap { groupedMemberships ->
         groupedMemberships.reduce(
-          groupedMemberships.key().copy()
+          groupedMemberships.key().copy(),
         ) { acc: Membership, m: Membership ->
           acc.roles = acc.roles.union(m.roles)
           if (acc.lastVisit.before(m.lastVisit)) {

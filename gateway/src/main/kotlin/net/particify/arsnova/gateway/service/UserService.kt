@@ -17,11 +17,14 @@ import java.util.Date
 class UserService(
   private val webClient: WebClient,
   private val httpGatewayProperties: HttpGatewayProperties,
-  private val authProcessor: AuthProcessor
+  private val authProcessor: AuthProcessor,
 ) {
   private val logger = LoggerFactory.getLogger(javaClass)
 
-  fun get(userId: String, jwt: String): Mono<User> {
+  fun get(
+    userId: String,
+    jwt: String,
+  ): Mono<User> {
     val url = "${httpGatewayProperties.httpClient.core}/user/$userId?view=owner"
     logger.trace("Querying core for user with url: {}", url)
     return webClient.get()
@@ -31,7 +34,10 @@ class UserService(
       .checkpoint("Request failed in ${this::class.simpleName}::${::get.name}.")
   }
 
-  fun exists(userId: String, jwt: String): Mono<Boolean> {
+  fun exists(
+    userId: String,
+    jwt: String,
+  ): Mono<Boolean> {
     val url = "${httpGatewayProperties.httpClient.core}/user/$userId"
     logger.trace("Querying core for user with url: {}", url)
     return webClient.get()
@@ -47,7 +53,10 @@ class UserService(
       }
   }
 
-  fun getRoomHistory(userId: String, jwt: String): Flux<RoomHistoryEntry> {
+  fun getRoomHistory(
+    userId: String,
+    jwt: String,
+  ): Flux<RoomHistoryEntry> {
     val url = "${httpGatewayProperties.httpClient.core}/user/$userId/roomHistory"
     logger.trace("Querying core for room history with url: {}", url)
     return webClient.get()
@@ -57,7 +66,10 @@ class UserService(
       .checkpoint("Request failed in ${this::class.simpleName}::${::getRoomHistory.name}.")
   }
 
-  fun updateAnnouncementReadTimestamp(userId: String, jwt: String): Mono<ResponseEntity<Void>> {
+  fun updateAnnouncementReadTimestamp(
+    userId: String,
+    jwt: String,
+  ): Mono<ResponseEntity<Void>> {
     val url = "${httpGatewayProperties.httpClient.core}/user/$userId"
     return webClient.patch()
       .uri(url)

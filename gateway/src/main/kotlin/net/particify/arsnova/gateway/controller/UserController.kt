@@ -19,26 +19,30 @@ import reactor.core.publisher.Mono
 class UserController(
   private val announcementService: AnnouncementService,
   private val userService: UserService,
-  private val authProcessor: AuthProcessor
+  private val authProcessor: AuthProcessor,
 ) {
   companion object {
-    const val baseMapping = "/user/{userId}"
-    const val announcementMapping = "$baseMapping/announcement"
-    const val announcementStateMapping = "$announcementMapping/state"
+    const val BASE_MAPPING = "/user/{userId}"
+    const val ANNOUNCEMENT_MAPPING = "$BASE_MAPPING/announcement"
+    const val ANNOUNCEMENT_STATE_MAPPING = "$ANNOUNCEMENT_MAPPING/state"
   }
 
   private val logger = LoggerFactory.getLogger(this::class.java)
 
-  @GetMapping(path = [announcementMapping])
+  @GetMapping(path = [ANNOUNCEMENT_MAPPING])
   @ResponseBody
-  fun getAnnouncements(@PathVariable userId: String): Flux<Announcement> {
+  fun getAnnouncements(
+    @PathVariable userId: String,
+  ): Flux<Announcement> {
     logger.trace("Getting announcements")
     return announcementService.getByUserIdWithRoomName(userId)
   }
 
-  @PostMapping(path = [announcementMapping])
+  @PostMapping(path = [ANNOUNCEMENT_MAPPING])
   @ResponseBody
-  fun postAnnouncements(@PathVariable userId: String): Flux<Announcement> {
+  fun postAnnouncements(
+    @PathVariable userId: String,
+  ): Flux<Announcement> {
     logger.trace("Getting announcements and updating timestamp")
     return authProcessor.getAuthentication()
       .filter { authentication ->
@@ -53,9 +57,11 @@ class UserController(
       }
   }
 
-  @GetMapping(path = [announcementStateMapping])
+  @GetMapping(path = [ANNOUNCEMENT_STATE_MAPPING])
   @ResponseBody
-  fun getAnnouncementState(@PathVariable userId: String): Mono<AnnouncementState> {
+  fun getAnnouncementState(
+    @PathVariable userId: String,
+  ): Mono<AnnouncementState> {
     logger.trace("Getting announcement state")
     return authProcessor.getAuthentication()
       .filter { authentication ->

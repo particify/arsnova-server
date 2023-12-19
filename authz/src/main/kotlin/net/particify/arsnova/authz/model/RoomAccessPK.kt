@@ -7,5 +7,5 @@ import java.util.UUID
 @Embeddable
 data class RoomAccessPK(
   var roomId: UUID,
-  var userId: UUID
+  var userId: UUID,
 ) : Serializable

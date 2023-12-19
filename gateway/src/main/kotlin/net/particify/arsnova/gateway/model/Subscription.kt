@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 data class RoomSubscription(
   var roomId: String = "",
   var tier: String = "",
-  var tierId: String = ""
+  var tierId: String = "",
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UserSubscription(
   var userId: String = "",
   var tier: String = "",
-  var tierId: String = ""
+  var tierId: String = "",
 )

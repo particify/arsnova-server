@@ -23,7 +23,7 @@ class SystemView(
   private val authProcessor: AuthProcessor,
   private val wsGatewayService: WsGatewayService,
   private val coreStatsService: CoreStatsService,
-  private val commentService: CommentService
+  private val commentService: CommentService,
 ) {
   fun getServiceStats(params: MultiValueMap<String, String>): Mono<Stats> {
     return authProcessor.getAuthentication()
@@ -39,7 +39,7 @@ class SystemView(
         Mono.zip(
           wsGatewayService.getGatewayStats(),
           coreStatsService.getServiceStats(jwt, params),
-          commentService.getServiceStats(params)
+          commentService.getServiceStats(params),
         )
           .map { (wsGatewayStats: WsGatewayStats, coreServiceStats: Map<String, Any>, commentServiceStats: CommentServiceStats) ->
             Stats(wsGatewayStats, coreServiceStats, commentServiceStats)
@@ -61,7 +61,7 @@ class SystemView(
         Mono.zip(
           wsGatewayService.getGatewayStats(),
           coreStatsService.getSummarizedStats(jwt, params),
-          commentService.getServiceStats(params)
+          commentService.getServiceStats(params),
         )
           .map { (wsGatewayStats: WsGatewayStats, coreStats: CoreStats, commentServiceStats: CommentServiceStats) ->
             SummarizedStats(
@@ -71,7 +71,7 @@ class SystemView(
               rooms = coreStats.room.totalCount,
               contents = coreStats.content.totalCount,
               answers = coreStats.answer.totalCount,
-              comments = commentServiceStats.commentCount.toInt()
+              comments = commentServiceStats.commentCount.toInt(),
             )
           }
       }

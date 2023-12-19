@@ -15,7 +15,7 @@ import java.util.Date
 @Service
 class MetricsService(
   meterRegistry: MeterRegistry,
-  private val roomAccessRepository: RoomAccessRepository
+  private val roomAccessRepository: RoomAccessRepository,
 ) {
   companion object {
     const val GATHERING_INTERVAL_DAILY = 10 * 60 * 1000L
@@ -24,21 +24,24 @@ class MetricsService(
     const val ROLE_TYPE_TAG_NAME = "role.type"
   }
 
-  val roomMembershipsDailyDistribution = DistributionSummary
-    .builder("arsnova.room.memberships.daily")
-    .publishPercentileHistogram()
-    .maximumExpectedValue(1000.0)
-    .register(meterRegistry)
-  val roomMembershipsWeeklyDistribution = DistributionSummary
-    .builder("arsnova.room.memberships.weekly")
-    .publishPercentileHistogram()
-    .maximumExpectedValue(1000.0)
-    .register(meterRegistry)
-  val roomMembershipsMonthlyDistribution = DistributionSummary
-    .builder("arsnova.room.memberships.monthly")
-    .publishPercentileHistogram()
-    .maximumExpectedValue(1000.0)
-    .register(meterRegistry)
+  val roomMembershipsDailyDistribution =
+    DistributionSummary
+      .builder("arsnova.room.memberships.daily")
+      .publishPercentileHistogram()
+      .maximumExpectedValue(1000.0)
+      .register(meterRegistry)
+  val roomMembershipsWeeklyDistribution =
+    DistributionSummary
+      .builder("arsnova.room.memberships.weekly")
+      .publishPercentileHistogram()
+      .maximumExpectedValue(1000.0)
+      .register(meterRegistry)
+  val roomMembershipsMonthlyDistribution =
+    DistributionSummary
+      .builder("arsnova.room.memberships.monthly")
+      .publishPercentileHistogram()
+      .maximumExpectedValue(1000.0)
+      .register(meterRegistry)
 
   var dailyUserCount = 0L
   var dailyOwnerCount = 0L
@@ -92,14 +95,19 @@ class MetricsService(
     updateRoomMembershipsMetrics(1, ChronoUnit.MONTHS, roomMembershipsMonthlyDistribution)
   }
 
-  private fun updateUserCountMetrics(interval: Long, unit: TemporalUnit) {
-    val userCount = roomAccessRepository.countDistinctUserIdByLastAccessAfter(
-      Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC))
-    )
-    val ownerCount = roomAccessRepository.countDistinctUserIdByRoleAndLastAccessAfter(
-      "OWNER",
-      Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC))
-    )
+  private fun updateUserCountMetrics(
+    interval: Long,
+    unit: TemporalUnit,
+  ) {
+    val userCount =
+      roomAccessRepository.countDistinctUserIdByLastAccessAfter(
+        Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC)),
+      )
+    val ownerCount =
+      roomAccessRepository.countDistinctUserIdByRoleAndLastAccessAfter(
+        "OWNER",
+        Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC)),
+      )
     when (unit) {
       ChronoUnit.DAYS -> {
         this.dailyUserCount = userCount
@@ -117,10 +125,15 @@ class MetricsService(
     }
   }
 
-  private fun updateRoomMembershipsMetrics(interval: Long, unit: TemporalUnit, distributionSummary: DistributionSummary) {
-    val membershipCounts = roomAccessRepository.countByLastAccessAfterAndGroupByRoomId(
-      Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC))
-    )
+  private fun updateRoomMembershipsMetrics(
+    interval: Long,
+    unit: TemporalUnit,
+    distributionSummary: DistributionSummary,
+  ) {
+    val membershipCounts =
+      roomAccessRepository.countByLastAccessAfterAndGroupByRoomId(
+        Date.from(LocalDateTime.now().minus(interval, unit).toInstant(ZoneOffset.UTC)),
+      )
     for (count in membershipCounts) {
       distributionSummary.record(count.toDouble())
     }

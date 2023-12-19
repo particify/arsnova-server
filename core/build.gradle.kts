@@ -83,9 +83,10 @@ tasks.jacocoTestReport {
 checkstyle {
   toolVersion = libs.versions.checkstyle.get()
   configFile = file("$projectDir/checkstyle.xml")
-  configProperties = mapOf(
-    "checkstyle.missing-javadoc.severity" to "info"
-  )
+  configProperties =
+    mapOf(
+      "checkstyle.missing-javadoc.severity" to "info",
+    )
   maxWarnings = 0
 }
 

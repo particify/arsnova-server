@@ -20,9 +20,8 @@ import java.util.concurrent.ConcurrentHashMap
 @Component
 class RequestRateLimiter(
   private val httpGatewayProperties: HttpGatewayProperties,
-  private val configurationService: ConfigurationService
+  private val configurationService: ConfigurationService,
 ) : AbstractRateLimiter<RequestRateLimiter.Config>(Config::class.java, CONFIGURATION_PROPERTY_NAME, configurationService) {
-
   companion object {
     private const val CONFIGURATION_PROPERTY_NAME = "rate-limiter"
     private const val QUERY_BUCKET_PREFIX = "QUERY_"
@@ -33,15 +32,19 @@ class RequestRateLimiter(
   private val logger: Logger = LoggerFactory.getLogger(this::class.java)
   private val defaultConfig = Config(httpGatewayProperties)
   private val ipBucketMap: MutableMap<String, Bucket> = ConcurrentHashMap()
-  private val allowedIpAddresses = httpGatewayProperties
-    .gateway.rateLimit.whitelistedIps.map { IpAddressMatcher(it) }
+  private val allowedIpAddresses =
+    httpGatewayProperties
+      .gateway.rateLimit.whitelistedIps.map { IpAddressMatcher(it) }
 
   /*
   The id is the key extracted from the KeyResolver configured in GatewayConfig.
   Format: <HTTPMethod>,<IP>
   Example: GET,172.18.0.18
    */
-  override fun isAllowed(routeId: String, id: String): Mono<RateLimiter.Response> {
+  override fun isAllowed(
+    routeId: String,
+    id: String,
+  ): Mono<RateLimiter.Response> {
     logger.trace("Checking rate limit for {} from {}.", routeId, id)
 
     var routeConfig: Config? = config[routeId]
@@ -57,19 +60,20 @@ class RequestRateLimiter(
       return Mono.just(RateLimiter.Response(true, mapOf("RateLimit-Remaining" to "infinite")))
     }
 
-    val bucket: Bucket = if (isQuery) {
-      ipBucketMap.computeIfAbsent(QUERY_BUCKET_PREFIX + ipAddr) { _: String ->
-        val refill: Refill = Refill.intervally(routeConfig.queryTokensPerTimeframe, routeConfig.duration)
-        val limit: Bandwidth = Bandwidth.classic(routeConfig.queryBurstCapacity, refill)
-        Bucket4j.builder().addLimit(limit).build()
+    val bucket: Bucket =
+      if (isQuery) {
+        ipBucketMap.computeIfAbsent(QUERY_BUCKET_PREFIX + ipAddr) { _: String ->
+          val refill: Refill = Refill.intervally(routeConfig.queryTokensPerTimeframe, routeConfig.duration)
+          val limit: Bandwidth = Bandwidth.classic(routeConfig.queryBurstCapacity, refill)
+          Bucket4j.builder().addLimit(limit).build()
+        }
+      } else {
+        ipBucketMap.computeIfAbsent(COMMAND_BUCKET_PREFIX + ipAddr) { _: String ->
+          val refill: Refill = Refill.intervally(routeConfig.commandTokensPerTimeframe, routeConfig.duration)
+          val limit: Bandwidth = Bandwidth.classic(routeConfig.commandBurstCapacity, refill)
+          Bucket4j.builder().addLimit(limit).build()
+        }
       }
-    } else {
-      ipBucketMap.computeIfAbsent(COMMAND_BUCKET_PREFIX + ipAddr) { _: String ->
-        val refill: Refill = Refill.intervally(routeConfig.commandTokensPerTimeframe, routeConfig.duration)
-        val limit: Bandwidth = Bandwidth.classic(routeConfig.commandBurstCapacity, refill)
-        Bucket4j.builder().addLimit(limit).build()
-      }
-    }
 
     if (bucket.availableTokens in 1..10) {
       // Check early so logs don't get spammed
@@ -87,7 +91,7 @@ class RequestRateLimiter(
   }
 
   class Config(
-    private val httpGatewayProperties: HttpGatewayProperties
+    private val httpGatewayProperties: HttpGatewayProperties,
   ) {
     val queryTokensPerTimeframe: Long = httpGatewayProperties.gateway.rateLimit.queryTokensPerTimeframe
     val queryBurstCapacity: Long = httpGatewayProperties.gateway.rateLimit.queryBurstCapacity

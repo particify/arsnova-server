@@ -8,7 +8,7 @@ import java.util.UUID
 class RoomAccessSyncTracker(
   @Id
   var roomId: UUID,
-  var rev: String = ""
+  var rev: String = "",
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

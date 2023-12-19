@@ -6,11 +6,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class AuthServiceProperties(
   val server: Server,
   val rabbitmq: Rabbitmq,
-  val spring: Spring
+  val spring: Spring,
 )
 
 data class Server(
-  val port: Int
+  val port: Int,
 )
 
 data class Rabbitmq(
@@ -18,12 +18,12 @@ data class Rabbitmq(
   val port: Int,
   val username: String,
   val password: String,
-  val virtualHost: String
+  val virtualHost: String,
 )
 
 data class Spring(
   val datasource: Datasource,
-  val jpa: Jpa
+  val jpa: Jpa,
 )
 
 data class Datasource(
@@ -31,13 +31,13 @@ data class Datasource(
   val driverClassName: String,
   val platform: String,
   val username: String,
-  val password: String
+  val password: String,
 )
 
 data class Jpa(
-  val hibernate: Hibernate
+  val hibernate: Hibernate,
 )
 
 data class Hibernate(
-  val ddlAuto: String
+  val ddlAuto: String,
 )
