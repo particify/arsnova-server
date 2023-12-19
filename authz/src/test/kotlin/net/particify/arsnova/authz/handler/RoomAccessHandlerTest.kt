@@ -24,6 +24,18 @@ import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class RoomAccessHandlerTest {
+  companion object {
+    val SOME_ROOM_ID = UUID.fromString("23e7c082-c533-e499-63b9-6d7a0500105f")
+    val SOME_USER_ID = UUID.fromString("23e7c082-c533-e499-63b9-6d7a05000d0e")
+    val SOME_OTHER_USER_ID = UUID.fromString("aaaac082-c533-e499-63b9-6d7a05000d0f")
+    val SOME_MODERATOR_ID = UUID.fromString("bbbbc082-c533-e499-63b9-6d7a05000d0f")
+    const val SOME_REV = "1-93b09a4699769e6abd3bf5b2ff341e5d"
+    const val SOME_NEWER_REV = "2-93b09a4699769e6abd3bf5b2ff341e5e"
+    const val SOME_EVEN_NEWER_REV = "3-93b09a4699769e6abd3bf5b2ff341e5f"
+    const val OWNER_STRING = "OWNER"
+    const val MODERATOR_STRING = "MODERATOR"
+  }
+
   @Mock
   private lateinit var rabbitTemplate: RabbitTemplate
 
@@ -34,16 +46,6 @@ class RoomAccessHandlerTest {
   private lateinit var roomAccessSyncTrackerRepository: RoomAccessSyncTrackerRepository
 
   private lateinit var roomAccessHandler: RoomAccessHandler
-
-  val SOME_ROOM_ID = UUID.fromString("23e7c082-c533-e499-63b9-6d7a0500105f")
-  val SOME_REV = "1-93b09a4699769e6abd3bf5b2ff341e5d"
-  val SOME_NEWER_REV = "2-93b09a4699769e6abd3bf5b2ff341e5e"
-  val SOME_EVEN_NEWER_REV = "3-93b09a4699769e6abd3bf5b2ff341e5f"
-  val SOME_USER_ID = UUID.fromString("23e7c082-c533-e499-63b9-6d7a05000d0e")
-  val SOME_OTHER_USER_ID = UUID.fromString("aaaac082-c533-e499-63b9-6d7a05000d0f")
-  val SOME_MODERATOR_ID = UUID.fromString("bbbbc082-c533-e499-63b9-6d7a05000d0f")
-  val OWNER_STRING = "OWNER"
-  val MODERATOR_STRING = "MODERATOR"
 
   @BeforeEach
   fun setUp() {

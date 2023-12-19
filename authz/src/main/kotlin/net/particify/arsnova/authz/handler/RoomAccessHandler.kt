@@ -53,7 +53,7 @@ class RoomAccessHandler(
       val event = RoomAccessSyncRequest(command.roomId)
       logger.debug("Sending room access sync request: {}", event)
       rabbitTemplate.convertAndSend(
-        RabbitConfig.roomAccessSyncRequestQueueName,
+        RabbitConfig.ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME,
         event,
       )
       return newTracker

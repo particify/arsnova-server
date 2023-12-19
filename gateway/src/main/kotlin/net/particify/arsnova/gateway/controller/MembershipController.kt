@@ -14,14 +14,13 @@ class MembershipController(
   private val membershipView: MembershipView,
 ) {
   companion object {
-    const val baseMapping = "/_view/membership"
-    const val byUserMapping = "$baseMapping/by-user/{userId}"
-    const val byUserAndRoomMapping = "$baseMapping/by-user-and-room/{userId}/{roomId}"
+    private const val BASE_MAPPING = "/_view/membership"
+    const val BY_USER_MAPPING = "$BASE_MAPPING/by-user/{userId}"
   }
 
   private val logger = LoggerFactory.getLogger(MembershipController::class.java)
 
-  @GetMapping(path = [byUserMapping])
+  @GetMapping(path = [BY_USER_MAPPING])
   @ResponseBody
   fun getMembershipByUser(
     @PathVariable userId: String,

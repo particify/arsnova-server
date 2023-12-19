@@ -14,12 +14,12 @@ class RoomModeratorController(
   private val roomAccessService: RoomAccessService,
 ) {
   companion object {
-    const val baseMapping = "/room/{roomId}/moderator"
+    const val BASE_MAPPING = "/room/{roomId}/moderator"
   }
 
   private val logger = LoggerFactory.getLogger(javaClass)
 
-  @GetMapping(path = [baseMapping])
+  @GetMapping(path = [BASE_MAPPING])
   @ResponseBody
   fun getRoomModerators(
     @PathVariable roomId: String,

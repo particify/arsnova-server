@@ -28,13 +28,13 @@ class RabbitConfig(
   private var authServiceProperties: AuthServiceProperties,
 ) {
   companion object {
-    const val roomAccessSyncResponseQueueName: String = "backend.event.room.access.sync.response"
-    const val roomAccessSyncRequestQueueName: String = "backend.event.room.access.sync.request"
-    const val roomCreatedExchangeName: String = "backend.event.room.aftercreation"
-    const val roomDeletedExchangeName: String = "backend.event.room.afterdeletion"
-    const val roomCreatedQueueName: String = "backend.event.room.aftercreation.consumer.auth-service"
-    const val roomDeletedQueueName: String = "backend.event.room.afterdeletion.consumer.auth-service"
-    const val participantAccessMigrationQueueName: String = "backend.event.migration.access.participant"
+    const val ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME: String = "backend.event.room.access.sync.response"
+    const val ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME: String = "backend.event.room.access.sync.request"
+    const val ROOM_CREATED_EXCHANGE_NAME: String = "backend.event.room.aftercreation"
+    const val ROOM_DELETED_EXCHANGE_NAME: String = "backend.event.room.afterdeletion"
+    const val ROOM_CREATED_QUEUE_NAME: String = "backend.event.room.aftercreation.consumer.auth-service"
+    const val ROOM_DELETED_QUEUE_NAME: String = "backend.event.room.afterdeletion.consumer.auth-service"
+    const val PARTICIPANT_ACCESS_MIGRATION_QUEUE_NAME: String = "backend.event.migration.access.participant"
   }
 
   @Bean
@@ -73,57 +73,57 @@ class RabbitConfig(
 
   @Bean
   fun declarables(): Declarables {
-    val roomCreatedFanoutExchange = FanoutExchange(roomCreatedExchangeName)
-    val roomDeletedFanoutExchange = FanoutExchange(roomDeletedExchangeName)
-    val participantAccessMigrationDlq = Queue("$participantAccessMigrationQueueName.dlq")
+    val roomCreatedFanoutExchange = FanoutExchange(ROOM_CREATED_EXCHANGE_NAME)
+    val roomDeletedFanoutExchange = FanoutExchange(ROOM_DELETED_EXCHANGE_NAME)
+    val participantAccessMigrationDlq = Queue("$PARTICIPANT_ACCESS_MIGRATION_QUEUE_NAME.dlq")
     val participantAccessMigrationQueue =
       Queue(
-        participantAccessMigrationQueueName,
+        PARTICIPANT_ACCESS_MIGRATION_QUEUE_NAME,
         true,
         false,
         false,
         mapOf(
           "x-dead-letter-exchange" to "",
-          "x-dead-letter-routing-key" to "$participantAccessMigrationQueueName.dlq",
+          "x-dead-letter-routing-key" to "$PARTICIPANT_ACCESS_MIGRATION_QUEUE_NAME.dlq",
         ),
       )
     val roomCreatedQueue =
       Queue(
-        roomCreatedQueueName,
+        ROOM_CREATED_QUEUE_NAME,
         true,
         true,
         false,
         mapOf(
           "x-dead-letter-exchange" to "",
-          "x-dead-letter-routing-key" to "$roomCreatedQueueName.dlq",
+          "x-dead-letter-routing-key" to "$ROOM_CREATED_QUEUE_NAME.dlq",
         ),
       )
     val roomDeletedQueue =
       Queue(
-        roomDeletedQueueName,
+        ROOM_DELETED_QUEUE_NAME,
         true,
         true,
         false,
         mapOf(
           "x-dead-letter-exchange" to "",
-          "x-dead-letter-routing-key" to "$roomDeletedQueueName.dlq",
+          "x-dead-letter-routing-key" to "$ROOM_DELETED_QUEUE_NAME.dlq",
         ),
       )
-    val roomCreatedDlq = Queue("$roomCreatedQueueName.dlq")
-    val roomDeletedDlq = Queue("$roomDeletedQueueName.dlq")
+    val roomCreatedDlq = Queue("$ROOM_CREATED_QUEUE_NAME.dlq")
+    val roomDeletedDlq = Queue("$ROOM_DELETED_QUEUE_NAME.dlq")
     val roomAccessSyncResponseQueue =
       Queue(
-        roomAccessSyncResponseQueueName,
+        ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME,
         true,
         false,
         false,
         mapOf(
           "x-dead-letter-exchange" to "",
-          "x-dead-letter-routing-key" to "$roomAccessSyncResponseQueueName.dlq",
+          "x-dead-letter-routing-key" to "$ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME.dlq",
         ),
       )
-    val roomAccessSyncResponseDlq = Queue("$roomAccessSyncResponseQueueName.dlq")
-    val roomAccessSyncRequestExchange = DirectExchange(roomAccessSyncRequestQueueName)
+    val roomAccessSyncResponseDlq = Queue("$ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME.dlq")
+    val roomAccessSyncRequestExchange = DirectExchange(ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME)
 
     return Declarables(
       listOf(

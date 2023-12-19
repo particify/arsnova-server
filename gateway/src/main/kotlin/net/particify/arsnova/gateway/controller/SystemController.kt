@@ -16,14 +16,14 @@ class SystemController(
   private val systemView: SystemView,
 ) {
   companion object {
-    const val baseMapping = "/_system"
-    const val serviceStatsMapping = "$baseMapping/servicestats"
-    const val summarizedStatsMapping = "$baseMapping/summarizedstats"
+    const val BASE_MAPPING = "/_system"
+    const val SERVICE_STATS_MAPPING = "$BASE_MAPPING/servicestats"
+    const val SUMMARIZED_STATS_MAPPING = "$BASE_MAPPING/summarizedstats"
   }
 
   private val logger = LoggerFactory.getLogger(this::class.java)
 
-  @GetMapping(path = [serviceStatsMapping])
+  @GetMapping(path = [SERVICE_STATS_MAPPING])
   @ResponseBody
   fun getServiceStats(
     @RequestParam params: MultiValueMap<String, String>,
@@ -32,7 +32,7 @@ class SystemController(
     return systemView.getServiceStats(params)
   }
 
-  @GetMapping(path = [summarizedStatsMapping])
+  @GetMapping(path = [SUMMARIZED_STATS_MAPPING])
   @ResponseBody
   fun getSummarizedStats(
     @RequestParam params: MultiValueMap<String, String>,

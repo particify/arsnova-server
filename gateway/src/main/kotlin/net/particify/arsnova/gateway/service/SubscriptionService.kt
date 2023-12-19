@@ -83,7 +83,9 @@ class SubscriptionService(
 
   fun getRoomParticipantLimit(tierId: String): Mono<Int> {
     return if (httpGatewayProperties.httpClient.subscriptionService != null) {
-      val url = "${httpGatewayProperties.httpClient.subscriptionService}/featuresettings/by-name-and-tierid-and-keys?name=$ROOM_FEATURE_STRING&tierId=$tierId&keys=$ROOM_PARTICIPANT_LIMIT_KEY_STRING"
+      val url =
+        "${httpGatewayProperties.httpClient.subscriptionService}/featuresettings/by-name-and-tierid-and-keys" +
+          "?name=$ROOM_FEATURE_STRING&tierId=$tierId&keys=$ROOM_PARTICIPANT_LIMIT_KEY_STRING"
       logger.trace("Querying subscription service for feature settingswith url: {}", url)
       webClient.get().uri(url)
         .retrieve().bodyToFlux(FeatureSetting::class.java).next()
