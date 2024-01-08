@@ -11,7 +11,11 @@ plugins {
   kotlin("plugin.spring")
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_17
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(21)
+  }
+}
 
 dependencies {
   implementation(platform(project(":platform")))
@@ -40,7 +44,7 @@ dependencies {
 tasks.withType<KotlinCompile> {
   kotlinOptions {
     freeCompilerArgs = listOf("-Xjsr305=strict")
-    jvmTarget = "17"
+    jvmTarget = "21"
   }
 }
 
@@ -51,7 +55,7 @@ tasks.withType<Test> {
 tasks.jib {
   jib {
     from {
-      image = "eclipse-temurin:17-alpine"
+      image = "eclipse-temurin:21-alpine"
     }
   }
 }

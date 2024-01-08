@@ -9,7 +9,11 @@ plugins {
   id("org.springframework.boot")
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_17
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(21)
+  }
+}
 
 repositories {
   mavenCentral()
@@ -69,7 +73,7 @@ tasks.withType<Test> {
 tasks.jib {
   jib {
     from {
-      image = "eclipse-temurin:17-alpine"
+      image = "eclipse-temurin:21-alpine"
     }
   }
 }
