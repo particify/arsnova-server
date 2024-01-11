@@ -29,6 +29,7 @@ import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.ChoiceAnswer;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.MultipleTextsAnswer;
+import net.particify.arsnova.core.model.NumericAnswer;
 import net.particify.arsnova.core.model.PrioritizationAnswer;
 import net.particify.arsnova.core.model.TextAnswer;
 
@@ -56,8 +57,8 @@ public class FormatAnswerTypeIdResolver extends TypeIdResolverBase {
         return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
       case CHOICE:
         return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
-      case NUMBER:
-        return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
+      case NUMERIC:
+        return TypeFactory.defaultInstance().constructType(NumericAnswer.class);
       case SCALE:
         return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
       case TEXT:

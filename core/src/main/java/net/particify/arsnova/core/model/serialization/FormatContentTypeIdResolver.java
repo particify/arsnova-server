@@ -28,6 +28,7 @@ import java.io.IOException;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.GridImageContent;
+import net.particify.arsnova.core.model.NumericContent;
 import net.particify.arsnova.core.model.PrioritizationChoiceContent;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
 import net.particify.arsnova.core.model.WordcloudContent;
@@ -56,8 +57,8 @@ public class FormatContentTypeIdResolver extends TypeIdResolverBase {
         return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
       case CHOICE:
         return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
-      case NUMBER:
-        return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
+      case NUMERIC:
+        return TypeFactory.defaultInstance().constructType(NumericContent.class);
       case SCALE:
         return TypeFactory.defaultInstance().constructType(ScaleChoiceContent.class);
       case SORT:

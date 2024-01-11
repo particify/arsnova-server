@@ -47,7 +47,7 @@ public class Content extends Entity implements RoomIdAware {
     CHOICE,
     BINARY,
     SCALE,
-    NUMBER,
+    NUMERIC,
     TEXT,
     GRID,
     SLIDE,
