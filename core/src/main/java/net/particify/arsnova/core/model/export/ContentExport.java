@@ -2,6 +2,7 @@ package net.particify.arsnova.core.model.export;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonView;
+import java.text.DecimalFormat;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -11,6 +12,7 @@ import java.util.stream.IntStream;
 
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
+import net.particify.arsnova.core.model.NumericContent;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
 import net.particify.arsnova.core.model.WordcloudContent;
 import net.particify.arsnova.core.model.serialization.View;
@@ -28,6 +30,7 @@ import net.particify.arsnova.core.model.serialization.View;
 public class ContentExport {
   private static final String SCALE_OPTION_FORMAT = "%s (%d)";
   private static final Pattern SCALE_TEMPLATE_PATTERN = Pattern.compile("^([A-Z_]+) \\(([45])\\)$");
+  private static final DecimalFormat decimalFormat = new DecimalFormat("#.#");
 
   private Content.Format format;
   private String body;
@@ -62,6 +65,17 @@ public class ContentExport {
           .mapToObj(i -> this.options.get(i))
           .collect(Collectors.toList());
       this.multiple = choiceQuestionContent.isMultiple();
+    } else if (content instanceof NumericContent numericContent) {
+      // Minus sign (U+2212) is used to separate min and max.
+      this.options = List.of(
+          decimalFormat.format(numericContent.getMinNumber()) + '−'
+              + decimalFormat.format(numericContent.getMaxNumber()));
+      if (numericContent.getCorrectNumber() != null) {
+        // Plus-minus sign (U+00B1) is used to separate correctNumber and tolerance.
+        this.correctOptions = List.of(
+            decimalFormat.format(numericContent.getCorrectNumber()) + '±'
+                + decimalFormat.format(numericContent.getTolerance()));
+      }
     } else if (content instanceof WordcloudContent) {
       final WordcloudContent wordcloudContent = (WordcloudContent) content;
       this.options = List.of(String.valueOf(wordcloudContent.getMaxAnswers()));
@@ -82,6 +96,8 @@ public class ContentExport {
         content = toChoiceContent();
         format = Content.Format.CHOICE;
       }
+    } else if (format == Content.Format.NUMERIC) {
+      content = toNumericContent();
     } else if (format == Content.Format.WORDCLOUD) {
       content = toWordcloudContent();
     } else {
@@ -156,6 +172,25 @@ public class ContentExport {
     scaleChoiceContent.setOptionCount(optionCount);
 
     return scaleChoiceContent;
+  }
+
+  private NumericContent toNumericContent() {
+    final NumericContent numericContent = new NumericContent();
+    if (this.options.size() != 1 && this.correctOptions.size() > 1) {
+      throw new InputMismatchException();
+    }
+    // Allow minus and similar signs as separator.
+    final String[] range = this.options.get(0).split("[−–-]");
+    numericContent.setMinNumber(Double.parseDouble(range[0]));
+    numericContent.setMaxNumber(Double.parseDouble(range[1]));
+    if (!this.correctOptions.isEmpty()) {
+      // Allow plus-minus and compositions of plus and minus signs as separator.
+      final String[] correctAndTolerance = this.correctOptions.get(0).split("±|\\+[−–-]");
+      numericContent.setCorrectNumber(Double.parseDouble(correctAndTolerance[0]));
+      numericContent.setTolerance(Double.parseDouble(correctAndTolerance[1]));
+    }
+
+    return numericContent;
   }
 
   private WordcloudContent toWordcloudContent() {
