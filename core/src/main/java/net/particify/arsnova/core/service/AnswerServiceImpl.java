@@ -58,6 +58,9 @@ import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.GridImageContent;
 import net.particify.arsnova.core.model.MultipleTextsAnswer;
+import net.particify.arsnova.core.model.NumericAnswer;
+import net.particify.arsnova.core.model.NumericAnswerStatistics;
+import net.particify.arsnova.core.model.NumericContent;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
 import net.particify.arsnova.core.model.PrioritizationChoiceContent;
 import net.particify.arsnova.core.model.Room;
@@ -71,6 +74,7 @@ import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.security.AuthenticationService;
 import net.particify.arsnova.core.security.User;
 import net.particify.arsnova.core.service.exceptions.AlreadyAnsweredContentException;
+import net.particify.arsnova.core.util.StatisticsUtil;
 import net.particify.arsnova.core.web.exceptions.NotFoundException;
 
 /**
@@ -224,6 +228,11 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       stats = textStats;
     } else if (content.getFormat() == Content.Format.PRIORITIZATION) {
       stats = getPrioritizationStatistics(content.getId());
+    } else if (content.getFormat() == Content.Format.NUMERIC) {
+      final NumericAnswerStatistics numericStats = getNumericStatistics(content.getId(), 1);
+      final NumericAnswerStatistics numericStats2 = getNumericStatistics(content.getId(), 2);
+      numericStats.getRoundStatistics().add(numericStats2.getRoundStatistics().get(1));
+      stats = numericStats;
     } else {
       final ChoiceAnswerStatistics choiceStats = getChoiceStatistics(content.getId(), 1);
       final ChoiceAnswerStatistics choiceStats2 = getChoiceStatistics(content.getId(), 2);
@@ -340,6 +349,71 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   }
 
   @Override
+  public NumericAnswerStatistics getNumericStatistics(final String contentId, final int round) {
+    final NumericContent content = (NumericContent) contentService.get(contentId);
+    if (content == null) {
+      throw new NotFoundException();
+    }
+    final List<NumericAnswer> answers = answerRepository.findByContentIdRoundForNumeric(contentId, round);
+    final NumericAnswerStatistics stats = new NumericAnswerStatistics();
+    stats.setContentId(contentId);
+    final NumericAnswerStatistics.NumericRoundStatistics roundStats =
+        new NumericAnswerStatistics.NumericRoundStatistics();
+    roundStats.setRound(round);
+    roundStats.setAbstentionCount((int) answers.stream().filter(a -> a.getSelectedNumber() == null).count());
+    roundStats.setAnswerCount(answers.size());
+    final List<Double> numbers = answers.stream().map(NumericAnswer::getSelectedNumber).toList();
+    final Map<Double, Long> numberCounts = numbers.stream()
+        .collect(Collectors.groupingBy(
+        Function.identity(),
+        Collectors.counting()));
+    roundStats.setSelectedNumbers(new ArrayList<>(numberCounts.keySet()));
+    roundStats.setIndependentCounts(numberCounts.values().stream().map(Long::intValue).collect(Collectors.toList()));
+    roundStats.setMinimum(StatisticsUtil.findMinimum(numbers));
+    roundStats.setMaximum(StatisticsUtil.findMaximum(numbers));
+    roundStats.setMean(StatisticsUtil.calculateMean(numbers));
+    roundStats.setMedian(StatisticsUtil.calculateMedian(numbers));
+    roundStats.setStandardDeviation(StatisticsUtil.calculateStandardDeviation(numbers));
+    roundStats.setVariance(StatisticsUtil.calculateVariance(numbers));
+    if (content.getCorrectNumber() != null) {
+      roundStats.setCorrectAnswerFraction(
+          calculateNumericCorrectFraction(numbers, content.getCorrectNumber(), content.getTolerance()));
+    }
+    final List<NumericAnswerStatistics.NumericRoundStatistics> roundStatisticsList =
+        new ArrayList<>(Collections.nCopies(round, null));
+    roundStatisticsList.set(round - 1, roundStats);
+    stats.setRoundStatistics(roundStatisticsList);
+    return stats;
+  }
+
+  @Override
+  public NumericAnswerStatistics getNumericStatistics(final String contentId) {
+    final Content content = contentService.get(contentId);
+    if (content == null) {
+      throw new NotFoundException();
+    }
+    return getNumericStatistics(content.getId(), content.getState().getRound());
+  }
+
+  private static double calculateNumericCorrectFraction(
+      final List<Double> numbers, final double correctNumber, final double tolerance) {
+    if (numbers.isEmpty()) {
+      return 0;
+    }
+    final double correctCount = numbers.stream()
+        .filter(number -> isNumericAnswerCorrect(number, correctNumber, tolerance))
+        .count();
+    final double totalCount = numbers.size();
+
+    return correctCount / totalCount;
+  }
+
+  private static boolean isNumericAnswerCorrect(
+      final Double selectedNumber, final double correctNumber, final double tolerance) {
+    return selectedNumber >= correctNumber - tolerance && selectedNumber <= correctNumber + tolerance;
+  }
+
+  @Override
   public List<String> getAnswerIdsByContentIdNotHidden(final String contentId) {
     return answerRepository.findIdsByContentIdAndHidden(contentId, true);
   }
@@ -430,6 +504,11 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
                 .filter(t -> sanitizedAnswers.add(
                     specialCharPattern.matcher(t.toLowerCase()).replaceAll("")))
                 .collect(Collectors.toList()));
+      } else if (content instanceof NumericContent numericContent) {
+        final double selectedNumber = ((NumericAnswer) answer).getSelectedNumber();
+        if (selectedNumber < numericContent.getMinNumber() || selectedNumber > numericContent.getMaxNumber()) {
+          throw new IllegalArgumentException("Selected number must be in content range.");
+        }
       }
       answer.setRound(content.getState().getRound());
     }

@@ -82,6 +82,8 @@ public class AnswerHandler {
         stats = answerService.getTextStatistics(contentId);
       } else if (format == Content.Format.PRIORITIZATION) {
         stats = answerService.getPrioritizationStatistics(contentId);
+      } else if (format == Content.Format.NUMERIC) {
+        stats = answerService.getNumericStatistics(contentId);
       }
       final AnswersChanged changedMessage = new AnswersChanged(answerIds, stats);
       messagingTemplate.convertAndSend(

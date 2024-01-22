@@ -35,6 +35,7 @@ import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics.ChoiceRoundStatistics;
 import net.particify.arsnova.core.model.MultipleTextsAnswer;
+import net.particify.arsnova.core.model.NumericAnswer;
 import net.particify.arsnova.core.model.PrioritizationAnswer;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics.PrioritizationRoundStatistics;
@@ -190,6 +191,16 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
     stats.setRoundStatistics(roundStatisticsList);
 
     return stats;
+  }
+
+  @Override
+  public List<NumericAnswer> findByContentIdRoundForNumeric(
+      final String contentId, final int round) {
+    return db.queryView(createQuery("by_contentid_round_selectedchoiceindexes")
+        .reduce(false)
+        .includeDocs(true)
+        .startKey(ComplexKey.of(contentId, round))
+        .endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())), NumericAnswer.class);
   }
 
   @Override
