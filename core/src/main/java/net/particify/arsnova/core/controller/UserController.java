@@ -33,6 +33,7 @@ import net.particify.arsnova.core.model.serialization.View;
 import net.particify.arsnova.core.service.UserService;
 import net.particify.arsnova.core.web.exceptions.BadRequestException;
 import net.particify.arsnova.core.web.exceptions.ForbiddenException;
+import net.particify.arsnova.core.web.exceptions.NotFoundException;
 
 @RestController
 @EntityRequestMapping(UserController.REQUEST_MAPPING)
@@ -134,7 +135,11 @@ public class UserController extends AbstractEntityController<UserProfile> {
   }
 
   @Override
-  protected String resolveAlias(final String alias) {
-    return userService.getByUsername(alias).getId();
+  protected String resolveAlias(final String alias) throws NotFoundException {
+    final UserProfile userProfile = userService.getByUsername(alias);
+    if (userProfile == null) {
+      throw new NotFoundException("User not found.");
+    }
+    return userProfile.getId();
   }
 }

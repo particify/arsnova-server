@@ -217,7 +217,7 @@ public abstract class AbstractEntityController<E extends Entity> {
         .forward(httpServletRequest, httpServletResponse);
   }
 
-  protected String resolveAlias(final String alias) {
+  protected String resolveAlias(final String alias) throws NotFoundException {
     throw new NotFoundException("Aliases not supported for " + getMapping() + ".");
   }
 
