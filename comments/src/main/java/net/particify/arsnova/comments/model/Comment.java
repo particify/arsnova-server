@@ -12,7 +12,7 @@ import java.util.UUID;
 @Entity
 public class Comment {
   public static final int MAX_BODY_LENGTH = 500;
-  public static final int MAX_ANSWER_LENGTH = 500;
+  public static final int MAX_ANSWER_LENGTH = 1000;
 
   @Id
   private UUID id;
