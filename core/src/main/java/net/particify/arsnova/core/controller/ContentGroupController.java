@@ -18,11 +18,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import net.particify.arsnova.core.model.AnswerStatisticsUserSummary;
 import net.particify.arsnova.core.model.ContentGroup;
+import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.model.ContentLicenseAttribution;
+import net.particify.arsnova.core.model.ContentTemplate;
 import net.particify.arsnova.core.model.serialization.View;
 import net.particify.arsnova.core.service.AnswerService;
 import net.particify.arsnova.core.service.ContentGroupService;
 import net.particify.arsnova.core.service.ContentGroupTemplateService;
+import net.particify.arsnova.core.service.ContentTemplateService;
 
 @RestController
 @EntityRequestMapping(ContentGroupController.REQUEST_MAPPING)
@@ -33,19 +36,23 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
   private static final String IMPORT_MAPPING = DEFAULT_ID_MAPPING + "/import";
   private static final String ANSWER_STATISTICS_USER_SUMMARY_MAPPING = DEFAULT_ID_MAPPING + "/stats/user/{userId}";
   private static final String ATTRIBUTIONS_ENDPOINT = DEFAULT_ID_MAPPING + "/attributions";
+  private static final String CREATE_FROM_TEMPLATE_MAPPING = "/-/create-from-template";
 
   private ContentGroupService contentGroupService;
   private AnswerService answerService;
   private ContentGroupTemplateService contentGroupTemplateService;
+  private ContentTemplateService contentTemplateService;
 
   public ContentGroupController(
       @Qualifier("securedContentGroupService") final ContentGroupService contentGroupService,
       @Qualifier("securedAnswerService") final AnswerService answerService,
-      @Qualifier("securedContentGroupTemplateService") final ContentGroupTemplateService contentGroupTemplateService) {
+      @Qualifier("securedContentGroupTemplateService") final ContentGroupTemplateService contentGroupTemplateService,
+      @Qualifier("securedContentTemplateService") final ContentTemplateService contentTemplateService) {
     super(contentGroupService);
     this.contentGroupService = contentGroupService;
     this.answerService = answerService;
     this.contentGroupTemplateService = contentGroupTemplateService;
+    this.contentTemplateService = contentTemplateService;
   }
 
   @Override
@@ -111,6 +118,15 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
         userId, contentGroupService.get(id).getContentIds());
   }
 
+  @PostMapping(CREATE_FROM_TEMPLATE_MAPPING)
+  public ContentGroup copyFromTemplate(
+      @RequestBody final CreateCopyFromTemplateRequestEntity createCopyFromTemplateRequestEntity) {
+    final ContentGroupTemplate template = contentGroupTemplateService.get(createCopyFromTemplateRequestEntity.id);
+    final List<ContentTemplate> contentTemplates = contentTemplateService.get(template.getTemplateIds());
+    return contentGroupService.createFromTemplate(
+        createCopyFromTemplateRequestEntity.roomId, template, contentTemplates);
+  }
+
   @GetMapping(ATTRIBUTIONS_ENDPOINT)
   public List<ContentLicenseAttribution> getAttributions(@PathVariable final String id) {
     final ContentGroup contentGroup = get(id);
@@ -148,5 +164,8 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
     public void setContentId(final String contentId) {
       this.contentId = contentId;
     }
+  }
+
+  public record CreateCopyFromTemplateRequestEntity(String id, String roomId) {
   }
 }
