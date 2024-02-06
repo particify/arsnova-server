@@ -11,7 +11,7 @@ import net.particify.arsnova.core.validation.TemplateLicense;
 
 public class ContentGroupTemplate extends Entity {
   @NotBlank
-  @Size(max = 25)
+  @Size(max = 50)
   private String name;
 
   @Size(max = 250)
