@@ -149,6 +149,7 @@ public class CommentCommandHandlerTest {
     Comment c = new Comment();
     c.setId(id);
     c.setRoomId(roomId);
+    c.setAck(true);
     when(commentService.get(id)).thenReturn(c);
     when(permissionEvaluator.checkCommentDeletePermission(any())).thenReturn(true);
     DeleteCommentPayload payload = new DeleteCommentPayload(id);
@@ -230,9 +231,11 @@ public class CommentCommandHandlerTest {
     Comment one = new Comment();
     one.setId(firstCommentId);
     one.setRoomId(roomId);
+    one.setAck(true);
     Comment two = new Comment();
     two.setId(secondCommentId);
     two.setRoomId(roomId);
+    two.setAck(false);
     commentList.add(one);
     commentList.add(two);
 
@@ -264,7 +267,7 @@ public class CommentCommandHandlerTest {
     assertThat(capturedTopics.get(0)).isEqualTo(
         roomId.toString().replace("-", "") + ".comment.stream");
     assertThat(capturedTopics.get(2)).isEqualTo(
-        roomId.toString().replace("-", "") + ".comment.stream");
+        roomId.toString().replace("-", "") + ".comment.moderator.stream");
     List<CommentDeleted> capturedEvents = eventCaptor.getAllValues();
     assertThat(capturedEvents.get(0)).isEqualTo(e1);
     assertThat(capturedEvents.get(2)).isEqualTo(e2);
