@@ -289,7 +289,7 @@ public class CommentCommandHandler {
 
       messagingTemplate.convertAndSend(
           "amq.topic",
-        UuidHelper.uuidToString(c.getRoomId()) + ".comment.stream",
+          UuidHelper.uuidToString(c.getRoomId()) +  ".comment"  + (!c.isAck() ? ".moderator" : "") + ".stream",
           event
       );
 
@@ -344,7 +344,7 @@ public class CommentCommandHandler {
 
       messagingTemplate.convertAndSend(
           "amq.topic",
-          UuidHelper.uuidToString(c.getRoomId()) + ".comment.stream",
+          UuidHelper.uuidToString(c.getRoomId()) +  ".comment"  + (!c.isAck() ? ".moderator" : "") + ".stream",
           event
       );
 
