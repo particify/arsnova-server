@@ -22,10 +22,10 @@ public class LanguageController {
   public Set<Language> getLanguages(final HttpServletRequest request) {
     final String acceptLanguage = request.getHeader("Accept-Language");
     final Locale requestLocale = acceptLanguage != null && acceptLanguage.length() >= 2
-        ? new Locale(acceptLanguage.substring(0, 2))
-        : new Locale("en");
+        ? Locale.of(acceptLanguage.substring(0, 2))
+        : Locale.of("en");
     return Arrays.stream(Locale.getISOLanguages())
-        .map(lang -> new Locale(lang))
+        .map(lang -> Locale.of(lang))
         .map(locale -> new Language(
             locale.getLanguage(),
             locale.getDisplayLanguage(locale),
