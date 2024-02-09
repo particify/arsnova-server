@@ -2,11 +2,14 @@ package net.particify.arsnova.core.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LanguageIso639Validator implements ConstraintValidator<LanguageIso639, String> {
-  private static final List<String> languages = List.of(Locale.getISOLanguages());
+  private static final Set<String> languages = Set.of(Locale.getISOLanguages()).stream()
+      .filter(l -> Locale.of(l).getLanguage().equals(l))
+      .collect(Collectors.toSet());
 
   @Override
   public void initialize(final LanguageIso639 constraintAnnotation) {
