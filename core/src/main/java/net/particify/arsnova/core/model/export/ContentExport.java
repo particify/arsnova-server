@@ -13,6 +13,7 @@ import java.util.stream.IntStream;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.NumericContent;
+import net.particify.arsnova.core.model.PrioritizationChoiceContent;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
 import net.particify.arsnova.core.model.WordcloudContent;
 import net.particify.arsnova.core.model.serialization.View;
@@ -87,7 +88,8 @@ public class ContentExport {
     Content.Format format = this.format;
     if (format == Content.Format.CHOICE
         || format == Content.Format.BINARY
-        || format == Content.Format.SORT) {
+        || format == Content.Format.SORT
+        || format == Content.Format.PRIORITIZATION) {
       content = toChoiceContent();
     } else if (format == Content.Format.SCALE) {
       try {
@@ -143,7 +145,10 @@ public class ContentExport {
     if (this.options.size() < 2) {
       throw new InputMismatchException();
     }
-    final ChoiceQuestionContent choiceQuestionContent = new ChoiceQuestionContent();
+    final ChoiceQuestionContent choiceQuestionContent = switch (this.format) {
+      case PRIORITIZATION -> new PrioritizationChoiceContent();
+      default -> new ChoiceQuestionContent();
+    };
     choiceQuestionContent.setOptions(
         this.options.stream()
             .map(o -> new ChoiceQuestionContent.AnswerOption(o))
