@@ -176,7 +176,7 @@ public class ContentExport {
 
   private NumericContent toNumericContent() {
     final NumericContent numericContent = new NumericContent();
-    if (this.options.size() != 1 && this.correctOptions.size() > 1) {
+    if (this.options.size() != 1 || this.correctOptions.size() > 1) {
       throw new InputMismatchException();
     }
     // Allow minus and similar signs as separator.
