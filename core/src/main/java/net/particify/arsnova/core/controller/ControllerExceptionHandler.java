@@ -41,6 +41,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import net.particify.arsnova.core.model.EntityValidationException;
+import net.particify.arsnova.core.model.export.ImportValidationException;
 import net.particify.arsnova.core.service.exceptions.AlreadyAnsweredContentException;
 import net.particify.arsnova.core.service.exceptions.UserAlreadyExistsException;
 import net.particify.arsnova.core.web.exceptions.BadRequestException;
@@ -137,6 +138,14 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public Map<String, Object> handleUserAlreadyExistsException(
       final UserAlreadyExistsException e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.DEBUG);
+  }
+
+  @ExceptionHandler(ImportValidationException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public Map<String, Object> handleImportValidationException(
+      final ImportValidationException e, final HttpServletRequest request) {
     return helper.handleException(e, Level.DEBUG);
   }
 
