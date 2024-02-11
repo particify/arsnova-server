@@ -140,6 +140,9 @@ public class ContentExport {
   }
 
   private ChoiceQuestionContent toChoiceContent() {
+    if (this.options.size() < 2) {
+      throw new InputMismatchException();
+    }
     final ChoiceQuestionContent choiceQuestionContent = new ChoiceQuestionContent();
     choiceQuestionContent.setOptions(
         this.options.stream()
