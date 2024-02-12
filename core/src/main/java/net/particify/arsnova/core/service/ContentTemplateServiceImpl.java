@@ -4,11 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
+import net.particify.arsnova.core.event.BeforeDeletionEvent;
 import net.particify.arsnova.core.model.Content;
+import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.model.ContentTemplate;
+import net.particify.arsnova.core.model.Deletion;
 import net.particify.arsnova.core.persistence.ContentTemplateRepository;
 import net.particify.arsnova.core.persistence.DeletionRepository;
 
@@ -40,5 +44,11 @@ public class ContentTemplateServiceImpl
     return create(templates).stream()
         .map(t -> t.getId())
         .collect(Collectors.toList());
+  }
+
+  @EventListener
+  public void handleContentGroupTemplateDeletion(final BeforeDeletionEvent<ContentGroupTemplate> event) {
+    final List<ContentTemplate> templates = contentTemplateRepository.findAllById(event.getEntity().getTemplateIds());
+    delete(templates, Deletion.Initiator.CASCADE);
   }
 }
