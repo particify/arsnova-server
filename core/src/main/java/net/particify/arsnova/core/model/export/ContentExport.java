@@ -3,7 +3,6 @@ package net.particify.arsnova.core.model.export;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.text.DecimalFormat;
-import java.util.InputMismatchException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,6 +12,7 @@ import java.util.stream.IntStream;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.NumericContent;
+import net.particify.arsnova.core.model.PrioritizationChoiceContent;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
 import net.particify.arsnova.core.model.WordcloudContent;
 import net.particify.arsnova.core.model.serialization.View;
@@ -87,12 +87,13 @@ public class ContentExport {
     Content.Format format = this.format;
     if (format == Content.Format.CHOICE
         || format == Content.Format.BINARY
-        || format == Content.Format.SORT) {
+        || format == Content.Format.SORT
+        || format == Content.Format.PRIORITIZATION) {
       content = toChoiceContent();
     } else if (format == Content.Format.SCALE) {
       try {
         content = toScaleContent();
-      } catch (final InputMismatchException e) {
+      } catch (final ImportValidationException e) {
         content = toChoiceContent();
         format = Content.Format.CHOICE;
       }
@@ -140,7 +141,13 @@ public class ContentExport {
   }
 
   private ChoiceQuestionContent toChoiceContent() {
-    final ChoiceQuestionContent choiceQuestionContent = new ChoiceQuestionContent();
+    if (this.options.size() < 2) {
+      throw new ImportValidationException();
+    }
+    final ChoiceQuestionContent choiceQuestionContent = switch (this.format) {
+      case PRIORITIZATION -> new PrioritizationChoiceContent();
+      default -> new ChoiceQuestionContent();
+    };
     choiceQuestionContent.setOptions(
         this.options.stream()
             .map(o -> new ChoiceQuestionContent.AnswerOption(o))
@@ -158,11 +165,11 @@ public class ContentExport {
   private ScaleChoiceContent toScaleContent() {
     final ScaleChoiceContent scaleChoiceContent = new ScaleChoiceContent();
     if (this.options.size() != 1) {
-      throw new InputMismatchException();
+      throw new ImportValidationException();
     }
     final Matcher templateMatcher = SCALE_TEMPLATE_PATTERN.matcher(this.options.get(0));
     if (!templateMatcher.matches()) {
-      throw new InputMismatchException();
+      throw new ImportValidationException();
     }
     final int optionCount = Integer.parseInt(templateMatcher.group(2));
 
@@ -176,8 +183,8 @@ public class ContentExport {
 
   private NumericContent toNumericContent() {
     final NumericContent numericContent = new NumericContent();
-    if (this.options.size() != 1 && this.correctOptions.size() > 1) {
-      throw new InputMismatchException();
+    if (this.options.size() != 1 || this.correctOptions.size() > 1) {
+      throw new ImportValidationException();
     }
     // Allow minus and similar signs as separator.
     final String[] range = this.options.get(0).split("[−–-]");
@@ -197,12 +204,12 @@ public class ContentExport {
     final WordcloudContent wordcloudContent = new WordcloudContent();
     final int maxAnswers;
     if (this.getOptions().size() != 1) {
-      throw new InputMismatchException();
+      throw new ImportValidationException();
     }
     try {
       maxAnswers = Integer.parseInt(this.getOptions().get(0));
     } catch (final NumberFormatException e) {
-      throw new InputMismatchException();
+      throw new ImportValidationException();
     }
     wordcloudContent.setMaxAnswers(maxAnswers);
 
