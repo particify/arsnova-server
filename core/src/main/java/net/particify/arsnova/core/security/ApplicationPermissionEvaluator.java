@@ -154,7 +154,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
     }
 
     try {
-      switch (targetType) {
+      switch (targetType.toLowerCase()) {
         case "userprofile":
           final UserProfile targetUserProfile = new UserProfile();
           targetUserProfile.setId(targetId.toString());
