@@ -24,12 +24,26 @@ var designDoc = {
 					if (doc.lastPublishedIndex !== -1) {
 						emit([doc.type, "usingPublishingRange"], 1);
 					}
+					if (doc.templateId) {
+						emit([doc.type, "fromTemplate"], 1);
+					}
 					break;
 				case "Content":
 					emit([doc.type, "format", doc.format], 1);
+					if (doc.templateId) {
+						emit([doc.type, "fromTemplate"], 1);
+					}
+					break;
+				case "ContentGroupTemplate":
+					emit([doc.type, "language", doc.language], 1);
+					emit([doc.type, "license", doc.license], 1);
 					break;
 				case "Answer":
 					emit([doc.type, "format", doc.format], 1);
+					break;
+				case "ViolationReport":
+					emit([doc.type, "reason", doc.reason], 1);
+					emit([doc.type, "decision", doc.decision], 1);
 					break;
 				case "Deletion":
 					emit([doc.deletedType, "deleted"], doc.count || 1);
