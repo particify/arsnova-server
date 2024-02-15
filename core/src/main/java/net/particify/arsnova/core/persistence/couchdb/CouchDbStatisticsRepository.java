@@ -69,8 +69,11 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
     final Statistics.RoomStats roomStats = stats.getRoom();
     final Statistics.ContentGroupStats contentGroupStats = stats.getContentGroup();
     final Statistics.ContentStats contentStats = stats.getContent();
+    final Statistics.ContentGroupTemplateStats contentGroupTemplateStats = stats.getContentGroupTemplate();
+    final Statistics.ContentTemplateStats contentTemplateStats = stats.getContentTemplate();
     final Statistics.AnswerStats answerStats = stats.getAnswer();
     final Statistics.AnnouncementStats announcementStats = stats.getAnnouncement();
+    final Statistics.ViolationReportStats violationReportStats = stats.getViolationReport();
 
     if (viewResult.isEmpty()) {
       return stats;
@@ -134,6 +137,9 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
               case "usingPublishingRange":
                 contentGroupStats.setUsingPublishingRange(value);
                 break;
+              case "fromTemplate":
+                contentGroupStats.setFromTemplate(value);
+                break;
               default:
                 break;
             }
@@ -149,6 +155,41 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
                 break;
               case "format":
                 contentStats.getCountByFormat().put(key.get(keyOffset + 2).asText(), value);
+                break;
+              case "fromTemplate":
+                contentStats.setFromTemplate(value);
+                break;
+              default:
+                break;
+            }
+          }
+          break;
+        case "ContentGroupTemplate":
+          if (offsetKeySize == 1) {
+            contentGroupTemplateStats.setTotalCount(value);
+          } else if (offsetKeySize > 1) {
+            switch (key.get(keyOffset + 1).asText()) {
+              case "deleted":
+                contentGroupTemplateStats.setDeleted(value);
+                break;
+              case "language":
+                contentGroupTemplateStats.getCountByLanguage().put(key.get(keyOffset + 2).asText(), value);
+                break;
+              case "license":
+                contentGroupTemplateStats.getCountByLicense().put(key.get(keyOffset + 2).asText(), value);
+                break;
+              default:
+                break;
+            }
+          }
+          break;
+        case "ContentTemplate":
+          if (offsetKeySize == 1) {
+            contentTemplateStats.setTotalCount(value);
+          } else if (offsetKeySize > 1) {
+            switch (key.get(keyOffset + 1).asText()) {
+              case "deleted":
+                contentTemplateStats.setDeleted(value);
                 break;
               default:
                 break;
@@ -178,6 +219,25 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
             switch (key.get(keyOffset + 1).asText()) {
               case "deleted":
                 announcementStats.setDeleted(value);
+                break;
+              default:
+                break;
+            }
+          }
+          break;
+        case "ViolationReport":
+          if (offsetKeySize == 1) {
+            violationReportStats.setTotalCount(value);
+          } else if (offsetKeySize > 1) {
+            switch (key.get(keyOffset + 1).asText()) {
+              case "deleted":
+                violationReportStats.setDeleted(value);
+                break;
+              case "reason":
+                violationReportStats.getCountByReason().put(key.get(keyOffset + 2).asText(), value);
+                break;
+              case "decision":
+                violationReportStats.getCountByDecision().put(key.get(keyOffset + 2).asText(), value);
                 break;
               default:
                 break;

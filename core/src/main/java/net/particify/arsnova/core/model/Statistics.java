@@ -128,6 +128,7 @@ public class Statistics {
 
     private int published;
     private int usingPublishingRange;
+    private int fromTemplate;
 
     public int getTotalCount() {
       return totalCount;
@@ -160,6 +161,14 @@ public class Statistics {
     public void setUsingPublishingRange(final int usingPublishingRange) {
       this.usingPublishingRange = usingPublishingRange;
     }
+
+    public int getFromTemplate() {
+      return fromTemplate;
+    }
+
+    public void setFromTemplate(final int fromTemplate) {
+      this.fromTemplate = fromTemplate;
+    }
   }
 
   @JsonView(View.Admin.class)
@@ -172,6 +181,7 @@ public class Statistics {
     private int deleted;
 
     private Map<String, Integer> countByFormat = new HashMap<>();
+    private int fromTemplate;
 
     public int getTotalCount() {
       return totalCount;
@@ -195,6 +205,85 @@ public class Statistics {
 
     public void setCountByFormat(final Map<String, Integer> countByFormat) {
       this.countByFormat = countByFormat;
+    }
+
+    public int getFromTemplate() {
+      return fromTemplate;
+    }
+
+    public void setFromTemplate(final int fromTemplate) {
+      this.fromTemplate = fromTemplate;
+    }
+  }
+
+  @JsonView(View.Admin.class)
+  public static class ContentGroupTemplateStats {
+    private int totalCount;
+
+    // Exclude if value is 0 because it can also mean N/A for deleted when multi
+    // tenancy is active
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private int deleted;
+
+    private Map<String, Integer> countByLanguage = new HashMap<>();
+    private Map<String, Integer> countByLicense = new HashMap<>();
+
+    public int getTotalCount() {
+      return totalCount;
+    }
+
+    public void setTotalCount(final int totalCount) {
+      this.totalCount = totalCount;
+    }
+
+    public int getDeleted() {
+      return deleted;
+    }
+
+    public void setDeleted(final int deleted) {
+      this.deleted = deleted;
+    }
+
+    public Map<String, Integer> getCountByLanguage() {
+      return countByLanguage;
+    }
+
+    public void setCountByLanguage(final Map<String, Integer> countByLanguage) {
+      this.countByLanguage = countByLanguage;
+    }
+
+    public Map<String, Integer> getCountByLicense() {
+      return countByLicense;
+    }
+
+    public void setCountByLicense(final Map<String, Integer> countByLicense) {
+      this.countByLicense = countByLicense;
+    }
+  }
+
+  @JsonView(View.Admin.class)
+  public static class ContentTemplateStats {
+    private int totalCount;
+
+    // Exclude if value is 0 because it can also mean N/A for deleted when multi
+    // tenancy is active
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private int deleted;
+
+    public int getTotalCount() {
+      return totalCount;
+    }
+
+    public void setTotalCount(final int totalCount) {
+      this.totalCount = totalCount;
+    }
+
+    public int getDeleted() {
+      return deleted;
+    }
+
+    public void setDeleted(final int deleted) {
+      this.deleted = deleted;
     }
   }
 
@@ -261,20 +350,71 @@ public class Statistics {
     }
   }
 
+  @JsonView(View.Admin.class)
+  public static class ViolationReportStats {
+    private int totalCount;
+
+    // Exclude if value is 0 because it can also mean N/A for deleted when multi
+    // tenancy is active
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private int deleted;
+
+    private Map<String, Integer> countByReason = new HashMap<>();
+    private Map<String, Integer> countByDecision = new HashMap<>();
+
+    public int getTotalCount() {
+      return totalCount;
+    }
+
+    public void setTotalCount(final int totalCount) {
+      this.totalCount = totalCount;
+    }
+
+    public int getDeleted() {
+      return deleted;
+    }
+
+    public void setDeleted(final int deleted) {
+      this.deleted = deleted;
+    }
+
+    public Map<String, Integer> getCountByReason() {
+      return countByReason;
+    }
+
+    public void setCountByReason(final Map<String, Integer> countByReason) {
+      this.countByReason = countByReason;
+    }
+
+    public Map<String, Integer> getCountByDecision() {
+      return countByDecision;
+    }
+
+    public void setCountByDecision(final Map<String, Integer> countByDecision) {
+      this.countByDecision = countByDecision;
+    }
+  }
+
   private UserProfileStats userProfile;
   private RoomStats room;
   private ContentGroupStats contentGroup;
   private ContentStats content;
+  private ContentGroupTemplateStats contentGroupTemplate;
+  private ContentTemplateStats contentTemplate;
   private AnswerStats answer;
   private AnnouncementStats announcement;
+  private ViolationReportStats violationReport;
 
   public Statistics() {
     this.userProfile = new UserProfileStats();
     this.room = new RoomStats();
     this.contentGroup = new ContentGroupStats();
     this.content = new ContentStats();
+    this.contentGroupTemplate = new ContentGroupTemplateStats();
+    this.contentTemplate = new ContentTemplateStats();
     this.answer = new AnswerStats();
     this.announcement = new AnnouncementStats();
+    this.violationReport = new ViolationReportStats();
   }
 
   public Statistics(
@@ -282,14 +422,20 @@ public class Statistics {
       final RoomStats room,
       final ContentGroupStats contentGroup,
       final ContentStats content,
+      final ContentGroupTemplateStats contentGroupTemplate,
+      final ContentTemplateStats contentTemplate,
       final AnswerStats answer,
-      final AnnouncementStats announcement) {
+      final AnnouncementStats announcement,
+      final ViolationReportStats violationReport) {
     this.userProfile = userProfile;
     this.room = room;
     this.contentGroup = contentGroup;
     this.content = content;
+    this.contentGroupTemplate = contentGroupTemplate;
+    this.contentTemplate = contentTemplate;
     this.answer = answer;
     this.announcement = announcement;
+    this.violationReport = violationReport;
   }
 
   public UserProfileStats getUserProfile() {
@@ -324,6 +470,22 @@ public class Statistics {
     this.content = content;
   }
 
+  public ContentGroupTemplateStats getContentGroupTemplate() {
+    return contentGroupTemplate;
+  }
+
+  public void setContentGroupTemplate(final ContentGroupTemplateStats contentGroupTemplate) {
+    this.contentGroupTemplate = contentGroupTemplate;
+  }
+
+  public ContentTemplateStats getContentTemplate() {
+    return contentTemplate;
+  }
+
+  public void setContentTemplate(final ContentTemplateStats contentTemplate) {
+    this.contentTemplate = contentTemplate;
+  }
+
   public AnswerStats getAnswer() {
     return answer;
   }
@@ -338,5 +500,13 @@ public class Statistics {
 
   public void setAnnouncement(final AnnouncementStats announcement) {
     this.announcement = announcement;
+  }
+
+  public ViolationReportStats getViolationReport() {
+    return violationReport;
+  }
+
+  public void setViolationReport(final ViolationReportStats violationReport) {
+    this.violationReport = violationReport;
   }
 }
