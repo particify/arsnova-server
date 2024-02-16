@@ -3,6 +3,7 @@ package net.particify.arsnova.core.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -130,7 +131,9 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
   @GetMapping(ATTRIBUTIONS_ENDPOINT)
   public List<ContentLicenseAttribution> getAttributions(@PathVariable final String id) {
     final ContentGroup contentGroup = get(id);
-    return contentGroupTemplateService.getAttributionsByContentIds(contentGroup.getContentIds());
+    // Create a copy of the list to avoid side effects on the cached entity
+    final List<String> ids = new ArrayList<>(contentGroup.getContentIds());
+    return contentGroupTemplateService.getAttributionsByContentIds(ids);
   }
 
   static class AddContentToGroupRequestEntity {
