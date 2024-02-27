@@ -1,4 +1,4 @@
-package net.particify.arsnova.comments.model.serialization;
+package net.particify.arsnova.common.uuid;
 
 import java.util.UUID;
 import java.util.regex.Pattern;

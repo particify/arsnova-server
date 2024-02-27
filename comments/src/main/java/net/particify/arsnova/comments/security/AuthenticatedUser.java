@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
 
-import net.particify.arsnova.comments.model.serialization.UuidHelper;
+import net.particify.arsnova.common.uuid.UuidHelper;
 
 public class AuthenticatedUser implements Serializable {
   @Serial

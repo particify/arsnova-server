@@ -39,7 +39,7 @@ import net.particify.arsnova.comments.model.command.PatchComment;
 import net.particify.arsnova.comments.model.command.PatchCommentPayload;
 import net.particify.arsnova.comments.model.command.UpdateComment;
 import net.particify.arsnova.comments.model.command.UpdateCommentPayload;
-import net.particify.arsnova.comments.model.serialization.UuidHelper;
+import net.particify.arsnova.common.uuid.UuidHelper;
 import net.particify.arsnova.comments.service.CommentFindQueryService;
 import net.particify.arsnova.comments.service.CommentService;
 import net.particify.arsnova.comments.service.FindQuery;

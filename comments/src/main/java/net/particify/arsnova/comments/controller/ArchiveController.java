@@ -21,7 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import net.particify.arsnova.comments.model.Archive;
 import net.particify.arsnova.comments.model.command.CreateArchiveCommand;
-import net.particify.arsnova.comments.model.serialization.UuidHelper;
+import net.particify.arsnova.common.uuid.UuidHelper;
 import net.particify.arsnova.comments.service.ArchiveService;
 
 @RestController("ArchiveController")

@@ -1,4 +1,4 @@
-package net.particify.arsnova.comments.model.serialization;
+package net.particify.arsnova.common.uuid;
 
 import com.fasterxml.jackson.databind.deser.std.StdDelegatingDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
