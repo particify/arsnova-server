@@ -10,7 +10,8 @@ import net.particify.arsnova.core.persistence.couchdb.support.MangoCouchDbConnec
 public class CouchDbViolationReportRepository
     extends MangoCouchDbCrudRepository<ViolationReport>
     implements ViolationReportRepository, MangoIndexInitializer {
-  private static final String INDEX_NAME = "violation-report-index";
+  private static final String WITH_DECISION_INDEX_NAME = "violation-report-w-decision-index";
+  private static final String WITHOUT_DECISION_INDEX_NAME = "violation-report-wo-decision-index";
 
   public CouchDbViolationReportRepository(
       final MangoCouchDbConnector db,
@@ -25,24 +26,29 @@ public class CouchDbViolationReportRepository
 
   public void createDefaultIndex() {
     final List<MangoCouchDbConnector.MangoQuery.Sort> fields = List.of(
-        new MangoCouchDbConnector.MangoQuery.Sort("creationTimestamp", true),
-        new MangoCouchDbConnector.MangoQuery.Sort("decision", true)
+        new MangoCouchDbConnector.MangoQuery.Sort("creationTimestamp", true)
     );
-    final Map<String, Object> filterSelector = Map.of(
-        "type", type.getSimpleName()
+    final Map<String, Object> withDecisionFilterSelector = Map.of(
+        "type", type.getSimpleName(),
+        "decision", Map.of("$exists", true)
     );
-    db.createPartialJsonIndex(INDEX_NAME, fields, filterSelector);
+    final Map<String, Object> withoutDecisionFilterSelector = Map.of(
+        "type", type.getSimpleName(),
+        "decision", Map.of("$exists", false)
+    );
+    db.createPartialJsonIndex(WITH_DECISION_INDEX_NAME, fields, withDecisionFilterSelector);
+    db.createPartialJsonIndex(WITHOUT_DECISION_INDEX_NAME, fields, withoutDecisionFilterSelector);
   }
 
   @Override
   public List<ViolationReport> findAllByHasDecisionOrderByCreationTimestampDesc(final boolean hasDecision) {
     final Map<String, Object> querySelector = Map.of(
         "type", type.getSimpleName(),
-        "creationTimestamp", Map.of("$exists", true),
-        "decision", Map.of("$exists", hasDecision)
+        "decision", Map.of("$exists", hasDecision),
+        "creationTimestamp", Map.of("$exists", true)
     );
     final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(querySelector);
-    query.setIndexDocument(INDEX_NAME);
+    query.setIndexDocument(hasDecision ? WITH_DECISION_INDEX_NAME : WITHOUT_DECISION_INDEX_NAME);
     return db.query(query, type);
   }
 }
