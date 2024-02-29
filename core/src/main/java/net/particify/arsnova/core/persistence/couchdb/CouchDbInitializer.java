@@ -19,6 +19,7 @@
 package net.particify.arsnova.core.persistence.couchdb;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
@@ -33,9 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import org.apache.http.NoHttpResponseException;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
@@ -50,7 +48,6 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
@@ -65,6 +62,7 @@ import net.particify.arsnova.core.service.StatusService;
 @Component
 @Profile("!test")
 public class CouchDbInitializer implements ApplicationEventPublisherAware {
+  private static final TypeReference<HashMap<String, Object>> JSON_MAP_TYPE_REF = new TypeReference<>() {};
   private static final Logger logger = LoggerFactory.getLogger(CouchDbInitializer.class);
   private final List<Map<String, Object>> docs = new ArrayList<>();
 
@@ -92,14 +90,9 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware {
     this.applicationEventPublisher = applicationEventPublisher;
   }
 
-  protected void loadDesignDocFiles() throws IOException, ScriptException {
-    final ScriptEngine engine = new ScriptEngineManager().getEngineByMimeType("application/javascript");
-    engine.eval(new InputStreamReader(
-        new ClassPathResource("couchdb/jsToJson.js").getInputStream(),
-        StandardCharsets.UTF_8));
-
+  protected void loadDesignDocFiles() throws IOException {
     final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-    final Resource[] resources = resolver.getResources("classpath*:couchdb/*.design.js");
+    final Resource[] resources = resolver.getResources("classpath*:couchdb/*.design.json");
     // Remove duplicates, prioritize file over jar resources
     final Map<String, Resource> resourceMap = Arrays.stream(resources).collect(Collectors.toMap(
         r -> r.getFilename(),
@@ -108,11 +101,9 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware {
     ));
     for (final Resource resource : resourceMap.values()) {
       logger.debug("Loading CouchDB design doc: {} ({})", resource.getFilename(), resource.getURI());
-      final String js = FileCopyUtils.copyToString(
+      final String json = FileCopyUtils.copyToString(
           new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
-      /* Reset designDoc before parsing a new one. */
-      engine.eval("var designDoc = null;" + js);
-      final Map<String, Object> jsonObject = (Map<String, Object>) engine.eval("jsToJson(designDoc)");
+      final Map<String, Object> jsonObject = objectMapper.readValue(json, JSON_MAP_TYPE_REF);
       docs.add(jsonObject);
     }
     for (final MangoIndexInitializer initializer : mangoIndexInitializers) {
@@ -219,7 +210,7 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware {
   }
 
   @EventListener
-  private void onApplicationEvent(final ContextRefreshedEvent event) throws IOException, ScriptException {
+  private void onApplicationEvent(final ContextRefreshedEvent event) throws IOException {
     /* Event is triggered more than once */
     if (initEventHandled) {
       return;

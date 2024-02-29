@@ -53,8 +53,6 @@ dependencies {
   implementation("org.pac4j:pac4j-saml")
   implementation("org.ektorp:org.ektorp")
   implementation("org.ektorp:org.ektorp.spring")
-  implementation("org.graalvm.js:js-scriptengine")
-  implementation("org.graalvm.polyglot:js-community")
   implementation("net.particify.arsnova.integrations:connector-client")
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
