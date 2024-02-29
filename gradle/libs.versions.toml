@@ -4,7 +4,6 @@ aspectj-rt = "1.9.21.1"
 bucket4j = "7.6.0"
 checkstyle = "10.12.4"
 ektorp = "1.5.0"
-graalvm = "23.1.2"
 java-jwt = "4.4.0"
 jib-plugin = "3.4.1"
 kotlin = "1.9.22"
@@ -22,8 +21,6 @@ aspectj-rt = { module = "org.aspectj:aspectjrt", version.ref = "aspectj-rt" }
 bucket4j = { module = "com.github.vladimir-bukhtoyarov:bucket4j-core", version.ref = "bucket4j" }
 ektorp = { module = "org.ektorp:org.ektorp", version.ref = "ektorp" }
 ektorp-spring = { module = "org.ektorp:org.ektorp.spring", version.ref = "ektorp" }
-graalvm-js-community = { module = "org.graalvm.polyglot:js-community", version.ref = "graalvm" }
-graalvm-js-scriptengine = { module = "org.graalvm.js:js-scriptengine", version.ref = "graalvm" }
 java-jwt = { module = "com.auth0:java-jwt", version.ref = "java-jwt" }
 lms-connector = { module = "net.particify.arsnova.integrations:connector-client", version.ref = "lms-connector" }
 pac4j-jakartaee = { module = "org.pac4j:pac4j-jakartaee", version.ref = "pac4j" }
