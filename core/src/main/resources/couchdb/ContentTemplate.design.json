@@ -1,0 +1,1 @@
+{"_id":"_design/ContentTemplate","language":"javascript","views":{"by_id":{"map":"function (doc) {\n        if (doc.type === \"ContentTemplate\") {\n          emit(doc._id, {_rev: doc._rev});\n        }\n      }","reduce":"_count"}}}

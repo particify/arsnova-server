@@ -1,0 +1,1 @@
+{"_id":"_design/ViolationReport","language":"javascript","views":{"by_id":{"map":"function (doc) {\n        if (doc.type === \"ViolationReport\") {\n          emit(doc._id, {_rev: doc._rev});\n        }\n      }","reduce":"_count"}}}
