@@ -31,7 +31,7 @@ import net.particify.arsnova.core.web.exceptions.BadRequestException;
 @RestController
 @EntityRequestMapping(AnswerController.REQUEST_MAPPING)
 public class AnswerController extends AbstractEntityController<Answer> {
-  protected static final String REQUEST_MAPPING = "/answer";
+  protected static final String REQUEST_MAPPING = "/room/{roomId}/answer";
   private static final String HIDE_MAPPING = DEFAULT_ID_MAPPING + "/hide";
 
   private AnswerService answerService;

@@ -31,7 +31,7 @@ import net.particify.arsnova.core.service.ContentTemplateService;
 @RestController
 @EntityRequestMapping(ContentGroupController.REQUEST_MAPPING)
 public class ContentGroupController extends AbstractEntityController<ContentGroup> {
-  protected static final String REQUEST_MAPPING = "/contentgroup";
+  protected static final String REQUEST_MAPPING = "/room/{roomId}/contentgroup";
   private static final String ADD_CONTENT_MAPPING = "/-/content/";
   private static final String REMOVE_CONTENT_MAPPING = DEFAULT_ID_MAPPING + "/content/{contentId}";
   private static final String IMPORT_MAPPING = DEFAULT_ID_MAPPING + "/import";

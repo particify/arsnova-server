@@ -48,7 +48,7 @@ import net.particify.arsnova.core.web.exceptions.NotFoundException;
 @RestController
 @EntityRequestMapping(ContentController.REQUEST_MAPPING)
 public class ContentController extends AbstractEntityController<Content> {
-  protected static final String REQUEST_MAPPING = "/content";
+  protected static final String REQUEST_MAPPING = "/room/{roomId}/content";
   private static final String GET_ANSWER_STATISTICS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
   private static final String DELETE_ANSWERS_MAPPING = DEFAULT_ID_MAPPING + "/answer";
   private static final String CORRECT_CHOICE_INDEXES_MAPPING = DEFAULT_ID_MAPPING + "/correct-choice-indexes";

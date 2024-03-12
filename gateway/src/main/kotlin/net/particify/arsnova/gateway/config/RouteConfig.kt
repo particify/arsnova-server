@@ -6,7 +6,6 @@ import net.particify.arsnova.gateway.filter.AuthFilter
 import net.particify.arsnova.gateway.filter.JwtUserIdFilter
 import net.particify.arsnova.gateway.filter.RemoveMembershipFilter
 import net.particify.arsnova.gateway.filter.RequestRateLimiter
-import net.particify.arsnova.gateway.filter.RoomIdFilter
 import net.particify.arsnova.gateway.filter.RoomShortIdFilter
 import net.particify.arsnova.gateway.filter.UpdateRoomAccessFilter
 import org.slf4j.Logger
@@ -50,7 +49,6 @@ class RouteConfig(
     authFilter: AuthFilter,
     addMembershipFilter: AddMembershipFilter,
     removeMembershipFilter: RemoveMembershipFilter,
-    roomIdFilter: RoomIdFilter,
     roomShortIdFilter: RoomShortIdFilter,
     roomAuthFilter: UpdateRoomAccessFilter,
     roomCreationAuthFilter: AddRoomCreatorAccessFilter,
@@ -122,7 +120,6 @@ class RouteConfig(
             )
             .filters { f ->
               f.filter(authFilter.apply(AuthFilter.Config()))
-              f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
               f.requestRateLimiter { r ->
                 r.rateLimiter = requestRateLimiter
               }

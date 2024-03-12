@@ -38,6 +38,11 @@ class AuthFilter(
   private val roomAccessService: RoomAccessService,
   private val subscriptionService: SubscriptionService,
 ) : AbstractGatewayFilterFactory<AuthFilter.Config>(Config::class.java) {
+  companion object {
+    val topicRoomIdLength = 32
+    val roomIdRegex: Regex = Regex("[0-9a-f]{$topicRoomIdLength}")
+  }
+
   private val logger = LoggerFactory.getLogger(AuthFilter::class.java)
 
   override fun apply(config: Config): GatewayFilter {
@@ -50,7 +55,7 @@ class AuthFilter(
         val jwt = bearer[0].removePrefix("Bearer ")
         val uriVariables = ServerWebExchangeUtils.getUriTemplateVariables(exchange)
         val roomId = uriVariables["roomId"]
-        if (!roomId!!.matches(RoomIdFilter.roomIdRegex)) {
+        if (!roomId!!.matches(roomIdRegex)) {
           logger.debug("Didn't get a valid roomId out of the uri variables: {}", uriVariables)
           throw ResponseStatusException(HttpStatus.BAD_REQUEST)
         }
