@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import net.particify.arsnova.comments.model.Comment;
 import net.particify.arsnova.comments.model.Vote;
-import net.particify.arsnova.comments.model.serialization.UuidHelper;
+import net.particify.arsnova.common.uuid.UuidHelper;
 
 @Component
 public class PermissionEvaluator {

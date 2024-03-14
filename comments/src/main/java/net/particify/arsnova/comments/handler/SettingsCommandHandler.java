@@ -14,7 +14,7 @@ import net.particify.arsnova.comments.model.command.CreateSettingsPayload;
 import net.particify.arsnova.comments.model.command.UpdateSettings;
 import net.particify.arsnova.comments.model.command.UpdateSettingsPayload;
 import net.particify.arsnova.comments.model.event.SettingsUpdated;
-import net.particify.arsnova.comments.model.serialization.UuidHelper;
+import net.particify.arsnova.common.uuid.UuidHelper;
 import net.particify.arsnova.comments.security.PermissionEvaluator;
 import net.particify.arsnova.comments.service.SettingsService;
 

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import net.particify.arsnova.comments.model.Comment;
 import net.particify.arsnova.comments.model.Vote;
 import net.particify.arsnova.comments.model.VotePK;
-import net.particify.arsnova.comments.model.serialization.UuidHelper;
+import net.particify.arsnova.common.uuid.UuidHelper;
 
 @Service
 public class VoteFindQueryService {

@@ -39,7 +39,7 @@ import net.particify.arsnova.comments.model.event.CommentPatched;
 import net.particify.arsnova.comments.model.event.CommentPatchedPayload;
 import net.particify.arsnova.comments.model.event.CommentUpdated;
 import net.particify.arsnova.comments.model.event.CommentUpdatedPayload;
-import net.particify.arsnova.comments.model.serialization.UuidHelper;
+import net.particify.arsnova.common.uuid.UuidHelper;
 import net.particify.arsnova.comments.security.PermissionEvaluator;
 import net.particify.arsnova.comments.service.CommentService;
 import net.particify.arsnova.comments.service.SettingsService;

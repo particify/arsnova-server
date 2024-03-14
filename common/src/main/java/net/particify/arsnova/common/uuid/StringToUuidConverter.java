@@ -1,4 +1,4 @@
-package net.particify.arsnova.comments.model.serialization;
+package net.particify.arsnova.common.uuid;
 
 import java.util.UUID;
 import org.springframework.core.convert.converter.Converter;
