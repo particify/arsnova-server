@@ -5,7 +5,11 @@ plugins {
   id("org.jlleitschuh.gradle.ktlint")
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_21
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(21)
+  }
+}
 
 dependencies {
   implementation(platform(project(":platform")))
