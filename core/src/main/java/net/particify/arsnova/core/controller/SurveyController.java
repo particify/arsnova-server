@@ -10,9 +10,7 @@ import net.particify.arsnova.core.service.FeedbackStorageService;
 
 @RestController
 public class SurveyController {
-  protected static final String REQUEST_MAPPING = "/survey";
-  private static final String GET_SURVEY_BY_ROOM_MAPPING =
-      "/room" + AbstractEntityController.DEFAULT_ID_MAPPING + REQUEST_MAPPING;
+  protected static final String REQUEST_MAPPING = "/room/{roomId}/survey";
 
   private FeedbackStorageService service;
 
@@ -22,11 +20,11 @@ public class SurveyController {
     this.service = service;
   }
 
-  @GetMapping(GET_SURVEY_BY_ROOM_MAPPING)
-  public int[] getByRoom(@PathVariable final String id) {
+  @GetMapping(REQUEST_MAPPING)
+  public int[] getByRoom(@PathVariable final String roomId) {
     // Fake room for ref management
     final Room room = new Room();
-    room.setId(id);
+    room.setId(roomId);
 
     final Feedback feedback = service.getByRoom(room);
     final int[] currentVals = feedback.getValues().stream().mapToInt(i -> i).toArray();

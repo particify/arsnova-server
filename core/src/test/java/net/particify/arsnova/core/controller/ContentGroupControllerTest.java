@@ -100,7 +100,7 @@ public class ContentGroupControllerTest {
 
     when(roomRepository.findOne(room.getId())).thenReturn(room);
     when(contentGroupRepository.findOne(contentGroup.getId())).thenReturn(contentGroup);
-    mockMvc.perform(get("/contentgroup/" + contentGroup.getId())
+    mockMvc.perform(get("/room/any-room-id/contentgroup/" + contentGroup.getId())
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString(contentGroup.getName())));
@@ -126,7 +126,7 @@ public class ContentGroupControllerTest {
     requestBody.setRoomId(room.getId());
     requestBody.setContentGroupName(contentGroupName);
     requestBody.setContentId(contentId);
-    mockMvc.perform(post("/contentgroup/-/content/")
+    mockMvc.perform(post("/room/any-room-id/contentgroup/-/content/")
         .with(csrf())
         .content(new ObjectMapper().writeValueAsString(requestBody))
         .contentType(MediaType.APPLICATION_JSON)
@@ -158,7 +158,7 @@ public class ContentGroupControllerTest {
     requestBody.setRoomId(room.getId());
     requestBody.setContentGroupName(contentGroup.getName());
     requestBody.setContentId(contentId2);
-    mockMvc.perform(post("/contentgroup/-/content/")
+    mockMvc.perform(post("/room/any-room-id/contentgroup/-/content/")
         .with(csrf())
         .content(new ObjectMapper().writeValueAsString(requestBody))
         .contentType(MediaType.APPLICATION_JSON)
@@ -186,7 +186,7 @@ public class ContentGroupControllerTest {
     when(contentGroupRepository.findOne(contentGroup.getId())).thenReturn(contentGroup);
     when(contentGroupRepository.save(any(ContentGroup.class))).thenAnswer(i -> i.getArgument(0));
 
-    mockMvc.perform(put("/contentgroup/" + contentGroup.getId())
+    mockMvc.perform(put("/room/any-room-id/contentgroup/" + contentGroup.getId())
         .with(csrf())
         .contentType(MediaType.APPLICATION_JSON)
         .content(new ObjectMapper().writeValueAsString(contentGroup))

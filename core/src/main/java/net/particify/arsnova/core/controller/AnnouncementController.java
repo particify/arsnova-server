@@ -13,6 +13,8 @@ import net.particify.arsnova.core.service.AnnouncementService;
 @RestController
 @EntityRequestMapping(AnnouncementController.REQUEST_MAPPING)
 public class AnnouncementController extends AbstractEntityController<Announcement> {
+  public static final String REQUEST_MAPPING = "/room/{roomId}/announcement";
+
   private AnnouncementService announcementService;
 
   protected AnnouncementController(
@@ -20,8 +22,6 @@ public class AnnouncementController extends AbstractEntityController<Announcemen
     super(announcementService);
     this.announcementService = announcementService;
   }
-
-  public static final String REQUEST_MAPPING = "/room/{roomId}/announcement";
 
   @Override
   protected String getMapping() {
