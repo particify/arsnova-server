@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"net.particify.arsnova.authz", "net.particify.arsnova.common"})
+@ComponentScan(basePackages = {"net.particify.arsnova.comments", "net.particify.arsnova.common"})
 @PropertySource(
     value = {"classpath:arsnova.comment.properties.example", "file:/etc/arsnova/arsnova.comment.properties"},
     ignoreResourceNotFound = true,
