@@ -31,6 +31,7 @@ public class SystemProperties {
     private String proxyPath;
     private boolean indentResponseBody;
     private boolean exposeErrorMessages;
+    private boolean forwardAliases;
 
     public String getProxyPath() {
       return proxyPath;
@@ -54,6 +55,14 @@ public class SystemProperties {
 
     public void setExposeErrorMessages(final boolean exposeErrorMessages) {
       this.exposeErrorMessages = exposeErrorMessages;
+    }
+
+    public boolean isForwardAliases() {
+      return forwardAliases;
+    }
+
+    public void setForwardAliases(final boolean forwardAliases) {
+      this.forwardAliases = forwardAliases;
     }
   }
 

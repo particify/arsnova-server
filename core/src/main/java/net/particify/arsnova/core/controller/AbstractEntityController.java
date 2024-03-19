@@ -50,6 +50,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
+import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.model.Entity;
 import net.particify.arsnova.core.model.FindQuery;
 import net.particify.arsnova.core.model.RoomIdAware;
@@ -86,6 +87,7 @@ public abstract class AbstractEntityController<E extends Entity> {
   protected static final String LEGACY_FIND_MAPPING = "/find";
   protected final EntityService<E> entityService;
   protected FindQueryService<E> findQueryService;
+  private SystemProperties systemProperties;
 
   protected AbstractEntityController(final EntityService<E> entityService) {
     if (!(entityService instanceof SecuredService)) {
@@ -212,9 +214,16 @@ public abstract class AbstractEntityController<E extends Entity> {
     final String targetPath = String.format(
         "%s/%s%s", getMapping(), resolveAlias(alias), !subPath.isEmpty() ? "/" + subPath : "");
     logger.debug("Forwarding, subpath {}, getMapping {}, resolveAlias {}", subPath, getMapping(), resolveAlias(alias));
-    logger.debug("Forwarding alias request to {}", targetPath);
-    httpServletRequest.getRequestDispatcher(targetPath)
-        .forward(httpServletRequest, httpServletResponse);
+    if (systemProperties.getApi().isForwardAliases()) {
+      logger.debug("Forwarding alias request to {}", targetPath);
+      httpServletRequest.getRequestDispatcher(targetPath)
+          .forward(httpServletRequest, httpServletResponse);
+    } else {
+      final String fullTargetPath = systemProperties.getApi().getProxyPath() + targetPath;
+      logger.debug("Redirecting alias request to {}", fullTargetPath);
+      httpServletResponse.setStatus(HttpServletResponse.SC_TEMPORARY_REDIRECT);
+      httpServletResponse.setHeader(HttpHeaders.LOCATION, fullTargetPath);
+    }
   }
 
   protected String resolveAlias(final String alias) throws NotFoundException {
@@ -224,5 +233,10 @@ public abstract class AbstractEntityController<E extends Entity> {
   @Autowired(required = false)
   public void setFindQueryService(final FindQueryService<E> findQueryService) {
     this.findQueryService = findQueryService;
+  }
+
+  @Autowired
+  public void setSystemProperties(final SystemProperties systemProperties) {
+    this.systemProperties = systemProperties;
   }
 }

@@ -13,6 +13,7 @@ arsnova:
     # manually.
     api:
       proxy-path: ""
+      forward-aliases: true
 
     # Database
     couchdb:
