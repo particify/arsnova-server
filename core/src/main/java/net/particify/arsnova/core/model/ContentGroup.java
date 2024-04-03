@@ -21,6 +21,8 @@ package net.particify.arsnova.core.model;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,15 +38,17 @@ public class ContentGroup extends Entity implements RoomIdAware {
   private String name;
 
   private List<String> contentIds;
-  private boolean published;
 
-  /* The index in contentIds of the first content to publish. No
-   * contents are published if set to <code>-1</code>. */
-  private int firstPublishedIndex = 0;
+  @NotNull
+  private PublishingMode publishingMode = PublishingMode.NONE;
 
-  /* The index in contentIds of the last content to publish. All contents
-   * after the first published one are published if set to <code>-1</code>. */
-  private int lastPublishedIndex = -1;
+  /**
+   * The index of the published content (publishingMode SINGLE) or the last
+   * published content (UP_TO). Not relevant for the publishingModes NONE and
+   * ALL.
+   */
+  @PositiveOrZero
+  private int publishingIndex;
 
   private boolean statisticsPublished = true;
   private boolean correctOptionsPublished = true;
@@ -68,9 +72,8 @@ public class ContentGroup extends Entity implements RoomIdAware {
     super(contentGroup);
     this.name = contentGroup.name;
     this.contentIds = contentGroup.contentIds;
-    this.published = contentGroup.published;
-    this.firstPublishedIndex = contentGroup.firstPublishedIndex;
-    this.lastPublishedIndex = contentGroup.lastPublishedIndex;
+    this.publishingMode = contentGroup.publishingMode;
+    this.publishingIndex = contentGroup.publishingIndex;
     this.statisticsPublished = contentGroup.statisticsPublished;
     this.correctOptionsPublished = contentGroup.correctOptionsPublished;
     this.templateId = contentGroup.templateId;
@@ -108,36 +111,31 @@ public class ContentGroup extends Entity implements RoomIdAware {
   @JsonView({View.Persistence.class, View.Public.class})
   public void setContentIds(final List<String> contentIds) {
     this.contentIds = contentIds;
+    if (publishingIndex != 0 && publishingIndex >= contentIds.size()) {
+      this.publishingIndex = contentIds.size() - 1;
+    }
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
-  public boolean isPublished() {
-    return published;
+  public PublishingMode getPublishingMode() {
+    return publishingMode;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
-  public void setPublished(final boolean published) {
-    this.published = published;
+  public void setPublishingMode(final PublishingMode publishingMode) {
+    this.publishingMode = publishingMode;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
-  public int getFirstPublishedIndex() {
-    return firstPublishedIndex;
+  public int getPublishingIndex() {
+    return publishingIndex;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
-  public void setFirstPublishedIndex(final int firstPublishedIndex) {
-    this.firstPublishedIndex = firstPublishedIndex;
-  }
-
-  @JsonView({View.Persistence.class, View.Public.class})
-  public int getLastPublishedIndex() {
-    return lastPublishedIndex;
-  }
-
-  @JsonView({View.Persistence.class, View.Public.class})
-  public void setLastPublishedIndex(final int lastPublishedIndex) {
-    this.lastPublishedIndex = lastPublishedIndex;
+  public void setPublishingIndex(final int publishingIndex) {
+    this.publishingIndex = publishingIndex != 0 && publishingIndex >= contentIds.size()
+        ? contentIds.size() - 1
+        : publishingIndex;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
@@ -170,10 +168,18 @@ public class ContentGroup extends Entity implements RoomIdAware {
     this.templateId = templateId;
   }
 
+  public boolean isPublished() {
+    return publishingMode != PublishingMode.NONE;
+  }
+
   public boolean isContentPublished(final String contentId) {
     final int i = contentIds.indexOf(contentId);
-    return i > -1 && firstPublishedIndex > -1 && i >= firstPublishedIndex
-        && (lastPublishedIndex == -1 || i <= lastPublishedIndex);
+    return switch (publishingMode) {
+      case NONE -> false;
+      case ALL -> true;
+      case SINGLE -> i == publishingIndex;
+      case UP_TO -> i <= publishingIndex;
+    };
   }
 
   public boolean containsContent(final String contentId) {
@@ -204,11 +210,29 @@ public class ContentGroup extends Entity implements RoomIdAware {
     return new ToStringCreator(this)
         .append("name", name)
         .append("contentIds", contentIds)
-        .append("published", published)
-        .append("firstPublishedIndex", firstPublishedIndex)
-        .append("lastPublishedIndex", lastPublishedIndex)
+        .append("publishingMode", publishingMode)
+        .append("publishingIndex", publishingIndex)
         .append("statisticsPublished", statisticsPublished)
         .append("correctOptionsPublished", correctOptionsPublished)
         .toString();
+  }
+
+  public enum PublishingMode {
+    /**
+     * Publishes no contents / do not publish content group at all.
+     */
+    NONE,
+    /**
+     * Publishes all contents.
+     */
+    ALL,
+    /**
+     * Publishes the content referenced by publishingIndex.
+     */
+    SINGLE,
+    /**
+     * Publishes contents up to publishingIndex.
+     */
+    UP_TO
   }
 }

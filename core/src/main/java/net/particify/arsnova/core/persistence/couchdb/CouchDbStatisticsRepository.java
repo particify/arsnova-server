@@ -131,11 +131,8 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
               case "deleted":
                 contentGroupStats.setDeleted(value);
                 break;
-              case "published":
-                contentGroupStats.setPublished(value);
-                break;
-              case "usingPublishingRange":
-                contentGroupStats.setUsingPublishingRange(value);
+              case "publishingMode":
+                contentGroupStats.getCountByPublishingMode().put(key.get(keyOffset + 2).asText(), value);
                 break;
               case "fromTemplate":
                 contentGroupStats.setFromTemplate(value);

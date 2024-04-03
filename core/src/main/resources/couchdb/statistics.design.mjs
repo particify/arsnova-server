@@ -18,12 +18,7 @@ export let designDoc = {
           }
           break;
         case "ContentGroup":
-          if (doc.published) {
-            emit([doc.type, "published"], 1);
-          }
-          if (doc.lastPublishedIndex !== -1) {
-            emit([doc.type, "usingPublishingRange"], 1);
-          }
+          emit([doc.type, "publishingMode", doc.publishingMode], 1);
           if (doc.templateId) {
             emit([doc.type, "fromTemplate"], 1);
           }
