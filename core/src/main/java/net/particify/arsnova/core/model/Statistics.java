@@ -126,8 +126,7 @@ public class Statistics {
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int deleted;
 
-    private int published;
-    private int usingPublishingRange;
+    private Map<String, Integer> countByPublishingMode = new HashMap<>();
     private int fromTemplate;
 
     public int getTotalCount() {
@@ -146,20 +145,12 @@ public class Statistics {
       this.deleted = deleted;
     }
 
-    public int getPublished() {
-      return published;
+    public Map<String, Integer> getCountByPublishingMode() {
+      return countByPublishingMode;
     }
 
-    public void setPublished(final int published) {
-      this.published = published;
-    }
-
-    public int getUsingPublishingRange() {
-      return usingPublishingRange;
-    }
-
-    public void setUsingPublishingRange(final int usingPublishingRange) {
-      this.usingPublishingRange = usingPublishingRange;
+    public void setCountByPublishingMode(final Map<String, Integer> countByPublishingMode) {
+      this.countByPublishingMode = countByPublishingMode;
     }
 
     public int getFromTemplate() {
