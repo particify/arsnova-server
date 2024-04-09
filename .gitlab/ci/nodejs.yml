@@ -65,7 +65,7 @@ eslint:
     - yarn_install
   allow_failure: false
   script:
-    - yarn eslint --config eslint.json .
+    - yarn eslint .
 
 docker_image:
   stage: deploy
