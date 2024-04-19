@@ -1,7 +1,7 @@
 [versions]
 aspectj-plugin = "8.6"
 aspectj-rt = "1.9.22"
-bucket4j = "7.6.1"
+bucket4j = "8.10.1"
 checkstyle = "10.12.4"
 ektorp = "1.5.0"
 java-jwt = "4.4.0"
@@ -18,7 +18,7 @@ springmockk = "4.0.2"
 
 [libraries]
 aspectj-rt = { module = "org.aspectj:aspectjrt", version.ref = "aspectj-rt" }
-bucket4j = { module = "com.github.vladimir-bukhtoyarov:bucket4j-core", version.ref = "bucket4j" }
+bucket4j = { module = "com.bucket4j:bucket4j-core", version.ref = "bucket4j" }
 ektorp = { module = "org.ektorp:org.ektorp", version.ref = "ektorp" }
 ektorp-spring = { module = "org.ektorp:org.ektorp.spring", version.ref = "ektorp" }
 java-jwt = { module = "com.auth0:java-jwt", version.ref = "java-jwt" }

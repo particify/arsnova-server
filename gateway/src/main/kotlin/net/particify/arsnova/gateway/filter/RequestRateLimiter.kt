@@ -2,7 +2,6 @@ package net.particify.arsnova.gateway.filter
 
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
-import io.github.bucket4j.Bucket4j
 import io.github.bucket4j.ConsumptionProbe
 import io.github.bucket4j.Refill
 import net.particify.arsnova.gateway.config.HttpGatewayProperties
@@ -65,13 +64,13 @@ class RequestRateLimiter(
         ipBucketMap.computeIfAbsent(QUERY_BUCKET_PREFIX + ipAddr) { _: String ->
           val refill: Refill = Refill.intervally(routeConfig.queryTokensPerTimeframe, routeConfig.duration)
           val limit: Bandwidth = Bandwidth.classic(routeConfig.queryBurstCapacity, refill)
-          Bucket4j.builder().addLimit(limit).build()
+          Bucket.builder().addLimit(limit).build()
         }
       } else {
         ipBucketMap.computeIfAbsent(COMMAND_BUCKET_PREFIX + ipAddr) { _: String ->
           val refill: Refill = Refill.intervally(routeConfig.commandTokensPerTimeframe, routeConfig.duration)
           val limit: Bandwidth = Bandwidth.classic(routeConfig.commandBurstCapacity, refill)
-          Bucket4j.builder().addLimit(limit).build()
+          Bucket.builder().addLimit(limit).build()
         }
       }
 
