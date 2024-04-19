@@ -2,7 +2,6 @@ package net.particify.arsnova.websocket.service
 
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
-import io.github.bucket4j.Bucket4j
 import io.github.bucket4j.Refill
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -90,7 +89,7 @@ class RoomSubscriptionService(
         eventBucketMap.computeIfAbsent(roomId) {
           val refill: Refill = Refill.intervally(tokensPerTimeframe, duration)
           val limit: Bandwidth = Bandwidth.classic(burstCapacity, refill)
-          Bucket4j.builder().addLimit(limit).build()
+          Bucket.builder().addLimit(limit).build()
         }
       val probe = bucket.tryConsumeAndReturnRemaining(1)
       if (!probe.isConsumed) {
