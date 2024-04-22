@@ -16,6 +16,7 @@ dependencies {
   implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   implementation("org.springframework:spring-context")
   implementation("org.springframework:spring-core")
+  implementation("com.google.guava:guava")
   implementation("com.fasterxml.jackson.core:jackson-databind")
   implementation("org.slf4j:slf4j-api")
 }
