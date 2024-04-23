@@ -361,11 +361,11 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
         new NumericAnswerStatistics.NumericRoundStatistics();
     roundStats.setRound(round);
     roundStats.setAbstentionCount((int) answers.stream().filter(a -> a.getSelectedNumber() == null).count());
-    roundStats.setAnswerCount(answers.size());
     final List<Double> numbers = answers.stream()
         .map(NumericAnswer::getSelectedNumber)
         .filter(n -> n != null)
         .toList();
+    roundStats.setAnswerCount(numbers.size());
     final Map<Double, Long> numberCounts = numbers.stream()
         .collect(Collectors.groupingBy(
         Function.identity(),
