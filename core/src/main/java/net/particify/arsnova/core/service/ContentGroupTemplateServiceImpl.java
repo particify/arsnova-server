@@ -102,6 +102,7 @@ public class ContentGroupTemplateServiceImpl
     final ContentGroup contentGroup = contentGroupService.get(id);
     final List<String> ids = contentTemplateService.createTemplatesFromContents(contentGroup.getContentIds());
     template.setTemplateIds(ids);
+    template.setGroupType(contentGroup.getGroupType());
     return create(template);
   }
 
