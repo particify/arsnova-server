@@ -362,7 +362,10 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     roundStats.setRound(round);
     roundStats.setAbstentionCount((int) answers.stream().filter(a -> a.getSelectedNumber() == null).count());
     roundStats.setAnswerCount(answers.size());
-    final List<Double> numbers = answers.stream().map(NumericAnswer::getSelectedNumber).toList();
+    final List<Double> numbers = answers.stream()
+        .map(NumericAnswer::getSelectedNumber)
+        .filter(n -> n != null)
+        .toList();
     final Map<Double, Long> numberCounts = numbers.stream()
         .collect(Collectors.groupingBy(
         Function.identity(),
@@ -505,8 +508,9 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
                     specialCharPattern.matcher(t.toLowerCase()).replaceAll("")))
                 .collect(Collectors.toList()));
       } else if (content instanceof NumericContent numericContent) {
-        final double selectedNumber = ((NumericAnswer) answer).getSelectedNumber();
-        if (selectedNumber < numericContent.getMinNumber() || selectedNumber > numericContent.getMaxNumber()) {
+        final Double selectedNumber = ((NumericAnswer) answer).getSelectedNumber();
+        if (selectedNumber != null
+            && (selectedNumber < numericContent.getMinNumber() || selectedNumber > numericContent.getMaxNumber())) {
           throw new IllegalArgumentException("Selected number must be in content range.");
         }
       }
