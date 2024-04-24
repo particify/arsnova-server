@@ -37,9 +37,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -54,8 +56,10 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
+import net.particify.arsnova.common.util.YamlPropertiesLoader;
 import net.particify.arsnova.connector.client.ConnectorClient;
 import net.particify.arsnova.connector.client.ConnectorClientImpl;
+import net.particify.arsnova.core.config.properties.AliasWordsProperties;
 import net.particify.arsnova.core.config.properties.PresetsProperties;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
@@ -76,6 +80,7 @@ import net.particify.arsnova.core.web.PathBasedContentNegotiationStrategy;
  */
 @Configuration
 @EnableConfigurationProperties({
+    AliasWordsProperties.class,
     PresetsProperties.class,
     SystemProperties.class,
     TemplateProperties.class})
@@ -274,5 +279,14 @@ public class AppConfig implements WebMvcConfigurer {
     }
 
     return mailSender;
+  }
+
+  @Bean
+  public MessageSource yamlMessageSource() {
+    final ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+    messageSource.setBasename("classpath:messages/messages");
+    messageSource.setPropertiesPersister(new YamlPropertiesLoader());
+    messageSource.setFileExtensions(List.of(".yml", ".yaml"));
+    return messageSource;
   }
 }

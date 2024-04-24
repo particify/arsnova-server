@@ -1,0 +1,121 @@
+alias-nouns:
+  alpaca: Alpaka|n
+  armadillo: Gürteltier|n
+  badger: Dachs|m
+  barracuda: Barrakuda|m
+  bat: Fledermaus|f
+  bear: Bär|m
+  beaver: Biber|m
+  bison: Bison|m
+  bumblebee: Hummel|f
+  butterfly: Schmetterling|m
+  cockatoo: Kakadu|m
+  chameleon: Chamäleon|n
+  cheetah: Gepard|m
+  crocodile: Krokodil|n
+  deer: Reh|n
+  dolphin: Delfin|m
+  dragonfly: Libelle|f
+  duck: Ente|f
+  eagle: Adler|m
+  emu: Emu|m
+  elephant: Elefant|m
+  falcon: Falke|m
+  ferret: Frettchen|n
+  flamingo: Flamingo|m
+  giraffe: Giraffe|f
+  goose: Gans|f
+  hare: Hase|m
+  hedgehog: Igel|m
+  heron: Reiher|m
+  hummingbird: Kolibri|m
+  ibex: Steinbock|m
+  iguana: Leguan|m
+  jaguar: Jaguar|m
+  jellyfish: Qualle|f
+  kangaroo: Känguru|n
+  kiwi: Kiwi|m
+  koala: Koala|m
+  leopard: Leopard|m
+  lion: Löwe|m
+  llama: Lama|n
+  lobster: Hummer|m
+  lynx: Luchs|m
+  meerkat: Erdmännchen|n
+  mole: Maulwurf|m
+  narwhal: Narwal|m
+  owl: Eule|f
+  peacock: Pfau|m
+  pelican: Pelikan|m
+  penguin: Pinguin|m
+  pigeon: Taube|f
+  piranha: Piranha|m
+  puma: Puma|m
+  racoon: Waschbär|m
+  seal: Seehund|m
+  squirrel: Eichhörnchen|n
+  starfish: Seestern|m
+  swan: Schwan|m
+  tapir: Tapir|m
+  tiger: Tiger|m
+  viper: Viper|f
+  wolf: Wolf|m
+  zebra: Zebra|n
+
+alias-special-nouns:
+  mammoth: Mammut|n
+  archaeopteryx: Archaeopteryx|m
+  brachiosaurus: Brachiosaurus|m
+  brontosaurus: Brontosaurus|m
+  pteranodon: Pteranodon|m
+  stegosaurus: Stegosaurus|m
+  triceratops: Triceratops|m
+  tyrannosaurus: Tyrannosaurus|m
+  velociraptor: Velociraptor|m
+  dragon: Drache|m
+  unicorn: Einhorn|n
+  vampire: Vampir|m
+  werewolf: Werwolf|m
+
+alias-adjectives:
+  adept: Geschickt{1, choice, f#e|m#er|n#es} {0}
+  adventurous: Abenteurerisch{1, choice, f#e|m#er|n#es} {0}
+  ambitious: Ehrgeizig{1, choice, f#e|m#er|n#es} {0}
+  brilliant: Glänzend{1, choice, f#e|m#er|n#es} {0}
+  brave: Mutig{1, choice, f#e|m#er|n#es} {0}
+  capable: Fähig{1, choice, f#e|m#er|n#es} {0}
+  chatty: Geschwätzig{1, choice, f#e|m#er|n#es} {0}
+  cheerful: Fröhlich{1, choice, f#e|m#er|n#es} {0}
+  courageous: Mutig{1, choice, f#e|m#er|n#es} {0}
+  creative: Kreativ{1, choice, f#e|m#er|n#es} {0}
+  curious: Neugierig{1, choice, f#e|m#er|n#es} {0}
+  decisive: Entschlussfreudig{1, choice, f#e|m#er|n#es} {0}
+  determined: Entschlossen{1, choice, f#e|m#er|n#es} {0}
+  diligent: Fleißig{1, choice, f#e|m#er|n#es} {0}
+  elegant: Elegant{1, choice, f#e|m#er|n#es} {0}
+  enthusiastic: Enthusiastisch{1, choice, f#e|m#er|n#es} {0}
+  fabulous: Fabelhaft{1, choice, f#e|m#er|n#es} {0}
+  focused: Fokussiert{1, choice, f#e|m#er|n#es} {0}
+  generous: Großzügig{1, choice, f#e|m#er|n#es} {0}
+  helpful: Hilfreich{1, choice, f#e|m#er|n#es} {0}
+  hilarious: Urkomisch{1, choice, f#e|m#er|n#es} {0}
+  imaginative: Einfallsreich{1, choice, f#e|m#er|n#es} {0}
+  ingenious: Genial{1, choice, f#e|m#er|n#es} {0}
+  inquisitive: Wissbegierig{1, choice, f#e|m#er|n#es} {0}
+  insightful: Aufschlussreich{1, choice, f#e|m#er|n#es} {0}
+  inventive: Erfinderisch{1, choice, f#e|m#er|n#es} {0}
+  knowledgeable: Wissend{1, choice, f#e|m#er|n#es} {0}
+  observant: Aufmerksam{1, choice, f#e|m#er|n#es} {0}
+  optimistic: Optimistisch{1, choice, f#e|m#er|n#es} {0}
+  passionate: Leidenschaftlich{1, choice, f#e|m#er|n#es} {0}
+  patient: Geduldig{1, choice, f#e|m#er|n#es} {0}
+  persistent: Ausdauernd{1, choice, f#e|m#er|n#es} {0}
+  reliable: Zuverlässig{1, choice, f#e|m#er|n#es} {0}
+  resourceful: Einfallsreich{1, choice, f#e|m#er|n#es} {0}
+  responsible: Verantwortungsbewusst{1, choice, f#e|m#er|n#es} {0}
+  sincere: Aufrichtig{1, choice, f#e|m#er|n#es} {0}
+  swift: Flink{1, choice, f#e|m#er|n#es} {0}
+  thoughtful: Nachdenklich{1, choice, f#e|m#er|n#es} {0}
+  unique: Einzigartig{1, choice, f#e|m#er|n#es} {0}
+  versatile: Vielseitig{1, choice, f#e|m#er|n#es} {0}
+  vivid: Lebendig{1, choice, f#e|m#er|n#es} {0}

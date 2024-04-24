@@ -33,6 +33,7 @@ import net.particify.arsnova.core.persistence.ContentRepository;
 import net.particify.arsnova.core.persistence.ContentTemplateRepository;
 import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.persistence.RoomRepository;
+import net.particify.arsnova.core.persistence.RoomUserAliasRepository;
 import net.particify.arsnova.core.persistence.StatisticsRepository;
 import net.particify.arsnova.core.persistence.TemplateTagRepository;
 import net.particify.arsnova.core.persistence.UserRepository;
@@ -75,6 +76,9 @@ public class TestPersistanceConfig {
 
   @MockBean
   private ViolationReportRepository violationReportRepository;
+
+  @MockBean
+  private RoomUserAliasRepository roomUserAliasRepository;
 
   @MockBean
   private StatisticsRepository statisticsRepository;

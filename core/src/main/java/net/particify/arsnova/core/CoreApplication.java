@@ -20,6 +20,7 @@ import net.particify.arsnova.core.config.YamlPropertySourceFactory;
     value = {
         "classpath:config/defaults.yml",
         "classpath:config/actuator.yml",
+        "classpath:config/alias-words.yml",
         "file:${arsnova.config-dir:.}/application.yml",
         "file:${arsnova.config-dir:.}/secrets.yml",
         "file:${arsnova.config-dir:.}/ui.yml"},

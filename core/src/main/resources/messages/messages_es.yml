@@ -1,0 +1,121 @@
+alias-nouns:
+  alpaca: Alpaca|f
+  armadillo: Armadillo|m
+  badger: Tejón|m
+  barracuda: Barracuda|f
+  bat: Murciélago|m
+  bear: Oso|m
+  beaver: Castor|m
+  bison: Bisonte|m
+  bumblebee: Abejorro|m
+  butterfly: Mariposa|f
+  cockatoo: Cacatúa|f
+  chameleon: Camaleón|m
+  cheetah: Guepardo|m
+  crocodile: Cocodrilo|m
+  deer: Ciervo|m
+  dolphin: Delfín|m
+  dragonfly: Libélula|f
+  duck: Pato|m
+  eagle: Águila|f
+  emu: Emú|m
+  elephant: Elefante|m
+  falcon: Halcón|m
+  ferret: Hurón|m
+  flamingo: Flamenco|m
+  giraffe: Jirafa|f
+  goose: Ganso|m
+  hare: Liebre|f
+  hedgehog: Erizo|m
+  heron: Garza|f
+  hummingbird: Colibrí|m
+  ibex: Íbice|m
+  iguana: Iguana|f
+  jaguar: Jaguar|m
+  jellyfish: Medusa|f
+  kangaroo: Canguro|m
+  kiwi: Kiwi|m
+  koala: Koala|m
+  leopard: Leopardo|m
+  lion: León|m
+  llama: Llama|f
+  lobster: Langosta|f
+  lynx: Lince|m
+  meerkat: Suricata|f
+  mole: Topo|m
+  narwhal: Narval|m
+  owl: Búho|m
+  peacock: Pavo real|m
+  pelican: Pelícano|m
+  penguin: Pingüino|m
+  pigeon: Paloma|f
+  piranha: Piraña|f
+  puma: Puma|m
+  racoon: Mapache|m
+  seal: Foca|f
+  squirrel: Ardilla|f
+  starfish: Estrella de mar|f
+  swan: Cisne|m
+  tapir: Tapir|m
+  tiger: Tigre|m
+  viper: Víbora|f
+  wolf: Lobo|m
+  zebra: Cebra|f
+
+alias-special-nouns:
+  mammoth: Mamut|m
+  archaeopteryx: Archaeopteryx|m
+  brachiosaurus: Braquiosaurio|m
+  brontosaurus: Brontosaurio|m
+  pteranodon: Pteranodon|m
+  stegosaurus: Estegosaurio|m
+  triceratops: Triceratops|
+  tyrannosaurus: Tiranosaurio|m
+  velociraptor: Velociraptor|m
+  dragon: Dragón|m
+  unicorn: Unicornio|m
+  vampire: Vampiro|m
+  werewolf: Hombre lobo|m
+
+alias-adjectives:
+  adept: "{0} adept{1, choice, f#a|m#o}"
+  adventurous: "{0} aventurer{1, choice, f#a|m#o}"
+  ambitious: "{0} ambicios{1, choice, f#a|m#o}"
+  brilliant: "{0} brillante"
+  brave: "{0} valiente"
+  capable: "{0} capaz"
+  chatty: "{0} hablador{1, choice, f#a|m#}"
+  cheerful: "{0} alegre"
+  courageous: "{0} valiente"
+  creative: "{0} creativ{1, choice, f#a|m#o}"
+  curious: "{0} curios{1, choice, f#a|m#o}"
+  decisive: "{0} decidid{1, choice, f#a|m#o}"
+  determined: "{0} determinad{1, choice, f#a|m#o}"
+  diligent: "{0} diligente"
+  elegant: "{0} elegante"
+  enthusiastic: "{0} entusiasta"
+  fabulous: "{0} fabulos{1, choice, f#a|m#o}"
+  focused: "{0} centrad{1, choice, f#a|m#o}"
+  generous: "{0} generos{1, choice, f#a|m#o}"
+  helpful: "{0} servicial"
+  hilarious: "{0} divertid{1, choice, f#a|m#o}"
+  imaginative: "{0} imaginativ{1, choice, f#a|m#o}"
+  ingenious: "{0} ingenios{1, choice, f#a|m#o}"
+  inquisitive: "{0} curios{1, choice, f#a|m#o}"
+  insightful: "{0} perspicaz"
+  inventive: "{0} inventiv{1, choice, f#a|m#o}"
+  knowledgeable: "{0} informado{1, choice, f#a|m#o}"
+  observant: "{0} observador{1, choice, f#a|m#}"
+  optimistic: "{0} optimista"
+  passionate: "{0} apasionad{1, choice, f#a|m#o}"
+  patient: "{0} paciente"
+  persistent: "{0} persistente"
+  reliable: "{0} fiable"
+  resourceful: "{0} hábil"
+  responsible: "{0} responsable"
+  sincere: "{0} sincer{1, choice, f#a|m#o}"
+  swift: "{0} veloz"
+  thoughtful: "{0} atento"
+  unique: "{0} únic{1, choice, f#a|m#o}"
+  versatile: "{0} versátil"
+  vivid: "{0} viv{1, choice, f#a|m#o}"
