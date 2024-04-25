@@ -21,6 +21,7 @@ package net.particify.arsnova.core.service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -58,8 +59,11 @@ import net.particify.arsnova.core.model.AnswerStatisticsUserSummary;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
+import net.particify.arsnova.core.model.ContentGroup;
 import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.GridImageContent;
+import net.particify.arsnova.core.model.LeaderboardCurrentResult;
+import net.particify.arsnova.core.model.LeaderboardEntry;
 import net.particify.arsnova.core.model.MultipleTextsAnswer;
 import net.particify.arsnova.core.model.NumericAnswer;
 import net.particify.arsnova.core.model.NumericAnswerStatistics;
@@ -552,6 +556,38 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   public void hideTextAnswer(final TextAnswer answer, final boolean hidden) {
     answer.setHidden(hidden);
     update(answer);
+  }
+
+  @Override
+  public Collection<LeaderboardEntry> buildLeaderboard(final ContentGroup contentGroup, final String currentContentId) {
+    final Map<String, LeaderboardEntry> leaderboard = new HashMap<>();
+    final Map<String, LeaderboardCurrentResult> currentResults =
+        currentContentId != null ? buildCurrentLeaderboard(currentContentId) : new HashMap<>();
+    final List<Content> contents = contentService.get(contentGroup.getContentIds());
+    for (final Content content : contents) {
+      final Map<String, Integer> contentScores =
+          answerRepository.findUserScoreByContentIdRound(content.getId(), content.getState().getRound());
+      for (final Map.Entry<String, Integer> entry : contentScores.entrySet()) {
+        final LeaderboardEntry leaderboardEntry = leaderboard.getOrDefault(
+            entry.getKey(), new LeaderboardEntry(entry.getKey(), 0, null));
+        leaderboard.put(entry.getKey(), new LeaderboardEntry(
+            entry.getKey(), leaderboardEntry.score() + entry.getValue(), currentResults.get(entry.getKey())));
+      }
+    }
+    return leaderboard.values();
+  }
+
+  private Map<String, LeaderboardCurrentResult> buildCurrentLeaderboard(final String contentId) {
+    final Content content = contentService.get(contentId);
+    final List<Answer> answers = answerRepository.findByContentIdRound(
+        Answer.class, contentId, content.getState().getRound());
+    return answers.stream()
+      .collect(Collectors.toMap(
+          a -> a.getCreatorId(),
+          a -> new LeaderboardCurrentResult(
+              a.getPoints(),
+              a.getDurationMs(),
+             content.determineAnswerResult(a).getState() == AnswerResult.AnswerResultState.CORRECT)));
   }
 
   private record AnswerUniqueKey(String userId, String contentId) { }

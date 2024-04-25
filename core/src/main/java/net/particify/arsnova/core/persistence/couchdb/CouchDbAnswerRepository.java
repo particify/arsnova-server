@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewQuery;
@@ -200,5 +201,18 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
         .includeDocs(true)
         .startKey(ComplexKey.of(contentId, round))
         .endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())), clazz);
+  }
+
+  @Override
+  public Map<String, Integer> findUserScoreByContentIdRound(final String contentId, final int round) {
+    final ViewResult result = db.queryView(createQuery("points_by_contentid_round_creatorid")
+        .reduce(true)
+        .startKey(ComplexKey.of(contentId, round))
+        .endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject()))
+        .group(true));
+    return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toMap(
+        r -> r.getKeyAsNode().get(2).asText(),
+        r -> r.getValueAsInt()
+    ));
   }
 }

@@ -197,5 +197,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
       throw new BadRequestException("Already started.");
     }
     content.getState().setAnsweringEndTime(Date.from(Instant.now().plusSeconds(content.getDuration())));
+    update(content);
   }
 }

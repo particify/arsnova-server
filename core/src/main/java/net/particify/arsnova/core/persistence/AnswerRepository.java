@@ -19,6 +19,7 @@
 package net.particify.arsnova.core.persistence;
 
 import java.util.List;
+import java.util.Map;
 
 import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
@@ -42,4 +43,6 @@ public interface AnswerRepository extends CrudRepository<Answer, String> {
   PrioritizationAnswerStatistics findByContentIdRoundForPrioritization(String contentId, int optionCount);
 
   <T extends Answer> List<T> findByContentIdRound(Class<T> clazz, String contentId, int round);
+
+  Map<String, Integer> findUserScoreByContentIdRound(String contentId, int round);
 }

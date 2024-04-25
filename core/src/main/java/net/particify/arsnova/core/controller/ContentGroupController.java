@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -22,11 +23,13 @@ import net.particify.arsnova.core.model.ContentGroup;
 import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.model.ContentLicenseAttribution;
 import net.particify.arsnova.core.model.ContentTemplate;
+import net.particify.arsnova.core.model.LeaderboardEntry;
 import net.particify.arsnova.core.model.serialization.View;
 import net.particify.arsnova.core.service.AnswerService;
 import net.particify.arsnova.core.service.ContentGroupService;
 import net.particify.arsnova.core.service.ContentGroupTemplateService;
 import net.particify.arsnova.core.service.ContentTemplateService;
+import net.particify.arsnova.core.web.exceptions.NotFoundException;
 
 @RestController
 @EntityRequestMapping(ContentGroupController.REQUEST_MAPPING)
@@ -38,6 +41,7 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
   private static final String ANSWER_STATISTICS_USER_SUMMARY_MAPPING = DEFAULT_ID_MAPPING + "/stats/user/{userId}";
   private static final String ATTRIBUTIONS_ENDPOINT = DEFAULT_ID_MAPPING + "/attributions";
   private static final String CREATE_FROM_TEMPLATE_MAPPING = "/-/create-from-template";
+  private static final String LEADERBOARD_MAPPING = DEFAULT_ID_MAPPING + "/leaderboard";
 
   private ContentGroupService contentGroupService;
   private AnswerService answerService;
@@ -134,6 +138,16 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
     // Create a copy of the list to avoid side effects on the cached entity
     final List<String> ids = new ArrayList<>(contentGroup.getContentIds());
     return contentGroupTemplateService.getAttributionsByContentIds(ids);
+  }
+
+  @GetMapping(LEADERBOARD_MAPPING)
+  public Collection<LeaderboardEntry> leaderboard(
+      @PathVariable final String id, @RequestParam(required = false) final String contentId) {
+    final ContentGroup contentGroup = contentGroupService.get(id);
+    if (contentGroup == null) {
+      throw new NotFoundException();
+    }
+    return answerService.buildLeaderboard(contentGroup, contentId);
   }
 
   static class AddContentToGroupRequestEntity {
