@@ -18,6 +18,8 @@
 
 package net.particify.arsnova.core.service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -266,7 +268,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     final List<AnswerResult> answerResultList = contents.stream()
         .map(c -> answerResults.containsKey(c.getId())
             ? answerResults.get(c.getId())
-            : new AnswerResult(c.getId(), 0, c.getPoints(), AnswerResult.AnswerResultState.UNANSWERED))
+            : new AnswerResult(c.getId(), 0, 0, c.getPoints(), 0, AnswerResult.AnswerResultState.UNANSWERED))
         .collect(Collectors.toList());
 
     return new AnswerStatisticsUserSummary(
@@ -493,6 +495,18 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       answer.setCreatorId(user.getId());
     }
     answer.setRoomId(content.getRoomId());
+
+    if (content.isScorable()) {
+      if (content.getState().getAnsweringEndTime() == null) {
+        answer.setPoints((int) Math.round(content.calculateAchievedPoints(answer)));
+      } else {
+        answer.setPoints((int) Math.round(content.calculateCompetitivePoints(
+            answer.getCreationTimestamp().toInstant(), content.calculateAchievedPoints(answer))));
+        final int timeLeft = (int) Instant.now().until(
+            content.getState().getAnsweringEndTime().toInstant(), ChronoUnit.MILLIS);
+        answer.setDurationMs(content.getDuration() * 1000 - timeLeft);
+      }
+    }
 
     if (content.getFormat() == Content.Format.TEXT) {
       answer.setRound(0);
