@@ -73,10 +73,10 @@ public class RoomUserAliasServiceImpl extends DefaultEntityServiceImpl<RoomUserA
   }
 
   @Override
-  public Map<String, String> getUserAliasMappingsByRoomId(final String roomId, final Locale locale) {
+  public Map<String, RoomUserAlias> getUserAliasMappingsByRoomId(final String roomId, final Locale locale) {
     return getByRoomId(roomId).stream().collect(Collectors.toMap(
         a -> a.getUserId(),
-        a -> a.getAlias() != null ? a.getAlias() : generateAlias(a.getSeed(), locale).getAlias()
+        a -> a.getAlias() != null ? a : generateAlias(a, locale)
     ));
   }
 
@@ -89,6 +89,12 @@ public class RoomUserAliasServiceImpl extends DefaultEntityServiceImpl<RoomUserA
     if (roomUserAlias.getSeed() == 0) {
       roomUserAlias.setSeed(ThreadLocalRandom.current().nextInt());
     }
+  }
+
+  private RoomUserAlias generateAlias(final RoomUserAlias roomUserAlias, final Locale locale) {
+    final RoomUserAlias generatedAlias = generateAlias(roomUserAlias.getSeed(), locale);
+    generatedAlias.setId(roomUserAlias.getId());
+    return generatedAlias;
   }
 
   public RoomUserAlias generateAlias(final Locale locale) {

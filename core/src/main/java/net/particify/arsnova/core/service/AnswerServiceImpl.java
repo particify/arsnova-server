@@ -72,6 +72,7 @@ import net.particify.arsnova.core.model.NumericContent;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
 import net.particify.arsnova.core.model.PrioritizationChoiceContent;
 import net.particify.arsnova.core.model.Room;
+import net.particify.arsnova.core.model.RoomUserAlias;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
 import net.particify.arsnova.core.model.TextAnswer;
 import net.particify.arsnova.core.model.TextAnswerStatistics;
@@ -568,7 +569,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       final String currentContentId,
       final Locale locale) {
     final Map<String, LeaderboardEntry> leaderboard = new HashMap<>();
-    final Map<String, String> aliasMappings =
+    final Map<String, RoomUserAlias> aliasMappings =
         roomUserAliasService.getUserAliasMappingsByRoomId(contentGroup.getRoomId(), locale);
     final Map<String, LeaderboardCurrentResult> currentResults =
         currentContentId != null ? buildCurrentLeaderboard(currentContentId) : new HashMap<>();
