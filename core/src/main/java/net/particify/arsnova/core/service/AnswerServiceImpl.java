@@ -20,6 +20,7 @@ package net.particify.arsnova.core.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -486,6 +487,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       }
     }
 
+    answer.setCreationTimestamp(new Date());
     if (answer.getCreatorId() == null) {
       answer.setCreatorId(user.getId());
     }
