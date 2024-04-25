@@ -34,8 +34,6 @@ import org.ektorp.ViewResult;
 import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics.ChoiceRoundStatistics;
-import net.particify.arsnova.core.model.MultipleTextsAnswer;
-import net.particify.arsnova.core.model.NumericAnswer;
 import net.particify.arsnova.core.model.PrioritizationAnswer;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics.PrioritizationRoundStatistics;
@@ -113,7 +111,8 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
   }
 
   @Override
-  public ChoiceAnswerStatistics findByContentIdRound(final String contentId, final int round, final int optionCount) {
+  public ChoiceAnswerStatistics findStatisticsByContentIdRound(
+      final String contentId, final int round, final int optionCount) {
     final ViewResult result = db.queryView(createQuery("by_contentid_round_selectedchoiceindexes")
             .group(true)
             .startKey(ComplexKey.of(contentId, round))
@@ -194,21 +193,12 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
   }
 
   @Override
-  public List<NumericAnswer> findByContentIdRoundForNumeric(
-      final String contentId, final int round) {
+  public <T extends Answer> List<T> findByContentIdRound(
+      final Class<T> clazz, final String contentId, final int round) {
     return db.queryView(createQuery("by_contentid_round_selectedchoiceindexes")
         .reduce(false)
         .includeDocs(true)
         .startKey(ComplexKey.of(contentId, round))
-        .endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())), NumericAnswer.class);
-  }
-
-  @Override
-  public List<MultipleTextsAnswer> findByContentIdRoundForText(final String contentId, final int round) {
-    return db.queryView(createQuery("by_contentid_round_selectedchoiceindexes")
-        .reduce(false)
-        .includeDocs(true)
-        .startKey(ComplexKey.of(contentId, round))
-        .endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())), MultipleTextsAnswer.class);
+        .endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())), clazz);
   }
 }

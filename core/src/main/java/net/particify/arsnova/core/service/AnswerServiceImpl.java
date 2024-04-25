@@ -185,12 +185,12 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       } else {
         optionCount = ((ChoiceQuestionContent) content).getOptions().size();
       }
-      stats = answerRepository.findByContentIdRound(
+      stats = answerRepository.findStatisticsByContentIdRound(
           content.getId(), round, optionCount);
     } else if (content instanceof GridImageContent) {
       final GridImageContent.Grid grid = ((GridImageContent) content).getGrid();
       optionCount = grid.getColumns() * grid.getRows();
-      stats = answerRepository.findByContentIdRound(
+      stats = answerRepository.findStatisticsByContentIdRound(
           content.getId(), round, optionCount);
     } else {
       throw new IllegalStateException(
@@ -288,7 +288,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     } else {
       bannedKeywords = Collections.emptySet();
     }
-    final List<MultipleTextsAnswer> answers = answerRepository.findByContentIdRoundForText(contentId, round);
+    final List<MultipleTextsAnswer> answers =
+        answerRepository.findByContentIdRound(MultipleTextsAnswer.class, contentId, round);
     /* Flatten lists of individual answers to a combined map of texts with
      * count */
     final Map<String, Long> textCounts = answers.stream()
@@ -355,7 +356,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     if (content == null) {
       throw new NotFoundException();
     }
-    final List<NumericAnswer> answers = answerRepository.findByContentIdRoundForNumeric(contentId, round);
+    final List<NumericAnswer> answers = answerRepository.findByContentIdRound(NumericAnswer.class, contentId, round);
     final NumericAnswerStatistics stats = new NumericAnswerStatistics();
     stats.setContentId(contentId);
     final NumericAnswerStatistics.NumericRoundStatistics roundStats =
