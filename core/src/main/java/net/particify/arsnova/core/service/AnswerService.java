@@ -20,6 +20,7 @@ package net.particify.arsnova.core.service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.AnswerStatistics;
@@ -67,5 +68,5 @@ public interface AnswerService extends EntityService<Answer> {
 
   void hideTextAnswer(TextAnswer answer, boolean hidden);
 
-  Collection<LeaderboardEntry> buildLeaderboard(ContentGroup contentGroup, String currentContentId);
+  Collection<LeaderboardEntry> buildLeaderboard(ContentGroup contentGroup, String currentContentId, Locale locale);
 }

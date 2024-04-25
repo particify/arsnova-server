@@ -1,11 +1,13 @@
 package net.particify.arsnova.core.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -142,12 +144,17 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
 
   @GetMapping(LEADERBOARD_MAPPING)
   public Collection<LeaderboardEntry> leaderboard(
-      @PathVariable final String id, @RequestParam(required = false) final String contentId) {
+      @PathVariable final String id, @RequestParam(required = false) final String contentId,
+      final HttpServletRequest request) {
+    final String acceptLanguage = request.getHeader("Accept-Language");
+    final Locale requestLocale = acceptLanguage != null && acceptLanguage.length() >= 2
+        ? Locale.of(acceptLanguage.substring(0, 2))
+        : Locale.of("en");
     final ContentGroup contentGroup = contentGroupService.get(id);
     if (contentGroup == null) {
       throw new NotFoundException();
     }
-    return answerService.buildLeaderboard(contentGroup, contentId);
+    return answerService.buildLeaderboard(contentGroup, contentId, requestLocale);
   }
 
   static class AddContentToGroupRequestEntity {

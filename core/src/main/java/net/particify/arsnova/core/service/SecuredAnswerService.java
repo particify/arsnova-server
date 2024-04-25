@@ -2,6 +2,7 @@ package net.particify.arsnova.core.service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -135,7 +136,10 @@ public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answe
 
   @Override
   @PreAuthorize("hasPermission(#contentGroup, 'read')")
-  public Collection<LeaderboardEntry> buildLeaderboard(final ContentGroup contentGroup, final String currentContentId) {
-    return answerService.buildLeaderboard(contentGroup, currentContentId);
+  public Collection<LeaderboardEntry> buildLeaderboard(
+      final ContentGroup contentGroup,
+      final String currentContentId,
+      final Locale locale) {
+    return answerService.buildLeaderboard(contentGroup, currentContentId, locale);
   }
 }

@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -98,6 +99,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   private final Map<AnswerUniqueKey, Answer> queuedAnswers = new ConcurrentHashMap<>();
   private RoomService roomService;
   private ContentService contentService;
+  private RoomUserAliasService roomUserAliasService;
   private AnswerRepository answerRepository;
   private UserService userService;
   private AuthenticationService authenticationService;
@@ -107,6 +109,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       final DeletionRepository deletionRepository,
       final RoomService roomService,
       final UserService userService,
+      final RoomUserAliasService roomUserAliasService,
       final AuthenticationService authenticationService,
       @Qualifier("defaultJsonMessageConverter") final
       MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
@@ -115,6 +118,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     this.answerRepository = repository;
     this.roomService = roomService;
     this.userService = userService;
+    this.roomUserAliasService = roomUserAliasService;
     this.authenticationService = authenticationService;
   }
 
@@ -559,8 +563,13 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   }
 
   @Override
-  public Collection<LeaderboardEntry> buildLeaderboard(final ContentGroup contentGroup, final String currentContentId) {
+  public Collection<LeaderboardEntry> buildLeaderboard(
+      final ContentGroup contentGroup,
+      final String currentContentId,
+      final Locale locale) {
     final Map<String, LeaderboardEntry> leaderboard = new HashMap<>();
+    final Map<String, String> aliasMappings =
+        roomUserAliasService.getUserAliasMappingsByRoomId(contentGroup.getRoomId(), locale);
     final Map<String, LeaderboardCurrentResult> currentResults =
         currentContentId != null ? buildCurrentLeaderboard(currentContentId) : new HashMap<>();
     final List<Content> contents = contentService.get(contentGroup.getContentIds());
@@ -569,9 +578,11 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
           answerRepository.findUserScoreByContentIdRound(content.getId(), content.getState().getRound());
       for (final Map.Entry<String, Integer> entry : contentScores.entrySet()) {
         final LeaderboardEntry leaderboardEntry = leaderboard.getOrDefault(
-            entry.getKey(), new LeaderboardEntry(entry.getKey(), 0, null));
+            entry.getKey(), new LeaderboardEntry(aliasMappings.get(entry.getKey()), 0, null));
         leaderboard.put(entry.getKey(), new LeaderboardEntry(
-            entry.getKey(), leaderboardEntry.score() + entry.getValue(), currentResults.get(entry.getKey())));
+            aliasMappings.get(entry.getKey()),
+            leaderboardEntry.score() + entry.getValue(),
+            currentResults.get(entry.getKey())));
       }
     }
     return leaderboard.values();
