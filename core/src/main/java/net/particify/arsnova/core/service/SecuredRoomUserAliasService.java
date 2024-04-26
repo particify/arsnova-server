@@ -45,7 +45,7 @@ public class SecuredRoomUserAliasService
 
   @Override
   @PreAuthorize("denyAll")
-  public Map<String, String> getUserAliasMappingsByRoomId(final String roomId, final Locale locale) {
+  public Map<String, RoomUserAlias> getUserAliasMappingsByRoomId(final String roomId, final Locale locale) {
     return roomUserAliasService.getUserAliasMappingsByRoomId(roomId, locale);
   }
 

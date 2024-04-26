@@ -19,17 +19,16 @@
 package net.particify.arsnova.core.persistence;
 
 import java.util.List;
+import java.util.Map;
 
 import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
-import net.particify.arsnova.core.model.MultipleTextsAnswer;
-import net.particify.arsnova.core.model.NumericAnswer;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
 
 public interface AnswerRepository extends CrudRepository<Answer, String> {
   <T extends Answer> T findByContentIdUserIdPiRound(String contentId, Class<T> type, String userId, int piRound);
 
-  ChoiceAnswerStatistics findByContentIdRound(String contentId, int round, int optionCount);
+  ChoiceAnswerStatistics findStatisticsByContentIdRound(String contentId, int round, int optionCount);
 
   Iterable<Answer> findStubsByContentIdAndHidden(String contentId, boolean excludeHidden);
 
@@ -41,9 +40,9 @@ public interface AnswerRepository extends CrudRepository<Answer, String> {
 
   List<String> findIdsByAnswerStubs(List<Answer> answerStubs);
 
-  List<MultipleTextsAnswer> findByContentIdRoundForText(String contentId, int round);
-
   PrioritizationAnswerStatistics findByContentIdRoundForPrioritization(String contentId, int optionCount);
 
-  List<NumericAnswer> findByContentIdRoundForNumeric(String contentId, int round);
+  <T extends Answer> List<T> findByContentIdRound(Class<T> clazz, String contentId, int round);
+
+  Map<String, Integer> findUserScoreByContentIdRound(String contentId, int round);
 }

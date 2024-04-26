@@ -73,4 +73,10 @@ public class SecuredContentService extends AbstractSecuredEntityServiceImpl<Cont
       final List<ContentTemplate> templates) {
     return contentService.createFromTemplates(roomId, contentGroupTemplate, templates);
   }
+
+  @Override
+  @PreAuthorize("hasPermission(#contentId, 'content', 'update')")
+  public void start(final String contentId) {
+    contentService.start(contentId);
+  }
 }

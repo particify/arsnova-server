@@ -39,6 +39,14 @@ export let designDoc = {
           emit([doc.creatorId, doc.roomId], {_rev: doc._rev});
         }
       }
+    },
+    "points_by_contentid_round_creatorid": {
+      "map": function (doc) {
+        if (doc.type === "Answer") {
+          emit([doc.contentId, doc.round, doc.creatorId], doc.points);
+        }
+      },
+      "reduce": "_sum"
     }
   }
 };

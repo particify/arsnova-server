@@ -88,7 +88,9 @@ public class NumericContent extends Content {
       return new AnswerResult(
           this.id,
           0,
+          0,
           this.getPoints(),
+          0,
           AnswerResult.AnswerResultState.ABSTAINED);
     }
 
@@ -96,7 +98,9 @@ public class NumericContent extends Content {
       return new AnswerResult(
           this.id,
           0,
+          0,
           this.getPoints(),
+          0,
           AnswerResult.AnswerResultState.NEUTRAL);
     }
 
@@ -107,8 +111,18 @@ public class NumericContent extends Content {
     return new AnswerResult(
         this.id,
         achievedPoints,
+        calculateCompetitivePoints(answer.getCreationTimestamp().toInstant(), achievedPoints),
         this.getPoints(),
+        answer.getDurationMs(),
         state);
+  }
+
+  @Override
+  public double calculateAchievedPoints(final Answer answer) {
+    if (answer instanceof NumericAnswer numericAnswer) {
+      return calculateAchievedPoints(numericAnswer.getSelectedNumber());
+    }
+    return super.calculateAchievedPoints(answer);
   }
 
   private double calculateAchievedPoints(final double selectedNumber) {

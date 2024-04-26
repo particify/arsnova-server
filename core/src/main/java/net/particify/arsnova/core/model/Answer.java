@@ -65,6 +65,12 @@ public class Answer extends Entity implements RoomIdAware {
   @PositiveOrZero
   private int round = 1;
 
+  @PositiveOrZero
+  private int points;
+
+  @PositiveOrZero
+  private int durationMs;
+
   @JsonView({View.Persistence.class, View.Public.class})
   public String getContentId() {
     return contentId;
@@ -114,6 +120,26 @@ public class Answer extends Entity implements RoomIdAware {
     this.round = round;
   }
 
+  @JsonView({View.Persistence.class, View.Public.class})
+  public int getPoints() {
+    return points;
+  }
+
+  @JsonView(View.Persistence.class)
+  public void setPoints(final int points) {
+    this.points = points;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public int getDurationMs() {
+    return durationMs;
+  }
+
+  @JsonView(View.Persistence.class)
+  public void setDurationMs(final int durationMs) {
+    this.durationMs = durationMs;
+  }
+
   public boolean isAbstention() {
     return false;
   }
@@ -145,12 +171,14 @@ public class Answer extends Entity implements RoomIdAware {
     return round == answer.round
         && Objects.equals(contentId, answer.contentId)
         && Objects.equals(roomId, answer.roomId)
-        && Objects.equals(creatorId, answer.creatorId);
+        && Objects.equals(creatorId, answer.creatorId)
+        && Objects.equals(points, answer.points)
+        && Objects.equals(durationMs, answer.durationMs);
   }
 
   @Override
   public int hashCode() {
-    return hashCode(super.hashCode(), round, contentId, roomId, creatorId);
+    return hashCode(super.hashCode(), round, contentId, roomId, creatorId, points);
   }
 
   @Override
@@ -160,6 +188,8 @@ public class Answer extends Entity implements RoomIdAware {
         .append("roomId", roomId)
         .append("creatorId", creatorId)
         .append("format", format)
-        .append("round", round);
+        .append("round", round)
+        .append("points", points)
+        .append("durationMs", durationMs);
   }
 }

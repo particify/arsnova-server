@@ -13,7 +13,7 @@ public interface RoomUserAliasService extends EntityService<RoomUserAlias> {
 
   List<RoomUserAlias> getByUserId(String userId);
 
-  Map<String, String> getUserAliasMappingsByRoomId(String roomId, Locale locale);
+  Map<String, RoomUserAlias> getUserAliasMappingsByRoomId(String roomId, Locale locale);
 
   RoomUserAlias generateAlias(Locale locale);
 

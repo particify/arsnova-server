@@ -56,6 +56,7 @@ public class ContentController extends AbstractEntityController<Content> {
   private static final String CONTENT_COUNT_MAPPING = NO_ID_MAPPING + "/count";
   private static final String EXPORT_MAPPING = NO_ID_MAPPING + "/export";
   private static final String BANNED_KEYWORDS_MAPPING = DEFAULT_ID_MAPPING + "/banned-keywords";
+  private static final String START_MAPPING = DEFAULT_ID_MAPPING + "/start";
 
   private ContentService contentService;
   private AnswerService answerService;
@@ -148,6 +149,11 @@ public class ContentController extends AbstractEntityController<Content> {
     }
     final WordcloudContent wordcloudContent = (WordcloudContent) content;
     contentService.clearBannedKeywords(wordcloudContent);
+  }
+
+  @PostMapping(START_MAPPING)
+  public void start(@PathVariable final String id) {
+    contentService.start(id);
   }
 
   @JsonView(View.Public.class)

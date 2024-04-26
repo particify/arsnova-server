@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewQuery;
@@ -34,8 +35,6 @@ import org.ektorp.ViewResult;
 import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics.ChoiceRoundStatistics;
-import net.particify.arsnova.core.model.MultipleTextsAnswer;
-import net.particify.arsnova.core.model.NumericAnswer;
 import net.particify.arsnova.core.model.PrioritizationAnswer;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics.PrioritizationRoundStatistics;
@@ -113,7 +112,8 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
   }
 
   @Override
-  public ChoiceAnswerStatistics findByContentIdRound(final String contentId, final int round, final int optionCount) {
+  public ChoiceAnswerStatistics findStatisticsByContentIdRound(
+      final String contentId, final int round, final int optionCount) {
     final ViewResult result = db.queryView(createQuery("by_contentid_round_selectedchoiceindexes")
             .group(true)
             .startKey(ComplexKey.of(contentId, round))
@@ -194,21 +194,25 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
   }
 
   @Override
-  public List<NumericAnswer> findByContentIdRoundForNumeric(
-      final String contentId, final int round) {
+  public <T extends Answer> List<T> findByContentIdRound(
+      final Class<T> clazz, final String contentId, final int round) {
     return db.queryView(createQuery("by_contentid_round_selectedchoiceindexes")
         .reduce(false)
         .includeDocs(true)
         .startKey(ComplexKey.of(contentId, round))
-        .endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())), NumericAnswer.class);
+        .endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())), clazz);
   }
 
   @Override
-  public List<MultipleTextsAnswer> findByContentIdRoundForText(final String contentId, final int round) {
-    return db.queryView(createQuery("by_contentid_round_selectedchoiceindexes")
-        .reduce(false)
-        .includeDocs(true)
+  public Map<String, Integer> findUserScoreByContentIdRound(final String contentId, final int round) {
+    final ViewResult result = db.queryView(createQuery("points_by_contentid_round_creatorid")
+        .reduce(true)
         .startKey(ComplexKey.of(contentId, round))
-        .endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())), MultipleTextsAnswer.class);
+        .endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject()))
+        .group(true));
+    return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toMap(
+        r -> r.getKeyAsNode().get(2).asText(),
+        r -> r.getValueAsInt()
+    ));
   }
 }

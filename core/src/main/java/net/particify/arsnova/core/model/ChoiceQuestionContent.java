@@ -173,7 +173,9 @@ public class ChoiceQuestionContent extends Content {
       return new AnswerResult(
           this.id,
           0,
+          0,
           this.getPoints(),
+          0,
           AnswerResult.AnswerResultState.ABSTAINED);
     }
 
@@ -181,19 +183,33 @@ public class ChoiceQuestionContent extends Content {
       return new AnswerResult(
           this.id,
           0,
+          0,
           this.getPoints(),
+          0,
           AnswerResult.AnswerResultState.NEUTRAL);
     }
 
     final double achievedPoints = calculateAchievedPoints(answer.getSelectedChoiceIndexes());
     final AnswerResult.AnswerResultState state = achievedPoints > getPoints() * 0.999
         ? AnswerResult.AnswerResultState.CORRECT : AnswerResult.AnswerResultState.WRONG;
+    final double competitivePoints =
+        calculateCompetitivePoints(answer.getCreationTimestamp().toInstant(), achievedPoints);
 
     return new AnswerResult(
         this.id,
         achievedPoints,
+        competitivePoints,
         this.getPoints(),
+        answer.getDurationMs(),
         state);
+  }
+
+  @Override
+  public double calculateAchievedPoints(final Answer answer) {
+    if (answer instanceof ChoiceAnswer choiceAnswer) {
+      return calculateAchievedPoints(choiceAnswer.getSelectedChoiceIndexes());
+    }
+    return super.calculateAchievedPoints(answer);
   }
 
   public double calculateAchievedPoints(final List<Integer> selectedChoiceIndexes) {

@@ -18,11 +18,16 @@
 
 package net.particify.arsnova.core.service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -55,8 +60,11 @@ import net.particify.arsnova.core.model.AnswerStatisticsUserSummary;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
+import net.particify.arsnova.core.model.ContentGroup;
 import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.GridImageContent;
+import net.particify.arsnova.core.model.LeaderboardCurrentResult;
+import net.particify.arsnova.core.model.LeaderboardEntry;
 import net.particify.arsnova.core.model.MultipleTextsAnswer;
 import net.particify.arsnova.core.model.NumericAnswer;
 import net.particify.arsnova.core.model.NumericAnswerStatistics;
@@ -64,6 +72,7 @@ import net.particify.arsnova.core.model.NumericContent;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
 import net.particify.arsnova.core.model.PrioritizationChoiceContent;
 import net.particify.arsnova.core.model.Room;
+import net.particify.arsnova.core.model.RoomUserAlias;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
 import net.particify.arsnova.core.model.TextAnswer;
 import net.particify.arsnova.core.model.TextAnswerStatistics;
@@ -91,6 +100,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   private final Map<AnswerUniqueKey, Answer> queuedAnswers = new ConcurrentHashMap<>();
   private RoomService roomService;
   private ContentService contentService;
+  private RoomUserAliasService roomUserAliasService;
   private AnswerRepository answerRepository;
   private UserService userService;
   private AuthenticationService authenticationService;
@@ -100,6 +110,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       final DeletionRepository deletionRepository,
       final RoomService roomService,
       final UserService userService,
+      final RoomUserAliasService roomUserAliasService,
       final AuthenticationService authenticationService,
       @Qualifier("defaultJsonMessageConverter") final
       MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
@@ -108,6 +119,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     this.answerRepository = repository;
     this.roomService = roomService;
     this.userService = userService;
+    this.roomUserAliasService = roomUserAliasService;
     this.authenticationService = authenticationService;
   }
 
@@ -184,12 +196,12 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       } else {
         optionCount = ((ChoiceQuestionContent) content).getOptions().size();
       }
-      stats = answerRepository.findByContentIdRound(
+      stats = answerRepository.findStatisticsByContentIdRound(
           content.getId(), round, optionCount);
     } else if (content instanceof GridImageContent) {
       final GridImageContent.Grid grid = ((GridImageContent) content).getGrid();
       optionCount = grid.getColumns() * grid.getRows();
-      stats = answerRepository.findByContentIdRound(
+      stats = answerRepository.findStatisticsByContentIdRound(
           content.getId(), round, optionCount);
     } else {
       throw new IllegalStateException(
@@ -265,7 +277,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     final List<AnswerResult> answerResultList = contents.stream()
         .map(c -> answerResults.containsKey(c.getId())
             ? answerResults.get(c.getId())
-            : new AnswerResult(c.getId(), 0, c.getPoints(), AnswerResult.AnswerResultState.UNANSWERED))
+            : new AnswerResult(c.getId(), 0, 0, c.getPoints(), 0, AnswerResult.AnswerResultState.UNANSWERED))
         .collect(Collectors.toList());
 
     return new AnswerStatisticsUserSummary(
@@ -287,7 +299,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     } else {
       bannedKeywords = Collections.emptySet();
     }
-    final List<MultipleTextsAnswer> answers = answerRepository.findByContentIdRoundForText(contentId, round);
+    final List<MultipleTextsAnswer> answers =
+        answerRepository.findByContentIdRound(MultipleTextsAnswer.class, contentId, round);
     /* Flatten lists of individual answers to a combined map of texts with
      * count */
     final Map<String, Long> textCounts = answers.stream()
@@ -354,7 +367,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     if (content == null) {
       throw new NotFoundException();
     }
-    final List<NumericAnswer> answers = answerRepository.findByContentIdRoundForNumeric(contentId, round);
+    final List<NumericAnswer> answers = answerRepository.findByContentIdRound(NumericAnswer.class, contentId, round);
     final NumericAnswerStatistics stats = new NumericAnswerStatistics();
     stats.setContentId(contentId);
     final NumericAnswerStatistics.NumericRoundStatistics roundStats =
@@ -489,10 +502,23 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       }
     }
 
+    answer.setCreationTimestamp(new Date());
     if (answer.getCreatorId() == null) {
       answer.setCreatorId(user.getId());
     }
     answer.setRoomId(content.getRoomId());
+
+    if (content.isScorable()) {
+      if (content.getState().getAnsweringEndTime() == null) {
+        answer.setPoints((int) Math.round(content.calculateAchievedPoints(answer)));
+      } else {
+        answer.setPoints((int) Math.round(content.calculateCompetitivePoints(
+            answer.getCreationTimestamp().toInstant(), content.calculateAchievedPoints(answer))));
+        final int timeLeft = (int) Instant.now().until(
+            content.getState().getAnsweringEndTime().toInstant(), ChronoUnit.MILLIS);
+        answer.setDurationMs(content.getDuration() * 1000 - timeLeft);
+      }
+    }
 
     if (content.getFormat() == Content.Format.TEXT) {
       answer.setRound(0);
@@ -539,6 +565,45 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   public void hideTextAnswer(final TextAnswer answer, final boolean hidden) {
     answer.setHidden(hidden);
     update(answer);
+  }
+
+  @Override
+  public Collection<LeaderboardEntry> buildLeaderboard(
+      final ContentGroup contentGroup,
+      final String currentContentId,
+      final Locale locale) {
+    final Map<String, LeaderboardEntry> leaderboard = new HashMap<>();
+    final Map<String, RoomUserAlias> aliasMappings =
+        roomUserAliasService.getUserAliasMappingsByRoomId(contentGroup.getRoomId(), locale);
+    final Map<String, LeaderboardCurrentResult> currentResults =
+        currentContentId != null ? buildCurrentLeaderboard(currentContentId) : new HashMap<>();
+    final List<Content> contents = contentService.get(contentGroup.getContentIds());
+    for (final Content content : contents) {
+      final Map<String, Integer> contentScores =
+          answerRepository.findUserScoreByContentIdRound(content.getId(), content.getState().getRound());
+      for (final Map.Entry<String, Integer> entry : contentScores.entrySet()) {
+        final LeaderboardEntry leaderboardEntry = leaderboard.getOrDefault(
+            entry.getKey(), new LeaderboardEntry(aliasMappings.get(entry.getKey()), 0, null));
+        leaderboard.put(entry.getKey(), new LeaderboardEntry(
+            aliasMappings.get(entry.getKey()),
+            leaderboardEntry.score() + entry.getValue(),
+            currentResults.get(entry.getKey())));
+      }
+    }
+    return leaderboard.values();
+  }
+
+  private Map<String, LeaderboardCurrentResult> buildCurrentLeaderboard(final String contentId) {
+    final Content content = contentService.get(contentId);
+    final List<Answer> answers = answerRepository.findByContentIdRound(
+        Answer.class, contentId, content.getState().getRound());
+    return answers.stream()
+      .collect(Collectors.toMap(
+          a -> a.getCreatorId(),
+          a -> new LeaderboardCurrentResult(
+              a.getPoints(),
+              a.getDurationMs(),
+             content.determineAnswerResult(a).getState() == AnswerResult.AnswerResultState.CORRECT)));
   }
 
   private record AnswerUniqueKey(String userId, String contentId) { }

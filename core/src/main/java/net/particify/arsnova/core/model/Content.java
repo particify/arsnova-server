@@ -22,10 +22,14 @@ import com.fasterxml.jackson.annotation.JsonMerge;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
@@ -154,6 +158,10 @@ public class Content extends Entity implements RoomIdAware {
   private String additionalTextTitle;
   private String templateId;
   private String groupTemplateId;
+
+  @PositiveOrZero
+  @Max(3600)
+  private int duration;
 
   private TextRenderingOptions bodyRenderingOptions;
 
@@ -343,6 +351,16 @@ public class Content extends Entity implements RoomIdAware {
     this.groupTemplateId = groupTemplateId;
   }
 
+  @JsonView({View.Persistence.class, View.Public.class})
+  public int getDuration() {
+    return duration;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setDuration(final int duration) {
+    this.duration = duration;
+  }
+
   @JsonView(View.Public.class)
   public int getPoints() {
     return 0;
@@ -357,7 +375,21 @@ public class Content extends Entity implements RoomIdAware {
     final AnswerResult.AnswerResultState state = answer.isAbstention()
         ? AnswerResult.AnswerResultState.ABSTAINED
         : AnswerResult.AnswerResultState.NEUTRAL;
-    return new AnswerResult(this.id, 0, this.getPoints(), state);
+    return new AnswerResult(
+        this.id, answer.getPoints(), answer.getPoints(), this.getPoints(), answer.getDurationMs(), state);
+  }
+
+  public double calculateCompetitivePoints(final Instant answerTime, final double achievedPoints) {
+    if (getState().getAnsweringEndTime() == null) {
+      return achievedPoints;
+    }
+    final long timeLeft = answerTime.until(
+        getState().getAnsweringEndTime().toInstant(), ChronoUnit.SECONDS);
+    return 1.0 * timeLeft / getDuration() * achievedPoints;
+  }
+
+  public double calculateAchievedPoints(final Answer answer) {
+    return 0;
   }
 
   /**
@@ -396,12 +428,13 @@ public class Content extends Entity implements RoomIdAware {
         && Objects.equals(body, content.body)
         && format == content.format
         && Objects.equals(groups, content.groups)
-        && Objects.equals(timestamp, content.timestamp);
+        && Objects.equals(timestamp, content.timestamp)
+        && Objects.equals(duration, content.duration);
   }
 
   @Override
   public int hashCode() {
-    return hashCode(super.hashCode(), roomId, subject, body, format, groups, timestamp);
+    return hashCode(super.hashCode(), roomId, subject, body, format, groups, timestamp, duration);
   }
 
   @Override
@@ -416,6 +449,7 @@ public class Content extends Entity implements RoomIdAware {
         .append("state", state)
         .append("additionalText", additionalText)
         .append("additionalTextTitle", additionalTextTitle)
-        .append("timestamp", timestamp);
+        .append("timestamp", timestamp)
+        .append("duration", duration);
   }
 }
