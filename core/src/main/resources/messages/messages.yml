@@ -1,0 +1,121 @@
+alias-nouns:
+  alpaca: Alpaca
+  armadillo: Armadillo
+  badger: Badger
+  barracuda: Barracuda
+  bat: Bat
+  bear: Bear
+  beaver: Beaver
+  bison: Bison
+  bumblebee: Bumblebee
+  butterfly: Butterfly
+  cockatoo: Cockatoo
+  chameleon: Chameleon
+  cheetah: Cheetah
+  crocodile: Crocodile
+  deer: Deer
+  dolphin: Dolphin
+  dragonfly: Dragonfly
+  duck: Duck
+  eagle: Eagle
+  emu: Emu
+  elephant: Elephant
+  falcon: Falcon
+  ferret: Ferret
+  flamingo: Flamingo
+  giraffe: Giraffe
+  goose: Goose
+  hare: Hare
+  hedgehog: Hedgehog
+  heron: Heron
+  hummingbird: Hummingbird
+  ibex: Ibex
+  iguana: Iguana
+  jaguar: Jaguar
+  jellyfish: Jellyfish
+  kangaroo: Kangaroo
+  kiwi: Kiwi
+  koala: Koala
+  leopard: Leopard
+  lion: Lion
+  llama: Llama
+  lobster: Lobster
+  lynx: Lynx
+  meerkat: Meerkat
+  mole: Mole
+  narwhal: Narwhal
+  owl: Owl
+  peacock: Peacock
+  pelican: Pelican
+  penguin: Penguin
+  pigeon: Pigeon
+  piranha: Piranha
+  puma: Puma
+  racoon: Racoon
+  seal: Seal
+  squirrel: Squirrel
+  starfish: Starfish
+  swan: Swan
+  tapir: Tapir
+  tiger: Tiger
+  viper: Viper
+  wolf: Wolf
+  zebra: Zebra
+
+alias-special-nouns:
+  mammoth: Mammoth
+  archaeopteryx: Archaeopteryx
+  brachiosaurus: Brachiosaurus
+  brontosaurus: Brontosaurus
+  pteranodon: Pteranodon
+  stegosaurus: Stegosaurus
+  triceratops: Triceratops
+  tyrannosaurus: Tyrannosaurus
+  velociraptor: Velociraptor
+  dragon: Dragon
+  unicorn: Unicorn
+  vampire: Vampire
+  werewolf: Werewolf
+
+alias-adjectives:
+  adept: Adept {0}
+  adventurous: Adventurous {0}
+  ambitious: Ambitious {0}
+  brilliant: Brilliant {0}
+  brave: Brave {0}
+  capable: Capable {0}
+  chatty: Chatty {0}
+  cheerful: Cheerful {0}
+  courageous: Courageous {0}
+  creative: Creative {0}
+  curious: Curious {0}
+  decisive: Decisive {0}
+  determined: Determined {0}
+  diligent: Diligent {0}
+  elegant: Elegant {0}
+  enthusiastic: Enthusiastic {0}
+  fabulous: Fabulous {0}
+  focused: Focused {0}
+  generous: Generous {0}
+  helpful: Helpful {0}
+  hilarious: Hilarious {0}
+  imaginative: Imaginative {0}
+  ingenious: Ingenious {0}
+  inquisitive: Inquisitive {0}
+  insightful: Insightful {0}
+  inventive: Inventive {0}
+  knowledgeable: Knowledgeable {0}
+  observant: Observant {0}
+  optimistic: Optimistic {0}
+  passionate: Passionate {0}
+  patient: Patient {0}
+  persistent: Persistent {0}
+  reliable: Reliable {0}
+  resourceful: Resourceful {0}
+  responsible: Responsible {0}
+  sincere: Sincere {0}
+  swift: Swift {0}
+  thoughtful: Thoughtful {0}
+  unique: Unique {0}
+  versatile: Versatile {0}
+  vivid: Vivid {0}

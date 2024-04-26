@@ -55,6 +55,7 @@ import net.particify.arsnova.core.service.StubAuthenticationService;
     value = {
         "classpath:config/defaults.yml",
         "classpath:config/actuator.yml",
+        "classpath:config/alias-words.yml",
         "classpath:config/test.yml"
     },
     encoding = "UTF-8",
