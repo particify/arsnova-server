@@ -2,6 +2,7 @@ package net.particify.arsnova.core.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
@@ -13,6 +14,9 @@ public class ContentGroupTemplate extends Entity {
   @NotBlank
   @Size(max = 50)
   private String name;
+
+  @NotNull
+  private ContentGroup.GroupType groupType = ContentGroup.GroupType.MIXED;
 
   @Size(max = 250)
   private String description;
@@ -42,6 +46,16 @@ public class ContentGroupTemplate extends Entity {
   @JsonView({View.Persistence.class, View.Public.class})
   public void setName(final String name) {
     this.name = name;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public ContentGroup.GroupType getGroupType() {
+    return groupType;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setGroupType(final ContentGroup.GroupType groupType) {
+    this.groupType = groupType;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})

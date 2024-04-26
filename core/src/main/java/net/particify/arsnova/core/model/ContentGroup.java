@@ -37,6 +37,9 @@ public class ContentGroup extends Entity implements RoomIdAware {
   @NotBlank
   private String name;
 
+  @NotNull
+  private GroupType groupType = GroupType.MIXED;
+
   private List<String> contentIds;
 
   @NotNull
@@ -71,6 +74,7 @@ public class ContentGroup extends Entity implements RoomIdAware {
   public ContentGroup(final ContentGroup contentGroup) {
     super(contentGroup);
     this.name = contentGroup.name;
+    this.groupType = contentGroup.groupType;
     this.contentIds = contentGroup.contentIds;
     this.publishingMode = contentGroup.publishingMode;
     this.publishingIndex = contentGroup.publishingIndex;
@@ -97,6 +101,16 @@ public class ContentGroup extends Entity implements RoomIdAware {
   @JsonView({View.Persistence.class, View.Public.class})
   public void setName(final String name) {
     this.name = name;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public GroupType getGroupType() {
+    return groupType;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setGroupType(final GroupType groupType) {
+    this.groupType = groupType;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
@@ -197,24 +211,31 @@ public class ContentGroup extends Entity implements RoomIdAware {
     final ContentGroup that = (ContentGroup) o;
 
     return Objects.equals(name, that.name)
+      && Objects.equals(groupType, that.groupType)
       && Objects.equals(contentIds, that.contentIds);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, contentIds);
+    return Objects.hash(name, groupType, contentIds);
   }
 
   @Override
   public String toString() {
     return new ToStringCreator(this)
         .append("name", name)
+        .append("groupType", groupType)
         .append("contentIds", contentIds)
         .append("publishingMode", publishingMode)
         .append("publishingIndex", publishingIndex)
         .append("statisticsPublished", statisticsPublished)
         .append("correctOptionsPublished", correctOptionsPublished)
         .toString();
+  }
+
+  public enum GroupType {
+    MIXED,
+    QUIZ
   }
 
   public enum PublishingMode {
