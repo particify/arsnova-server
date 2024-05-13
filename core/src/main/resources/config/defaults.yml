@@ -221,7 +221,7 @@ arsnova:
           store-password: arsnova
           key-alias: saml
           key-password: arsnova
-        user-id-attribute: uid
+        user-id-attribute: urn:oasis:names:tc:SAML:attribute:subject-id
         assertion-consumer-service-index: 0
         max-authentication-lifetime: 3600
 
