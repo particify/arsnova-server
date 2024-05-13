@@ -314,6 +314,9 @@ public class AuthenticationProviderProperties {
     private Sp sp;
     private Keystore keystore;
     private String userIdAttribute;
+    private String mailAttribute;
+    private String firstNameAttribute;
+    private String lastNameAttribute;
     private int assertionConsumerServiceIndex;
     private int maxAuthenticationLifetime;
 
@@ -357,6 +360,30 @@ public class AuthenticationProviderProperties {
 
     public void setUserIdAttribute(final String userIdAttribute) {
       this.userIdAttribute = userIdAttribute;
+    }
+
+    public String getMailAttribute() {
+      return mailAttribute;
+    }
+
+    public void setMailAttribute(final String mailAttribute) {
+      this.mailAttribute = mailAttribute;
+    }
+
+    public String getFirstNameAttribute() {
+      return firstNameAttribute;
+    }
+
+    public void setFirstNameAttribute(final String firstNameAttribute) {
+      this.firstNameAttribute = firstNameAttribute;
+    }
+
+    public String getLastNameAttribute() {
+      return lastNameAttribute;
+    }
+
+    public void setLastNameAttribute(final String lastNameAttribute) {
+      this.lastNameAttribute = lastNameAttribute;
     }
 
     public int getAssertionConsumerServiceIndex() {

@@ -144,6 +144,7 @@ public class UserProfile extends Entity {
     private String displayName;
     private String firstName;
     private String lastName;
+    private String mail;
     private String organization;
     private String department;
 
@@ -169,6 +170,14 @@ public class UserProfile extends Entity {
 
     public void setLastName(final String lastName) {
       this.lastName = lastName;
+    }
+
+    public String getMail() {
+      return mail;
+    }
+
+    public void setMail(final String mail) {
+      this.mail = mail;
     }
 
     public String getOrganization() {
