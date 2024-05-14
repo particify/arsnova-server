@@ -92,9 +92,12 @@ public class AuthenticationService {
     final String jwt = !refresh && authentication instanceof JwtToken
         ? (String) authentication.getCredentials() : jwtService.createSignedToken(user, false);
 
-    final ClientAuthentication clientAuthentication =
-        new ClientAuthentication(user.getId(), user.getUsername(),
-            user.getAuthProvider(), jwt);
+    final ClientAuthentication clientAuthentication = new ClientAuthentication(
+        user.getId(),
+        user.getDisplayId(),
+        user.getUsername(),
+        user.getAuthProvider(),
+        jwt);
 
     return clientAuthentication;
   }

@@ -117,6 +117,9 @@ arsnova:
     # The number of constraints (like "Has to contain a number") which have to
     # be met.
     password-strictness-level: 2
+    # The user attribute which uniquely identifies the user on the UI.
+    # Supported values: loginId, mail
+    user-display-id-attribute: loginId
 
     # JSON Web Tokens
     jwt:

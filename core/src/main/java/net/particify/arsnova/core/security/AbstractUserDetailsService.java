@@ -3,6 +3,7 @@ package net.particify.arsnova.core.security;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -126,8 +127,8 @@ public abstract class AbstractUserDetailsService implements ApplicationEventPubl
 
   private boolean personNeedsUpdate(final UserProfile.Person person, final Map<String, Object> attributes) {
     final UserProfile.Person newPerson = buildPersonFromAttributes(attributes);
-    return !newPerson.getMail().equals(person.getMail())
-      || !newPerson.getFirstName().equals(person.getFirstName())
-      || !newPerson.getLastName().equals(person.getLastName());
+    return !Objects.equals(newPerson.getMail(), person.getMail())
+        || !Objects.equals(newPerson.getFirstName(), person.getFirstName())
+        || !Objects.equals(newPerson.getLastName(), person.getLastName());
   }
 }

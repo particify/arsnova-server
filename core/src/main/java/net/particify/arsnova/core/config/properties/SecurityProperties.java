@@ -124,6 +124,7 @@ public class SecurityProperties {
   private int resendMailLimit;
   private int passwordStrictnessLevel;
   private List<String> corsOrigins;
+  private String userDisplayIdAttribute;
 
   public Jwt getJwt() {
     return jwt;
@@ -171,5 +172,13 @@ public class SecurityProperties {
 
   public void setCorsOrigins(final List<String> corsOrigins) {
     this.corsOrigins = corsOrigins;
+  }
+
+  public String getUserDisplayIdAttribute() {
+    return userDisplayIdAttribute;
+  }
+
+  public void setUserDisplayIdAttribute(final String userDisplayIdAttribute) {
+    this.userDisplayIdAttribute = userDisplayIdAttribute;
   }
 }

@@ -194,6 +194,19 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
   }
 
   @Override
+  protected void modifyRetrieved(final UserProfile userProfile) {
+    super.modifyRetrieved(userProfile);
+    final UserProfile.Person person = userProfile.getPerson();
+    person.setDisplayId(
+        switch (securityProperties.getUserDisplayIdAttribute()) {
+          case "loginId" -> userProfile.getLoginId();
+          case "mail" -> person.getMail();
+          default -> throw new IllegalStateException("Invalid display ID attribute.");
+        }
+    );
+  }
+
+  @Override
   protected void prepareCreate(final UserProfile userProfile) {
     if (userProfile.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA) {
       userProfile.setLoginId(userProfile.getLoginId().toLowerCase());
@@ -232,17 +245,35 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
   @Override
   public UserProfile getByAuthProviderAndLoginId(final UserProfile.AuthProvider authProvider, final String loginId) {
-    return userRepository.findByAuthProviderAndLoginId(authProvider, loginId);
+    final UserProfile userProfile = userRepository.findByAuthProviderAndLoginId(authProvider, loginId);
+    if (userProfile != null) {
+      modifyRetrieved(userProfile);
+    }
+    return userProfile;
   }
 
   @Override
   public List<UserProfile> getByLoginId(final String loginId) {
-    return userRepository.findByLoginId(loginId);
+    final List<UserProfile> userProfiles = userRepository.findByLoginId(loginId);
+    userProfiles.forEach(this::modifyRetrieved);
+    return userProfiles;
   }
 
   @Override
   public UserProfile getByUsername(final String username) {
-    return userRepository.findByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA, username.toLowerCase());
+    final UserProfile userProfile = userRepository.findByAuthProviderAndLoginId(
+        UserProfile.AuthProvider.ARSNOVA, username.toLowerCase());
+    if (userProfile != null) {
+      modifyRetrieved(userProfile);
+    }
+    return userProfile;
+  }
+
+  @Override
+  public List<UserProfile> getAllByMail(final String mail) {
+    final List<UserProfile> userProfiles = userRepository.findAllByMail(mail);
+    userProfiles.forEach(this::modifyRetrieved);
+    return userProfiles;
   }
 
   @Override
