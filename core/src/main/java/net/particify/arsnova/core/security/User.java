@@ -38,6 +38,7 @@ public class User implements org.springframework.security.core.userdetails.UserD
   private static final long serialVersionUID = 1L;
 
   private String id;
+  private String displayId;
   private String loginId;
   private UserProfile.AuthProvider authProvider;
   private String password;
@@ -51,6 +52,7 @@ public class User implements org.springframework.security.core.userdetails.UserD
       throw new IllegalArgumentException();
     }
     id = profile.getId();
+    displayId = profile.getPerson().getDisplayId();
     loginId = profile.getLoginId();
     authProvider = profile.getAuthProvider();
     password = profile.getAccount().getPassword();
@@ -105,6 +107,10 @@ public class User implements org.springframework.security.core.userdetails.UserD
 
   public String getId() {
     return id;
+  }
+
+  public String getDisplayId() {
+    return displayId;
   }
 
   public boolean hasRole(final String role) {
