@@ -235,7 +235,9 @@ public class ContentGroup extends Entity implements RoomIdAware {
 
   public enum GroupType {
     MIXED,
-    QUIZ
+    QUIZ,
+    SURVEY,
+    FLASHCARDS
   }
 
   public enum PublishingMode {
