@@ -23,6 +23,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Optional;
 import org.pac4j.core.client.IndirectClient;
@@ -208,6 +209,8 @@ public class AuthenticationController {
       throw new NotImplementedException("SAML authentication is disabled.");
     }
 
-    return saml2Client.getServiceProviderMetadataResolver().getMetadata();
+    return saml2Client.getConfiguration().getServiceProviderMetadataResource() != null
+        ? saml2Client.getConfiguration().getServiceProviderMetadataResource().getContentAsString(StandardCharsets.UTF_8)
+        : saml2Client.getServiceProviderMetadataResolver().getMetadata();
   }
 }
