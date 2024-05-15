@@ -159,10 +159,12 @@ public class UserProfile extends Entity {
       this.displayId = displayId;
     }
 
+    @JsonView({View.Persistence.class, View.Public.class})
     public String getDisplayName() {
       return displayName;
     }
 
+    @JsonView({View.Persistence.class, View.Public.class})
     public void setDisplayName(final String displayName) {
       this.displayName = displayName;
     }

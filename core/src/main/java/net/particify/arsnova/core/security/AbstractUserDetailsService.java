@@ -129,6 +129,7 @@ public abstract class AbstractUserDetailsService implements ApplicationEventPubl
     final UserProfile.Person newPerson = buildPersonFromAttributes(attributes);
     return !Objects.equals(newPerson.getMail(), person.getMail())
         || !Objects.equals(newPerson.getFirstName(), person.getFirstName())
-        || !Objects.equals(newPerson.getLastName(), person.getLastName());
+        || !Objects.equals(newPerson.getLastName(), person.getLastName())
+        || !Objects.equals(newPerson.getDisplayName(), person.getDisplayName());
   }
 }
