@@ -95,6 +95,7 @@ public class AuthenticationService {
     final ClientAuthentication clientAuthentication = new ClientAuthentication(
         user.getId(),
         user.getDisplayId(),
+        user.getDisplayName(),
         user.getUsername(),
         user.getAuthProvider(),
         jwt);

@@ -103,6 +103,7 @@ public class SsoUserDetailsService extends AbstractUserDetailsService
     person.setMail(extractAttribute(attributes, samlProperties.getMailAttribute()));
     person.setFirstName(extractAttribute(attributes, samlProperties.getFirstNameAttribute()));
     person.setLastName(extractAttribute(attributes, samlProperties.getLastNameAttribute()));
+    person.setDisplayName((person.getFirstName() + " " + person.getLastName()).trim());
     return person;
   }
 }

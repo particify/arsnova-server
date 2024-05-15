@@ -26,6 +26,7 @@ import net.particify.arsnova.core.model.serialization.View;
 public class ClientAuthentication {
   private String userId;
   private String displayId;
+  private String displayName;
   private String loginId;
   private UserProfile.AuthProvider authProvider;
   private String token;
@@ -33,11 +34,13 @@ public class ClientAuthentication {
   public ClientAuthentication(
       final String userId,
       final String displayId,
+      final String displayName,
       final String loginId,
       final UserProfile.AuthProvider authProvider,
       final String token) {
     this.userId = userId;
     this.displayId = displayId;
+    this.displayName = displayName;
     this.loginId = loginId;
     this.authProvider = authProvider;
     this.token = token;
@@ -51,6 +54,11 @@ public class ClientAuthentication {
   @JsonView(View.Public.class)
   public String getDisplayId() {
     return displayId;
+  }
+
+  @JsonView(View.Public.class)
+  public String getDisplayName() {
+    return displayName;
   }
 
   @JsonView(View.Public.class)

@@ -39,6 +39,7 @@ public class User implements org.springframework.security.core.userdetails.UserD
 
   private String id;
   private String displayId;
+  private String displayName;
   private String loginId;
   private UserProfile.AuthProvider authProvider;
   private String password;
@@ -53,6 +54,7 @@ public class User implements org.springframework.security.core.userdetails.UserD
     }
     id = profile.getId();
     displayId = profile.getPerson().getDisplayId();
+    displayName = profile.getPerson().getDisplayName();
     loginId = profile.getLoginId();
     authProvider = profile.getAuthProvider();
     password = profile.getAccount().getPassword();
@@ -111,6 +113,10 @@ public class User implements org.springframework.security.core.userdetails.UserD
 
   public String getDisplayId() {
     return displayId;
+  }
+
+  public String getDisplayName() {
+    return displayName;
   }
 
   public boolean hasRole(final String role) {
