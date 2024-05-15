@@ -1,7 +1,9 @@
 package net.particify.arsnova.core.security;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -79,13 +81,20 @@ public abstract class AbstractUserDetailsService implements ApplicationEventPubl
       final UserProfile.AuthProvider authProvider,
       final Collection<GrantedAuthority> grantedAuthorities,
       final Map<String, Object> userAttributes) {
+    final UserProfile userProfile = getUserProfile(loginId, authProvider).orElseGet(() -> {
+      final UserProfile newUserProfile = new UserProfile(authProvider, loginId);
+      newUserProfile.setPerson(buildPersonFromAttributes(userAttributes));
+      applicationEventPublisher.publishEvent(
+          new BeforeUserProfileAutoCreationEvent(this, newUserProfile, userAttributes));
+      return userService.create(newUserProfile);
+    });
+    if (personNeedsUpdate(userProfile.getPerson(), userAttributes)) {
+      userProfile.setPerson(buildPersonFromAttributes(userAttributes));
+      userService.update(userProfile);
+    }
+
     return new User(
-      getUserProfile(loginId, authProvider).orElseGet(() -> {
-        final UserProfile userProfile = new UserProfile(authProvider, loginId);
-        applicationEventPublisher.publishEvent(
-            new BeforeUserProfileAutoCreationEvent(this, userProfile, userAttributes));
-        return userService.create(userProfile);
-      }),
+      userProfile,
       grantedAuthorities);
   }
 
@@ -98,5 +107,29 @@ public abstract class AbstractUserDetailsService implements ApplicationEventPubl
 
     return Optional.ofNullable(
       userService.getByAuthProviderAndLoginId(authProvider, loginId));
+  }
+
+  protected UserProfile.Person buildPersonFromAttributes(final Map<String, Object> attributes) {
+    return new UserProfile.Person();
+  }
+
+  protected String extractAttribute(final Map<String, Object> attributes, final String oid) {
+    final Object attribute = attributes.get(oid);
+    if (attribute == null) {
+      return "";
+    }
+    if (attribute instanceof List<?> list) {
+      return list.get(0).toString();
+    } else {
+      return attribute.toString();
+    }
+  }
+
+  private boolean personNeedsUpdate(final UserProfile.Person person, final Map<String, Object> attributes) {
+    final UserProfile.Person newPerson = buildPersonFromAttributes(attributes);
+    return !Objects.equals(newPerson.getMail(), person.getMail())
+        || !Objects.equals(newPerson.getFirstName(), person.getFirstName())
+        || !Objects.equals(newPerson.getLastName(), person.getLastName())
+        || !Objects.equals(newPerson.getDisplayName(), person.getDisplayName());
   }
 }

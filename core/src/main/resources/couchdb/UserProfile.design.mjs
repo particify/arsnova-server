@@ -30,6 +30,13 @@ export let designDoc = {
           emit(doc.loginId, {_rev: doc._rev});
         }
       }
+    },
+    "by_mail": {
+      "map": function (doc) {
+        if (doc.type === "UserProfile" && doc.person && doc.person.mail) {
+          emit(doc.person.mail, {_rev: doc._rev});
+        }
+      }
     }
   }
 };

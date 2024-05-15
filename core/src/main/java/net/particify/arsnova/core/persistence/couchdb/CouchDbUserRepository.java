@@ -63,6 +63,11 @@ public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> im
   }
 
   @Override
+  public List<UserProfile> findAllByMail(final String mail) {
+    return queryView("by_mail", mail);
+  }
+
+  @Override
   public void delete(final UserProfile user) {
     if (db.delete(user) != null) {
       log("delete", "type", "user", "id", user.getId());

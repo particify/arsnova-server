@@ -21,6 +21,7 @@ package net.particify.arsnova.core.security.pac4j;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.pac4j.oidc.profile.OidcProfile;
 import org.pac4j.saml.profile.SAML2Profile;
@@ -94,5 +95,15 @@ public class SsoUserDetailsService extends AbstractUserDetailsService
     }
 
     return getOrCreate(uid, UserProfile.AuthProvider.SAML, grantedAuthorities, profile.getAttributes());
+  }
+
+  @Override
+  protected UserProfile.Person buildPersonFromAttributes(final Map<String, Object> attributes) {
+    final UserProfile.Person person = new UserProfile.Person();
+    person.setMail(extractAttribute(attributes, samlProperties.getMailAttribute()));
+    person.setFirstName(extractAttribute(attributes, samlProperties.getFirstNameAttribute()));
+    person.setLastName(extractAttribute(attributes, samlProperties.getLastNameAttribute()));
+    person.setDisplayName((person.getFirstName() + " " + person.getLastName()).trim());
+    return person;
   }
 }

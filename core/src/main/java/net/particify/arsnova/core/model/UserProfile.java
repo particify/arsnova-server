@@ -139,18 +139,32 @@ public class UserProfile extends Entity {
     }
   }
 
-  @JsonView({View.Persistence.class, View.Public.class})
+  @JsonView({View.Persistence.class, View.Owner.class})
   public static class Person {
+    private String displayId;
     private String displayName;
     private String firstName;
     private String lastName;
+    private String mail;
     private String organization;
     private String department;
 
+    @JsonView(View.Public.class)
+    public String getDisplayId() {
+      return displayId;
+    }
+
+    @JsonView(View.Public.class)
+    public void setDisplayId(final String displayId) {
+      this.displayId = displayId;
+    }
+
+    @JsonView({View.Persistence.class, View.Public.class})
     public String getDisplayName() {
       return displayName;
     }
 
+    @JsonView({View.Persistence.class, View.Public.class})
     public void setDisplayName(final String displayName) {
       this.displayName = displayName;
     }
@@ -169,6 +183,14 @@ public class UserProfile extends Entity {
 
     public void setLastName(final String lastName) {
       this.lastName = lastName;
+    }
+
+    public String getMail() {
+      return mail;
+    }
+
+    public void setMail(final String mail) {
+      this.mail = mail;
     }
 
     public String getOrganization() {
@@ -284,8 +306,11 @@ public class UserProfile extends Entity {
     this.account = account;
   }
 
-  @JsonView({View.Persistence.class, View.Owner.class})
+  @JsonView({View.Persistence.class, View.Public.class})
   public Person getPerson() {
+    if (person == null) {
+      person = new Person();
+    }
     return person;
   }
 

@@ -23,15 +23,18 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
 
+import net.particify.arsnova.core.config.properties.SecurityProperties;
 import net.particify.arsnova.core.model.FindQuery;
 import net.particify.arsnova.core.model.UserProfile;
 
 @Service
 public class UserFindQueryService implements FindQueryService<UserProfile> {
   private UserService userService;
+  private final String displayIdAttribute;
 
-  public UserFindQueryService(final UserService userService) {
+  public UserFindQueryService(final UserService userService, final SecurityProperties securityProperties) {
     this.userService = userService;
+    this.displayIdAttribute = securityProperties.getUserDisplayIdAttribute();
   }
 
   @Override
@@ -39,6 +42,17 @@ public class UserFindQueryService implements FindQueryService<UserProfile> {
     final Set<String> userIds = new HashSet<>();
     if (findQuery.getProperties().getLoginId() != null) {
       final List<UserProfile> userList = userService.getByLoginId(findQuery.getProperties().getLoginId());
+      for (final UserProfile user : userList) {
+        userIds.add(user.getId());
+      }
+    }
+    final String displayId = findQuery.getProperties().getPerson().getDisplayId();
+    if (displayId != null) {
+      final List<UserProfile> userList = switch (displayIdAttribute) {
+        case "loginId" -> userService.getByLoginId(displayId);
+        case "mail" -> userService.getAllByMail(displayId);
+        default -> throw new IllegalStateException("Invalid display ID attribute.");
+      };
       for (final UserProfile user : userList) {
         userIds.add(user.getId());
       }
