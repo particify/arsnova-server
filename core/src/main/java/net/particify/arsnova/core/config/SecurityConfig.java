@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import org.apereo.cas.client.validation.Cas20ProxyTicketValidator;
 import org.opensaml.saml.common.xml.SAMLConstants;
+import org.pac4j.core.adapter.FrameworkAdapter;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.http.callback.PathParameterCallbackUrlResolver;
@@ -567,7 +568,9 @@ public class SecurityConfig {
       prefix = AuthenticationProviderProperties.PREFIX,
       havingValue = "true")
   public Config samlConfig() {
-    return new Config(rootUrl + apiPath + SAML_CALLBACK_PATH, saml2Client());
+    final Config config = new Config(rootUrl + apiPath + SAML_CALLBACK_PATH, saml2Client());
+    FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
+    return config;
   }
 
   @Bean
@@ -600,7 +603,7 @@ public class SecurityConfig {
         samlProperties.getKeystore().getStorePassword(),
         samlProperties.getKeystore().getKeyPassword(),
         idpMetadataPath);
-    config.setKeystoreAlias(samlProperties.getKeystore().getKeyAlias());
+    config.setKeyStoreAlias(samlProperties.getKeystore().getKeyAlias());
     if (!samlProperties.getSp().getMetaFile().isEmpty()) {
       config.setServiceProviderMetadataPath("file:" + samlProperties.getSp().getMetaFile());
     }
@@ -637,7 +640,9 @@ public class SecurityConfig {
       clients.add(oidcClient());
     }
 
-    return new Config(rootUrl + apiPath + OAUTH_CALLBACK_PATH, clients);
+    final Config config = new Config(rootUrl + apiPath + OAUTH_CALLBACK_PATH, clients);
+    FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
+    return config;
   }
 
   @Bean

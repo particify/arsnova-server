@@ -31,11 +31,12 @@ import java.util.Date;
 import java.util.Optional;
 import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.config.Config;
+import org.pac4j.core.context.CallContext;
+import org.pac4j.core.context.FrameworkParameters;
+import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.exception.http.WithLocationAction;
-import org.pac4j.core.util.FindBest;
-import org.pac4j.jee.context.JEEContext;
-import org.pac4j.jee.context.session.JEESessionStoreFactory;
+import org.pac4j.jee.context.JEEFrameworkParameters;
 import org.pac4j.oidc.client.OidcClient;
 import org.pac4j.saml.client.SAML2Client;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -198,12 +199,13 @@ public class AuthenticationController {
       final Config config,
       final HttpServletRequest request,
       final HttpServletResponse response) {
-    final JEEContext context = new JEEContext(request, response);
-    final SessionStore sessionStore = FindBest.sessionStoreFactory(
-        null, config, JEESessionStoreFactory.INSTANCE).newSessionStore();
-    final Optional<RedirectView> view = client.getRedirectionAction(context, sessionStore).map(action -> {
-      if (action instanceof WithLocationAction) {
-        return new RedirectView(((WithLocationAction) action).getLocation());
+    final FrameworkParameters parameters = new JEEFrameworkParameters(request, response);
+    final WebContext webContext = config.getWebContextFactory().newContext(parameters);
+    final SessionStore sessionStore = config.getSessionStoreFactory().newSessionStore(parameters);
+    final CallContext context = new CallContext(webContext, sessionStore);
+    final Optional<RedirectView> view = client.getRedirectionAction(context).map(action -> {
+      if (action instanceof WithLocationAction withLocationAction) {
+        return new RedirectView(withLocationAction.getLocation());
       }
       return null;
     });
