@@ -79,4 +79,10 @@ public class SecuredContentService extends AbstractSecuredEntityServiceImpl<Cont
   public void start(final String contentId) {
     contentService.start(contentId);
   }
+
+  @Override
+  @PreAuthorize("hasPermission(#contentId, 'content', 'update')")
+  public void stop(final String contentId) {
+    contentService.stop(contentId);
+  }
 }

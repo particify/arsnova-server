@@ -50,4 +50,6 @@ public interface ContentService extends EntityService<Content> {
       List<ContentTemplate> templates);
 
   void start(String contentId);
+
+  void stop(String contentId);
 }

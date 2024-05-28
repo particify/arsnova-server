@@ -199,4 +199,17 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
     content.getState().setAnsweringEndTime(Date.from(Instant.now().plusSeconds(content.getDuration())));
     update(content);
   }
+
+  @Override
+  public void stop(final String contentId) {
+    final Content content = get(contentId);
+    if (content == null) {
+      throw new NotFoundException();
+    }
+    if (content.getState().getAnsweringEndTime() == null) {
+      throw new BadRequestException("Not started.");
+    }
+    content.getState().setAnsweringEndTime(new Date());
+    update(content);
+  }
 }
