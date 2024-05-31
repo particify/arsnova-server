@@ -55,6 +55,7 @@ public class ContentGroup extends Entity implements RoomIdAware {
 
   private boolean statisticsPublished = true;
   private boolean correctOptionsPublished = true;
+  private boolean leaderboardEnabled = true;
 
   private String templateId;
 
@@ -80,6 +81,7 @@ public class ContentGroup extends Entity implements RoomIdAware {
     this.publishingIndex = contentGroup.publishingIndex;
     this.statisticsPublished = contentGroup.statisticsPublished;
     this.correctOptionsPublished = contentGroup.correctOptionsPublished;
+    this.leaderboardEnabled = contentGroup.leaderboardEnabled;
     this.templateId = contentGroup.templateId;
   }
 
@@ -173,6 +175,16 @@ public class ContentGroup extends Entity implements RoomIdAware {
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
+  public boolean isLeaderboardEnabled() {
+    return this.groupType == GroupType.QUIZ ? leaderboardEnabled : false;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setLeaderboardEnabled(final boolean leaderboardEnabled) {
+    this.leaderboardEnabled = leaderboardEnabled;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
   public String getTemplateId() {
     return templateId;
   }
@@ -230,6 +242,7 @@ public class ContentGroup extends Entity implements RoomIdAware {
         .append("publishingIndex", publishingIndex)
         .append("statisticsPublished", statisticsPublished)
         .append("correctOptionsPublished", correctOptionsPublished)
+        .append("leaderboardEnabled", leaderboardEnabled)
         .toString();
   }
 
