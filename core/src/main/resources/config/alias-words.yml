@@ -2,12 +2,15 @@ arsnova:
   alias-words:
     nouns:
       - alpaca
+      - ant
       - armadillo
       - badger
       - barracuda
       - bat
       - bear
       - beaver
+      - bee
+      - beetle
       - bison
       - bumblebee
       - butterfly
@@ -17,6 +20,7 @@ arsnova:
       - crocodile
       - deer
       - dolphin
+      - donkey
       - dragonfly
       - duck
       - eagle
@@ -25,11 +29,17 @@ arsnova:
       - falcon
       - ferret
       - flamingo
+      - fox
       - giraffe
+      - goat
       - goose
+      - gorilla
+      - guinea-pig
       - hare
       - hedgehog
       - heron
+      - hippo
+      - hornet
       - hummingbird
       - ibex
       - iguana
@@ -40,28 +50,44 @@ arsnova:
       - koala
       - leopard
       - lion
+      - lemur
       - llama
       - lobster
       - lynx
       - meerkat
       - mole
+      - monkey
       - narwhal
+      - octopus
+      - orca
       - owl
+      - panda
       - peacock
       - pelican
       - penguin
+      - pig
       - pigeon
       - piranha
+      - polar-bear
       - puma
+      - rabbit
       - racoon
+      - rhino
+      - salamander
       - seal
+      - shark
+      - sheep
       - squirrel
       - starfish
+      - stork
       - swan
       - tapir
       - tiger
+      - turtle
       - viper
       - wolf
+      - wombat
+      - woodpecker
       - zebra
     special-nouns:
       - mammoth
@@ -88,16 +114,19 @@ arsnova:
       - cheerful
       - courageous
       - creative
+      - colorful
       - curious
-      - decisive
       - determined
       - diligent
       - elegant
       - enthusiastic
       - fabulous
       - focused
+      - funny
       - generous
+      - giant
       - helpful
+      - happy
       - hilarious
       - imaginative
       - ingenious
@@ -112,10 +141,11 @@ arsnova:
       - persistent
       - reliable
       - resourceful
-      - responsible
       - sincere
+      - smart
       - swift
       - thoughtful
+      - tiny
       - unique
       - versatile
       - vivid
