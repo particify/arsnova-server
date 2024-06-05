@@ -14,7 +14,7 @@ pac4j = "5.7.4"
 spotbugs-annotations = "4.8.5"
 spotbugs-plugin = "6.0.15"
 spring-boot-plugin = "3.2.5"
-spring-cloud = "2023.0.1"
+spring-cloud = "2023.0.2"
 springmockk = "4.0.2"
 
 [libraries]
