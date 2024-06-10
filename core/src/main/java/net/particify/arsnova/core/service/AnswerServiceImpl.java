@@ -568,32 +568,35 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   }
 
   @Override
-  public Collection<LeaderboardEntry> buildLeaderboard(
+  public Collection<LeaderboardEntry> buildAliasedLeaderboard(
       final ContentGroup contentGroup,
       final String currentContentId,
       final Locale locale) {
-    final Map<String, LeaderboardEntry> leaderboard = new HashMap<>();
     final Map<String, RoomUserAlias> aliasMappings =
         roomUserAliasService.getUserAliasMappingsByRoomId(contentGroup.getRoomId(), locale);
     final Map<String, LeaderboardCurrentResult> currentResults =
-        currentContentId != null ? buildCurrentLeaderboard(currentContentId) : new HashMap<>();
+        currentContentId != null ? buildContentLeaderboard(currentContentId) : new HashMap<>();
+    return buildContentGroupLeaderboard(contentGroup).entrySet().stream()
+        .map(es -> new LeaderboardEntry(
+            aliasMappings.get(es.getKey()), es.getValue(), currentResults.get(es.getKey())))
+        .collect(Collectors.toList());
+  }
+
+  private Map<String, Integer> buildContentGroupLeaderboard(final ContentGroup contentGroup) {
+    final Map<String, Integer> leaderboard = new HashMap<>();
     final List<Content> contents = contentService.get(contentGroup.getContentIds());
     for (final Content content : contents) {
       final Map<String, Integer> contentScores =
           answerRepository.findUserScoreByContentIdRound(content.getId(), content.getState().getRound());
       for (final Map.Entry<String, Integer> entry : contentScores.entrySet()) {
-        final LeaderboardEntry leaderboardEntry = leaderboard.getOrDefault(
-            entry.getKey(), new LeaderboardEntry(aliasMappings.get(entry.getKey()), 0, null));
-        leaderboard.put(entry.getKey(), new LeaderboardEntry(
-            aliasMappings.get(entry.getKey()),
-            leaderboardEntry.score() + entry.getValue(),
-            currentResults.get(entry.getKey())));
+        final int score = leaderboard.getOrDefault(entry.getKey(), 0);
+        leaderboard.put(entry.getKey(), score + entry.getValue());
       }
     }
-    return leaderboard.values();
+    return leaderboard;
   }
 
-  private Map<String, LeaderboardCurrentResult> buildCurrentLeaderboard(final String contentId) {
+  private Map<String, LeaderboardCurrentResult> buildContentLeaderboard(final String contentId) {
     final Content content = contentService.get(contentId);
     final List<Answer> answers = answerRepository.findByContentIdRound(
         Answer.class, contentId, content.getState().getRound());

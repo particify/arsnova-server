@@ -154,7 +154,7 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
     if (contentGroup == null) {
       throw new NotFoundException();
     }
-    return answerService.buildLeaderboard(contentGroup, contentId, requestLocale);
+    return answerService.buildAliasedLeaderboard(contentGroup, contentId, requestLocale);
   }
 
   static class AddContentToGroupRequestEntity {
