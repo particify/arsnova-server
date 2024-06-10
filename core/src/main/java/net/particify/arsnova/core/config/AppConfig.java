@@ -218,6 +218,8 @@ public class AppConfig implements WebMvcConfigurer {
     final CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
     caffeineCacheManager.setCacheNames(List.of(
         "entity",
+        "leaderboard-content",
+        "leaderboard-contentgroup",
         "rendered-texts",
         "room.id-by-shortid",
         "system"));
