@@ -68,5 +68,6 @@ public interface AnswerService extends EntityService<Answer> {
 
   void hideTextAnswer(TextAnswer answer, boolean hidden);
 
-  Collection<LeaderboardEntry> buildLeaderboard(ContentGroup contentGroup, String currentContentId, Locale locale);
+  Collection<LeaderboardEntry> buildAliasedLeaderboard(
+      ContentGroup contentGroup, String currentContentId, Locale locale);
 }

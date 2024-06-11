@@ -136,10 +136,10 @@ public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answe
 
   @Override
   @PreAuthorize("hasPermission(#contentGroup, 'read')")
-  public Collection<LeaderboardEntry> buildLeaderboard(
+  public Collection<LeaderboardEntry> buildAliasedLeaderboard(
       final ContentGroup contentGroup,
       final String currentContentId,
       final Locale locale) {
-    return answerService.buildLeaderboard(contentGroup, currentContentId, locale);
+    return answerService.buildAliasedLeaderboard(contentGroup, currentContentId, locale);
   }
 }

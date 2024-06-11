@@ -42,6 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -104,6 +106,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   private AnswerRepository answerRepository;
   private UserService userService;
   private AuthenticationService authenticationService;
+  private CacheManager cacheManager;
 
   public AnswerServiceImpl(
       final AnswerRepository repository,
@@ -112,6 +115,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       final UserService userService,
       final RoomUserAliasService roomUserAliasService,
       final AuthenticationService authenticationService,
+      final CacheManager cacheManager,
       @Qualifier("defaultJsonMessageConverter") final
       MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
       final Validator validator) {
@@ -121,6 +125,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     this.userService = userService;
     this.roomUserAliasService = roomUserAliasService;
     this.authenticationService = authenticationService;
+    this.cacheManager = cacheManager;
   }
 
   @Autowired
@@ -132,6 +137,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   public void flushAnswerQueue() {
     if (answerQueue.isEmpty()) {
       // no need to send an empty bulk request.
+      clearContentGroupLeaderboardCache();
       return;
     }
 
@@ -151,7 +157,9 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
         this.eventPublisher.publishEvent(new BeforeCreationEvent<>(this, e));
       }
       answerRepository.saveAll(new ArrayList<>(answers.values()));
+      clearContentGroupLeaderboardCache();
       for (final Answer e : answers.values()) {
+        evictLeaderboardCacheEntries(e.getContentId());
         this.eventPublisher.publishEvent(new AfterCreationEvent<>(this, e));
       }
       this.eventPublisher.publishEvent(new BulkChangeEvent<>(this, Answer.class, answers.values()));
@@ -170,6 +178,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     final Iterable<Answer> answers = answerRepository.findStubsByContentIdAndHidden(content.getId(), false);
     answers.forEach(a -> a.setRoomId(content.getRoomId()));
     delete(answers, Initiator.USER);
+    evictLeaderboardCacheEntries(contentId);
   }
 
   @Override
@@ -568,32 +577,37 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   }
 
   @Override
-  public Collection<LeaderboardEntry> buildLeaderboard(
+  public Collection<LeaderboardEntry> buildAliasedLeaderboard(
       final ContentGroup contentGroup,
       final String currentContentId,
       final Locale locale) {
-    final Map<String, LeaderboardEntry> leaderboard = new HashMap<>();
     final Map<String, RoomUserAlias> aliasMappings =
         roomUserAliasService.getUserAliasMappingsByRoomId(contentGroup.getRoomId(), locale);
     final Map<String, LeaderboardCurrentResult> currentResults =
-        currentContentId != null ? buildCurrentLeaderboard(currentContentId) : new HashMap<>();
+        currentContentId != null ? buildContentLeaderboard(currentContentId) : new HashMap<>();
+    return buildContentGroupLeaderboard(contentGroup).entrySet().stream()
+        .map(es -> new LeaderboardEntry(
+            aliasMappings.get(es.getKey()), es.getValue(), currentResults.get(es.getKey())))
+        .collect(Collectors.toList());
+  }
+
+  @Cacheable(cacheNames = "leaderboard-contentgroup")
+  private Map<String, Integer> buildContentGroupLeaderboard(final ContentGroup contentGroup) {
+    final Map<String, Integer> leaderboard = new HashMap<>();
     final List<Content> contents = contentService.get(contentGroup.getContentIds());
     for (final Content content : contents) {
       final Map<String, Integer> contentScores =
           answerRepository.findUserScoreByContentIdRound(content.getId(), content.getState().getRound());
       for (final Map.Entry<String, Integer> entry : contentScores.entrySet()) {
-        final LeaderboardEntry leaderboardEntry = leaderboard.getOrDefault(
-            entry.getKey(), new LeaderboardEntry(aliasMappings.get(entry.getKey()), 0, null));
-        leaderboard.put(entry.getKey(), new LeaderboardEntry(
-            aliasMappings.get(entry.getKey()),
-            leaderboardEntry.score() + entry.getValue(),
-            currentResults.get(entry.getKey())));
+        final int score = leaderboard.getOrDefault(entry.getKey(), 0);
+        leaderboard.put(entry.getKey(), score + entry.getValue());
       }
     }
-    return leaderboard.values();
+    return leaderboard;
   }
 
-  private Map<String, LeaderboardCurrentResult> buildCurrentLeaderboard(final String contentId) {
+  @Cacheable(cacheNames = "leaderboard-content")
+  private Map<String, LeaderboardCurrentResult> buildContentLeaderboard(final String contentId) {
     final Content content = contentService.get(contentId);
     final List<Answer> answers = answerRepository.findByContentIdRound(
         Answer.class, contentId, content.getState().getRound());
@@ -604,6 +618,14 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
               a.getPoints(),
               a.getDurationMs(),
              content.determineAnswerResult(a).getState() == AnswerResult.AnswerResultState.CORRECT)));
+  }
+
+  private void evictLeaderboardCacheEntries(final String contentId) {
+    cacheManager.getCache("leaderboard-content").evict(contentId);
+  }
+
+  public void clearContentGroupLeaderboardCache() {
+    cacheManager.getCache("leaderboard-contentgroup").clear();
   }
 
   private record AnswerUniqueKey(String userId, String contentId) { }
