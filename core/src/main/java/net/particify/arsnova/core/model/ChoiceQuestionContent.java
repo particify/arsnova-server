@@ -150,7 +150,7 @@ public class ChoiceQuestionContent extends Content {
   @Override
   @JsonView(View.Public.class)
   public int getPoints() {
-    return isScorable() ? 10 : 0;
+    return isScorable() ? 500 : 0;
   }
 
   @Override

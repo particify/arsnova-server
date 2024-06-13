@@ -36,7 +36,7 @@ public class ContentTest {
     answer.setSelectedChoiceIndexes(List.of(1, 3, 5));
 
     final AnswerResult answerResult = content.determineAnswerResult(answer);
-    assertEquals(10, answerResult.getAchievedPoints(), 0.01);
+    assertEquals(500, answerResult.getAchievedPoints(), 0.01);
     assertEquals(AnswerResult.AnswerResultState.CORRECT, answerResult.getState());
   }
 
@@ -61,7 +61,7 @@ public class ContentTest {
 
     final AnswerResult answerResult = content.determineAnswerResult(answer);
     // 10 points total, 3 correct options, 3 correct options chosen, 1 incorrect option chosen
-    assertEquals(10.0 / 3 * (3 - 1), answerResult.getAchievedPoints(), 0.01);
+    assertEquals(500.0 / 3 * (3 - 1), answerResult.getAchievedPoints(), 0.01);
     assertEquals(AnswerResult.AnswerResultState.WRONG, answerResult.getState());
   }
 
@@ -85,7 +85,7 @@ public class ContentTest {
     answer.setSelectedChoiceIndexes(List.of(1, 2, 3, 4));
 
     final AnswerResult answerResult = content.determineAnswerResult(answer);
-    assertEquals(10, answerResult.getAchievedPoints(), 0.01);
+    assertEquals(500, answerResult.getAchievedPoints(), 0.01);
     assertEquals(AnswerResult.AnswerResultState.CORRECT, answerResult.getState());
   }
 

@@ -385,7 +385,10 @@ public class Content extends Entity implements RoomIdAware {
     }
     final long timeLeft = answerTime.until(
         getState().getAnsweringEndTime().toInstant(), ChronoUnit.SECONDS);
-    return 1.0 * timeLeft / getDuration() * achievedPoints;
+    // By multiplying by 2, taking less than half of the duration for answering
+    // results in additional points while taking more time results in subtracted
+    // points in comparison to the base points given for correct answers.
+    return 2.0 * timeLeft / getDuration() * achievedPoints;
   }
 
   public double calculateAchievedPoints(final Answer answer) {
