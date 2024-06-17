@@ -25,7 +25,8 @@ import net.particify.arsnova.core.model.serialization.View;
     "options",
     "correctOptions",
     "multiple",
-    "abstentionsAllowed"
+    "abstentionsAllowed",
+    "duration"
 })
 public class ContentExport {
   private static final String SCALE_OPTION_FORMAT = "%s (%d)";
@@ -39,6 +40,7 @@ public class ContentExport {
   private List<String> correctOptions;
   private boolean multiple;
   private boolean abstentionsAllowed;
+  private int duration;
 
   public ContentExport() {
 
@@ -49,6 +51,7 @@ public class ContentExport {
     this.body = content.getBody();
     this.additionalText = content.getAdditionalText();
     this.abstentionsAllowed = content.isAbstentionsAllowed();
+    this.duration = content.getDuration();
     if (content instanceof ScaleChoiceContent) {
       final ScaleChoiceContent scaleChoiceContent = (ScaleChoiceContent) content;
       this.options = List.of(String.format(
@@ -108,6 +111,7 @@ public class ContentExport {
     content.setBody(this.body);
     content.setAdditionalText(this.additionalText);
     content.setAbstentionsAllowed(this.abstentionsAllowed);
+    content.setDuration(this.duration);
 
     return content;
   }
@@ -138,6 +142,10 @@ public class ContentExport {
 
   public boolean isAbstentionsAllowed() {
     return abstentionsAllowed;
+  }
+
+  public int getDuration() {
+    return duration;
   }
 
   private ChoiceQuestionContent toChoiceContent() {
