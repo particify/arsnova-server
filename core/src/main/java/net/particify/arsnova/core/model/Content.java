@@ -194,6 +194,7 @@ public class Content extends Entity implements RoomIdAware {
     this.timestamp = content.timestamp;
     this.additionalText = content.additionalText;
     this.additionalTextTitle = content.additionalTextTitle;
+    this.duration = content.duration;
     this.templateId = content.templateId;
     this.groupTemplateId = content.groupTemplateId;
   }
