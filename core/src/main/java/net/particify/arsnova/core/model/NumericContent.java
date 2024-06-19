@@ -65,11 +65,6 @@ public class NumericContent extends Content {
   }
 
   @JsonView(View.Public.class)
-  public int getPoints() {
-    return isScorable() ? 10 : 0;
-  }
-
-  @JsonView(View.Public.class)
   public boolean isScorable() {
     return correctNumber != null;
   }

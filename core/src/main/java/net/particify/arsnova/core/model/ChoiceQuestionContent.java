@@ -149,12 +149,6 @@ public class ChoiceQuestionContent extends Content {
 
   @Override
   @JsonView(View.Public.class)
-  public int getPoints() {
-    return isScorable() ? 500 : 0;
-  }
-
-  @Override
-  @JsonView(View.Public.class)
   public boolean isScorable() {
     return correctOptionIndexes.size() > 0;
   }
