@@ -62,7 +62,9 @@ dependencies {
   compileOnly(libs.spotbugs.annotations)
   aspect(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   aspect("org.springframework:spring-aspects")
-  aspect("org.springframework.security:spring-security-aspects")
+  aspect("org.springframework.security:spring-security-aspects") {
+    exclude(group = "io.micrometer", module = "micrometer-observation")
+  }
 }
 
 tasks.withType<Test> {
