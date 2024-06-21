@@ -47,6 +47,8 @@ import net.particify.arsnova.core.model.serialization.View;
 )
 @JsonTypeIdResolver(FormatContentTypeIdResolver.class)
 public class Content extends Entity implements RoomIdAware {
+  public static final int BASE_POINTS = 500;
+
   public enum Format {
     CHOICE,
     BINARY,
@@ -364,7 +366,7 @@ public class Content extends Entity implements RoomIdAware {
 
   @JsonView(View.Public.class)
   public int getPoints() {
-    return 0;
+    return isScorable() ? BASE_POINTS : 0;
   }
 
   @JsonView(View.Public.class)
