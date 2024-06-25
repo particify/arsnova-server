@@ -58,11 +58,13 @@ import net.particify.arsnova.core.event.BulkChangeEvent;
 import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.AnswerResult;
 import net.particify.arsnova.core.model.AnswerStatistics;
+import net.particify.arsnova.core.model.AnswerStatisticsSummaryEntry;
 import net.particify.arsnova.core.model.AnswerStatisticsUserSummary;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.ContentGroup;
+import net.particify.arsnova.core.model.ContentIdRoundResultKey;
 import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.GridImageContent;
 import net.particify.arsnova.core.model.LeaderboardCurrentResult;
@@ -518,16 +520,18 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     answer.setRoomId(content.getRoomId());
 
     if (content.isScorable()) {
+      final double achievedPoints = content.calculateAchievedPoints(answer);
       if (content.getState().getAnsweringEndTime() == null) {
-        answer.setPoints((int) Math.round(content.calculateAchievedPoints(answer)));
+        answer.setPoints((int) Math.round(achievedPoints));
       } else {
         answer.setPoints((int) Math.round(content.calculateCompetitivePoints(
-            answer.getCreationTimestamp().toInstant(), content.calculateAchievedPoints(answer))));
+            answer.getCreationTimestamp().toInstant(), achievedPoints)));
         final int timeLeft = (int) Instant.now().until(
             content.getState().getAnsweringEndTime().toInstant(), ChronoUnit.MILLIS);
         answer.setDurationMs(content.getDuration() * 1000 - timeLeft);
       }
     }
+    answer.setResult(content.determineAnswerResult(answer).getState());
 
     if (content.getFormat() == Content.Format.TEXT) {
       answer.setRound(0);
@@ -618,6 +622,28 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
               a.getPoints(),
               a.getDurationMs(),
              content.determineAnswerResult(a).getState() == AnswerResult.AnswerResultState.CORRECT)));
+  }
+
+  public List<AnswerStatisticsSummaryEntry> calculateStatsByContentIds(
+      final String roomId,
+      final List<String> contentIds) {
+    final Map<ContentIdRoundResultKey, Integer> counts =
+        answerRepository.countByRoomIdGroupByContentIdRoundResult(roomId);
+    final List<AnswerStatisticsSummaryEntry> results = counts.entrySet().stream()
+        .filter(entry -> contentIds.contains(entry.getKey().contentId()))
+        .map(entry -> {
+          final var k = entry.getKey();
+          return new AnswerStatisticsSummaryEntry(
+              k.contentId(),
+              k.round(),
+              k.result(),
+              entry.getValue());
+        })
+        .collect(Collectors.toList());
+    if (results.stream().anyMatch(e -> e.result() == AnswerResult.AnswerResultState.UNKNOWN)) {
+      throw new NotFoundException("Statistics are not available for this content group.");
+    }
+    return results;
   }
 
   private void evictLeaderboardCacheEntries(final String contentId) {

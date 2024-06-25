@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import net.particify.arsnova.core.model.AnswerStatisticsSummaryEntry;
 import net.particify.arsnova.core.model.AnswerStatisticsUserSummary;
 import net.particify.arsnova.core.model.ContentGroup;
 import net.particify.arsnova.core.model.ContentGroupTemplate;
@@ -40,6 +41,7 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
   private static final String ADD_CONTENT_MAPPING = "/-/content/";
   private static final String REMOVE_CONTENT_MAPPING = DEFAULT_ID_MAPPING + "/content/{contentId}";
   private static final String IMPORT_MAPPING = DEFAULT_ID_MAPPING + "/import";
+  private static final String ANSWER_STATISTICS_SUMMARY_MAPPING = DEFAULT_ID_MAPPING + "/stats";
   private static final String ANSWER_STATISTICS_USER_SUMMARY_MAPPING = DEFAULT_ID_MAPPING + "/stats/user/{userId}";
   private static final String ATTRIBUTIONS_ENDPOINT = DEFAULT_ID_MAPPING + "/attributions";
   private static final String CREATE_FROM_TEMPLATE_MAPPING = "/-/create-from-template";
@@ -155,6 +157,12 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
       throw new NotFoundException();
     }
     return answerService.buildAliasedLeaderboard(contentGroup, contentId, requestLocale);
+  }
+
+  @GetMapping(ANSWER_STATISTICS_SUMMARY_MAPPING)
+  public List<AnswerStatisticsSummaryEntry> getStatistics(@PathVariable final String id) {
+    final ContentGroup contentGroup = get(id);
+    return answerService.calculateStatsByContentIds(contentGroup.getRoomId(), contentGroup.getContentIds());
   }
 
   static class AddContentToGroupRequestEntity {

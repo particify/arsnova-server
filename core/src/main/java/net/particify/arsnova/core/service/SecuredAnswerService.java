@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.AnswerStatistics;
+import net.particify.arsnova.core.model.AnswerStatisticsSummaryEntry;
 import net.particify.arsnova.core.model.AnswerStatisticsUserSummary;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
 import net.particify.arsnova.core.model.ContentGroup;
@@ -141,5 +142,13 @@ public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answe
       final String currentContentId,
       final Locale locale) {
     return answerService.buildAliasedLeaderboard(contentGroup, currentContentId, locale);
+  }
+
+  @PreAuthorize("hasPermission(#roomId, 'room', 'read')")
+  @Override
+  public List<AnswerStatisticsSummaryEntry> calculateStatsByContentIds(
+      final String roomId,
+      final List<String> contentIds) {
+    return answerService.calculateStatsByContentIds(roomId, contentIds);
   }
 }

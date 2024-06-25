@@ -33,8 +33,10 @@ import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 
 import net.particify.arsnova.core.model.Answer;
+import net.particify.arsnova.core.model.AnswerResult;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics.ChoiceRoundStatistics;
+import net.particify.arsnova.core.model.ContentIdRoundResultKey;
 import net.particify.arsnova.core.model.PrioritizationAnswer;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics.PrioritizationRoundStatistics;
@@ -212,6 +214,28 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
         .group(true));
     return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toMap(
         r -> r.getKeyAsNode().get(2).asText(),
+        r -> r.getValueAsInt()
+    ));
+  }
+
+  @Override
+  public Map<ContentIdRoundResultKey, Integer> countByRoomIdGroupByContentIdRoundResult(
+      final String roomId) {
+    final ViewResult result = db.queryView(createQuery("by_roomid_contentid_round_result")
+        .reduce(true)
+        .startKey(ComplexKey.of(roomId))
+        .endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))
+        .group(true));
+    return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toMap(
+        r -> {
+          final var node = r.getKeyAsNode();
+          final var contentId = node.get(1).asText();
+          final var round = node.get(2).asInt();
+          final var resultState = node.hasNonNull(3)
+              ? AnswerResult.AnswerResultState.valueOf(node.get(3).asText())
+              : AnswerResult.AnswerResultState.UNKNOWN;
+          return new ContentIdRoundResultKey(contentId, round, resultState);
+        },
         r -> r.getValueAsInt()
     ));
   }

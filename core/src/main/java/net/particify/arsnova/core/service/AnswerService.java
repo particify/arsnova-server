@@ -24,6 +24,7 @@ import java.util.Locale;
 
 import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.AnswerStatistics;
+import net.particify.arsnova.core.model.AnswerStatisticsSummaryEntry;
 import net.particify.arsnova.core.model.AnswerStatisticsUserSummary;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
 import net.particify.arsnova.core.model.ContentGroup;
@@ -70,4 +71,6 @@ public interface AnswerService extends EntityService<Answer> {
 
   Collection<LeaderboardEntry> buildAliasedLeaderboard(
       ContentGroup contentGroup, String currentContentId, Locale locale);
+
+  List<AnswerStatisticsSummaryEntry> calculateStatsByContentIds(String roomId, List<String> contentIds);
 }
