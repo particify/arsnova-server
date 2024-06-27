@@ -25,6 +25,7 @@ dependencies {
   implementation("com.auth0:java-jwt")
   implementation("org.postgresql:postgresql")
   implementation("org.flywaydb:flyway-core")
+  implementation("org.flywaydb:flyway-database-postgresql")
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   compileOnly(libs.spotbugs.annotations)
