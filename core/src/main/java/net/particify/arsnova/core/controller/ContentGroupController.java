@@ -27,6 +27,7 @@ import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.model.ContentLicenseAttribution;
 import net.particify.arsnova.core.model.ContentTemplate;
 import net.particify.arsnova.core.model.LeaderboardEntry;
+import net.particify.arsnova.core.model.export.ContentCsvImportSummary;
 import net.particify.arsnova.core.model.serialization.View;
 import net.particify.arsnova.core.service.AnswerService;
 import net.particify.arsnova.core.service.ContentGroupService;
@@ -115,10 +116,10 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
   }
 
   @PostMapping(IMPORT_MAPPING)
-  public void importFromFile(@PathVariable final String id, @RequestParam final MultipartFile file)
+  public ContentCsvImportSummary importFromFile(@PathVariable final String id, @RequestParam final MultipartFile file)
       throws IOException {
     final ContentGroup contentGroup = get(id);
-    contentGroupService.importFromCsv(file.getBytes(), contentGroup);
+    return contentGroupService.importFromCsv(file.getBytes(), contentGroup);
   }
 
   @GetMapping(ANSWER_STATISTICS_USER_SUMMARY_MAPPING)

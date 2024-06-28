@@ -39,7 +39,9 @@ import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.model.ContentTemplate;
 import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.Room;
+import net.particify.arsnova.core.model.export.ContentCsvImportSummary;
 import net.particify.arsnova.core.model.export.ContentExport;
+import net.particify.arsnova.core.model.export.CsvImportLineResult;
 import net.particify.arsnova.core.persistence.ContentGroupRepository;
 import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.web.exceptions.BadRequestException;
@@ -166,12 +168,18 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
   }
 
   @Override
-  public void importFromCsv(final byte[] csv, final ContentGroup contentGroup) {
+  public ContentCsvImportSummary importFromCsv(final byte[] csv, final ContentGroup contentGroup) {
     try {
-      final List<Content> contents = csvService.toObject(csv, ContentExport.class).stream()
-          .map(c -> c.toContent())
-          .filter(c -> determineCompatibility(contentGroup.getGroupType(), c))
-          .collect(Collectors.toList());
+      final List<CsvImportLineResult<Content>> results = csvService.toObject(csv, ContentExport.class).stream()
+          .map(r -> new CsvImportLineResult<>(r.line(), r.data() != null ? r.data().toContent() : null))
+          .map(r -> r.data() != null && determineCompatibility(contentGroup.getGroupType(), r.data())
+              ? r
+              : new CsvImportLineResult<Content>(r.line(), null))
+          .toList();
+      final List<Content> contents = results.stream()
+          .filter(r -> r.data() != null)
+          .map(r -> r.data())
+          .toList();
       for (final Content content : contents) {
         content.setRoomId(contentGroup.getRoomId());
         contentService.create(content);
@@ -179,6 +187,10 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
       contentGroup.getContentIds().addAll(
           contents.stream().map(c -> c.getId()).collect(Collectors.toList()));
       createOrUpdateContentGroup(contentGroup);
+      return new ContentCsvImportSummary(
+          results.size(),
+          contents.size(),
+          results.stream().filter(c -> c.data() == null).map(r -> r.line()).toList());
     } catch (final IOException e) {
       throw new BadRequestException("Could not import contents from CSV.", e);
     }

@@ -25,10 +25,13 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
+
+import net.particify.arsnova.core.model.export.CsvImportLineResult;
 
 /**
  * This services handles serialization and deserialization for
@@ -93,11 +96,21 @@ public class CsvService {
    * @param clazz reified target type for deserialization
    * @param <T> target type for deserialization
    */
-  public <T> List<T> toObject(final byte[] csv, final Class<T> clazz) throws IOException {
+  public <T> List<CsvImportLineResult<T>> toObject(final byte[] csv, final Class<T> clazz) throws IOException {
     final char separator = detectSeparator(csv);
     final CsvSchema schema = separator == '\t' ? tsvSchemaFor(clazz) : csvSchemaFor(clazz);
     final MappingIterator<T> iterator = mapper.readerFor(clazz).with(schema).readValues(csv);
-    return iterator.readAll();
+    final List<CsvImportLineResult<T>> items = new ArrayList<>();
+    int i = 0;
+    while (iterator.hasNext()) {
+      i++;
+      try {
+        items.add(new CsvImportLineResult(i, iterator.nextValue()));
+      } catch (final IOException e) {
+        items.add(new CsvImportLineResult(i, null));
+      }
+    }
+    return items;
   }
 
   private String byteOrderMark(final Charset charset) {
