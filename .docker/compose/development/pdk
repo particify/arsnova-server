@@ -184,7 +184,7 @@ seed_gradle_ro_cache() {
 start_dev_server() {
   if [ -f "$LOCAL_ROOT_DIR/$PROJECT/build.gradle.kts" ]; then
     docker compose -f "$PDK_COMPOSE_FILE" restart "$SERVICE"
-    docker compose -f "$PDK_COMPOSE_FILE" exec -it -u dev "$SERVICE" sh -c "/post-attach.sh && trap '{ echo; echo \"Starting production server...\"; }' INT && cd /workspace/$PROJECT && ../gradlew bootRun $@; exit"
+    docker compose -f "$PDK_COMPOSE_FILE" exec -it -u dev "$SERVICE" sh -c "/post-attach.sh && trap '{ echo; echo \"Starting production server...\"; }' INT && cd /workspace/$PROJECT && ../gradlew bootRun $*; exit"
   else
     echo "Service $SERVICE is not supported."
   fi
