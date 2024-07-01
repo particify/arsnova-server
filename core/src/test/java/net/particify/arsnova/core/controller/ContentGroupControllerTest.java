@@ -96,6 +96,7 @@ public class ContentGroupControllerTest {
     contentGroup.setId("Test-ID-ContentGroup");
     contentGroup.setName("ContentGroupNameTest");
     contentGroup.setRoomId(room.getId());
+    contentGroup.setPublished(true);
     contentGroup.setPublishingMode(ContentGroup.PublishingMode.ALL);
 
     when(roomRepository.findOne(room.getId())).thenReturn(room);
@@ -202,6 +203,7 @@ public class ContentGroupControllerTest {
     contentGroup.setName("Test-ContentGroupName");
     contentGroup.setContentIds(Arrays.stream(contentIds).collect(Collectors.toList()));
     contentGroup.setRoomId(roomId);
+    contentGroup.setPublished(true);
     contentGroup.setPublishingMode(ContentGroup.PublishingMode.ALL);
     return contentGroup;
   }
