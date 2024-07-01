@@ -210,8 +210,7 @@ public class ContentGroup extends Entity implements RoomIdAware {
     final int i = contentIds.indexOf(contentId);
     return published && switch (publishingMode) {
       case ALL -> true;
-      case SINGLE -> i == publishingIndex;
-      case UP_TO -> i <= publishingIndex;
+      case UP_TO, LIVE -> i <= publishingIndex;
     };
   }
 
@@ -267,12 +266,12 @@ public class ContentGroup extends Entity implements RoomIdAware {
      */
     ALL,
     /**
-     * Publishes the content referenced by publishingIndex.
-     */
-    SINGLE,
-    /**
      * Publishes contents up to publishingIndex.
      */
-    UP_TO
+    UP_TO,
+    /**
+     * Publishes contents up to publishingIndex for a live use case.
+     */
+    LIVE,
   }
 }
