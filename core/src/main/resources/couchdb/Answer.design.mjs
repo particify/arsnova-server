@@ -40,6 +40,14 @@ export let designDoc = {
         }
       }
     },
+    "by_roomid_contentid_round_result": {
+      "map": function (doc) {
+        if (doc.type === "Answer") {
+          emit([doc.roomId, doc.contentId, doc.round, doc.result], {_rev: doc._rev});
+        }
+      },
+      "reduce": "_count"
+    },
     "points_by_contentid_round_creatorid": {
       "map": function (doc) {
         if (doc.type === "Answer") {

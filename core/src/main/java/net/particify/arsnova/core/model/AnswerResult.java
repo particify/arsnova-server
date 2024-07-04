@@ -66,6 +66,7 @@ public class AnswerResult {
   }
 
   public enum AnswerResultState {
+    UNKNOWN,
     UNANSWERED,
     ABSTAINED,
     CORRECT,

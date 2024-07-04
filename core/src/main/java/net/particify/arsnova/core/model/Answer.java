@@ -65,6 +65,8 @@ public class Answer extends Entity implements RoomIdAware {
   @PositiveOrZero
   private int round = 1;
 
+  private AnswerResult.AnswerResultState result;
+
   @PositiveOrZero
   private int points;
 
@@ -118,6 +120,16 @@ public class Answer extends Entity implements RoomIdAware {
   @JsonView({View.Persistence.class, View.Public.class})
   public void setRound(final int round) {
     this.round = round;
+  }
+
+  @JsonView(View.Persistence.class)
+  public AnswerResult.AnswerResultState getResult() {
+    return result;
+  }
+
+  @JsonView(View.Persistence.class)
+  public void setResult(final AnswerResult.AnswerResultState result) {
+    this.result = result;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})

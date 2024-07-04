@@ -23,6 +23,7 @@ import java.util.Map;
 
 import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.ChoiceAnswerStatistics;
+import net.particify.arsnova.core.model.ContentIdRoundResultKey;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
 
 public interface AnswerRepository extends CrudRepository<Answer, String> {
@@ -45,4 +46,6 @@ public interface AnswerRepository extends CrudRepository<Answer, String> {
   <T extends Answer> List<T> findByContentIdRound(Class<T> clazz, String contentId, int round);
 
   Map<String, Integer> findUserScoreByContentIdRound(String contentId, int round);
+
+  Map<ContentIdRoundResultKey, Integer> countByRoomIdGroupByContentIdRoundResult(String roomId);
 }
