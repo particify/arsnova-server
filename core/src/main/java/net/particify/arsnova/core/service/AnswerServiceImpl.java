@@ -519,7 +519,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     }
     answer.setRoomId(content.getRoomId());
 
-    if (content.isScorable()) {
+    if (content.isScorable() && !answer.isAbstention()) {
       final double achievedPoints = content.calculateAchievedPoints(answer);
       if (content.getState().getAnsweringEndTime() == null) {
         answer.setPoints((int) Math.round(achievedPoints));
