@@ -1,11 +1,14 @@
 alias-nouns:
   alpaca: Alpaca
+  ant: Ant
   armadillo: Armadillo
   badger: Badger
   barracuda: Barracuda
   bat: Bat
   bear: Bear
   beaver: Beaver
+  bee: Bee
+  beetle: Beetle
   bison: Bison
   bumblebee: Bumblebee
   butterfly: Butterfly
@@ -15,6 +18,7 @@ alias-nouns:
   crocodile: Crocodile
   deer: Deer
   dolphin: Dolphin
+  donkey: Donkey
   dragonfly: Dragonfly
   duck: Duck
   eagle: Eagle
@@ -23,11 +27,18 @@ alias-nouns:
   falcon: Falcon
   ferret: Ferret
   flamingo: Flamingo
+  fox: Fox
   giraffe: Giraffe
+  goat: Goat
   goose: Goose
+  gorilla: Gorilla
+  guinea-pig: Guinea pig
   hare: Hare
   hedgehog: Hedgehog
   heron: Heron
+  hippo: Hippo
+  hornet: Hornet
+  horse: Horse
   hummingbird: Hummingbird
   ibex: Ibex
   iguana: Iguana
@@ -38,28 +49,47 @@ alias-nouns:
   koala: Koala
   leopard: Leopard
   lion: Lion
+  lemur: Lemur
   llama: Llama
   lobster: Lobster
   lynx: Lynx
   meerkat: Meerkat
   mole: Mole
+  monkey: Monkey
+  mouse: Mouse
   narwhal: Narwhal
+  octopus: Octopus
+  orca: Orca
   owl: Owl
+  panda: Panda
   peacock: Peacock
   pelican: Pelican
   penguin: Penguin
+  pig: Pig
   pigeon: Pigeon
   piranha: Piranha
+  polar-bear: Polar bear
   puma: Puma
+  rabbit: Rabbit
   racoon: Racoon
+  rat: Rat
+  rhino: Rhino
+  salamander: Salamander
   seal: Seal
+  shark: Shark
+  sheep: Sheep
   squirrel: Squirrel
   starfish: Starfish
+  stork: Stork
   swan: Swan
   tapir: Tapir
   tiger: Tiger
+  turtle: Turtle
   viper: Viper
+  vulture: Vulture
   wolf: Wolf
+  wombat: Wombat
+  woodpecker: Woodpecker
   zebra: Zebra
 
 alias-special-nouns:
@@ -88,16 +118,19 @@ alias-adjectives:
   cheerful: Cheerful {0}
   courageous: Courageous {0}
   creative: Creative {0}
+  colorful: Colorful {0}
   curious: Curious {0}
-  decisive: Decisive {0}
   determined: Determined {0}
   diligent: Diligent {0}
   elegant: Elegant {0}
   enthusiastic: Enthusiastic {0}
   fabulous: Fabulous {0}
   focused: Focused {0}
+  funny: Funny {0}
   generous: Generous {0}
+  giant: Giant {0}
   helpful: Helpful {0}
+  happy: Happy {0}
   hilarious: Hilarious {0}
   imaginative: Imaginative {0}
   ingenious: Ingenious {0}
@@ -112,10 +145,11 @@ alias-adjectives:
   persistent: Persistent {0}
   reliable: Reliable {0}
   resourceful: Resourceful {0}
-  responsible: Responsible {0}
   sincere: Sincere {0}
+  smart: Smart {0}
   swift: Swift {0}
   thoughtful: Thoughtful {0}
+  tiny: Tiny {0}
   unique: Unique {0}
   versatile: Versatile {0}
   vivid: Vivid {0}

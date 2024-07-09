@@ -1,11 +1,14 @@
 alias-nouns:
   alpaca: Alpaga|m
+  ant: Fourmi|f
   armadillo: Tatou|m
   badger: Blaireau|m
   barracuda: Barracuda|m
   bat: Chauve-souris|f
   bear: Ours|m
   beaver: Castor|m
+  bee: Abeille|f
+  beetle: Gracioso|m
   bison: Bison|m
   bumblebee: Bourdon|m
   butterfly: Papillon|m
@@ -15,6 +18,7 @@ alias-nouns:
   crocodile: Crocodile|m
   deer: Daim|m
   dolphin: Dauphin|m
+  donkey: Âne|m
   dragonfly: Libellule|f
   duck: Canard|m
   eagle: Aigle|m
@@ -23,11 +27,18 @@ alias-nouns:
   falcon: Faucon|m
   ferret: Furet|m
   flamingo: Flamand rose|m
+  fox: Renard|m
   giraffe: Girafe|f
+  goat: Chèvre|f
   goose: Oie|f
+  gorilla: Gorille|m
+  guinea-pig: Cochon d'Inde|m
   hare: Lièvre|m
   hedgehog: Hérisson|m
   heron: Héron|m
+  hippo: Hippopotame|m
+  hornet: Frelon|m
+  horse: Cheval|m
   hummingbird: Colibri|m
   ibex: Bouquetin|m
   iguana: Iguane|m
@@ -38,28 +49,47 @@ alias-nouns:
   koala: Koala|m
   leopard: Léopard|m
   lion: Lion|m
+  lemur: Lémurien|m
   llama: Lama|m
   lobster: Homard|m
   lynx: Lynx|m
   meerkat: Suricate|m
   mole: Taupe|f
+  monkey: Singe|m
+  mouse: Souris|f
   narwhal: Narval|m
+  octopus: Poulpe|m
+  orca: Orque|m
   owl: Hibou|m
+  panda: Panda|m
   peacock: Paon|m
   pelican: Pélican|m
   penguin: Pingouin|m
+  pig: Cochon|m
   pigeon: Pigeon|m
   piranha: Piranha|m
+  polar-bear: Ours polaire|m
   puma: Puma|m
+  rabbit: Lapin|m
   racoon: Raton laveur|m
+  rat: Rat|m
+  rhino: Rhinocéros|m
+  salamander: Salamandre|f
   seal: Phoque|m
+  shark: Requin|m
+  sheep: Mouton|m
   squirrel: Écureuil|m
   starfish: Étoile de mer|f
+  stork: Cigogne|f
   swan: Cygne|m
   tapir: Tapir|m
   tiger: Tigre|m
+  turtle: Tortue|f
   viper: Vipère|f
+  vulture: Vautour|m
   wolf: Loup|m
+  wombat: Wombat|m
+  woodpecker: Pic|m
   zebra: Zèbre|m
 
 alias-special-nouns:
@@ -88,16 +118,19 @@ alias-adjectives:
   cheerful: "{0} joyeu{1, choice, f#se|m#x}"
   courageous: "{0} courageu{1, choice, f#se|m#x}"
   creative: "{0} créati{1, choice, f#ve|m#f}"
+  colorful: "{0} multicolore"
   curious: "{0} curieu{1, choice, f#se|m#x}"
-  decisive: "{0} décisif"
   determined: "{0} déterminé{1, choice, f#e|m#}"
   diligent: "{0} diligent{1, choice, f#e|m#}"
   elegant: "{0} élégant{1, choice, f#e|m#}"
   enthusiastic: "{0} enthousiaste"
   fabulous: "{0} fabuleu{1, choice, f#se|m#x}"
   focused: "{0} concentré{1, choice, f#e|m#}"
+  funny: "{0} rigol{1, choice, f#a|m#o}"
   generous: "{0} généreu{1, choice, f#se|m#x}"
+  giant: "{0} géant{1, choice, f#e|m#}"
   helpful: "{0} serviable"
+  happy: "{0} heureu{1, choice, f#se|m#x"
   hilarious: "{0} hilarant{1, choice, f#e|m#}"
   imaginative: "{0} imaginati{1, choice, f#ve|m#f}"
   ingenious: "{0} ingénieu{1, choice, f#se|m#x}"
@@ -112,10 +145,11 @@ alias-adjectives:
   persistent: "{0} persévérant{1, choice, f#e|m#}"
   reliable: "{0} fiable"
   resourceful: "{0} débrouillard{1, choice, f#e|m#}"
-  responsible: "{0} responsable"
   sincere: "{0} sincère"
+  smart: "{0} intelligente"
   swift: "{0} rapide"
   thoughtful: "{0} réfléchi{1, choice, f#e|m#}"
+  tiny: "{0} minuscule"
   unique: "{0} unique"
   versatile: "{0} polyvalent{1, choice, f#e|m#}"
   vivid: "{0} vi{1, choice, f#ve|m#f}"

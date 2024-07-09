@@ -1,11 +1,14 @@
 alias-nouns:
   alpaca: Alpaca|f
+  ant: Hormiga|f
   armadillo: Armadillo|m
   badger: Tejón|m
   barracuda: Barracuda|f
   bat: Murciélago|m
   bear: Oso|m
   beaver: Castor|m
+  bee: Abeja|f
+  beetle: Gracioso|m
   bison: Bisonte|m
   bumblebee: Abejorro|m
   butterfly: Mariposa|f
@@ -15,6 +18,7 @@ alias-nouns:
   crocodile: Cocodrilo|m
   deer: Ciervo|m
   dolphin: Delfín|m
+  donkey: Burro|m
   dragonfly: Libélula|f
   duck: Pato|m
   eagle: Águila|f
@@ -23,11 +27,18 @@ alias-nouns:
   falcon: Halcón|m
   ferret: Hurón|m
   flamingo: Flamenco|m
+  fox: Zorro|m
   giraffe: Jirafa|f
+  goat: Cabra|f
   goose: Ganso|m
+  gorilla: Gorila|m
+  guinea-pig: Cobaya|f
   hare: Liebre|f
   hedgehog: Erizo|m
   heron: Garza|f
+  hippo: Hipopótamo|m
+  hornet: Avispón|m
+  horse: Caballo|m
   hummingbird: Colibrí|m
   ibex: Íbice|m
   iguana: Iguana|f
@@ -38,28 +49,47 @@ alias-nouns:
   koala: Koala|m
   leopard: Leopardo|m
   lion: León|m
+  lemur: Lémur|m
   llama: Llama|f
   lobster: Langosta|f
   lynx: Lince|m
   meerkat: Suricata|f
   mole: Topo|m
+  monkey: Mono|m
+  mouse: Ratón|m
   narwhal: Narval|m
+  octopus: Pulpo|m
+  orca: Orca|f
   owl: Búho|m
+  panda: Panda|m
   peacock: Pavo real|m
   pelican: Pelícano|m
   penguin: Pingüino|m
+  pig: Cerdo|m
   pigeon: Paloma|f
   piranha: Piraña|f
+  polar-bear: Oso polar|m
   puma: Puma|m
+  rabbit: Conejo|m
   racoon: Mapache|m
+  rat: Rata|f
+  rhino: Rinoceronte|m
+  salamander: Salamandra|f
   seal: Foca|f
+  shark: Tiburón|m
+  sheep: Oveja|f
   squirrel: Ardilla|f
   starfish: Estrella de mar|f
+  stork: Cigüeña|f
   swan: Cisne|m
   tapir: Tapir|m
   tiger: Tigre|m
+  turtle: Tortuga|f
   viper: Víbora|f
+  vulture: Buitre|m
   wolf: Lobo|m
+  wombat: Wombat|m
+  woodpecker: Pájaro carpintero|m
   zebra: Cebra|f
 
 alias-special-nouns:
@@ -88,16 +118,19 @@ alias-adjectives:
   cheerful: "{0} alegre"
   courageous: "{0} valiente"
   creative: "{0} creativ{1, choice, f#a|m#o}"
+  colorful: "{0} colorid{1, choice, f#a|m#o}"
   curious: "{0} curios{1, choice, f#a|m#o}"
-  decisive: "{0} decidid{1, choice, f#a|m#o}"
   determined: "{0} determinad{1, choice, f#a|m#o}"
   diligent: "{0} diligente"
   elegant: "{0} elegante"
   enthusiastic: "{0} entusiasta"
   fabulous: "{0} fabulos{1, choice, f#a|m#o}"
   focused: "{0} centrad{1, choice, f#a|m#o}"
+  funny: "{0} gracios{1, choice, f#a|m#o}"
   generous: "{0} generos{1, choice, f#a|m#o}"
+  giant: "{0} gigante"
   helpful: "{0} servicial"
+  happy: "{0} feliz"
   hilarious: "{0} divertid{1, choice, f#a|m#o}"
   imaginative: "{0} imaginativ{1, choice, f#a|m#o}"
   ingenious: "{0} ingenios{1, choice, f#a|m#o}"
@@ -112,10 +145,11 @@ alias-adjectives:
   persistent: "{0} persistente"
   reliable: "{0} fiable"
   resourceful: "{0} hábil"
-  responsible: "{0} responsable"
   sincere: "{0} sincer{1, choice, f#a|m#o}"
+  smart: "{0} inteligente"
   swift: "{0} veloz"
   thoughtful: "{0} atento"
+  tiny: "{0} pequeñ{1, choice, f#a|m#o}"
   unique: "{0} únic{1, choice, f#a|m#o}"
   versatile: "{0} versátil"
   vivid: "{0} viv{1, choice, f#a|m#o}"
