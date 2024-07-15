@@ -114,7 +114,7 @@ public class NumericContent extends Content {
 
   @Override
   public double calculateAchievedPoints(final Answer answer) {
-    if (answer instanceof NumericAnswer numericAnswer) {
+    if (answer instanceof NumericAnswer numericAnswer && numericAnswer.getSelectedNumber() != null) {
       return calculateAchievedPoints(numericAnswer.getSelectedNumber());
     }
     return super.calculateAchievedPoints(answer);
