@@ -52,4 +52,6 @@ public interface ContentService extends EntityService<Content> {
   void start(String contentId);
 
   void stop(String contentId);
+
+  void startRound(String contentId, int round);
 }

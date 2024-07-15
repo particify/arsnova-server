@@ -212,4 +212,17 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
     content.getState().setAnsweringEndTime(new Date());
     update(content);
   }
+
+  @Override
+  public void startRound(final String contentId, final int round) {
+    final var content = get(contentId);
+    final var state = content.getState();
+    // round param is only used for validation to prevent unintended increases.
+    if (round != state.getRound() + 1) {
+      throw new BadRequestException("Invalid round increase.");
+    }
+    content.getState().setRound(state.getRound() + 1);
+    content.getState().setAnsweringEndTime(null);
+    update(content);
+  }
 }
