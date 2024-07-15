@@ -2,6 +2,8 @@ package net.particify.arsnova.core.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -185,6 +187,19 @@ public class ContentTest {
     final AnswerResult answerResult = content.determineAnswerResult(answer);
     assertEquals(0, answerResult.getAchievedPoints(), 0.01);
     assertEquals(AnswerResult.AnswerResultState.ABSTAINED, answerResult.getState());
+  }
+
+  @Test
+  public void testCalculateCompetitivePoints() {
+    final Content content = new Content();
+    content.setId("ID-1");
+    content.setFormat(Content.Format.CHOICE);
+    content.setDuration(20);
+    final Instant endTime = Instant.now();
+    final Instant answerTime = endTime.minus(1200, ChronoUnit.MILLIS);
+    final Content.State state = content.getState();
+    state.setAnsweringEndTime(Date.from(endTime));
+    assertEquals(60, Math.round(content.calculateCompetitivePoints(answerTime, 500)));
   }
 
   private ChoiceQuestionContent buildChoiceQuestionContent(
