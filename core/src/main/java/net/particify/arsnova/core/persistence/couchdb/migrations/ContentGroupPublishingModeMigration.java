@@ -54,19 +54,15 @@ public class ContentGroupPublishingModeMigration extends AbstractMigration {
             "published", Map.of("$exists", true)
         ),
         contentGroup -> {
-          if (!contentGroup.isPublished() || contentGroup.getFirstPublishedIndex() == -1) {
-            contentGroup.setPublishingMode(PublishingMode.NONE);
-          } else if (contentGroup.getFirstPublishedIndex() == 0 && (contentGroup.getLastPublishedIndex() == -1
+          if (contentGroup.getFirstPublishedIndex() == 0 && (contentGroup.getLastPublishedIndex() == -1
               || contentGroup.getLastPublishedIndex() == contentGroup.getContentIds().size() - 1)) {
             contentGroup.setPublishingMode(PublishingMode.ALL);
-          } else if (contentGroup.getLastPublishedIndex() - contentGroup.getFirstPublishedIndex() == 0) {
-            contentGroup.setPublishingMode(PublishingMode.SINGLE);
-            contentGroup.setPublishingIndex(contentGroup.getFirstPublishedIndex());
           } else if (contentGroup.getFirstPublishedIndex() == 0) {
             contentGroup.setPublishingMode(PublishingMode.UP_TO);
             contentGroup.setPublishingIndex(contentGroup.getLastPublishedIndex());
           } else {
-            contentGroup.setPublishingMode(PublishingMode.NONE);
+            contentGroup.setPublished(false);
+            contentGroup.setPublishingMode(PublishingMode.ALL);
           }
           return List.of(contentGroup);
         }
@@ -111,8 +107,7 @@ public class ContentGroupPublishingModeMigration extends AbstractMigration {
       this.publishingIndex = publishingIndex;
     }
 
-    /* Legacy property: Do not serialize. */
-    @JsonIgnore
+    @JsonView(View.Persistence.class)
     public boolean isPublished() {
       return published;
     }
@@ -146,9 +141,7 @@ public class ContentGroupPublishingModeMigration extends AbstractMigration {
   }
 
   enum PublishingMode {
-    NONE,
     ALL,
-    SINGLE,
     UP_TO
   }
 }
