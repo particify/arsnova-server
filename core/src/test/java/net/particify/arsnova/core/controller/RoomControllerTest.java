@@ -170,6 +170,7 @@ public class RoomControllerTest {
       contentGroup.setName("ContentGroupNameTest-" + (i + 1));
       contentGroup.setRoomId(roomId);
       contentGroup.setRevision("ContentGroupRevID");
+      contentGroup.setPublished(true);
       contentGroup.setPublishingMode(ContentGroup.PublishingMode.ALL);
       final List<String> listOfContentsGroups = new ArrayList<>();
       for (int ii = 0; ii < numberOfContents; ii++) {

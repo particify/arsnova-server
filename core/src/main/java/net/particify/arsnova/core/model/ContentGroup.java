@@ -41,9 +41,10 @@ public class ContentGroup extends Entity implements RoomIdAware {
   private GroupType groupType = GroupType.MIXED;
 
   private List<String> contentIds;
+  private boolean published;
 
   @NotNull
-  private PublishingMode publishingMode = PublishingMode.NONE;
+  private PublishingMode publishingMode = PublishingMode.ALL;
 
   /**
    * The index of the published content (publishingMode SINGLE) or the last
@@ -77,6 +78,7 @@ public class ContentGroup extends Entity implements RoomIdAware {
     this.name = contentGroup.name;
     this.groupType = contentGroup.groupType;
     this.contentIds = contentGroup.contentIds;
+    this.published = contentGroup.published;
     this.publishingMode = contentGroup.publishingMode;
     this.publishingIndex = contentGroup.publishingIndex;
     this.statisticsPublished = contentGroup.statisticsPublished;
@@ -130,6 +132,16 @@ public class ContentGroup extends Entity implements RoomIdAware {
     if (publishingIndex != 0 && publishingIndex >= contentIds.size()) {
       this.publishingIndex = contentIds.size() - 1;
     }
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public boolean isPublished() {
+    return published;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setPublished(final boolean published) {
+    this.published = published;
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
@@ -194,17 +206,11 @@ public class ContentGroup extends Entity implements RoomIdAware {
     this.templateId = templateId;
   }
 
-  public boolean isPublished() {
-    return publishingMode != PublishingMode.NONE;
-  }
-
   public boolean isContentPublished(final String contentId) {
     final int i = contentIds.indexOf(contentId);
-    return switch (publishingMode) {
-      case NONE -> false;
+    return published && switch (publishingMode) {
       case ALL -> true;
-      case SINGLE -> i == publishingIndex;
-      case UP_TO -> i <= publishingIndex;
+      case UP_TO, LIVE -> i <= publishingIndex;
     };
   }
 
@@ -238,6 +244,7 @@ public class ContentGroup extends Entity implements RoomIdAware {
         .append("name", name)
         .append("groupType", groupType)
         .append("contentIds", contentIds)
+        .append("published", published)
         .append("publishingMode", publishingMode)
         .append("publishingIndex", publishingIndex)
         .append("statisticsPublished", statisticsPublished)
@@ -255,20 +262,16 @@ public class ContentGroup extends Entity implements RoomIdAware {
 
   public enum PublishingMode {
     /**
-     * Publishes no contents / do not publish content group at all.
-     */
-    NONE,
-    /**
      * Publishes all contents.
      */
     ALL,
     /**
-     * Publishes the content referenced by publishingIndex.
-     */
-    SINGLE,
-    /**
      * Publishes contents up to publishingIndex.
      */
-    UP_TO
+    UP_TO,
+    /**
+     * Publishes contents up to publishingIndex for a live use case.
+     */
+    LIVE,
   }
 }
