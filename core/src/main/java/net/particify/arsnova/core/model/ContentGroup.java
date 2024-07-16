@@ -218,6 +218,15 @@ public class ContentGroup extends Entity implements RoomIdAware {
     return contentIds.contains(contentId);
   }
 
+  public boolean publishContent(final String contentId) {
+    final int index = contentIds.indexOf(contentId);
+    if (publishingIndex >= index) {
+      return false;
+    }
+    publishingIndex = index;
+    return true;
+  }
+
   @Override
   public boolean equals(final Object o) {
     if (this == o) {

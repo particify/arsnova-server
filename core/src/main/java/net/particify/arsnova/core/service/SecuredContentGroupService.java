@@ -53,6 +53,12 @@ public class SecuredContentGroupService extends AbstractSecuredEntityServiceImpl
   }
 
   @Override
+  @PreAuthorize("hasPermission(#groupId, 'contentgroup', 'update') and hasPermission(#contentId, 'content', 'update')")
+  public void startContent(final String groupId, final String contentId, final int round) {
+    contentGroupService.startContent(groupId, contentId, round);
+  }
+
+  @Override
   @PreAuthorize("hasPermission(#contentGroup, 'update')")
   public ContentGroup createOrUpdateContentGroup(final ContentGroup contentGroup) {
     return contentGroupService.createOrUpdateContentGroup(contentGroup);

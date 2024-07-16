@@ -21,7 +21,6 @@ package net.particify.arsnova.core.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -193,10 +192,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
     if (content == null) {
       throw new NotFoundException();
     }
-    if (content.getState().getAnsweringEndTime() != null) {
+    if (!content.startTime()) {
       throw new BadRequestException("Already started.");
     }
-    content.getState().setAnsweringEndTime(Date.from(Instant.now().plusSeconds(content.getDuration())));
     update(content);
   }
 

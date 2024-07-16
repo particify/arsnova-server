@@ -399,6 +399,38 @@ public class Content extends Entity implements RoomIdAware {
   }
 
   /**
+   * Sets answeringEndTime based on the duration. If duration is 0, a duration
+   * of 10 years is used as fallback.
+   *
+   * @return true if the content was not already started.
+   */
+  public boolean startTime() {
+    if (state.answeringEndTime != null) {
+      return false;
+    }
+    state.setAnsweringEndTime(Date.from(
+        duration > 0
+            ? Instant.now().plusSeconds(duration)
+            : Instant.now().plus(3650, ChronoUnit.DAYS)));
+    return true;
+  }
+
+  /**
+   * Starts the next round.
+   *
+   * @param round Only used for validation to prevent accidentally skipping rounds.
+   * @return true if round was successfully updated.
+   */
+  public boolean startRound(final int round) {
+    if (round != state.round + 1) {
+      return false;
+    }
+    state.round = round;
+    state.answeringEndTime = null;
+    return true;
+  }
+
+  /**
    * Creates a deep copy of a Content. Some fields for persistence are ignored.
    */
   public Content copy() {

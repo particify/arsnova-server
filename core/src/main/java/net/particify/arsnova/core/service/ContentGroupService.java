@@ -22,4 +22,6 @@ public interface ContentGroupService extends EntityService<ContentGroup> {
   void importFromCsv(byte[] csv, ContentGroup contentGroup);
 
   ContentGroup createFromTemplate(String roomId, ContentGroupTemplate template, List<ContentTemplate> contentTemplates);
+
+  void startContent(String groupId, String contentId, int round);
 }
