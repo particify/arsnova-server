@@ -58,6 +58,7 @@ public class ContentController extends AbstractEntityController<Content> {
   private static final String BANNED_KEYWORDS_MAPPING = DEFAULT_ID_MAPPING + "/banned-keywords";
   private static final String START_MAPPING = DEFAULT_ID_MAPPING + "/start";
   private static final String STOP_MAPPING = DEFAULT_ID_MAPPING + "/stop";
+  private static final String START_ROUND_MAPPING = DEFAULT_ID_MAPPING + "/start-round";
 
   private ContentService contentService;
   private AnswerService answerService;
@@ -160,6 +161,11 @@ public class ContentController extends AbstractEntityController<Content> {
   @PostMapping(STOP_MAPPING)
   public void stop(@PathVariable final String id) {
     contentService.stop(id);
+  }
+
+  @PostMapping(START_ROUND_MAPPING)
+  public void startRound(@PathVariable final String id, @RequestParam final int round) {
+    contentService.startRound(id, round);
   }
 
   @JsonView(View.Public.class)

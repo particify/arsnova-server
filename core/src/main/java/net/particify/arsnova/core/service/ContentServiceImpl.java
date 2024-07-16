@@ -21,7 +21,6 @@ package net.particify.arsnova.core.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -193,10 +192,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
     if (content == null) {
       throw new NotFoundException();
     }
-    if (content.getState().getAnsweringEndTime() != null) {
+    if (!content.startTime()) {
       throw new BadRequestException("Already started.");
     }
-    content.getState().setAnsweringEndTime(Date.from(Instant.now().plusSeconds(content.getDuration())));
     update(content);
   }
 
@@ -210,6 +208,19 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
       throw new BadRequestException("Not started.");
     }
     content.getState().setAnsweringEndTime(new Date());
+    update(content);
+  }
+
+  @Override
+  public void startRound(final String contentId, final int round) {
+    final var content = get(contentId);
+    final var state = content.getState();
+    // round param is only used for validation to prevent unintended increases.
+    if (round != state.getRound() + 1) {
+      throw new BadRequestException("Invalid round increase.");
+    }
+    content.getState().setRound(state.getRound() + 1);
+    content.getState().setAnsweringEndTime(null);
     update(content);
   }
 }

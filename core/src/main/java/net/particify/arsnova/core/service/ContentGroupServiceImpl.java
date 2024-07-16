@@ -217,6 +217,32 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
     return false;
   }
 
+  @Override
+  public void startContent(final String groupId, final String contentId, final int round) {
+    final var group = get(groupId);
+    if (!group.containsContent(contentId)) {
+      throw new IllegalArgumentException("Content group does not contain content.");
+    }
+    final var content = contentService.get(contentId);
+    if (content == null) {
+      throw new NotFoundException();
+    }
+    if (round > 0) {
+      if (!content.startRound(round)) {
+        throw new BadRequestException("Invalid round.");
+      }
+    }
+    if (group.getPublishingMode() == ContentGroup.PublishingMode.LIVE) {
+      if (!content.startTime()) {
+        throw new BadRequestException("Already started.");
+      }
+    }
+    if (group.publishContent(contentId)) {
+      update(group);
+    }
+    contentService.update(content);
+  }
+
   @EventListener
   public void handleContentGroupDeletion(final AfterDeletionEvent<ContentGroup> event) {
     // Delete contents which were part of the deleted group and are not in
