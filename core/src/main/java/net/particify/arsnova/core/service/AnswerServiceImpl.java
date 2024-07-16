@@ -521,7 +521,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
     if (content.isScorable() && !answer.isAbstention()) {
       final double achievedPoints = content.calculateAchievedPoints(answer);
-      if (content.getState().getAnsweringEndTime() == null) {
+      if (content.getDuration() == 0) {
         answer.setPoints((int) Math.round(achievedPoints));
       } else {
         answer.setPoints((int) Math.round(content.calculateCompetitivePoints(
