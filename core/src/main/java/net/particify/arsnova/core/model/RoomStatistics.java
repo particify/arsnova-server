@@ -137,6 +137,7 @@ public class RoomStatistics {
     private String id;
     private String groupName;
     private int contentCount = 0;
+    private ContentGroup.GroupType groupType;
 
     public ContentGroupStatistics() {
 
@@ -146,6 +147,7 @@ public class RoomStatistics {
       this.setId(contentGroup.getId());
       this.setGroupName(contentGroup.getName());
       this.setContentCount(contentGroup.getContentIds().size());
+      this.setGroupType(contentGroup.getGroupType());
     }
 
     @JsonView(View.Public.class)
@@ -175,12 +177,22 @@ public class RoomStatistics {
       this.contentCount = contentCount;
     }
 
+    @JsonView(View.Public.class)
+    public ContentGroup.GroupType getGroupType() {
+      return groupType;
+    }
+
+    public void setGroupType(final ContentGroup.GroupType groupType) {
+      this.groupType = groupType;
+    }
+
     @Override
     public String toString() {
       return new ToStringCreator(this)
         .append("id", id)
         .append("groupName", groupName)
         .append("contentCount", contentCount)
+        .append("groupType", groupType)
         .toString();
     }
   }
