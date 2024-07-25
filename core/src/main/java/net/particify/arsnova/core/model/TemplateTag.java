@@ -2,6 +2,7 @@ package net.particify.arsnova.core.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import net.particify.arsnova.core.model.serialization.View;
 import net.particify.arsnova.core.validation.LanguageIso639;
@@ -11,7 +12,8 @@ public class TemplateTag extends Entity {
   private String name;
 
   private boolean verified;
-  
+
+  @NotNull
   @LanguageIso639
   private String language;
 

@@ -21,6 +21,7 @@ public class ContentGroupTemplate extends Entity {
   @Size(max = 250)
   private String description;
 
+  @NotNull
   @LanguageIso639
   private String language;
 
