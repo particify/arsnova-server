@@ -28,6 +28,7 @@ import java.util.Objects;
 import org.springframework.core.style.ToStringCreator;
 
 import net.particify.arsnova.core.model.serialization.View;
+import net.particify.arsnova.core.validation.LanguageIso639;
 
 public class Room extends Entity implements RoomIdAware {
   public static class Settings {
@@ -118,6 +119,9 @@ public class Room extends Entity implements RoomIdAware {
   private Date scheduledDeletion;
   private boolean focusModeEnabled;
 
+  @LanguageIso639
+  private String language;
+
   @JsonMerge
   private Settings settings;
 
@@ -148,6 +152,7 @@ public class Room extends Entity implements RoomIdAware {
     this.description = room.description;
     this.closed = room.closed;
     this.settings = room.settings;
+    this.language = room.language;
     this.extensions = room.extensions;
   }
 
@@ -271,6 +276,16 @@ public class Room extends Entity implements RoomIdAware {
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
+  public String getLanguage() {
+    return language;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setLanguage(final String language) {
+    this.language = language;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
   public Settings getSettings() {
     if (settings == null) {
       settings = new Settings();
@@ -335,12 +350,13 @@ public class Room extends Entity implements RoomIdAware {
         && Objects.equals(shortId, room.shortId)
         && Objects.equals(ownerId, room.ownerId)
         && Objects.equals(name, room.name)
-        && Objects.equals(description, room.description);
+        && Objects.equals(description, room.description)
+        && Objects.equals(language, room.language);
   }
 
   @Override
   public int hashCode() {
-    return hashCode(super.hashCode(), closed, shortId, ownerId, name, description);
+    return hashCode(super.hashCode(), closed, shortId, ownerId, name, description, language);
   }
 
   @Override
@@ -353,6 +369,7 @@ public class Room extends Entity implements RoomIdAware {
         .append("closed", closed)
         .append("passwordProtected", isPasswordProtected())
         .append("settings", settings)
+        .append("language", language)
         .append("statistics", statistics)
         .append("focusModeEnabled", focusModeEnabled);
   }

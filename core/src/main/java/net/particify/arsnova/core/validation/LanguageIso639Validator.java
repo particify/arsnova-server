@@ -18,6 +18,6 @@ public class LanguageIso639Validator implements ConstraintValidator<LanguageIso6
 
   @Override
   public boolean isValid(final String value, final ConstraintValidatorContext context) {
-    return value != null && languages.contains(value);
+    return value == null || languages.contains(value);
   }
 }
