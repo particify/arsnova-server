@@ -34,7 +34,7 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     HAVING MIN(ra.lastAccess) < :lastAccessBefore
     """,
   )
-  fun findUserIdsByLastAccessBefore(lastAccessBefore: Date): Iterable<String>
+  fun findUserIdsByLastAccessBefore(lastAccessBefore: Date): Iterable<UUID>
 
   @Query(
     """

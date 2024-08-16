@@ -75,7 +75,7 @@ class RoomAccessController(
   @ResponseBody
   fun getInactiveUserIds(
     @RequestParam lastActiveBefore: String,
-  ): Mono<List<String>> {
+  ): Mono<List<UUID>> {
     val lastActiveBeforeInstant = Date.from(Instant.parse(lastActiveBefore))
     return Mono.just(handler.getUserIdsLastActiveBefore(lastActiveBeforeInstant).toList())
   }
