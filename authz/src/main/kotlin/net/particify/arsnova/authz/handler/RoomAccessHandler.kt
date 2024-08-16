@@ -152,7 +152,7 @@ class RoomAccessHandler(
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun getUserIdsLastActiveBefore(lastActiveBefore: Date): Iterable<String> {
+  fun getUserIdsLastActiveBefore(lastActiveBefore: Date): Iterable<UUID> {
     return roomAccessRepository.findUserIdsByLastAccessBefore(lastActiveBefore)
   }
 
