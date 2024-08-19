@@ -137,6 +137,9 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
               case "publishingMode":
                 contentGroupStats.getCountByPublishingMode().put(key.get(keyOffset + 2).asText(), value);
                 break;
+              case "groupType":
+                contentGroupStats.getCountByGroupType().put(key.get(keyOffset + 2).asText(), value);
+                break;
               case "fromTemplate":
                 contentGroupStats.setFromTemplate(value);
                 break;
