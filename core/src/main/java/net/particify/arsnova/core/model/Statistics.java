@@ -128,6 +128,7 @@ public class Statistics {
 
     private int published;
     private Map<String, Integer> countByPublishingMode = new HashMap<>();
+    private Map<String, Integer> countByGroupType = new HashMap<>();
     private int fromTemplate;
 
     public int getTotalCount() {
@@ -160,6 +161,14 @@ public class Statistics {
 
     public void setCountByPublishingMode(final Map<String, Integer> countByPublishingMode) {
       this.countByPublishingMode = countByPublishingMode;
+    }
+
+    public Map<String, Integer> getCountByGroupType() {
+      return countByGroupType;
+    }
+
+    public void setCountByGroupType(final Map<String, Integer> countByGroupType) {
+      this.countByGroupType = countByGroupType;
     }
 
     public int getFromTemplate() {

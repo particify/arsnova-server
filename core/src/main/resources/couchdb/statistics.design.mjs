@@ -22,6 +22,7 @@ export let designDoc = {
             emit([doc.type, "published"], 1);
           }
           emit([doc.type, "publishingMode", doc.publishingMode], 1);
+          emit([doc.type, "groupType", doc.groupType], 1);
           if (doc.templateId) {
             emit([doc.type, "fromTemplate"], 1);
           }
