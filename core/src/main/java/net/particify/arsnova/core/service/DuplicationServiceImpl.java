@@ -20,6 +20,7 @@ import net.particify.arsnova.core.model.NumericContent;
 import net.particify.arsnova.core.model.PrioritizationChoiceContent;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
+import net.particify.arsnova.core.model.ShortAnswerContent;
 import net.particify.arsnova.core.model.WordcloudContent;
 import net.particify.arsnova.core.web.exceptions.NotFoundException;
 
@@ -117,6 +118,8 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
       return new ChoiceQuestionContent((ChoiceQuestionContent) content);
     } else if (content instanceof WordcloudContent) {
       return new WordcloudContent((WordcloudContent) content);
+    } else if (content instanceof ShortAnswerContent shortAnswerContent) {
+      return new ShortAnswerContent(shortAnswerContent);
     } else if (content instanceof GridImageContent) {
       return new GridImageContent((GridImageContent) content);
     } else if (content instanceof NumericContent) {

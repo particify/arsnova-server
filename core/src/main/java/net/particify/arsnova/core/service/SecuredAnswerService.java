@@ -60,6 +60,18 @@ public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answe
 
   @Override
   @PreAuthorize("hasPermission(#contentId, 'content', 'read')")
+  public TextAnswerStatistics getShortAnswerStatistics(final String contentId, final int round) {
+    return answerService.getShortAnswerStatistics(contentId, round);
+  }
+
+  @Override
+  @PreAuthorize("hasPermission(#contentId, 'content', 'read')")
+  public TextAnswerStatistics getShortAnswerStatistics(final String contentId) {
+    return answerService.getShortAnswerStatistics(contentId);
+  }
+
+  @Override
+  @PreAuthorize("hasPermission(#contentId, 'content', 'read')")
   public NumericAnswerStatistics getNumericStatistics(final String contentId) {
     return answerService.getNumericStatistics(contentId);
   }

@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
@@ -38,7 +39,8 @@ import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.model.ContentTemplate;
 import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.Room;
-import net.particify.arsnova.core.model.WordcloudContent;
+import net.particify.arsnova.core.model.ShortAnswerContent;
+import net.particify.arsnova.core.model.WordContent;
 import net.particify.arsnova.core.model.export.ContentExport;
 import net.particify.arsnova.core.persistence.AnswerRepository;
 import net.particify.arsnova.core.persistence.ContentRepository;
@@ -134,6 +136,15 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
   }
 
   @Override
+  public Set<String> getCorrectTerms(final String contentId) {
+    final Content content = get(contentId);
+    if (content instanceof ShortAnswerContent shortAnswerContent) {
+      return shortAnswerContent.getCorrectTerms();
+    }
+    throw new IllegalArgumentException("Content has no terms.");
+  }
+
+  @Override
   public byte[] exportToCsv(final List<String> contentIds, final String charset) throws JsonProcessingException {
     final List<Content> contents = get(contentIds);
     return csvService.toCsv(
@@ -158,13 +169,13 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
   }
 
   @Override
-  public void addToBannedKeywords(final WordcloudContent wordcloudContent, final String keyword) {
+  public void addToBannedKeywords(final WordContent wordcloudContent, final String keyword) {
     wordcloudContent.addBannedKeyword(keyword);
     update(wordcloudContent);
   }
 
   @Override
-  public void clearBannedKeywords(final WordcloudContent wordcloudContent) {
+  public void clearBannedKeywords(final WordContent wordcloudContent) {
     wordcloudContent.getBannedKeywords().clear();
     update(wordcloudContent);
   }

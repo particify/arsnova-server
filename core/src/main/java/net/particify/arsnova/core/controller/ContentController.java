@@ -21,6 +21,7 @@ package net.particify.arsnova.core.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 import net.particify.arsnova.core.config.AppConfig;
 import net.particify.arsnova.core.model.AnswerStatistics;
 import net.particify.arsnova.core.model.Content;
+import net.particify.arsnova.core.model.WordContent;
 import net.particify.arsnova.core.model.WordcloudContent;
 import net.particify.arsnova.core.model.serialization.View;
 import net.particify.arsnova.core.service.AnswerService;
@@ -52,6 +54,7 @@ public class ContentController extends AbstractEntityController<Content> {
   private static final String GET_ANSWER_STATISTICS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
   private static final String DELETE_ANSWERS_MAPPING = DEFAULT_ID_MAPPING + "/answer";
   private static final String CORRECT_CHOICE_INDEXES_MAPPING = DEFAULT_ID_MAPPING + "/correct-choice-indexes";
+  private static final String CORRECT_TERMS_MAPPING = DEFAULT_ID_MAPPING + "/correct-terms";
   private static final String DUPLICATE_MAPPING = DEFAULT_ID_MAPPING + "/duplicate";
   private static final String CONTENT_COUNT_MAPPING = NO_ID_MAPPING + "/count";
   private static final String EXPORT_MAPPING = NO_ID_MAPPING + "/export";
@@ -92,6 +95,11 @@ public class ContentController extends AbstractEntityController<Content> {
   @GetMapping(CORRECT_CHOICE_INDEXES_MAPPING)
   public List<Integer> getCorrectOptionIndexes(@PathVariable final String id) {
     return contentService.getCorrectChoiceIndexes(id);
+  }
+
+  @GetMapping(CORRECT_TERMS_MAPPING)
+  public Set<String> getCorrectTerms(@PathVariable final String id) {
+    return contentService.getCorrectTerms(id);
   }
 
   @PostMapping(DUPLICATE_MAPPING)
@@ -136,10 +144,10 @@ public class ContentController extends AbstractEntityController<Content> {
       @PathVariable final String id,
       @RequestBody final BannedKeywordRequestEntity bannedKeywordEntity) {
     final Content content = contentService.get(id);
-    if (!(content instanceof WordcloudContent)) {
-      throw new BadRequestException("Only wordcloud contents are supported.");
+    if (!(content instanceof WordContent)) {
+      throw new BadRequestException("Only word contents are supported.");
     }
-    final WordcloudContent wordcloudContent = (WordcloudContent) content;
+    final WordContent wordcloudContent = (WordContent) content;
     contentService.addToBannedKeywords(wordcloudContent, bannedKeywordEntity.keyword);
   }
 
@@ -147,9 +155,9 @@ public class ContentController extends AbstractEntityController<Content> {
   public void clearBannedKeywords(@PathVariable final String id) {
     final Content content = contentService.get(id);
     if (!(content instanceof WordcloudContent)) {
-      throw new BadRequestException("Only wordcloud contents are supported.");
+      throw new BadRequestException("Only word contents are supported.");
     }
-    final WordcloudContent wordcloudContent = (WordcloudContent) content;
+    final WordContent wordcloudContent = (WordContent) content;
     contentService.clearBannedKeywords(wordcloudContent);
   }
 

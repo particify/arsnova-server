@@ -20,11 +20,12 @@ package net.particify.arsnova.core.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
+import java.util.Set;
 
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.model.ContentTemplate;
-import net.particify.arsnova.core.model.WordcloudContent;
+import net.particify.arsnova.core.model.WordContent;
 
 /**
  * The functionality the question service should provide.
@@ -36,13 +37,15 @@ public interface ContentService extends EntityService<Content> {
 
   List<Integer> getCorrectChoiceIndexes(String contentId);
 
+  Set<String> getCorrectTerms(String contentId);
+
   byte[] exportToCsv(List<String> contentIds, String charset) throws JsonProcessingException;
 
   byte[] exportToTsv(List<String> contentIds, String charset) throws JsonProcessingException;
 
-  void addToBannedKeywords(WordcloudContent wordcloudContent, String keyword);
+  void addToBannedKeywords(WordContent wordcloudContent, String keyword);
 
-  void clearBannedKeywords(WordcloudContent wordcloudContent);
+  void clearBannedKeywords(WordContent wordcloudContent);
 
   List<Content> createFromTemplates(
       String roomId,
