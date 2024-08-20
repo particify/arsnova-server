@@ -125,8 +125,11 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
   @GetMapping(ANSWER_STATISTICS_USER_SUMMARY_MAPPING)
   public AnswerStatisticsUserSummary getAnswerStatisticsUserSummary(
       @PathVariable final String id, @PathVariable final String userId) {
+    final ContentGroup contentGroup = get(id);
     return answerService.getStatisticsByUserIdAndContentIds(
-        userId, contentGroupService.get(id).getContentIds());
+        userId,
+        contentGroupService.get(id).getContentIds(),
+        !contentGroup.isCorrectOptionsPublished());
   }
 
   @PostMapping(CREATE_FROM_TEMPLATE_MAPPING)
