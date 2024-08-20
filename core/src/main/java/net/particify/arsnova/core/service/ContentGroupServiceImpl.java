@@ -213,7 +213,8 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
         Content.Format.CHOICE,
         Content.Format.BINARY,
         Content.Format.NUMERIC,
-        Content.Format.SORT);
+        Content.Format.SORT,
+        Content.Format.SHORT_ANSWER);
     if (type == ContentGroup.GroupType.QUIZ
         && quizTypes.contains(content.getFormat())
         && content.isScorable()) {

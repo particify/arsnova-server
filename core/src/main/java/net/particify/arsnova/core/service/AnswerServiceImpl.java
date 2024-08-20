@@ -78,10 +78,12 @@ import net.particify.arsnova.core.model.PrioritizationChoiceContent;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.RoomUserAlias;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
+import net.particify.arsnova.core.model.ShortAnswer;
+import net.particify.arsnova.core.model.ShortAnswerContent;
 import net.particify.arsnova.core.model.TextAnswer;
 import net.particify.arsnova.core.model.TextAnswerStatistics;
 import net.particify.arsnova.core.model.TextAnswerStatistics.TextRoundStatistics;
-import net.particify.arsnova.core.model.WordcloudContent;
+import net.particify.arsnova.core.model.WordContent;
 import net.particify.arsnova.core.persistence.AnswerRepository;
 import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.security.AuthenticationService;
@@ -249,6 +251,11 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       final TextAnswerStatistics textStats2 = getTextStatistics(content.getId(), 2);
       textStats.getRoundStatistics().add(textStats2.getRoundStatistics().get(1));
       stats = textStats;
+    } else if (content.getFormat() == Content.Format.SHORT_ANSWER) {
+      final TextAnswerStatistics shortAnswerStats = getShortAnswerStatistics(content.getId(), 1);
+      final TextAnswerStatistics shortAnswerStats2 = getShortAnswerStatistics(content.getId(), 2);
+      shortAnswerStats.getRoundStatistics().add(shortAnswerStats2.getRoundStatistics().get(1));
+      stats = shortAnswerStats;
     } else if (content.getFormat() == Content.Format.PRIORITIZATION) {
       stats = getPrioritizationStatistics(content.getId());
     } else if (content.getFormat() == Content.Format.NUMERIC) {
@@ -301,14 +308,25 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
         answerResultList);
   }
 
+  @Override
+  public TextAnswerStatistics getTextStatistics(final String contentId) {
+    final Content content = contentService.get(contentId);
+    if (content == null) {
+      throw new NotFoundException();
+    }
+
+    return getTextStatistics(content.getId(), content.getState().getRound());
+  }
+
+  @Override
   public TextAnswerStatistics getTextStatistics(final String contentId, final int round) {
     final Content content = contentService.get(contentId);
     if (content == null) {
       throw new NotFoundException();
     }
     final Set<String> bannedKeywords;
-    if (content instanceof WordcloudContent) {
-      bannedKeywords = ((WordcloudContent) content).getBannedKeywords();
+    if (content instanceof WordContent wordContent) {
+      bannedKeywords = wordContent.getBannedKeywords();
     } else {
       bannedKeywords = Collections.emptySet();
     }
@@ -321,14 +339,100 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
         .collect(Collectors.groupingBy(
             Function.identity(),
             Collectors.counting()));
+
+    return buildTextAnswerStatistics(
+      round,
+      answers.size(),
+      (int) answers.stream().filter(a -> a.isAbstention()).count(),
+      textCounts,
+      bannedKeywords,
+      Collections.emptySet());
+  }
+
+  @Override
+  public TextAnswerStatistics getShortAnswerStatistics(final String contentId) {
+    final Content content = contentService.get(contentId);
+    if (content == null) {
+      throw new NotFoundException();
+    }
+
+    return getShortAnswerStatistics(contentId, content.getState().getRound());
+  }
+
+  @Override
+  public TextAnswerStatistics getShortAnswerStatistics(final String contentId, final int round) {
+    final Content content = contentService.get(contentId);
+    if (content == null) {
+      throw new NotFoundException();
+    }
+    final Set<String> bannedKeywords;
+    if (content instanceof WordContent wordContent) {
+      bannedKeywords = wordContent.getBannedKeywords();
+    } else {
+      bannedKeywords = Collections.emptySet();
+    }
+    final List<ShortAnswer> answers =
+        answerRepository.findByContentIdRound(ShortAnswer.class, contentId, round);
+    final Map<String, Long> textCounts = answers.stream()
+        .map(a -> a.getText())
+        .collect(Collectors.groupingBy(
+            Function.identity(),
+            Collectors.counting()));
+    final Set<String> preferredKeywords = content instanceof ShortAnswerContent shortAnswerContent
+        ? shortAnswerContent.getCorrectTerms()
+        : Collections.emptySet();
+
+    return buildTextAnswerStatistics(
+        round,
+        answers.size(),
+        (int) answers.stream().filter(a -> a.isAbstention()).count(),
+        textCounts,
+        bannedKeywords,
+        preferredKeywords);
+  }
+
+  private TextAnswerStatistics buildTextAnswerStatistics(
+      final int round,
+      final int answerCount,
+      final int abstentionCount,
+      final Map<String, Long> textCounts,
+      final Set<String> bannedKeywords,
+      final Set<String> preferredKeywords) {
     final TextAnswerStatistics stats = new TextAnswerStatistics();
     final TextRoundStatistics roundStats = new TextRoundStatistics();
     roundStats.setRound(round);
-    roundStats.setAbstentionCount((int) answers.stream().filter(a -> a.getTexts().isEmpty()).count());
-    /* Group by text similarity and then choose the most common variant as
-     * key and calculate the new count */
-    final Map<String, Integer> countsBySimilarity = textCounts.entrySet().stream()
-        .collect(Collectors.groupingBy(e -> WordcloudContent.normalizeText(e.getKey())))
+    roundStats.setAbstentionCount(abstentionCount);
+    final Map<String, String> normalizedPreferredKeywords = preferredKeywords.stream()
+        .collect(Collectors.toMap(
+            k -> WordContent.normalizeText(k),
+            k -> k
+        ));
+    Map<String, Integer> countsBySimilarity = buildCountsBySimilarityMap(textCounts, bannedKeywords);
+    if (!preferredKeywords.isEmpty()) {
+      countsBySimilarity = countsBySimilarity.entrySet().stream()
+          .collect(Collectors.toMap(
+              entry -> normalizedPreferredKeywords.getOrDefault(
+                  WordContent.normalizeText(entry.getKey()), entry.getKey()),
+              entry -> entry.getValue()
+          ));
+    }
+    roundStats.setTexts(countsBySimilarity.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
+    roundStats.setAnswerCount(answerCount);
+    roundStats.setIndependentCounts(countsBySimilarity.values().stream().collect(Collectors.toList()));
+    stats.setRoundStatistics(new ArrayList(Collections.nCopies(round, null)));
+    stats.getRoundStatistics().set(round - 1, roundStats);
+    return stats;
+  }
+
+  /**
+   * Group by text similarity and then choose the most common variant as
+   * key and calculate the new count.
+   */
+  private Map<String, Integer> buildCountsBySimilarityMap(
+      final Map<String, Long> textCounts,
+      final Set<String> bannedKeywords) {
+    return textCounts.entrySet().stream()
+        .collect(Collectors.groupingBy(e -> WordContent.normalizeText(e.getKey())))
         .entrySet().stream()
         .filter(entry -> !bannedKeywords.contains(entry.getKey()))
         .collect(Collectors.toMap(
@@ -343,23 +447,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
                 .reduce(Long::sum)
                 .map(Long::intValue)
                 .orElse(0)));
-    roundStats.setTexts(countsBySimilarity.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
-    roundStats.setAnswerCount(answers.size());
-    roundStats.setIndependentCounts(countsBySimilarity.values().stream().collect(Collectors.toList()));
-    stats.setRoundStatistics(new ArrayList(Collections.nCopies(round, null)));
-    stats.getRoundStatistics().set(round - 1, roundStats);
-
-    return stats;
-  }
-
-  @Override
-  public TextAnswerStatistics getTextStatistics(final String contentId) {
-    final Content content = contentService.get(contentId);
-    if (content == null) {
-      throw new NotFoundException();
-    }
-
-    return getTextStatistics(content.getId(), content.getState().getRound());
   }
 
   @Override

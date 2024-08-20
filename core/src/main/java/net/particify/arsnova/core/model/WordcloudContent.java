@@ -3,24 +3,15 @@ package net.particify.arsnova.core.model;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 import net.particify.arsnova.core.model.serialization.View;
 
-public class WordcloudContent extends Content {
-  private static final Pattern specialCharPattern = Pattern.compile("[^\\p{IsAlphabetic}\\p{IsDigit}]");
+public class WordcloudContent extends WordContent {
 
   @Min(1)
   @Max(10)
   private int maxAnswers = 1;
-
-  @Size(max = 50)
-  private Set<@NotBlank String> bannedKeywords;
 
   public WordcloudContent() {
 
@@ -41,29 +32,6 @@ public class WordcloudContent extends Content {
     this.maxAnswers = maxAnswers;
   }
 
-  @JsonView(View.Persistence.class)
-  public Set<String> getBannedKeywords() {
-    if (bannedKeywords == null) {
-      bannedKeywords = new HashSet<>();
-    }
-
-    return bannedKeywords;
-  }
-
-  @JsonView(View.Persistence.class)
-  public void setBannedKeywords(final Set<String> bannedKeywords) {
-    this.bannedKeywords = bannedKeywords;
-  }
-
-  public WordcloudContent addBannedKeyword(final String keyword) {
-    this.getBannedKeywords().add(normalizeText(keyword));
-    return this;
-  }
-
-  public static String normalizeText(final String text) {
-    return specialCharPattern.matcher(text.toLowerCase()).replaceAll("");
-  }
-
   @Override
   public WordcloudContent copy() {
     return new WordcloudContent(this);
@@ -81,12 +49,11 @@ public class WordcloudContent extends Content {
       return false;
     }
     final WordcloudContent that = (WordcloudContent) o;
-
-    return maxAnswers == that.maxAnswers && Objects.equals(bannedKeywords, that.bannedKeywords);
+    return maxAnswers == that.maxAnswers;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), maxAnswers, bannedKeywords);
+    return Objects.hash(super.hashCode(), maxAnswers);
   }
 }

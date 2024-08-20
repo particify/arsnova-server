@@ -3,6 +3,8 @@ package net.particify.arsnova.core.model.export;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,6 +16,7 @@ import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.NumericContent;
 import net.particify.arsnova.core.model.PrioritizationChoiceContent;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
+import net.particify.arsnova.core.model.ShortAnswerContent;
 import net.particify.arsnova.core.model.WordcloudContent;
 import net.particify.arsnova.core.model.serialization.View;
 
@@ -82,6 +85,9 @@ public class ContentExport {
     } else if (content instanceof WordcloudContent) {
       final WordcloudContent wordcloudContent = (WordcloudContent) content;
       this.options = List.of(String.valueOf(wordcloudContent.getMaxAnswers()));
+    } else if (content instanceof ShortAnswerContent shortAnswerContent) {
+      this.options = new ArrayList<>(shortAnswerContent.getCorrectTerms());
+      this.correctOptions = this.options;
     }
   }
 
@@ -104,6 +110,8 @@ public class ContentExport {
       content = toNumericContent();
     } else if (format == Content.Format.WORDCLOUD) {
       content = toWordcloudContent();
+    } else if (format == Content.Format.SHORT_ANSWER) {
+      content = toShortAnswerContent();
     } else {
       content = new Content();
     }
@@ -222,5 +230,16 @@ public class ContentExport {
     wordcloudContent.setMaxAnswers(maxAnswers);
 
     return wordcloudContent;
+  }
+
+  private ShortAnswerContent toShortAnswerContent() {
+    final ShortAnswerContent shortAnswerContent = new ShortAnswerContent();
+    if (this.options.isEmpty() && this.correctOptions.isEmpty()
+        || !this.options.isEmpty() && !this.correctOptions.isEmpty() && !this.options.equals(this.correctOptions)) {
+      throw new ImportValidationException();
+    }
+    shortAnswerContent.setCorrectTerms(new HashSet<>(!this.options.isEmpty() ? this.options : this.correctOptions));
+
+    return shortAnswerContent;
   }
 }

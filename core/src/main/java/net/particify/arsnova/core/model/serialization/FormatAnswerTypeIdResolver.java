@@ -31,6 +31,7 @@ import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.MultipleTextsAnswer;
 import net.particify.arsnova.core.model.NumericAnswer;
 import net.particify.arsnova.core.model.PrioritizationAnswer;
+import net.particify.arsnova.core.model.ShortAnswer;
 import net.particify.arsnova.core.model.TextAnswer;
 
 public class FormatAnswerTypeIdResolver extends TypeIdResolverBase {
@@ -71,6 +72,8 @@ public class FormatAnswerTypeIdResolver extends TypeIdResolverBase {
         return TypeFactory.defaultInstance().constructType(MultipleTextsAnswer.class);
       case PRIORITIZATION:
         return TypeFactory.defaultInstance().constructType(PrioritizationAnswer.class);
+      case SHORT_ANSWER:
+        return TypeFactory.defaultInstance().constructType(ShortAnswer.class);
       default:
         throw new IllegalArgumentException("Unsupported type ID.");
     }

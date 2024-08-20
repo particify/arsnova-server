@@ -2,6 +2,7 @@ package net.particify.arsnova.core.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
+import java.util.Set;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.access.prepost.PreFilter;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.model.ContentTemplate;
-import net.particify.arsnova.core.model.WordcloudContent;
+import net.particify.arsnova.core.model.WordContent;
 
 @Service
 public class SecuredContentService extends AbstractSecuredEntityServiceImpl<Content>
@@ -42,6 +43,12 @@ public class SecuredContentService extends AbstractSecuredEntityServiceImpl<Cont
   }
 
   @Override
+  @PreAuthorize("hasPermission(#contentId, 'content', 'read-correct-options')")
+  public Set<String> getCorrectTerms(final String contentId) {
+    return contentService.getCorrectTerms(contentId);
+  }
+
+  @Override
   @PreFilter(value = "hasPermission(filterObject, 'content', 'owner')", filterTarget = "contentIds")
   public byte[] exportToCsv(final List<String> contentIds, final String charset) throws JsonProcessingException {
     return contentService.exportToCsv(contentIds, charset);
@@ -55,13 +62,13 @@ public class SecuredContentService extends AbstractSecuredEntityServiceImpl<Cont
 
   @Override
   @PreAuthorize("hasPermission(#wordcloudContent, 'moderate')")
-  public void addToBannedKeywords(final WordcloudContent wordcloudContent, final String keyword) {
+  public void addToBannedKeywords(final WordContent wordcloudContent, final String keyword) {
     contentService.addToBannedKeywords(wordcloudContent, keyword);
   }
 
   @Override
   @PreAuthorize("hasPermission(#wordcloudContent, 'moderate')")
-  public void clearBannedKeywords(final WordcloudContent wordcloudContent) {
+  public void clearBannedKeywords(final WordContent wordcloudContent) {
     contentService.clearBannedKeywords(wordcloudContent);
   }
 

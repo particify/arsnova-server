@@ -47,6 +47,10 @@ public interface AnswerService extends EntityService<Answer> {
 
   TextAnswerStatistics getTextStatistics(String contentId);
 
+  TextAnswerStatistics getShortAnswerStatistics(String contentId, int round);
+
+  TextAnswerStatistics getShortAnswerStatistics(String contentId);
+
   PrioritizationAnswerStatistics getPrioritizationStatistics(String contentId);
 
   NumericAnswerStatistics getNumericStatistics(String contentId, int round);
