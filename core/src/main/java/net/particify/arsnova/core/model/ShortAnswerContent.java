@@ -1,7 +1,9 @@
 package net.particify.arsnova.core.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -32,6 +34,11 @@ public class ShortAnswerContent extends WordContent {
   @JsonView(View.Public.class)
   public boolean isScorable() {
     return true;
+  }
+
+  @Override
+  public List<String> getCorrectnessCriteria() {
+    return new ArrayList<>(correctTerms);
   }
 
   @Override

@@ -70,6 +70,11 @@ public class NumericContent extends Content {
   }
 
   @Override
+  public CorrectnessCriteria getCorrectnessCriteria() {
+    return new CorrectnessCriteria(correctNumber, tolerance);
+  }
+
+  @Override
   public AnswerResult determineAnswerResult(final Answer answer) {
     if (answer instanceof NumericAnswer numericAnswer) {
       return determineAnswerResult(numericAnswer);
@@ -158,4 +163,7 @@ public class NumericContent extends Content {
   public int hashCode() {
     return Objects.hash(super.hashCode(), minNumber, maxNumber, correctNumber, tolerance);
   }
+
+  @JsonView(View.Public.class)
+  record CorrectnessCriteria(double correctNumber, double tolerance) {}
 }
