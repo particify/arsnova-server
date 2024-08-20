@@ -266,14 +266,16 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   }
 
   public AnswerStatisticsUserSummary getStatisticsByUserIdAndContentIds(
-      final String userId, final List<String> contentIds) {
+      final String userId, final List<String> contentIds, final boolean hideResult) {
     final List<Content> contents = contentService.get(contentIds);
     final List<String> answerIds = answerRepository.findIdsByAnswerStubs(contents.stream()
         .map(c -> new Answer(c, userId)).collect(Collectors.toList()));
     final List<Answer> answers = get(answerIds);
     // Results for answered contents
     final Map<String, AnswerResult> answerResults = answers.stream()
-        .map(a -> contents.get(contentIds.indexOf(a.getContentId())).determineAnswerResult(a))
+        .map(a -> hideResult
+            ? new AnswerResult(a.getContentId(), 0, 0, 0, a.getDurationMs(), AnswerResult.AnswerResultState.NEUTRAL)
+            : contents.get(contentIds.indexOf(a.getContentId())).determineAnswerResult(a))
         .collect(Collectors.toMap(
             AnswerResult::getContentId,
             Function.identity(),

@@ -85,8 +85,10 @@ public class SecuredAnswerService extends AbstractSecuredEntityServiceImpl<Answe
   @Override
   @PreAuthorize("hasPermission(#userId, 'userprofile', 'owner')")
   public AnswerStatisticsUserSummary getStatisticsByUserIdAndContentIds(
-      final String userId, final List<String> contentIds) {
-    return answerService.getStatisticsByUserIdAndContentIds(userId, contentIds);
+      final String userId,
+      final List<String> contentIds,
+      final boolean hideResult) {
+    return answerService.getStatisticsByUserIdAndContentIds(userId, contentIds, hideResult);
   }
 
   @Override

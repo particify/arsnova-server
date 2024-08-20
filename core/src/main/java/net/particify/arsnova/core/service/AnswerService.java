@@ -53,7 +53,10 @@ public interface AnswerService extends EntityService<Answer> {
 
   NumericAnswerStatistics getNumericStatistics(String contentId);
 
-  AnswerStatisticsUserSummary getStatisticsByUserIdAndContentIds(String userId, List<String> contentIds);
+  AnswerStatisticsUserSummary getStatisticsByUserIdAndContentIds(
+      String userId,
+      List<String> contentIds,
+      boolean hideResult);
 
   List<String> getAnswerIdsByContentIdNotHidden(String contentId);
 
