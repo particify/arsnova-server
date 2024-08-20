@@ -18,14 +18,18 @@
 
 package net.particify.arsnova.core.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import net.particify.arsnova.core.model.Answer;
+import net.particify.arsnova.core.model.AnswerResponse;
 import net.particify.arsnova.core.model.TextAnswer;
 import net.particify.arsnova.core.service.AnswerService;
+import net.particify.arsnova.core.service.ContentService;
 import net.particify.arsnova.core.web.exceptions.BadRequestException;
 
 @RestController
@@ -33,13 +37,27 @@ import net.particify.arsnova.core.web.exceptions.BadRequestException;
 public class AnswerController extends AbstractEntityController<Answer> {
   protected static final String REQUEST_MAPPING = "/room/{roomId}/answer";
   private static final String HIDE_MAPPING = DEFAULT_ID_MAPPING + "/hide";
+  private static final String CHECK_RESULT_MAPPING = "/check-result";
 
   private AnswerService answerService;
+  private ContentService contentService;
 
   public AnswerController(
-      @Qualifier("securedAnswerService") final AnswerService answerService) {
+      @Qualifier("securedAnswerService") final AnswerService answerService,
+      @Qualifier("securedContentService") final ContentService contentService) {
     super(answerService);
     this.answerService = answerService;
+    this.contentService = contentService;
+  }
+
+  @PostMapping(CHECK_RESULT_MAPPING)
+  public AnswerResponse postAndCheckResult(
+      @RequestBody final Answer answer,
+      final HttpServletResponse httpServletResponse) {
+    final var persistedAnswer = super.post(answer, httpServletResponse);
+    final var content = contentService.get(answer.getContentId());
+    final var result = content.determineAnswerResult(answer);
+    return new AnswerResponse(persistedAnswer, result, content.getCorrectnessCriteria());
   }
 
   @Override

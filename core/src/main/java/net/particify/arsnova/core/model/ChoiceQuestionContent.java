@@ -154,6 +154,11 @@ public class ChoiceQuestionContent extends Content {
   }
 
   @Override
+  public List<Integer> getCorrectnessCriteria() {
+    return correctOptionIndexes;
+  }
+
+  @Override
   public AnswerResult determineAnswerResult(final Answer answer) {
     if (answer instanceof ChoiceAnswer) {
       return determineAnswerResult((ChoiceAnswer) answer);

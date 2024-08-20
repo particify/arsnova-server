@@ -375,6 +375,10 @@ public class Content extends Entity implements RoomIdAware {
     return false;
   }
 
+  public Object getCorrectnessCriteria() {
+    return null;
+  }
+
   public AnswerResult determineAnswerResult(final Answer answer) {
     final AnswerResult.AnswerResultState state = answer.isAbstention()
         ? AnswerResult.AnswerResultState.ABSTAINED
