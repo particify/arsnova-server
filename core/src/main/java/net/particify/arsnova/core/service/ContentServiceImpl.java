@@ -169,15 +169,15 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
   }
 
   @Override
-  public void addToBannedKeywords(final WordContent wordcloudContent, final String keyword) {
-    wordcloudContent.addBannedKeyword(keyword);
-    update(wordcloudContent);
+  public void addToBannedKeywords(final WordContent wordContent, final String keyword) {
+    wordContent.addBannedKeyword(keyword);
+    update(wordContent);
   }
 
   @Override
-  public void clearBannedKeywords(final WordContent wordcloudContent) {
-    wordcloudContent.getBannedKeywords().clear();
-    update(wordcloudContent);
+  public void clearBannedKeywords(final WordContent wordContent) {
+    wordContent.getBannedKeywords().clear();
+    update(wordContent);
   }
 
   @Override
