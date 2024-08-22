@@ -43,9 +43,9 @@ public interface ContentService extends EntityService<Content> {
 
   byte[] exportToTsv(List<String> contentIds, String charset) throws JsonProcessingException;
 
-  void addToBannedKeywords(WordContent wordcloudContent, String keyword);
+  void addToBannedKeywords(WordContent wordContent, String keyword);
 
-  void clearBannedKeywords(WordContent wordcloudContent);
+  void clearBannedKeywords(WordContent wordContent);
 
   List<Content> createFromTemplates(
       String roomId,

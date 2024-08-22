@@ -61,15 +61,15 @@ public class SecuredContentService extends AbstractSecuredEntityServiceImpl<Cont
   }
 
   @Override
-  @PreAuthorize("hasPermission(#wordcloudContent, 'moderate')")
-  public void addToBannedKeywords(final WordContent wordcloudContent, final String keyword) {
-    contentService.addToBannedKeywords(wordcloudContent, keyword);
+  @PreAuthorize("hasPermission(#wordContent, 'moderate')")
+  public void addToBannedKeywords(final WordContent wordContent, final String keyword) {
+    contentService.addToBannedKeywords(wordContent, keyword);
   }
 
   @Override
-  @PreAuthorize("hasPermission(#wordcloudContent, 'moderate')")
-  public void clearBannedKeywords(final WordContent wordcloudContent) {
-    contentService.clearBannedKeywords(wordcloudContent);
+  @PreAuthorize("hasPermission(#wordContent, 'moderate')")
+  public void clearBannedKeywords(final WordContent wordContent) {
+    contentService.clearBannedKeywords(wordContent);
   }
 
   @Override

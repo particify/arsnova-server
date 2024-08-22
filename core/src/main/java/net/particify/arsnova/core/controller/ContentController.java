@@ -39,7 +39,6 @@ import net.particify.arsnova.core.config.AppConfig;
 import net.particify.arsnova.core.model.AnswerStatistics;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.WordContent;
-import net.particify.arsnova.core.model.WordcloudContent;
 import net.particify.arsnova.core.model.serialization.View;
 import net.particify.arsnova.core.service.AnswerService;
 import net.particify.arsnova.core.service.ContentService;
@@ -147,18 +146,18 @@ public class ContentController extends AbstractEntityController<Content> {
     if (!(content instanceof WordContent)) {
       throw new BadRequestException("Only word contents are supported.");
     }
-    final WordContent wordcloudContent = (WordContent) content;
-    contentService.addToBannedKeywords(wordcloudContent, bannedKeywordEntity.keyword);
+    final WordContent wordContent = (WordContent) content;
+    contentService.addToBannedKeywords(wordContent, bannedKeywordEntity.keyword);
   }
 
   @DeleteMapping(BANNED_KEYWORDS_MAPPING)
   public void clearBannedKeywords(@PathVariable final String id) {
     final Content content = contentService.get(id);
-    if (!(content instanceof WordcloudContent)) {
+    if (!(content instanceof WordContent)) {
       throw new BadRequestException("Only word contents are supported.");
     }
-    final WordContent wordcloudContent = (WordContent) content;
-    contentService.clearBannedKeywords(wordcloudContent);
+    final WordContent wordContent = (WordContent) content;
+    contentService.clearBannedKeywords(wordContent);
   }
 
   @PostMapping(START_MAPPING)
