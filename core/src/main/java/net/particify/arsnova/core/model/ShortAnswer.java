@@ -22,6 +22,11 @@ public class ShortAnswer extends Answer {
   }
 
   @Override
+  public boolean isAbstention() {
+    return text == null;
+  }
+
+  @Override
   public boolean equals(final Object o) {
     if (this == o) {
       return true;
