@@ -19,11 +19,13 @@
 package net.particify.arsnova.core.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.core.style.ToStringCreator;
 
 import net.particify.arsnova.core.model.serialization.View;
@@ -39,6 +41,7 @@ public class ChoiceQuestionContent extends Content {
     }
 
     @NotBlank
+    @Length(max = 250)
     private String label;
 
     private String renderedLabel;
@@ -89,7 +92,9 @@ public class ChoiceQuestionContent extends Content {
 
   }
 
+  @Valid
   private List<AnswerOption> options = new ArrayList<>();
+
   private List<Integer> correctOptionIndexes = new ArrayList<>();
   private boolean multiple;
 
