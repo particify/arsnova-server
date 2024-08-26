@@ -37,7 +37,7 @@ import net.particify.arsnova.core.persistence.couchdb.support.MangoCouchDbConnec
 @Service
 public class ContentGroupPublishingModeMigration extends AbstractMigration {
   private static final String ID = "20240403144000";
-  private static final String ROOM_INDEX = "content-group-published-index";
+  private static final String CONTENT_GROUP_INDEX = "content-group-published-index";
 
   public ContentGroupPublishingModeMigration(
       final MangoCouchDbConnector connector) {
@@ -48,10 +48,10 @@ public class ContentGroupPublishingModeMigration extends AbstractMigration {
   public void initMigration() {
     addEntityMigrationStepHandler(
         ContentGroupMigrationEntity.class,
-        ROOM_INDEX,
+        CONTENT_GROUP_INDEX,
         Map.of(
             "type", "ContentGroup",
-            "published", Map.of("$exists", true)
+            "publishingMode", Map.of("$exists", false)
         ),
         contentGroup -> {
           if (contentGroup.getFirstPublishedIndex() == 0 && (contentGroup.getLastPublishedIndex() == -1
