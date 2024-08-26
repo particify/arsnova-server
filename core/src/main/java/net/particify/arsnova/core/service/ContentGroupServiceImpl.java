@@ -19,10 +19,13 @@
 package net.particify.arsnova.core.service;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
@@ -33,6 +36,7 @@ import org.springframework.validation.Validator;
 
 import net.particify.arsnova.core.event.AfterDeletionEvent;
 import net.particify.arsnova.core.event.BeforeDeletionEvent;
+import net.particify.arsnova.core.event.BeforeUpdateEvent;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.ContentGroup;
 import net.particify.arsnova.core.model.ContentGroupTemplate;
@@ -51,6 +55,7 @@ import net.particify.arsnova.core.web.exceptions.NotFoundException;
 @Primary
 public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGroup>
     implements ContentGroupService {
+  private static final Logger logger = LoggerFactory.getLogger(ContentGroupServiceImpl.class);
   private ContentGroupRepository contentGroupRepository;
   private ContentService contentService;
   private CsvService csvService;
@@ -271,6 +276,26 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
     final List<String> idsForDeletion = event.getEntity().getContentIds().stream()
             .filter(id -> !idsWithGroup.contains(id)).toList();
     contentService.delete(contentService.get(idsForDeletion), Initiator.CASCADE);
+  }
+
+  @EventListener
+  public void handleContentGroupUpdate(final BeforeUpdateEvent<ContentGroup> event) {
+    // Reset answeringEndTime of contents when live mode is disabled
+    if (event.getOldEntity().getPublishingMode() == ContentGroup.PublishingMode.LIVE
+        && event.getEntity().getPublishingMode() != ContentGroup.PublishingMode.LIVE) {
+      try {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("answeringEndTime", null);
+        contentService.patch(
+            contentService.get(event.getEntity().getContentIds()).stream()
+                .filter(c -> c.getState().getAnsweringEndTime() != null)
+                .toList(),
+            map,
+            Content::getState);
+      } catch (final IOException e) {
+        logger.error("Failed to patch state of contents.", e);
+      }
+    }
   }
 
   @EventListener
