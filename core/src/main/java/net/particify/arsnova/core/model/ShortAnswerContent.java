@@ -43,7 +43,7 @@ public class ShortAnswerContent extends WordContent {
 
   @Override
   public AnswerResult determineAnswerResult(final Answer answer) {
-    if (answer instanceof ShortAnswer shortAnswer) {
+    if (!answer.isAbstention() && answer instanceof ShortAnswer shortAnswer) {
       return determineAnswerResult(shortAnswer);
     }
     return super.determineAnswerResult(answer);
@@ -75,7 +75,7 @@ public class ShortAnswerContent extends WordContent {
 
   @Override
   public double calculateAchievedPoints(final Answer answer) {
-    if (answer instanceof ShortAnswer shortAnswer && shortAnswer.getText() != null) {
+    if (!answer.isAbstention() && answer instanceof ShortAnswer shortAnswer) {
       return calculateAchievedPoints(shortAnswer.getText());
     }
     return super.calculateAchievedPoints(answer);

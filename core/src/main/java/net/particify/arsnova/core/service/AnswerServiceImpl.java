@@ -374,6 +374,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     final List<ShortAnswer> answers =
         answerRepository.findByContentIdRound(ShortAnswer.class, contentId, round);
     final Map<String, Long> textCounts = answers.stream()
+        .filter(a -> !a.isAbstention())
         .map(a -> a.getText())
         .collect(Collectors.groupingBy(
             Function.identity(),
