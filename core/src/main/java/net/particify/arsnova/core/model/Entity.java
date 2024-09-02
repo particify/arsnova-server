@@ -75,6 +75,9 @@ public abstract class Entity {
 
   @JsonView(View.Persistence.class)
   public Date getCreationTimestamp() {
+    if (creationTimestamp == null) {
+      creationTimestamp = new Date(0);
+    }
     return creationTimestamp;
   }
 
