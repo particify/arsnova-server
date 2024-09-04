@@ -1,5 +1,6 @@
 package net.particify.arsnova.core.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import net.particify.arsnova.core.model.ContentGroup;
@@ -24,5 +25,5 @@ public interface ContentGroupService extends EntityService<ContentGroup> {
 
   ContentGroup createFromTemplate(String roomId, ContentGroupTemplate template, List<ContentTemplate> contentTemplates);
 
-  void startContent(String groupId, String contentId, int round);
+  void startContent(String groupId, String contentId, int round) throws IOException;
 }
