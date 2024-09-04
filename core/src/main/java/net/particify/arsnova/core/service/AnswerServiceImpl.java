@@ -693,6 +693,9 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       final Map<String, Integer> contentScores =
           answerRepository.findUserScoreByContentIdRound(content.getId(), content.getState().getRound());
       for (final Map.Entry<String, Integer> entry : contentScores.entrySet()) {
+        if (entry.getKey().equals(NIL_UUID)) {
+          continue;
+        }
         final int score = leaderboard.getOrDefault(entry.getKey(), 0);
         leaderboard.put(entry.getKey(), score + entry.getValue());
       }
@@ -706,6 +709,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     final List<Answer> answers = answerRepository.findByContentIdRound(
         Answer.class, contentId, content.getState().getRound());
     return answers.stream()
+      .filter(a -> !a.getCreatorId().equals(NIL_UUID))
       .collect(Collectors.toMap(
           a -> a.getCreatorId(),
           a -> new LeaderboardCurrentResult(
