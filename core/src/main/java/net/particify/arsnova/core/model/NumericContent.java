@@ -71,7 +71,7 @@ public class NumericContent extends Content {
 
   @Override
   public CorrectnessCriteria getCorrectnessCriteria() {
-    return new CorrectnessCriteria(correctNumber, tolerance);
+    return correctNumber != null ? new CorrectnessCriteria(correctNumber, tolerance) : null;
   }
 
   @Override
