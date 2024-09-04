@@ -52,8 +52,6 @@ public interface ContentService extends EntityService<Content> {
       ContentGroupTemplate contentGroupTemplate,
       List<ContentTemplate> templates);
 
-  void start(String contentId);
-
   void stop(String contentId);
 
   void startRound(String contentId, int round);

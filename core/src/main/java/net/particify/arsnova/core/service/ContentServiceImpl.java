@@ -198,18 +198,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
   }
 
   @Override
-  public void start(final String contentId) {
-    final Content content = get(contentId);
-    if (content == null) {
-      throw new NotFoundException();
-    }
-    if (!content.startTime()) {
-      throw new BadRequestException("Already started.");
-    }
-    update(content);
-  }
-
-  @Override
   public void stop(final String contentId) {
     final Content content = get(contentId);
     if (content == null) {
