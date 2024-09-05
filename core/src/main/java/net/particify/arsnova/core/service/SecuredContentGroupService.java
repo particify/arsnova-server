@@ -1,5 +1,6 @@
 package net.particify.arsnova.core.service;
 
+import java.io.IOException;
 import java.util.List;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
@@ -55,7 +56,7 @@ public class SecuredContentGroupService extends AbstractSecuredEntityServiceImpl
 
   @Override
   @PreAuthorize("hasPermission(#groupId, 'contentgroup', 'update') and hasPermission(#contentId, 'content', 'update')")
-  public void startContent(final String groupId, final String contentId, final int round) {
+  public void startContent(final String groupId, final String contentId, final int round) throws IOException {
     contentGroupService.startContent(groupId, contentId, round);
   }
 

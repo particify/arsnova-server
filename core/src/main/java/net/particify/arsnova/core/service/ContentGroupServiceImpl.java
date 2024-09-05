@@ -19,8 +19,10 @@
 package net.particify.arsnova.core.service;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -242,12 +244,13 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
   }
 
   @Override
-  public void startContent(final String groupId, final String contentId, final int round) {
+  public void startContent(final String groupId, final String contentId, final int round) throws IOException {
     final var group = get(groupId);
     if (!group.containsContent(contentId)) {
       throw new IllegalArgumentException("Content group does not contain content.");
     }
-    final var content = contentService.get(contentId);
+    final var contents = contentService.get(group.getContentIds());
+    final var content = contents.stream().filter(c -> c.getId().equals(contentId)).findFirst().orElseThrow();
     if (content == null) {
       throw new NotFoundException();
     }
@@ -264,6 +267,10 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
     if (group.publishContent(contentId)) {
       update(group);
     }
+    final var contentsToStop = contents.stream()
+        .filter(c -> !c.getId().equals(contentId) && c.getState().getAnsweringEndTime() != null)
+        .toList();
+    contentService.patch(contentsToStop, Map.of("answeringEndTime", new Date()), Content::getState);
     contentService.update(content);
   }
 

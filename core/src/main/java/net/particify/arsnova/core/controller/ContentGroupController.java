@@ -174,7 +174,7 @@ public class ContentGroupController extends AbstractEntityController<ContentGrou
   public void startContent(
       @PathVariable final String id,
       @RequestParam final String contentId,
-      @RequestParam(defaultValue = "-1") final int round) {
+      @RequestParam(defaultValue = "-1") final int round) throws IOException {
     contentGroupService.startContent(id, contentId, round);
   }
 
