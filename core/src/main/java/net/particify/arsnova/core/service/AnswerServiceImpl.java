@@ -342,7 +342,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
     return buildTextAnswerStatistics(
       round,
-      answers.size(),
+      (int) answers.stream().filter(a -> !a.isAbstention()).count(),
       (int) answers.stream().filter(a -> a.isAbstention()).count(),
       textCounts,
       bannedKeywords,
@@ -385,7 +385,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
     return buildTextAnswerStatistics(
         round,
-        answers.size(),
+        (int) answers.stream().filter(a -> !a.isAbstention()).count(),
         (int) answers.stream().filter(a -> a.isAbstention()).count(),
         textCounts,
         bannedKeywords,
