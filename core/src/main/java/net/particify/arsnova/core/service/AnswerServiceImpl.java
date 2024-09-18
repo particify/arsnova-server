@@ -406,7 +406,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     final Map<String, String> normalizedPreferredKeywords = preferredKeywords.stream()
         .collect(Collectors.toMap(
             k -> WordContent.normalizeText(k),
-            k -> k
+            k -> k,
+            (a, b) -> a
         ));
     Map<String, Integer> countsBySimilarity = buildCountsBySimilarityMap(textCounts, bannedKeywords);
     if (!preferredKeywords.isEmpty()) {
