@@ -247,7 +247,7 @@ public class UserProfile extends Entity {
   @NotEmpty
   private String loginId;
 
-  private Date lastActivityTimestamp;
+  private Date lastActivityTimestamp = new Date();
   private Account account;
   private Person person;
   private Settings settings;

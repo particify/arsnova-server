@@ -24,7 +24,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Optional;
 import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.config.Config;
@@ -56,12 +59,14 @@ import net.particify.arsnova.core.model.LoginCredentials;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.security.AuthenticationService;
 import net.particify.arsnova.core.security.LoginAuthenticationSucessHandler;
+import net.particify.arsnova.core.service.UserService;
 import net.particify.arsnova.core.web.exceptions.NotImplementedException;
 
 @RestController
 @EntityRequestMapping("/auth")
 public class AuthenticationController {
   private AuthenticationService authenticationService;
+  private UserService userService;
   private OidcClient oidcClient;
   private SAML2Client saml2Client;
   private CasAuthenticationEntryPoint casEntryPoint;
@@ -71,11 +76,13 @@ public class AuthenticationController {
 
   public AuthenticationController(
       final AuthenticationService authenticationService,
+      @Qualifier("securedUserService") final UserService userService,
       final SystemProperties systemProperties,
       final ServletContext servletContext,
       @Qualifier("oauthConfig") final Config oauthConfig,
       @Autowired(required = false) @Qualifier("samlConfig") final Config samlConfig) {
     this.authenticationService = authenticationService;
+    this.userService = userService;
     this.oauthConfig = oauthConfig;
     this.samlConfig = samlConfig;
     final String proxyPath = systemProperties.getApi().getProxyPath();
@@ -112,6 +119,8 @@ public class AuthenticationController {
     final ClientAuthentication authentication = authenticationService.getCurrentClientAuthentication(refresh);
     if (authentication == null) {
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    } else {
+      updateLastActivityTimestamp(authentication);
     }
     return authentication;
   }
@@ -212,5 +221,15 @@ public class AuthenticationController {
     return saml2Client.getConfiguration().getServiceProviderMetadataResource() != null
         ? saml2Client.getConfiguration().getServiceProviderMetadataResource().getContentAsString(StandardCharsets.UTF_8)
         : saml2Client.getServiceProviderMetadataResolver().getMetadata();
+  }
+
+  private void updateLastActivityTimestamp(final ClientAuthentication authentication) {
+    final UserProfile userProfile = userService.getByAuthProviderAndLoginId(
+        authentication.getAuthProvider(), authentication.getLoginId());
+    if (userProfile.getLastActivityTimestamp().toInstant().isBefore(
+          Instant.now().minus(1, ChronoUnit.HOURS))) {
+      userProfile.setLastActivityTimestamp(new Date());
+      userService.update(userProfile);
+    }
   }
 }
