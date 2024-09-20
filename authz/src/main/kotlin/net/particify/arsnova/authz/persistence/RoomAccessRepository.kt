@@ -31,7 +31,7 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     SELECT ra.userId
     FROM RoomAccess ra
     GROUP BY ra.userId
-    HAVING MIN(ra.lastAccess) < :lastAccessBefore
+    HAVING MAX(ra.lastAccess) < :lastAccessBefore
     """,
   )
   fun findUserIdsByLastAccessBefore(lastAccessBefore: Date): Iterable<UUID>
