@@ -2,6 +2,7 @@ package net.particify.arsnova.authz.controller
 
 import net.particify.arsnova.authz.exception.NotFoundException
 import net.particify.arsnova.authz.handler.RoomAccessHandler
+import net.particify.arsnova.authz.model.LastAccess
 import net.particify.arsnova.authz.model.RoomAccess
 import net.particify.arsnova.authz.model.RoomAccessSyncTracker
 import net.particify.arsnova.authz.model.command.RequestRoomAccessSyncCommand
@@ -78,6 +79,22 @@ class RoomAccessController(
   ): Mono<List<UUID>> {
     val lastActiveBeforeInstant = Date.from(Instant.parse(lastActiveBefore))
     return Mono.just(handler.getUserIdsLastActiveBefore(lastActiveBeforeInstant).toList())
+  }
+
+  @GetMapping(path = ["/roomaccess/last-access"])
+  @ResponseBody
+  fun getLastAccess(
+    @RequestParam page: Int,
+  ): Mono<List<LastAccess>> {
+    return Mono.just(handler.getAllLastActive(page))
+  }
+
+  @GetMapping(path = ["/roomaccess/last-access/{userId}"])
+  @ResponseBody
+  fun getLastAccessByUserIdBetween(
+    @PathVariable userId: UUID,
+  ): Mono<LastAccess> {
+    return Mono.justOrEmpty(handler.getLastActiveByUserId(userId))
   }
 
   @PostMapping(path = ["/roomaccess/sync/{roomId}/{revNumber}"])
