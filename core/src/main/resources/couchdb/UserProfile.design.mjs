@@ -37,6 +37,14 @@ export let designDoc = {
           emit(doc.person.mail, {_rev: doc._rev});
         }
       }
+    },
+    "by_lastactivitytimestamp": {
+      "map": function (doc) {
+        if (doc.type === "UserProfile" && doc.lastActivityTimestamp) {
+          emit(new Date(doc.lastActivityTimestamp).getTime(), {_rev: doc._rev});
+        }
+      },
+      "reduce": "_count"
     }
   }
 };

@@ -23,14 +23,12 @@ import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -39,12 +37,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
@@ -104,7 +100,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
   private Pattern mailPattern;
   private ConcurrentHashMap<String, Byte> resentMailCount;
   private Set<String> resendMailBans;
-  private WebClient authzWebClient;
 
   {
     resentMailCount = new ConcurrentHashMap<>();
@@ -129,10 +124,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
     this.passwordUtils = passwordUtils;
     this.emailService = emailService;
     this.rootUrl = systemProperties.getRootUrl();
-    final String authzUrl = systemProperties.getAuthzServiceUrl();
     this.userInactivityPeriod = systemProperties.getAutoDeletionThresholds().getUserInactivityPeriod();
     this.userInactivityLimit = systemProperties.getAutoDeletionThresholds().getUserInactivityLimit();
-    this.authzWebClient = WebClient.create(authzUrl);
   }
 
   @Scheduled(fixedDelay = MAIL_RESEND_TRY_RESET_DELAY_MS)
@@ -168,29 +161,20 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
     final Instant lastActiveBefore = Instant.now().minus(userInactivityPeriod);
     final String lastActiveBeforeParam = lastActiveBefore.toString();
     logger.debug("Retrieving IDs of inactive (since {}) user accounts.", lastActiveBeforeParam);
-    final List<String> userIds = authzWebClient
-        .get()
-        .uri(uriBuilder -> uriBuilder
-            .path("/roomaccess/inactive-user-ids")
-            .queryParam("lastActiveBefore", lastActiveBeforeParam)
-            .build())
-        .retrieve()
-        .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
-        .block();
-    if (userIds.size() > userInactivityLimit) {
+    final int inactiveCount = userRepository.countByLastActivityTimestamp(lastActiveBefore);
+    if (inactiveCount > userInactivityLimit) {
       logger.warn("Number of inactive users ({}) is over the threshold of {}. Accounts will not be deleted.",
-          userIds.size(), userInactivityLimit);
+          inactiveCount, userInactivityLimit);
       return;
     }
-    logger.info("Deleting {} inactive (since {}) user accounts.", userIds.size(), lastActiveBeforeParam);
-    final AtomicInteger count = new AtomicInteger();
-    final Collection<List<String>> groupedUserIds = userIds.stream()
-        .collect(Collectors.groupingBy(uid -> count.getAndIncrement() / 20))
-        .values();
-    for (final List<String> userIdList : groupedUserIds) {
-      final List<UserProfile> userProfiles = get(userIdList);
-      delete(userProfiles, Initiator.SYSTEM);
+    if (inactiveCount == 0) {
+      logger.debug("No inactive accounts up for deletion.");
+      return;
     }
+    final List<UserProfile> userProfiles = userRepository.findAllByLastActivityTimestamp(lastActiveBefore, 20);
+    logger.info("Deleting {} of {} inactive (since {}) user accounts.",
+        userProfiles.size(), inactiveCount, lastActiveBeforeParam);
+    delete(userProfiles, Initiator.SYSTEM);
   }
 
   @Override

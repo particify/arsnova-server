@@ -19,6 +19,7 @@
 package net.particify.arsnova.core.persistence.couchdb;
 
 import com.google.common.collect.Lists;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import org.ektorp.BulkDeleteDocument;
@@ -65,6 +66,24 @@ public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> im
   @Override
   public List<UserProfile> findAllByMail(final String mail) {
     return queryView("by_mail", mail);
+  }
+
+  @Override
+  public List<UserProfile> findAllByLastActivityTimestamp(final Instant lastActivityTimestamp, final int limit) {
+    return createEntityStubs(db.queryView(createQuery("by_lastactivitytimestamp")
+        .endKey(lastActivityTimestamp.getEpochSecond() * 1000)
+        .limit(limit)
+        .reduce(false)),
+        (u, k) -> {});
+  }
+
+  @Override
+  public int countByLastActivityTimestamp(final Instant lastActivityTimestamp) {
+    final var rows = db.queryView(createQuery("by_lastactivitytimestamp")
+        .endKey(lastActivityTimestamp.getEpochSecond() * 1000)
+        .reduce(true))
+        .getRows();
+    return rows.size() > 0 ? rows.get(0).getValueAsInt() : 0;
   }
 
   @Override
