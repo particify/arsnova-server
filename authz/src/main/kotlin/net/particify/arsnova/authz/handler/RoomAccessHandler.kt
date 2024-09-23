@@ -3,6 +3,7 @@ package net.particify.arsnova.authz.handler
 import net.particify.arsnova.authz.config.RabbitConfig
 import net.particify.arsnova.authz.exception.ForbiddenException
 import net.particify.arsnova.authz.exception.InternalServerErrorException
+import net.particify.arsnova.authz.model.LastAccess
 import net.particify.arsnova.authz.model.RoomAccess
 import net.particify.arsnova.authz.model.RoomAccessPK
 import net.particify.arsnova.authz.model.RoomAccessSyncTracker
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.dao.CannotAcquireLockException
 import org.springframework.dao.EmptyResultDataAccessException
+import org.springframework.data.domain.Pageable
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -154,6 +156,18 @@ class RoomAccessHandler(
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
   fun getUserIdsLastActiveBefore(lastActiveBefore: Date): Iterable<UUID> {
     return roomAccessRepository.findUserIdsByLastAccessBefore(lastActiveBefore)
+  }
+
+  @Transactional(isolation = Isolation.READ_COMMITTED)
+  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  fun getAllLastActive(page: Int): List<LastAccess> {
+    return roomAccessRepository.findAllLastAccess(Pageable.ofSize(10).withPage(page)).toList()
+  }
+
+  @Transactional(isolation = Isolation.READ_COMMITTED)
+  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  fun getLastActiveByUserId(userId: UUID): LastAccess? {
+    return roomAccessRepository.findLastAccessByUserId(userId).firstOrNull()
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)

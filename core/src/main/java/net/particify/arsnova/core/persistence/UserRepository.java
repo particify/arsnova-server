@@ -18,6 +18,7 @@
 
 package net.particify.arsnova.core.persistence;
 
+import java.time.Instant;
 import java.util.List;
 
 import net.particify.arsnova.core.model.UserProfile;
@@ -30,4 +31,8 @@ public interface UserRepository extends CrudRepository<UserProfile, String> {
   List<UserProfile> findAllByMail(String mail);
 
   int deleteNonActivatedUsers(long lastActivityBefore);
+
+  List<UserProfile> findAllByLastActivityTimestamp(Instant lastActivityTimestamp, int limit);
+
+  int countByLastActivityTimestamp(Instant lastActivityTimestamp);
 }

@@ -247,7 +247,7 @@ public class UserProfile extends Entity {
   @NotEmpty
   private String loginId;
 
-  private Date lastLoginTimestamp;
+  private Date lastActivityTimestamp = new Date();
   private Account account;
   private Person person;
   private Settings settings;
@@ -284,13 +284,13 @@ public class UserProfile extends Entity {
   }
 
   @JsonView({View.Persistence.class, View.Owner.class})
-  public Date getLastLoginTimestamp() {
-    return lastLoginTimestamp;
+  public Date getLastActivityTimestamp() {
+    return lastActivityTimestamp;
   }
 
   @JsonView(View.Persistence.class)
-  public void setLastLoginTimestamp(final Date lastLoginTimestamp) {
-    this.lastLoginTimestamp = lastLoginTimestamp;
+  public void setLastActivityTimestamp(final Date lastActivityTimestamp) {
+    this.lastActivityTimestamp = lastActivityTimestamp;
   }
 
   @JsonView({View.Persistence.class, View.Admin.class})
@@ -369,12 +369,12 @@ public class UserProfile extends Entity {
 
     return authProvider == that.authProvider
         && Objects.equals(loginId, that.loginId)
-        && Objects.equals(lastLoginTimestamp, that.lastLoginTimestamp);
+        && Objects.equals(lastActivityTimestamp, that.lastActivityTimestamp);
   }
 
   @Override
   public int hashCode() {
-    return hashCode(super.hashCode(), authProvider, loginId, lastLoginTimestamp);
+    return hashCode(super.hashCode(), authProvider, loginId, lastActivityTimestamp);
   }
 
   @Override
@@ -382,7 +382,7 @@ public class UserProfile extends Entity {
     return super.buildToString()
         .append("authProvider", authProvider)
         .append("loginId", loginId)
-        .append("lastLoginTimestamp", lastLoginTimestamp)
+        .append("lastActivityTimestamp", lastActivityTimestamp)
         .append("account", account)
         .append("acknowledgedMotds", acknowledgedMotds);
   }

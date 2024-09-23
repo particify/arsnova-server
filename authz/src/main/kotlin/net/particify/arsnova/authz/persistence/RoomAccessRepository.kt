@@ -1,7 +1,10 @@
 package net.particify.arsnova.authz.persistence
 
+import net.particify.arsnova.authz.model.LastAccess
 import net.particify.arsnova.authz.model.RoomAccess
 import net.particify.arsnova.authz.model.RoomAccessPK
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -35,6 +38,27 @@ interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     """,
   )
   fun findUserIdsByLastAccessBefore(lastAccessBefore: Date): Iterable<UUID>
+
+  @Query(
+    """
+    SELECT new net.particify.arsnova.authz.model.LastAccess(ra.userId, MAX(ra.lastAccess))
+    FROM RoomAccess ra
+    GROUP BY ra.userId
+    ORDER BY MAX(ra.lastAccess) DESC
+    """,
+  )
+  fun findAllLastAccess(pageable: Pageable): Page<LastAccess>
+
+  @Query(
+    """
+    SELECT new net.particify.arsnova.authz.model.LastAccess(ra.userId, MAX(ra.lastAccess))
+    FROM RoomAccess ra
+    WHERE ra.userId = :userId
+    GROUP BY ra.userId
+    ORDER BY MAX(ra.lastAccess) DESC
+    """,
+  )
+  fun findLastAccessByUserId(userId: UUID): Iterable<LastAccess>
 
   @Query(
     """

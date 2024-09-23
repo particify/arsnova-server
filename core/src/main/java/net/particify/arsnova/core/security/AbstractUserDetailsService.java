@@ -1,6 +1,9 @@
 package net.particify.arsnova.core.security;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -88,8 +91,16 @@ public abstract class AbstractUserDetailsService implements ApplicationEventPubl
           new BeforeUserProfileAutoCreationEvent(this, newUserProfile, userAttributes));
       return userService.create(newUserProfile);
     });
+    boolean needsUpdate = false;
     if (personNeedsUpdate(userProfile.getPerson(), userAttributes)) {
       userProfile.setPerson(buildPersonFromAttributes(userAttributes));
+      needsUpdate = true;
+    }
+    if (lastActivityNeedsUpdate(userProfile)) {
+      userProfile.setLastActivityTimestamp(new Date());
+      needsUpdate = true;
+    }
+    if (needsUpdate) {
       userService.update(userProfile);
     }
 
@@ -104,9 +115,13 @@ public abstract class AbstractUserDetailsService implements ApplicationEventPubl
     if (authProvider == UserProfile.AuthProvider.NONE) {
       throw new IllegalArgumentException("Invalid auth provider.");
     }
+    final UserProfile userProfile = userService.getByAuthProviderAndLoginId(authProvider, loginId);
+    if (userProfile != null && lastActivityNeedsUpdate(userProfile)) {
+      userProfile.setLastActivityTimestamp(new Date());
+      userService.update(userProfile);
+    }
 
-    return Optional.ofNullable(
-      userService.getByAuthProviderAndLoginId(authProvider, loginId));
+    return Optional.ofNullable(userProfile);
   }
 
   protected UserProfile.Person buildPersonFromAttributes(final Map<String, Object> attributes) {
@@ -131,5 +146,10 @@ public abstract class AbstractUserDetailsService implements ApplicationEventPubl
         || !Objects.equals(newPerson.getFirstName(), person.getFirstName())
         || !Objects.equals(newPerson.getLastName(), person.getLastName())
         || !Objects.equals(newPerson.getDisplayName(), person.getDisplayName());
+  }
+
+  protected boolean lastActivityNeedsUpdate(final UserProfile userProfile) {
+    return userProfile.getLastActivityTimestamp().toInstant().isBefore(
+        Instant.now().minus(1, ChronoUnit.HOURS));
   }
 }
