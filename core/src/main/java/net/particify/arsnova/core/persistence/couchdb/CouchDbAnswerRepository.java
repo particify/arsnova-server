@@ -186,7 +186,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
         }
       }
     }
-    roundStats.setAnswerCount(answers.size());
+    roundStats.setAnswerCount(answers.size() - roundStats.getAbstentionCount());
     roundStats.setAssignedPoints(assignedPoints);
     final List<PrioritizationRoundStatistics> roundStatisticsList = new ArrayList<>(Collections.nCopies(1, null));
     roundStatisticsList.set(0, roundStats);
