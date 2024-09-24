@@ -70,7 +70,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
   private static final long ACTIVATION_KEY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
   private static final long ACTIVATION_KEY_DURABILITY_MS = 5 * 24 * 60 * 60 * 1000L;
-  private static final long INACTIVE_USERS_CHECK_INTERVAL_MS = 60 * 60 * 1000L;
+  private static final long INACTIVE_USERS_CHECK_INTERVAL_MS = 60 * 1000L;
 
   private static final int VERIFICATION_CODE_LENGTH = 6;
   private static final int MAX_VERIFICATION_CODE_ATTEMPTS = 10;
