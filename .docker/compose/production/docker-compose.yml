@@ -53,6 +53,7 @@ services:
       SYSTEM_MAIL_PASSWORD: $MAIL_PASSWORD
       SYSTEM_MAIL_SENDERNAME: $MAIL_SENDERNAME
       SYSTEM_MAIL_SENDERADDRESS: $MAIL_SENDERADDRESS
+      SYSTEM_AUTHZ_SERVICE_URL: http://arsnova-auth-service:8080
       SYSTEM_FORMATTING_SERVICE_HOST_URL: http://arsnova-formatting-service:3000
       SECURITY_JWT_SECRET: $JWT_SECRET
       SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
@@ -114,6 +115,8 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
+      SECURITY_JWT_SECRET: $JWT_SECRET
+      SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
     command: /jetty/start.jar --module=http-forwarded
   arsnova-comment-service:
     image: particify/arsnova-server-comments:$COMMENT_TAG
