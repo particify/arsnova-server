@@ -1,4 +1,3 @@
-version: "3"
 services:
   couchdb:
     image: particify/couchdb:3.3
