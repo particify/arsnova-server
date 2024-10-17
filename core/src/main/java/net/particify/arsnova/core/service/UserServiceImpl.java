@@ -244,13 +244,13 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
   }
 
   @Override
-  public UserProfile getByUsername(final String username) {
+  public String getIdByUsername(final String username) {
     final UserProfile userProfile = userRepository.findByAuthProviderAndLoginId(
         UserProfile.AuthProvider.ARSNOVA, username.toLowerCase());
-    if (userProfile != null) {
-      modifyRetrieved(userProfile);
+    if (userProfile == null) {
+      throw new NotFoundException("User not found.");
     }
-    return userProfile;
+    return userProfile.getId();
   }
 
   @Override

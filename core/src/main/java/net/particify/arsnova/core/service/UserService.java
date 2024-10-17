@@ -32,7 +32,7 @@ public interface UserService extends EntityService<UserProfile> {
 
   List<UserProfile> getByLoginId(String loginId);
 
-  UserProfile getByUsername(String username);
+  String getIdByUsername(String username);
 
   List<UserProfile> getAllByMail(String mail);
 
