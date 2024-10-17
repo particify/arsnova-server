@@ -30,19 +30,19 @@ public class SecuredUserService extends AbstractSecuredEntityServiceImpl<UserPro
   }
 
   @Override
-  // @PreAuthorize("permitAll")
+  @PreAuthorize("isAuthenticated and !hasRole('GUEST_USER')")
   public List<UserProfile> getByLoginId(final String loginId) {
     return userService.getByLoginId(loginId);
   }
 
   @Override
   // @PreAuthorize("permitAll")
-  public UserProfile getByUsername(final String username) {
-    return userService.getByUsername(username);
+  public String getIdByUsername(final String username) {
+    return userService.getIdByUsername(username);
   }
 
   @Override
-  // @PreAuthorize("permitAll")
+  @PreAuthorize("isAuthenticated and !hasRole('GUEST_USER')")
   public List<UserProfile> getAllByMail(final String mail) {
     return userService.getAllByMail(mail);
   }

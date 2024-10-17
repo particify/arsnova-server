@@ -136,10 +136,6 @@ public class UserController extends AbstractEntityController<UserProfile> {
 
   @Override
   protected String resolveAlias(final String alias) throws NotFoundException {
-    final UserProfile userProfile = userService.getByUsername(alias);
-    if (userProfile == null) {
-      throw new NotFoundException("User not found.");
-    }
-    return userProfile.getId();
+    return userService.getIdByUsername(alias);
   }
 }
