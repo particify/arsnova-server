@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.model.Content;
@@ -32,8 +33,9 @@ public class ContentFindQueryService implements FindQueryService<Content> {
   private ContentService contentService;
   private ContentGroupService contentGroupService;
 
-  public ContentFindQueryService(final ContentService contentService,
-      final ContentGroupService contentGroupService) {
+  public ContentFindQueryService(
+      @Qualifier("securedContentService") final ContentService contentService,
+      @Qualifier("securedContentGroupService") final ContentGroupService contentGroupService) {
     this.contentService = contentService;
     this.contentGroupService = contentGroupService;
   }

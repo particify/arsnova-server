@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.model.FindQuery;
@@ -31,7 +32,7 @@ import net.particify.arsnova.core.model.Room;
 public class RoomFindQueryService implements FindQueryService<Room> {
   private RoomService roomService;
 
-  public RoomFindQueryService(final RoomService roomService) {
+  public RoomFindQueryService(@Qualifier("securedRoomService") final RoomService roomService) {
     this.roomService = roomService;
   }
 
