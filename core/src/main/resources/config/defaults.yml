@@ -111,6 +111,9 @@ arsnova:
     # After the specified number of login tries the client IP will be banned for
     # several minutes.
     login-try-limit: 50
+    # After the specified number of registration failures the client IP will be
+    # banned for several minutes.
+    registration-failure-limit: 10
     # After the specified number of resent emails the client IP will be banned
     # for several minutes from resending.
     resend-mail-limit: 5

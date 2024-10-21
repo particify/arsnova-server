@@ -121,6 +121,8 @@ public class SecurityProperties {
   private Jwt jwt;
   private List<AdminAccount> adminAccounts;
   private int loginTryLimit;
+
+  private int registrationFailureLimit;
   private int resendMailLimit;
   private int passwordStrictnessLevel;
   private List<String> corsOrigins;
@@ -148,6 +150,14 @@ public class SecurityProperties {
 
   public void setLoginTryLimit(final int loginTryLimit) {
     this.loginTryLimit = loginTryLimit;
+  }
+
+  public int getRegistrationFailureLimit() {
+    return registrationFailureLimit;
+  }
+
+  public void setRegistrationFailureLimit(final int registrationFailureLimit) {
+    this.registrationFailureLimit = registrationFailureLimit;
   }
 
   public int getResendMailLimit() {
