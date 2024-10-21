@@ -94,8 +94,11 @@ public class UserController extends AbstractEntityController<UserProfile> {
   }
 
   @PostMapping(REGISTER_MAPPING)
-  public void register(@RequestBody final LoginCredentials loginCredentials) {
-    if (userService.create(loginCredentials.getLoginId(), loginCredentials.getPassword()) == null) {
+  public void register(@RequestBody final LoginCredentials loginCredentials, final HttpServletRequest request) {
+    if (userService.create(
+        loginCredentials.getLoginId(),
+        loginCredentials.getPassword(),
+        request.getRemoteAddr()) == null) {
       throw new ForbiddenException();
     }
   }
