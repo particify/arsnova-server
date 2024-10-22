@@ -33,6 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.ektorp.DbAccessException;
+import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -474,11 +475,12 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
   @Override
   public void initiatePasswordReset(final String id) {
-    final UserProfile userProfile = get(id);
-    if (null == userProfile) {
+    final UserProfile userProfile;
+    try {
+      userProfile = get(id);
+    } catch (final DocumentNotFoundException e) {
       logger.info("Password reset failed. User does not exist.");
-
-      throw new NotFoundException();
+      throw new NotFoundException(e);
     }
     final UserProfile.Account account = userProfile.getAccount();
     // checks if a password reset process in in progress

@@ -38,6 +38,7 @@ import net.particify.arsnova.core.web.exceptions.NotFoundException;
 @RestController
 @EntityRequestMapping(UserController.REQUEST_MAPPING)
 public class UserController extends AbstractEntityController<UserProfile> {
+  private static final String NIL_UUID = "00000000000000000000000000000000";
   protected static final String REQUEST_MAPPING = "/user";
   private static final String REGISTER_MAPPING = "/register";
   private static final String ACTIVATE_MAPPING = DEFAULT_ID_MAPPING + "/activate";
@@ -133,12 +134,21 @@ public class UserController extends AbstractEntityController<UserProfile> {
         throw new ForbiddenException();
       }
     } else {
-      userService.initiatePasswordReset(id);
+      try {
+        userService.initiatePasswordReset(id);
+      } catch (final NotFoundException e) {
+        // Do not reveal error to prevent username enumeration
+      }
     }
   }
 
   @Override
   protected String resolveAlias(final String alias) throws NotFoundException {
-    return userService.getIdByUsername(alias);
+    try {
+      return userService.getIdByUsername(alias);
+    } catch (final NotFoundException e) {
+      // Do not reveal error to prevent username enumeration
+      return NIL_UUID;
+    }
   }
 }
