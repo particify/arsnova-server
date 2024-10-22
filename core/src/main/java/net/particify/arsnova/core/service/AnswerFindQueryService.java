@@ -3,6 +3,7 @@ package net.particify.arsnova.core.service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.model.Answer;
@@ -12,7 +13,7 @@ import net.particify.arsnova.core.model.FindQuery;
 public class AnswerFindQueryService implements FindQueryService<Answer> {
   private AnswerService answerService;
 
-  public AnswerFindQueryService(final AnswerService answerService) {
+  public AnswerFindQueryService(@Qualifier("securedAnswerService") final AnswerService answerService) {
     this.answerService = answerService;
   }
 

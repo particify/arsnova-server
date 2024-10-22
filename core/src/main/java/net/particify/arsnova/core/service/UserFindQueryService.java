@@ -21,6 +21,7 @@ package net.particify.arsnova.core.service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.config.properties.SecurityProperties;
@@ -32,7 +33,9 @@ public class UserFindQueryService implements FindQueryService<UserProfile> {
   private UserService userService;
   private final String displayIdAttribute;
 
-  public UserFindQueryService(final UserService userService, final SecurityProperties securityProperties) {
+  public UserFindQueryService(
+      @Qualifier("securedUserService") final UserService userService,
+      final SecurityProperties securityProperties) {
     this.userService = userService;
     this.displayIdAttribute = securityProperties.getUserDisplayIdAttribute();
   }
