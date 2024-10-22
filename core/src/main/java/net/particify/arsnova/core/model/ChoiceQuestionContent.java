@@ -41,7 +41,7 @@ public class ChoiceQuestionContent extends Content {
     }
 
     @NotBlank
-    @Length(max = 250)
+    @Length(max = 500)
     private String label;
 
     private String renderedLabel;
