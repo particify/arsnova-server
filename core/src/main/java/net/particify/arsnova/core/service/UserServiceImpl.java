@@ -52,6 +52,7 @@ import net.particify.arsnova.core.persistence.UserRepository;
 import net.particify.arsnova.core.security.PasswordUtils;
 import net.particify.arsnova.core.service.exceptions.UserAlreadyExistsException;
 import net.particify.arsnova.core.web.exceptions.BadRequestException;
+import net.particify.arsnova.core.web.exceptions.ForbiddenException;
 import net.particify.arsnova.core.web.exceptions.NotFoundException;
 
 /**
@@ -60,9 +61,9 @@ import net.particify.arsnova.core.web.exceptions.NotFoundException;
 @Service
 @Primary
 public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> implements UserService {
-  private static final int MAIL_RESEND_TRY_RESET_DELAY_MS = 30 * 1000;
+  private static final int TRY_RESET_DELAY_MS = 30 * 1000;
 
-  private static final int MAIL_RESEND_BAN_RESET_DELAY_MS = 2 * 60 * 1000;
+  private static final int BAN_RESET_DELAY_MS = 2 * 60 * 1000;
 
   private static final int REPEATED_PASSWORD_RESET_DELAY_MS = 3 * 60 * 1000;
 
@@ -100,10 +101,14 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
   private Pattern mailPattern;
   private ConcurrentHashMap<String, Byte> resentMailCount;
   private Set<String> resendMailBans;
+  private ConcurrentHashMap<String, Byte> failedRegistrationCount;
+  private Set<String> failedRegistrationBans;
 
   {
     resentMailCount = new ConcurrentHashMap<>();
-    resendMailBans = Collections.synchronizedSet(new HashSet<String>());
+    resendMailBans = Collections.synchronizedSet(new HashSet<>());
+    failedRegistrationCount = new ConcurrentHashMap<>();
+    failedRegistrationBans = Collections.synchronizedSet(new HashSet<>());
   }
 
   public UserServiceImpl(
@@ -128,19 +133,27 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
     this.userInactivityLimit = systemProperties.getAutoDeletionThresholds().getUserInactivityLimit();
   }
 
-  @Scheduled(fixedDelay = MAIL_RESEND_TRY_RESET_DELAY_MS)
-  public void resetResendingActivationTries() {
+  @Scheduled(fixedDelay = TRY_RESET_DELAY_MS)
+  public void resetTries() {
     if (!resentMailCount.isEmpty()) {
       logger.debug("Resetting counters for resent activation mails.");
       resentMailCount.clear();
     }
+    if (!failedRegistrationCount.isEmpty()) {
+      logger.debug("Resetting counters for failed registrations.");
+      failedRegistrationCount.clear();
+    }
   }
 
-  @Scheduled(fixedDelay = MAIL_RESEND_BAN_RESET_DELAY_MS)
-  public void resetResendingActivationBan() {
+  @Scheduled(fixedDelay = BAN_RESET_DELAY_MS)
+  public void resetBans() {
     if (!resendMailBans.isEmpty()) {
       logger.info("Clearing temporary bans for resent activation mails ({}).", resendMailBans.size());
       resendMailBans.clear();
+    }
+    if (!failedRegistrationBans.isEmpty()) {
+      logger.info("Clearing temporary bans for failed registrations ({}).", resendMailBans.size());
+      failedRegistrationBans.clear();
     }
   }
 
@@ -227,6 +240,20 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
     }
   }
 
+  private void increaseFailedRegistrationCount(final String addr) {
+    Byte tries = failedRegistrationCount.get(addr);
+    if (null == tries) {
+      tries = 0;
+    }
+    if (tries < securityProperties.getLoginTryLimit()) {
+      failedRegistrationCount.put(addr, ++tries);
+      if (securityProperties.getRegistrationFailureLimit() == tries) {
+        logger.info("Temporarily banned {} from registration.", addr);
+        failedRegistrationBans.add(addr);
+      }
+    }
+  }
+
   @Override
   public UserProfile getByAuthProviderAndLoginId(final UserProfile.AuthProvider authProvider, final String loginId) {
     final UserProfile userProfile = userRepository.findByAuthProviderAndLoginId(authProvider, loginId);
@@ -261,8 +288,12 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
   }
 
   @Override
-  public UserProfile create(final String username, final String password) {
+  public UserProfile create(final String username, final String password, final String clientAddress) {
     final String lcUsername = username.toLowerCase();
+
+    if (failedRegistrationBans.contains(clientAddress)) {
+      throw new ForbiddenException();
+    }
 
     if (null == mailPattern) {
       parseMailAddressPattern();
@@ -295,7 +326,13 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
     account.setActivationKey(generateVerificationCode());
     userProfile.setCreationTimestamp(new Date());
 
-    final UserProfile result = create(userProfile);
+    final UserProfile result;
+    try {
+      result = create(userProfile);
+    } catch (final UserAlreadyExistsException e) {
+      increaseFailedRegistrationCount(clientAddress);
+      throw e;
+    }
     logger.debug("Activation key for user '{}': {}",
         userProfile.getLoginId(),
         account.getActivationKey());

@@ -49,8 +49,8 @@ public class SecuredUserService extends AbstractSecuredEntityServiceImpl<UserPro
 
   @Override
   // @PreAuthorize("permitAll")
-  public UserProfile create(final String username, final String password) {
-    return userService.create(username, password);
+  public UserProfile create(final String username, final String password, final String clientAddress) {
+    return userService.create(username, password, clientAddress);
   }
 
   @Override

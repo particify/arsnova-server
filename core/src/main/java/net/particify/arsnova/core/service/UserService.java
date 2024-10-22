@@ -36,7 +36,7 @@ public interface UserService extends EntityService<UserProfile> {
 
   List<UserProfile> getAllByMail(String mail);
 
-  UserProfile create(String username, String password);
+  UserProfile create(String username, String password, String clientAddress);
 
   UserProfile createAnonymizedGuestUser();
 
