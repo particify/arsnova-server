@@ -12,7 +12,6 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,7 +38,6 @@ public class RabbitConfig {
   @Value("${spring.rabbitmq.vhost}") private String rabbitmqVhost;
 
   @Bean
-  @Autowired
   public ConnectionFactory connectionFactory(
       @TaskExecutorConfig.RabbitConnectionExecutor TaskExecutor executor
   ) {
@@ -52,7 +50,6 @@ public class RabbitConfig {
   }
 
   @Bean
-  @Autowired
   public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter messageConverter) {
     final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
     rabbitTemplate.setMessageConverter(messageConverter);
@@ -65,7 +62,6 @@ public class RabbitConfig {
   }
 
   @Bean
-  @Autowired
   public Declarables rabbitDeclarables() {
     final FanoutExchange commentFanoutExchange = new FanoutExchange(BACKEND_COMMENT_FANOUT_NAME);
     final Queue commentQueue = new Queue(BACKEND_COMMENT_QUEUE_NAME, true, false, false);

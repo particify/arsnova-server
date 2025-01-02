@@ -1,6 +1,5 @@
 package net.particify.arsnova.websocket.config
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -40,7 +39,6 @@ class TaskExecutorConfig {
    * http://docs.spring.io/spring-amqp/reference/htmlsingle/#connections
    */
   @Bean
-  @Autowired
   @RabbitConnectionExecutor
   fun rabbitConnectionExecutor(): TaskExecutor? {
     val executor = ThreadPoolTaskExecutor()
@@ -56,7 +54,6 @@ class TaskExecutorConfig {
    * http://docs.spring.io/spring-amqp/reference/htmlsingle/#_threading_and_asynchronous_consumers
    */
   @Bean
-  @Autowired
   @RabbitListenerExecutor
   fun rabbitListenerExecutor(): TaskExecutor? {
     val executor = ThreadPoolTaskExecutor()
