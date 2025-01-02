@@ -5,7 +5,6 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
 import org.springframework.amqp.support.converter.MessageConverter
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -17,7 +16,6 @@ class RabbitConfig(
   private val webSocketProperties: WebSocketProperties,
 ) {
   @Bean
-  @Autowired
   fun connectionFactory(
     @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor,
   ): ConnectionFactory? {
@@ -34,7 +32,6 @@ class RabbitConfig(
   }
 
   @Bean
-  @Autowired
   fun rabbitTemplate(connectionFactory: ConnectionFactory): RabbitTemplate? {
     val rabbitTemplate = RabbitTemplate(connectionFactory)
     rabbitTemplate.messageConverter = jsonMessageConverter()

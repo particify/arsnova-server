@@ -16,7 +16,6 @@ import org.springframework.amqp.support.converter.ClassMapper
 import org.springframework.amqp.support.converter.DefaultClassMapper
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
 import org.springframework.amqp.support.converter.MessageConverter
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -38,7 +37,6 @@ class RabbitConfig(
   }
 
   @Bean
-  @Autowired
   fun connectionFactory(
     @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor,
   ): ConnectionFactory {
@@ -55,7 +53,6 @@ class RabbitConfig(
   }
 
   @Bean
-  @Autowired
   fun rabbitTemplate(
     connectionFactory: ConnectionFactory,
     messsageConverter: MessageConverter,
@@ -66,7 +63,6 @@ class RabbitConfig(
   }
 
   @Bean
-  @Autowired
   fun rabbitAdmin(connectionFactory: ConnectionFactory): RabbitAdmin {
     return RabbitAdmin(connectionFactory)
   }

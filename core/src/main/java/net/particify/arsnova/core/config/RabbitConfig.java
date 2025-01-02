@@ -20,7 +20,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -50,7 +49,6 @@ public class RabbitConfig {
   }
 
   @Bean
-  @Autowired
   @ConditionalOnProperty(
       name = RabbitConfigProperties.RABBIT_ENABLED,
       prefix = MessageBrokerProperties.PREFIX,
@@ -71,7 +69,6 @@ public class RabbitConfig {
   }
 
   @Bean
-  @Autowired
   @ConditionalOnProperty(
       name = {RabbitConfigProperties.RABBIT_ENABLED, RabbitConfigProperties.RABBIT_MANAGE_DECLARATIONS},
       prefix = MessageBrokerProperties.PREFIX,
@@ -127,7 +124,6 @@ public class RabbitConfig {
   }
 
   @Bean
-  @Autowired
   @ConditionalOnProperty(
       name = RabbitConfigProperties.RABBIT_ENABLED,
       prefix = MessageBrokerProperties.PREFIX,
@@ -141,7 +137,6 @@ public class RabbitConfig {
   }
 
   @Bean
-  @Autowired
   @ConditionalOnProperty(
       name = RabbitConfigProperties.RABBIT_ENABLED,
       prefix = MessageBrokerProperties.PREFIX,

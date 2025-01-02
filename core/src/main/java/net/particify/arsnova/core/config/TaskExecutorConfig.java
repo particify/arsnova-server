@@ -7,7 +7,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,7 +37,6 @@ public class TaskExecutorConfig {
    * </p>
    */
   @Bean
-  @Autowired
   @RabbitConnectionExecutor
   public TaskExecutor rabbitConnectionExecutor() {
     final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -56,7 +54,6 @@ public class TaskExecutorConfig {
    * </p>
    */
   @Bean
-  @Autowired
   @RabbitListenerExecutor
   public TaskExecutor rabbitListenerExecutor() {
     final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

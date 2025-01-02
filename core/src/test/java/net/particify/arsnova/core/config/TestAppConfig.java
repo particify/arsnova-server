@@ -92,7 +92,6 @@ public class TestAppConfig {
   }
 
   @Bean
-  @Autowired
   @TaskExecutorConfig.RabbitConnectionExecutor
   public TaskExecutor rabbitConnectionExecutor() {
     final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -102,7 +101,6 @@ public class TestAppConfig {
   }
 
   @Bean
-  @Autowired
   public ConnectionFactory connectionFactory(
       @TaskExecutorConfig.RabbitConnectionExecutor final TaskExecutor executor,
       final MessageBrokerProperties messageBrokerProperties) {
@@ -123,7 +121,6 @@ public class TestAppConfig {
   }
 
   @Bean
-  @Autowired
   public RabbitTemplate rabbitTemplate(
       final ConnectionFactory connectionFactory,
       final MessageConverter messageConverter) {
