@@ -89,9 +89,6 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
     if (this.getByRoomIdAndName(contentGroup.getRoomId(), contentGroup.getName()) != null) {
       throw new BadRequestException();
     }
-    if (contentGroup.isLeaderboardEnabled()) {
-      contentGroup.setCorrectOptionsPublished(true);
-    }
   }
 
   @Override
@@ -102,9 +99,6 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
       if (!oldContentGroup.getName().equals(contentGroup.getName())) {
         throw new BadRequestException();
       }
-    }
-    if (contentGroup.isLeaderboardEnabled()) {
-      contentGroup.setCorrectOptionsPublished(true);
     }
   }
 
