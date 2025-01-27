@@ -39,6 +39,8 @@ public class ContentGroupTemplate extends Entity {
 
   private String creatorId;
 
+  private boolean published;
+
   @JsonView({View.Persistence.class, View.Public.class})
   public String getName() {
     return name;
@@ -147,5 +149,15 @@ public class ContentGroupTemplate extends Entity {
   @JsonView(View.Persistence.class)
   public void setCreatorId(final String creatorId) {
     this.creatorId = creatorId;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public boolean isPublished() {
+    return published;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setPublished(final boolean published) {
+    this.published = published;
   }
 }

@@ -51,7 +51,8 @@ public class CouchDbContentGroupTemplateRepository
         new MangoCouchDbConnector.MangoQuery.Sort("creationTimestamp", true)
     );
     final Map<String, Object> filterSelector = Map.of(
-        "type", type.getSimpleName()
+        "type", type.getSimpleName(),
+        "published", true
     );
     db.createPartialJsonIndex(TAGS_INDEX_NAME, fields, filterSelector);
   }
@@ -63,7 +64,8 @@ public class CouchDbContentGroupTemplateRepository
     final Map<String, Object> querySelector = Map.of(
         "type", type.getSimpleName(),
         "language", language,
-        "creationTimestamp", Map.of("$exists", true)
+        "creationTimestamp", Map.of("$exists", true),
+        "published", true
     );
     final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(querySelector);
     query.setIndexDocument(TAGS_INDEX_NAME);

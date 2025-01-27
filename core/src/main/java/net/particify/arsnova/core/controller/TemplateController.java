@@ -56,6 +56,7 @@ public class TemplateController extends AbstractEntityController<ContentGroupTem
     contentGroupTemplate.setAttribution(requestEntity.attribution);
     contentGroupTemplate.setAiGenerated(requestEntity.aiGenerated);
     contentGroupTemplate.setTags(requestEntity.tags);
+    contentGroupTemplate.setPublished(requestEntity.published);
     return contentGroupTemplateService.createFromContentGroup(requestEntity.contentGroupId, contentGroupTemplate);
   }
 
@@ -72,6 +73,7 @@ public class TemplateController extends AbstractEntityController<ContentGroupTem
       String attribution,
       boolean aiGenerated,
       String contentGroupId,
-      List<TemplateTag> tags) {
+      List<TemplateTag> tags,
+      boolean published) {
   }
 }
