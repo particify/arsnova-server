@@ -215,6 +215,7 @@ public class UserProfile extends Entity {
     private boolean contentAnswersDirectlyBelowChart;
     private boolean contentVisualizationUnitPercent;
     private boolean showContentResultsDirectly;
+    private boolean rotateWordcloudItems;
 
     public boolean isContentAnswersDirectlyBelowChart() {
       return contentAnswersDirectlyBelowChart;
@@ -238,6 +239,14 @@ public class UserProfile extends Entity {
 
     public void setShowContentResultsDirectly(final boolean showContentResultsDirectly) {
       this.showContentResultsDirectly = showContentResultsDirectly;
+    }
+
+    public boolean isRotateWordcloudItems() {
+      return rotateWordcloudItems;
+    }
+
+    public void setRotateWordcloudItems(final boolean rotateWordcloudItems) {
+      this.rotateWordcloudItems = rotateWordcloudItems;
     }
   }
 
