@@ -215,7 +215,7 @@ public class UserProfile extends Entity {
     private boolean contentAnswersDirectlyBelowChart;
     private boolean contentVisualizationUnitPercent;
     private boolean showContentResultsDirectly;
-    private boolean rotateWordcloudItems;
+    private boolean rotateWordcloudItems = true;
 
     public boolean isContentAnswersDirectlyBelowChart() {
       return contentAnswersDirectlyBelowChart;
