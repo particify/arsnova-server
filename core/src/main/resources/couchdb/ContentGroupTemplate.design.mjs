@@ -9,6 +9,13 @@ export let designDoc = {
         }
       },
       "reduce": "_count"
+    },
+    "by_creatorid_updatetimestamp": {
+      "map": function (doc) {
+        if (doc.type === "ContentGroupTemplate") {
+          emit([doc.creatorId, doc.updateTimestamp], {_rev: doc._rev});
+        }
+      }
     }
   }
 };

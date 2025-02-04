@@ -2,6 +2,7 @@ package net.particify.arsnova.core.persistence.couchdb;
 
 import java.util.List;
 import java.util.Map;
+import org.ektorp.ComplexKey;
 
 import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.persistence.ContentGroupTemplateRepository;
@@ -87,12 +88,15 @@ public class CouchDbContentGroupTemplateRepository
 
   @Override
   public List<ContentGroupTemplate> findByCreatorId(final String creatorId) {
-    final Map<String, Object> querySelector = Map.of(
-        "type", type.getSimpleName(),
-        "creatorId", creatorId
-    );
-    final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(querySelector);
-    query.setIndexDocument(TAGS_INDEX_NAME);
-    return db.query(query, type);
+    final List<ContentGroupTemplate> templates = db.queryView(
+        createQuery("by_creatorid_updatetimestamp")
+            .startKey(ComplexKey.of(creatorId, ComplexKey.emptyObject()))
+            .endKey(ComplexKey.of(creatorId, 0))
+            .includeDocs(true)
+            .reduce(false)
+            .descending(true),
+        ContentGroupTemplate.class);
+
+    return templates;
   }
 }
