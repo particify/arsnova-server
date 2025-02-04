@@ -42,7 +42,7 @@ export let designDoc = {
     },
     "by_roomid_contentid_round_result": {
       "map": function (doc) {
-        if (doc.type === "Answer") {
+        if (doc.type === "Answer" && !doc.hidden) {
           emit([doc.roomId, doc.contentId, doc.round, doc.result], {_rev: doc._rev});
         }
       },
