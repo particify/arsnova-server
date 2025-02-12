@@ -78,7 +78,8 @@ public class CouchDbContentGroupTemplateRepository
   public List<ContentGroupTemplate> findByTagIds(final List<String> tagIds) {
     final Map<String, Object> querySelector = Map.of(
         "type", type.getSimpleName(),
-        "tagIds", Map.of("$all", tagIds)
+        "tagIds", Map.of("$all", tagIds),
+        "published", true
     );
     final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(querySelector);
     query.setIndexDocument(TAGS_INDEX_NAME);
