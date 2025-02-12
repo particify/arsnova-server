@@ -12,8 +12,8 @@ export let designDoc = {
     },
     "by_creatorid_updatetimestamp": {
       "map": function (doc) {
-        if (doc.type === "ContentGroupTemplate") {
-          emit([doc.creatorId, doc.updateTimestamp], {_rev: doc._rev});
+        if (doc.type === "ContentGroupTemplate" && doc.creatorId && (doc.updateTimestamp || doc.creationTimestamp)) {
+          emit([doc.creatorId, doc.updateTimestamp ? doc.updateTimestamp : doc.creationTimestamp], {_rev: doc._rev});
         }
       }
     }
