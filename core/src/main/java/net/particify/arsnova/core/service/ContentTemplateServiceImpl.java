@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
 import net.particify.arsnova.core.event.BeforeDeletionEvent;
+import net.particify.arsnova.core.event.BeforeUpdateEvent;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.model.ContentTemplate;
@@ -44,6 +45,13 @@ public class ContentTemplateServiceImpl
     return create(templates).stream()
         .map(t -> t.getId())
         .collect(Collectors.toList());
+  }
+
+  @EventListener
+  public void handleUpdate(final BeforeUpdateEvent<ContentGroupTemplate> event) {
+    event.getEntity().setGroupType(event.getOldEntity().getGroupType());
+    event.getEntity().setLicense(event.getOldEntity().getLicense());
+    event.getEntity().setTemplateIds(event.getOldEntity().getTemplateIds());
   }
 
   @EventListener
