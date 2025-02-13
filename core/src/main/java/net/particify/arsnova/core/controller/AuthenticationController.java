@@ -212,6 +212,27 @@ public class AuthenticationController {
     });
   }
 
+  @GetMapping("/sso/{providerId}/logout")
+  public RedirectView redirectToSsoLogout(@PathVariable final String providerId) {
+    final String url = switch (providerId) {
+      case SecurityConfig.OIDC_PROVIDER_ID -> {
+        if (oidcClient == null) {
+          throw new IllegalArgumentException("Invalid provider ID.");
+        }
+        yield oidcClient.getConfiguration().getLogoutUrl();
+      }
+      case SecurityConfig.SAML_PROVIDER_ID -> {
+        if (saml2Client == null) {
+          throw new IllegalArgumentException("Invalid provider ID.");
+        }
+        yield saml2Client.getConfiguration().getSingleSignOutServiceUrl();
+      }
+      default -> throw new IllegalArgumentException("Invalid provider ID.");
+    };
+
+    return new RedirectView(url);
+  }
+
   @GetMapping(value = "/config/saml/sp-metadata.xml", produces = MediaType.APPLICATION_XML_VALUE)
   public String samlSpMetadata() throws IOException {
     if (saml2Client == null) {
