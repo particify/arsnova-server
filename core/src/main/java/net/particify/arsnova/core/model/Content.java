@@ -166,18 +166,17 @@ public class Content extends Entity implements RoomIdAware {
   @Max(3600)
   private int duration;
 
-  private TextRenderingOptions bodyRenderingOptions;
-
   {
-    this.bodyRenderingOptions = new TextRenderingOptions();
+    final TextRenderingOptions bodyRenderingOptions = new TextRenderingOptions();
+    bodyRenderingOptions.setMarkdownFeatureset(TextRenderingOptions.MarkdownFeatureset.EXTENDED);
     this.addRenderingMapping(
         this::getBody,
         this::setRenderedBody,
-        this.bodyRenderingOptions);
+        bodyRenderingOptions);
     this.addRenderingMapping(
         this::getAdditionalText,
         this::setRenderedAdditionalText,
-        this.bodyRenderingOptions);
+        bodyRenderingOptions);
   }
 
   public Content() {
@@ -250,10 +249,6 @@ public class Content extends Entity implements RoomIdAware {
   @JsonView({View.Persistence.class, View.Public.class})
   public void setFormat(final Format format) {
     this.format = format;
-    this.bodyRenderingOptions.setMarkdownFeatureset(
-        format == Format.SLIDE || format == Format.FLASHCARD
-        ? TextRenderingOptions.MarkdownFeatureset.EXTENDED
-        : TextRenderingOptions.MarkdownFeatureset.SIMPLE);
   }
 
   @JsonView(View.Public.class)
