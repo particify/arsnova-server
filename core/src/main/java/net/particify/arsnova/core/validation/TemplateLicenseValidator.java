@@ -20,6 +20,6 @@ public class TemplateLicenseValidator implements ConstraintValidator<TemplateLic
 
   @Override
   public boolean isValid(final String value, final ConstraintValidatorContext context) {
-    return value != null && licenses.contains(value);
+    return value == null || licenses.contains(value);
   }
 }
