@@ -50,7 +50,9 @@ public class ContentTemplateServiceImpl
   @EventListener
   public void handleUpdate(final BeforeUpdateEvent<ContentGroupTemplate> event) {
     event.getEntity().setGroupType(event.getOldEntity().getGroupType());
-    event.getEntity().setLicense(event.getOldEntity().getLicense());
+    if (event.getOldEntity().getLicense() != null) {
+      event.getEntity().setLicense(event.getOldEntity().getLicense());
+    }
     event.getEntity().setTemplateIds(event.getOldEntity().getTemplateIds());
   }
 
