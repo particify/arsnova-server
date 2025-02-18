@@ -610,7 +610,7 @@ public class SecurityConfig {
     if (!samlProperties.getIdp().getEntityId().isEmpty()) {
       config.setIdentityProviderEntityId(samlProperties.getIdp().getEntityId());
     }
-    final String acsUrl = rootUrl + apiPath + AUTH_CALLBACK_PATH;
+    final String acsUrl = rootUrl + apiPath + SAML_CALLBACK_PATH;
     if (samlProperties.getAssertionConsumerServiceIndex() == -1) {
       config.setAssertionConsumerServiceUrl(acsUrl);
     }
