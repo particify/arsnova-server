@@ -610,9 +610,8 @@ public class SecurityConfig {
     if (!samlProperties.getIdp().getEntityId().isEmpty()) {
       config.setIdentityProviderEntityId(samlProperties.getIdp().getEntityId());
     }
-    final String acsUrl = rootUrl + apiPath + SAML_CALLBACK_PATH;
     if (samlProperties.getAssertionConsumerServiceIndex() == -1) {
-      config.setAssertionConsumerServiceUrl(acsUrl);
+      config.setAssertionConsumerServiceUrl(rootUrl + apiPath + SAML_CALLBACK_PATH);
     }
     config.setAssertionConsumerServiceIndex(samlProperties.getAssertionConsumerServiceIndex());
     config.setMaximumAuthenticationLifetime(samlProperties.getMaxAuthenticationLifetime());
@@ -620,7 +619,7 @@ public class SecurityConfig {
     config.setAuthnRequestSigned(true);
     final SAML2Client client = new SAML2Client(config);
     client.setName(SAML_PROVIDER_ID);
-    client.setCallbackUrl(acsUrl);
+    client.setCallbackUrl(rootUrl + apiPath + AUTH_CALLBACK_PATH);
     client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
 
     /* Initialize the client manually for the metadata endpoint */
