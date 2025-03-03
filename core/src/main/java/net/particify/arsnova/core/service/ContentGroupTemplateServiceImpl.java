@@ -115,11 +115,14 @@ public class ContentGroupTemplateServiceImpl
     final Map<String, ContentGroupTemplate> templates = get(templateIds).stream()
         .collect(Collectors.toMap(ContentGroupTemplate::getId, Function.identity()));
 
-    return templateContents.stream().map(tc ->
-        new ContentLicenseAttribution(
-            tc.getId(),
-            templates.get(tc.getGroupTemplateId()).getLicense(),
-            templates.get(tc.getGroupTemplateId()).getAttribution()))
+    return templateContents.stream()
+        .filter(tc -> templates.get(tc.getGroupTemplateId()) != null)
+        .map(tc ->
+            new ContentLicenseAttribution(
+                tc.getId(),
+                templates.get(tc.getGroupTemplateId()).getLicense(),
+                templates.get(tc.getGroupTemplateId()).getAttribution()))
+        .filter(cla -> cla.license() != null)
         .collect(Collectors.toList());
   }
 
