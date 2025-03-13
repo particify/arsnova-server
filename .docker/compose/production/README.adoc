@@ -1,12 +1,9 @@
-= Docker orchestration for production
+= Particify Docker Orchestration
 
-This directory contains files to integrate all of the Particify services and service dependencies using Docker:
+This repository contains files to integrate all of the Particify services and service dependencies using Docker:
 
-* Configuration templates for Docker Compose
-* `particifyctl`: A helper script to setup ARSnova using Docker Compose
-
-These files are available separately for https://github.com/particify/arsnova-server/releases[releases],
-so you do not need to clone the whole repository on production systems.
+* Configuration for Docker Compose
+* Dockerfiles (and additional assets) to create modified versions of thirdparty images
 
 == Requirements
 
@@ -18,32 +15,31 @@ so you do not need to clone the whole repository on production systems.
 
 === Software
 
-* Linux (see https://docs.docker.com/engine/install/#server for availability of official Docker packages)
+* Linux is the recommended OS, but basically any OS that is supported by Docker Engine and runs shell scripts should work.
 * https://docs.docker.com/engine/install/[Docker Engine] >= 20.10 (older versions might work but are not tested for compatibility)
-* https://docs.docker.com/compose/install/linux/[Docker Compose] >= 2.0
+* https://docs.docker.com/compose/install/[Docker Compose]
 
 == Usage
 
 === Preparations
 
-. link:https://github.com/particify/arsnova-server/releases[Download the latest release].
-. Extract the archive and switch to the extracted directory.
-. Run `./particifyctl` to list all available commands.
+. Clone this repository.
+. Inside the repositories root directory run `./set-env.sh prod`.
 
 === Running
 
-. Run `./particifyctl run`. Append `-d` to run in detached mode for production.
-. Run `./particifyctl compose down` stop and remove the containers.
+. Run `PORT=<port> docker-compose up`. Append `-d` to run in detached mode for production.
+. Run `docker-compose down` stop and remove the containers.
+. Run `docker-compose pull` to update the images.
 
 === Configuration
 
-The default configuration can be adjusted via environment variables.
-To persist the configuration, add those variable assignments to `local.env` (one assignment per line).
+The default configuration can be adjusted via environment variables:
 
 |=======
 |Variable |Default value |Description
 |PORT |80 |Port used for the frontend proxy
-|JWT_SECRET | |Encryption token for authentication (MUST be changed for production)
+|JWT_SECRET |secret |Encryption token for authentication (MUST be changed for production)
 |JWT_DOMAIN |example.com |A domain usable as server ID (used for the JWT issuer/audience claim)
 |ARSNOVA_HOSTNAME |app.particify.de |Hostname for the application
 |MAIL_HOST | |Hostname of the mail server
@@ -62,23 +58,22 @@ To persist the configuration, add those variable assignments to `local.env` (one
 |LDAP_USERSEARCHBASE |ou=people |LDAP user search base
 |LDAP_MANAGERUSERDN| cn=arsnova-manager,dc=example,dc=com |LDAP DN of manager user
 |LDAP_MANAGERPASSWORD| |LDAP password of manager user
-|GATEWAY_TAG |next |Version (Docker) tag for the gateway service
-|WEBSOCKET_TAG |next |Version (Docker) for the WebSocket service
-|AUTHZ_TAG |next |Version (Docker) for the authz service
-|CORE_TAG |next |Version (Docker) for the core service
-|COMMENTS_TAG |next |Version (Docker) for comments service
-|WEBCLIENT_TAG |next |Version (Docker) for the webclient
-|FORMATTING_TAG|next |Version (Docker) for the formatting service
+|CORE_TAG |3.12.20250313 |Docker tag (repository branch) for Core Backend
+|WSGW_TAG |3.12.20250313 |Docker tag (repository branch) for WebSocket Gateway
+|HTTPGW_TAG |3.12.20250313 |Docker tag (repository branch) for HTTP Gateway
+|AUTH_TAG |3.12.20250313 |Docker tag (repository branch) for Auth Service
+|COMMENT_TAG |3.12.20250313 |Docker tag (repository branch) for Comment Service
+|WEB_TAG |3.12.20250313 |Docker tag (repository branch) for Webclient
+|FORMATTING_TAG|3.12.20250313 |Docker tag (repository branch) for Formatting Service
 |=======
 
-Example: `PORT=8100 ./particifyctl run`
+Example: `PORT=8100 WEB_TAG=my-dev-branch docker-compose up`
 
-If you need to override the default Docker Compose configuration, you can add your configuration in `local.compose.yaml`.
-The local configuration has perference over other `\*.compose.yaml` configurations provided in this repository.
-We recommend that you only use the `local.*` files to adjust the configuration, so you do not need to manually merge changes when updating.
+NOTE: Docker images are not automatically created for development branches.
+Make sure to trigger the `docker_image_dev` job in GitLab's pipeline view and delete the image from the registry once it is no longer needed.
 
 === PostgreSQL updates
 
 When the PostgreSQL image was updated to a new major version, `pg_upgrade.sh` needs to be run to perform a database migration.
 The script expects the service name, the old and the new PostgreSQL version as parameters.
-There is no rollback support, so backups for PostgreSQL volumes should be created before running the script.
+There is no rollback support, so backups for the PostgreSQL volumes should be created before running the script.
