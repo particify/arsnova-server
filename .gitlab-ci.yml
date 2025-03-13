@@ -68,15 +68,17 @@ build_dependency_image:
       when: manual
       variables:
         IMAGE_TAG_AFFIX: $CI_COMMIT_REF_SLUG
+    - if: $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/
+      when: manual
+      variables:
+        IMAGE_TAG_AFFIX: $CI_COMMIT_REF_SLUG
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
         - ".docker/images/**/*"
         - ".docker/images/$IMAGE_NAME/**/*"
       when: on_success
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: manual
-      variables:
-        IMAGE_TAG_AFFIX: $CI_COMMIT_REF_SLUG
   trigger:
     include: ".docker/images/.gitlab-ci.yml"
     strategy: depend
