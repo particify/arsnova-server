@@ -1,0 +1,119 @@
+= Design decisions
+
+== Programming language: Kotlin
+Starting with version 4, we will use Kotlin as primary language for backend development.
+
+The key advantage of Kotlin over Java is its null safety.
+Furthermore, the language has better defaults and requires less boilerplate code which leads to better readibility and reduced maintenance work.
+While Java is catching up to Kotlin, there are aspects where Java simply cannot improve due to compatibility requirements.
+
+But Kotlin does not come without downsides.
+Code examples are most of the time written for Java and while they can be easily converted to Kotlin, good knowledge in both languages is required.
+Futhermore, Java-based framework do not work well with some Kotlin features.
+E.g. inline value classes can cause issues with frameworks which use reflection.
+
+Overall, we came to the conclusion that Kotlin's advantages overweight its disadvatages for our use case.
+
+== Framework: Spring Boot
+
+We will continue using Spring Boot for the development of version 4 of the core service.
+It has a consistent development cycle, has been around for a long time (since 2002) and has one of the largest ecosystems for the JVM platform.
+Furthermore, it has first party support for a lot of features for backend development.
+It has comprehensive documentation resources, both official and community provided.
+While it is primarily a Java framework, it does have acceptable Kotlin support (documentation, extension functions, but there are issues with some Kotlin features).
+
+Spring provides good abstractions for persistence through Spring Data and supports a lot of database technologies (JDBC, JPA, some NoSQL DBMS) out of the box.
+Spring Security provides a flexible solution for implementing authentication and authorization with support for OIDC and SAML.
+Furthermore, Spring has solutions for API development including HATEOAS and GraphQL.
+
+=== Web Stack: Servlet (Spring Web MVC)
+
+We will use the traditional Servlet stack for version 4.
+Using the reactive Webflux stack for the gateway in version 3, we have made the experience that the reactive code is often hard to debug.
+Furthermore, the excessive use of asynchronous callbacks makes the code harder to read.
+With the introduction of virtual threads to Java the performance advantage of Webflux diminishes and no longer justifies the increased complexity for us.
+
+== Database management system: Dropping CouchDB
+
+We will move away from CouchDB for version 4.
+CouchDB is a niche DBMS and as a consequence has a low number of contributors and a small ecosystem.
+There is no out-of-the-box support for frameworks like Spring Boot.
+Multiple Java libraries are no longer maintained.
+For version 3, we are using our own code on top of an older library to support current versions of CouchDB.
+
+CouchDB has two types of views.
+The newer Mango views make it easier to query but lack features of the older JS-based views (e.g. basic aggregation fuctionality like count and sum).
+The JS views on the other hand are slower when it comes to index updates.
+Using both types of views makes it unnecessary hard to work with the database.
+Furthermore, there has not been many improvements to Mango, so it does not seem this situation will improve in the near future.
+
+Since CouchDB has no concept of types, it has to analyze all document updates for every view which create unnecessary load.
+As a workaround, a separate database per type could be used.
+
+CouchDB does not have any features which we benefit from and are not be supported by a more widely adopted DBMS.
+Its use is simply inherited from the early versions of arsnova.
+
+== Database management system: PostgreSQL
+
+As primary database management system we will be using PostgreSQL for version 4.
+The relational database model makes sense for our data structures since they have a mostly fixed schema and a lot of relations between each other.
+For cases where more flexible structures are needed, PostgreSQL's JSON support seems to be a good fit.
+PostgreSQL has been around for a long time (since 1996) and has a reliable release cylce.
+It has a large ecosystem with integrations for most of programming languages and frameworks.
+
+== Database abstraction layer
+
+We will be using Spring Data JPA with Hibernate and QueryDSL for version 4.
+This helps with separating the technical aspects from the business logic.
+Futhermore, it brings additional safety by avoiding direct SQL queries which cannot be checked at compile time.
+JPQL/HQL queries are checked at application startup.
+Hibernate provides first level caching for entities during a single session out of the box and query caching can be optionally set up.
+
+Spring Data is able to generate queries (derived queries) based on interface method names and parameters.
+These support result scrolling or pagination out of the box.
+For more complex queries like a search, QueryDSL can be used to query in a type-safe way.
+For cases with need for more control, JPQL queries can be used.
+
+While JPA abstracts away the database, profound knowledge about the way SQL queries are generated is required to avoid performance pitfalls caused by inappropriate usage.
+Simple looking code can quickly lead to unintended complex queries.
+Therefore, generated queries for new code need to be monitored.
+
+Spring Data JDBC has been considered which provides a more lightweight alternative.
+It works well with simple data models and has the advantage that records/data classes can be used since no proxy classes are generated.
+But it lacks features which are required for our use case.
+It does not yet support composite IDs and there is no support for result scrolling.
+Furthermore, it has does not have a caching implementation.
+
+== API: GraphQL
+
+REST APIs are great due to their simplicity and cachability.
+They work well for simple data-driven workflows.
+But over time, some limitations of REST, which effect our use case, have become clear.
+
+We have conditions which determine when and how a resource can be modified and different views for different user roles.
+This has been implemented by adding query parameters and multiple endpoints for resources.
+But as a result, the API is no longer self explainatory.
+Futhermore, the use of different views single resources makes it hard to define reliable data types on the client side.
+
+We have considered implementing HATEOAS for version 4, which would expose the available endpoints through the API itself and make it navigatable.
+But it does not help with resources which have different views.
+
+Instead, we decided to provide a GraphQL API for version 4.
+GraphQL is much more complex but in return gives a lot more control to the API client.
+The client gains fine-grained control about which data will be transmitted.
+The backend can implement access control per field.
+Due to fine-grained error reporting, an error on single field does not automatically let the whole request fail.
+GraphQL's schema declaration with input and output types serves as documentation.
+Futhermore, code generators are available, which makes makes it easy to keep client types in sync with the backend and allows type safe us of API data.
+Caching of GraphQL entities is possible but more sophisticated because not all properties might be in the cache.
+The Apollo GraphQL client supports caching
+
+== Entity models and DTO
+
+We used a single model as DAO and DTO in version 3.
+While this reduced the amount of classes it made it harder to differentiate between properties for the REST API and persistence.
+Having multiple views for the REST API further exacerbated this issue.
+
+For version 4 we will use one class for the database entity and separate DTOs for API requests and responses.
+This provides enhanced flexibility and better matches the GraphQL approach of having separate input and output types which is important because the latter can often be asymmetric.
+E.g. only a `name` is required for the creation of a room but a created room always has an `id` and `shortId`.
