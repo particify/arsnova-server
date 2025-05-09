@@ -22,7 +22,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 
 import net.particify.arsnova.core.config.properties.MessageBrokerProperties;
+import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.model.Entity;
+import net.particify.arsnova.core.security.User;
 
 /**
  * AmqpEventDispatcher listens to application events, converts them to messages and sends them to RabbitMQ.
@@ -43,14 +45,17 @@ public class AmqpEventDispatcher {
   private static final Logger logger = LoggerFactory.getLogger(AmqpEventDispatcher.class);
 
   private final RabbitTemplate messagingTemplate;
+  private final SystemProperties systemProperties;
   private final Map<String, Set> eventConfig;
   private final Map<String, ObjectMapper> objectMappers = new HashMap<>();
 
   @Autowired
   public AmqpEventDispatcher(
       final RabbitTemplate rabbitTemplate,
-      final MessageBrokerProperties messageBrokerProperties) {
+      final MessageBrokerProperties messageBrokerProperties,
+      final SystemProperties systemProperties) {
     messagingTemplate = rabbitTemplate;
+    this.systemProperties = systemProperties;
     eventConfig = messageBrokerProperties.getPublishedEvents().stream().collect(Collectors.toMap(
         c -> c.entityType + "-" + c.eventType,
         c -> c.includedProperties));
@@ -62,6 +67,10 @@ public class AmqpEventDispatcher {
 
   @EventListener
   public <T extends CrudEvent, E extends Entity> void dispatchEntityCrudEvent(final T event) {
+    if (event.getClass().isAssignableFrom(User.class) && systemProperties.isExternalUserManagement()) {
+      logger.debug("Skipping user event dispatch due to external user management.");
+      return;
+    }
     String eventType = event.getClass().getSimpleName();
     eventType = eventType.substring(0, eventType.length() - 5);
     final String entityType = event.getEntity().getSupertype().getSimpleName();

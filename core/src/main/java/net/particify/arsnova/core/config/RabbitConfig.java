@@ -31,6 +31,7 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 import net.particify.arsnova.core.config.properties.MessageBrokerProperties;
+import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.event.AmqpEventDispatcher;
 import net.particify.arsnova.core.event.AmqpMigrationEventDispatcher;
 import net.particify.arsnova.core.event.RoomAccessEventDispatcher;
@@ -152,8 +153,9 @@ public class RabbitConfig {
       havingValue = "true")
   public AmqpEventDispatcher eventToTopicPublisher(
       final RabbitTemplate rabbitTemplate,
-      final MessageBrokerProperties messageBrokerProperties) {
-    return new AmqpEventDispatcher(rabbitTemplate, messageBrokerProperties);
+      final MessageBrokerProperties messageBrokerProperties,
+      final SystemProperties systemProperties) {
+    return new AmqpEventDispatcher(rabbitTemplate, messageBrokerProperties, systemProperties);
   }
 
   @Bean
