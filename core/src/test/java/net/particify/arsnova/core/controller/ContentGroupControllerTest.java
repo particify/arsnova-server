@@ -89,7 +89,7 @@ public class ContentGroupControllerTest {
   }
 
   @Test
-  @WithMockUser(value = "TestUser", userId = "1234")
+  @WithMockUser(value = "TestUser", userId = "1234", roles = {"USER", "PARTICIPANT__TestRoomID"})
   public void shouldGetContentGroup() throws Exception {
     final Room room = this.getRoomForUserWithDatabaseDetails("TestRoomID", user);
     final ContentGroup contentGroup = new ContentGroup();

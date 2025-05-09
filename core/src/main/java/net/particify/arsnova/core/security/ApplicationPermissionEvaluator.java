@@ -161,9 +161,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
           return isAccountManagementAccess(authentication)
               || hasUserProfilePermission(authentication, targetUserProfile, permission.toString());
         case "room":
-          final Room targetRoom = roomService.get(targetId.toString());
-          return targetRoom != null
-              && hasRoomPermission(authentication, targetRoom, permission.toString());
+          return hasRoomPermission(authentication, targetId.toString(), permission.toString());
         case "content":
           final Content targetContent = contentService.get(targetId.toString());
           return targetContent != null
@@ -218,64 +216,71 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
   private boolean hasRoomPermission(
       final Authentication auth,
-      final Room targetRoom,
+      final String targetRoomId,
       final String permission) {
     switch (permission) {
       case READ_PERMISSION:
-        return !targetRoom.isClosed() || targetRoom.isTemplate()
-            || hasAuthenticationRoomModeratingRole(auth, targetRoom);
+        return true;
       case READ_EXTENDED_PERMISSION:
-        return hasAuthenticationRoomModeratingRole(auth, targetRoom);
+        return hasAuthenticationRoomModeratingRole(auth, targetRoomId);
       case CREATE_PERMISSION:
         return !getUserId(auth).isEmpty();
       case UPDATE_PERMISSION:
-        return hasAuthenticationRoomRole(auth, targetRoom, RoomRole.EDITOR);
+        return hasAuthenticationRoomRole(auth, targetRoomId, RoomRole.EDITOR);
       case OWNER_PERMISSION:
       case DELETE_PERMISSION:
-        return hasAuthenticationRoomRole(auth, targetRoom, RoomRole.OWNER);
+        return hasAuthenticationRoomRole(auth, targetRoomId, RoomRole.OWNER);
       case DUPLICATE_PERMISSION:
-        return hasAuthenticationRoomRole(auth, targetRoom, RoomRole.OWNER)
-            || targetRoom.isTemplate();
+        return hasAuthenticationRoomRole(auth, targetRoomId, RoomRole.OWNER);
       default:
         return false;
     }
+  }
+
+  private boolean hasRoomPermission(
+      final Authentication auth,
+      final Room targetRoom,
+      final String permission) {
+    if (permission.equals(READ_PERMISSION) || permission.equals(DUPLICATE_PERMISSION) && targetRoom.isTemplate()) {
+      return true;
+    }
+    return hasRoomPermission(auth, targetRoom.getId(), permission);
   }
 
   private boolean hasContentPermission(
       final Authentication auth,
       final Content targetContent,
       final String permission) {
-    final Room room = roomService.get(targetContent.getRoomId());
-    if (room == null) {
-      return false;
-    }
+    final String roomId = targetContent.getRoomId();
 
     switch (permission) {
       case READ_PERMISSION:
-        if (hasAuthenticationRoomModeratingRole(auth, room)) {
+        if (hasAuthenticationRoomModeratingRole(auth, roomId)) {
           return true;
         }
-        return !room.isClosed() && contentGroupService.getByRoomIdAndContainingContentId(
+        return hasAuthenticationRoomRole(auth, roomId, RoomRole.PARTICIPANT)
+            && contentGroupService.getByRoomIdAndContainingContentId(
             targetContent.getRoomId(), targetContent.getId()).stream()
             .anyMatch(cg -> cg.isContentPublished(targetContent.getId()));
       case READ_EXTENDED_PERMISSION:
-        return hasAuthenticationRoomModeratingRole(auth, room);
+        return hasAuthenticationRoomModeratingRole(auth, roomId);
       case READ_CORRECT_OPTIONS_PERMISSION:
-        if (hasAuthenticationRoomModeratingRole(auth, room)) {
+        if (hasAuthenticationRoomModeratingRole(auth, roomId)) {
           return true;
         }
-        return !room.isClosed() && contentGroupService.getByRoomIdAndContainingContentId(
+        return hasAuthenticationRoomRole(auth, roomId, RoomRole.PARTICIPANT)
+            && contentGroupService.getByRoomIdAndContainingContentId(
             targetContent.getRoomId(), targetContent.getId()).stream()
             .anyMatch(cg -> cg.isContentPublished(targetContent.getId()) && cg.isCorrectOptionsPublished());
       case MODERATE_PERMISSION:
-        return hasAuthenticationRoomModeratingRole(auth, room);
+        return hasAuthenticationRoomModeratingRole(auth, roomId);
       case CREATE_PERMISSION:
       case UPDATE_PERMISSION:
       case DELETE_PERMISSION:
       case OWNER_PERMISSION:
       case DUPLICATE_PERMISSION:
         /* TODO: Remove owner permission for content. Use create/update/delete instead. */
-        return hasAuthenticationRoomRole(auth, room, RoomRole.EDITOR);
+        return hasAuthenticationRoomRole(auth, roomId, RoomRole.EDITOR);
       default:
         return false;
     }
@@ -285,19 +290,16 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
       final Authentication auth,
       final ContentGroup targetContentGroup,
       final String permission) {
-    final Room room = roomService.get(targetContentGroup.getRoomId());
-    if (room == null) {
-      return false;
-    }
+    final String roomId = targetContentGroup.getRoomId();
 
     switch (permission) {
       case "read":
-        return (!room.isClosed() && targetContentGroup.isPublished())
-            || hasAuthenticationRoomModeratingRole(auth, room);
+        return (hasAuthenticationRoomRole(auth, roomId, RoomRole.PARTICIPANT) && targetContentGroup.isPublished())
+            || hasAuthenticationRoomModeratingRole(auth, roomId);
       case "create":
       case "update":
       case "delete":
-        return hasAuthenticationRoomRole(auth, room, RoomRole.EDITOR);
+        return hasAuthenticationRoomRole(auth, roomId, RoomRole.EDITOR);
       default:
         return false;
     }
@@ -311,14 +313,13 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
     if (!hasContentPermission(auth, content, "read")) {
       return false;
     }
-    final Room room;
+    final String roomId = targetAnswer.getRoomId();
     switch (permission) {
       case READ_PERMISSION:
         if (content.getState().isAnswersPublished() || getUserId(auth).equals(targetAnswer.getCreatorId())) {
           return true;
         }
-        room = roomService.get(targetAnswer.getRoomId());
-        return room != null && hasAuthenticationRoomModeratingRole(auth, room);
+        return hasAuthenticationRoomModeratingRole(auth, roomId);
       case CREATE_PERMISSION:
         return content.getState().isAnswerable();
       case OWNER_PERMISSION:
@@ -327,11 +328,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
         /* TODO */
         return false;
       case MODERATE_PERMISSION:
-        room = roomService.get(targetAnswer.getRoomId());
-        return room != null && hasAuthenticationRoomModeratingRole(auth, room);
+        return hasAuthenticationRoomModeratingRole(auth, roomId);
       case DELETE_PERMISSION:
-        room = roomService.get(targetAnswer.getRoomId());
-        return room != null && hasAuthenticationRoomRole(auth, room, RoomRole.EDITOR);
+        return hasAuthenticationRoomRole(auth, roomId, RoomRole.EDITOR);
       default:
         return false;
     }
@@ -341,24 +340,17 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
       final Authentication auth,
       final Announcement targetAnnouncement,
       final String permission) {
-    final Room room;
+    if (getUserId(auth).isEmpty() || targetAnnouncement.getRoomId() == null) {
+      return false;
+    }
+    final String roomId = targetAnnouncement.getRoomId();
     switch (permission) {
       case CREATE_PERMISSION:
       case UPDATE_PERMISSION:
       case DELETE_PERMISSION:
-        if (getUserId(auth).isEmpty() || targetAnnouncement.getRoomId() == null) {
-          return false;
-        }
-        room = roomService.get(targetAnnouncement.getRoomId());
-        if (room == null) {
-          return false;
-        }
-
-        return hasAuthenticationRoomRole(auth, room, RoomRole.EDITOR);
+        return hasAuthenticationRoomRole(auth, roomId, RoomRole.EDITOR);
       case READ_PERMISSION:
-        room = roomService.get(targetAnnouncement.getRoomId());
-
-        return room != null && (!room.isClosed() || hasAuthenticationRoomModeratingRole(auth, room));
+        return hasAuthenticationRoomRole(auth, roomId, RoomRole.PARTICIPANT);
       default:
         return false;
     }
@@ -400,23 +392,23 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
    * Checks if the authentication has the owner or has any moderating role for
    * the room.
    */
-  private boolean hasAuthenticationRoomModeratingRole(final Authentication auth, final Room room) {
-    return hasAuthenticationRoomRole(auth, room, RoomRole.MODERATOR);
+  private boolean hasAuthenticationRoomModeratingRole(final Authentication auth, final String roomId) {
+    return hasAuthenticationRoomRole(auth, roomId, RoomRole.MODERATOR);
   }
 
   /**
    * Checks if the authentication has a specific role for the room.
    *
-   * @param room The room to check the role for.
    * @param auth The authentication to check the role for.
+   * @param roomId The ID of the room to check the role for.
    * @param role The role that is checked.
    * @return Returns true if the user has the moderator role for the room.
    */
   private boolean hasAuthenticationRoomRole(
       final Authentication auth,
-      final Room room,
+      final String roomId,
       final RoomRole role) {
-    final List<String> allowedRoles = determineRoleSuperset(room, role);
+    final List<String> allowedRoles = determineRoleSuperset(roomId, role);
     return auth.getAuthorities().stream().anyMatch(ga -> allowedRoles.contains(ga.getAuthority()));
   }
 
@@ -424,29 +416,25 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
    * Returns a superset of roles which contains the passed role and roles with
    * a superset of permissions.
    */
-  private List<String> determineRoleSuperset(final Room room, final RoomRole role) {
+  private List<String> determineRoleSuperset(final String roomId, final RoomRole role) {
     final List<String> roles = new ArrayList<>();
 
-    roles.add(
-        String.format(ROOM_ROLE_PATTERN, RoomRole.OWNER, room.getId()));
+    roles.add(String.format(ROOM_ROLE_PATTERN, RoomRole.OWNER, roomId));
     if (role == RoomRole.OWNER) {
       return roles;
     }
 
-    roles.add(
-        String.format(ROOM_ROLE_PATTERN, RoomRole.EDITOR, room.getId()));
+    roles.add(String.format(ROOM_ROLE_PATTERN, RoomRole.EDITOR, roomId));
     if (role == RoomRole.EDITOR) {
       return roles;
     }
 
-    roles.add(
-        String.format(ROOM_ROLE_PATTERN, RoomRole.MODERATOR, room.getId()));
+    roles.add(String.format(ROOM_ROLE_PATTERN, RoomRole.MODERATOR, roomId));
     if (role == RoomRole.MODERATOR) {
       return roles;
     }
 
-    roles.add(
-        String.format(ROOM_ROLE_PATTERN, RoomRole.PARTICIPANT, room.getId()));
+    roles.add(String.format(ROOM_ROLE_PATTERN, RoomRole.PARTICIPANT, roomId));
 
     return roles;
   }
