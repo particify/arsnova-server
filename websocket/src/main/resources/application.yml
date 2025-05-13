@@ -47,8 +47,12 @@ stomp:
 security:
   jwt:
     secret: "secret"
+  authorize-uri-endpoint: "/jwt"
+  authorize-uri-header: X-Forwarded-Uri
+  authorize-uri-prefix: /api
 http-client:
-  auth-service: "http://127.0.0.1:8092"
+  auth-service: "http://arsnova-server-authz:8080"
+  use-jwt-endpoint: true
 gateway:
   event-rate-limit:
     # If threshold is exceeded, rate limiting applies

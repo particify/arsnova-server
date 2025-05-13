@@ -42,6 +42,9 @@ data class Stomp(
 
 data class Security(
   val jwt: Jwt,
+  val authorizeUriEndpoint: String,
+  val authorizeUriHeader: String,
+  val authorizeUriPrefix: String,
 )
 
 data class Jwt(
@@ -50,6 +53,7 @@ data class Jwt(
 
 data class HttpClient(
   val authService: String,
+  val useJwtEndpoint: Boolean,
 )
 
 data class Gateway(

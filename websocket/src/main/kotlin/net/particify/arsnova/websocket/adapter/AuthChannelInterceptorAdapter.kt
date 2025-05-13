@@ -2,6 +2,7 @@ package net.particify.arsnova.websocket.adapter
 
 import com.auth0.jwt.exceptions.JWTVerificationException
 import net.particify.arsnova.websocket.security.JwtTokenUtil
+import net.particify.arsnova.websocket.security.User
 import net.particify.arsnova.websocket.service.RoomAccessService
 import org.slf4j.LoggerFactory
 import org.springframework.messaging.Message
@@ -69,12 +70,10 @@ class AuthChannelInterceptorAdapter(
       }
     } else {
       logger.trace("Incoming message is anything but a connect command")
-      val userId = accessor.user?.name
-      if (userId == null) {
+      if (accessor.user == null) {
         logger.debug("User didn't authenticate himself, dropping message. WebSocket session id: {}", wsSessionId)
         return null
       }
-
       if (accessor.destination != null && accessor.command != null && accessor.command == StompCommand.SUBSCRIBE) {
         val destination: String = accessor.destination!!
         val roomId = destination.substring(topicIndexBeforeRoomId, topicIndexBeforeRoomId + topicRoomIdLength)
@@ -87,7 +86,7 @@ class AuthChannelInterceptorAdapter(
         logger.debug("Incoming message is a subscribe command")
         if (moderatorString in destination) {
           logger.trace("Noticed a moderator role in topic, checking for auth")
-          val userRoomAccess = roomAccessService.getRoomAccess(roomId, userId)
+          val userRoomAccess = roomAccessService.getRoomAccess(roomId, accessor.user as User)
           val allowedRoles = listOf(ownerRoleString, moderatorRoleString, editorRoleString)
           if (!allowedRoles.contains(userRoomAccess.role)) {
             logger.debug("User doesn't have any auth information, dropping the message")
