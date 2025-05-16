@@ -1,0 +1,152 @@
+= Road to v4
+
+== Problem statement
+During the course of development of the 3.x series multiple issues revealed which negatively impact the developer experience and slow down the development of new features.
+Tackling these issues is not an easy feat because they are rooted in achitectural and technology stack choices.
+So this would require large scale refactoring and rewrites of major code parts.
+Still, we are sure of the necessity of approaching these issues.
+
+=== CouchDB
+
+==== Performance
+View updates are slow.
+They are handled by a separate JS process.
+This improved since CouchDB introduced QuickJS engine as an alternative but it is still not optimal.
+CouchDB has to analyze all document changes for updating view because it does not no which ones are relevant.
+While we have types for documents, CouchDB does not have such a concept.
+The recommendation here is to use a separate DB per type.
+
+==== Inflexibility (Queries)
+CouchDB does not work well for dynamic queries.
+Instead queries have to be predefined in form of views.
+While Mango could be used to perform dynamic queries this does not work in practice without an appropriate index.
+CouchDB can only use a single index per query which means that all relevant fields must be part of the index.
+Furthermore, Mango's functionality is limited compared to JS views.
+It does not support aggregation functions (count, sum, etc.).
+Having to use to different systems for queries makes it unnecessary hard to work with the database.
+
+==== Ecosystem
+Because of its low adoption, there is little to no support for CouchDB by frameworks.
+Spring Data and Micrometer have integrations for a lot of databases but do not support CouchDB.
+There are libraries around for CouchDB but, at least on the Java side, multiple have been abandonned (Ektorp, CouchDB4J, java-cloudant).
+While there is the official documentation, there is little community contributed information like best practises or examples around.
+Currently, we use our own code to work with Mango views and to perform data migrations.
+
+==== Features
+CouchDB has a few unique features like master-master replication, its changes feed and offline first.
+For our use case, these features are not relevant.
+It lacks features of other DBMS which would be useful for us.
+
+==== NoSQL
+CouchDB is a document-based DBMS which does not enforce any schema on its JSON docuemnts.
+While this flexibility can be an advantage, for our use case it has more downsides than upsides.
+We enforce a schema on the application side by mapping the JSON documents to POJOs.
+As a consequence, we have to ensure that documents conform with our schema when storing them and migrate documents when it changes.
+While we can take advantage of the documents to store data of types with structural variance, this is also possible with relational databases (e.g. JSON fields).
+
+=== Micro services
+With version 3, the backend has been split up into multiple service.
+Working with this new architechture over a longer period of time has shown multiple shortcomings.
+
+* The chosen boundaries for services are not reasonable.
+  As a consequence, there are a lot of dependencies between services and they cannot run independently.
+* The port of tooling for the development of micro services is limited.
+  While it is usually not a problem, when working on a single service independently, it becomes a problem when working on multiple services at once (which is necessary because the previous point).
+  We have introduced our own tooling (`pdk`) to counter this issue but this adds additional maintenance cost.
+
+In our case, the microservice architecture adds a lot of complexity while there are little to no gains.
+It is neither needed from a organizational nor a performance perspective.
+For performance optimizations, database sharding would be a better alternative for our use case when it is needed.
+
+=== API
+Our REST API currently has a mainly data-driven design.
+We have resource endpoints which support CRUD operations using HTTP GET, POST, PUT, PATCH and DELETE.
+For simple use cases this works well.
+The limitations become noticible in more complex scenarios.
+
+==== Per property access control
+Contents as an example have correct options which may only be retrieved by a participant when they have already answered the options are published.
+We have introduced a role parameter, so room creators can retrieve the content together with options.
+For participants, a separate endpoint is used to retrieve the correct options which will check the conditions and respond with 403 if they are not met.
+
+==== Shared input/output models
+In general, the API uses the same model for retrieving as well as creating or updating entities.
+But only a subset of properties is valid in each case.
+Usually, the backend just ignores properties or overwrites them if they should not be updated by the client.
+This is not properly documented and would require additional maintenance to keep the documentation in sync.
+
+==== Nullability
+The API has a lot of properties which can be conditionally undefined.
+Without an API schema, it is not clear for which properties this is the case.
+This has caused bugs on the client side in the past.
+
+==== Querying
+We have query endpoints (/find) for some resources.
+These are inconvenient to use because it is not immediately clear, which properties can be used for querying.
+In some cases, they only support a single property which limits there usefulness.
+
+==== Inconsistencies
+There are currently some inconsisting in the structure of endpoints:
+
+* /find endpoints for comments which retrieve counts.
+* The endpoint for comment settings contains the room ID twice: `/room/<roomId>/settings/<roomId>`
+* Settings are all over the place (room.settings, room.extensions, separate endpoint for comment settings)
+
+==== Pagination
+The API does not support pagination.
+As a consequence, more data than necessary is retrieved in some cases.
+This has a negative impact on performance when a lot of data is returned for an endpoint.
+
+=== Technical debt
+There a few wide spread issues in the code base which do not cause problems on its own but can lead to the introduction of bugs.
+
+==== Mutability
+Private properties can be modified because direct references to mutable types are returned by getters.
+This affects cached entities, so modifications could lead to an inconsistent application state due to differences between cached and persisted objects.
+
+==== Shared models between DAO and DTO
+A single model is used for DAOs and DTOs.
+While this approach avoids code duplication it does not work well when there are larger differences between the public API and entity structure.
+Due to this coupling, changes to the entity structure always lead to API changes and vice versa.
+Furthermore, combining the properties of DAO and DTO increases the complexity of the resulting model.
+
+==== Circular dependencies
+In a few cases, circular dependencies between services exist.
+This is a bad practise and requires work arounds to initialize the services.
+As an example, template-related services are effected by this.
+
+== Goals
+
+=== Simplify architecture
+A reduction of the architectural complexity should simplify setup of development environment and reduce development overhead.
+
+=== Simplify deployment
+Reducing the number of different database systems should simplify the deployment and reduce the required maintenance work.
+
+=== Consistent, domain-oriented API
+Having a domain-oriented API makes it easier to use the API without knowing about its technical implementation.
+It also makes easier to apply different permissions based on the domain use case compared to generic CRUD operations.
+
+=== Prepare for new features
+While this is not the main goal, we should keep potential new features in mind to ensure they can be implemented without requiring larger refactoring.
+
+Potential features:
+
+  * Pagination
+  * Analytics
+  * Content dependencies (show content only if previous was answered in a certain way)
+  * Multiple rounds (unlimited)
+  * Q&A moderation queue
+
+== Risks
+The rewrite of existing code could lead to regression bugs or performance issues.
+Furthermore, due to the large scope the required development is hard to assess.
+This could delay releases for a while.
+
+=== Mitigation
+To mitigate these risks, the following steps will be taken:
+
+* We will focus one domain aspect at a time.
+  This requires a temporary integration of old and new services.
+* We will start with rooms, memberships and announcements first.
+* Other parts will be approached once we are confident that the changes have not introduced any new issues and have been used in production.
