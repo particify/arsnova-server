@@ -19,7 +19,7 @@ class JwtTokenUtil(
   @Throws(JWTVerificationException::class)
   fun getUser(token: String): User {
     val decodedJwt = verifier.verify(token)
-    return User(decodedJwt.subject)
+    return User(decodedJwt.subject, token)
   }
 
   fun getRolesFromToken(token: String): List<String> {
