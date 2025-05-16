@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import net.particify.arsnova.core.config.properties.MessageBrokerProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.model.Entity;
+import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.security.User;
 
 /**
@@ -69,6 +70,10 @@ public class AmqpEventDispatcher {
   public <T extends CrudEvent, E extends Entity> void dispatchEntityCrudEvent(final T event) {
     if (event.getClass().isAssignableFrom(User.class) && systemProperties.isExternalUserManagement()) {
       logger.debug("Skipping user event dispatch due to external user management.");
+      return;
+    }
+    if (event.getClass().isAssignableFrom(Room.class) && systemProperties.isExternalRoomManagement()) {
+      logger.debug("Skipping room event dispatch due to external room management.");
       return;
     }
     String eventType = event.getClass().getSimpleName();
