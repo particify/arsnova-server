@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Declarable;
 import org.springframework.amqp.core.Declarables;
 import org.springframework.amqp.core.FanoutExchange;
@@ -32,8 +33,8 @@ import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 import net.particify.arsnova.core.config.properties.MessageBrokerProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
-import net.particify.arsnova.core.event.AmqpEventDispatcher;
 import net.particify.arsnova.core.event.AmqpMigrationEventDispatcher;
+import net.particify.arsnova.core.event.OutgoingAmqpEventDispatcher;
 import net.particify.arsnova.core.event.RoomAccessEventDispatcher;
 import net.particify.arsnova.core.websocket.handler.FeedbackHandler;
 
@@ -42,6 +43,13 @@ import net.particify.arsnova.core.websocket.handler.FeedbackHandler;
 @ComponentScan(basePackages = "net.particify.arsnova.core.websocket.handler")
 @EnableConfigurationProperties(MessageBrokerProperties.class)
 public class RabbitConfig {
+  public static final String ROOM_BEFORE_DELETION_EXCHANGE_NAME = "backend.event.room.beforedeletion";
+  public static final String ROOM_BEFORE_DELETION_QUEUE_NAME = "backend.event.room.beforedeletion.consumer.core";
+  public static final String ROOM_AFTER_DELETION_EXCHANGE_NAME = "backend.event.room.afterdeletion";
+  public static final String ROOM_AFTER_DELETION_QUEUE_NAME = "backend.event.room.afterdeletion.consumer.core";
+  public static final String ROOM_DUPLICATION_EXCHANGE_NAME = "backend.event.room.duplicated";
+  public static final String ROOM_DUPLICATION_QUEUE_NAME = "backend.event.room.duplicated.consumer.core";
+
   private static final Logger log = LoggerFactory.getLogger(RabbitConfig.class);
 
   public static class RabbitConfigProperties {
@@ -75,14 +83,16 @@ public class RabbitConfig {
       prefix = MessageBrokerProperties.PREFIX,
       havingValue = "true")
   public Declarables declarables(
-      final MessageBrokerProperties messageBrokerProperties) {
+      final MessageBrokerProperties messageBrokerProperties,
+      final SystemProperties systemProperties) {
     final Set<String> eventExchanges = messageBrokerProperties.getPublishedEvents().stream()
-        .map(c -> AmqpEventDispatcher.makeQueueName(c.entityType, c.eventType)).collect(Collectors.toSet());
+        .map(c -> OutgoingAmqpEventDispatcher.makeQueueName(c.entityType, c.eventType)).collect(Collectors.toSet());
 
     final List<Declarable> declarables = eventExchanges.stream()
         .map(FanoutExchange::new).collect(Collectors.toList());
 
-    declarables.add(new FanoutExchange(AmqpEventDispatcher.ROOM_DUPLICATION_EVENT_QUEUE_NAME));
+    final FanoutExchange roomDuplicationExchange = new FanoutExchange(ROOM_DUPLICATION_EXCHANGE_NAME);
+    declarables.add(roomDuplicationExchange);
     declarables.add(new Queue(
         RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME,
         true,
@@ -121,6 +131,27 @@ public class RabbitConfig {
     ));
     declarables.add(new Queue(AmqpMigrationEventDispatcher.PARTICIPANT_ACCESS_MIGRATION_QUEUE_NAME + ".dlq"));
 
+    if (systemProperties.isExternalRoomManagement()) {
+      // With external room management the event direction for rooms is inverted, so we need to receive them instead of
+      // sending them. For this we need to bind queues to the exchanges.
+
+      final Queue roomBeforeDeletionQueue = new Queue(ROOM_BEFORE_DELETION_QUEUE_NAME);
+      final FanoutExchange roomBeforeDeletionExchange = new FanoutExchange(ROOM_BEFORE_DELETION_EXCHANGE_NAME);
+      declarables.add(roomBeforeDeletionExchange);
+      declarables.add(roomBeforeDeletionQueue);
+      declarables.add(BindingBuilder.bind(roomBeforeDeletionQueue).to(roomBeforeDeletionExchange));
+
+      final Queue roomAfterDeletionQueue = new Queue(ROOM_AFTER_DELETION_QUEUE_NAME);
+      final FanoutExchange roomAfterDeletionExchange = new FanoutExchange(ROOM_AFTER_DELETION_EXCHANGE_NAME);
+      declarables.add(roomAfterDeletionExchange);
+      declarables.add(roomAfterDeletionQueue);
+      declarables.add(BindingBuilder.bind(roomAfterDeletionQueue).to(roomAfterDeletionExchange));
+
+      final Queue roomDuplicationQueue = new Queue(ROOM_DUPLICATION_QUEUE_NAME);
+      declarables.add(roomDuplicationQueue);
+      declarables.add(BindingBuilder.bind(roomDuplicationQueue).to(roomDuplicationExchange));
+    }
+
     return new Declarables(declarables);
   }
 
@@ -151,11 +182,11 @@ public class RabbitConfig {
       name = RabbitConfigProperties.RABBIT_ENABLED,
       prefix = MessageBrokerProperties.PREFIX,
       havingValue = "true")
-  public AmqpEventDispatcher eventToTopicPublisher(
+  public OutgoingAmqpEventDispatcher eventToTopicPublisher(
       final RabbitTemplate rabbitTemplate,
       final MessageBrokerProperties messageBrokerProperties,
       final SystemProperties systemProperties) {
-    return new AmqpEventDispatcher(rabbitTemplate, messageBrokerProperties, systemProperties);
+    return new OutgoingAmqpEventDispatcher(rabbitTemplate, messageBrokerProperties, systemProperties);
   }
 
   @Bean
