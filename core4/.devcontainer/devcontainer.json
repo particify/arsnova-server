@@ -1,0 +1,22 @@
+{
+  "name": "Server: Core v4",
+  "service": "arsnova-server-core4",
+  "dockerComposeFile": [
+    "${localEnv:PDK_COMPOSE_FILE}"
+  ],
+  "workspaceFolder": "/workspace/core4",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "asciidoctor.asciidoctor-vscode",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig",
+        "pivotal.vscode-spring-boot",
+        "vscjava.vscode-java-pack"
+      ]
+    }
+  },
+  "shutdownAction": "none",
+  "remoteUser": "dev",
+  "postAttachCommand": "/post-attach.sh"
+}

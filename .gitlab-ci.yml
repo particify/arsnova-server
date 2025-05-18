@@ -14,6 +14,7 @@ build_project:
       - PROJECT: authz
       - PROJECT: comments
       - PROJECT: core
+      - PROJECT: core4
       - PROJECT: formatting
       - PROJECT: gateway
       - PROJECT: websocket

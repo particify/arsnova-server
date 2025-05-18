@@ -1,0 +1,25 @@
+include: .gitlab/ci/gradle.yml
+
+spotbugs:
+  rules:
+    - when: never
+
+ktlint:
+  rules:
+    - when: never
+
+spotless:
+  extends: .gradle
+  stage: test
+  needs:
+    - compile
+  script:
+    - ../gradlew $GRADLE_CLI_OPTS spotlessKotlinApply spotlessKotlinGradleApply -x classes
+
+detekt:
+  extends: .gradle
+  stage: test
+  needs:
+    - compile
+  script:
+    - ../gradlew $GRADLE_CLI_OPTS detekt -x classes
