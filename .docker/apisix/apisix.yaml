@@ -1,0 +1,99 @@
+upstreams:
+  - id: webclient
+    nodes:
+      "arsnova-webclient:4200": 1
+  - id: core-v4
+    nodes:
+      "arsnova-server-core4:8080": 1
+  - id: core-v3
+    nodes:
+      "arsnova-server-core:8080": 1
+  - id: websocket
+    nodes:
+      "arsnova-server-websocket:8080": 1
+  - id: qna-v3
+    nodes:
+      "arsnova-server-comments:8080": 1
+  - id: formatting
+    nodes:
+      "arsnova-server-formatting:3000": 1
+  - id: echo
+    nodes:
+      "echo:8080": 1
+
+routes:
+  - id: webclient
+    uri: /*
+    upstream_id: webclient
+  - id: core-v4
+    uris:
+      - /api/*
+    upstream_id: core-v4
+  - id: core-v3-room
+    uris:
+      - /api/room/*/content/*
+      - /api/room/*/contentgroup/*
+      - /api/room/*/roomsettings/*
+      - /api/room/*/stats
+      - /api/room/*/survey
+      - /api/room/*/survey/*
+    upstream_id: core-v3
+    plugin_config_id: path-rewrite-and-authz
+  - id: core-v3-misc
+    uris:
+      - /api/language/*
+      - /api/template/*
+    upstream_id: core-v3
+    plugin_config_id: path-rewrite
+  - id: qna-v3
+    uris:
+      - /api/room/*/comment/*
+      - /api/room/*/settings/*
+      - /api/room/*/vote/*
+    upstream_id: qna-v3
+    plugin_config_id: path-rewrite-and-authz
+  - id: websocket
+    uri: /api/ws/*
+    enable_websocket: true
+    upstream_id: websocket
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - ^/api/(.*)
+          - /$1
+  - id: focus
+    uri: /api/room/*/focus-event
+    upstream_id: websocket
+    plugin_config_id: path-rewrite-and-authz
+  - id: formatting
+    uri: /api/_util/formatting/render
+    upstream_id: formatting
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - ^/api/_util/formatting/(.*)
+          - /$1
+
+plugin_configs:
+  - id: path-rewrite
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - ^/api/(.*)
+          - /$1
+  - id: path-rewrite-and-authz
+    plugins:
+      forward-auth:
+        uri: http://arsnova-server-core4:8080/api/jwt
+        request_method: GET
+        request_headers:
+          - Authorization
+        upstream_headers:
+          - Authorization
+        # keepalive connections currently cause a 400 response
+        keepalive: false
+      proxy-rewrite:
+        regex_uri:
+          - ^/api/(.*)
+          - /$1
+#END

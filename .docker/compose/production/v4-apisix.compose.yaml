@@ -1,0 +1,10 @@
+services:
+  apisix:
+    image: apache/apisix:3.12.0-debian
+    ports:
+      - 9080:9080
+    volumes:
+      - $ROOT_DIR/.docker/apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - $ROOT_DIR/.docker/apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+    extra_hosts:
+      - host.containers.internal:host-gateway
