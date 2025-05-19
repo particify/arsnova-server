@@ -1,0 +1,42 @@
+logging:
+  include-application-name: false
+  exception-conversion-word: "%wEx{${logging.exception-depth:short}}"
+
+server:
+  servlet:
+    contextPath: /api
+
+spring:
+  application:
+    name: arsnova-core4
+
+  datasource:
+    hikari:
+      schema: public
+
+  jpa:
+    properties:
+      hibernate:
+        default_schema: public
+        globally_quoted_identifiers: true
+
+  threads:
+    virtual:
+      enabled: true
+
+  graphql:
+    graphiql:
+      enabled: true
+
+docker:
+  compose:
+    file:
+      - .containers/compose.yaml
+
+security:
+  jwt:
+    issuer: arsnova.backend.v3:example.com
+    secret: weaksecret1234567890123456789012
+    validity-period: 6H
+  authorize-uri-header: X-Forwarded-Uri
+  authorize-uri-prefix: /api

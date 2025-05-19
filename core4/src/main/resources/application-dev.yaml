@@ -1,0 +1,2 @@
+logging:
+  exception-depth: full

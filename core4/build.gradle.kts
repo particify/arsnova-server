@@ -1,6 +1,8 @@
 plugins {
   jacoco
   alias(libs.plugins.detekt)
+  alias(libs.plugins.graalvm.native)
+  alias(libs.plugins.kapt)
   alias(libs.plugins.jib)
   alias(libs.plugins.kotlin.jvm)
   alias(libs.plugins.kotlin.spring)
@@ -10,16 +12,48 @@ plugins {
 
 java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
 
+val compose = findProperty("compose") == "true"
+
 dependencies {
   implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   implementation(platform(libs.spring.modulith.bom))
   implementation(libs.kotlin.reflect)
+  implementation(libs.spring.actuator)
+  implementation(libs.spring.cache)
+  implementation(libs.spring.graphql)
+  implementation(libs.spring.jpa)
   implementation(libs.spring.modulith)
-  implementation(libs.spring.web)
+  implementation(libs.spring.security)
+  implementation(libs.spring.security.jose)
+  implementation(libs.spring.validation)
+  implementation(libs.spring.websocket)
+  implementation(libs.jackson.jsr310)
+  implementation(libs.jackson.kotlin)
+  implementation(libs.graphql.scalars)
+  implementation(libs.querydsl.jpa)
+  implementation(libs.liquibase)
+  developmentOnly(libs.spring.hal.explorer)
+  compileOnly(libs.postgresql)
+  developmentOnly(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
+  developmentOnly(libs.spring.devtools)
+  runtimeOnly(libs.postgresql)
+  runtimeOnly(libs.spring.modulith.actuator)
+  runtimeOnly(libs.spring.modulith.observability)
   testImplementation(libs.kotlin.junit)
   testImplementation(libs.spring.test) { exclude(module = "mockito-core") }
+  testImplementation(libs.spring.graphql.test)
   testImplementation(libs.spring.modulith.test)
+  testImplementation(libs.spring.security.test)
+  testImplementation(libs.spring.testcontainers)
+  testImplementation(libs.testcontainers.postgresql)
+  testImplementation(libs.liquibase)
   testRuntimeOnly(libs.junit.launcher)
+  kapt(variantOf(libs.querydsl.apt) { classifier("jakarta") })
+  kaptTest(variantOf(libs.querydsl.apt) { classifier("jakarta") })
+
+  if (compose) {
+    developmentOnly(libs.spring.docker)
+  }
 }
 
 kotlin { compilerOptions { freeCompilerArgs.addAll("-Xjsr305=strict") } }

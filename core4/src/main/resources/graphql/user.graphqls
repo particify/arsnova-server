@@ -1,0 +1,22 @@
+extend type Query {
+  userById(id: ID): User
+  users(
+    user: UserQueryInput!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): UserConnection
+}
+
+type User {
+  id: ID!
+  username: String!
+  mailAddress: String
+  givenName: String
+  surname: String
+}
+
+input UserQueryInput {
+  username: String
+}
