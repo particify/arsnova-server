@@ -147,9 +147,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
   @Override
   public void prepareCreate(final Room room) {
-    final Room.Settings sf = new Room.Settings();
-    room.setSettings(sf);
-
     room.setShortId(generateShortId());
     if (room.getOwnerId() == null) {
       room.setOwnerId(authenticationService.getCurrentUser().getId());

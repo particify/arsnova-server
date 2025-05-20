@@ -38,6 +38,7 @@ import net.particify.arsnova.core.model.ContentGroup;
 import net.particify.arsnova.core.model.ContentGroupTemplate;
 import net.particify.arsnova.core.model.ContentTemplate;
 import net.particify.arsnova.core.model.Room;
+import net.particify.arsnova.core.model.RoomSettings;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.service.AnnouncementService;
 import net.particify.arsnova.core.service.AnswerService;
@@ -46,6 +47,7 @@ import net.particify.arsnova.core.service.ContentGroupTemplateService;
 import net.particify.arsnova.core.service.ContentService;
 import net.particify.arsnova.core.service.ContentTemplateService;
 import net.particify.arsnova.core.service.RoomService;
+import net.particify.arsnova.core.service.RoomSettingsService;
 
 /**
  * Provides access control methods that can be used in annotations.
@@ -70,6 +72,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
   private static final Logger logger = LoggerFactory.getLogger(ApplicationPermissionEvaluator.class);
 
   private final RoomService roomService;
+  private final RoomSettingsService roomSettingsService;
   private final ContentService contentService;
   private final ContentGroupService contentGroupService;
   private final AnswerService answerService;
@@ -79,6 +82,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
   public ApplicationPermissionEvaluator(
       final RoomService roomService,
+      final RoomSettingsService roomSettingsService,
       final ContentService contentService,
       final ContentGroupService contentGroupService,
       final AnswerService answerService,
@@ -87,6 +91,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
       final ContentTemplateService contentTemplateService
   ) {
     this.roomService = roomService;
+    this.roomSettingsService = roomSettingsService;
     this.contentService = contentService;
     this.contentGroupService = contentGroupService;
     this.answerService = answerService;
@@ -117,6 +122,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
         || (targetDomainObject instanceof Room
         && hasRoomPermission(authentication,
         ((Room) targetDomainObject), permission.toString()))
+        || (targetDomainObject instanceof RoomSettings
+        && hasRoomSettingsPermission(authentication,
+        ((RoomSettings) targetDomainObject), permission.toString()))
         || (targetDomainObject instanceof Content
         && hasContentPermission(authentication,
         ((Content) targetDomainObject), permission.toString()))
@@ -162,6 +170,10 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
               || hasUserProfilePermission(authentication, targetUserProfile, permission.toString());
         case "room":
           return hasRoomPermission(authentication, targetId.toString(), permission.toString());
+        case "roomsettings":
+          final RoomSettings targetRoomSettings = roomSettingsService.get(targetId.toString());
+          return targetRoomSettings != null
+              && hasRoomSettingsPermission(authentication, targetRoomSettings, permission.toString());
         case "content":
           final Content targetContent = contentService.get(targetId.toString());
           return targetContent != null
@@ -245,6 +257,16 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
       return true;
     }
     return hasRoomPermission(auth, targetRoom.getId(), permission);
+  }
+
+  private boolean hasRoomSettingsPermission(
+      final Authentication auth,
+      final RoomSettings targetRoomSettings,
+      final String permission) {
+    if (permission.equals(READ_PERMISSION)) {
+      return hasAuthenticationRoomRole(auth, targetRoomSettings.getRoomId(), RoomRole.PARTICIPANT);
+    }
+    return hasAuthenticationRoomModeratingRole(auth, targetRoomSettings.getRoomId());
   }
 
   private boolean hasContentPermission(

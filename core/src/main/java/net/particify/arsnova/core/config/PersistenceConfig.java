@@ -39,6 +39,7 @@ import net.particify.arsnova.core.persistence.ContentRepository;
 import net.particify.arsnova.core.persistence.ContentTemplateRepository;
 import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.persistence.RoomRepository;
+import net.particify.arsnova.core.persistence.RoomSettingsRepository;
 import net.particify.arsnova.core.persistence.RoomUserAliasRepository;
 import net.particify.arsnova.core.persistence.StatisticsRepository;
 import net.particify.arsnova.core.persistence.TemplateTagRepository;
@@ -53,6 +54,7 @@ import net.particify.arsnova.core.persistence.couchdb.CouchDbContentRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbContentTemplateRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbDeletionRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbRoomRepository;
+import net.particify.arsnova.core.persistence.couchdb.CouchDbRoomSettingsRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbRoomUserAliasRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbStatisticsRepository;
 import net.particify.arsnova.core.persistence.couchdb.CouchDbTemplateTagRepository;
@@ -171,6 +173,11 @@ public class PersistenceConfig {
   @Bean
   public RoomUserAliasRepository roomUserAliasRepository() throws Exception {
     return new CouchDbRoomUserAliasRepository(couchDbConnector(), false);
+  }
+
+  @Bean
+  public RoomSettingsRepository surveySettingsRepository() throws Exception {
+    return new CouchDbRoomSettingsRepository(couchDbConnector(), false);
   }
 
   @Bean

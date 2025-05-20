@@ -18,12 +18,10 @@
 
 package net.particify.arsnova.core.model;
 
-import com.fasterxml.jackson.annotation.JsonMerge;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.Date;
-import java.util.Map;
 import java.util.Objects;
 import org.springframework.core.style.ToStringCreator;
 
@@ -31,45 +29,6 @@ import net.particify.arsnova.core.model.serialization.View;
 import net.particify.arsnova.core.validation.LanguageIso639;
 
 public class Room extends Entity implements RoomIdAware {
-  public static class Settings {
-    private boolean feedbackLocked = true;
-
-    @JsonView({View.Persistence.class, View.Public.class})
-    public boolean isFeedbackLocked() {
-      return feedbackLocked;
-    }
-
-    @JsonView({View.Persistence.class, View.Public.class})
-    public void setFeedbackLocked(final boolean feedbackLocked) {
-      this.feedbackLocked = feedbackLocked;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-      final Settings settings = (Settings) o;
-
-      return feedbackLocked == settings.feedbackLocked;
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(feedbackLocked);
-    }
-
-    @Override
-    public String toString() {
-      return new ToStringCreator(this)
-          .append("feedbackLocked", feedbackLocked)
-          .toString();
-    }
-  }
-
   @JsonView(View.Persistence.class)
   public static class ImportMetadata {
     private String source;
@@ -117,16 +76,11 @@ public class Room extends Entity implements RoomIdAware {
   private String password;
   private String lmsCourseId;
   private Date scheduledDeletion;
-  private boolean focusModeEnabled;
 
   @LanguageIso639
   private String language;
 
-  @JsonMerge
-  private Settings settings;
-
   private ImportMetadata importMetadata;
-  private Map<String, Map<String, Object>> extensions;
   private RoomStatistics statistics;
 
   {
@@ -151,9 +105,7 @@ public class Room extends Entity implements RoomIdAware {
     this.name = room.name;
     this.description = room.description;
     this.closed = room.closed;
-    this.settings = room.settings;
     this.language = room.language;
-    this.extensions = room.extensions;
   }
 
   @Override
@@ -266,16 +218,6 @@ public class Room extends Entity implements RoomIdAware {
   }
 
   @JsonView({View.Persistence.class, View.Public.class})
-  public boolean isFocusModeEnabled() {
-    return focusModeEnabled;
-  }
-
-  @JsonView({View.Persistence.class, View.Public.class})
-  public void setFocusModeEnabled(final boolean focusModeEnabled) {
-    this.focusModeEnabled = focusModeEnabled;
-  }
-
-  @JsonView({View.Persistence.class, View.Public.class})
   public String getLanguage() {
     return language;
   }
@@ -283,20 +225,6 @@ public class Room extends Entity implements RoomIdAware {
   @JsonView({View.Persistence.class, View.Public.class})
   public void setLanguage(final String language) {
     this.language = language;
-  }
-
-  @JsonView({View.Persistence.class, View.Public.class})
-  public Settings getSettings() {
-    if (settings == null) {
-      settings = new Settings();
-    }
-
-    return settings;
-  }
-
-  @JsonView({View.Persistence.class, View.Public.class})
-  public void setSettings(final Settings settings) {
-    this.settings = settings;
   }
 
   @JsonView(View.Persistence.class)
@@ -307,16 +235,6 @@ public class Room extends Entity implements RoomIdAware {
   @JsonView(View.Persistence.class)
   public void setImportMetadata(final ImportMetadata importMetadata) {
     this.importMetadata = importMetadata;
-  }
-
-  @JsonView({View.Persistence.class, View.Public.class})
-  public Map<String, Map<String, Object>> getExtensions() {
-    return extensions;
-  }
-
-  @JsonView({View.Persistence.class, View.Public.class})
-  public void setExtensions(final Map<String, Map<String, Object>> extensions) {
-    this.extensions = extensions;
   }
 
   @JsonView(View.Public.class)
@@ -333,7 +251,7 @@ public class Room extends Entity implements RoomIdAware {
    *
    * <p>
    * The following fields of <tt>Room</tt> are excluded from equality checks:
-   * {@link #settings}, {@link #extensions}, {@link #statistics}.
+   * {@link #statistics}.
    * </p>
    */
   @Override
@@ -368,9 +286,7 @@ public class Room extends Entity implements RoomIdAware {
         .append("description", description)
         .append("closed", closed)
         .append("passwordProtected", isPasswordProtected())
-        .append("settings", settings)
         .append("language", language)
-        .append("statistics", statistics)
-        .append("focusModeEnabled", focusModeEnabled);
+        .append("statistics", statistics);
   }
 }

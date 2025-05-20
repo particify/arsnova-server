@@ -15,8 +15,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import net.particify.arsnova.core.model.Feedback;
 import net.particify.arsnova.core.model.Room;
+import net.particify.arsnova.core.model.RoomSettings;
 import net.particify.arsnova.core.service.FeedbackStorageService;
-import net.particify.arsnova.core.service.RoomService;
+import net.particify.arsnova.core.service.RoomSettingsService;
 import net.particify.arsnova.core.websocket.message.CreateFeedback;
 import net.particify.arsnova.core.websocket.message.CreateFeedbackPayload;
 import net.particify.arsnova.core.websocket.message.FeedbackChanged;
@@ -31,28 +32,29 @@ public class FeedbackCommandHandlerTest {
   private FeedbackStorageService feedbackStorage;
 
   @MockBean
-  private RoomService roomService;
+  private RoomSettingsService roomSettingsService;
 
   private FeedbackCommandHandler commandHandler;
 
   private Room getTestRoom() {
     final Room r = new Room();
     r.setId("12345678");
-    r.getSettings().setFeedbackLocked(false);
     return r;
   }
 
   @BeforeEach
   public void setUp() {
-    this.commandHandler = new FeedbackCommandHandler(messagingTemplate, feedbackStorage, roomService);
+    this.commandHandler = new FeedbackCommandHandler(messagingTemplate, feedbackStorage, roomSettingsService);
   }
 
   @Test
   public void sendFeedback() {
+    final RoomSettings roomSettings = new RoomSettings();
+    roomSettings.setSurveyEnabled(true);
     final Room r = getTestRoom();
     final String roomId = r.getId();
 
-    Mockito.when(roomService.get(roomId, true)).thenReturn(r);
+    Mockito.when(roomSettingsService.getByRoomId(roomId)).thenReturn(roomSettings);
     Mockito.when(feedbackStorage.getByRoom(r)).thenReturn(new Feedback(0, 1, 0, 0));
 
     final CreateFeedbackPayload createFeedbackPayload = new CreateFeedbackPayload(roomId, "1", 1);
@@ -69,5 +71,3 @@ public class FeedbackCommandHandlerTest {
     assertThat(keyCaptor.getValue()).isEqualTo(roomId + ".feedback.stream");
   }
 }
-
-

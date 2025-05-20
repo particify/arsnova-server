@@ -35,9 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -194,15 +192,6 @@ public class RoomControllerTest {
     room.setOwnerId(user.getId());
     room.setName("TestRoom");
     room.setShortId("12345678");
-    room.setExtensions(new HashMap<String, Map<String, Object>>() {
-      {
-        put("comments", new HashMap<String, Object>() {
-          {
-            put("enableModeration", true);
-          }
-        });
-      }
-    });
     return room;
   }
 
