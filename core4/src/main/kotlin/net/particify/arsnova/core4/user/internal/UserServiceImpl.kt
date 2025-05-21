@@ -3,6 +3,7 @@
  */
 package net.particify.arsnova.core4.user.internal
 
+import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
@@ -16,5 +17,11 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
 
   override fun loadUserById(id: UUID): User? {
     return userRepository.findByIdOrNull(id)
+  }
+
+  override fun markAnnouncementsReadForUserId(id: UUID) {
+    val user = userRepository.findByIdOrNull(id) ?: error("User not found.")
+    user.announcementsReadAt = Instant.now()
+    userRepository.save(user)
   }
 }

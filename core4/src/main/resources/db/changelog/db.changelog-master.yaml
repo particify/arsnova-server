@@ -12,6 +12,7 @@ databaseChangeLog:
       changes:
         - sql: CREATE SCHEMA "user"
         - sql: CREATE SCHEMA "room"
+        - sql: CREATE SCHEMA "announcement"
   - changeSet:
       id: 2
       author: arsnova
@@ -68,6 +69,9 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                   defaultValue: true
+              - column:
+                  name: announcements_read_at
+                  type: timestamp with time zone
               - column:
                   name: created_by
                   type: uuid
@@ -256,6 +260,70 @@ databaseChangeLog:
             tableName: membership
             column:
               - name: last_activity_at
+        - createTable:
+            schemaName: announcement
+            tableName: announcement
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValue: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: room_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: room_id_fkey
+                    references: '"room"."room"(id)'
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: body
+                  type: varchar(2000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: created_by_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: updated_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+              - column:
+                  name: deleted_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: deleted_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: deleted_at
+                  type: timestamp with time zone
   - changeSet:
       id: 4
       author: arsnova
@@ -282,3 +350,7 @@ databaseChangeLog:
             schemaName: room
             tableName: membership
             file: db/data/room/membership.csv
+        - loadData:
+            schemaName: announcement
+            tableName: announcement
+            file: db/data/announcement/announcement.csv

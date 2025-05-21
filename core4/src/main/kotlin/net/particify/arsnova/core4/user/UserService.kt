@@ -8,4 +8,6 @@ import org.springframework.security.core.userdetails.UserDetailsService
 
 interface UserService : UserDetailsService {
   fun loadUserById(id: UUID): User?
+
+  fun markAnnouncementsReadForUserId(id: UUID)
 }

@@ -13,6 +13,7 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.Table
 import jakarta.persistence.Version
+import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.user.internal.Role
@@ -43,6 +44,7 @@ class User(
         inverseJoinColumns = [JoinColumn(name = "role_id")],
     )
     val roles: List<Role> = mutableListOf(),
+    var announcementsReadAt: Instant? = null,
     @Embedded val auditMetadata: AuditMetadata = AuditMetadata(),
 ) : UserDetails {
 
