@@ -65,6 +65,9 @@ dependencies {
   aspect("org.springframework.security:spring-security-aspects") {
     exclude(group = "io.micrometer", module = "micrometer-observation")
   }
+
+  // Jackson 2.19 causes issues with our migrations, see https://gitlab.com/particify/dev/foss/arsnova-server/-/issues/317
+  implementation(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.18.4.1"))
 }
 
 tasks.withType<Test> {
