@@ -11,8 +11,9 @@ import net.particify.arsnova.core.config.properties.MessageBrokerProperties;
 import net.particify.arsnova.core.event.AfterPatchEvent;
 import net.particify.arsnova.core.model.Feedback;
 import net.particify.arsnova.core.model.Room;
+import net.particify.arsnova.core.model.RoomSettings;
 import net.particify.arsnova.core.service.FeedbackStorageService;
-import net.particify.arsnova.core.service.RoomService;
+import net.particify.arsnova.core.service.RoomSettingsService;
 import net.particify.arsnova.core.websocket.message.CreateFeedback;
 import net.particify.arsnova.core.websocket.message.CreateFeedbackPayload;
 import net.particify.arsnova.core.websocket.message.FeedbackChanged;
@@ -31,16 +32,16 @@ import net.particify.arsnova.core.websocket.message.ResetFeedback;
 public class FeedbackCommandHandler {
   private final RabbitTemplate messagingTemplate;
   private final FeedbackStorageService feedbackStorage;
-  private final RoomService roomService;
+  private final RoomSettingsService roomSettingsService;
 
   public FeedbackCommandHandler(
       final RabbitTemplate messagingTemplate,
       final FeedbackStorageService feedbackStorage,
-      final RoomService roomService
+      final RoomSettingsService roomSettingsService
   ) {
     this.messagingTemplate = messagingTemplate;
     this.feedbackStorage = feedbackStorage;
-    this.roomService = roomService;
+    this.roomSettingsService = roomSettingsService;
   }
 
   /* ToDo: Listen to a more specific event */
@@ -48,8 +49,8 @@ public class FeedbackCommandHandler {
   public void handleLockFeedback(final AfterPatchEvent<Room> event) {
     if (event.getRequestedChanges().containsKey("settings")) {
       final String roomId = event.getEntity().getId();
-      final Room.Settings settings = event.getEntity().getSettings();
-      if (settings.isFeedbackLocked()) {
+      final RoomSettings settings = roomSettingsService.getByRoomId(roomId);
+      if (!settings.isSurveyEnabled()) {
         final FeedbackStopped stompEvent = new FeedbackStopped();
 
         messagingTemplate.convertAndSend(
@@ -72,10 +73,10 @@ public class FeedbackCommandHandler {
 
   public void handle(final CreateFeedback command) {
     final String roomId = command.getPayload().getRoomId();
-    final Room loadedRoom = roomService.get(roomId, true);
+    final RoomSettings roomSettings = roomSettingsService.getByRoomId(roomId);
     final Room room = new Room();
     room.setId(roomId);
-    if (!loadedRoom.getSettings().isFeedbackLocked()) {
+    if (roomSettings.isSurveyEnabled()) {
       final CreateFeedbackPayload p = command.getPayload();
 
       feedbackStorage.save(room, p.getValue(), p.getUserId());

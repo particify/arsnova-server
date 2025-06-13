@@ -62,6 +62,12 @@ public class User implements org.springframework.security.core.userdetails.UserD
     enabled = profile.getAccount().getActivationKey() == null;
   }
 
+  public User(final String id, final Collection<? extends GrantedAuthority> authorities) {
+    this.id = id;
+    this.authorities = authorities;
+    this.enabled = true;
+  }
+
   public User(final UserProfile profile, final Collection<? extends GrantedAuthority> authorities,
       final org.springframework.security.core.userdetails.UserDetails details) {
     this(profile, authorities);

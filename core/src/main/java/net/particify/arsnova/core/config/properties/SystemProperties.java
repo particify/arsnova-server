@@ -248,6 +248,8 @@ public class SystemProperties {
   }
 
   private String rootUrl;
+  private boolean externalUserManagement;
+  private boolean externalRoomManagement;
   private Api api;
   private Mail mail;
   private Caching caching;
@@ -262,6 +264,22 @@ public class SystemProperties {
 
   public void setRootUrl(final String rootUrl) {
     this.rootUrl = rootUrl;
+  }
+
+  public boolean isExternalUserManagement() {
+    return externalUserManagement;
+  }
+
+  public void setExternalUserManagement(final boolean externalUserManagement) {
+    this.externalUserManagement = externalUserManagement;
+  }
+
+  public boolean isExternalRoomManagement() {
+    return externalRoomManagement;
+  }
+
+  public void setExternalRoomManagement(final boolean externalRoomManagement) {
+    this.externalRoomManagement = externalRoomManagement;
   }
 
   public Api getApi() {

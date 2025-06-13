@@ -367,16 +367,13 @@ public class DefaultEntityServiceImplTest {
     room1.setId("ID");
     room1.setOwnerId("TestUser");
     room1.setName("TestName");
-    room1.getSettings().setFeedbackLocked(true);
     final Room room2 = new Room();
     prefillRoomFields(room2);
     room2.setId("ID");
     room2.setOwnerId("PrivatePropertyChange");
     room2.setName("ChangedTestName");
-    room2.getSettings().setFeedbackLocked(false);
     final Map<String, Object> expectedChanges = Map.of(
-        "name", room2.getName(),
-        "settings", Map.of("feedbackLocked", room2.getSettings().isFeedbackLocked())
+        "name", room2.getName()
     );
 
     entityService.update(room1, room2, View.Public.class);

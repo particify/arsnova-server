@@ -39,6 +39,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.config.properties.SecurityProperties;
+import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.security.User;
 import net.particify.arsnova.core.service.UserService;
@@ -50,6 +51,7 @@ public class JwtService {
   private static final String USER_ROLE = "USER";
   private static final String GUEST_ROLE = "GUEST_USER";
   private static final String ROLES_CLAIM_NAME = "roles";
+  private boolean externalUserManagement;
   private Algorithm algorithm;
   private String serverId;
   private TemporalAmount defaultValidityPeriod;
@@ -62,8 +64,10 @@ public class JwtService {
 
   public JwtService(
       final UserService userService,
-      final SecurityProperties securityProperties) {
+      final SecurityProperties securityProperties,
+      final SystemProperties systemProperties) {
     this.userService = userService;
+    this.externalUserManagement = systemProperties.isExternalUserManagement();
     this.serverId = securityProperties.getJwt().getServerId();
     this.defaultValidityPeriod = securityProperties.getJwt().getValidityPeriod();
     guestValidityPeriod = Duration.parse("P180D");
@@ -115,12 +119,15 @@ public class JwtService {
           .map(role -> role.replace("-", "__"))
           .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role)).collect(Collectors.toList());
 
-      final UserProfile userProfile = userService.get(userId);
-      if (userProfile == null) {
-        throw new UsernameNotFoundException("User does not exist.");
+      if (externalUserManagement) {
+        return new User(userId, authorities);
+      } else {
+        final UserProfile userProfile = userService.get(userId);
+        if (userProfile == null) {
+          throw new UsernameNotFoundException("User does not exist.");
+        }
+        return new User(userProfile, authorities);
       }
-
-      return new User(userProfile, authorities);
     } catch (final JWTVerificationException e) {
       if (legacyVerifier == null) {
         throw e;

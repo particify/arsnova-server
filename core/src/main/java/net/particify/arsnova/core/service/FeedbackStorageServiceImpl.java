@@ -65,9 +65,13 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
   }
 
   private static final Logger logger = LoggerFactory.getLogger(FeedbackStorageServiceImpl.class);
-
+  private final RoomSettingsService roomSettingsService;
   private final Map<Room, Map<String, FeedbackStorageObject>> data =
       new ConcurrentHashMap<>();
+
+  public FeedbackStorageServiceImpl(final RoomSettingsService roomSettingsService) {
+    this.roomSettingsService = roomSettingsService;
+  }
 
   @Override
   public Feedback getByRoom(final Room room) {
@@ -136,7 +140,7 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
   public Map<Room, List<String>> cleanVotes(final int cleanupFeedbackDelay) {
     final Map<Room, List<String>> removedFeedbackOfUsersInSession = new HashMap<>();
     for (final Room room : data.keySet()) {
-      if (room.getSettings().isFeedbackLocked()) {
+      if (!roomSettingsService.getByRoomId(room.getId()).isSurveyEnabled()) {
         final List<String> affectedUserIds = cleanVotesByRoom(room, cleanupFeedbackDelay);
         if (!affectedUserIds.isEmpty()) {
           removedFeedbackOfUsersInSession.put(room, affectedUserIds);

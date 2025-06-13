@@ -14,9 +14,7 @@ public class SurveyController {
 
   private FeedbackStorageService service;
 
-  public SurveyController(
-      final FeedbackStorageService service
-  ) {
+  public SurveyController(final FeedbackStorageService service) {
     this.service = service;
   }
 
