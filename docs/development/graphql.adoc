@@ -1,0 +1,48 @@
+= GraphQL
+
+With version 4, we are switching from a REST- to a GraphQL-based API.
+GraphQL gives a lot of control to the client and provides more flexibility.
+As a consequence, it also introduces a lot of new complexity.
+Caching in particular is much more difficult when comparing to a REST API.
+Some of the complexity is abstracted away by libraries.
+Still, it is important to understand the concepts of GraphQL to design and use the API efficiently.
+We use https://docs.spring.io/spring-graphql/reference/index.html[Spring for GraphQL] on the backend side
+and https://www.apollographql.com/docs/react[Apollo Client]
+with https://the-guild.dev/graphql/apollo-angular/docs[Apollo Angular] on the frontend side.
+
+A good starting point to learn more about GraphQL is the official https://graphql.org/learn/[Introduction to GraphQL].
+GraphiQL, which is http://localhost:9080/graphiql/[embedded] to our server, can be helpful to get familiar with our existing API.
+
+== API development workflow
+
+Our GraphQL tooling allows for designing the API without writing any implementation code on the backend side.
+When the GraphQL schema (`src/resources/graphql/*.graphqls`) is extended without providing a matching implementation, the backend will still start and just log a warning.
+Once the API definition is considered stable enough, it can already be used for client-side development without the need for a backend-side implementation.
+GraphQL fields with missing implementations can be mocked on the client side.
+Therefore, the client can be developed independently from the backend implementation.
+
+.Recommended workflow
+****
+1. Extend the GraphQL schema on the backend side.
+2. Use GraphiQL to build the queries, mutations and subscriptions for the client.
+   Copy them to a src/graphql/*.graphql file.
+3. Run the GraphQL code generator to generate services for GraphQL operations with appropriate typings.
+4. (optional) Temporarily https://www.apollographql.com/docs/react/development-testing/client-schema-mocking[mock] incomplete API implementations using the `@client` directive when necessary.
+5. Create client and backend implementations.
+****
+
+== Code generatation
+
+On the client-side, we https://the-guild.dev/graphql/codegen[generate types and service classes] to ensure typesafe use of the GraphQL API.
+The code is generated based on the backend's GraphQL schema and the client's queries, mutations and subscriptions defined in `src/graphql/*.graphql` files.
+To run code generation, perform the following steps:
+
+1. Ensure that the backend is running.
+2. Install dependencies: `yarn`
+3. Run the code generator: `yarn generate-gql`
+
+== Additional resources
+
+* https://graphql.org/learn/best-practices/[GraphQL best practices]
+* https://www.apollographql.com/docs/react/development-testing/developer-tooling[Developer tools]
+* https://relay.dev/graphql/connections.htm[GraphQL cursor connections specification]
