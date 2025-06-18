@@ -365,9 +365,6 @@ public class CommentCommandHandler {
     for (final UUID roomId : roomIds) {
       CommentStats roomStatistics = new CommentStats();
       int ackCommentcount = (int) service.countByRoomIdAndAck(roomId, true);
-      // ToDo: Implement view to show unacknowledge counter to owner / moderators
-      // int unackCommentcount = (int) service.countByRoomIdAndAck(roomId, false);
-      // roomStatistics.setUnackCommentCount(unackCommentcount);
       roomStatistics.setRoomId(roomId);
       roomStatistics.setAckCommentCount(ackCommentcount);
       stats.add(roomStatistics);

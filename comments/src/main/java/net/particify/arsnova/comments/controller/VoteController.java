@@ -52,11 +52,6 @@ public class VoteController extends AbstractEntityController {
     this.findQueryService = findQueryService;
   }
 
-  /*@GetMapping(GET_MAPPING)
-  public Vote get(@PathVariable String id) {
-    return service.get(id);
-  }*/
-
   @PostMapping(POST_MAPPING)
   @ResponseStatus(HttpStatus.CREATED)
   public Vote post(
@@ -78,11 +73,6 @@ public class VoteController extends AbstractEntityController {
     }
 
     if (v != null) {
-      /*final String uri = UriComponentsBuilder.fromPath(REQUEST_MAPPING).path(GET_MAPPING)
-          .buildAndExpand(v.getId()).toUriString();
-      httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
-      httpServletResponse.setHeader(ENTITY_ID_HEADER, v.getId());*/
-
       return v;
     } else {
       logger.warn("Vote is neither up- nor downvote: " + vote.toString());
