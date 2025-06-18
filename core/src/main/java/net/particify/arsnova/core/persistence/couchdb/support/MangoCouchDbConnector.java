@@ -290,8 +290,6 @@ public class MangoCouchDbConnector extends StdCouchDbConnector implements Applic
       throw new DbAccessException("Could not serialize Mango query.");
     }
     final List<T> result = restTemplate.postUncached(dbURI.append("_find").toString(), queryString, rh);
-    //List<T> result = restTemplate.post(dbURI.append("_find").toString(),
-    //    new JacksonableEntity(query, objectMapper), rh);
 
     logger.debug("Answer from CouchDB Mango query: {}", result);
 
