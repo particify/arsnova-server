@@ -30,7 +30,7 @@ dependencies {
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("io.projectreactor:reactor-tools")
   implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-  implementation("com.bucket4j:bucket4j-core")
+  implementation("com.bucket4j:bucket4j_jdk17-core")
   implementation("com.auth0:java-jwt")
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
