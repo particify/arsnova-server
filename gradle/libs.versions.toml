@@ -1,5 +1,5 @@
 [versions]
-aspectj-plugin = "8.13.1"
+aspectj-plugin = "8.14"
 aspectj-rt = "1.9.24"
 bucket4j = "8.14.0"
 checkstyle = "10.12.4"
