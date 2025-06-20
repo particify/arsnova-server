@@ -91,7 +91,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.header.writers.HstsHeaderWriter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
@@ -544,7 +544,7 @@ public class SecurityConfig {
       havingValue = "true")
   public LogoutFilter casLogoutFilter() {
     final LogoutFilter filter = new LogoutFilter(casLogoutSuccessHandler(), logoutHandler());
-    filter.setLogoutRequestMatcher(new AntPathRequestMatcher("/**" + CAS_LOGOUT_PATH));
+    filter.setLogoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher(CAS_LOGOUT_PATH));
 
     return filter;
   }
