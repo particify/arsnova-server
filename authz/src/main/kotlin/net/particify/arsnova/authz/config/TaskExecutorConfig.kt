@@ -5,8 +5,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.task.TaskExecutor
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
 
 @Configuration
 class TaskExecutorConfig {
@@ -17,7 +15,7 @@ class TaskExecutorConfig {
     AnnotationTarget.PROPERTY_GETTER,
     AnnotationTarget.PROPERTY_SETTER,
   )
-  @Retention(RetentionPolicy.RUNTIME)
+  @Retention(AnnotationRetention.RUNTIME)
   @Qualifier
   annotation class RabbitConnectionExecutor
 
@@ -28,7 +26,7 @@ class TaskExecutorConfig {
     AnnotationTarget.PROPERTY_GETTER,
     AnnotationTarget.PROPERTY_SETTER,
   )
-  @Retention(RetentionPolicy.RUNTIME)
+  @Retention(AnnotationRetention.RUNTIME)
   @Qualifier
   annotation class RabbitListenerExecutor
 

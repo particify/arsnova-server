@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import net.particify.arsnova.comments.exception.BadRequestException;
 import net.particify.arsnova.comments.handler.VoteCommandHandler;
 import net.particify.arsnova.comments.model.Vote;
 import net.particify.arsnova.comments.model.VotePK;
@@ -76,7 +76,7 @@ public class VoteController extends AbstractEntityController {
       return v;
     } else {
       logger.warn("Vote is neither up- nor downvote: " + vote.toString());
-      throw new HttpMessageNotReadableException("Invalid request");
+      throw new BadRequestException("Invalid request");
     }
   }
 
