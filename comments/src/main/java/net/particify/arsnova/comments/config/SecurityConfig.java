@@ -32,14 +32,15 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-    httpSecurity.csrf().disable();
-    httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    httpSecurity.csrf(csrf -> csrf.disable());
+    httpSecurity.sessionManagement(sessionManagement ->
+        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     // Add a filter to validate the tokens with every request
     httpSecurity.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-    httpSecurity.authorizeHttpRequests()
+    httpSecurity.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
         .requestMatchers(managementPath + "/**").hasAnyRole("ADMIN", "MONITORING")
         .requestMatchers(StatsController.REQUEST_MAPPING).permitAll()
-        .anyRequest().authenticated();
+        .anyRequest().authenticated());
 
       return httpSecurity.build();
   }
