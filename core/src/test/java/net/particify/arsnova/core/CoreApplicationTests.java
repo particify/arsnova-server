@@ -14,6 +14,8 @@ import net.particify.arsnova.core.config.TestSecurityConfig;
     TestAppConfig.class,
     TestPersistanceConfig.class,
     TestSecurityConfig.class})
+@SharedRepositoryMocks
+@SharedSecurityMocks
 @ActiveProfiles("test")
 class CoreApplicationTests {
 

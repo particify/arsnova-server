@@ -52,6 +52,8 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.validation.Validator;
 
+import net.particify.arsnova.core.SharedRepositoryMocks;
+import net.particify.arsnova.core.SharedSecurityMocks;
 import net.particify.arsnova.core.config.TestAppConfig;
 import net.particify.arsnova.core.config.TestPersistanceConfig;
 import net.particify.arsnova.core.config.TestSecurityConfig;
@@ -70,6 +72,8 @@ import net.particify.arsnova.core.test.context.support.WithMockUser;
     TestAppConfig.class,
     TestPersistanceConfig.class,
     TestSecurityConfig.class})
+@SharedRepositoryMocks
+@SharedSecurityMocks
 @ActiveProfiles("test")
 public class DefaultEntityServiceImplTest {
   private static final String SOME_TEXT = "SomeText";

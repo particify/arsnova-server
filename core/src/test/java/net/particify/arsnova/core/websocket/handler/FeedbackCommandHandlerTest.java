@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import net.particify.arsnova.core.model.Feedback;
@@ -25,13 +25,13 @@ import net.particify.arsnova.core.websocket.message.FeedbackChanged;
 @ExtendWith(SpringExtension.class)
 public class FeedbackCommandHandlerTest {
 
-  @MockBean
+  @MockitoBean
   private RabbitTemplate messagingTemplate;
 
-  @MockBean
+  @MockitoBean
   private FeedbackStorageService feedbackStorage;
 
-  @MockBean
+  @MockitoBean
   private RoomSettingsService roomSettingsService;
 
   private FeedbackCommandHandler commandHandler;

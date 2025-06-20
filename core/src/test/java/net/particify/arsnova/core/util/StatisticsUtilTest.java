@@ -7,20 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 
-import net.particify.arsnova.core.config.TestAppConfig;
-import net.particify.arsnova.core.config.TestPersistanceConfig;
-import net.particify.arsnova.core.config.TestSecurityConfig;
-
-@SpringBootTest
-@Import({
-  TestAppConfig.class,
-  TestPersistanceConfig.class,
-  TestSecurityConfig.class})
-@ActiveProfiles("test")
 public class StatisticsUtilTest {
   private static final List<Double> SOME_NUMBERS = Arrays.asList(38.0, 40.0, 42.0, 47.0, 43.0, 42.0, 41.0, 99.0);
 

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import net.particify.arsnova.core.model.Room;
@@ -27,10 +27,10 @@ public class RoomAccessEventDispatcherTest {
   private static final String ROOM_ACCESS_GRANTED_QUEUE_NAME = "backend.event.room.access.granted";
   private static final String ROOM_ACCESS_REVOKED_QUEUE_NAME = "backend.event.room.access.revoked";
 
-  @MockBean
+  @MockitoBean
   private RabbitTemplate messagingTemplate;
 
-  @MockBean
+  @MockitoBean
   private RoomService roomService;
 
   private RoomAccessEventDispatcher roomAccessEventDispatcher;

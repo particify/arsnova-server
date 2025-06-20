@@ -32,6 +32,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import net.particify.arsnova.core.SharedRepositoryMocks;
+import net.particify.arsnova.core.SharedSecurityMocks;
 import net.particify.arsnova.core.config.TestAppConfig;
 import net.particify.arsnova.core.config.TestPersistanceConfig;
 import net.particify.arsnova.core.config.TestSecurityConfig;
@@ -51,6 +53,8 @@ import net.particify.arsnova.core.test.context.support.WithMockUser;
     TestAppConfig.class,
     TestPersistanceConfig.class,
     TestSecurityConfig.class})
+@SharedRepositoryMocks
+@SharedSecurityMocks
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ActiveProfiles("test")
 public class ContentGroupControllerTest {
