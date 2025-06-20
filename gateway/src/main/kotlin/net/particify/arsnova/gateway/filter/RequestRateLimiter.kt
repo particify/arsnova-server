@@ -1,9 +1,8 @@
 package net.particify.arsnova.gateway.filter
 
-import io.github.bucket4j.Bandwidth
+import io.github.bucket4j.BandwidthBuilder
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.ConsumptionProbe
-import io.github.bucket4j.Refill
 import net.particify.arsnova.gateway.config.HttpGatewayProperties
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -63,15 +62,23 @@ class RequestRateLimiter(
     val bucket: Bucket =
       if (isQuery) {
         ipBucketMap.computeIfAbsent(QUERY_BUCKET_PREFIX + ipAddr) { _: String ->
-          val refill: Refill = Refill.intervally(routeConfig.queryTokensPerTimeframe, routeConfig.duration)
-          val limit: Bandwidth = Bandwidth.classic(routeConfig.queryBurstCapacity, refill)
-          Bucket.builder().addLimit(limit).build()
+          val bandwidth =
+            BandwidthBuilder
+              .builder()
+              .capacity(routeConfig.queryBurstCapacity)
+              .refillIntervally(routeConfig.queryTokensPerTimeframe, routeConfig.duration)
+              .build()
+          Bucket.builder().addLimit(bandwidth).build()
         }
       } else {
         ipBucketMap.computeIfAbsent(COMMAND_BUCKET_PREFIX + ipAddr) { _: String ->
-          val refill: Refill = Refill.intervally(routeConfig.commandTokensPerTimeframe, routeConfig.duration)
-          val limit: Bandwidth = Bandwidth.classic(routeConfig.commandBurstCapacity, refill)
-          Bucket.builder().addLimit(limit).build()
+          val bandwidth =
+            BandwidthBuilder
+              .builder()
+              .capacity(routeConfig.commandBurstCapacity)
+              .refillIntervally(routeConfig.commandTokensPerTimeframe, routeConfig.duration)
+              .build()
+          Bucket.builder().addLimit(bandwidth).build()
         }
       }
 
