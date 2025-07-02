@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.DelegatingPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint
 
 @Configuration
 @EnableWebSecurity
@@ -43,6 +44,7 @@ class SecurityConfiguration(private val jwtAuthenticationFilter: JwtAuthenticati
               .authenticated()
         }
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+        .exceptionHandling { it.authenticationEntryPoint(BasicAuthenticationEntryPoint()) }
     return http.build()
   }
 
