@@ -70,6 +70,12 @@ databaseChangeLog:
                     nullable: false
                   defaultValue: true
               - column:
+                  name: settings
+                  type: jsonb
+                  constraints:
+                    nullable: false
+                  defaultValue: "{}"
+              - column:
                   name: announcements_read_at
                   type: timestamp with time zone
               - column:
@@ -187,6 +193,12 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                   defaultValue: ""
+              - column:
+                  name: settings
+                  type: jsonb
+                  constraints:
+                    nullable: false
+                  defaultValue: "{}"
               - column:
                   name: created_by
                   type: uuid

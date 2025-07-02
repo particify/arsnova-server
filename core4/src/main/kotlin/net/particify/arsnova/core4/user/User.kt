@@ -18,7 +18,9 @@ import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.user.internal.Role
 import org.hibernate.annotations.JdbcType
+import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.dialect.PostgreSQLEnumJdbcType
+import org.hibernate.type.SqlTypes
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
@@ -44,6 +46,7 @@ class User(
         inverseJoinColumns = [JoinColumn(name = "role_id")],
     )
     val roles: List<Role> = mutableListOf(),
+    @JdbcTypeCode(SqlTypes.JSON) val settings: MutableMap<String, Any> = mutableMapOf(),
     var announcementsReadAt: Instant? = null,
     @Embedded val auditMetadata: AuditMetadata = AuditMetadata(),
 ) : UserDetails {

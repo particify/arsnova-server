@@ -14,6 +14,8 @@ import jakarta.persistence.Table
 import jakarta.persistence.Version
 import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 
 @Entity
 @Table(schema = "room")
@@ -26,6 +28,7 @@ class Room(
     var description: String? = "",
     @OneToMany(mappedBy = "room", cascade = [CascadeType.ALL])
     val userRoles: MutableSet<Membership> = mutableSetOf(),
+    @JdbcTypeCode(SqlTypes.JSON) val settings: MutableMap<String, Any> = mutableMapOf(),
     @Embedded val auditMetadata: AuditMetadata = AuditMetadata(),
 ) {
   companion object {
