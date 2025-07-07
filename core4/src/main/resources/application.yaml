@@ -40,3 +40,9 @@ security:
     validity-period: 6H
   authorize-uri-header: X-Forwarded-Uri
   authorize-uri-prefix: /api
+
+persistence:
+  v3-migration:
+    enabled: false
+    couchdb-url: http://couchdb:5984/arsnova3
+    room-access-url: http://arsnova-server-authz:8080/roomaccess
