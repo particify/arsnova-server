@@ -19,23 +19,21 @@ class RoomShortIdFilter(
 
   private val logger = LoggerFactory.getLogger(javaClass)
 
-  override fun apply(config: Config): GatewayFilter {
-    return GatewayFilter { exchange, chain ->
+  override fun apply(config: Config): GatewayFilter =
+    GatewayFilter { exchange, chain ->
       val uriVariables = ServerWebExchangeUtils.getUriTemplateVariables(exchange)
-      Mono.just(uriVariables)
+      Mono
+        .just(uriVariables)
         .filter { uv -> uv["roomId"] != null }
         .map { uv ->
           // A bit confusing, but the gateway config does not have separate entries for routes with the shortId
           uv["roomId"]!!
-        }
-        .filter { potentialShortId -> potentialShortId.matches(shortIdRegex) }
+        }.filter { potentialShortId -> potentialShortId.matches(shortIdRegex) }
         .map { shortId ->
           shortId.drop(1)
-        }
-        .flatMap { shortId ->
+        }.flatMap { shortId ->
           roomService.getByShortId(shortId)
-        }
-        .map { room ->
+        }.map { room ->
           val pathPreChange = exchange.request.path.value()
           val pathWithRoomId = pathPreChange.replace("~${room.shortId}", room.id)
           val mutableUriVariables = uriVariables.toMutableMap()
@@ -48,13 +46,11 @@ class RoomShortIdFilter(
               .path(pathWithRoomId)
               .build()
           exchange.mutate().request(modifiedRequest).build()
-        }
-        .switchIfEmpty(Mono.just(exchange))
+        }.switchIfEmpty(Mono.just(exchange))
         .flatMap { e ->
           chain.filter(e)
         }
     }
-  }
 
   class Config {
     var name: String = "RoomShortIdFilter"

@@ -24,10 +24,13 @@ class CommentService(
   ): Flux<CommentStats> {
     val url = "${httpGatewayProperties.httpClient.commentService}/stats/comment-stats-by-rooms?roomIds=${roomIds.joinToString(",")}"
     logger.trace("Querying comment service for comment stats with url: {}", url)
-    return webClient.get()
+    return webClient
+      .get()
       .uri(url)
       .header("Authorization", jwt)
-      .retrieve().bodyToFlux(CommentStats::class.java).cache()
+      .retrieve()
+      .bodyToFlux(CommentStats::class.java)
+      .cache()
       .checkpoint("Request failed in ${this::class.simpleName}::${::getStats.name}.")
       .onErrorResume { exception ->
         logger.debug("Error on getting stats from comment service", exception)
@@ -45,7 +48,8 @@ class CommentService(
   fun getServiceStats(params: MultiValueMap<String, String>): Mono<CommentServiceStats> {
     val url = URI("${httpGatewayProperties.httpClient.commentService}/stats")
     logger.trace("Querying comment service for stats with url: {}", url)
-    return webClient.get()
+    return webClient
+      .get()
       .uri {
         it
           .scheme(url.scheme)
@@ -54,16 +58,12 @@ class CommentService(
           .path(url.path)
           .replaceQueryParams(params)
           .build()
-      }
-      .retrieve().bodyToMono(CommentServiceStats::class.java)
+      }.retrieve()
+      .bodyToMono(CommentServiceStats::class.java)
       .checkpoint("Request failed in ${this::class.simpleName}::${::getServiceStats.name}.")
   }
 
-  fun getAckCount(roomId: String): Mono<Int> {
-    return Mono.just(0)
-  }
+  fun getAckCount(roomId: String): Mono<Int> = Mono.just(0)
 
-  fun getUnackCount(roomId: String): Mono<Int> {
-    return Mono.just(0)
-  }
+  fun getUnackCount(roomId: String): Mono<Int> = Mono.just(0)
 }

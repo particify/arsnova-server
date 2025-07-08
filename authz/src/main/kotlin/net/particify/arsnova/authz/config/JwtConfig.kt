@@ -25,7 +25,12 @@ class JwtConfig {
     }
 
     logger.debug("Setting up JWT decoder using secret.")
-    val key = SecretKeySpec(authServiceProperties.security.jwt.secret.toByteArray(), SECRET_ALGORITHM)
+    val key =
+      SecretKeySpec(
+        authServiceProperties.security.jwt.secret
+          .toByteArray(),
+        SECRET_ALGORITHM,
+      )
     return NimbusJwtDecoder.withSecretKey(key).build()
   }
 }

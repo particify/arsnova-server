@@ -27,20 +27,20 @@ class RoomAccessService(
   private val logger = LoggerFactory.getLogger(RoomAccessService::class.java)
   private var roomAccessGetEndpoint = "${webSocketProperties.httpClient.authService}/$ROOM_ACCESS_STRING"
   private val jwtAuthorizationClient =
-    RestClient.builder()
+    RestClient
+      .builder()
       .baseUrl(webSocketProperties.httpClient.authService + webSocketProperties.security.authorizeUriEndpoint)
       .build()
 
   fun getRoomAccess(
     roomId: String,
     user: User,
-  ): RoomAccess {
-    return if (webSocketProperties.httpClient.useJwtEndpoint) {
+  ): RoomAccess =
+    if (webSocketProperties.httpClient.useJwtEndpoint) {
       getRoomAccessForJwt(roomId, user.jwt)
     } else {
       getRoomAccessForUserId(roomId, user.userId)
     }
-  }
 
   /**
    * Check for room roles using the user ID. This is implementation depends on the authz service.
@@ -75,15 +75,16 @@ class RoomAccessService(
   ): RoomAccess {
     val userId = jwtTokenUtil.getUser(jwt).userId
     val authorization =
-      jwtAuthorizationClient.get()
+      jwtAuthorizationClient
+        .get()
         .header("Authorization", "Bearer $jwt")
         .header(
           webSocketProperties.security.authorizeUriHeader,
           "${webSocketProperties.security.authorizeUriPrefix}/room/$roomId",
-        )
-        .retrieve()
+        ).retrieve()
         .toBodilessEntity()
-        .headers["authorization"]?.first() ?: error("No room authorization received.")
+        .headers["authorization"]
+        ?.first() ?: error("No room authorization received.")
     val roles = jwtTokenUtil.getRolesFromToken(authorization.removePrefix("Bearer "))
     val role =
       when {

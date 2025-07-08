@@ -48,16 +48,15 @@ class RoomAccess(
     return result
   }
 
-  override fun toString(): String {
-    return """
-      RoomAccess(
-        roomId=$roomId,
-        userId=$userId,
-        rev='$rev',
-        role=$role,
-        creationTimestamp=$creationTimestamp,
-        lastAccess=$lastAccess
-      )
-      """.trimIndent()
-  }
+  override fun toString(): String =
+    """
+    RoomAccess(
+      roomId=$roomId,
+      userId=$userId,
+      rev='$rev',
+      role=$role,
+      creationTimestamp=$creationTimestamp,
+      lastAccess=$lastAccess
+    )
+    """.trimIndent()
 }

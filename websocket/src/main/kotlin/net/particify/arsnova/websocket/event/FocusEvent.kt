@@ -25,7 +25,7 @@ enum class FocusView {
   OVERVIEW,
 }
 
-class OverviewFocusEvent() : FocusEvent(FocusView.OVERVIEW)
+class OverviewFocusEvent : FocusEvent(FocusView.OVERVIEW)
 
 data class ContentFocusEvent(
   val focusState: ContentFocusState,

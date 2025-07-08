@@ -32,24 +32,26 @@ class AddMembershipFilter(
   private val logger = LoggerFactory.getLogger(javaClass)
   private val tierIdToParticipantLimit = mutableMapOf<String, Int>()
 
-  override fun apply(config: Config): GatewayFilter {
-    return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
-      chain.filter(exchange)
+  override fun apply(config: Config): GatewayFilter =
+    GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
+      chain
+        .filter(exchange)
         .then(Mono.just(exchange))
         .filter { e ->
           e.response.statusCode != null &&
             e.response.statusCode!!.is2xxSuccessful
-        }
-        .filter { e ->
+        }.filter { e ->
           e.request.method === HttpMethod.POST
-        }
-        .flatMap { e ->
+        }.flatMap { e ->
           val roomId = e.response.headers.getFirst(ENTITY_ID_HEADER)!!
           val revId = e.response.headers.getFirst(ENTITY_REVISION_HEADER)!!
           /* Sending of the role as a header is a temporary solution for
            * now to allow accessing it without parsing the body. */
           val role = e.response.headers.getFirst(ARS_ROLE_HEADER)!!
-          val token = e.request.headers.getFirst(HttpHeaders.AUTHORIZATION)!!.removePrefix(UpdateRoomAccessFilter.BEARER_HEADER)
+          val token =
+            e.request.headers
+              .getFirst(HttpHeaders.AUTHORIZATION)!!
+              .removePrefix(UpdateRoomAccessFilter.BEARER_HEADER)
           val userId = jwtTokenUtil.getUserIdFromPublicToken(token)
           Mono.zip(
             Mono.just(
@@ -72,14 +74,11 @@ class AddMembershipFilter(
                 }
               },
           )
-        }
-        .flatMap { (roomAccess: RoomAccess, limit: Int) ->
+        }.flatMap { (roomAccess: RoomAccess, limit: Int) ->
           roomAccessService
             .postRoomAccessWithLimit(roomAccess, limit)
-        }
-        .then()
+        }.then()
     }
-  }
 
   class Config {
     var name: String = "AddMembershipFilter"

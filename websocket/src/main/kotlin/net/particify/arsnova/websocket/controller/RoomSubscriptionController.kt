@@ -20,7 +20,5 @@ class RoomSubscriptionController(
   @GetMapping(GET_USER_COUNT_SUBSCRIPTION)
   fun getUserCount(
     @RequestParam ids: List<String>,
-  ): List<Int?> {
-    return ids.map { id -> roomSubscriptionService.getUserCount(id) }
-  }
+  ): List<Int?> = ids.map { id -> roomSubscriptionService.getUserCount(id) }
 }

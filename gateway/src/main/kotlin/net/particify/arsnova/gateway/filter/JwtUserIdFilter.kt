@@ -32,34 +32,35 @@ class JwtUserIdFilter(
 
   private val logger = LoggerFactory.getLogger(AuthFilter::class.java)
 
-  override fun apply(config: Config): GatewayFilter {
-    return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
+  override fun apply(config: Config): GatewayFilter =
+    GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
       var request: ServerHttpRequest = exchange.request
       val headers: HttpHeaders = request.headers
       val bearer = headers[HttpHeaders.AUTHORIZATION]
 
       if (bearer != null) {
         val jwt = bearer[0].removePrefix("Bearer ")
-        Mono.just(jwtTokenUtil.getUserIdFromPublicToken(jwt))
+        Mono
+          .just(jwtTokenUtil.getUserIdFromPublicToken(jwt))
           .onErrorResume { exception ->
             logger.debug("Exception on verifying JWT and obtaining userId", exception)
             Mono.error(UnauthorizedException())
-          }
-          .map { userId: String ->
+          }.map { userId: String ->
             logger.trace("Working with userId: {}", userId)
-            exchange.mutate().request { r ->
-              r.headers { headers ->
-                headers.set(USER_ID_HEADER, userId)
-                headers.remove(HttpHeaders.AUTHORIZATION)
-              }
-            }.build()
-          }
-          .defaultIfEmpty(exchange).flatMap(chain::filter)
+            exchange
+              .mutate()
+              .request { r ->
+                r.headers { headers ->
+                  headers.set(USER_ID_HEADER, userId)
+                  headers.remove(HttpHeaders.AUTHORIZATION)
+                }
+              }.build()
+          }.defaultIfEmpty(exchange)
+          .flatMap(chain::filter)
       } else {
         throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
       }
     }
-  }
 
   class Config {
     var name: String = "JwtUseridFilter"

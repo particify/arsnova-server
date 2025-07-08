@@ -45,8 +45,8 @@ class AuthFilter(
 
   private val logger = LoggerFactory.getLogger(AuthFilter::class.java)
 
-  override fun apply(config: Config): GatewayFilter {
-    return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
+  override fun apply(config: Config): GatewayFilter =
+    GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
       var request: ServerHttpRequest = exchange.request
       val headers: HttpHeaders = request.headers
       val bearer = headers[HttpHeaders.AUTHORIZATION]
@@ -59,16 +59,17 @@ class AuthFilter(
           logger.debug("Didn't get a valid roomId out of the uri variables: {}", uriVariables)
           throw ResponseStatusException(HttpStatus.BAD_REQUEST)
         }
-        Mono.just(jwtTokenUtil.getUserIdAndClientRolesFromPublicToken(jwt))
+        Mono
+          .just(jwtTokenUtil.getUserIdAndClientRolesFromPublicToken(jwt))
           .onErrorResume { exception ->
             logger.debug("Exception on verifying JWT and obtaining userId", exception)
             Mono.error(UnauthorizedException())
-          }
-          .flatMap { pair: Pair<String, List<String>> ->
+          }.flatMap { pair: Pair<String, List<String>> ->
             val userId = pair.first
             val authorities = pair.second
             Mono.zip(
-              roomAccessService.getRoomAccess(roomId, userId)
+              roomAccessService
+                .getRoomAccess(roomId, userId)
                 .onErrorResume(WebClientResponseException::class) { e ->
                   if (e.statusCode != HttpStatus.NOT_FOUND) {
                     logger.error("Unexpected response from auth service")
@@ -86,27 +87,28 @@ class AuthFilter(
               subscriptionService.getRoomFeatures(roomId, true),
               Mono.just(authorities),
             )
-          }
-          .map { (roomAccess: RoomAccess, roomFeatures: RoomFeatures, authorityList: List<String>) ->
+          }.map { (roomAccess: RoomAccess, roomFeatures: RoomFeatures, authorityList: List<String>) ->
             logger.trace("Working with roomAccess: {}, roomFeatures: {}, authorityList: {}", roomAccess, roomFeatures, authorityList)
             jwtTokenUtil.createSignedInternalToken(roomAccess, roomFeatures, authorityList)
-          }
-          .map { token ->
+          }.map { token ->
             logger.trace("new token: {}", token)
-            exchange.mutate().request { r ->
-              r.headers { headers ->
-                headers.setBearerAuth(token)
-              }
-            }.build()
-          }
-          .defaultIfEmpty(exchange).flatMap(chain::filter)
+            exchange
+              .mutate()
+              .request { r ->
+                r.headers { headers ->
+                  headers.setBearerAuth(token)
+                }
+              }.build()
+          }.defaultIfEmpty(exchange)
+          .flatMap(chain::filter)
       } else {
         throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
       }
     }
-  }
 
-  class Config(val requireAuthentication: Boolean = true) {
+  class Config(
+    val requireAuthentication: Boolean = true,
+  ) {
     var name: String = "AuthFilter"
   }
 }

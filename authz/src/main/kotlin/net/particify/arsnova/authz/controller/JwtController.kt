@@ -37,7 +37,8 @@ class JwtController(
     val encodedJwt = jwtUtils.extractJwtString(authorization) ?: throw BadRequestException("Invalid Authorization header.")
     val publicJwt = jwtUtils.decodeJwt(encodedJwt)
     val userId = UuidHelper.stringToUuid(publicJwt.subject)
-    return Mono.justOrEmpty(roomAccessHandler.getByRoomIdAndUserId(roomId, userId!!))
+    return Mono
+      .justOrEmpty(roomAccessHandler.getByRoomIdAndUserId(roomId, userId!!))
       .switchIfEmpty(Mono.error(ForbiddenException()))
       .flatMap { roomAccess ->
         val internalJwt = jwtUtils.createSignedInternalToken(roomAccess.userId, roomAccess.roomId, roomAccess.role!!)

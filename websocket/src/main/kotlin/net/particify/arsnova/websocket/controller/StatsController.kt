@@ -18,7 +18,5 @@ class StatsController(
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   @GetMapping(STATS_MAPPING)
-  fun getStats(): Mono<Stats> {
-    return Mono.just(Stats(roomSubscriptionEventDispatcher.getWsSessionCount()))
-  }
+  fun getStats(): Mono<Stats> = Mono.just(Stats(roomSubscriptionEventDispatcher.getWsSessionCount()))
 }

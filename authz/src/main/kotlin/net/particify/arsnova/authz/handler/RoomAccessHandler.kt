@@ -45,7 +45,8 @@ class RoomAccessHandler(
   fun handleRequestRoomAccessSyncCommand(command: RequestRoomAccessSyncCommand): RoomAccessSyncTracker {
     logger.debug("Handling request: {}", command)
     val syncTracker =
-      roomAccessSyncTrackerRepository.findById(command.roomId)
+      roomAccessSyncTrackerRepository
+        .findById(command.roomId)
         .orElse(RoomAccessSyncTracker(command.roomId, "0"))
     if (syncTracker.rev.substringBefore("-").toInt() < command.revNumber) {
       // if either no sync has happened or the sync is older than the rev the request aims for
@@ -70,7 +71,8 @@ class RoomAccessHandler(
   fun handleSyncRoomAccessCommand(command: SyncRoomAccessCommand) {
     logger.debug("Handling event: {}", command)
     val syncTracker =
-      roomAccessSyncTrackerRepository.findById(command.roomId)
+      roomAccessSyncTrackerRepository
+        .findById(command.roomId)
         .orElse(RoomAccessSyncTracker(command.roomId, "0"))
     // Check if event has newer information based on the revision
     if (syncTracker.rev.substringBefore("-").toInt() > command.rev.substringBefore("-").toInt()) {
@@ -148,36 +150,30 @@ class RoomAccessHandler(
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun getByPK(pk: RoomAccessPK): Optional<RoomAccess> {
-    return roomAccessRepository.findById(pk)
-  }
+  fun getByPK(pk: RoomAccessPK): Optional<RoomAccess> = roomAccessRepository.findById(pk)
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun getUserIdsLastActiveBefore(lastActiveBefore: Date): Iterable<UUID> {
-    return roomAccessRepository.findUserIdsByLastAccessBefore(lastActiveBefore)
-  }
+  fun getUserIdsLastActiveBefore(lastActiveBefore: Date): Iterable<UUID> =
+    roomAccessRepository.findUserIdsByLastAccessBefore(lastActiveBefore)
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun getAllLastActive(page: Int): List<LastAccess> {
-    return roomAccessRepository.findAllLastAccess(Pageable.ofSize(10).withPage(page)).toList()
-  }
+  fun getAllLastActive(page: Int): List<LastAccess> = roomAccessRepository.findAllLastAccess(Pageable.ofSize(10).withPage(page)).toList()
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun getLastActiveByUserId(userId: UUID): LastAccess? {
-    return roomAccessRepository.findLastAccessByUserId(userId).firstOrNull()
-  }
+  fun getLastActiveByUserId(userId: UUID): LastAccess? = roomAccessRepository.findLastAccessByUserId(userId).firstOrNull()
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-  fun create(roomAccess: RoomAccess): RoomAccess {
-    return try {
+  fun create(roomAccess: RoomAccess): RoomAccess =
+    try {
       if (roomAccess.role == ROLE_OWNER_STRING) {
         val existingOwnerPks =
           roomAccessRepository
-            .findByRoomIdAndRole(roomAccess.roomId, ROLE_OWNER_STRING).map { roomAccess ->
+            .findByRoomIdAndRole(roomAccess.roomId, ROLE_OWNER_STRING)
+            .map { roomAccess ->
               RoomAccessPK(roomAccess.roomId, roomAccess.userId)
             }
         val otherOwnerPks = existingOwnerPks.filter { pk -> pk.userId != roomAccess.userId }
@@ -201,7 +197,6 @@ class RoomAccessHandler(
           InternalServerErrorException("Tried fetching the room access but could not obtain any")
         }
     }
-  }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
   @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
@@ -246,7 +241,5 @@ class RoomAccessHandler(
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  fun deleteByRoomId(roomId: UUID): List<RoomAccess> {
-    return roomAccessRepository.deleteByRoomIdWithoutChecking(roomId).toList()
-  }
+  fun deleteByRoomId(roomId: UUID): List<RoomAccess> = roomAccessRepository.deleteByRoomIdWithoutChecking(roomId).toList()
 }

@@ -11,10 +11,9 @@ class RestConfig(
   private val httpGatewayProperties: HttpGatewayProperties,
 ) {
   @Bean
-  fun authServiceWebClient(): WebClient? {
-    return WebClient
+  fun authServiceWebClient(): WebClient? =
+    WebClient
       .builder()
       .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
       .build()
-  }
 }

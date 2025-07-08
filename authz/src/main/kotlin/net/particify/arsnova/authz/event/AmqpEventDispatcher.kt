@@ -12,7 +12,9 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 
 @Component
-class AmqpEventDispatcher(private val eventPublisher: ApplicationEventPublisher) {
+class AmqpEventDispatcher(
+  private val eventPublisher: ApplicationEventPublisher,
+) {
   private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
   @RabbitListener(queues = [RabbitConfig.ROOM_CREATED_QUEUE_NAME])

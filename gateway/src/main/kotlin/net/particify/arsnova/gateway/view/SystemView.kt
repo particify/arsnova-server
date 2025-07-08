@@ -25,45 +25,42 @@ class SystemView(
   private val coreStatsService: CoreStatsService,
   private val commentService: CommentService,
 ) {
-  fun getServiceStats(params: MultiValueMap<String, String>): Mono<Stats> {
-    return authProcessor.getAuthentication()
+  fun getServiceStats(params: MultiValueMap<String, String>): Mono<Stats> =
+    authProcessor
+      .getAuthentication()
       .filter { authentication: Authentication ->
         authProcessor.isAdminOrMonitoring(authentication)
-      }
-      .switchIfEmpty(Mono.error(ForbiddenException()))
+      }.switchIfEmpty(Mono.error(ForbiddenException()))
       .map { authentication ->
         authentication.credentials
-      }
-      .cast(String::class.java)
+      }.cast(String::class.java)
       .flatMap { jwt ->
-        Mono.zip(
-          wsGatewayService.getGatewayStats(),
-          coreStatsService.getServiceStats(jwt, params),
-          commentService.getServiceStats(params),
-        )
-          .map { (wsGatewayStats: WsGatewayStats, coreServiceStats: Map<String, Any>, commentServiceStats: CommentServiceStats) ->
+        Mono
+          .zip(
+            wsGatewayService.getGatewayStats(),
+            coreStatsService.getServiceStats(jwt, params),
+            commentService.getServiceStats(params),
+          ).map { (wsGatewayStats: WsGatewayStats, coreServiceStats: Map<String, Any>, commentServiceStats: CommentServiceStats) ->
             Stats(wsGatewayStats, coreServiceStats, commentServiceStats)
           }
       }
-  }
 
-  fun getSummarizedStats(params: MultiValueMap<String, String>): Mono<SummarizedStats> {
-    return authProcessor.getAuthentication()
+  fun getSummarizedStats(params: MultiValueMap<String, String>): Mono<SummarizedStats> =
+    authProcessor
+      .getAuthentication()
       .filter { authentication: Authentication ->
         authProcessor.isAdminOrMonitoring(authentication)
-      }
-      .switchIfEmpty(Mono.error(ForbiddenException()))
+      }.switchIfEmpty(Mono.error(ForbiddenException()))
       .map { authentication ->
         authentication.credentials
-      }
-      .cast(String::class.java)
+      }.cast(String::class.java)
       .flatMap { jwt ->
-        Mono.zip(
-          wsGatewayService.getGatewayStats(),
-          coreStatsService.getSummarizedStats(jwt, params),
-          commentService.getServiceStats(params),
-        )
-          .map { (wsGatewayStats: WsGatewayStats, coreStats: CoreStats, commentServiceStats: CommentServiceStats) ->
+        Mono
+          .zip(
+            wsGatewayService.getGatewayStats(),
+            coreStatsService.getSummarizedStats(jwt, params),
+            commentService.getServiceStats(params),
+          ).map { (wsGatewayStats: WsGatewayStats, coreStats: CoreStats, commentServiceStats: CommentServiceStats) ->
             SummarizedStats(
               connectedUsers = wsGatewayStats.webSocketUserCount,
               users = coreStats.userProfile.accountCount,
@@ -75,5 +72,4 @@ class SystemView(
             )
           }
       }
-  }
 }

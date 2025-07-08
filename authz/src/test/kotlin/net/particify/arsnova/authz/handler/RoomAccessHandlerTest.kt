@@ -65,7 +65,8 @@ class RoomAccessHandlerTest {
         SOME_ROOM_ID,
       )
 
-    Mockito.`when`(roomAccessSyncTrackerRepository.findById(command.roomId))
+    Mockito
+      .`when`(roomAccessSyncTrackerRepository.findById(command.roomId))
       .thenReturn(
         Optional.of(
           RoomAccessSyncTracker(
@@ -119,7 +120,8 @@ class RoomAccessHandlerTest {
         SOME_NEWER_REV,
       )
 
-    Mockito.`when`(roomAccessSyncTrackerRepository.findById(command.roomId))
+    Mockito
+      .`when`(roomAccessSyncTrackerRepository.findById(command.roomId))
       .thenReturn(
         Optional.of(
           RoomAccessSyncTracker(
@@ -128,9 +130,11 @@ class RoomAccessHandlerTest {
           ),
         ),
       )
-    Mockito.`when`(roomAccessSyncTrackerRepository.save(expectedTracker))
+    Mockito
+      .`when`(roomAccessSyncTrackerRepository.save(expectedTracker))
       .thenReturn(expectedTracker)
-    Mockito.`when`(roomAccessRepository.findByRoomId(command.roomId))
+    Mockito
+      .`when`(roomAccessRepository.findByRoomId(command.roomId))
       .thenReturn(
         listOf(
           // Do not delete this one

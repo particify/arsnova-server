@@ -19,9 +19,7 @@ class RoomSubscriptionEventDispatcher(
   private val roomTopicPattern = Regex("^/topic/([0-9a-f]{32})\\.stream$")
   private val wsSessionIdToSubscriptionMapping = ConcurrentHashMap<String, RoomSubscription>()
 
-  fun getWsSessionCount(): Int {
-    return wsSessionIdToSubscriptionMapping.size
-  }
+  fun getWsSessionCount(): Int = wsSessionIdToSubscriptionMapping.size
 
   @EventListener
   fun dispatchSubscribeEvent(event: SessionSubscribeEvent) {

@@ -20,8 +20,12 @@ class RoomService(
   fun get(roomId: String): Mono<Room> {
     val url = "${httpGatewayProperties.httpClient.core}/room/$roomId"
     logger.trace("Querying core for room with url: {}", url)
-    return webClient.get().uri(url)
-      .retrieve().bodyToMono(Room::class.java).cache()
+    return webClient
+      .get()
+      .uri(url)
+      .retrieve()
+      .bodyToMono(Room::class.java)
+      .cache()
       .checkpoint("Request failed in ${this::class.simpleName}::get(roomId).")
       .onErrorResume { exception ->
         logger.debug("Error on getting room with id: {}", roomId, exception)
@@ -34,8 +38,12 @@ class RoomService(
     val url = "$path?ids=${roomIds.joinToString(",")}&skipMissing=false"
     logger.trace("Querying core for room with url: {}", url)
     val typeRef: ParameterizedTypeReference<List<Room?>> = object : ParameterizedTypeReference<List<Room?>>() {}
-    return webClient.get().uri(url)
-      .retrieve().bodyToMono(typeRef).cache()
+    return webClient
+      .get()
+      .uri(url)
+      .retrieve()
+      .bodyToMono(typeRef)
+      .cache()
       .checkpoint("Request failed in ${this::class.simpleName}::get(roomIds).")
       .flatMapMany { roomList: List<Room?> ->
         Flux.fromIterable(

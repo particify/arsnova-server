@@ -35,22 +35,26 @@ class AddRoomCreatorAccessFilter(
 
   private val logger = LoggerFactory.getLogger(javaClass)
 
-  override fun apply(config: Config): GatewayFilter {
-    return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
-      chain.filter(exchange)
+  override fun apply(config: Config): GatewayFilter =
+    GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
+      chain
+        .filter(exchange)
         .then(
-          Mono.just(exchange)
+          Mono
+            .just(exchange)
             .filter { e: ServerWebExchange ->
               e.response.statusCode != null &&
                 e.response.statusCode!!.is2xxSuccessful &&
                 e.request.method === HttpMethod.POST
-            }
-            .map { e: ServerWebExchange ->
+            }.map { e: ServerWebExchange ->
               val path = e.request.path.toString()
               val method = e.request.method
               val roomId = e.response.headers.getFirst(ENTITY_ID_HEADER)!!
               val revId = e.response.headers.getFirst(ENTITY_REVISION_HEADER)!!
-              val token = e.request.headers.getFirst(HttpHeaders.AUTHORIZATION)!!.removePrefix(BEARER_HEADER)
+              val token =
+                e.request.headers
+                  .getFirst(HttpHeaders.AUTHORIZATION)!!
+                  .removePrefix(BEARER_HEADER)
               val userId = jwtTokenUtil.getUserIdFromPublicToken(token)
 
               if (path == ROOM_POST_PATH && method === HttpMethod.POST) {
@@ -66,11 +70,9 @@ class AddRoomCreatorAccessFilter(
               } else {
                 listOf()
               }
-            }
-            .flatMapMany { list: List<AccessChangeRequest> ->
+            }.flatMapMany { list: List<AccessChangeRequest> ->
               Flux.fromIterable(list)
-            }
-            .flatMap { accessChangeRequest: AccessChangeRequest ->
+            }.flatMap { accessChangeRequest: AccessChangeRequest ->
               when (accessChangeRequest.type) {
                 AccessChangeRequestType.CREATE -> {
                   val roomAccess =
@@ -85,11 +87,9 @@ class AddRoomCreatorAccessFilter(
                 }
                 else -> throw IllegalStateException("Unexpected AccessChangeRequestType")
               }
-            }
-            .then(),
+            }.then(),
         )
     }
-  }
 
   class Config {
     var name: String = "RoomCreationAuthFilter"

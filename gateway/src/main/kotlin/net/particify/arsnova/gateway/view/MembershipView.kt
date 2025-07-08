@@ -21,25 +21,22 @@ class MembershipView(
   private val roomService: RoomService,
   private val userService: UserService,
 ) {
-  fun getByUser(userId: String): Flux<Membership> {
-    return authProcessor.getAuthentication()
+  fun getByUser(userId: String): Flux<Membership> =
+    authProcessor
+      .getAuthentication()
       .filter { authentication ->
         authentication.principal == userId
-      }
-      .switchIfEmpty(Mono.error(ForbiddenException()))
+      }.switchIfEmpty(Mono.error(ForbiddenException()))
       .map {
         roomAccessService.getRoomAccessByUser(userId)
-      }
-      .flatMapMany { list: Flux<RoomAccess> ->
+      }.flatMapMany { list: Flux<RoomAccess> ->
         list
-      }
-      .flatMap { roomAccess: RoomAccess ->
+      }.flatMap { roomAccess: RoomAccess ->
         Flux
           .zip(
             Mono.just(roomAccess),
             roomService.get(roomAccess.roomId),
-          )
-          .map { (roomAccess: RoomAccess, room: Room) ->
+          ).map { (roomAccess: RoomAccess, room: Room) ->
             Membership(
               roomAccess.roomId,
               room.shortId,
@@ -47,11 +44,9 @@ class MembershipView(
               roomAccess.lastAccess!!,
             )
           }
-      }
-      .groupBy { membership ->
+      }.groupBy { membership ->
         Membership(membership.roomId, membership.roomShortId, setOf(), membership.lastVisit)
-      }
-      .flatMap { groupedMemberships ->
+      }.flatMap { groupedMemberships ->
         groupedMemberships.reduce(
           groupedMemberships.key().copy(),
         ) { acc: Membership, m: Membership ->
@@ -62,5 +57,4 @@ class MembershipView(
           acc
         }
       }
-  }
 }

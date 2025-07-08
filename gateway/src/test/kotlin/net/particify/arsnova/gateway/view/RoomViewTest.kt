@@ -70,11 +70,9 @@ class RoomViewTest(
       .create(roomView.getSummaries(roomIds))
       .expectNextMatches { optionalRoomSummary ->
         optionalRoomSummary.isPresent
-      }
-      .expectNextMatches { optionalRoomSummary ->
+      }.expectNextMatches { optionalRoomSummary ->
         optionalRoomSummary.isPresent
-      }
-      .verifyComplete()
+      }.verifyComplete()
   }
 
   @Test
@@ -118,11 +116,9 @@ class RoomViewTest(
       .create(roomView.getSummaries(roomIds))
       .expectNextMatches { optionalRoomSummary ->
         optionalRoomSummary.isPresent
-      }
-      .expectNextMatches { optionalRoomSummary ->
+      }.expectNextMatches { optionalRoomSummary ->
         optionalRoomSummary.isEmpty
-      }
-      .verifyComplete()
+      }.verifyComplete()
   }
 
   @Test
@@ -168,12 +164,10 @@ class RoomViewTest(
         optionalRoomSummary
           .map { roomSummery -> roomSummery.stats.roomUserCount == null }
           .orElse(true)
-      }
-      .expectNextMatches { optionalRoomSummary ->
+      }.expectNextMatches { optionalRoomSummary ->
         optionalRoomSummary
           .map { roomSummery -> roomSummery.stats.roomUserCount == null }
           .orElse(true)
-      }
-      .verifyComplete()
+      }.verifyComplete()
   }
 }

@@ -67,7 +67,6 @@ class MembershipViewTest(
       .create(membershipView.getByUser(userId))
       .expectErrorMatches { e ->
         e is ForbiddenException
-      }
-      .verify()
+      }.verify()
   }
 }

@@ -28,7 +28,5 @@ class RoomAccessSyncTracker(
     return result
   }
 
-  override fun toString(): String {
-    return "RoomAccessSyncTracker(roomId='$roomId', rev='$rev')"
-  }
+  override fun toString(): String = "RoomAccessSyncTracker(roomId='$roomId', rev='$rev')"
 }

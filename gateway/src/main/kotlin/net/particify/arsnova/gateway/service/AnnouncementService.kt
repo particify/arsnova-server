@@ -24,35 +24,40 @@ class AnnouncementService(
 ) {
   private val logger = LoggerFactory.getLogger(javaClass)
 
-  fun getByUserId(userId: String): Flux<Announcement> {
-    return authProcessor.getAuthentication()
+  fun getByUserId(userId: String): Flux<Announcement> =
+    authProcessor
+      .getAuthentication()
       .filter { authentication ->
         authentication.principal == userId
-      }
-      .switchIfEmpty(Mono.error(ForbiddenException()))
+      }.switchIfEmpty(Mono.error(ForbiddenException()))
       .flatMapMany { auth ->
         val jwt: String = auth.credentials.toString()
-        roomAccessService.getRoomAccessByUser(userId).map {
-          it.roomId
-        }.collectList().flatMapMany { roomIds ->
-          val roomIdsStr = roomIds.joinToString(",")
-          val url = "${httpGatewayProperties.httpClient.core}/room/-/announcement/?roomIds=$roomIdsStr"
-          logger.trace("Querying core for announcements with url: {}", url)
-          webClient.get()
-            .uri(url)
-            .header("Authorization", jwt)
-            .retrieve().bodyToFlux(Announcement::class.java).cache()
-            .checkpoint("Request failed in ${this::class.simpleName}::${::getByUserId.name}.")
-        }
-      }
-      .sort { a, b ->
+        roomAccessService
+          .getRoomAccessByUser(userId)
+          .map {
+            it.roomId
+          }.collectList()
+          .flatMapMany { roomIds ->
+            val roomIdsStr = roomIds.joinToString(",")
+            val url = "${httpGatewayProperties.httpClient.core}/room/-/announcement/?roomIds=$roomIdsStr"
+            logger.trace("Querying core for announcements with url: {}", url)
+            webClient
+              .get()
+              .uri(url)
+              .header("Authorization", jwt)
+              .retrieve()
+              .bodyToFlux(Announcement::class.java)
+              .cache()
+              .checkpoint("Request failed in ${this::class.simpleName}::${::getByUserId.name}.")
+          }
+      }.sort { a, b ->
         (b.updateTimestamp ?: b.creationTimestamp).compareTo(a.updateTimestamp ?: a.creationTimestamp)
       }
-  }
 
-  fun getByUserIdWithRoomName(userId: String): Flux<Announcement> {
-    return getByUserId(userId).collectList().flatMapMany { announcements ->
-      roomService.get(announcements.map { it.roomId }.distinct())
+  fun getByUserIdWithRoomName(userId: String): Flux<Announcement> =
+    getByUserId(userId).collectList().flatMapMany { announcements ->
+      roomService
+        .get(announcements.map { it.roomId }.distinct())
         .filter(Optional<Room>::isPresent)
         .map(Optional<Room>::get)
         .collectMap { it.id }
@@ -62,10 +67,9 @@ class AnnouncementService(
           }
         }
     }
-  }
 
-  fun getStateByUser(user: User): Mono<AnnouncementState> {
-    return getByUserId(user.id).collectList().map { announcements ->
+  fun getStateByUser(user: User): Mono<AnnouncementState> =
+    getByUserId(user.id).collectList().map { announcements ->
       AnnouncementState(
         announcements.count(),
         announcements
@@ -77,5 +81,4 @@ class AnnouncementService(
         user.announcementReadTimestamp,
       )
     }
-  }
 }

@@ -21,3 +21,6 @@ ab215208560ad8b4222b1cb7446cb0ba827fe7f8
 
 # 2022-10-14 - Fix codestyle issues reported by Checkstyle
 11fdc60abfec6b7b6e304821ffa921dff431b923
+
+# 2025-07-08 - Apply Ktlint auto formatting
+b4128f653b535d5287a83517b5434706b2f044d7
