@@ -4,6 +4,7 @@
 package net.particify.arsnova.core4.user.internal
 
 import java.util.UUID
+import net.particify.arsnova.core4.user.Role
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -21,4 +22,6 @@ interface RoleRepository : JpaRepository<Role, UUID> {
   //  )
   @Query("SELECT r FROM Role r JOIN r.users u WHERE u.id = :userId")
   fun findByUserId(userId: UUID): List<Role>
+
+  fun findByName(name: String): Role
 }

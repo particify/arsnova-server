@@ -13,6 +13,7 @@ import net.particify.arsnova.core4.room.RoomRole
 import net.particify.arsnova.core4.system.migration.v3.Announcement as AnnouncementV3
 import net.particify.arsnova.core4.system.migration.v3.Room as RoomV3
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.UserService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty
 import org.springframework.core.ParameterizedTypeReference
@@ -25,6 +26,7 @@ import org.springframework.web.client.RestClient
 @ConditionalOnBooleanProperty(name = ["persistence.v3-migration.enabled"])
 class Migrator(
     @PersistenceContext private val entityManager: EntityManager,
+    private val userService: UserService,
     properties: MigrationProperties
 ) {
   companion object {
@@ -89,6 +91,7 @@ class Migrator(
   @Transactional
   fun migrateUsers() {
     logger.info("Migrating UserProfile data...")
+    val defaultRole = userService.findRoleByName("USER")
     migrate<UserProfile> {
       val settings = mutableMapOf<String, Any>()
       if (it.settings?.contentAnswersDirectlyBelowChart == true)
@@ -118,7 +121,8 @@ class Migrator(
           givenName = it.person?.firstName,
           surname = it.person?.lastName,
           settings = settings,
-          announcementsReadAt = it.announcementReadTimestamp)
+          announcementsReadAt = it.announcementReadTimestamp,
+          roles = mutableListOf(defaultRole))
     }
   }
 

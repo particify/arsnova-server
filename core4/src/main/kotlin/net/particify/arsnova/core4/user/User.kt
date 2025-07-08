@@ -15,7 +15,6 @@ import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.common.UuidGenerator
-import net.particify.arsnova.core4.user.internal.Role
 import org.hibernate.annotations.JdbcType
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.dialect.PostgreSQLEnumJdbcType
