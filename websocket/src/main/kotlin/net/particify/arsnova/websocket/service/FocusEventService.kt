@@ -33,7 +33,5 @@ class FocusEventService(
     }
   }
 
-  fun getLatestEvent(roomId: String): FocusEvent? {
-    return latestEvents[roomId]
-  }
+  fun getLatestEvent(roomId: String): FocusEvent? = latestEvents[roomId]
 }

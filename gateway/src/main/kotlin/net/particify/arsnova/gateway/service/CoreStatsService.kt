@@ -23,7 +23,8 @@ class CoreStatsService(
     params: MultiValueMap<String, String>,
   ): Mono<Map<String, Any>> {
     logger.trace("Querying core for stats with url: {}", url)
-    return webClient.get()
+    return webClient
+      .get()
       .uri {
         it
           .scheme(url.scheme)
@@ -32,8 +33,7 @@ class CoreStatsService(
           .path(url.path)
           .replaceQueryParams(params)
           .build()
-      }
-      .header("Authorization", jwt)
+      }.header("Authorization", jwt)
       .retrieve()
       .bodyToMono(object : ParameterizedTypeReference<Map<String, Any>>() {})
       .cache()
@@ -45,7 +45,8 @@ class CoreStatsService(
     params: MultiValueMap<String, String>,
   ): Mono<CoreStats> {
     logger.trace("Querying core for stats with url: {}", url)
-    return webClient.get()
+    return webClient
+      .get()
       .uri {
         it
           .scheme(url.scheme)
@@ -54,8 +55,7 @@ class CoreStatsService(
           .path(url.path)
           .replaceQueryParams(params)
           .build()
-      }
-      .header("Authorization", jwt)
+      }.header("Authorization", jwt)
       .retrieve()
       .bodyToMono(CoreStats::class.java)
       .cache()

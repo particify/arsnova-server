@@ -32,7 +32,5 @@ class FocusEventController(
   @GetMapping(path = [FOCUS_EVENT_MAPPING])
   fun get(
     @PathVariable roomId: String,
-  ): FocusEvent? {
-    return focusEventService.getLatestEvent(roomId)
-  }
+  ): FocusEvent? = focusEventService.getLatestEvent(roomId)
 }

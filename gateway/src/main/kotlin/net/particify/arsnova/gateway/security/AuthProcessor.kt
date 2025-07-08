@@ -14,18 +14,16 @@ class AuthProcessor {
     const val JWT_ADMIN_AUTHORITY_STRING = JwtTokenUtil.ROLE_AUTHORITY_PREFIX + "ADMIN"
   }
 
-  fun getAuthentication(): Mono<Authentication> {
-    return ReactiveSecurityContextHolder.getContext()
+  fun getAuthentication(): Mono<Authentication> =
+    ReactiveSecurityContextHolder
+      .getContext()
       .map { securityContext ->
         securityContext.authentication
-      }
-      .switchIfEmpty(Mono.error(UnauthorizedException()))
-  }
+      }.switchIfEmpty(Mono.error(UnauthorizedException()))
 
-  fun isAdminOrMonitoring(authentication: Authentication): Boolean {
-    return authentication.authorities.toList().any { ga ->
+  fun isAdminOrMonitoring(authentication: Authentication): Boolean =
+    authentication.authorities.toList().any { ga ->
       ga == (SimpleGrantedAuthority(JWT_MONITORING_AUTHORITY_STRING)) ||
         ga == (SimpleGrantedAuthority(JWT_ADMIN_AUTHORITY_STRING))
     }
-  }
 }

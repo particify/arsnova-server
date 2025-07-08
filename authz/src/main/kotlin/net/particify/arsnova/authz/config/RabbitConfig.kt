@@ -63,9 +63,7 @@ class RabbitConfig(
   }
 
   @Bean
-  fun rabbitAdmin(connectionFactory: ConnectionFactory): RabbitAdmin {
-    return RabbitAdmin(connectionFactory)
-  }
+  fun rabbitAdmin(connectionFactory: ConnectionFactory): RabbitAdmin = RabbitAdmin(connectionFactory)
 
   @Bean
   fun declarables(): Declarables {
@@ -141,9 +139,7 @@ class RabbitConfig(
   }
 
   @Bean
-  fun jsonMessageConverter(objectMapper: ObjectMapper): MessageConverter {
-    return Jackson2JsonMessageConverter(objectMapper)
-  }
+  fun jsonMessageConverter(objectMapper: ObjectMapper): MessageConverter = Jackson2JsonMessageConverter(objectMapper)
 
   @Bean
   fun classMapper(): ClassMapper {

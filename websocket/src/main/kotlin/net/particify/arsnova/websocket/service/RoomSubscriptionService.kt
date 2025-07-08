@@ -67,17 +67,11 @@ class RoomSubscriptionService(
     applicationEventPublisher.publishEvent(RoomUserCountChangedEvent(roomId, currentUsers.count()))
   }
 
-  fun getUserCount(roomId: String): Int? {
-    return roomUsers.get(roomId)?.count()
-  }
+  fun getUserCount(roomId: String): Int? = roomUsers.get(roomId)?.count()
 
-  fun getUserCounts(): List<Int> {
-    return this.roomUsers.map { (roomId, userIds) -> userIds.size }
-  }
+  fun getUserCounts(): List<Int> = this.roomUsers.map { (roomId, userIds) -> userIds.size }
 
-  fun getUserCountsMap(): Map<String, Int> {
-    return this.roomUsers.mapValues { (roomId, userIds) -> userIds.size }
-  }
+  fun getUserCountsMap(): Map<String, Int> = this.roomUsers.mapValues { (roomId, userIds) -> userIds.size }
 
   fun sendUserCountChangedEvent(
     roomId: String,

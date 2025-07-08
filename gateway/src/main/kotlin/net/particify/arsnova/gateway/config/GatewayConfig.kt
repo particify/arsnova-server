@@ -10,15 +10,14 @@ import reactor.core.publisher.Mono
 @EnableConfigurationProperties(HttpGatewayProperties::class)
 class GatewayConfig {
   @Bean
-  fun ipKeyResolver(): KeyResolver {
-    return KeyResolver { exchange ->
+  fun ipKeyResolver(): KeyResolver =
+    KeyResolver { exchange ->
       Mono.just(
         listOf(
           exchange.request.method.toString(),
-          exchange.request.remoteAddress!!.address.hostAddress,
-        )
-          .joinToString(","),
+          exchange.request.remoteAddress!!
+            .address.hostAddress,
+        ).joinToString(","),
       )
     }
-  }
 }

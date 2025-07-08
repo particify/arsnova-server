@@ -64,12 +64,15 @@ class JwtTokenUtil(
     roomId: String,
   ): List<AccessLevel> {
     val decodedJwt = internalVerifier.verify(token)
-    return decodedJwt.getClaim("roles").asList(String::class.java).filter { role ->
-      role.endsWith("-$roomId")
-    }.map { role ->
-      val roleString = role.replace(Regex("-$roomId\$"), "")
-      AccessLevel.valueOf(roleString)
-    }
+    return decodedJwt
+      .getClaim("roles")
+      .asList(String::class.java)
+      .filter { role ->
+        role.endsWith("-$roomId")
+      }.map { role ->
+        val roleString = role.replace(Regex("-$roomId\$"), "")
+        AccessLevel.valueOf(roleString)
+      }
   }
 
   fun getUserIdAndClientRolesFromPublicToken(token: String): Pair<String, List<String>> {
@@ -98,16 +101,20 @@ class JwtTokenUtil(
     val generatedRoles = arrayOf(roomRole)
     val roles = generatedRoles + clientAuthorities
     val roomFeaturesArray = roomFeatures.features.toTypedArray()
-    return JWT.create()
+    return JWT
+      .create()
       .withIssuer(serverId)
       .withAudience(serverId)
       .withIssuedAt(Date())
       .withExpiresAt(
         Date.from(
-          LocalDateTime.now().plus(defaultValidityPeriod).atZone(ZoneId.systemDefault()).toInstant(),
+          LocalDateTime
+            .now()
+            .plus(defaultValidityPeriod)
+            .atZone(ZoneId.systemDefault())
+            .toInstant(),
         ),
-      )
-      .withSubject(roomAccess.userId)
+      ).withSubject(roomAccess.userId)
       .withArrayClaim(rolesClaimName, roles)
       .withArrayClaim(roomFeaturesClaimName, roomFeaturesArray)
       .withClaim(tierIdClaimName, roomFeatures.tierId)

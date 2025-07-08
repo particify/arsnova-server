@@ -16,7 +16,10 @@ import java.util.Date
 import java.util.UUID
 
 @Component
-class JwtUtils(authServiceProperties: AuthServiceProperties, private val jwtDecoder: JwtDecoder?) {
+class JwtUtils(
+  authServiceProperties: AuthServiceProperties,
+  private val jwtDecoder: JwtDecoder?,
+) {
   private val signer = MACSigner(authServiceProperties.security.jwt.secret)
   private val header = JWSHeader(JWSAlgorithm.HS256)
   private val defaultValidityPeriod: TemporalAmount = authServiceProperties.security.jwt.validityPeriod
@@ -50,7 +53,8 @@ class JwtUtils(authServiceProperties: AuthServiceProperties, private val jwtDeco
     val expirationTime = issueTime.plus(defaultValidityPeriod)
 
     val builder =
-      JWTClaimsSet.Builder()
+      JWTClaimsSet
+        .Builder()
         .issuer(serverId)
         .audience(serverId)
         .issueTime(Date.from(issueTime))
@@ -87,7 +91,5 @@ class JwtUtils(authServiceProperties: AuthServiceProperties, private val jwtDeco
     return jwt.ifEmpty { null }
   }
 
-  private fun uuidToString(uuid: UUID): String {
-    return uuid.toString().replace("-", "")
-  }
+  private fun uuidToString(uuid: UUID): String = uuid.toString().replace("-", "")
 }

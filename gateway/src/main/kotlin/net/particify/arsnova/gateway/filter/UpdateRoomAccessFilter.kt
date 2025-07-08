@@ -43,8 +43,8 @@ class UpdateRoomAccessFilter(
 
   private val logger = LoggerFactory.getLogger(javaClass)
 
-  override fun apply(config: Config): GatewayFilter {
-    return GatewayFilter { exchange: ServerWebExchange, _ ->
+  override fun apply(config: Config): GatewayFilter =
+    GatewayFilter { exchange: ServerWebExchange, _ ->
       val request = exchange.request
       val path = request.path.toString()
       val method = request.method
@@ -63,14 +63,14 @@ class UpdateRoomAccessFilter(
         )
       }
 
-      Mono.just(exchange.request)
+      Mono
+        .just(exchange.request)
         .filter { r: ServerHttpRequest ->
           r.method === HttpMethod.POST ||
             r.method === HttpMethod.PUT ||
             r.method === HttpMethod.PATCH ||
             r.method === HttpMethod.DELETE
-        }
-        .map {
+        }.map {
           if (path.matches(ROOM_MODERATOR_REGEX) && method === HttpMethod.PUT) {
             val moderatorId = path.substringAfter("/moderator/")
             if (moderatorId == userId) {
@@ -139,20 +139,18 @@ class UpdateRoomAccessFilter(
           } else {
             listOf()
           }
-        }
-        .flatMapMany { list: List<AccessChangeRequest> ->
+        }.flatMapMany { list: List<AccessChangeRequest> ->
           Flux.fromIterable(list)
-        }
-        .flatMap { accessChangeRequest: AccessChangeRequest ->
-          userService.exists(accessChangeRequest.userId, token)
+        }.flatMap { accessChangeRequest: AccessChangeRequest ->
+          userService
+            .exists(accessChangeRequest.userId, token)
             .map { exists ->
               if (!exists) {
                 throw ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID does not exist.")
               }
               accessChangeRequest
             }
-        }
-        .flatMap { accessChangeRequest: AccessChangeRequest ->
+        }.flatMap { accessChangeRequest: AccessChangeRequest ->
           when (accessChangeRequest.type) {
             AccessChangeRequestType.CREATE -> {
               val roomAccess =
@@ -178,10 +176,8 @@ class UpdateRoomAccessFilter(
             }
             else -> throw IllegalStateException("Unexpected AccessChangeRequestType")
           }
-        }
-        .then()
+        }.then()
     }
-  }
 
   class Config {
     var name: String = "RoomAuthFilter"

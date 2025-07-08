@@ -10,8 +10,9 @@ class MembershipService(
   private val authProcessor: AuthProcessor,
   private val roomAccessService: RoomAccessService,
 ) {
-  fun cancel(roomId: String): Mono<RoomAccess> {
-    return authProcessor.getAuthentication()
+  fun cancel(roomId: String): Mono<RoomAccess> =
+    authProcessor
+      .getAuthentication()
       .map { authentication ->
         // Most values can be null as the room access service only needs userId and roomId
         RoomAccess(
@@ -21,9 +22,7 @@ class MembershipService(
           "",
           null,
         )
-      }
-      .flatMap { roomAccess ->
+      }.flatMap { roomAccess ->
         roomAccessService.deleteRoomAccess(roomAccess)
       }
-  }
 }

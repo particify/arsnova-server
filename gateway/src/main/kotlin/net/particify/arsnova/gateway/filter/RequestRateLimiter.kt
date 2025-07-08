@@ -33,7 +33,8 @@ class RequestRateLimiter(
   private val ipBucketMap: MutableMap<String, Bucket> = ConcurrentHashMap()
   private val allowedIpAddresses =
     httpGatewayProperties
-      .gateway.rateLimit.whitelistedIps.map { IpAddressMatcher(it) }
+      .gateway.rateLimit.whitelistedIps
+      .map { IpAddressMatcher(it) }
 
   /*
   The id is the key extracted from the KeyResolver configured in GatewayConfig.

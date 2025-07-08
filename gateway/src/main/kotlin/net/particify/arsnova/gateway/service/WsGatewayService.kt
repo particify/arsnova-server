@@ -20,9 +20,11 @@ class WsGatewayService(
   fun getUsercount(roomIds: List<String>): Flux<Optional<Int>> {
     val url = "${httpGatewayProperties.httpClient.wsGateway}/roomsubscription/usercount?ids=${roomIds.joinToString(",")}"
     val typeRef: ParameterizedTypeReference<List<Int?>> = object : ParameterizedTypeReference<List<Int?>>() {}
-    return webClient.get()
+    return webClient
+      .get()
       .uri(url)
-      .retrieve().bodyToMono(typeRef)
+      .retrieve()
+      .bodyToMono(typeRef)
       .checkpoint("Request failed in ${this::class.simpleName}::${::getUsercount.name}.")
       .flatMapMany { userCounts: List<Int?> ->
         Flux.fromIterable(
@@ -30,8 +32,7 @@ class WsGatewayService(
             Optional.ofNullable(entry)
           },
         )
-      }
-      .onErrorResume { exception ->
+      }.onErrorResume { exception ->
         logger.debug("Exception on getting room subscription user count from ws gw", exception)
         Flux.fromIterable(
           roomIds.map {
@@ -46,9 +47,11 @@ class WsGatewayService(
   fun getGatewayStats(): Mono<WsGatewayStats> {
     val url = "${httpGatewayProperties.httpClient.wsGateway}/stats"
     logger.trace("Querying ws gateway for stats with url: {}", url)
-    return webClient.get()
+    return webClient
+      .get()
       .uri(url)
-      .retrieve().bodyToMono(WsGatewayStats::class.java)
+      .retrieve()
+      .bodyToMono(WsGatewayStats::class.java)
       .checkpoint("Request failed in ${this::class.simpleName}::${::getGatewayStats.name}.")
   }
 }

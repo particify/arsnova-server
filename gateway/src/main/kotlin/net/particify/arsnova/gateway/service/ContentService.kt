@@ -19,10 +19,13 @@ class ContentService(
   ): Flux<Int> {
     val url = "${httpGatewayProperties.httpClient.core}/room/-/content/-/count?roomIds=${roomIds.joinToString(",")}"
     logger.trace("Querying core for content stats with url: {}", url)
-    return webClient.get()
+    return webClient
+      .get()
       .uri(url)
       .header("Authorization", jwt)
-      .retrieve().bodyToFlux(Int::class.java).cache()
+      .retrieve()
+      .bodyToFlux(Int::class.java)
+      .cache()
       .checkpoint("Request failed in ${this::class.simpleName}::${::getStats.name}.")
   }
 }

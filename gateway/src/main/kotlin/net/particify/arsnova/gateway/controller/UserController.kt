@@ -44,11 +44,11 @@ class UserController(
     @PathVariable userId: String,
   ): Flux<Announcement> {
     logger.trace("Getting announcements and updating timestamp")
-    return authProcessor.getAuthentication()
+    return authProcessor
+      .getAuthentication()
       .filter { authentication ->
         authentication.principal == userId
-      }
-      .switchIfEmpty(Mono.error(ForbiddenException()))
+      }.switchIfEmpty(Mono.error(ForbiddenException()))
       .map { it.credentials.toString() }
       .flatMapMany { jwt ->
         announcementService.getByUserIdWithRoomName(userId).doOnComplete {
@@ -63,11 +63,11 @@ class UserController(
     @PathVariable userId: String,
   ): Mono<AnnouncementState> {
     logger.trace("Getting announcement state")
-    return authProcessor.getAuthentication()
+    return authProcessor
+      .getAuthentication()
       .filter { authentication ->
         authentication.principal == userId
-      }
-      .switchIfEmpty(Mono.error(ForbiddenException()))
+      }.switchIfEmpty(Mono.error(ForbiddenException()))
       .map { it.credentials.toString() }
       .flatMap { jwt ->
         userService.get(userId, jwt).flatMap {

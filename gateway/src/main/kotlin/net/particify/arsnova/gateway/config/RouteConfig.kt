@@ -66,11 +66,9 @@ class RouteConfig(
                   httpGatewayProperties.gateway.healthzAllowedIpAddresses,
                 ),
               ),
-            )
-            .filters { f ->
+            ).filters { f ->
               f.rewritePath("^/healthz", "/management/health")
-            }
-            .uri(httpGatewayProperties.routing.endpoints.core)
+            }.uri(httpGatewayProperties.routing.endpoints.core)
         },
         RouteBuilderSpec("comments") { p ->
           p
@@ -78,14 +76,12 @@ class RouteConfig(
               "/room/{roomId}/comment/**",
               "/room/{roomId}/settings/**",
               "/room/{roomId}/vote/**",
-            )
-            .filters { f ->
+            ).filters { f ->
               f.filter(authFilter.apply(AuthFilter.Config()))
               f.requestRateLimiter { r ->
                 r.rateLimiter = requestRateLimiter
               }
-            }
-            .uri(httpGatewayProperties.routing.endpoints.commentService)
+            }.uri(httpGatewayProperties.routing.endpoints.commentService)
         },
         RouteBuilderSpec("request-membership") { p ->
           p
@@ -95,8 +91,7 @@ class RouteConfig(
               f.requestRateLimiter { r ->
                 r.rateLimiter = requestRateLimiter
               }
-            }
-            .uri(httpGatewayProperties.routing.endpoints.core)
+            }.uri(httpGatewayProperties.routing.endpoints.core)
         },
         RouteBuilderSpec("cancel-membership") { p ->
           p
@@ -108,8 +103,7 @@ class RouteConfig(
               f.requestRateLimiter { r ->
                 r.rateLimiter = requestRateLimiter
               }
-            }
-            .uri(httpGatewayProperties.routing.endpoints.core)
+            }.uri(httpGatewayProperties.routing.endpoints.core)
         },
         RouteBuilderSpec("contents") { p ->
           p
@@ -117,14 +111,12 @@ class RouteConfig(
               "/room/{roomId}/content/**",
               "/room/{roomId}/contentgroup/**",
               "/room/{roomId}/answer/**",
-            )
-            .filters { f ->
+            ).filters { f ->
               f.filter(authFilter.apply(AuthFilter.Config()))
               f.requestRateLimiter { r ->
                 r.rateLimiter = requestRateLimiter
               }
-            }
-            .uri(httpGatewayProperties.routing.endpoints.core)
+            }.uri(httpGatewayProperties.routing.endpoints.core)
         },
         RouteBuilderSpec("rooms-duplicate") { p ->
           p
@@ -135,8 +127,7 @@ class RouteConfig(
               f.requestRateLimiter { r ->
                 r.rateLimiter = requestRateLimiter
               }
-            }
-            .uri(httpGatewayProperties.routing.endpoints.core)
+            }.uri(httpGatewayProperties.routing.endpoints.core)
         },
         RouteBuilderSpec("rooms-post") { p ->
           p
@@ -146,24 +137,21 @@ class RouteConfig(
               f.requestRateLimiter { r ->
                 r.rateLimiter = requestRateLimiter
               }
-            }
-            .uri(httpGatewayProperties.routing.endpoints.core)
+            }.uri(httpGatewayProperties.routing.endpoints.core)
         },
         RouteBuilderSpec("rooms-access") { p ->
           p
             .path(
               "/room/{roomId}/moderator/**",
               "/room/{roomId}/transfer**",
-            )
-            .filters { f ->
+            ).filters { f ->
               f.filter(roomShortIdFilter.apply(RoomShortIdFilter.Config()))
               f.filter(authFilter.apply(AuthFilter.Config()))
               f.filter(roomAuthFilter.apply(UpdateRoomAccessFilter.Config()))
               f.requestRateLimiter { r ->
                 r.rateLimiter = requestRateLimiter
               }
-            }
-            .uri(httpGatewayProperties.routing.endpoints.core)
+            }.uri(httpGatewayProperties.routing.endpoints.core)
         },
         RouteBuilderSpec("focus-event") { p ->
           p
@@ -173,8 +161,7 @@ class RouteConfig(
               f.requestRateLimiter { r ->
                 r.rateLimiter = requestRateLimiter
               }
-            }
-            .uri(httpGatewayProperties.routing.endpoints.wsGateway)
+            }.uri(httpGatewayProperties.routing.endpoints.wsGateway)
         },
         RouteBuilderSpec("rooms") { p ->
           p
@@ -185,8 +172,7 @@ class RouteConfig(
               f.requestRateLimiter { r ->
                 r.rateLimiter = requestRateLimiter
               }
-            }
-            .uri(httpGatewayProperties.routing.endpoints.core)
+            }.uri(httpGatewayProperties.routing.endpoints.core)
         },
         RouteBuilderSpec("content-group-templates") { p ->
           p
@@ -194,13 +180,11 @@ class RouteConfig(
               "/template/content/**",
               "/template/contentgroup/**",
               "/template/tag/**",
-            )
-            .filters { f ->
+            ).filters { f ->
               f.requestRateLimiter { r ->
                 r.rateLimiter = requestRateLimiter
               }
-            }
-            .uri(httpGatewayProperties.routing.endpoints.core)
+            }.uri(httpGatewayProperties.routing.endpoints.core)
         },
         RouteBuilderSpec("core-without-room-auth") { p ->
           p
@@ -210,13 +194,11 @@ class RouteConfig(
               "/language/**",
               "/user/**",
               "/violationreport/**",
-            )
-            .filters { f ->
+            ).filters { f ->
               f.requestRateLimiter { r ->
                 r.rateLimiter = requestRateLimiter
               }
-            }
-            .uri(httpGatewayProperties.routing.endpoints.core)
+            }.uri(httpGatewayProperties.routing.endpoints.core)
         },
         RouteBuilderSpec("formatting") { p ->
           p
@@ -226,40 +208,35 @@ class RouteConfig(
               f.requestRateLimiter { r ->
                 r.rateLimiter = requestRateLimiter
               }
-            }
-            .uri(httpGatewayProperties.routing.endpoints.formattingService)
+            }.uri(httpGatewayProperties.routing.endpoints.formattingService)
         },
         RouteBuilderSpec("management-core") { p ->
           p
             .path("/management/core/**")
             .filters { f ->
               f.rewritePath("^/management/core", "/management")
-            }
-            .uri(httpGatewayProperties.routing.endpoints.core)
+            }.uri(httpGatewayProperties.routing.endpoints.core)
         },
         RouteBuilderSpec("management-websocket") { p ->
           p
             .path("/management/ws-gateway/**")
             .filters { f ->
               f.rewritePath("^/management/ws-gateway", "/management")
-            }
-            .uri(httpGatewayProperties.routing.endpoints.wsGateway)
+            }.uri(httpGatewayProperties.routing.endpoints.wsGateway)
         },
         RouteBuilderSpec("management-comments") { p ->
           p
             .path("/management/comment-service/**")
             .filters { f ->
               f.rewritePath("^/management/comment-service", "/management")
-            }
-            .uri(httpGatewayProperties.routing.endpoints.commentService)
+            }.uri(httpGatewayProperties.routing.endpoints.commentService)
         },
         RouteBuilderSpec("management-authz") { p ->
           p
             .path("/management/auth-service/**")
             .filters { f ->
               f.rewritePath("^/management/auth-service", "/management")
-            }
-            .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
+            }.uri(httpGatewayProperties.routing.endpoints.roomaccessService)
         },
       )
 
@@ -271,8 +248,7 @@ class RouteConfig(
               .path("/management/proxy/prometheus")
               .filters { f ->
                 f.rewritePath("^/management/proxy", "")
-              }
-              .uri(httpGatewayProperties.routing.endpoints.proxyMetrics)
+              }.uri(httpGatewayProperties.routing.endpoints.proxyMetrics)
           },
         )
     }

@@ -11,9 +11,8 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @ComponentScan(basePackages = ["net.particify.arsnova.authz", "net.particify.arsnova.common"])
 @EnableScheduling
 class AuthzApplication : SpringBootServletInitializer() {
-  override fun configure(application: SpringApplicationBuilder): SpringApplicationBuilder {
-    return application.sources(AuthzApplication::class.java)
-  }
+  override fun configure(application: SpringApplicationBuilder): SpringApplicationBuilder =
+    application.sources(AuthzApplication::class.java)
 }
 
 fun main(args: Array<String>) {

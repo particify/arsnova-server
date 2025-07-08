@@ -27,10 +27,13 @@ class UserService(
   ): Mono<User> {
     val url = "${httpGatewayProperties.httpClient.core}/user/$userId?view=owner"
     logger.trace("Querying core for user with url: {}", url)
-    return webClient.get()
+    return webClient
+      .get()
       .uri(url)
       .header("Authorization", jwt)
-      .retrieve().bodyToMono(User::class.java).cache()
+      .retrieve()
+      .bodyToMono(User::class.java)
+      .cache()
       .checkpoint("Request failed in ${this::class.simpleName}::${::get.name}.")
   }
 
@@ -40,10 +43,13 @@ class UserService(
   ): Mono<Boolean> {
     val url = "${httpGatewayProperties.httpClient.core}/user/$userId"
     logger.trace("Querying core for user with url: {}", url)
-    return webClient.get()
+    return webClient
+      .get()
       .uri(url)
       .header("Authorization", jwt)
-      .retrieve().bodyToMono(User::class.java).cache()
+      .retrieve()
+      .bodyToMono(User::class.java)
+      .cache()
       .map { true }
       .onErrorResume { e ->
         if (e !is NotFound) {
@@ -59,10 +65,13 @@ class UserService(
   ): Flux<RoomHistoryEntry> {
     val url = "${httpGatewayProperties.httpClient.core}/user/$userId/roomHistory"
     logger.trace("Querying core for room history with url: {}", url)
-    return webClient.get()
+    return webClient
+      .get()
       .uri(url)
       .header("Authorization", jwt)
-      .retrieve().bodyToFlux(RoomHistoryEntry::class.java).cache()
+      .retrieve()
+      .bodyToFlux(RoomHistoryEntry::class.java)
+      .cache()
       .checkpoint("Request failed in ${this::class.simpleName}::${::getRoomHistory.name}.")
   }
 
@@ -71,7 +80,8 @@ class UserService(
     jwt: String,
   ): Mono<ResponseEntity<Void>> {
     val url = "${httpGatewayProperties.httpClient.core}/user/$userId"
-    return webClient.patch()
+    return webClient
+      .patch()
       .uri(url)
       .header("Authorization", jwt)
       .bodyValue(AnnouncementReadTimestamp(Date()))
@@ -80,5 +90,7 @@ class UserService(
       .checkpoint("Request failed in ${this::class.simpleName}::${::getRoomHistory.name}.")
   }
 
-  data class AnnouncementReadTimestamp(val announcementReadTimestamp: Date)
+  data class AnnouncementReadTimestamp(
+    val announcementReadTimestamp: Date,
+  )
 }
