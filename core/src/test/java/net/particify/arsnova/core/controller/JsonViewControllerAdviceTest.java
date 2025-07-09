@@ -30,18 +30,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
+import net.particify.arsnova.core.SharedRepositoryMocks;
+import net.particify.arsnova.core.SharedSecurityMocks;
 import net.particify.arsnova.core.config.TestAppConfig;
 import net.particify.arsnova.core.config.TestPersistanceConfig;
 import net.particify.arsnova.core.config.TestSecurityConfig;
@@ -65,6 +67,8 @@ import net.particify.arsnova.core.test.context.support.WithMockUser;
     TestAppConfig.class,
     TestPersistanceConfig.class,
     TestSecurityConfig.class})
+@SharedRepositoryMocks
+@SharedSecurityMocks
 @ActiveProfiles({"test", "JsonViewControllerAdviceTest"})
 public class JsonViewControllerAdviceTest {
   private static final Logger logger = LoggerFactory.getLogger(JsonViewControllerAdviceTest.class);
@@ -74,7 +78,7 @@ public class JsonViewControllerAdviceTest {
 
   private MockMvc mockMvc;
 
-  @MockBean(extraInterfaces = SecuredService.class)
+  @MockitoBean(extraInterfaces = SecuredService.class)
   private DummyEntityService dummyEntityService;
 
   @Autowired

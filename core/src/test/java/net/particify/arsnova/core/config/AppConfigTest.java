@@ -31,6 +31,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import net.particify.arsnova.connector.client.ConnectorClient;
+import net.particify.arsnova.core.SharedRepositoryMocks;
+import net.particify.arsnova.core.SharedSecurityMocks;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
 
 @SpringBootTest
@@ -38,6 +40,8 @@ import net.particify.arsnova.core.config.properties.SecurityProperties;
     TestAppConfig.class,
     TestPersistanceConfig.class,
     TestSecurityConfig.class})
+@SharedRepositoryMocks
+@SharedSecurityMocks
 @ActiveProfiles("test")
 public class AppConfigTest {
   @Autowired

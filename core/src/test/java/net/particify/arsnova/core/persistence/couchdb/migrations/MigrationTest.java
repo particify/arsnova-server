@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import net.particify.arsnova.core.SharedRepositoryMocks;
+import net.particify.arsnova.core.SharedSecurityMocks;
 import net.particify.arsnova.core.config.TestAppConfig;
 import net.particify.arsnova.core.config.TestPersistanceConfig;
 import net.particify.arsnova.core.config.TestSecurityConfig;
@@ -22,6 +24,8 @@ import net.particify.arsnova.core.persistence.couchdb.support.MangoCouchDbConnec
   TestAppConfig.class,
   TestPersistanceConfig.class,
   TestSecurityConfig.class})
+@SharedRepositoryMocks
+@SharedSecurityMocks
 @ActiveProfiles("test")
 public class MigrationTest {
   @MockitoBean
