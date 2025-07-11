@@ -67,6 +67,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
@@ -90,7 +91,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.header.writers.HstsHeaderWriter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
@@ -190,11 +191,11 @@ public class SecurityConfig {
     }
 
     protected HttpSecurity configureFilterChain(final HttpSecurity http) throws Exception {
-      http.exceptionHandling()
+      http.exceptionHandling(exceptionHandling -> exceptionHandling
           .authenticationEntryPoint(authenticationEntryPoint)
-          .accessDeniedHandler(accessDeniedHandler);
-      http.csrf().disable();
-      http.headers().addHeaderWriter(new HstsHeaderWriter(false));
+          .accessDeniedHandler(accessDeniedHandler));
+      http.csrf(AbstractHttpConfigurer::disable);
+      http.headers(headers -> headers.addHeaderWriter(new HstsHeaderWriter(false)));
 
       http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
       if (providerProperties.getCas().isEnabled()) {
@@ -226,7 +227,8 @@ public class SecurityConfig {
     public SecurityFilterChain statelessFilterChain(final HttpSecurity http) throws Exception {
       super.configureFilterChain(http);
       http.securityMatcher("/**");
-      http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+      http.sessionManagement(sessionManagement ->
+          sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
       return http.build();
     }
@@ -246,13 +248,14 @@ public class SecurityConfig {
     public SecurityFilterChain managementFilterChain(final HttpSecurity http) throws Exception {
       super.configureFilterChain(http);
       http.securityMatcher(EndpointRequest.toAnyEndpoint());
-      http.authorizeHttpRequests()
+      http.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
           .requestMatchers(EndpointRequest.to("health", "info")).permitAll()
           .requestMatchers(
             EndpointRequest.to("metrics", "prometheus", "stats")
           ).hasAnyRole("ADMIN", "MONITORING")
-          .anyRequest().hasRole("ADMIN");
-      http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+          .anyRequest().hasRole("ADMIN"));
+      http.sessionManagement(sessionManagement ->
+          sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
       return http.build();
     }
@@ -354,8 +357,7 @@ public class SecurityConfig {
 
   @Bean
   public DaoAuthenticationProvider daoAuthenticationProvider() {
-    final DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    authProvider.setUserDetailsService(registeredUserDetailsService);
+    final DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(registeredUserDetailsService);
     authProvider.setPasswordEncoder(passwordEncoder());
 
     return authProvider;
@@ -542,7 +544,7 @@ public class SecurityConfig {
       havingValue = "true")
   public LogoutFilter casLogoutFilter() {
     final LogoutFilter filter = new LogoutFilter(casLogoutSuccessHandler(), logoutHandler());
-    filter.setLogoutRequestMatcher(new AntPathRequestMatcher("/**" + CAS_LOGOUT_PATH));
+    filter.setLogoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher(CAS_LOGOUT_PATH));
 
     return filter;
   }

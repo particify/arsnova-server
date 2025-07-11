@@ -21,28 +21,26 @@ class WebSecurityConfig(
   @Bean
   fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain? =
     http
-      .exceptionHandling()
-      .authenticationEntryPoint { swe: ServerWebExchange, _: AuthenticationException? ->
-        Mono.fromRunnable { swe.response.statusCode = HttpStatus.UNAUTHORIZED }
-      }.accessDeniedHandler { swe: ServerWebExchange, _: AccessDeniedException? ->
-        Mono.fromRunnable { swe.response.statusCode = HttpStatus.FORBIDDEN }
-      }.and()
-      .csrf()
-      .disable()
-      .formLogin()
-      .disable()
-      .httpBasic()
-      .disable()
+      .exceptionHandling {
+        it
+          .authenticationEntryPoint { swe: ServerWebExchange, _: AuthenticationException? ->
+            Mono.fromRunnable { swe.response.statusCode = HttpStatus.UNAUTHORIZED }
+          }.accessDeniedHandler { swe: ServerWebExchange, _: AccessDeniedException? ->
+            Mono.fromRunnable { swe.response.statusCode = HttpStatus.FORBIDDEN }
+          }
+      }.csrf { it.disable() }
+      .formLogin { it.disable() }
+      .httpBasic { it.disable() }
       .securityContextRepository(securityContextRepository)
-      .authorizeExchange()
-      .pathMatchers(HttpMethod.OPTIONS)
-      .permitAll()
-      .pathMatchers("/management" + "/**")
-      .hasAnyRole("ADMIN", "MONITORING")
-      .pathMatchers("/**")
-      .permitAll()
-      .anyExchange()
-      .authenticated()
-      .and()
-      .build()
+      .authorizeExchange {
+        it
+          .pathMatchers(HttpMethod.OPTIONS)
+          .permitAll()
+          .pathMatchers("/management" + "/**")
+          .hasAnyRole("ADMIN", "MONITORING")
+          .pathMatchers("/**")
+          .permitAll()
+          .anyExchange()
+          .authenticated()
+      }.build()
 }

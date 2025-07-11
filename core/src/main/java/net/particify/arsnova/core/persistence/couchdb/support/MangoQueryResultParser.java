@@ -76,7 +76,7 @@ public class MangoQueryResultParser<T> {
 
     // Issue #98: Can't assume order of JSON fields.
     while (jp.nextValue() != JsonToken.END_OBJECT) {
-      final String currentName = jp.getCurrentName();
+      final String currentName = jp.currentName();
       if (DOCS_FIELD_NAME.equals(currentName)) {
         docs = new ArrayList<>();
         try {

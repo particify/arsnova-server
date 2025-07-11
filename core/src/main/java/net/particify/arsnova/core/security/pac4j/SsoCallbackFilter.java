@@ -42,7 +42,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 /**
  * Handles callback requests by login redirects from Pac4j SSO providers.
@@ -55,7 +55,7 @@ public class SsoCallbackFilter extends AbstractAuthenticationProcessingFilter {
   private Config config;
 
   public SsoCallbackFilter(final Config pac4jConfig, final String callbackPath) {
-    super(new AntPathRequestMatcher("/**" + callbackPath));
+    super(PathPatternRequestMatcher.withDefaults().matcher(callbackPath));
     this.config = pac4jConfig;
   }
 

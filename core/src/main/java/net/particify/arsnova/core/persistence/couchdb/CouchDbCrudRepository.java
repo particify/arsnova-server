@@ -18,6 +18,7 @@
 
 package net.particify.arsnova.core.persistence.couchdb;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -192,7 +193,7 @@ abstract class CouchDbCrudRepository<T extends Entity>
     return viewResult.getRows().stream().map(row -> {
       final T stub;
       try {
-        stub = type.newInstance();
+        stub = type.getDeclaredConstructor().newInstance();
         stub.setId(row.getId());
         stub.setRevision(row.getValueAsNode().get("_rev").asText());
         final String key = row.getKeyAsNode().isContainerNode()
@@ -200,7 +201,10 @@ abstract class CouchDbCrudRepository<T extends Entity>
         keyPropertySetter.accept(stub, key);
 
         return stub;
-      } catch (InstantiationException | IllegalAccessException e) {
+      } catch (final IllegalAccessException
+          | InstantiationException
+          | InvocationTargetException
+          | NoSuchMethodException e) {
         return null;
       }
     }).collect(Collectors.toList());
