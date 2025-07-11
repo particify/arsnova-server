@@ -20,7 +20,6 @@ databaseChangeLog:
       context: default
       comment: Create initial database enum types
       changes:
-        - sql: CREATE TYPE "user_type" AS ENUM ('ACCOUNT', 'GUEST', 'DELETED')
         - sql: CREATE TYPE "room_role" AS ENUM ('OWNER', 'EDITOR', 'MODERATOR', 'PARTICIPANT')
   - changeSet:
       id: 3
@@ -46,9 +45,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: type
-                  type: user_type
-              - column:
                   name: username
                   type: varchar(100)
               - column:
@@ -56,7 +52,10 @@ databaseChangeLog:
                   type: varchar(100)
               - column:
                   name: mail_address
-                  type: varchar(50)
+                  type: varchar(100)
+              - column:
+                  name: unverified_mail_address
+                  type: varchar(100)
               - column:
                   name: given_name
                   type: varchar(50)
@@ -76,7 +75,19 @@ databaseChangeLog:
                     nullable: false
                   defaultValue: "{}"
               - column:
+                  name: password_changed_at
+                  type: timestamp with time zone
+              - column:
                   name: announcements_read_at
+                  type: timestamp with time zone
+              - column:
+                  name: verification_code
+                  type: int
+              - column:
+                  name: verification_errors
+                  type: smallint
+              - column:
+                  name: verification_expires_at
                   type: timestamp with time zone
               - column:
                   name: created_by

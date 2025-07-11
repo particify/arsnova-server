@@ -12,4 +12,6 @@ interface UserService : UserDetailsService {
   fun markAnnouncementsReadForUserId(id: UUID)
 
   fun findRoleByName(name: String): Role
+
+  fun createAccount(): User
 }

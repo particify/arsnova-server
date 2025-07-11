@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Import
 
 @SpringBootTest
 @Import(TestcontainersConfiguration::class)
-class UserTests {
+class UserServiceTests {
   @Autowired lateinit var userDetailsService: UserServiceImpl
 
   @Test
@@ -33,5 +33,12 @@ class UserTests {
     Assertions.assertNotNull(user)
     Assertions.assertEquals(userId, user!!.id)
     Assertions.assertEquals(username, user!!.username)
+  }
+
+  @Test
+  fun shouldCreateUser() {
+    val user = userDetailsService.createAccount()
+    val retrievedUser = userDetailsService.loadUserById(user.id!!)
+    Assertions.assertNotNull(retrievedUser)
   }
 }

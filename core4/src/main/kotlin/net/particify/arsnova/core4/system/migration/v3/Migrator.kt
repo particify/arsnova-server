@@ -105,16 +105,6 @@ class Migrator(
           id = UuidHelper.stringToUuid(it.id),
           auditMetadata =
               AuditMetadata(createdAt = it.creationTimestamp, updatedAt = it.updateTimestamp),
-          type =
-              when (it.authProvider) {
-                UserProfile.AuthProvider.ARSNOVA -> User.Type.ACCOUNT
-                UserProfile.AuthProvider.ARSNOVA_GUEST -> User.Type.GUEST
-                UserProfile.AuthProvider.ANONYMIZED -> User.Type.DELETED
-                else -> {
-                  logger.error("Unsupported AuthProvider {}.", it.authProvider)
-                  return@migrate null
-                }
-              },
           username = it.loginId,
           password = if (it.account.password != null) "{bcrypt}" + it.account.password else null,
           mailAddress = it.person?.mail,

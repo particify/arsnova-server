@@ -8,13 +8,15 @@ import java.util.UUID
 import net.particify.arsnova.core4.user.Role
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
-@Component
+@Service
 class UserServiceImpl(
     private val userRepository: UserRepository,
-    private val roleRepository: RoleRepository
+    private val roleRepository: RoleRepository,
 ) : UserService {
+  private val userRole = roleRepository.findByName("USER")
+
   override fun loadUserByUsername(username: String): User? {
     return userRepository.findOneByUsername(username)
   }
@@ -31,5 +33,10 @@ class UserServiceImpl(
 
   override fun findRoleByName(name: String): Role {
     return roleRepository.findByName(name)
+  }
+
+  override fun createAccount(): User {
+    val user = User(roles = mutableListOf(userRole))
+    return userRepository.save(user)
   }
 }
