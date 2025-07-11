@@ -17,6 +17,7 @@ import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.common.UuidGenerator
 import net.particify.arsnova.core4.user.internal.VERIFICATION_MAX_ERRORS
 import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.annotations.SoftDelete
 import org.hibernate.type.SqlTypes
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -24,6 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails
 
 @Entity
 @Table(schema = "user")
+@SoftDelete
 @Suppress("LongParameterList")
 class User(
     @Id @UuidGenerator var id: UUID? = null,
@@ -42,7 +44,7 @@ class User(
         joinColumns = [JoinColumn(name = "user_id")],
         inverseJoinColumns = [JoinColumn(name = "role_id")],
     )
-    val roles: List<Role> = mutableListOf(),
+    val roles: MutableList<Role> = mutableListOf(),
     @JdbcTypeCode(SqlTypes.JSON) val settings: MutableMap<String, Any> = mutableMapOf(),
     var passwordChangedAt: Instant? = null,
     var announcementsReadAt: Instant? = null,
@@ -77,5 +79,18 @@ class User(
     return unverifiedMailAddress == null &&
         verificationErrors!! < VERIFICATION_MAX_ERRORS &&
         Instant.now() < verificationExpiresAt!!
+  }
+
+  fun clearForSoftDelete() {
+    username = null
+    password = null
+    mailAddress = null
+    unverifiedMailAddress = null
+    givenName = null
+    surname = null
+    passwordChangedAt = null
+    announcementsReadAt = null
+    settings.clear()
+    resetVerification()
   }
 }

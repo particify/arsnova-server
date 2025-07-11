@@ -4,16 +4,27 @@
 package net.particify.arsnova.core4.user.internal
 
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import net.particify.arsnova.core4.user.Role
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.UserDeletedEvent
 import net.particify.arsnova.core4.user.UserService
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.domain.Limit
+import org.springframework.data.domain.ScrollPosition
+import org.springframework.data.support.WindowIterator
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+private const val DELETE_AFTER_DAYS = 7L
+private const val DELETE_BATCH_SIZE = 10
 
 @Service
 class UserServiceImpl(
     private val userRepository: UserRepository,
     private val roleRepository: RoleRepository,
+    private val eventPublisher: ApplicationEventPublisher
 ) : UserService {
   private val userRole = roleRepository.findByName("USER")
 
@@ -38,5 +49,33 @@ class UserServiceImpl(
   override fun createAccount(): User {
     val user = User(roles = mutableListOf(userRole))
     return userRepository.save(user)
+  }
+
+  fun markAccountForDeletion(user: User): Boolean {
+    user.enabled = false
+    user.auditMetadata.deletedAt = Instant.now()
+    user.auditMetadata.deletedBy = user.id
+    userRepository.save(user)
+    return true
+  }
+
+  @Transactional
+  fun deleteMarkedUsers() {
+    val users =
+        WindowIterator.of {
+              userRepository.findByAuditMetadataDeletedAtBefore(
+                  Instant.now().minus(DELETE_AFTER_DAYS, ChronoUnit.DAYS),
+                  it,
+                  Limit.of(DELETE_BATCH_SIZE))
+            }
+            .startingAt(ScrollPosition.offset())
+    users.forEachRemaining {
+      eventPublisher.publishEvent(UserDeletedEvent(it.id!!))
+      it.clearForSoftDelete()
+      it.enabled = false
+      it.roles.clear()
+      userRepository.saveAndFlush(it)
+      userRepository.delete(it)
+    }
   }
 }

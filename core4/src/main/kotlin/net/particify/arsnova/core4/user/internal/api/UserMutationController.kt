@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.user.internal.api
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.internal.LocalUserService
 import net.particify.arsnova.core4.user.internal.UserRepository
+import net.particify.arsnova.core4.user.internal.UserServiceImpl
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Controller
 @Controller
 @SchemaMapping(typeName = "Mutation")
 class UserMutationController(
+    private val userService: UserServiceImpl,
     private val localUserService: LocalUserService,
     private val userRepository: UserRepository,
 ) {
@@ -62,5 +64,10 @@ class UserMutationController(
     user.surname = input.surname
     userRepository.save(user)
     return true
+  }
+
+  @MutationMapping
+  fun deleteUser(@AuthenticationPrincipal user: User): Boolean {
+    return userService.markAccountForDeletion(user)
   }
 }

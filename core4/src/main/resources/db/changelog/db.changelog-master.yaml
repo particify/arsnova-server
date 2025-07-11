@@ -90,6 +90,12 @@ databaseChangeLog:
                   name: verification_expires_at
                   type: timestamp with time zone
               - column:
+                  name: deleted
+                  type: boolean
+                  constraints:
+                    nullable: false
+                  defaultValue: false
+              - column:
                   name: created_by
                   type: uuid
               - column:
@@ -126,6 +132,11 @@ databaseChangeLog:
             tableName: user
             column:
               - name: mail_address
+        - createIndex:
+            schemaName: user
+            tableName: user
+            column:
+              - name: deleted_at
         - createTable:
             schemaName: user
             tableName: role
