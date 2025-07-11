@@ -64,7 +64,11 @@ tasks.jib { jib { from { image = "eclipse-temurin:21-alpine" } } }
 
 tasks.jacocoTestReport { reports { csv.required.set(true) } }
 
-detekt { toolVersion = libs.versions.detekt.get() }
+detekt {
+  toolVersion = libs.versions.detekt.get()
+  buildUponDefaultConfig = true
+  config.setFrom("detekt.yaml")
+}
 
 spotless {
   ratchetFrom("origin/master")
