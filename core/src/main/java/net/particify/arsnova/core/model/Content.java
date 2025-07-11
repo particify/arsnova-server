@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -165,6 +166,10 @@ public class Content extends Entity implements RoomIdAware {
   @PositiveOrZero
   @Max(3600)
   private int duration;
+
+  @Min(1)
+  @Max(5)
+  private int weight = 1;
 
   {
     final TextRenderingOptions bodyRenderingOptions = new TextRenderingOptions();
@@ -359,9 +364,19 @@ public class Content extends Entity implements RoomIdAware {
     this.duration = duration;
   }
 
+  @JsonView({View.Persistence.class, View.Public.class})
+  public int getWeight() {
+    return weight;
+  }
+
+  @JsonView({View.Persistence.class, View.Public.class})
+  public void setWeight(final int weight) {
+    this.weight = weight;
+  }
+
   @JsonView(View.Public.class)
   public int getPoints() {
-    return isScorable() ? BASE_POINTS : 0;
+    return isScorable() ? BASE_POINTS * this.getWeight() : 0;
   }
 
   @JsonView(View.Public.class)
@@ -466,12 +481,13 @@ public class Content extends Entity implements RoomIdAware {
         && format == content.format
         && Objects.equals(groups, content.groups)
         && Objects.equals(timestamp, content.timestamp)
-        && Objects.equals(duration, content.duration);
+        && Objects.equals(duration, content.duration)
+        && Objects.equals(weight, content.weight);
   }
 
   @Override
   public int hashCode() {
-    return hashCode(super.hashCode(), roomId, subject, body, format, groups, timestamp, duration);
+    return hashCode(super.hashCode(), roomId, subject, body, format, groups, timestamp, duration, weight);
   }
 
   @Override
@@ -487,6 +503,7 @@ public class Content extends Entity implements RoomIdAware {
         .append("additionalText", additionalText)
         .append("additionalTextTitle", additionalTextTitle)
         .append("timestamp", timestamp)
-        .append("duration", duration);
+        .append("duration", duration)
+        .append("weight", weight);
   }
 }
