@@ -183,6 +183,81 @@ databaseChangeLog:
             constraintName: user_role_mapping_pkey
             columnNames: user_id,role_id
         - createTable:
+            schemaName: user
+            tableName: external_login
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValue: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: user_id_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: provider_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: external_id
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_login_at
+                  type: timestamp with time zone
+              - column:
+                  name: created_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: created_by_fkey
+                    references: '"user"."user"(id)'
+                    # nullable: true - Can be created without authentication
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: updated_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+              - column:
+                  name: deleted_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: deleted_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: deleted_at
+                  type: timestamp with time zone
+        - addUniqueConstraint:
+            schemaName: user
+            tableName: external_login
+            columnNames: user_id,provider_id
+        - addUniqueConstraint:
+            schemaName: user
+            tableName: external_login
+            columnNames: provider_id,external_id
+        - createTable:
             schemaName: room
             tableName: room
             columns:

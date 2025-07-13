@@ -3,22 +3,26 @@
  */
 package net.particify.arsnova.core4.user
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.Version
 import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.common.UuidGenerator
+import net.particify.arsnova.core4.user.internal.ExternalLogin
 import net.particify.arsnova.core4.user.internal.VERIFICATION_MAX_ERRORS
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.annotations.SoftDelete
 import org.hibernate.type.SqlTypes
+import org.springframework.security.core.AuthenticatedPrincipal
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
@@ -52,7 +56,11 @@ class User(
     var verificationErrors: Int? = 0,
     var verificationExpiresAt: Instant? = null,
     @Embedded val auditMetadata: AuditMetadata = AuditMetadata(),
-) : UserDetails {
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL])
+    val externalLogins: MutableList<ExternalLogin> = mutableListOf(),
+) : AuthenticatedPrincipal, UserDetails {
+  override fun getName() = username
+
   override fun getAuthorities(): Set<GrantedAuthority> =
       roles.map { SimpleGrantedAuthority("ROLE_" + it.name) }.toSet()
 
@@ -93,4 +101,7 @@ class User(
     settings.clear()
     resetVerification()
   }
+
+  fun displayName() =
+      if (!givenName.isNullOrEmpty() && !surname.isNullOrEmpty()) "$givenName $surname" else null
 }

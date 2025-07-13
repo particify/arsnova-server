@@ -14,6 +14,11 @@ java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
 
 val compose = findProperty("compose") == "true"
 
+repositories {
+  mavenCentral()
+  maven("https://build.shibboleth.net/nexus/content/repositories/releases/")
+}
+
 dependencies {
   implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   implementation(platform(libs.spring.modulith.bom))
@@ -25,6 +30,7 @@ dependencies {
   implementation(libs.spring.modulith)
   implementation(libs.spring.security)
   implementation(libs.spring.security.jose)
+  implementation(libs.spring.security.saml)
   implementation(libs.spring.validation)
   implementation(libs.spring.websocket)
   implementation(libs.jackson.jsr310)
@@ -53,6 +59,11 @@ dependencies {
 
   if (compose) {
     developmentOnly(libs.spring.docker)
+  }
+
+  constraints {
+    implementation(libs.opensaml.api)
+    implementation(libs.opensaml.impl)
   }
 }
 

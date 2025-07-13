@@ -6,6 +6,8 @@ package net.particify.arsnova.core4.user.internal
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
+import kotlin.jvm.optionals.getOrNull
+import net.particify.arsnova.core4.user.QUser
 import net.particify.arsnova.core4.user.Role
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserDeletedEvent
@@ -36,6 +38,16 @@ class UserServiceImpl(
     return userRepository.findByIdOrNull(id)
   }
 
+  fun loadUserByProviderIdAndExternalId(providerId: UUID, externalId: String): User? {
+    val q =
+        QUser.user.externalLogins
+            .any()
+            .providerId
+            .eq(providerId)
+            .and(QUser.user.externalLogins.any().externalId.eq(externalId))
+    return userRepository.findOne(q).getOrNull()
+  }
+
   override fun markAnnouncementsReadForUserId(id: UUID) {
     val user = userRepository.findByIdOrNull(id) ?: error("User not found.")
     user.announcementsReadAt = Instant.now()
@@ -48,6 +60,15 @@ class UserServiceImpl(
 
   override fun createAccount(): User {
     val user = User(roles = mutableListOf(userRole))
+    return userRepository.save(user)
+  }
+
+  @Transactional
+  fun createForExternalLogin(user: User, externalLogin: ExternalLogin): User {
+    externalLogin.user = user
+    externalLogin.lastLoginAt = Instant.now()
+    user.roles += userRole
+    user.externalLogins += externalLogin
     return userRepository.save(user)
   }
 
