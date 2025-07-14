@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.room.internal.api
 import com.querydsl.core.BooleanBuilder
 import java.util.Locale
 import java.util.UUID
+import net.particify.arsnova.core4.common.TextRenderingService
 import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.QMembership
 import net.particify.arsnova.core4.room.Room
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Controller
 class RoomQueryController(
     private val roomRepository: RoomRepository,
     private val membershipRepository: MembershipRepository,
+    private val textRenderingService: TextRenderingService
 ) {
   companion object {
     const val DEFAULT_QUERY_LIMIT = 10
@@ -100,6 +102,11 @@ class RoomQueryController(
   @SchemaMapping(typeName = "RoomMembership", field = "stats")
   fun stats(): RoomStats {
     return RoomStats()
+  }
+
+  @SchemaMapping(typeName = "Room", field = "descriptionRendered")
+  fun descriptionRendered(room: Room): String? {
+    return textRenderingService.renderText(room.description)
   }
 
   data class RoomStats(

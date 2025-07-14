@@ -9,6 +9,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 import net.particify.arsnova.core4.announcement.Announcement
 import net.particify.arsnova.core4.announcement.internal.AnnouncementRepository
+import net.particify.arsnova.core4.common.TextRenderingService
 import net.particify.arsnova.core4.room.MembershipService
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
@@ -26,7 +27,8 @@ import org.springframework.stereotype.Controller
 class AnnouncementQueryController(
     private val announcementRepository: AnnouncementRepository,
     private val membershipService: MembershipService,
-    private val userService: UserService
+    private val userService: UserService,
+    private val textRenderingService: TextRenderingService
 ) {
   @QueryMapping
   fun announcementsByRoomId(
@@ -77,6 +79,11 @@ class AnnouncementQueryController(
   @SchemaMapping(typeName = "Announcement")
   fun updatedAt(announcement: Announcement): OffsetDateTime? {
     return announcement.auditMetadata.updatedAt?.atOffset(ZoneOffset.UTC)
+  }
+
+  @SchemaMapping(typeName = "Announcement", field = "bodyRendered")
+  fun bodyRendered(announcement: Announcement): String? {
+    return textRenderingService.renderText(announcement.body)
   }
 
   data class AnnouncementMeta(val count: Int, val readAt: OffsetDateTime?)
