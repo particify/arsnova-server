@@ -1,7 +1,7 @@
 /* Copyright 2025 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.user.internal
+package net.particify.arsnova.core4.user
 
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -13,7 +13,6 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.Table
 import jakarta.persistence.Version
 import java.util.UUID
-import net.particify.arsnova.core4.user.User
 
 @Entity
 @Table(schema = "user")

@@ -5,8 +5,6 @@ package net.particify.arsnova.core4.user
 
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
@@ -16,7 +14,7 @@ import jakarta.persistence.Version
 import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
-import net.particify.arsnova.core4.user.internal.Role
+import net.particify.arsnova.core4.common.UuidGenerator
 import org.hibernate.annotations.JdbcType
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.dialect.PostgreSQLEnumJdbcType
@@ -29,7 +27,7 @@ import org.springframework.security.core.userdetails.UserDetails
 @Table(schema = "user")
 @Suppress("LongParameterList")
 class User(
-    @Id @GeneratedValue(strategy = GenerationType.UUID) var id: UUID? = null,
+    @Id @UuidGenerator var id: UUID? = null,
     @Version var version: Int? = 0,
     @JdbcType(PostgreSQLEnumJdbcType::class) var type: Type? = Type.ACCOUNT,
     @JvmField var username: String? = null,
@@ -50,7 +48,6 @@ class User(
     var announcementsReadAt: Instant? = null,
     @Embedded val auditMetadata: AuditMetadata = AuditMetadata(),
 ) : UserDetails {
-
   override fun getAuthorities(): Set<GrantedAuthority> =
       roles.map { SimpleGrantedAuthority("ROLE_" + it.name) }.toSet()
 
