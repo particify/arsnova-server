@@ -1,0 +1,15 @@
+= Single Sign On
+
+== SAML service provider credentials
+Signing of SAML requests is set up to be mandatory, so private and public keys need to be provided.
+We do not store credentials in the repository -- even if they are only used for local development purposes.
+Instead, they can be generated after cloning the repository using the link:core4/generate-credentials.sh[] script.
+This script also creates realm data for Keycloak from a template.
+
+== Keycloak
+The development environment includes Keycloak to help with the development of SSO features.
+A realm configuration is included and automatically imported at startup.
+The Keycloak service can be accessed at http://localhost:8080 (username: `admin`, password: `admin`).
+The imported dev realm needs to be enabled on the realm's settings page.
+Users which are created for the dev realm can be used to log in to the application using SSO.
+Make sure to set the e-mail address and password for the new user needs to be marked as verified and a password.
