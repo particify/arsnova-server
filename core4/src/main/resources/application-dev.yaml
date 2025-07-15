@@ -15,3 +15,8 @@ security:
                 certificate-location: classpath:credentials/rp.crt
           assertingparty:
             metadata-uri: http://keycloak:8080/realms/dev/protocol/saml/descriptor
+
+persistence:
+  v3-migration:
+    authentication-provider-mapping:
+      SAML: fc62cd95-bea9-4aa3-987d-fa976ef300f3
