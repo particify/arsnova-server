@@ -105,4 +105,6 @@ spotless {
                 "@prettier/plugin-xml" to libs.versions.prettier.xml.get()))
         .config(mapOf("plugins" to listOf("@prettier/plugin-xml")))
   }
+
+  tasks.withType<Jar> { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 }
