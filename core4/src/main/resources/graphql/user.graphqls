@@ -9,6 +9,15 @@ extend type Query {
   ): UserConnection
 }
 
+extend type Mutation {
+  claimUnverifiedUser(mailAddress: String!, password: String!): Boolean
+  deleteUser: Boolean
+  updateUserMailAddress(mailAddress: String!): Boolean
+  updateUserPassword(oldPassword: String!, newPassword: String!): Boolean
+  updateUserDetails(input: UpdateUserDetailsInput!): Boolean
+  verifyUserMailAddress(verificationCode: String!): Boolean
+}
+
 type User {
   id: ID!
   username: String!
@@ -19,4 +28,9 @@ type User {
 
 input UserQueryInput {
   username: String
+}
+
+input UpdateUserDetailsInput {
+  givenName: String
+  surname: String
 }

@@ -15,9 +15,9 @@ import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.common.UuidGenerator
-import org.hibernate.annotations.JdbcType
+import net.particify.arsnova.core4.user.internal.VERIFICATION_MAX_ERRORS
 import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.dialect.PostgreSQLEnumJdbcType
+import org.hibernate.annotations.SoftDelete
 import org.hibernate.type.SqlTypes
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -25,14 +25,15 @@ import org.springframework.security.core.userdetails.UserDetails
 
 @Entity
 @Table(schema = "user")
+@SoftDelete
 @Suppress("LongParameterList")
 class User(
     @Id @UuidGenerator var id: UUID? = null,
     @Version var version: Int? = 0,
-    @JdbcType(PostgreSQLEnumJdbcType::class) var type: Type? = Type.ACCOUNT,
     @JvmField var username: String? = null,
     @JvmField var password: String? = null,
     var mailAddress: String? = null,
+    var unverifiedMailAddress: String? = null,
     var givenName: String? = null,
     var surname: String? = null,
     var enabled: Boolean? = true,
@@ -43,9 +44,13 @@ class User(
         joinColumns = [JoinColumn(name = "user_id")],
         inverseJoinColumns = [JoinColumn(name = "role_id")],
     )
-    val roles: List<Role> = mutableListOf(),
+    val roles: MutableList<Role> = mutableListOf(),
     @JdbcTypeCode(SqlTypes.JSON) val settings: MutableMap<String, Any> = mutableMapOf(),
+    var passwordChangedAt: Instant? = null,
     var announcementsReadAt: Instant? = null,
+    var verificationCode: Int? = null,
+    var verificationErrors: Int? = 0,
+    var verificationExpiresAt: Instant? = null,
     @Embedded val auditMetadata: AuditMetadata = AuditMetadata(),
 ) : UserDetails {
   override fun getAuthorities(): Set<GrantedAuthority> =
@@ -57,9 +62,35 @@ class User(
 
   override fun isEnabled(): Boolean = enabled ?: false
 
-  enum class Type {
-    ACCOUNT,
-    GUEST,
-    DELETED
+  fun resetVerification() {
+    unverifiedMailAddress = null
+    verificationCode = null
+    verificationErrors = 0
+    verificationExpiresAt = null
+  }
+
+  fun isMailAddressVerificationActive(): Boolean {
+    return unverifiedMailAddress != null &&
+        verificationErrors!! < VERIFICATION_MAX_ERRORS &&
+        Instant.now() < verificationExpiresAt!!
+  }
+
+  fun isPasswordResetVerificationActive(): Boolean {
+    return unverifiedMailAddress == null &&
+        verificationErrors!! < VERIFICATION_MAX_ERRORS &&
+        Instant.now() < verificationExpiresAt!!
+  }
+
+  fun clearForSoftDelete() {
+    username = null
+    password = null
+    mailAddress = null
+    unverifiedMailAddress = null
+    givenName = null
+    surname = null
+    passwordChangedAt = null
+    announcementsReadAt = null
+    settings.clear()
+    resetVerification()
   }
 }

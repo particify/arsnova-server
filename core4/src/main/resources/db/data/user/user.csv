@@ -1,3 +1,3 @@
-id,type,username,password,mail_address
-9c778494-9b52-424d-8c7f-f4936629facb,ACCOUNT,admin@example.com,{bcrypt}$2a$12$eROV3FryPEnhfc5PBnCd1eFjfrCqv7obDTwGg3R8nmaDXlwK215yK,admin@example.com
-43389844-708b-469d-8d22-abdd2eb88777,ACCOUNT,user@example.com,{bcrypt}$2a$12$.pOjbkgP8HXcWfADwvmKx.2Db9tYznS.z4Vh/m/YO3upCRmg9Xw76,user@example.com
+id,username,password,mail_address
+9c778494-9b52-424d-8c7f-f4936629facb,admin@example.com,{bcrypt}$2a$12$eROV3FryPEnhfc5PBnCd1eFjfrCqv7obDTwGg3R8nmaDXlwK215yK,admin@example.com
+43389844-708b-469d-8d22-abdd2eb88777,user@example.com,{bcrypt}$2a$12$.pOjbkgP8HXcWfADwvmKx.2Db9tYznS.z4Vh/m/YO3upCRmg9Xw76,user@example.com

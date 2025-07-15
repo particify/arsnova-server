@@ -1,0 +1,3 @@
+style:
+  ReturnCount:
+    excludeGuardClauses: true
