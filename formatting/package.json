@@ -16,7 +16,7 @@
     "markdown-it-prism": "3.0.0"
   },
   "devDependencies": {
-    "eslint": "9.30.1",
+    "eslint": "9.31.0",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-n": "17.21.0",
     "eslint-plugin-promise": "7.2.1"
