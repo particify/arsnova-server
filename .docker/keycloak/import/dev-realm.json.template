@@ -1,0 +1,90 @@
+{
+  "id": "ea8de604-ebb3-4b34-bc40-035b97f6cba8",
+  "realm": "dev",
+  "enabled": true,
+  "clients": [
+    {
+      "id": "cb6d2c8c-7122-49c7-a677-61c4e38cf26d",
+      "clientId": "http://arsnova-server-core4:8080/api/saml2/service-provider-metadata/fc62cd95-bea9-4aa3-987d-fa976ef300f3",
+      "redirectUris": [
+        "http://localhost:4200/api/login/saml2/sso/fc62cd95-bea9-4aa3-987d-fa976ef300f3"
+      ],
+      "webOrigins": [
+        "http://localhost:4200"
+      ],
+      "protocol": "saml",
+      "attributes": {
+        "client.secret.creation.time": "1752480361",
+        "saml.force.post.binding": "true",
+        "saml.encrypt": "false",
+        "saml_assertion_consumer_url_post": "http://localhost:4200/api/login/saml2/sso/fc62cd95-bea9-4aa3-987d-fa976ef300f3",
+        "saml.server.signature": "true",
+        "saml.server.signature.keyinfo.ext": "false",
+        "saml.signing.certificate": "$SAML_SIGNING_CERTIFICATE",
+        "realm_client": "false",
+        "saml.artifact.binding.identifier": "car5H0Itl+DzojWMT9P5EGiKUcg=",
+        "saml.signature.algorithm": "RSA_SHA256",
+        "saml_force_name_id_format": "false",
+        "saml.client.signature": "true",
+        "saml.authnstatement": "true",
+        "saml_name_id_format": "username",
+        "saml.allow.ecp.flow": "false",
+        "saml_signature_canonicalization_method": "http://www.w3.org/2001/10/xml-exc-c14n#"
+      },
+      "protocolMappers": [
+        {
+          "id": "61054ebd-cbc3-46c2-91d9-b952a84b04e6",
+          "name": "X500 givenName",
+          "protocol": "saml",
+          "protocolMapper": "saml-user-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "attribute.nameformat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+            "user.attribute": "firstName",
+            "friendly.name": "givenName",
+            "attribute.name": "urn:oid:2.5.4.42"
+          }
+        },
+        {
+          "id": "79c6434e-9959-43f9-bce8-70ea3013f0e7",
+          "name": "OASIS SAML subject-id",
+          "protocol": "saml",
+          "protocolMapper": "saml-user-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "attribute.nameformat": "URI Reference",
+            "user.attribute": "username",
+            "friendly.name": "subjectId",
+            "attribute.name": " urn:oasis:names:tc:SAML:attribute:subject-id "
+          }
+        },
+        {
+          "id": "2cf49746-f062-4175-8232-12d86b351c42",
+          "name": "X500 surname",
+          "protocol": "saml",
+          "protocolMapper": "saml-user-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "attribute.nameformat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+            "user.attribute": "lastName",
+            "friendly.name": "surname",
+            "attribute.name": "urn:oid:2.5.4.4"
+          }
+        },
+        {
+          "id": "8f97a06f-3b07-4a57-bff5-455f16bb5ce5",
+          "name": "X500 email",
+          "protocol": "saml",
+          "protocolMapper": "saml-user-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "attribute.nameformat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+            "user.attribute": "email",
+            "friendly.name": "email",
+            "attribute.name": "urn:oid:1.2.840.113549.1.9.1"
+          }
+        }
+      ]
+    }
+  ]
+}

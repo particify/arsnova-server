@@ -15,6 +15,7 @@ kotlin = "2.2.0"
 ktfmt = "0.55"
 ktlint-plugin = "12.3.0"
 lms-connector = "1.0.2"
+opensaml = "5.1.4"
 pac4j = "6.2.0"
 prettier = "3.5.3"
 prettier-toml = "2.0.5"
@@ -43,6 +44,8 @@ kotlin-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
 liquibase = { module = "org.liquibase:liquibase-core" }
 lms-connector = { module = "net.particify.arsnova.integrations:connector-client", version.ref = "lms-connector" }
+opensaml-api = { module = "org.opensaml:opensaml-saml-api", version.ref = "opensaml" }
+opensaml-impl = { module = "org.opensaml:opensaml-saml-impl", version.ref = "opensaml" }
 pac4j-jakartaee = { module = "org.pac4j:pac4j-jakartaee", version.ref = "pac4j" }
 pac4j-oauth = { module = "org.pac4j:pac4j-oauth", version.ref = "pac4j" }
 pac4j-oidc = { module = "org.pac4j:pac4j-oidc", version.ref = "pac4j" }
@@ -67,6 +70,7 @@ spring-modulith-observability = { module = "org.springframework.modulith:spring-
 spring-modulith-test = { module = "org.springframework.modulith:spring-modulith-starter-test" }
 spring-security = { module = "org.springframework.boot:spring-boot-starter-security" }
 spring-security-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }
+spring-security-saml = { module = "org.springframework.security:spring-security-saml2-service-provider" }
 spring-security-test = { module = "org.springframework.security:spring-security-test" }
 spring-test = { module = "org.springframework.boot:spring-boot-starter-test" }
 spring-testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }

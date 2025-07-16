@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.system.migration.v3
 
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
+import java.time.Instant
 import net.particify.arsnova.core4.announcement.Announcement
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.room.Membership
@@ -14,6 +15,7 @@ import net.particify.arsnova.core4.system.migration.v3.Announcement as Announcem
 import net.particify.arsnova.core4.system.migration.v3.Room as RoomV3
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.internal.ExternalLogin
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty
 import org.springframework.core.ParameterizedTypeReference
@@ -27,7 +29,7 @@ import org.springframework.web.client.RestClient
 class Migrator(
     @PersistenceContext private val entityManager: EntityManager,
     private val userService: UserService,
-    properties: MigrationProperties
+    private val properties: MigrationProperties
 ) {
   companion object {
     private const val COUCHDB_RESULT_LIMIT = 200
@@ -101,19 +103,63 @@ class Migrator(
       if (it.settings?.rotateWordcloudItems == false) settings["rotateWordcloudItems"] = false
       if (it.settings?.showContentResultsDirectly == true)
           settings["showContentResultsDirectly"] = true
-      User(
-          id = UuidHelper.stringToUuid(it.id),
-          auditMetadata =
-              AuditMetadata(createdAt = it.creationTimestamp, updatedAt = it.updateTimestamp),
-          username = it.loginId,
-          password = if (it.account.password != null) "{bcrypt}" + it.account.password else null,
-          mailAddress = it.person?.mail,
-          givenName = it.person?.firstName,
-          surname = it.person?.lastName,
-          settings = settings,
-          announcementsReadAt = it.announcementReadTimestamp,
-          roles = mutableListOf(defaultRole))
+      val newUser =
+          User(
+              id = UuidHelper.stringToUuid(it.id),
+              auditMetadata =
+                  AuditMetadata(createdAt = it.creationTimestamp, updatedAt = it.updateTimestamp),
+              username = it.loginId,
+              password =
+                  if (it.account.password != null) "{bcrypt}" + it.account.password else null,
+              mailAddress = it.person?.mail,
+              givenName = it.person?.firstName,
+              surname = it.person?.lastName,
+              settings = settings,
+              announcementsReadAt = it.announcementReadTimestamp,
+              roles = mutableListOf(defaultRole))
+      if (!migrateExternalLogins(newUser, it)) {
+        return@migrate null
+      }
+      newUser
     }
+  }
+
+  private fun migrateExternalLogins(newUser: User, userProfile: UserProfile): Boolean {
+    var error = false
+    when (userProfile.authProvider) {
+      UserProfile.AuthProvider.ANONYMIZED -> {
+        newUser.clearForSoftDelete()
+        newUser.auditMetadata.deletedAt = Instant.now()
+      }
+      UserProfile.AuthProvider.ARSNOVA_GUEST -> {
+        newUser.username = null
+      }
+      UserProfile.AuthProvider.ARSNOVA -> {}
+      UserProfile.AuthProvider.CAS,
+      UserProfile.AuthProvider.LDAP,
+      UserProfile.AuthProvider.OIDC,
+      UserProfile.AuthProvider.SAML -> {
+        val providerId = properties.authenticationProviderMapping[userProfile.authProvider.name]
+        if (providerId == null) {
+          logger.warn(
+              "No ID mapping for authentication provider found: {}", userProfile.authProvider)
+          error = true
+        }
+        val externalLogin =
+            ExternalLogin(
+                user = newUser,
+                providerId = providerId,
+                externalId = userProfile.loginId,
+                auditMetadata = AuditMetadata(createdAt = Instant.now()))
+        newUser.externalLogins += externalLogin
+        newUser.username = null
+      }
+      else -> {
+        logger.warn("Unsupported authentication provider: {}", userProfile.authProvider)
+        error = true
+      }
+    }
+    return !error
   }
 
   @Transactional

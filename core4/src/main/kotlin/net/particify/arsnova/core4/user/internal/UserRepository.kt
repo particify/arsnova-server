@@ -11,8 +11,9 @@ import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Window
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.querydsl.QuerydslPredicateExecutor
 
-interface UserRepository : JpaRepository<User, UUID> {
+interface UserRepository : JpaRepository<User, UUID>, QuerydslPredicateExecutor<User> {
   @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.id = :id")
   fun findByIdOrNull(id: UUID): User?
 

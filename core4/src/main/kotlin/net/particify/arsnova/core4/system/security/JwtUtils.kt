@@ -32,13 +32,13 @@ class JwtUtils(securityProperties: SecurityProperties, private val jwtDecoder: J
   ): String {
     val roomIdString = uuidToString(roomId)
     val roomRole = "$roomRole-$roomIdString"
-    val roles = arrayOf(roomRole)
+    val roles = listOf(roomRole)
     return encodeJwt(uuidToString(userId), roles)
   }
 
   fun encodeJwt(
       subject: String,
-      roles: Array<String>,
+      roles: List<String>,
   ): String {
     val jwt = SignedJWT(header, buildClaimsSet(subject, mapOf("roles" to roles)))
     jwt.sign(signer)
