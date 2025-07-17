@@ -6,6 +6,9 @@ services:
     image: pgautoupgrade/pgautoupgrade:17-alpine
   postgresql-comments:
     image: pgautoupgrade/pgautoupgrade:17-alpine
+  rabbitmq:
+    ports:
+      - 15672:15672
   arsnova-proxy:
     ports:
       - 127.0.0.1:${PORT:-8080}:80
