@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import net.particify.arsnova.core.config.SecurityConfig;
 import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
+import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.config.properties.UiProperties;
 import net.particify.arsnova.core.model.AuthenticationProvider;
 import net.particify.arsnova.core.model.Configuration;
@@ -38,13 +39,16 @@ public class ConfigurationController {
 
   private AuthenticationProviderProperties providerProperties;
   private UiProperties uiProperties;
+  private final boolean readOnly;
   private List<AuthenticationProvider> authenticationProviders;
 
   public ConfigurationController(
       final AuthenticationProviderProperties authenticationProviderProperties,
-      final UiProperties uiProperties) {
+      final UiProperties uiProperties,
+      final SystemProperties systemProperties) {
     this.providerProperties = authenticationProviderProperties;
     this.uiProperties = uiProperties;
+    this.readOnly = systemProperties.isReadOnly();
     buildAuthenticationProviderConfig();
   }
 
@@ -53,6 +57,7 @@ public class ConfigurationController {
     final Configuration configuration = new Configuration();
     configuration.setAuthenticationProviders(authenticationProviders);
     configuration.setUi(uiProperties.getUi());
+    configuration.setReadOnly(readOnly);
 
     return configuration;
   }

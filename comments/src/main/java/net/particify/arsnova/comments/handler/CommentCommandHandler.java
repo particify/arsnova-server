@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import net.particify.arsnova.comments.config.RabbitConfig;
@@ -52,18 +53,21 @@ public class CommentCommandHandler {
   private final CommentService service;
   private final SettingsService settingsService;
   private final PermissionEvaluator permissionEvaluator;
+  final boolean readOnly;
 
   @Autowired
   public CommentCommandHandler(
       AmqpTemplate messagingTemplate,
       CommentService service,
       SettingsService settingsService,
-      PermissionEvaluator permissionEvaluator
+      PermissionEvaluator permissionEvaluator,
+      @Value("${system.read-only:false}") final boolean readOnly
   ) {
     this.messagingTemplate = messagingTemplate;
     this.service = service;
     this.settingsService = settingsService;
     this.permissionEvaluator = permissionEvaluator;
+    this.readOnly = readOnly;
   }
 
   private Comment createOrImportComment(Comment comment, Settings settings) {
@@ -104,7 +108,7 @@ public class CommentCommandHandler {
 
     Settings settings = settingsService.get(payload.getRoomId());
 
-    if (settings.isReadonly() || settings.isDisabled()) {
+    if (settings.isReadonly() || settings.isDisabled() || readOnly) {
       throw new ForbiddenException();
     }
 
@@ -119,7 +123,7 @@ public class CommentCommandHandler {
     newComment.setAck(settings.getDirectSend());
 
     if (!permissionEvaluator.checkCommentOwnerPermission(newComment)) {
-      throw new BadRequestException();
+      throw new ForbiddenException();
     }
 
     return createOrImportComment(newComment, settings);
@@ -152,7 +156,7 @@ public class CommentCommandHandler {
     PatchCommentPayload p = command.getPayload();
     Comment c = this.service.get(p.getId());
 
-    if (!permissionEvaluator.checkCommentPatchPermission(c, p.getChanges())) {
+    if (!permissionEvaluator.checkCommentPatchPermission(c, p.getChanges()) || readOnly) {
       throw new ForbiddenException();
     }
 
@@ -222,7 +226,7 @@ public class CommentCommandHandler {
     newComment.setTag(p.getTag());
     newComment.setAnswer(p.getAnswer());
 
-    if (!permissionEvaluator.checkCommentUpdatePermission(newComment, old)) {
+    if (!permissionEvaluator.checkCommentUpdatePermission(newComment, old) || readOnly) {
       throw new ForbiddenException();
     }
 

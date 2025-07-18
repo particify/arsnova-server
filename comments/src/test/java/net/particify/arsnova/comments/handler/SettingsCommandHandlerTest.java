@@ -35,7 +35,7 @@ public class SettingsCommandHandlerTest {
 
   @BeforeEach
   public void setup() {
-    this.commandHandler = new SettingsCommandHandler(messagingTemplate, settingsService, permissionEvaluator);
+    this.commandHandler = new SettingsCommandHandler(messagingTemplate, settingsService, permissionEvaluator, false);
   }
 
   @Test

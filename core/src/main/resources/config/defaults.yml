@@ -6,6 +6,10 @@ arsnova:
     # The URL under which the ARSnova server is reachable. Use
     # http://localhost:8080 for development.
     root-url: https://example.com
+    # Read-only mode prevents the creation and modification of data. It does
+    # however not prevent the deletion of data. This does not affect handling of
+    # user accounts.
+    read-only: false
 
     # The path where the ARSnova API is accessible by clients. By default,
     # this path is set to the context path of the backend. If you are running

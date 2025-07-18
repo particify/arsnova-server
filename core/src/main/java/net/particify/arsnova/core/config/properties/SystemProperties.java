@@ -248,6 +248,7 @@ public class SystemProperties {
   }
 
   private String rootUrl;
+  private boolean readOnly;
   private boolean externalUserManagement;
   private boolean externalRoomManagement;
   private Api api;
@@ -264,6 +265,14 @@ public class SystemProperties {
 
   public void setRootUrl(final String rootUrl) {
     this.rootUrl = rootUrl;
+  }
+
+  public boolean isReadOnly() {
+    return readOnly;
+  }
+
+  public void setReadOnly(final boolean readOnly) {
+    this.readOnly = readOnly;
   }
 
   public boolean isExternalUserManagement() {

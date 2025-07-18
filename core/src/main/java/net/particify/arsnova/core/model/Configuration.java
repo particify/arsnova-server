@@ -29,6 +29,7 @@ import net.particify.arsnova.core.model.serialization.View;
 public class Configuration {
   private List<AuthenticationProvider> authenticationProviders;
   private Map<String, Object> ui;
+  private boolean readOnly;
 
   @JsonView(View.Public.class)
   public List<AuthenticationProvider> getAuthenticationProviders() {
@@ -52,5 +53,14 @@ public class Configuration {
 
   public void setUi(final Map<String, Object> ui) {
     this.ui = ui;
+  }
+
+  @JsonView(View.Public.class)
+  public boolean isReadOnly() {
+    return readOnly;
+  }
+
+  public void setReadOnly(final boolean readOnly) {
+    this.readOnly = readOnly;
   }
 }
