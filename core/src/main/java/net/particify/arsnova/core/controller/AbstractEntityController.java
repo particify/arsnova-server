@@ -174,11 +174,11 @@ public abstract class AbstractEntityController<E extends Entity> {
   public E patch(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
       final HttpServletResponse httpServletResponse) throws IOException {
     final E entity = entityService.get(id);
-    entityService.patch(entity, changes, View.Public.class);
+    final E patchedEntity = entityService.patch(entity, changes, View.Public.class);
     httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
     httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
 
-    return entity;
+    return patchedEntity;
   }
 
   @DeleteMapping(DELETE_MAPPING)

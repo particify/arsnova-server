@@ -163,17 +163,19 @@ public class DefaultEntityServiceImplTest {
     patchedValues.put("closed", patchedActive);
     patchedValues.put("ownerId", "Should not be changeable.");
 
-    entityService.patch(room, patchedValues, View.Public.class);
+    final Room patchedRoom = entityService.patch(room, patchedValues, View.Public.class);
 
-    assertEquals(originalId, room.getId());
-    assertEquals(patchedName, room.getName());
-    assertEquals(patchedActive, room.isClosed());
-    assertEquals(originalOwnerId, room.getOwnerId());
+    assertEquals(originalName, room.getName());
+
+    assertEquals(originalId, patchedRoom.getId());
+    assertEquals(patchedName, patchedRoom.getName());
+    assertEquals(patchedActive, patchedRoom.isClosed());
+    assertEquals(originalOwnerId, patchedRoom.getOwnerId());
 
     assertEquals(originalName, eventListenerConfig.getRoomBeforeUpdateEvents().get(0).getOldEntity().getName());
     assertEquals(originalName, eventListenerConfig.getRoomAfterUpdateEvents().get(0).getOldEntity().getName());
-    assertEquals(room.getName(), eventListenerConfig.getRoomBeforeUpdateEvents().get(0).getEntity().getName());
-    assertEquals(room.getName(), eventListenerConfig.getRoomAfterUpdateEvents().get(0).getEntity().getName());
+    assertEquals(patchedRoom.getName(), eventListenerConfig.getRoomBeforeUpdateEvents().get(0).getEntity().getName());
+    assertEquals(patchedRoom.getName(), eventListenerConfig.getRoomAfterUpdateEvents().get(0).getEntity().getName());
   }
 
   @Test
@@ -186,7 +188,7 @@ public class DefaultEntityServiceImplTest {
 
     when(roomRepository.saveAll(anyList())).then(returnsFirstArg());
 
-    final List<Room> sessions = new ArrayList<>();
+    final List<Room> rooms = new ArrayList<>();
     final String originalId1 = "d8833f0d78964a9487ded02ba2dfbbad";
     final String originalName1 = "Test Room 1";
     final String originalOwnerId1 = "TestUser";
@@ -197,7 +199,7 @@ public class DefaultEntityServiceImplTest {
     room1.setName(originalName1);
     room1.setClosed(originalClosed1);
     room1.setOwnerId(originalOwnerId1);
-    sessions.add(room1);
+    rooms.add(room1);
     final String originalId2 = "3dc8cbff05da49d5980f6c001a6ea867";
     final String originalName2 = "Test Room 2";
     final String originalOwnerId2 = "TestUser";
@@ -208,7 +210,7 @@ public class DefaultEntityServiceImplTest {
     room2.setName(originalName2);
     room2.setClosed(originalClosed2);
     room2.setOwnerId(originalOwnerId2);
-    sessions.add(room2);
+    rooms.add(room2);
 
     final String patchedName = "Patched Room";
     final boolean patchedClosed = false;
@@ -217,25 +219,30 @@ public class DefaultEntityServiceImplTest {
     patchedValues.put("closed", patchedClosed);
     patchedValues.put("ownerId", "Should not be changeable.");
 
-    entityService.patch(sessions, patchedValues, View.Public.class);
+    final List<Room> patchedRooms = entityService.patch(rooms, patchedValues, View.Public.class);
+    final Room patchedRoom1 = patchedRooms.get(0);
+    final Room patchedRoom2 = patchedRooms.get(1);
 
-    assertEquals(originalId1, room1.getId());
-    assertEquals(patchedName, room1.getName());
-    assertEquals(patchedClosed, room1.isClosed());
-    assertEquals(originalOwnerId1, room1.getOwnerId());
-    assertEquals(originalId2, room2.getId());
-    assertEquals(patchedName, room2.getName());
-    assertEquals(patchedClosed, room2.isClosed());
-    assertEquals(originalOwnerId2, room2.getOwnerId());
+    assertEquals(originalName1, room1.getName());
+    assertEquals(originalName2, room2.getName());
+
+    assertEquals(originalId1, patchedRoom1.getId());
+    assertEquals(patchedName, patchedRoom1.getName());
+    assertEquals(patchedClosed, patchedRoom1.isClosed());
+    assertEquals(originalOwnerId1, patchedRoom1.getOwnerId());
+    assertEquals(originalId2, patchedRoom2.getId());
+    assertEquals(patchedName, patchedRoom2.getName());
+    assertEquals(patchedClosed, patchedRoom2.isClosed());
+    assertEquals(originalOwnerId2, patchedRoom2.getOwnerId());
 
     assertEquals(originalName1, eventListenerConfig.getRoomBeforeUpdateEvents().get(0).getOldEntity().getName());
     assertEquals(originalName1, eventListenerConfig.getRoomAfterUpdateEvents().get(0).getOldEntity().getName());
-    assertEquals(room1.getName(), eventListenerConfig.getRoomBeforeUpdateEvents().get(0).getEntity().getName());
-    assertEquals(room1.getName(), eventListenerConfig.getRoomAfterUpdateEvents().get(0).getEntity().getName());
+    assertEquals(patchedRoom1.getName(), eventListenerConfig.getRoomBeforeUpdateEvents().get(0).getEntity().getName());
+    assertEquals(patchedRoom1.getName(), eventListenerConfig.getRoomAfterUpdateEvents().get(0).getEntity().getName());
     assertEquals(originalName2, eventListenerConfig.getRoomBeforeUpdateEvents().get(1).getOldEntity().getName());
     assertEquals(originalName2, eventListenerConfig.getRoomAfterUpdateEvents().get(1).getOldEntity().getName());
-    assertEquals(room2.getName(), eventListenerConfig.getRoomBeforeUpdateEvents().get(1).getEntity().getName());
-    assertEquals(room2.getName(), eventListenerConfig.getRoomAfterUpdateEvents().get(1).getEntity().getName());
+    assertEquals(patchedRoom2.getName(), eventListenerConfig.getRoomBeforeUpdateEvents().get(1).getEntity().getName());
+    assertEquals(patchedRoom2.getName(), eventListenerConfig.getRoomAfterUpdateEvents().get(1).getEntity().getName());
   }
 
   @Test
@@ -262,9 +269,9 @@ public class DefaultEntityServiceImplTest {
         "name", "UpdatedName",
         "contentIds", List.of("A", "B", "C")
     );
-    entityService.patch(contentGroup, mapForPatching);
+    final ContentGroup patchedContentGroup = entityService.patch(contentGroup, mapForPatching);
 
-    assertEquals(List.of("A", "B", "C"), contentGroup.getContentIds());
+    assertEquals(List.of("A", "B", "C"), patchedContentGroup.getContentIds());
   }
 
   @Test
@@ -291,9 +298,9 @@ public class DefaultEntityServiceImplTest {
         "name", "UpdatedName",
         "contentIds", List.of("B", "C", "A")
     );
-    entityService.patch(contentGroup, mapForPatching, View.Public.class);
+    final ContentGroup patchedContentGroup = entityService.patch(contentGroup, mapForPatching, View.Public.class);
 
-    assertEquals(List.of("B", "C", "A"), contentGroup.getContentIds());
+    assertEquals(List.of("B", "C", "A"), patchedContentGroup.getContentIds());
   }
 
   @Test

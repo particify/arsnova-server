@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -293,18 +294,18 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
   @Override
   public T patch(final T entity, final Map<String, Object> changes,
       final Function<T, ? extends Object> propertyGetter, final Class<?> view) throws IOException {
-    final T oldEntity = cloneEntity(entity);
-    final Object obj = propertyGetter.apply(entity);
+    final T entityForPatch = cloneEntity(entity);
+    final Object obj = propertyGetter.apply(entityForPatch);
     final ObjectReader reader = objectMapper.readerForUpdating(obj).withView(view);
     final JsonNode tree = objectMapperForPatchTree.valueToTree(changes);
     reader.readValue(tree);
-    entity.setUpdateTimestamp(new Date());
-    preparePatch(entity);
-    eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, oldEntity, propertyGetter, changes));
-    validate(entity);
-    final T patchedEntity = repository.save(entity);
+    entityForPatch.setUpdateTimestamp(new Date());
+    preparePatch(entityForPatch);
+    eventPublisher.publishEvent(new BeforePatchEvent<>(this, entityForPatch, entity, propertyGetter, changes));
+    validate(entityForPatch);
+    final T patchedEntity = repository.save(entityForPatch);
     eventPublisher.publishEvent(new AfterPatchEvent<>(
-        this, patchedEntity, oldEntity, propertyGetter, getChanges(oldEntity, patchedEntity), changes));
+        this, patchedEntity, entity, propertyGetter, getChanges(entity, patchedEntity), changes));
     modifyRetrieved(patchedEntity);
 
     return patchedEntity;
@@ -332,19 +333,21 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
       final Function<T, ? extends Object> propertyGetter, final Class<?> view) throws IOException {
     final JsonNode tree = objectMapperForPatchTree.valueToTree(changes);
     final Map<String, T> oldEntities = new HashMap<>();
+    final List<T> entitiesForPatch = new ArrayList<>();
     for (final T entity : entities) {
-      final T oldEntity = cloneEntity(entity);
-      oldEntities.put(entity.getId(), oldEntity);
-      final Object obj = propertyGetter.apply(entity);
+      final T entityForPatch = cloneEntity(entity);
+      oldEntities.put(entity.getId(), entity);
+      entitiesForPatch.add(entityForPatch);
+      final Object obj = propertyGetter.apply(entityForPatch);
       final ObjectReader reader = objectMapper.readerForUpdating(obj).withView(view);
       reader.readValue(tree);
-      entity.setUpdateTimestamp(new Date());
-      preparePatch(entity);
-      eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, oldEntity, propertyGetter, changes));
-      validate(entity);
+      entityForPatch.setUpdateTimestamp(new Date());
+      preparePatch(entityForPatch);
+      eventPublisher.publishEvent(new BeforePatchEvent<>(this, entityForPatch, entity, propertyGetter, changes));
+      validate(entityForPatch);
     }
 
-    final List<T> patchedEntities = repository.saveAll(entities);
+    final List<T> patchedEntities = repository.saveAll(entitiesForPatch);
     patchedEntities.forEach((e) -> {
       eventPublisher.publishEvent(new AfterPatchEvent<>(
           this, e, oldEntities.get(e.getId()), propertyGetter,
