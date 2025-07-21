@@ -92,17 +92,6 @@ public class ContentGroupServiceImpl extends DefaultEntityServiceImpl<ContentGro
   }
 
   @Override
-  public void prepareUpdate(final ContentGroup contentGroup) {
-    final ContentGroup oldContentGroup = this.get(contentGroup.getId());
-    if (oldContentGroup != null) {
-      // Disallow changing the name of a content group for now
-      if (!oldContentGroup.getName().equals(contentGroup.getName())) {
-        throw new BadRequestException();
-      }
-    }
-  }
-
-  @Override
   public ContentGroup getByRoomIdAndName(final String roomId, final String name) {
     return contentGroupRepository.findByRoomIdAndName(roomId, name);
   }
