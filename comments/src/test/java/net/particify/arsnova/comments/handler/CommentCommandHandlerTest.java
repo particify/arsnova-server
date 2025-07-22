@@ -60,7 +60,8 @@ public class CommentCommandHandlerTest {
         messagingTemplate,
         commentService,
         settingsService,
-        permissionEvaluator
+        permissionEvaluator,
+        false
     );
   }
 

@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import net.particify.arsnova.core.event.ReadOnlyCrudEventListener;
 import net.particify.arsnova.core.model.EntityValidationException;
 import net.particify.arsnova.core.model.export.ImportValidationException;
 import net.particify.arsnova.core.service.exceptions.AlreadyAnsweredContentException;
@@ -182,6 +183,13 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
   @ResponseBody
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public Map<String, Object> handleDocumentNotFoundException(final Exception e, final HttpServletRequest request) {
+    return helper.handleException(e, Level.TRACE);
+  }
+
+  @ExceptionHandler(ReadOnlyCrudEventListener.ReadOnlyException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public Map<String, Object> handleReadOnlyException(final Exception e, final HttpServletRequest request) {
     return helper.handleException(e, Level.TRACE);
   }
 

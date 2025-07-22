@@ -39,7 +39,7 @@ public class VoteCommandHandlerTest {
 
   @BeforeEach
   public void setup() {
-    this.commandHandler = new VoteCommandHandler(voteService, commentEventSource, permissionEvaluator);
+    this.commandHandler = new VoteCommandHandler(voteService, commentEventSource, permissionEvaluator, false);
   }
 
   @Test

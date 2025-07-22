@@ -3,6 +3,7 @@ package net.particify.arsnova.comments.handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import net.particify.arsnova.comments.CommentEventSource;
@@ -22,16 +23,19 @@ public class VoteCommandHandler {
   private final VoteService service;
   private final CommentEventSource eventer;
   private final PermissionEvaluator permissionEvaluator;
+  final boolean readOnly;
 
   @Autowired
   public VoteCommandHandler(
       VoteService service,
       CommentEventSource eventer,
-      PermissionEvaluator permissionEvaluator
+      PermissionEvaluator permissionEvaluator,
+      @Value("${system.read-only:false}") final boolean readOnly
   ) {
     this.service = service;
     this.eventer = eventer;
     this.permissionEvaluator = permissionEvaluator;
+    this.readOnly = readOnly;
   }
 
   public Vote handle(Upvote vote) {
@@ -43,7 +47,7 @@ public class VoteCommandHandler {
     v.setVote(1);
     v.setUserId(p.getUserId());
 
-    if (!permissionEvaluator.checkVoteOwnerPermission(v)) {
+    if (!permissionEvaluator.checkVoteOwnerPermission(v) || readOnly) {
       throw new ForbiddenException();
     }
 
@@ -63,7 +67,7 @@ public class VoteCommandHandler {
     v.setVote(-1);
     v.setUserId(p.getUserId());
 
-    if (!permissionEvaluator.checkVoteOwnerPermission(v)) {
+    if (!permissionEvaluator.checkVoteOwnerPermission(v) || readOnly) {
       throw new ForbiddenException();
     }
 
@@ -82,7 +86,7 @@ public class VoteCommandHandler {
     Vote v = new Vote();
     v.setUserId(p.getUserId());
 
-    if (!permissionEvaluator.checkVoteOwnerPermission(v)) {
+    if (!permissionEvaluator.checkVoteOwnerPermission(v) || readOnly) {
       throw new ForbiddenException();
     }
 

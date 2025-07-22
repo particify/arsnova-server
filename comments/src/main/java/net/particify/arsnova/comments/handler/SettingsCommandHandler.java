@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.comments.exception.ForbiddenException;
@@ -25,16 +26,19 @@ public class SettingsCommandHandler {
   private final AmqpTemplate messagingTemplate;
   private final SettingsService service;
   private final PermissionEvaluator permissionEvaluator;
+  final boolean readOnly;
 
   @Autowired
   public SettingsCommandHandler(
       AmqpTemplate messagingTemplate,
       SettingsService service,
-      PermissionEvaluator permissionEvaluator
+      PermissionEvaluator permissionEvaluator,
+      @Value("${system.read-only:false}") final boolean readOnly
   ) {
     this.messagingTemplate = messagingTemplate;
     this.service = service;
     this.permissionEvaluator = permissionEvaluator;
+    this.readOnly = readOnly;
   }
 
   public Settings handle(
@@ -45,7 +49,7 @@ public class SettingsCommandHandler {
 
     CreateSettingsPayload payload = command.getPayload();
 
-    if (!permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(payload.getRoomId())) {
+    if (!permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(payload.getRoomId()) || readOnly) {
       throw new ForbiddenException();
     }
 
@@ -66,7 +70,7 @@ public class SettingsCommandHandler {
 
     UpdateSettingsPayload payload = command.getPayload();
 
-    if (!permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(payload.getRoomId())) {
+    if (!permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(payload.getRoomId()) || readOnly) {
       throw new ForbiddenException();
     }
 
