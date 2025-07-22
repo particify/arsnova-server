@@ -11,10 +11,6 @@ management:
   endpoint:
     health:
       show-details: always
-  metrics:
-    web:
-      server:
-        auto-time-requests: true
 rabbitmq:
   host: localhost
   port: 5672
