@@ -8,7 +8,7 @@ services:
     volumes:
       - couchdb_data:/opt/couchdb/data
   postgresql-authz:
-    image: postgres:14.4-alpine
+    image: postgres:14.18-alpine
     restart: $RESTART_MODE
     environment:
       POSTGRES_DB: arsnovaauth
@@ -17,7 +17,7 @@ services:
     volumes:
       - postgresql_data_auth:/var/lib/postgresql/data
   postgresql-comments:
-    image: postgres:14.4-alpine
+    image: postgres:14.18-alpine
     restart: $RESTART_MODE
     environment:
       POSTGRES_DB: arsnovacomment
