@@ -1,12 +1,9 @@
 spring:
   jackson:
     default-property-inclusion: NON_NULL
----
 server:
   port: 9090
-  use-forward-headers: true
   forward-headers-strategy: NATIVE
----
 management:
   endpoints:
     web:
@@ -21,11 +18,6 @@ management:
       roles:
         - ADMIN
         - MONITORING
-  metrics:
-    web:
-      server:
-        auto-time-requests: true
----
 routing:
   endpoints:
     core: "http://localhost:8080/"
@@ -34,24 +26,20 @@ routing:
     roomaccess-service: "http://localhost:8092/"
     formatting-service: "http://localhost:3020/"
     attachment-service: "http://localhost:3030/"
----
 security:
   jwt:
     public-secret: "secret"
     internal-secret: "secret"
     serverId: arsnova.backend.v3:example.com
     validity-period: 5m
----
 http-client:
   auth-service: "http://127.0.0.1:8092"
   comment-service: "http://127.0.0.1:8088"
   core: "http://127.0.0.1:8080"
   ws-gateway: "http://127.0.0.1:8099"
----
 logging:
   level:
     org.springframework.cloud.gateway: INFO
----
 gateway:
   rate-limit:
     duration: 5s

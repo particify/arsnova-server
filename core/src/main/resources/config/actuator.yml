@@ -11,7 +11,3 @@ arsnova:
         roles:
           - ADMIN
           - MONITORING
-    metrics:
-      web:
-        server:
-          auto-time-requests: true
