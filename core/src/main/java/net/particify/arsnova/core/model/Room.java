@@ -118,7 +118,7 @@ public class Room extends Entity implements RoomIdAware {
     return shortId;
   }
 
-  @JsonView({View.Persistence.class, View.Public.class})
+  @JsonView(View.Persistence.class)
   public void setShortId(final String shortId) {
     this.shortId = shortId;
   }
