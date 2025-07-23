@@ -19,6 +19,7 @@ import net.particify.arsnova.core.model.GridImageContent;
 import net.particify.arsnova.core.model.NumericContent;
 import net.particify.arsnova.core.model.PrioritizationChoiceContent;
 import net.particify.arsnova.core.model.Room;
+import net.particify.arsnova.core.model.RoomSettings;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
 import net.particify.arsnova.core.model.ShortAnswerContent;
 import net.particify.arsnova.core.model.WordcloudContent;
@@ -29,15 +30,18 @@ import net.particify.arsnova.core.web.exceptions.NotFoundException;
 public class DuplicationServiceImpl implements ApplicationEventPublisherAware, DuplicationService {
   private static Duration TEMPORARY_DURATION = Duration.parse("P2D");
   private RoomService roomService;
+  private RoomSettingsService roomSettingsService;
   private ContentGroupService contentGroupService;
   private ContentService contentService;
   private ApplicationEventPublisher applicationEventPublisher;
 
   public DuplicationServiceImpl(
       final RoomService roomService,
+      final RoomSettingsService roomSettingsService,
       final ContentGroupService contentGroupService,
       final ContentService contentService) {
     this.roomService = roomService;
+    this.roomSettingsService = roomSettingsService;
     this.contentGroupService = contentGroupService;
     this.contentService = contentService;
   }
@@ -50,6 +54,7 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
   @Override
   public Room duplicateRoomCascading(final Room room, final boolean temporary, final String newName) {
     final Room roomCopy = duplicateRoom(room, temporary, newName);
+    duplicateRoomSettings(room, roomCopy);
     contentGroupService.getByRoomId(room.getRoomId()).forEach(cg -> duplicateContentGroup(cg, roomCopy));
     applicationEventPublisher.publishEvent(new RoomDuplicationEvent(this, room, roomCopy));
     return roomCopy;
@@ -88,6 +93,13 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
     }
 
     return roomService.create(roomCopy);
+  }
+
+  private RoomSettings duplicateRoomSettings(final Room originalRoom, final Room duplicatedRoom) {
+    final RoomSettings settings = roomSettingsService.getByRoomId(originalRoom.getRoomId());
+    final RoomSettings settingsCopy = new RoomSettings(settings);
+    settingsCopy.setRoomId(duplicatedRoom.getRoomId());
+    return roomSettingsService.create(settingsCopy);
   }
 
   private ContentGroup duplicateContentGroup(final ContentGroup contentGroup, final Room room) {
