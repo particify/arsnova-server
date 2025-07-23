@@ -21,26 +21,26 @@ public class AmqpEventDispatcher {
 
   @RabbitListener(queues = RabbitConfig.ROOM_CREATED_QUEUE_NAME)
   public void dispatchRoomCreatedEvent(final RoomCreatedEvent event) {
-    logger.info("Dispatching RoomCreatedEvent: {}", event);
+    logger.debug("Dispatching RoomCreatedEvent: {}", event);
     eventPublisher.publishEvent(event);
   }
 
   @RabbitListener(queues = RabbitConfig.ROOM_DELETED_QUEUE_NAME)
   public void dispatchRoomDeletedEvent(final RoomDeletedEvent event) {
-    logger.info("Dispatching RoomDeletedEvent: {}", event);
+    logger.debug("Dispatching RoomDeletedEvent: {}", event);
     eventPublisher.publishEvent(event);
   }
 
   @RabbitListener(queues = RabbitConfig.BACKEND_COMMENT_QUEUE_NAME)
   public void dispatchImportEvent(final ImportEvent event) {
-    logger.info("Dispatching ImportEvent: {}", event);
+    logger.debug("Dispatching ImportEvent: {}", event);
     eventPublisher.publishEvent(event);
   }
 
   @RabbitListener(queues = RabbitConfig.BACKEND_ROOM_DUPLICATED_QUEUE_NAME)
   @Transactional
   public void dispatchRoomDuplicatedEvent(final RoomDuplicatedEvent event) {
-    logger.info("Dispatching RoomDuplicatedEvent: {}", event);
+    logger.debug("Dispatching RoomDuplicatedEvent: {}", event);
     eventPublisher.publishEvent(event);
   }
 }

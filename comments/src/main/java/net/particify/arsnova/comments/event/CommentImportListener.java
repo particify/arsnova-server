@@ -23,7 +23,7 @@ public class CommentImportListener {
 
   @EventListener
   public void handleImportEvent(final ImportEvent entity) {
-    logger.info("Received comment creation message for room ID {} from backend queue.", entity.getRoomId());
+    logger.debug("Received comment creation message for room ID {} from backend queue.", entity.getRoomId());
     ImportCommentPayload payload = new ImportCommentPayload();
     payload.setRoomId(entity.getRoomId());
     payload.setCreatorId(entity.getCreatorId());
@@ -31,6 +31,6 @@ public class CommentImportListener {
     payload.setTimestamp(entity.getTimestamp());
     payload.setRead(entity.isRead());
     Comment comment = commentCommandHandler.handle(new ImportComment(payload));
-    logger.info("Created comment with ID {} for creation message from backend queue.", comment.getId());
+    logger.debug("Created comment with ID {} for creation message from backend queue.", comment.getId());
   }
 }
