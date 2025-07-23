@@ -27,7 +27,7 @@ public class RoomDeletedListener {
 
   @EventListener
   public void handleRoomDeletedEvent(final RoomDeletedEvent event) {
-    logger.info("Received room deleted event {}", event);
+    logger.debug("Received room deleted event {}", event);
     commentService.deleteByRoomId(event.getId());
     settingsService.delete(event.getId());
   }
