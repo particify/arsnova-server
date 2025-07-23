@@ -30,7 +30,9 @@ public class SettingsService {
     Settings defaults = new Settings();
     defaults.setRoomId(id);
     Settings s = repository.findById(id).orElse(defaults);
-    s.setReadonly(readOnly);
+    if (readOnly) {
+      s.setReadonly(true);
+    }
 
     return s;
   }
