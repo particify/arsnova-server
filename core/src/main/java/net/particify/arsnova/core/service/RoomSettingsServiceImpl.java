@@ -2,9 +2,12 @@ package net.particify.arsnova.core.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
+import net.particify.arsnova.core.event.BeforeDeletionEvent;
+import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.RoomSettings;
 import net.particify.arsnova.core.persistence.DeletionRepository;
 import net.particify.arsnova.core.persistence.RoomSettingsRepository;
@@ -39,5 +42,13 @@ public class RoomSettingsServiceImpl
   @Override
   public RoomSettings getByRoomId(final String roomId) {
     return roomSettingsRepository.findByRoomId(roomId);
+  }
+
+  @EventListener
+  public void handleRoomDeletion(final BeforeDeletionEvent<Room> event) {
+    final RoomSettings settings = getByRoomId(event.getEntity().getId());
+    if (settings != null) {
+      delete(settings);
+    }
   }
 }
