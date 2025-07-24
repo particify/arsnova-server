@@ -22,6 +22,16 @@ public class RoomSettings extends Entity implements RoomIdAware {
     this.roomId = roomId;
   }
 
+  public RoomSettings(final RoomSettings roomSettings) {
+    super(roomSettings);
+    this.commentThresholdEnabled = roomSettings.commentThresholdEnabled;
+    this.commentThreshold = roomSettings.commentThreshold;
+    this.commentTags = new HashSet<>(roomSettings.commentTags);
+    this.surveyEnabled = roomSettings.surveyEnabled;
+    this.surveyType = roomSettings.surveyType;
+    this.focusModeEnabled = roomSettings.focusModeEnabled;
+  }
+
   @Override
   @JsonView(View.Persistence.class)
   public void setId(final String id) {
