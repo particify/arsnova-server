@@ -97,6 +97,9 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
 
   private RoomSettings duplicateRoomSettings(final Room originalRoom, final Room duplicatedRoom) {
     final RoomSettings settings = roomSettingsService.getByRoomId(originalRoom.getRoomId());
+    if (settings == null) {
+      return null;
+    }
     final RoomSettings settingsCopy = new RoomSettings(settings);
     settingsCopy.setRoomId(duplicatedRoom.getRoomId());
     return roomSettingsService.create(settingsCopy);
