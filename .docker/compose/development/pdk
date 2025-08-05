@@ -1,5 +1,5 @@
 #!/bin/bash
-PATH=$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin/:$PATH
+export PATH=$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin/:$PATH
 COMMAND=$1
 
 COMPOSE_DIR=$(dirname $(readlink -f $0))
