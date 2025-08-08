@@ -1,0 +1,45 @@
+extend type Query {
+  qnasByRoomId(
+    roomId: UUID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): QnaConnection
+}
+
+extend type Mutation {
+  startQna(id: ID!): Qna!
+  pauseQna(id: ID!): Qna!
+  stopQna(id: ID!): Qna!
+  updateQnaThreshold(id: ID!, threshold: Int): Qna!
+  updateQnaAutoPublish(id: ID!, autoPublish: Boolean!): Qna!
+  updateQnaActivePostId(id: ID!, activePostId: UUID): Qna!
+}
+
+extend type Subscription {
+  qnaStateChanged(roomId: UUID!): Qna
+  activeQnaPostUpdated(roomId: UUID!): Qna
+}
+
+type Qna {
+  id: ID!
+  roomId: UUID!
+  topic: String
+  autoPublish: Boolean
+  state: QnaState
+  threshold: Int
+  activePost: Post
+  tags: [Tag!]
+}
+
+enum QnaState {
+  STARTED
+  PAUSED
+  STOPPED
+}
+
+input CreateQnaInput {
+  roomId: UUID!
+  topic: String
+}

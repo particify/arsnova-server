@@ -24,10 +24,12 @@ upstreams:
 routes:
   - id: webclient
     uri: /*
+    enable_websocket: true
     upstream_id: webclient
   - id: core-v4
     uris:
       - /api/*
+    enable_websocket: true
     upstream_id: core-v4
   - id: core-v3-room
     uris:

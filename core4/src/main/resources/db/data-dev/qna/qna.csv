@@ -1,0 +1,4 @@
+id,room_id,topic,state,created_by
+4664a865-2413-4cc7-bfb8-349dd37ade5b,3f9cecb5-6dbf-45cc-b630-4af700d474b6,Q&A Topic 1,STARTED,9c778494-9b52-424d-8c7f-f4936629facb
+4664a865-2413-4cc7-bfb8-349dd37ade5c,3f9cecb5-6dbf-45cc-b630-4af700d474b6,Q&A Topic 2,STARTED,9c778494-9b52-424d-8c7f-f4936629facb
+4664a865-2413-4cc7-bfb8-349dd37ade5d,659f7444-d5e3-41bc-b1c7-c1e3b085cd56,Q&A,STARTED,43389844-708b-469d-8d22-abdd2eb88777

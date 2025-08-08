@@ -73,9 +73,10 @@ class SecurityConfiguration(
               .requestMatchers("/graphql")
               .authenticated()
               .requestMatchers(
+                  "/auth/sso/**",
                   "/challenge",
                   "/configuration",
-                  "/auth/sso/**",
+                  "/graphql/ws",
                   "/jwt",
                   *publicRoutes.toTypedArray())
               .permitAll()

@@ -1,0 +1,22 @@
+extend type Mutation {
+  createQnaReply(input: CreateReplyInput!): Reply!
+  updateQnaReply(input: UpdateReplyInput!): Reply!
+  deleteQnaReply(id: ID!): ID!
+}
+
+type Reply {
+  id: ID!
+  body: String!
+  bodyRendered: String
+  createdAt: DateTime!
+}
+
+input CreateReplyInput {
+  postId: UUID!
+  body: String!
+}
+
+input UpdateReplyInput {
+  postId: UUID!
+  body: String!
+}

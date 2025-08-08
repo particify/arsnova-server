@@ -4,5 +4,8 @@ type Query {
 type Mutation {
 }
 
+type Subscription {
+}
+
 scalar UUID @specifiedBy(url: "https://tools.ietf.org/html/rfc4122")
 scalar DateTime @specifiedBy(url: "https://scalars.graphql.org/andimarek/date-time.html")

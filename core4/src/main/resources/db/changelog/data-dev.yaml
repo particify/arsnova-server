@@ -2,7 +2,7 @@ databaseChangeLog:
   - changeSet:
       id: 1
       author: arsnova
-      labels: data,user,room,announcement
+      labels: data,user,room,announcement,qna
       runAlways: true
       comment: Load data fixtures for development
       changes:
@@ -31,3 +31,18 @@ databaseChangeLog:
             tableName: announcement
             primaryKey: id
             file: db/data-dev/announcement/announcement.csv
+        - loadUpdateData:
+            schemaName: qna
+            tableName: qna
+            primaryKey: id
+            file: db/data-dev/qna/qna.csv
+        - loadUpdateData:
+            schemaName: qna
+            tableName: post
+            primaryKey: id
+            file: db/data-dev/qna/post.csv
+        - loadUpdateData:
+            schemaName: qna
+            tableName: tag
+            primaryKey: id
+            file: db/data-dev/qna/tag.csv

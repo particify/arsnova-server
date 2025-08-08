@@ -31,6 +31,8 @@ spring:
   graphql:
     graphiql:
       enabled: true
+    websocket:
+      path: /graphql/ws
 
   rabbitmq:
     host: rabbitmq
