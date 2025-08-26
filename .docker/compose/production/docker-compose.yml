@@ -1,14 +1,14 @@
 version: "3"
 services:
   couchdb:
-    image: particify/couchdb:3.3
+    image: particify/couchdb:3.4
     environment:
       COUCHDB_USER: arsnova
       COUCHDB_PASSWORD: arsnova
     volumes:
       - couchdb_data:/opt/couchdb/data
   postgresql_auth:
-    image: postgres:13.14-alpine
+    image: postgres:13.20-alpine
     environment:
       POSTGRES_DB: arsnovaauth
       POSTGRES_USER: arsnovaauth
@@ -16,7 +16,7 @@ services:
     volumes:
       - postgresql_data_auth:/var/lib/postgresql/data
   postgresql_comment:
-    image: postgres:13.14-alpine
+    image: postgres:13.20-alpine
     environment:
       POSTGRES_DB: arsnovacomment
       POSTGRES_USER: arsnovacomment
@@ -24,7 +24,7 @@ services:
     volumes:
       - postgresql_data_comment:/var/lib/postgresql/data
   rabbitmq:
-    image: particify/rabbitmq-stomp:3.12-alpine
+    image: particify/rabbitmq-stomp:4.0-alpine
     environment:
       RABBITMQ_NODENAME: rabbit@localhost
     volumes:
