@@ -29,13 +29,13 @@ import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.client.finder.ClientFinder;
 import org.pac4j.core.client.finder.DefaultCallbackClientFinder;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.CallContext;
-import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
-import org.pac4j.jee.context.JEEFrameworkParameters;
+import org.pac4j.core.util.FindBest;
+import org.pac4j.jee.context.JEEContext;
+import org.pac4j.jee.context.session.JEESessionStoreFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -63,19 +63,16 @@ public class SsoCallbackFilter extends AbstractAuthenticationProcessingFilter {
   public Authentication attemptAuthentication(
       final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
       throws AuthenticationException {
-    final UserProfile profile = retrieveProfile(
-        new JEEFrameworkParameters(httpServletRequest, httpServletResponse), null);
+    final UserProfile profile = retrieveProfile(new JEEContext(httpServletRequest, httpServletResponse), null);
     return getAuthenticationManager().authenticate(new SsoAuthenticationToken(null, profile, Collections.emptyList()));
   }
 
-  private UserProfile retrieveProfile(final JEEFrameworkParameters parameters, final String clientName)
+  private UserProfile retrieveProfile(final JEEContext context, final String clientName)
       throws AuthenticationServiceException {
     /* Adapted from Pac4j: org.pac4j.core.engine.DefaultCallbackLogic.perform */
-    CommonHelper.assertNotNull("config", config);
     final Clients clients = config.getClients();
     CommonHelper.assertNotNull("clients", clients);
-    final WebContext webContext = config.getWebContextFactory().newContext(parameters);
-    final List<Client> foundClients = clientFinder.find(clients, webContext, clientName);
+    final List<Client> foundClients = clientFinder.find(clients, context, clientName);
     CommonHelper.assertTrue(foundClients != null && foundClients.size() == 1,
         "unable to find one indirect client for the callback:"
             + " check the callback URL for a client name parameter or suffix path"
@@ -86,15 +83,11 @@ public class SsoCallbackFilter extends AbstractAuthenticationProcessingFilter {
     CommonHelper.assertTrue(foundClient instanceof IndirectClient,
         "only indirect clients are allowed on the callback url");
 
-    final SessionStore sessionStore = config.getSessionStoreFactory().newSessionStore(parameters);
-    CommonHelper.assertNotNull("sessionStore", sessionStore);
-    final CallContext callContext = new CallContext(webContext, sessionStore);
-    CommonHelper.assertNotNull("callContext", callContext);
-    final Credentials credentials = foundClient.getCredentials(callContext).orElse(null);
+    final SessionStore sessionStore = FindBest.sessionStoreFactory(
+        null, config, JEESessionStoreFactory.INSTANCE).newSessionStore();
+    final Optional<Credentials> credentials = foundClient.getCredentials(context, sessionStore);
     logger.debug("credentials: {}", credentials);
-    final Credentials validatedCredentials = foundClient.validateCredentials(callContext, credentials).orElse(null);
-    logger.debug("validatedCredentials: {}", validatedCredentials);
-    final Optional<UserProfile> profile = foundClient.getUserProfile(callContext, validatedCredentials);
+    final Optional<UserProfile> profile = foundClient.getUserProfile(credentials.orElse(null), context, sessionStore);
     logger.debug("profile: {}", profile);
 
     return profile.orElseThrow(() -> new AuthenticationServiceException("No user profile found."));
