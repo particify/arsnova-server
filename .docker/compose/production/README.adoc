@@ -58,12 +58,12 @@ The default configuration can be adjusted via environment variables:
 |LDAP_USERSEARCHBASE |ou=people |LDAP user search base
 |LDAP_MANAGERUSERDN| cn=arsnova-manager,dc=example,dc=com |LDAP DN of manager user
 |LDAP_MANAGERPASSWORD| |LDAP password of manager user
-|CORE_TAG |3.13.20250826 |Docker tag (repository branch) for Core Backend
+|CORE_TAG |3.13.20250827 |Docker tag (repository branch) for Core Backend
 |WSGW_TAG |3.13.20250826 |Docker tag (repository branch) for WebSocket Gateway
 |HTTPGW_TAG |3.13.20250826 |Docker tag (repository branch) for HTTP Gateway
 |AUTH_TAG |3.13.20250826 |Docker tag (repository branch) for Auth Service
 |COMMENT_TAG |3.13.20250826 |Docker tag (repository branch) for Comment Service
-|WEB_TAG |3.13.20250826 |Docker tag (repository branch) for Webclient
+|WEB_TAG |3.13.20250827 |Docker tag (repository branch) for Webclient
 |FORMATTING_TAG|3.13.20250826 |Docker tag (repository branch) for Formatting Service
 |=======
 
