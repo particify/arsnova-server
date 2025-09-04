@@ -11,7 +11,7 @@ default:
   interruptible: true
 
 default:
-  image: node:22.18-alpine
+  image: node:22.19-alpine
   before_script:
     - echo "$PROJECT"
     - cd "$PROJECT"
