@@ -76,7 +76,8 @@ public class RoomUserAliasServiceImpl extends DefaultEntityServiceImpl<RoomUserA
   public Map<String, RoomUserAlias> getUserAliasMappingsByRoomId(final String roomId, final Locale locale) {
     return getByRoomId(roomId).stream().collect(Collectors.toMap(
         a -> a.getUserId(),
-        a -> a.getAlias() != null ? a : generateAlias(a, locale)
+        a -> a.getAlias() != null ? a : generateAlias(a, locale),
+        (a, b) -> a
     ));
   }
 
