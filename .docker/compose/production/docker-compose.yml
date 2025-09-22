@@ -114,6 +114,8 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
+      SECURITY_JWT_SECRET: $JWT_SECRET
+      SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
     command: /jetty/start.jar --module=http-forwarded
   arsnova-comment-service:
     image: particify/arsnova-server-comments:$COMMENT_TAG
