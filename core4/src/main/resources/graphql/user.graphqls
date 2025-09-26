@@ -1,0 +1,36 @@
+extend type Query {
+  userById(id: ID): User
+  users(
+    user: UserQueryInput!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): UserConnection
+}
+
+extend type Mutation {
+  claimUnverifiedUser(mailAddress: String!, password: String!): Boolean
+  deleteUser: Boolean
+  updateUserMailAddress(mailAddress: String!): Boolean
+  updateUserPassword(oldPassword: String!, newPassword: String!): Boolean
+  updateUserDetails(input: UpdateUserDetailsInput!): Boolean
+  verifyUserMailAddress(verificationCode: String!): Boolean
+}
+
+type User {
+  id: ID!
+  username: String!
+  mailAddress: String
+  givenName: String
+  surname: String
+}
+
+input UserQueryInput {
+  username: String
+}
+
+input UpdateUserDetailsInput {
+  givenName: String
+  surname: String
+}

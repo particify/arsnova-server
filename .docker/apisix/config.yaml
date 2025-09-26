@@ -1,0 +1,7 @@
+apisix:
+  enable_server_tokens: false
+
+deployment:
+  role: data_plane
+  role_data_plane:
+    config_provider: yaml

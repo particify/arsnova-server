@@ -1,0 +1,56 @@
+extend type Query {
+  announcementsMetaForCurrentUser: AnnouncementsMeta
+  announcementsForCurrentUser(
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): AnnouncementConnection
+  announcementsByRoomId(
+    roomId: UUID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): AnnouncementConnection
+  announcementsByUserId(
+    userId: UUID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): AnnouncementConnection
+}
+
+extend type Mutation {
+  createAnnouncement(input: CreateAnnouncementInput!): Announcement!
+  updateAnnouncement(input: UpdateAnnouncementInput): Announcement!
+  deleteAnnouncement(id: ID!): ID!
+}
+
+type Announcement {
+  id: ID!
+  room: Room
+  createdAt: DateTime!
+  updatedAt: DateTime
+  title: String!
+  body: String!
+  bodyRendered: String
+}
+
+type AnnouncementsMeta {
+  count: Int!
+  readAt: DateTime
+}
+
+input CreateAnnouncementInput {
+  roomId: UUID!
+  title: String!
+  body: String!
+}
+
+input UpdateAnnouncementInput {
+  id: ID!
+  title: String
+  body: String
+}

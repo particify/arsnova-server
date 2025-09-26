@@ -22,6 +22,20 @@ repos:
         entry: ./gradlew
         args: [checkstyleMain, checkstyleTest]
         pass_filenames: false
+      - id: spotless
+        name: Spotless
+        files: \.(java|kts?)$
+        language: system
+        entry: ./gradlew
+        args: [spotlessCheck]
+        pass_filenames: false
+      - id: detekt
+        name: Detekt
+        files: \.kts?$
+        language: system
+        entry: ./gradlew
+        args: [detekt]
+        pass_filenames: false
       - id: ktlint
         name: Ktlint
         files: \.kts?$

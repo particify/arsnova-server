@@ -1,0 +1,103 @@
+extend type Query {
+  roomById(id: ID!): Room
+  roomByShortId(shortId: ID!): Room
+  rooms(
+    room: RoomQueryInput!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): RoomConnection
+  roomsByUserId(
+    userId: UUID!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): RoomMembershipConnection
+  roomMembershipById(roomId: UUID!): RoomMembership
+  roomMembershipByShortId(shortId: String!): RoomMembership
+  roomMemberships(
+    query: RoomQueryInput
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): RoomMembershipConnection
+  roomManagingMembersByRoomId(roomId: UUID!): [RoomMember!]
+}
+
+extend type Mutation {
+  createRoom(input: CreateRoomInput!): Room!
+  deleteRoom(id: ID!): Boolean!
+  duplicateDemoRoom: Room!
+  duplicateRoom(input: DuplicateRoomInput!): Room!
+  grantRoomRole(roomId: UUID!, userId: UUID!, role: RoomRole!): Boolean!
+  joinRoom(input: JoinRoomInput!): RoomMembership!
+  revokeRoomRole(roomId: UUID!, userId: UUID!): Boolean!
+  updateRoom(input: UpdateRoomInput!): Room!
+}
+
+type Room {
+  id: ID!
+  shortId: ID!
+  name: String!
+  description: String
+  descriptionRendered: String
+}
+
+type RoomMembership {
+  room: Room!
+  role: RoomRole!
+  lastActivityAt: DateTime!
+  stats: RoomStats
+}
+
+type RoomMember {
+  user: User
+  role: RoomRole
+}
+
+enum RoomRole {
+  OWNER
+  EDITOR
+  MODERATOR
+  PARTICIPANT
+  NONE
+}
+
+type RoomStats {
+  roomUserCount: Int
+  contentCount: Int
+  ackCommentCount: Int
+}
+
+input RoomQueryInput {
+  id: ID
+  shortId: ID
+  name: String
+}
+
+input RoomQueryUserInput {
+  id: ID!
+}
+
+input CreateRoomInput {
+  name: String!
+}
+
+input UpdateRoomInput {
+  id: ID!
+  name: String
+  description: String
+}
+
+input JoinRoomInput @oneOf {
+  id: ID
+  shortId: ID
+}
+
+input DuplicateRoomInput {
+  id: ID!
+  newName: String!
+}

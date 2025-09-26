@@ -4,14 +4,18 @@ version = "0.0.1-SNAPSHOT"
 extra["gitlabHost"] = "gitlab.com"
 
 plugins {
-  alias(libs.plugins.spotbugs) apply false
-  alias(libs.plugins.jib) apply false
   alias(libs.plugins.aspectj) apply false
-  alias(libs.plugins.ktlint) apply false
-  alias(libs.plugins.spring.boot) apply false
+  alias(libs.plugins.detekt) apply false
+  alias(libs.plugins.graalvm.native) apply false
+  alias(libs.plugins.jib) apply false
+  alias(libs.plugins.kapt) apply false
   alias(libs.plugins.kotlin.jvm) apply false
   alias(libs.plugins.kotlin.jpa) apply false
   alias(libs.plugins.kotlin.spring) apply false
+  alias(libs.plugins.ktlint) apply false
+  alias(libs.plugins.spotbugs) apply false
+  alias(libs.plugins.spotless) apply false
+  alias(libs.plugins.spring.boot) apply false
 }
 
 subprojects {

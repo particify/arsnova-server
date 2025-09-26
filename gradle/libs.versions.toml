@@ -3,18 +3,29 @@ aspectj-plugin = "8.14.2"
 aspectj-rt = "1.9.24"
 bucket4j = "8.15.0"
 checkstyle = "10.12.4"
+detekt = "1.23.8"
 ektorp = "1.5.0"
 guava = "33.5.0-jre"
+graalvm-native-plugin = "0.10.6"
+graphql-scalars = "22.0"
 java-jwt = "4.5.0"
 jib-plugin = "3.4.5"
 kotlin = "2.2.20"
+ktfmt = "0.55"
 ktlint-plugin = "13.1.0"
 lms-connector = "1.0.2"
+opensaml = "5.1.4"
 pac4j = "6.2.2"
 spotbugs-annotations = "4.9.6"
+prettier = "3.5.3"
+prettier-toml = "2.0.5"
+prettier-xml = "3.4.1"
+querydsl = "6.12"
 spotbugs-plugin = "6.2.3"
+spotless = "7.0.4"
 spring-boot-plugin = "3.5.6"
 spring-cloud = "2025.0.0"
+spring-modulith = "1.4.1"
 springmockk = "4.0.2"
 
 [libraries]
@@ -22,23 +33,62 @@ aspectj-rt = { module = "org.aspectj:aspectjrt", version.ref = "aspectj-rt" }
 bucket4j = { module = "com.bucket4j:bucket4j_jdk17-core", version.ref = "bucket4j" }
 ektorp = { module = "org.ektorp:org.ektorp", version.ref = "ektorp" }
 ektorp-spring = { module = "org.ektorp:org.ektorp.spring", version.ref = "ektorp" }
+graphql-scalars = { module = "com.graphql-java:graphql-java-extended-scalars", version.ref = "graphql-scalars" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
+jackson-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" }
+jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
 java-jwt = { module = "com.auth0:java-jwt", version.ref = "java-jwt" }
+junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+kotlin-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
+liquibase = { module = "org.liquibase:liquibase-core" }
 lms-connector = { module = "net.particify.arsnova.integrations:connector-client", version.ref = "lms-connector" }
+opensaml-api = { module = "org.opensaml:opensaml-saml-api", version.ref = "opensaml" }
+opensaml-impl = { module = "org.opensaml:opensaml-saml-impl", version.ref = "opensaml" }
 pac4j-jakartaee = { module = "org.pac4j:pac4j-jakartaee", version.ref = "pac4j" }
 pac4j-oauth = { module = "org.pac4j:pac4j-oauth", version.ref = "pac4j" }
 pac4j-oidc = { module = "org.pac4j:pac4j-oidc", version.ref = "pac4j" }
 pac4j-saml = { module = "org.pac4j:pac4j-saml", version.ref = "pac4j" }
+postgresql = { module = "org.postgresql:postgresql" }
+querydsl-jpa = { module = "io.github.openfeign.querydsl:querydsl-jpa", version.ref = "querydsl" }
+querydsl-apt = { module = "io.github.openfeign.querydsl:querydsl-apt", version.ref = "querydsl" }
 spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugs-annotations" }
+spring-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+spring-cache = { module = "org.springframework.boot:spring-boot-starter-cache" }
 spring-cloud = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "spring-cloud" }
+spring-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
+spring-docker = { module = "org.springframework.boot:spring-boot-docker-compose" }
+spring-hal-explorer = { module = "org.springframework.data:spring-data-rest-hal-explorer" }
+spring-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
+spring-graphql = { module = "org.springframework.boot:spring-boot-starter-graphql" }
+spring-graphql-test = { module = "org.springframework.graphql:spring-graphql-test" }
+spring-modulith = { module = "org.springframework.modulith:spring-modulith-starter-core" }
+spring-modulith-bom = { module = "org.springframework.modulith:spring-modulith-bom", version.ref = "spring-modulith" }
+spring-modulith-actuator = { module = "org.springframework.modulith:spring-modulith-actuator" }
+spring-modulith-observability = { module = "org.springframework.modulith:spring-modulith-observability" }
+spring-modulith-test = { module = "org.springframework.modulith:spring-modulith-starter-test" }
+spring-security = { module = "org.springframework.boot:spring-boot-starter-security" }
+spring-security-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }
+spring-security-saml = { module = "org.springframework.security:spring-security-saml2-service-provider" }
+spring-security-test = { module = "org.springframework.security:spring-security-test" }
+spring-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+spring-testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
+spring-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
+spring-websocket = { module = "org.springframework.boot:spring-boot-starter-websocket" }
+spring-web = { module = "org.springframework.boot:spring-boot-starter-web" }
 springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmockk" }
+testcontainers-postgresql = { module = "org.testcontainers:postgresql" }
 
 [plugins]
 aspectj = { id = "io.freefair.aspectj.post-compile-weaving", version.ref = "aspectj-plugin" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+graalvm-native = { id = "org.graalvm.buildtools.native", version.ref = "graalvm-native-plugin" }
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib-plugin" }
+kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-plugin" }
 spotbugs = { id = "com.github.spotbugs", version.ref = "spotbugs-plugin" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot-plugin" }

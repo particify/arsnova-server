@@ -1,0 +1,26 @@
+services:
+  arsnova-server-core4:
+    image: devcontainer-arsnova-server-core4:$CORE4_TAG
+    init: true
+    build:
+      context: $ROOT_DIR/core4/.devcontainer
+      args:
+        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/core4:$CORE4_TAG
+        INSTALL_MAVEN: "true"
+        MAVEN_VERSION: $MAVEN_VERSION
+    environment:
+      SERVER_PORT: ""
+      SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
+      GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
+    volumes:
+      - $ROOT_DIR:/workspace
+      - gradle-workspace-core4:/workspace/.gradle
+      - gradle-cache-core4:/home/dev/.gradle/caches
+      - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
+      - gradle-wrapper:/home/dev/.gradle/wrapper
+      - vscode-extensions-core4:/home/dev/.vscode-server/extensions
+
+volumes:
+  gradle-cache-core4:
+  gradle-workspace-core4:
+  vscode-extensions-core4:
