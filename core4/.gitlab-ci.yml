@@ -14,6 +14,8 @@ spotless:
   needs:
     - compile
   script:
+    # git fetch is needed for Spotless' ratchetFrom
+    - git fetch origin master
     - ../gradlew $GRADLE_CLI_OPTS spotlessKotlinApply spotlessKotlinGradleApply -x classes
 
 detekt:
