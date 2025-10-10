@@ -11,7 +11,7 @@ and https://www.apollographql.com/docs/react[Apollo Client]
 with https://the-guild.dev/graphql/apollo-angular/docs[Apollo Angular] on the frontend side.
 
 A good starting point to learn more about GraphQL is the official https://graphql.org/learn/[Introduction to GraphQL].
-GraphiQL, which is http://localhost:9080/graphiql/[embedded] to our server, can be helpful to get familiar with our existing API.
+GraphiQL, which is http://localhost:9080/api/graphiql/[embedded] to our server, can be helpful to get familiar with our existing API.
 
 == API development workflow
 
