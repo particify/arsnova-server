@@ -24,6 +24,8 @@ persistence:
 mail:
   sender-address: arsnova@localhost
   sender-name: arsnova
+  host: mailpit
+  port: 1025
 
 service:
   root-url: http://localhost:4200
