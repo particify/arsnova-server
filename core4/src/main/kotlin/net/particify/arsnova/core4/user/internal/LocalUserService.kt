@@ -6,8 +6,10 @@ package net.particify.arsnova.core4.user.internal
 import java.security.SecureRandom
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 import kotlin.math.pow
 import kotlin.math.roundToLong
+import net.particify.arsnova.core4.system.MailService
 import net.particify.arsnova.core4.user.User
 import org.slf4j.LoggerFactory
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -20,7 +22,8 @@ const val VERIFICATION_CODE_LENGTH = 6
 @Service
 class LocalUserService(
     private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val mailService: MailService
 ) {
   companion object {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -28,7 +31,12 @@ class LocalUserService(
 
   private val secureRandom = SecureRandom()
 
-  fun claimUnverifiedUser(user: User, mailAddress: String, password: String): Boolean {
+  fun claimUnverifiedUser(
+      user: User,
+      mailAddress: String,
+      password: String,
+      locale: Locale
+  ): Boolean {
     if (user.mailAddress != null || user.password != null) {
       return false
     }
@@ -36,13 +44,21 @@ class LocalUserService(
     user.unverifiedMailAddress = mailAddress
     user.password = passwordEncoder.encode(password)
     userRepository.save(user)
+    sendVerificationMail(user, "welcome-verification", locale)
     return true
   }
 
-  fun initiateMailVerification(user: User, mailAddress: String) {
+  fun initiateMailVerification(user: User, mailAddress: String, locale: Locale) {
     initiateVerification(user)
     user.unverifiedMailAddress = mailAddress
     userRepository.save(user)
+    sendVerificationMail(user, "mail-verification", locale)
+  }
+
+  private fun sendVerificationMail(user: User, template: String, locale: Locale) {
+    val code = toFixedLength(user.verificationCode!!)
+    val templateData = mapOf("code" to code)
+    mailService.sendMail(user.unverifiedMailAddress!!, template, templateData, locale)
   }
 
   fun completeMailVerification(user: User, verificationCode: Int): Boolean {
@@ -59,13 +75,20 @@ class LocalUserService(
     return true
   }
 
-  fun initiatePasswordReset(user: User): Boolean {
+  fun initiatePasswordReset(user: User, locale: Locale): Boolean {
     if (user.password == null || user.mailAddress == null) {
       return false
     }
     initiateVerification(user)
     userRepository.save(user)
+    sendPasswordResetMail(user, locale)
     return true
+  }
+
+  private fun sendPasswordResetMail(user: User, locale: Locale) {
+    val code = toFixedLength(user.verificationCode!!)
+    val templateData = mapOf("code" to code)
+    mailService.sendMail(user.mailAddress!!, "password-reset", templateData, locale)
   }
 
   fun completePasswordReset(user: User, password: String, verificationCode: Int): Boolean {

@@ -20,3 +20,10 @@ persistence:
   v3-migration:
     authentication-provider-mapping:
       SAML: fc62cd95-bea9-4aa3-987d-fa976ef300f3
+
+mail:
+  sender-address: arsnova@localhost
+  sender-name: arsnova
+
+service:
+  root-url: http://localhost:4200

@@ -1,0 +1,9 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:insert="head.html"></head>
+<body>
+<h1 th:text="#{mail.welcome(${productName})}"></h1>
+<p th:text="#{mail.verification-code-intro}"></p>
+<p class="code" th:text="${code}"></p>
+<footer th:insert="footer.html"></footer>
+</body>
+</html>

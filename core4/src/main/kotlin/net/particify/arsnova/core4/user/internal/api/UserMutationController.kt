@@ -3,6 +3,7 @@
  */
 package net.particify.arsnova.core4.user.internal.api
 
+import java.util.Locale
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.internal.LocalUserService
 import net.particify.arsnova.core4.user.internal.UserRepository
@@ -24,17 +25,19 @@ class UserMutationController(
   fun claimUnverifiedUser(
       @Argument mailAddress: String,
       @Argument password: String,
-      @AuthenticationPrincipal user: User
+      @AuthenticationPrincipal user: User,
+      locale: Locale
   ): Boolean {
-    return localUserService.claimUnverifiedUser(user, mailAddress, password)
+    return localUserService.claimUnverifiedUser(user, mailAddress, password, locale)
   }
 
   @MutationMapping
   fun updateUserMailAddress(
       @Argument mailAddress: String,
-      @AuthenticationPrincipal user: User
+      @AuthenticationPrincipal user: User,
+      locale: Locale
   ): Boolean {
-    localUserService.initiateMailVerification(user, mailAddress)
+    localUserService.initiateMailVerification(user, mailAddress, locale)
     return true
   }
 
