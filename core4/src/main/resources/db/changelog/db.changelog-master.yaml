@@ -47,12 +47,16 @@ databaseChangeLog:
               - column:
                   name: username
                   type: varchar(100)
+                  constraints:
+                    unique: true
               - column:
                   name: password
                   type: varchar(100)
               - column:
                   name: mail_address
                   type: varchar(100)
+                  constraints:
+                    unique: true
               - column:
                   name: unverified_mail_address
                   type: varchar(100)
@@ -122,16 +126,6 @@ databaseChangeLog:
               - column:
                   name: deleted_at
                   type: timestamp with time zone
-        - createIndex:
-            schemaName: user
-            tableName: user
-            column:
-              - name: username
-        - createIndex:
-            schemaName: user
-            tableName: user
-            column:
-              - name: mail_address
         - createIndex:
             schemaName: user
             tableName: user
