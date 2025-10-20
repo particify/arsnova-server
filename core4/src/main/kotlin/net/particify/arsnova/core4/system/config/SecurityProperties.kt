@@ -15,6 +15,7 @@ import org.springframework.validation.annotation.Validated
 @Validated
 data class SecurityProperties(
     @field:Valid val jwt: Jwt,
+    @field:Valid val challenge: Challenge,
     @field:NotBlank val authorizeUriHeader: String,
     @field:NotBlank val authorizeUriPrefix: String,
 ) {
@@ -23,5 +24,11 @@ data class SecurityProperties(
       @field:NotBlank val issuer: String,
       val idpIssuer: URL?,
       val validityPeriod: Duration
+  )
+
+  data class Challenge(
+      @field:Length(min = 32) val secret: String,
+      val maxNumber: Long,
+      val validitySeconds: Long
   )
 }

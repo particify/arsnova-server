@@ -43,6 +43,7 @@ dependencies {
   implementation(libs.querydsl.jpa)
   implementation(libs.liquibase)
   implementation(libs.thymeleaf.spring)
+  implementation(libs.altcha)
   developmentOnly(libs.spring.hal.explorer)
   compileOnly(libs.postgresql)
   developmentOnly(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))

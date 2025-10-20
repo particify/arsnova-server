@@ -39,8 +39,9 @@ class JwtUtils(securityProperties: SecurityProperties, private val jwtDecoder: J
   fun encodeJwt(
       subject: String,
       roles: List<String>,
+      expirationTime: Instant = Instant.now().plus(defaultValidityPeriod)
   ): String {
-    val jwt = SignedJWT(header, buildClaimsSet(subject, mapOf("roles" to roles)))
+    val jwt = SignedJWT(header, buildClaimsSet(subject, mapOf("roles" to roles), expirationTime))
     jwt.sign(signer)
     return jwt.serialize()
   }
@@ -48,10 +49,9 @@ class JwtUtils(securityProperties: SecurityProperties, private val jwtDecoder: J
   private fun buildClaimsSet(
       subject: String,
       claims: Map<String, Any>,
+      expirationTime: Instant
   ): JWTClaimsSet {
     val issueTime = Instant.now()
-    val expirationTime = issueTime.plus(defaultValidityPeriod)
-
     val builder =
         JWTClaimsSet.Builder()
             .issuer(issuer)

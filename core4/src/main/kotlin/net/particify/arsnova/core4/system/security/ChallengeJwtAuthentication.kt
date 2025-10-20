@@ -3,13 +3,15 @@
  */
 package net.particify.arsnova.core4.system.security
 
-import net.particify.arsnova.core4.user.User
+import java.util.UUID
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
 
-class JwtAuthentication(
+const val CHALLENGE_SOLVED_ROLE = "CHALLENGE_SOLVED"
+
+class ChallengeJwtAuthentication(
     private val token: String,
-    private var principal: User? = null,
+    private var principal: UUID? = null,
     grantedAuthorities: Set<GrantedAuthority?> = emptySet()
 ) : AbstractAuthenticationToken(grantedAuthorities) {
   init {
