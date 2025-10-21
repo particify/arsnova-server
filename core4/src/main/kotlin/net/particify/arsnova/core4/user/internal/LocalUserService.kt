@@ -34,7 +34,7 @@ class LocalUserService(
     }
     initiateVerification(user)
     user.unverifiedMailAddress = mailAddress
-    user.password = password
+    user.password = passwordEncoder.encode(password)
     userRepository.save(user)
     return true
   }
@@ -53,6 +53,7 @@ class LocalUserService(
       return false
     }
     user.mailAddress = user.unverifiedMailAddress
+    user.username = user.unverifiedMailAddress
     user.resetVerification()
     userRepository.save(user)
     return true
