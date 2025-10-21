@@ -15,7 +15,10 @@ import org.springframework.stereotype.Component
 private val ID_PATTERN = Pattern.compile("challenge-(.*)")
 
 @Component
-class ChallengeAuthenticationProvider(private val jwtUtils: JwtUtils) : AuthenticationProvider {
+class ChallengeAuthenticationProvider(
+    private val challengeService: ChallengeService,
+    private val jwtUtils: JwtUtils
+) : AuthenticationProvider {
   override fun authenticate(authentication: Authentication): Authentication? {
     val token = authentication.credentials as String
     try {
@@ -28,6 +31,8 @@ class ChallengeAuthenticationProvider(private val jwtUtils: JwtUtils) : Authenti
       val id =
           if (matcher.matches()) matcher.group(1)
           else throw BadCredentialsException("Invalid ID pattern for subject")
+      if (!challengeService.useId(UUID.fromString(id)))
+          throw BadCredentialsException("Challenge solution already used")
       return ChallengeJwtAuthentication(
           token, UUID.fromString(id), setOf(SimpleGrantedAuthority(CHALLENGE_SOLVED_ROLE)))
     } catch (e: JwtException) {
