@@ -72,6 +72,8 @@ dependencies {
 
 kotlin { compilerOptions { freeCompilerArgs.addAll("-Xjsr305=strict") } }
 
+tasks.bootRun { setArgs(listOf("--spring.profiles.active=dev")) }
+
 tasks.withType<Test> { useJUnitPlatform() }
 
 tasks.jib { jib { from { image = "eclipse-temurin:21-alpine" } } }

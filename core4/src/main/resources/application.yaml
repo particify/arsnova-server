@@ -35,8 +35,6 @@ docker:
 
 security:
   jwt:
-    issuer: arsnova.backend.v3:example.com
-    secret: weaksecret1234567890123456789012
     validity-period: 6H
   authorize-uri-header: X-Forwarded-Uri
   authorize-uri-prefix: /api

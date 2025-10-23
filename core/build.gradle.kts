@@ -70,6 +70,10 @@ dependencies {
   implementation(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.18.4.1"))
 }
 
+tasks.bootRun {
+  setArgs(listOf("--spring.profiles.active=dev"))
+}
+
 tasks.withType<Test> {
   useJUnitPlatform()
 }
