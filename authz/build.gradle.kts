@@ -17,6 +17,9 @@ java {
   }
 }
 
+val debugHost = System.getenv("DEBUG_HOST") ?: "127.0.0.1"
+val debugPort = System.getenv("DEBUG_PORT")?.toInt() ?: 5005
+
 dependencies {
   implementation(platform(project(":platform")))
   implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
@@ -48,6 +51,13 @@ kotlin {
   compilerOptions {
     freeCompilerArgs.addAll("-Xjsr305=strict")
     jvmTarget = JvmTarget.JVM_21
+  }
+}
+
+tasks.bootRun {
+  debugOptions {
+    host = debugHost
+    port = debugPort
   }
 }
 

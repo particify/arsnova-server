@@ -13,6 +13,9 @@ java {
   }
 }
 
+val debugHost = System.getenv("DEBUG_HOST") ?: "127.0.0.1"
+val debugPort = System.getenv("DEBUG_PORT")?.toInt() ?: 5005
+
 dependencies {
   implementation(platform(project(":platform")))
   implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
@@ -29,6 +32,13 @@ dependencies {
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   compileOnly(libs.spotbugs.annotations)
+}
+
+tasks.bootRun {
+  debugOptions {
+    host = debugHost
+    port = debugPort
+  }
 }
 
 tasks.withType<Test> {
