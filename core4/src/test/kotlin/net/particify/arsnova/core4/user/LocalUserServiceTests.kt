@@ -4,6 +4,7 @@
 package net.particify.arsnova.core4.user
 
 import java.time.Instant
+import java.util.Locale
 import net.particify.arsnova.core4.TestcontainersConfiguration
 import net.particify.arsnova.core4.user.internal.LocalUserService
 import org.junit.jupiter.api.Assertions
@@ -21,7 +22,7 @@ class LocalUserServiceTests {
   fun shouldClaimUnverifiedUser() {
     val mailAddress = "shouldClaimUnverifiedUser@example.com"
     val user = User()
-    val result = localUserService.claimUnverifiedUser(user, mailAddress, "password")
+    val result = localUserService.claimUnverifiedUser(user, mailAddress, "password", Locale.ENGLISH)
     Assertions.assertTrue(result)
     Assertions.assertEquals(mailAddress, user.unverifiedMailAddress)
     Assertions.assertNull(user.mailAddress)
@@ -34,7 +35,7 @@ class LocalUserServiceTests {
   fun shouldNotClaimVerifiedUser() {
     val mailAddress = "shouldNotClaimVerifiedUser@example.com"
     val user = User(mailAddress = "verified-user@example.com", password = "{noop}password")
-    val result = localUserService.claimUnverifiedUser(user, mailAddress, "password")
+    val result = localUserService.claimUnverifiedUser(user, mailAddress, "password", Locale.ENGLISH)
     Assertions.assertFalse(result)
   }
 
@@ -42,7 +43,7 @@ class LocalUserServiceTests {
   fun shouldInitiateMailVerification() {
     val mailAddress = "shouldInitiateMailVerification@example.com"
     val user = User()
-    localUserService.initiateMailVerification(user, mailAddress)
+    localUserService.initiateMailVerification(user, mailAddress, Locale.ENGLISH)
     Assertions.assertEquals(mailAddress, user.unverifiedMailAddress)
     Assertions.assertNull(user.mailAddress)
     Assertions.assertNotNull(user.verificationCode)

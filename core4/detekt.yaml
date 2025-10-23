@@ -1,3 +1,6 @@
+complexity:
+  TooManyFunctions:
+    thresholdInClasses: 16
 style:
   ReturnCount:
     excludeGuardClauses: true

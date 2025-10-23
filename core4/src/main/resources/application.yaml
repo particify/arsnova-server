@@ -51,3 +51,6 @@ common:
   text-rendering:
     enabled: true
     service-url: http://arsnova-server-formatting:3000
+
+service:
+  product-name: arsnova

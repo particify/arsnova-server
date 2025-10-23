@@ -1,0 +1,7 @@
+mail:
+  password-reset-intro: Du hast eine Passwortrücksetzung für {0} angefordert.
+  password-reset-subject: Verifizierungscode für Passwortrücksetzung
+  password-reset-your-code: "Hier ist der Verifizierungscode, den du zum Setzen eines neuen Passworts benötigst:"
+  verification-code-intro: "Hier ist der Code, den du für die Verifizierung deiner E-Mail-Adresse benötigst:"
+  verification-code-subject: "{0} ist dein {1}-Verifizierungscode"
+  welcome: Willkommen bei {0}!

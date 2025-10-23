@@ -1,0 +1,7 @@
+[(#{mail.welcome(${productName})})]
+
+[(#{mail.verification-code-intro})]
+
+    [(${code})]
+
+[# th:insert="footer.txt" /]

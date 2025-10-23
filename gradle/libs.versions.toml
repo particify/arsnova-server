@@ -62,6 +62,7 @@ spring-hal-explorer = { module = "org.springframework.data:spring-data-rest-hal-
 spring-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
 spring-graphql = { module = "org.springframework.boot:spring-boot-starter-graphql" }
 spring-graphql-test = { module = "org.springframework.graphql:spring-graphql-test" }
+spring-mail = { module = "org.springframework.boot:spring-boot-starter-mail" }
 spring-modulith = { module = "org.springframework.modulith:spring-modulith-starter-core" }
 spring-modulith-bom = { module = "org.springframework.modulith:spring-modulith-bom", version.ref = "spring-modulith" }
 spring-modulith-actuator = { module = "org.springframework.modulith:spring-modulith-actuator" }
@@ -78,6 +79,7 @@ spring-websocket = { module = "org.springframework.boot:spring-boot-starter-webs
 spring-web = { module = "org.springframework.boot:spring-boot-starter-web" }
 springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmockk" }
 testcontainers-postgresql = { module = "org.testcontainers:postgresql" }
+thymeleaf-spring = { module = "org.thymeleaf:thymeleaf-spring6" }
 
 [plugins]
 aspectj = { id = "io.freefair.aspectj.post-compile-weaving", version.ref = "aspectj-plugin" }
