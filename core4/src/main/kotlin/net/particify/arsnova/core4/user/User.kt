@@ -50,6 +50,7 @@ class User(
     )
     val roles: MutableList<Role> = mutableListOf(),
     @JdbcTypeCode(SqlTypes.JSON) val settings: MutableMap<String, Any> = mutableMapOf(),
+    var tokenVersion: Int? = 1,
     var passwordChangedAt: Instant? = null,
     var announcementsReadAt: Instant? = null,
     var verificationCode: Int? = null,

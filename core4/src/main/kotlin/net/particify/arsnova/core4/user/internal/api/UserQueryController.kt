@@ -13,11 +13,17 @@ import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.graphql.data.query.ScrollSubrange
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Controller
 
 @Controller
 @SchemaMapping(typeName = "Query")
 class UserQueryController(private val userRepository: UserRepository) {
+  @QueryMapping
+  fun currentUser(@AuthenticationPrincipal user: User): User {
+    return user
+  }
+
   @QueryMapping
   fun users(@Argument user: User, subrange: ScrollSubrange): Window<User> {
     val matcher = ExampleMatcher.matchingAll().withIgnorePaths("version")

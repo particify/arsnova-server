@@ -7,6 +7,7 @@ import jakarta.servlet.DispatcherType
 import java.util.function.Consumer
 import net.particify.arsnova.core4.system.security.AuthenticationSuccessHandler
 import net.particify.arsnova.core4.system.security.ChallengeJwtAuthenticationFilter
+import net.particify.arsnova.core4.system.security.RefreshAuthenticationFilter
 import net.particify.arsnova.core4.system.security.UserJwtAuthenticationFilter
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.internal.Saml2ResponseAuthenticationConverter
@@ -20,6 +21,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.converter.RsaKeyConverters
 import org.springframework.security.saml2.core.Saml2X509Credential
 import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider
@@ -33,6 +35,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationEn
 @Configuration
 @EnableWebSecurity
 class SecurityConfiguration(
+    private val refreshAuthenticationFilter: RefreshAuthenticationFilter,
     private val challengeJwtAuthenticationFilter: ChallengeJwtAuthenticationFilter,
     private val userJwtAuthenticationFilter: UserJwtAuthenticationFilter
 ) {
@@ -46,6 +49,7 @@ class SecurityConfiguration(
     http
         .csrf(AbstractHttpConfigurer<*, *>::disable)
         .cors(AbstractHttpConfigurer<*, *>::disable)
+        .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
         .formLogin(Customizer.withDefaults())
         .httpBasic(Customizer.withDefaults())
         .authorizeHttpRequests { authorize ->
@@ -54,12 +58,13 @@ class SecurityConfiguration(
               .permitAll()
               .requestMatchers("/graphql")
               .authenticated()
-              .requestMatchers(
-                  "/challenge", "/configuration", "/auth/login/**", "/auth/sso/**", "/jwt")
+              .requestMatchers("/challenge", "/configuration", "/auth/sso/**", "/jwt")
               .permitAll()
               .anyRequest()
               .authenticated()
         }
+        .addFilterBefore(
+            refreshAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
         .addFilterBefore(
             challengeJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
         .addFilterBefore(

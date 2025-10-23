@@ -79,6 +79,12 @@ databaseChangeLog:
                     nullable: false
                   defaultValue: "{}"
               - column:
+                  name: token_version
+                  type: smallint
+                  constraints:
+                    nullable: false
+                  defaultValue: 1
+              - column:
                   name: password_changed_at
                   type: timestamp with time zone
               - column:

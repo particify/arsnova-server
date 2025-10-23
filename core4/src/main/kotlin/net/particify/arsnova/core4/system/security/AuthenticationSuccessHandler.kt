@@ -3,8 +3,6 @@
  */
 package net.particify.arsnova.core4.system.security
 
-import jakarta.servlet.ServletContext
-import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import net.particify.arsnova.core4.user.User
@@ -14,12 +12,9 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component
 
 @Component
-class AuthenticationSuccessHandler(
-    private val servletContext: ServletContext,
-    private val jwtUtils: JwtUtils
-) : SimpleUrlAuthenticationSuccessHandler() {
+class AuthenticationSuccessHandler(private val refreshCookieComponent: RefreshCookieComponent) :
+    SimpleUrlAuthenticationSuccessHandler() {
   companion object {
-    const val AUTH_COOKIE_NAME: String = "auth"
     const val URL_ATTRIBUTE: String = "ars-login-success-url"
   }
 
@@ -42,16 +37,11 @@ class AuthenticationSuccessHandler(
     val session = request.getSession(false)
     if (session == null || session.getAttribute(URL_ATTRIBUTE) == null) {
       val user = authentication.principal as User
-      val token = jwtUtils.encodeJwt(user.id.toString(), user.roles.map { it.name!! })
-      val cookie = Cookie(AUTH_COOKIE_NAME, token)
-      cookie.path = servletContext.contextPath
-      cookie.secure = request.isSecure
-      cookie.isHttpOnly = true
-      response.addCookie(cookie)
+      val subject = user.id.toString()
+      refreshCookieComponent.add(subject, user.version!!, response)
       response.contentType = MediaType.TEXT_HTML_VALUE
       response.writer.println(
           "<!DOCTYPE html><script>if (window.opener) window.close(); else location.href='/login/complete'</script>")
-
       return
     }
     super.onAuthenticationSuccess(request, response, authentication)

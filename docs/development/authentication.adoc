@@ -1,0 +1,99 @@
+= Authentication
+ifdef::env-github[]
+:MERMAID: source, mermaid
+endif::[]
+ifndef::env-github[]
+:MERMAID: mermaid
+endif::[]
+
+All API endpoints, except for the challenge endpoint, require authentication.
+In most cases, authentication for an existing user account is needed.
+But for a few endpoints, a user account or respective authentication is not available, e.g. login or account creation.
+For these cases, anonymous authentication is available, which does not authenticate a specific user.
+It instead testifies that the client has solved a proof of work challenge.
+
+== Proof of work
+
+Proof of work is a method where the client has to solve a server provided cryptographic challenge.
+While it is easy for the server to generate the challenge and verify the solution, it is expansive to solve for the client.
+We use PoW as a form of protection against DoS attacks and bots.
+
+For the implementation of a PoW algorithm the Altcha library is used.
+The client fetches a challenge via `GET` request to `/api/challenge` and sends its solution to the URI as `POST` request.
+If the challenge is verified successfully, the server responds with an authentication token.
+This token has a short expiration time and is only accepted to authenticate a single request.
+
+== Tokens
+
+JSON Web Tokens are used to authentication clients statelessly for use of the API.
+Following a common security practise, two separate tokens are used:
+
+* A short-lived access token which authorizes the client for API access.
+  It cannot be revoked.
+  The client sends this token in the `Authorization` header for further API requests.
+* A long-lived refresh token which allows the client to request new access tokens.
+  It can be revoked by increasing the users token version.
+  To protect this token against XSS attacks, it is stored using an `HttpOnly` cookie.
+  Therefore, it is not accessible through JavaScript.
+
+=== Obtaining tokens
+
+The following diagram visualizes the process of obtaining tokens when a user logs in.
+The `/api` prefix has been omitted for clarity.
+
+[{MERMAID}]
+----
+sequenceDiagram
+actor User
+
+User ->> Browser: Submit login
+activate Browser
+
+Browser ->> Server: GET /challenge
+activate Server
+Server ->> Server: Generate challenge (Altcha)
+Server -->> Browser: Payload (JSON): Challenge data
+deactivate Server
+
+Browser ->> Browser: Solve challenge (Altcha)
+
+Browser ->> Server: POST /challenge<br>Payload (JSON): Solution
+activate Server
+Server ->> Server: Verify solution (Altcha)
+Server -->> Browser: Payload (JSON): Challenge access token<br>(one-time use)
+deactivate Server
+
+Browser ->> Server: POST /auth/login<br>Payload (JSON): Username + password
+activate Server
+Server ->> Server: Verify credentials
+Server -->> Browser: Payload (JSON): User access token<br>Cookie: Refresh token
+deactivate Server
+
+Browser ->> Server: POST /graphql<br>Authorization: Bearer <access token><br>Payload (GraphQL): currentUser
+activate Server
+Server ->> Server: Verify JWT
+Server -->> Browser: Cookie: Refresh token<br>Payload (GraphQL data): currentUser
+deactivate Server
+
+Browser -->> User: Logged in
+deactivate Browser
+
+Browser ->> Server: POST /auth/refresh<br>Cookie: Refresh token
+activate Browser
+activate Server
+Server ->> Server: Verify JWT
+Server -->> Browser: Cookie: Refresh token (new)<br>Payload (JSON): User access token (new)
+deactivate Browser
+deactivate Server
+
+User ->> Browser: Logout
+activate Browser
+
+Browser ->> Server: POST /auth/logout
+activate Server
+Server -->> Browser: Cookie: Refresh token (delete)
+deactivate Server
+
+Browser -->> User: Logged out
+deactivate Browser
+----
