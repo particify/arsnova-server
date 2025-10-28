@@ -9,6 +9,8 @@ security:
   jwt:
     issuer: arsnova.backend.v3:example.com
     secret: weaksecret1234567890123456789012
+  challenge:
+    secret: weaksecret1234567890123456789012
   saml2:
     relyingparty:
       registration:

@@ -36,6 +36,9 @@ docker:
 security:
   jwt:
     validity-period: 6H
+  challenge:
+    max-number: 100_000
+    validity-seconds: 60
   authorize-uri-header: X-Forwarded-Uri
   authorize-uri-prefix: /api
 

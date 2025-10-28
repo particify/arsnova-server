@@ -17,8 +17,9 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.GenericFilterBean
 
 @Component
-class JwtAuthenticationFilter(private val jwtAuthenticationProvider: JwtAuthenticationProvider) :
-    GenericFilterBean() {
+class UserJwtAuthenticationFilter(
+    private val userJwtAuthenticationProvider: UserJwtAuthenticationProvider
+) : GenericFilterBean() {
   companion object {
     private val BEARER_TOKEN_PATTERN = Pattern.compile("Bearer (.*)", Pattern.CASE_INSENSITIVE)
   }
@@ -34,11 +35,11 @@ class JwtAuthenticationFilter(private val jwtAuthenticationProvider: JwtAuthenti
       logger.debug("Skipping JWT handling due to pattern mismatch.")
       return chain.doFilter(request, response)
     }
-    val authentication = JwtAuthentication(tokenMatcher.group(1))
+    val authentication = UserJwtAuthentication(tokenMatcher.group(1))
 
     try {
       val authenticatedToken: Authentication =
-          jwtAuthenticationProvider.authenticate(authentication)
+          userJwtAuthenticationProvider.authenticate(authentication)
       logger.debug("Storing JWT to SecurityContext: $authenticatedToken")
       SecurityContextHolder.getContext().authentication = authenticatedToken
     } catch (e: AuthenticationException) {

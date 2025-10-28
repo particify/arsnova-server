@@ -12,7 +12,7 @@ import org.springframework.security.oauth2.jwt.JwtException
 import org.springframework.stereotype.Component
 
 @Component
-class JwtAuthenticationProvider(
+class UserJwtAuthenticationProvider(
     private var jwtUtils: JwtUtils,
     private val userService: UserService
 ) : AuthenticationProvider {
@@ -23,7 +23,7 @@ class JwtAuthenticationProvider(
       val user =
           userService.loadUserById(UUID.fromString(jwt.subject))
               ?: throw BadCredentialsException("User for JWT not found.")
-      return JwtAuthentication(token, user, user.getAuthorities())
+      return UserJwtAuthentication(token, user, user.getAuthorities())
     } catch (e: JwtException) {
       throw BadCredentialsException("Invalid JWT", e)
     } catch (e: IllegalArgumentException) {
@@ -31,7 +31,7 @@ class JwtAuthenticationProvider(
     }
   }
 
-  override fun supports(authentication: Class<*>?): Boolean {
-    return JwtAuthentication::class.java.isAssignableFrom(authentication)
+  override fun supports(authentication: Class<*>): Boolean {
+    return UserJwtAuthentication::class.java.isAssignableFrom(authentication)
   }
 }

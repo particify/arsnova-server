@@ -6,7 +6,8 @@ package net.particify.arsnova.core4.system.config
 import jakarta.servlet.DispatcherType
 import java.util.function.Consumer
 import net.particify.arsnova.core4.system.security.AuthenticationSuccessHandler
-import net.particify.arsnova.core4.system.security.JwtAuthenticationFilter
+import net.particify.arsnova.core4.system.security.ChallengeJwtAuthenticationFilter
+import net.particify.arsnova.core4.system.security.UserJwtAuthenticationFilter
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.internal.Saml2ResponseAuthenticationConverter
 import org.opensaml.security.x509.X509Support
@@ -31,7 +32,10 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationEn
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfiguration(private val jwtAuthenticationFilter: JwtAuthenticationFilter) {
+class SecurityConfiguration(
+    private val challengeJwtAuthenticationFilter: ChallengeJwtAuthenticationFilter,
+    private val userJwtAuthenticationFilter: UserJwtAuthenticationFilter
+) {
   @Bean
   fun filterChain(
       http: HttpSecurity,
@@ -50,12 +54,16 @@ class SecurityConfiguration(private val jwtAuthenticationFilter: JwtAuthenticati
               .permitAll()
               .requestMatchers("/graphql")
               .authenticated()
-              .requestMatchers("/configuration", "/auth/login/**", "/auth/sso/**", "/jwt")
+              .requestMatchers(
+                  "/challenge", "/configuration", "/auth/login/**", "/auth/sso/**", "/jwt")
               .permitAll()
               .anyRequest()
               .authenticated()
         }
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+        .addFilterBefore(
+            challengeJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+        .addFilterBefore(
+            userJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
         .exceptionHandling { it.authenticationEntryPoint(BasicAuthenticationEntryPoint()) }
     if (saml2Properties.registration.isNotEmpty()) {
       val samlAuthenticationProvider = OpenSaml5AuthenticationProvider()
