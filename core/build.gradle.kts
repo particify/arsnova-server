@@ -15,6 +15,9 @@ java {
   }
 }
 
+val debugHost = System.getenv("DEBUG_HOST") ?: "127.0.0.1"
+val debugPort = System.getenv("DEBUG_PORT")?.toInt() ?: 5005
+
 repositories {
   mavenCentral()
   maven {
@@ -68,6 +71,14 @@ dependencies {
 
   // Jackson 2.19 causes issues with our migrations, see https://gitlab.com/particify/dev/foss/arsnova-server/-/issues/317
   implementation(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.18.4.1"))
+}
+
+tasks.bootRun {
+  setArgs(listOf("--spring.profiles.active=dev"))
+  debugOptions {
+    host = debugHost
+    port = debugPort
+  }
 }
 
 tasks.withType<Test> {

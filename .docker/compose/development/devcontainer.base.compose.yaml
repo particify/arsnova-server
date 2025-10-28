@@ -35,11 +35,15 @@ services:
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
+      DEBUG_HOST: 0.0.0.0
+      DEBUG_PORT: $CORE_DEBUG_PORT
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
       SECURITY_CORSORIGINS_0: http://localhost
       SECURITY_CORSORIGINS_1: http://localhost:4200
       GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
+    ports:
+      - 127.0.0.1:$CORE_DEBUG_PORT_CORE:$CORE_DEBUG_PORT
     volumes:
       - $ROOT_DIR:/workspace
       - gradle-workspace-core:/workspace/.gradle
@@ -57,9 +61,13 @@ services:
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
+      DEBUG_HOST: 0.0.0.0
+      DEBUG_PORT: $GATEWAY_DEBUG_PORT
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
       GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
+    ports:
+      - $GATEWAY_DEBUG_PORT:$GATEWAY_DEBUG_PORT
     volumes:
       - $ROOT_DIR:/workspace
       - gradle-workspace-gateway:/workspace/.gradle
@@ -77,9 +85,13 @@ services:
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
+      DEBUG_HOST: 0.0.0.0
+      DEBUG_PORT: $WEBSOCKET_DEBUG_PORT
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
       GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
+    ports:
+      - $WEBSOCKET_DEBUG_PORT:$WEBSOCKET_DEBUG_PORT
     volumes:
       - $ROOT_DIR:/workspace
       - gradle-workspace-websocket:/workspace/.gradle
@@ -97,6 +109,8 @@ services:
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
+      DEBUG_HOST: 0.0.0.0
+      DEBUG_PORT: $AUTHZ_DEBUG_PORT
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
       GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
@@ -104,6 +118,8 @@ services:
       PGDATABASE: arsnovaauth
       PGUSER: arsnovaauth
       PGPASSWORD: arsnovaauth
+    ports:
+      - $AUTHZ_DEBUG_PORT:$AUTHZ_DEBUG_PORT
     volumes:
       - $ROOT_DIR:/workspace
       - gradle-workspace-authz:/workspace/.gradle
@@ -121,6 +137,8 @@ services:
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
+      DEBUG_HOST: 0.0.0.0
+      DEBUG_PORT: $COMMENTS_DEBUG_PORT
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
       GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
@@ -128,6 +146,8 @@ services:
       PGDATABASE: arsnovacomment
       PGUSER: arsnovacomment
       PGPASSWORD: arsnovacomment
+    ports:
+      - $COMMENTS_DEBUG_PORT:$COMMENTS_DEBUG_PORT
     volumes:
       - $ROOT_DIR:/workspace
       - gradle-workspace-comments:/workspace/.gradle

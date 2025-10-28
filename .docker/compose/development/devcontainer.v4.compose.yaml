@@ -9,9 +9,13 @@ services:
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: $MAVEN_VERSION
     environment:
+      DEBUG_HOST: 0.0.0.0
+      DEBUG_PORT: $CORE4_DEBUG_PORT
       SERVER_PORT: ""
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
       GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
+    ports:
+      - $CORE4_DEBUG_PORT:$CORE4_DEBUG_PORT
     volumes:
       - $ROOT_DIR:/workspace
       - gradle-workspace-core4:/workspace/.gradle
