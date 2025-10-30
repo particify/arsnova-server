@@ -1,13 +1,5 @@
 extend type Query {
   currentUser: User
-  userById(id: ID): User
-  users(
-    user: UserQueryInput!
-    first: Int
-    after: String
-    last: Int
-    before: String
-  ): UserConnection
 }
 
 extend type Mutation {
