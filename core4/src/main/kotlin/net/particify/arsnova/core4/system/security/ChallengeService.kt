@@ -45,7 +45,8 @@ class ChallengeService(
     val id = Altcha.extractParams(payload.salt)["id"]
     val expires = Instant.ofEpochSecond(Altcha.extractParams(payload.salt)["expires"]!!.toLong())
 
-    return jwtUtils.encodeJwt("challenge-$id", listOf(CHALLENGE_SOLVED_ROLE), expires)
+    return jwtUtils.encodeJwt(
+        "challenge-$id", listOf(CHALLENGE_SOLVED_ROLE), expirationTime = expires)
   }
 
   fun useId(id: UUID): Boolean {

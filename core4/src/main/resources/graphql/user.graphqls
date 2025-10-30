@@ -1,12 +1,5 @@
 extend type Query {
-  userById(id: ID): User
-  users(
-    user: UserQueryInput!
-    first: Int
-    after: String
-    last: Int
-    before: String
-  ): UserConnection
+  currentUser: User
 }
 
 extend type Mutation {
@@ -20,14 +13,9 @@ extend type Mutation {
 
 type User {
   id: ID!
-  username: String!
-  mailAddress: String
-  givenName: String
-  surname: String
-}
-
-input UserQueryInput {
-  username: String
+  verified: Boolean!
+  displayId: String
+  displayName: String
 }
 
 input UpdateUserDetailsInput {

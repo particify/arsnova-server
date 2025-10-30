@@ -25,10 +25,10 @@ class UserJwtAuthenticationFilter(
   }
 
   override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-    val httpServletRequest = request as HttpServletRequest
-    val jwtHeader =
-        httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION)
-            ?: return chain.doFilter(request, response)
+    val request = request as HttpServletRequest
+    val jwtHeader = request.getHeader(HttpHeaders.AUTHORIZATION)
+    if (jwtHeader == null || SecurityContextHolder.getContext().authentication != null)
+        return chain.doFilter(request, response)
 
     val tokenMatcher: Matcher = BEARER_TOKEN_PATTERN.matcher(jwtHeader)
     if (!tokenMatcher.matches()) {
@@ -40,10 +40,10 @@ class UserJwtAuthenticationFilter(
     try {
       val authenticatedToken: Authentication =
           userJwtAuthenticationProvider.authenticate(authentication)
-      logger.debug("Storing JWT to SecurityContext: $authenticatedToken")
+      logger.debug("Storing UserJwtAuthentication to SecurityContext: $authenticatedToken")
       SecurityContextHolder.getContext().authentication = authenticatedToken
     } catch (e: AuthenticationException) {
-      logger.debug("JWT authentication failed", e)
+      logger.debug("User JWT authentication failed", e)
     }
 
     chain.doFilter(request, response)
