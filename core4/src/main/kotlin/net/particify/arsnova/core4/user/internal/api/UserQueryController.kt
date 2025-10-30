@@ -16,4 +16,14 @@ class UserQueryController {
   fun currentUser(@AuthenticationPrincipal user: User): User {
     return user
   }
+
+  @SchemaMapping(typeName = "User", field = "verified")
+  fun verified(user: User): Boolean {
+    return user.username != null
+  }
+
+  @SchemaMapping(typeName = "User", field = "displayId")
+  fun displayId(user: User): String? {
+    return user.username
+  }
 }
