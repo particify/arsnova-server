@@ -33,6 +33,11 @@ extend type Mutation {
   duplicateDemoRoom: Room!
   duplicateRoom(input: DuplicateRoomInput!): Room!
   grantRoomRole(roomId: UUID!, userId: UUID!, role: RoomRole!): Boolean!
+  grantRoomRoleByInvitation(
+    roomId: UUID!
+    mailAddress: String!
+    role: RoomRole!
+  ): Boolean!
   joinRoom(input: JoinRoomInput!): RoomMembership!
   revokeRoomRole(roomId: UUID!, userId: UUID!): Boolean!
   updateRoom(input: UpdateRoomInput!): Room!
@@ -54,7 +59,7 @@ type RoomMembership {
 }
 
 type RoomMember {
-  user: User
+  user: User!
   role: RoomRole
 }
 

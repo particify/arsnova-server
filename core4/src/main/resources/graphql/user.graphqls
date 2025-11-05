@@ -1,5 +1,6 @@
 extend type Query {
   currentUser: User
+  userByDisplayId(displayId: ID!): User
 }
 
 extend type Mutation {
