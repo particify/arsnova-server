@@ -40,7 +40,10 @@ extend type Mutation {
   ): Boolean!
   joinRoom(input: JoinRoomInput!): RoomMembership!
   revokeRoomRole(roomId: UUID!, userId: UUID!): Boolean!
-  updateRoom(input: UpdateRoomInput!): Room!
+  updateRoomDescription(id: ID!, description: String!): Room!
+  updateRoomFocusMode(id: ID!, enabled: Boolean!): Room!
+  updateRoomLanguage(id: ID!, languageCode: String): Room!
+  updateRoomName(id: ID!, name: String!): Room!
 }
 
 type Room {
@@ -49,6 +52,8 @@ type Room {
   name: String!
   description: String
   descriptionRendered: String
+  language: String
+  focusModeEnabled: Boolean
 }
 
 type RoomMembership {
@@ -89,12 +94,6 @@ input RoomQueryUserInput {
 
 input CreateRoomInput {
   name: String!
-}
-
-input UpdateRoomInput {
-  id: ID!
-  name: String
-  description: String
 }
 
 input JoinRoomInput @oneOf {
