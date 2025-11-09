@@ -41,6 +41,69 @@ To run code generation, perform the following steps:
 2. Install dependencies: `yarn`
 3. Run the code generator: `yarn generate-gql`
 
+== API conventions
+
+=== General structure and naming
+
+1. A flat structure is used for operations.
+   All operations are declared at the top level of their respective type.
+[sidebar]
+Rationale:
+While GraphQL supports nesting, the operation fields for
+https://spec.graphql.org/September2025/#:~:text=Because%20the%20resolution%20of%20fields,affect%20the%20result[mutations have to be top-level elements].
+To avoid inconsistencies between different operation types, this should be applied to all of them.
+
+2. Type and operation names always include the application module name.
+   Operation names also include the entity's type name if they operate on one.
+   If the module and entity type share the same name, one of them is omitted.
+[sidebar]
+Rationale:
+Because of the flat structure for operations, it is key to ensure that operation names are unambiguous across application modules.
+Including the module name ensures that operations of one module do not conflict with the names of another one.
+3. Type names use `PascalCase`.
+   Field names use `camelCase`.
+4. Optimize the API for readability—not for ease of implementation.
+   Example: Prefer the use of an enum type for the API even if the implementation uses a nullable boolean to model three states.
+
+=== Queries
+
+1. In general, names for queries start with the module name followed by the entity type as long as they are not the same.
+   If the query uses hard-coded entity filtering, they may be prefixed by an adjective to better describe the expected response (e.g. `currentUser`).
+2. For queries filtered by specific fields, `By` and the filtering property are appended.
+   The values are passed as separate, required arguments in this case.
+   This includes queries by ID or composite key.
+3. For generic query operations, an input type with optional fields is used.
+4. If the query results in a list of entities, a
+   https://relay.dev/graphql/connections.htm[connection]
+   type should be considered as response type.
+   Lists should only be used if the response always consists of only a limited amount of entities.
+5. Query names do NOT include any verb like `query`, `get`, `find` as it is common for function names.
+[sidebar]
+Rationale:
+For the API the implementation difference between a query and a simple field should not matter.
+When a query has no arguments, it should look the same as a field (e.g. `currentUser`).
+
+=== Mutations
+
+1. Avoid creating generic update operations which can modify all fields of an entity.
+   Prefer separate update operations each fields instead.
+2. Use a single operation to update multiple fields if this is necessary to ensure data consistency.
+3. Mutation names follow the following pattern: `verbModuleEntityField`
+   While naming should be consistent, prefer more specific verbs appropriate for the domains
+   (e.g. `grant-` and `revokePermission` instead of `add-` and `removePermission`).
+
+=== Arguments vs. input types
+
+Prefer the use of arguments if they are required and their number will not change in the future.
+Examples:
+* Queries using the ID or composite key
+* Mutations for single property updates
+
+Use an input type instead of optional arguments.
+Examples:
+* Queries with multiple, optional filters
+* Mutations for entity creation
+
 == Additional resources
 
 * https://graphql.org/learn/best-practices/[GraphQL best practices]
