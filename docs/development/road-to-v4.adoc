@@ -2,7 +2,7 @@
 
 == Problem statement
 During the course of development of the 3.x series multiple issues revealed which negatively impact the developer experience and slow down the development of new features.
-Tackling these issues is not an easy feat because they are rooted in achitectural and technology stack choices.
+Tackling these issues is not an easy feat because they are rooted in architectural and technology stack choices.
 So this would require large scale refactoring and rewrites of major code parts.
 Still, we are sure of the necessity of approaching these issues.
 
@@ -11,24 +11,24 @@ Still, we are sure of the necessity of approaching these issues.
 ==== Performance
 View updates are slow.
 They are handled by a separate JS process.
-This improved since CouchDB introduced QuickJS engine as an alternative but it is still not optimal.
-CouchDB has to analyze all document changes for updating view because it does not no which ones are relevant.
+This improved since CouchDB introduced QuickJS engine as an alternative, but it is still not optimal.
+CouchDB has to analyze all document changes for updating view because it does not know which ones are relevant.
 While we have types for documents, CouchDB does not have such a concept.
 The recommendation here is to use a separate DB per type.
 
 ==== Inflexibility (Queries)
 CouchDB does not work well for dynamic queries.
-Instead queries have to be predefined in form of views.
+Instead, queries have to be predefined in form of views.
 While Mango could be used to perform dynamic queries this does not work in practice without an appropriate index.
 CouchDB can only use a single index per query which means that all relevant fields must be part of the index.
 Furthermore, Mango's functionality is limited compared to JS views.
-It does not support aggregation functions (count, sum, etc.).
+It does not support aggregation functions (count, sum, etc.)
 Having to use to different systems for queries makes it unnecessary hard to work with the database.
 
 ==== Ecosystem
 Because of its low adoption, there is little to no support for CouchDB by frameworks.
 Spring Data and Micrometer have integrations for a lot of databases but do not support CouchDB.
-There are libraries around for CouchDB but, at least on the Java side, multiple have been abandonned (Ektorp, CouchDB4J, java-cloudant).
+There are libraries around for CouchDB but, at least on the Java side, multiple have been abandoned (Ektorp, CouchDB4J, java-cloudant).
 While there is the official documentation, there is little community contributed information like best practises or examples around.
 Currently, we use our own code to work with Mango views and to perform data migrations.
 
@@ -38,7 +38,7 @@ For our use case, these features are not relevant.
 It lacks features of other DBMS which would be useful for us.
 
 ==== NoSQL
-CouchDB is a document-based DBMS which does not enforce any schema on its JSON docuemnts.
+CouchDB is a document-based DBMS which does not enforce any schema on its JSON documents.
 While this flexibility can be an advantage, for our use case it has more downsides than upsides.
 We enforce a schema on the application side by mapping the JSON documents to POJOs.
 As a consequence, we have to ensure that documents conform with our schema when storing them and migrate documents when it changes.
@@ -46,11 +46,11 @@ While we can take advantage of the documents to store data of types with structu
 
 === Micro services
 With version 3, the backend has been split up into multiple service.
-Working with this new architechture over a longer period of time has shown multiple shortcomings.
+Working with this new architecture over a longer period of time has shown multiple shortcomings.
 
 * The chosen boundaries for services are not reasonable.
   As a consequence, there are a lot of dependencies between services and they cannot run independently.
-* The port of tooling for the development of micro services is limited.
+* The port of tooling for the development of microservices is limited.
   While it is usually not a problem, when working on a single service independently, it becomes a problem when working on multiple services at once (which is necessary because the previous point).
   We have introduced our own tooling (`pdk`) to counter this issue but this adds additional maintenance cost.
 
@@ -62,7 +62,7 @@ For performance optimizations, database sharding would be a better alternative f
 Our REST API currently has a mainly data-driven design.
 We have resource endpoints which support CRUD operations using HTTP GET, POST, PUT, PATCH and DELETE.
 For simple use cases this works well.
-The limitations become noticible in more complex scenarios.
+The limitations become noticeable in more complex scenarios.
 
 ==== Per property access control
 Contents as an example have correct options which may only be retrieved by a participant when they have already answered the options are published.
@@ -86,7 +86,7 @@ These are inconvenient to use because it is not immediately clear, which propert
 In some cases, they only support a single property which limits there usefulness.
 
 ==== Inconsistencies
-There are currently some inconsisting in the structure of endpoints:
+There are currently some inconsistencies in the structure of endpoints:
 
 * /find endpoints for comments which retrieve counts.
 * The endpoint for comment settings contains the room ID twice: `/room/<roomId>/settings/<roomId>`
@@ -98,7 +98,7 @@ As a consequence, more data than necessary is retrieved in some cases.
 This has a negative impact on performance when a lot of data is returned for an endpoint.
 
 === Technical debt
-There a few wide spread issues in the code base which do not cause problems on its own but can lead to the introduction of bugs.
+There a few widespread issues in the code base which do not cause problems on its own but can lead to the introduction of bugs.
 
 ==== Mutability
 Private properties can be modified because direct references to mutable types are returned by getters.
@@ -112,7 +112,7 @@ Furthermore, combining the properties of DAO and DTO increases the complexity of
 
 ==== Circular dependencies
 In a few cases, circular dependencies between services exist.
-This is a bad practise and requires work arounds to initialize the services.
+This is a bad practise and requires workarounds to initialize the services.
 As an example, template-related services are effected by this.
 
 == Goals

@@ -19,7 +19,7 @@ Our GraphQL tooling allows for designing the API without writing any implementat
 When the GraphQL schema (`src/resources/graphql/*.graphqls`) is extended without providing a matching implementation, the backend will still start and just log a warning.
 Once the API definition is considered stable enough, it can already be used for client-side development without the need for a backend-side implementation.
 GraphQL fields with missing implementations can be mocked on the client side.
-Therefore, the client can be developed independently from the backend implementation.
+Therefore, the client can be developed independently of the backend implementation.
 
 .Recommended workflow
 ****
@@ -31,7 +31,7 @@ Therefore, the client can be developed independently from the backend implementa
 5. Create client and backend implementations.
 ****
 
-== Code generatation
+== Code generation
 
 On the client-side, we https://the-guild.dev/graphql/codegen[generate types and service classes] to ensure typesafe use of the GraphQL API.
 The code is generated based on the backend's GraphQL schema and the client's queries, mutations and subscriptions defined in `src/graphql/*.graphql` files.
