@@ -166,7 +166,6 @@ class Migrator(
   fun migrateRooms() {
     logger.info("Migrating Room data...")
     migrate<RoomV3> {
-      val settings = mutableMapOf<String, Any>()
       val userId = UuidHelper.stringToUuid(it.ownerId)
       val user = entityManager.find(User::class.java, userId)
       if (user == null) {
@@ -183,8 +182,7 @@ class Migrator(
                       createdBy = user.id),
               shortId = it.shortId.toInt(),
               name = it.name,
-              description = it.description,
-              settings = settings)
+              description = it.description)
       migrateMemberships(newRoom)
       newRoom
     }

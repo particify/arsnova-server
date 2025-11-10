@@ -19,6 +19,7 @@ import org.springframework.data.domain.ExampleMatcher
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Window
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
@@ -35,6 +36,11 @@ class RoomQueryController(
 ) {
   companion object {
     const val DEFAULT_QUERY_LIMIT = 10
+  }
+
+  @QueryMapping
+  fun roomById(@Argument id: UUID): Room? {
+    return roomRepository.findByIdOrNull(id)
   }
 
   @QueryMapping

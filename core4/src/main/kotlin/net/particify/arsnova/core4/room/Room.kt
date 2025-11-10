@@ -12,9 +12,8 @@ import jakarta.persistence.Table
 import jakarta.persistence.Version
 import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
+import net.particify.arsnova.core4.common.LanguageIso639
 import net.particify.arsnova.core4.common.UuidGenerator
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
 
 @Entity
 @Table(schema = "room")
@@ -25,9 +24,10 @@ class Room(
     val shortId: Int? = null,
     var name: String? = null,
     var description: String? = "",
+    @field:LanguageIso639 var language: String? = null,
+    var focusModeEnabled: Boolean? = false,
     @OneToMany(mappedBy = "room", cascade = [CascadeType.ALL])
     val userRoles: MutableSet<Membership> = mutableSetOf(),
-    @JdbcTypeCode(SqlTypes.JSON) val settings: MutableMap<String, Any> = mutableMapOf(),
     @Embedded val auditMetadata: AuditMetadata = AuditMetadata(),
 ) {
   companion object {

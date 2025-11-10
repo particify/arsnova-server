@@ -7,6 +7,7 @@ import java.security.SecureRandom
 import java.time.Instant
 import java.util.UUID
 import kotlin.math.pow
+import net.particify.arsnova.core4.common.LanguageIso639
 import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomRole
@@ -70,14 +71,33 @@ class RoomMutationController(
   }
 
   @MutationMapping
-  fun updateRoom(@Argument input: UpdateRoomInput): Room {
-    val room = roomRepository.findOneById(input.id)
-    if (input.name != null) {
-      room.name = input.name
-    }
-    if (input.description != null) {
-      room.description = input.description
-    }
+  fun updateRoomName(@Argument id: UUID, @Argument name: String): Room {
+    val room = roomRepository.findOneById(id)
+    room.name = name
+    return roomRepository.save(room)
+  }
+
+  @MutationMapping
+  fun updateRoomDescription(@Argument id: UUID, @Argument description: String): Room {
+    val room = roomRepository.findOneById(id)
+    room.description = description
+    return roomRepository.save(room)
+  }
+
+  @MutationMapping
+  fun updateRoomLanguage(
+      @Argument id: UUID,
+      @Argument @LanguageIso639 languageCode: String?
+  ): Room {
+    val room = roomRepository.findOneById(id)
+    room.language = languageCode
+    return roomRepository.save(room)
+  }
+
+  @MutationMapping
+  fun updateRoomFocusMode(@Argument id: UUID, @Argument enabled: Boolean): Room {
+    val room = roomRepository.findOneById(id)
+    room.focusModeEnabled = enabled
     return roomRepository.save(room)
   }
 

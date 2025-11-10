@@ -291,11 +291,14 @@ databaseChangeLog:
                     nullable: false
                   defaultValue: ""
               - column:
-                  name: settings
-                  type: jsonb
+                  name: language
+                  type: varchar(2)
+              - column:
+                  name: focus_mode_enabled
+                  type: boolean
                   constraints:
                     nullable: false
-                  defaultValue: "{}"
+                  defaultValue: false
               - column:
                   name: created_by
                   type: uuid
