@@ -4,15 +4,15 @@
 Starting with version 4, we will use Kotlin as primary language for backend development.
 
 The key advantage of Kotlin over Java is its null safety.
-Furthermore, the language has better defaults and requires less boilerplate code which leads to better readibility and reduced maintenance work.
+Furthermore, the language has better defaults and requires less boilerplate code which leads to better readability and reduced maintenance work.
 While Java is catching up to Kotlin, there are aspects where Java simply cannot improve due to compatibility requirements.
 
 But Kotlin does not come without downsides.
 Code examples are most of the time written for Java and while they can be easily converted to Kotlin, good knowledge in both languages is required.
-Futhermore, Java-based framework do not work well with some Kotlin features.
+Furthermore, Java-based framework do not work well with some Kotlin features.
 E.g. inline value classes can cause issues with frameworks which use reflection.
 
-Overall, we came to the conclusion that Kotlin's advantages overweight its disadvatages for our use case.
+Overall, we came to the conclusion that Kotlin's advantages overweight its disadvantages for our use case.
 
 == Framework: Spring Boot
 
@@ -42,7 +42,7 @@ Multiple Java libraries are no longer maintained.
 For version 3, we are using our own code on top of an older library to support current versions of CouchDB.
 
 CouchDB has two types of views.
-The newer Mango views make it easier to query but lack features of the older JS-based views (e.g. basic aggregation fuctionality like count and sum).
+The newer Mango views make it easier to query but lack features of the older JS-based views (e.g. basic aggregation functionality like count and sum).
 The JS views on the other hand are slower when it comes to index updates.
 Using both types of views makes it unnecessary hard to work with the database.
 Furthermore, there has not been many improvements to Mango, so it does not seem this situation will improve in the near future.
@@ -58,14 +58,14 @@ Its use is simply inherited from the early versions of arsnova.
 As primary database management system we will be using PostgreSQL for version 4.
 The relational database model makes sense for our data structures since they have a mostly fixed schema and a lot of relations between each other.
 For cases where more flexible structures are needed, PostgreSQL's JSON support seems to be a good fit.
-PostgreSQL has been around for a long time (since 1996) and has a reliable release cylce.
-It has a large ecosystem with integrations for most of programming languages and frameworks.
+PostgreSQL has been around for a long time (since 1996) and has a reliable release cycle.
+It has a large ecosystem with integrations for most programming languages and frameworks.
 
 == Database abstraction layer
 
 We will be using Spring Data JPA with Hibernate and QueryDSL for version 4.
 This helps with separating the technical aspects from the business logic.
-Futhermore, it brings additional safety by avoiding direct SQL queries which cannot be checked at compile time.
+Furthermore, it brings additional safety by avoiding direct SQL queries which cannot be checked at compile time.
 JPQL/HQL queries are checked at application startup.
 Hibernate provides first level caching for entities during a single session out of the box and query caching can be optionally set up.
 
@@ -86,14 +86,14 @@ Furthermore, it has does not have a caching implementation.
 
 == API: GraphQL
 
-REST APIs are great due to their simplicity and cachability.
+REST APIs are great due to their simplicity and cacheability.
 They work well for simple data-driven workflows.
 But over time, some limitations of REST, which effect our use case, have become clear.
 
 We have conditions which determine when and how a resource can be modified and different views for different user roles.
 This has been implemented by adding query parameters and multiple endpoints for resources.
-But as a result, the API is no longer self explainatory.
-Futhermore, the use of different views single resources makes it hard to define reliable data types on the client side.
+But as a result, the API is no longer self explanatory.
+Furthermore, the use of different views single resources makes it hard to define reliable data types on the client side.
 
 We have considered implementing HATEOAS for version 4, which would expose the available endpoints through the API itself and make it navigatable.
 But it does not help with resources which have different views.
@@ -104,7 +104,7 @@ The client gains fine-grained control about which data will be transmitted.
 The backend can implement access control per field.
 Due to fine-grained error reporting, an error on single field does not automatically let the whole request fail.
 GraphQL's schema declaration with input and output types serves as documentation.
-Futhermore, code generators are available, which makes makes it easy to keep client types in sync with the backend and allows type safe us of API data.
+Furthermore, code generators are available, which makes it easy to keep client types in sync with the backend and allows type safe us of API data.
 Caching of GraphQL entities is possible but more sophisticated because not all properties might be in the cache.
 The Apollo GraphQL client supports caching
 
