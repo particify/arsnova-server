@@ -17,6 +17,7 @@ type User {
   verified: Boolean!
   displayId: String
   displayName: String
+  unverifiedMailAddress: String
 }
 
 input UpdateUserDetailsInput {
