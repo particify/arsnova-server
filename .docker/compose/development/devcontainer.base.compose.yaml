@@ -43,7 +43,7 @@ services:
       SECURITY_CORSORIGINS_1: http://localhost:4200
       GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
     ports:
-      - 127.0.0.1:$CORE_DEBUG_PORT_CORE:$CORE_DEBUG_PORT
+      - $CORE_DEBUG_PORT:$CORE_DEBUG_PORT
     volumes:
       - $ROOT_DIR:/workspace
       - gradle-workspace-core:/workspace/.gradle
