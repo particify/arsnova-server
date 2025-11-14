@@ -16,5 +16,6 @@ data class MailProperties(
     val implicitTls: Boolean = false,
     val username: String? = null,
     val password: String? = null,
-    val localhost: String? = null
+    val localhost: String? = null,
+    val verificationUriPattern: String
 )

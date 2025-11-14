@@ -4,6 +4,7 @@
 package net.particify.arsnova.core4.user.internal.api
 
 import java.util.Locale
+import java.util.UUID
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.internal.LocalUserService
 import net.particify.arsnova.core4.user.internal.UserRepository
@@ -47,6 +48,14 @@ class UserMutationController(
       @AuthenticationPrincipal user: User
   ): Boolean {
     return localUserService.completeMailVerification(user, verificationCode.toInt())
+  }
+
+  @MutationMapping
+  fun verifyUserMailAddressUnauthenticated(
+      @Argument verificationCode: String,
+      @Argument userId: UUID
+  ): Boolean {
+    return localUserService.completeMailVerification(userId, verificationCode.toInt())
   }
 
   @MutationMapping

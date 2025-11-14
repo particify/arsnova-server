@@ -4,4 +4,7 @@
 
     [(${code})]
 
+[(#{mail.verification-link-intro})]
+[(@{|${serviceUrl}${verificationUri}|})]
+
 [# th:insert="~{footer.txt}" /]

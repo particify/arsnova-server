@@ -4,6 +4,7 @@
 <h1 th:text="#{mail.welcome(${productName})}"></h1>
 <p th:text="#{mail.verification-code-intro}"></p>
 <p class="code" th:text="${code}"></p>
+<p><span th:text="#{mail.verification-link-intro}"></span> <a th:href="@{|${serviceUrl}${verificationUri}|}" th:text="#{mail.verification-link-text}"></a></p>
 <footer th:insert="~{footer.html}"></footer>
 </body>
 </html>

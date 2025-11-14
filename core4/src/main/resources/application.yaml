@@ -48,6 +48,9 @@ persistence:
     couchdb-url: http://couchdb:5984/arsnova3
     room-access-url: http://arsnova-server-authz:8080/roomaccess
 
+mail:
+  verification-uri-pattern: /user/{0}/verify?code={1}&expires={2}
+
 common:
   text-rendering:
     enabled: true

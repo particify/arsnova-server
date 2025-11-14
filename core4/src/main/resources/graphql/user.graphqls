@@ -10,6 +10,10 @@ extend type Mutation {
   updateUserPassword(oldPassword: String!, newPassword: String!): Boolean
   updateUserDetails(input: UpdateUserDetailsInput!): Boolean
   verifyUserMailAddress(verificationCode: String!): Boolean
+  verifyUserMailAddressUnauthenticated(
+    verificationCode: String!
+    userId: UUID!
+  ): Boolean
 }
 
 type User {
