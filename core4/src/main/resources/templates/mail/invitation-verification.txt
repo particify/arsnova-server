@@ -1,0 +1,7 @@
+[(#{mail.greeting})]
+
+[(#{mail.room-invitation-verification-intro(${productName}, ${room.name}, ${inviter.displayName} ?: ${inviter.username})})]
+
+[(@{|${serviceUrl}${invitationUri}|})]
+
+[# th:insert="~{footer.txt}" /]

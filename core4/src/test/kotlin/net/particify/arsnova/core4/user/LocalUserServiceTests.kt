@@ -6,7 +6,7 @@ package net.particify.arsnova.core4.user
 import java.time.Instant
 import java.util.Locale
 import net.particify.arsnova.core4.TestcontainersConfiguration
-import net.particify.arsnova.core4.user.internal.LocalUserService
+import net.particify.arsnova.core4.user.internal.LocalUserServiceImpl
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Import
 @SpringBootTest
 @Import(TestcontainersConfiguration::class)
 class LocalUserServiceTests {
-  @Autowired lateinit var localUserService: LocalUserService
+  @Autowired lateinit var localUserService: LocalUserServiceImpl
 
   @Test
   fun shouldClaimUnverifiedUser() {

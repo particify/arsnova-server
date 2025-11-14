@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.room.internal.api
 
 import java.security.SecureRandom
 import java.time.Instant
+import java.util.Locale
 import java.util.UUID
 import kotlin.math.pow
 import net.particify.arsnova.core4.common.LanguageIso639
@@ -13,6 +14,7 @@ import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomRole
 import net.particify.arsnova.core4.room.internal.MembershipRepository
 import net.particify.arsnova.core4.room.internal.RoomRepository
+import net.particify.arsnova.core4.user.LocalUserService
 import net.particify.arsnova.core4.user.User
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.method.annotation.Argument
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Controller
 class RoomMutationController(
     private val roomRepository: RoomRepository,
     private val membershipRepository: MembershipRepository,
+    private val localUserService: LocalUserService
 ) {
   companion object {
     private val SHORT_ID_MAX: Int = (10.0.pow(Room.SHORT_ID_LENGTH) - 1).toInt()
@@ -123,6 +126,27 @@ class RoomMutationController(
     if (membership.role == RoomRole.OWNER) {
       error("Change role of owner is not allowed.")
     }
+    membership.role = role
+    membershipRepository.save(membership)
+    return true
+  }
+
+  @MutationMapping
+  fun grantRoomRoleByInvitation(
+      @Argument roomId: UUID,
+      @Argument mailAddress: String,
+      @Argument role: RoomRole,
+      @AuthenticationPrincipal user: User,
+      locale: Locale
+  ): Boolean {
+    if (role == RoomRole.OWNER || role == RoomRole.PARTICIPANT) {
+      error("Changing role to owner or participant is not allowed.")
+    }
+    val room = roomRepository.findByIdOrNull(roomId) ?: error("Room not found.")
+    val invitee =
+        localUserService.inviteUser(
+            user, mailAddress, "invitation-verification", mapOf("room" to room), locale)
+    val membership = Membership(room = Room(id = roomId), user = User(id = invitee.id))
     membership.role = role
     membershipRepository.save(membership)
     return true

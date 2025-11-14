@@ -13,7 +13,9 @@ import kotlin.math.pow
 import kotlin.math.roundToLong
 import net.particify.arsnova.core4.system.MailService
 import net.particify.arsnova.core4.system.config.MailProperties
+import net.particify.arsnova.core4.user.LocalUserService
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.UserService
 import org.slf4j.LoggerFactory
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -23,17 +25,19 @@ const val VERIFICATION_MAX_ERRORS = 10
 const val VERIFICATION_CODE_LENGTH = 6
 
 @Service
-class LocalUserService(
+class LocalUserServiceImpl(
+    private val userService: UserService,
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
     private val mailService: MailService,
     mailProperties: MailProperties
-) {
+) : LocalUserService {
   companion object {
     private val logger = LoggerFactory.getLogger(this::class.java)
   }
 
   private val secureRandom = SecureRandom()
+  private val invitationUriPattern = mailProperties.invitationUriPattern
   private val verificationUriPattern = mailProperties.verificationUriPattern
 
   fun claimUnverifiedUser(
@@ -72,6 +76,30 @@ class LocalUserService(
     mailService.sendMail(user.unverifiedMailAddress!!, template, templateData, locale)
   }
 
+  override fun inviteUser(
+      inviter: User,
+      mailAddress: String,
+      template: String,
+      data: Map<String, Any>,
+      locale: Locale
+  ): User {
+    val invitee = userService.createAccount()
+    initiateVerification(invitee)
+    invitee.unverifiedMailAddress = mailAddress
+    userRepository.save(invitee)
+    val code = toFixedLength(invitee.verificationCode!!)
+    val invitationUri =
+        MessageFormat.format(
+            invitationUriPattern,
+            invitee.id,
+            code,
+            invitee.verificationExpiresAt?.epochSecond.toString())
+    val templateData =
+        data.plus(mapOf("code" to code, "inviter" to inviter, "invitationUri" to invitationUri))
+    mailService.sendMail(invitee.unverifiedMailAddress!!, template, templateData, locale)
+    return invitee
+  }
+
   fun completeMailVerification(user: User, verificationCode: Int): Boolean {
     if (!user.isMailAddressVerificationActive()) return false
     if (user.verificationCode != verificationCode) {
@@ -86,8 +114,20 @@ class LocalUserService(
     return true
   }
 
-  fun completeMailVerification(userId: UUID, verificationCode: Int): Boolean {
-    val user = userRepository.findByIdOrNull(userId) ?: error("User not found")
+  fun completeMailVerification(userId: UUID, verificationCode: Int, password: String?): Boolean {
+    val user = requireNotNull(userRepository.findByIdOrNull(userId)) { "User not found" }
+    check(user.isMailAddressVerificationActive()) { "Verification is not active" }
+    if (user.verificationCode != verificationCode) {
+      user.verificationErrors!!.inc()
+      userRepository.save(user)
+      return false
+    }
+    if (!password.isNullOrEmpty()) {
+      if (!user.password.isNullOrEmpty()) {
+        error("Password is already set")
+      }
+      user.password = passwordEncoder.encode(password)
+    }
     return completeMailVerification(user, verificationCode)
   }
 
