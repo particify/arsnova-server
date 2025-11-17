@@ -1,8 +1,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:insert="head.html"></head>
+<head th:insert="~{head.html}"></head>
 <body>
 <p th:text="#{mail.verification-code-intro}"></p>
 <p class="code" th:text="${code}"></p>
-<footer th:insert="footer.html"></footer>
+<footer th:insert="~{footer.html}"></footer>
 </body>
 </html>

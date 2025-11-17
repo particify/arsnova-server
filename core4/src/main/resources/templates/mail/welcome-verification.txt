@@ -4,4 +4,4 @@
 
     [(${code})]
 
-[# th:insert="footer.txt" /]
+[# th:insert="~{footer.txt}" /]
