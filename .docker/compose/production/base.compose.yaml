@@ -57,26 +57,6 @@ services:
       SYSTEM_FORMATTING_SERVICE_HOST_URL: http://arsnova-server-formatting:3000
       SECURITY_JWT_SECRET: $JWT_SECRET
       SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
-  arsnova-server-gateway:
-    image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}gateway:$GATEWAY_TAG
-    restart: $RESTART_MODE
-    depends_on:
-      - rabbitmq
-      - arsnova-server-authz
-    environment:
-      SERVER_PORT: 8080
-      ROUTING_ENDPOINTS_CORE: http://arsnova-server-core:8080
-      ROUTING_ENDPOINTS_WS_GATEWAY: http://arsnova-server-websocket:8080
-      ROUTING_ENDPOINTS_COMMENT_SERVICE: http://arsnova-server-comments:8080
-      ROUTING_ENDPOINTS_ROOMACCESS_SERVICE: http://arsnova-server-authz:8080
-      ROUTING_ENDPOINTS_FORMATTING_SERVICE: http://arsnova-server-formatting:3000
-      HTTP_CLIENT_AUTH_SERVICE: http://arsnova-server-authz:8080
-      HTTP_CLIENT_CORE: http://arsnova-server-core:8080
-      HTTP_CLIENT_WS_GATEWAY: http://arsnova-server-websocket:8080
-      HTTP_CLIENT_COMMENT_SERVICE: http://arsnova-server-comments:8080
-      SECURITY_JWT_PUBLIC_SECRET: $JWT_SECRET
-      SECURITY_JWT_INTERNAL_SECRET: $JWT_SECRET
-      SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
   arsnova-server-websocket:
     image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}websocket:$WEBSOCKET_TAG
     restart: $RESTART_MODE

@@ -16,7 +16,6 @@ build_project:
       - PROJECT: core
       - PROJECT: core4
       - PROJECT: formatting
-      - PROJECT: gateway
       - PROJECT: websocket
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
