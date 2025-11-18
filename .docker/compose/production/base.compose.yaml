@@ -114,19 +114,6 @@ services:
     restart: $RESTART_MODE
     environment:
       SERVER_PORT: 3000
-  arsnova-proxy:
-    image: $IMAGE_NAMESPACE/${IMAGE_DEPENDENCY_PREFIX}arsnova-proxy:$PROXY_TAG
-    restart: $RESTART_MODE
-    depends_on:
-      - arsnova-server-core
-      - arsnova-server-authz
-      - arsnova-server-websocket
-      - arsnova-server-gateway
-      - arsnova-server-comments
-      - arsnova-webclient
-    environment:
-      ARSNOVA_HOSTNAME: $ARSNOVA_HOSTNAME
-      CSP_FRAME_ANCESTORS: $CSP_FRAME_ANCESTORS
 
 volumes:
   couchdb_data:

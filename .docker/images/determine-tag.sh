@@ -21,21 +21,10 @@ fi
 read -r DOCKER_FROM <"$DOCKERFILE_PATH"
 
 VERSION=$(echo "$DOCKER_FROM" | sed -E 's/FROM ([a-z0-9./_-]+\/)?[a-z0-9_-]+:([^@]+).*/\2/')
-if [ "$IMAGE_NAME" = arsnova-proxy ]; then
-  # The local version is more meaningful as the base image version.
-  # => Always include the local version in the tag name.
-  # => Use the local version it as prefix.
-  BASE_IMAGE_NAME=$(echo "$DOCKER_FROM" | sed -E 's/FROM ([a-z0-9./_-]+\/)?([a-z0-9_-]+):[^@]+.*/\2/')
-  if [ -z "$IMAGE_AFFIX" ]; then
-    IMAGE_AFFIX=next
-  fi
-  IMAGE_TAG="${IMAGE_AFFIX}-${BASE_IMAGE_NAME}-${VERSION}"
-else
-  # The base image version is more meaningful as the local version.
-  # => Use the local version as suffx.
-  IMAGE_TAG="$VERSION"
-  if [ -n "$IMAGE_AFFIX" ]; then
-    IMAGE_TAG="${VERSION}-${IMAGE_AFFIX}"
-  fi
+# The base image version is more meaningful as the local version.
+# => Use the local version as suffx.
+IMAGE_TAG="$VERSION"
+if [ -n "$IMAGE_AFFIX" ]; then
+  IMAGE_TAG="${VERSION}-${IMAGE_AFFIX}"
 fi
 printf "$IMAGE_TAG"

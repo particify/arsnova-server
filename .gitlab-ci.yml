@@ -52,7 +52,6 @@ build_dependency_image:
   needs: []
   parallel:
     matrix:
-      - IMAGE_NAME: arsnova-proxy
       - IMAGE_NAME: rabbitmq-stomp
         IMAGE_VARIANT:
           - ""

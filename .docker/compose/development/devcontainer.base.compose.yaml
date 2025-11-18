@@ -9,9 +9,6 @@ services:
   rabbitmq:
     ports:
       - 15672:15672
-  arsnova-proxy:
-    ports:
-      - 127.0.0.1:${PORT:-8080}:80
   arsnova-webclient:
     image: devcontainer-arsnova-webclient:$WEBCLIENT_TAG
     init: true
