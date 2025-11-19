@@ -9,9 +9,6 @@ services:
   rabbitmq:
     ports:
       - 15672:15672
-  arsnova-proxy:
-    ports:
-      - 127.0.0.1:${PORT:-8080}:80
   arsnova-webclient:
     image: devcontainer-arsnova-webclient:$WEBCLIENT_TAG
     init: true
@@ -51,30 +48,6 @@ services:
       - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
       - gradle-wrapper:/home/dev/.gradle/wrapper
       - vscode-extensions-core:/home/dev/.vscode-server/extensions
-  arsnova-server-gateway:
-    image: devcontainer-arsnova-server-gateway:$GATEWAY_TAG
-    init: true
-    build:
-      context: $ROOT_DIR/gateway/.devcontainer
-      args:
-        APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-server/gateway:$GATEWAY_TAG
-        INSTALL_MAVEN: "true"
-        MAVEN_VERSION: $MAVEN_VERSION
-    environment:
-      DEBUG_HOST: 0.0.0.0
-      DEBUG_PORT: $GATEWAY_DEBUG_PORT
-      SERVER_PORT: ""
-      SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
-      GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
-    ports:
-      - $GATEWAY_DEBUG_PORT:$GATEWAY_DEBUG_PORT
-    volumes:
-      - $ROOT_DIR:/workspace
-      - gradle-workspace-gateway:/workspace/.gradle
-      - gradle-cache-gateway:/home/dev/.gradle/caches
-      - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
-      - gradle-wrapper:/home/dev/.gradle/wrapper
-      - vscode-extensions-gateway:/home/dev/.vscode-server/extensions
   arsnova-server-websocket:
     image: devcontainer-arsnova-server-websocket:$WEBSOCKET_TAG
     init: true
@@ -172,20 +145,17 @@ volumes:
   gradle-cache-authz:
   gradle-cache-comments:
   gradle-cache-core:
-  gradle-cache-gateway:
   gradle-cache-websocket:
   gradle-ro-dep-cache:
   gradle-workspace-authz:
   gradle-workspace-comments:
   gradle-workspace-core:
-  gradle-workspace-gateway:
   gradle-workspace-websocket:
   gradle-wrapper:
   vscode-extensions-authz:
   vscode-extensions-comments:
   vscode-extensions-core:
   vscode-extensions-formatting:
-  vscode-extensions-gateway:
   vscode-extensions-webclient:
   vscode-extensions-websocket:
   yarn-global-webclient:
