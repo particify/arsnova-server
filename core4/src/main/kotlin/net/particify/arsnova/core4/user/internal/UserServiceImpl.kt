@@ -16,6 +16,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Limit
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.support.WindowIterator
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -30,8 +31,9 @@ class UserServiceImpl(
 ) : UserService {
   private val userRole = roleRepository.findByName("USER")
 
-  override fun loadUserByUsername(username: String): User? {
+  override fun loadUserByUsername(username: String): User {
     return userRepository.findOneByUsername(username)
+        ?: throw UsernameNotFoundException("Username $username not found.")
   }
 
   override fun loadUserById(id: UUID): User? {

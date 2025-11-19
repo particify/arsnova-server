@@ -10,7 +10,7 @@ import org.springframework.security.core.GrantedAuthority
 class UserJwtAuthentication(
     private val token: String,
     private var principal: User? = null,
-    grantedAuthorities: Set<GrantedAuthority?> = emptySet()
+    grantedAuthorities: Set<GrantedAuthority> = emptySet()
 ) : AbstractAuthenticationToken(grantedAuthorities) {
   init {
     isAuthenticated = grantedAuthorities.isNotEmpty()

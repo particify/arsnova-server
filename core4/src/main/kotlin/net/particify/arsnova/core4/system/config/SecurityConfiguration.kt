@@ -97,8 +97,12 @@ class SecurityConfiguration(
         saml2Properties.registration.map {
           val credentials =
               it.value.signing.credentials.map { c ->
-                val key = RsaKeyConverters.pkcs8().convert(c.privateKeyLocation.file.inputStream())
-                val certificate = X509Support.decodeCertificate(c.certificateLocation.file)
+                require(c.privateKeyLocation != null && c.certificateLocation != null) {
+                  "Incomplete SAML configuration ${it.key}"
+                }
+                val key =
+                    RsaKeyConverters.pkcs8().convert(c.privateKeyLocation!!.file.inputStream())
+                val certificate = X509Support.decodeCertificate(c.certificateLocation!!.file)
                 Saml2X509Credential.signing(key, certificate)
               }
           RelyingPartyRegistrations.fromMetadataLocation(it.value.assertingparty.metadataUri)

@@ -60,14 +60,14 @@ class User(
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL])
     val externalLogins: MutableList<ExternalLogin> = mutableListOf(),
 ) : AuthenticatedPrincipal, UserDetails {
-  override fun getName() = username
+  override fun getName(): String = username ?: ""
 
   override fun getAuthorities(): Set<GrantedAuthority> =
       roles.map { SimpleGrantedAuthority("ROLE_" + it.name) }.toSet()
 
   override fun getPassword(): String? = password
 
-  override fun getUsername(): String? = username
+  override fun getUsername(): String = username ?: ""
 
   override fun isEnabled(): Boolean = enabled ?: false
 

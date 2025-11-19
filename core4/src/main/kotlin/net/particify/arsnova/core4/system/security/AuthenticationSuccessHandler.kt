@@ -20,12 +20,11 @@ class AuthenticationSuccessHandler(private val refreshCookieComponent: RefreshCo
 
   override fun determineTargetUrl(
       request: HttpServletRequest,
-      response: HttpServletResponse?
-  ): String? {
+      response: HttpServletResponse
+  ): String {
     val session = request.getSession(false)
-    val url = session.getAttribute(URL_ATTRIBUTE) as String?
+    val url = session.getAttribute(URL_ATTRIBUTE) as String? ?: ""
     session.removeAttribute(URL_ATTRIBUTE)
-
     return url
   }
 
