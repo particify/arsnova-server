@@ -18,7 +18,6 @@
 
 package net.particify.arsnova.core.service;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.Instant;
@@ -437,7 +436,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
   }
 
   @Override
-  @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
   public boolean activateAccount(final String id, final String key, final String clientAddress) {
     final UserProfile userProfile = get(id, true);
     if (userProfile == null) {

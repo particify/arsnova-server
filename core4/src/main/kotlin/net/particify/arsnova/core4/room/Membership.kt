@@ -13,7 +13,7 @@ import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.user.User
 import org.hibernate.annotations.JdbcType
-import org.hibernate.dialect.PostgreSQLEnumJdbcType
+import org.hibernate.dialect.type.PostgreSQLEnumJdbcType
 import org.springframework.data.annotation.Version
 
 @Entity

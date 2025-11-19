@@ -24,9 +24,9 @@ prettier-xml = "3.4.1"
 querydsl = "6.12"
 spotbugs-plugin = "6.2.3"
 spotless = "7.0.4"
-spring-boot-plugin = "3.5.7"
+spring-boot-plugin = "4.0.0"
 spring-cloud = "2025.0.0"
-spring-modulith = "1.4.3"
+spring-modulith = "2.0.0"
 springmockk = "4.0.2"
 
 [libraries]
@@ -37,8 +37,7 @@ ektorp = { module = "org.ektorp:org.ektorp", version.ref = "ektorp" }
 ektorp-spring = { module = "org.ektorp:org.ektorp.spring", version.ref = "ektorp" }
 graphql-scalars = { module = "com.graphql-java:graphql-java-extended-scalars", version.ref = "graphql-scalars" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
-jackson-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" }
-jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
+jackson-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 java-jwt = { module = "com.auth0:java-jwt", version.ref = "java-jwt" }
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 kotlin-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
@@ -72,7 +71,7 @@ spring-modulith-observability = { module = "org.springframework.modulith:spring-
 spring-modulith-test = { module = "org.springframework.modulith:spring-modulith-starter-test" }
 spring-security = { module = "org.springframework.boot:spring-boot-starter-security" }
 spring-security-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }
-spring-security-saml = { module = "org.springframework.security:spring-security-saml2-service-provider" }
+spring-security-saml = { module = "org.springframework.boot:spring-boot-starter-security-saml2" }
 spring-security-test = { module = "org.springframework.security:spring-security-test" }
 spring-test = { module = "org.springframework.boot:spring-boot-starter-test" }
 spring-testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
@@ -80,7 +79,7 @@ spring-validation = { module = "org.springframework.boot:spring-boot-starter-val
 spring-websocket = { module = "org.springframework.boot:spring-boot-starter-websocket" }
 spring-web = { module = "org.springframework.boot:spring-boot-starter-web" }
 springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmockk" }
-testcontainers-postgresql = { module = "org.testcontainers:postgresql" }
+testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
 thymeleaf-spring = { module = "org.thymeleaf:thymeleaf-spring6" }
 
 [plugins]

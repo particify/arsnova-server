@@ -4,8 +4,8 @@
 package net.particify.arsnova.core4.user.internal
 
 import java.util.UUID
-import org.springframework.boot.autoconfigure.security.saml2.Saml2RelyingPartyProperties
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.security.saml2.autoconfigure.Saml2RelyingPartyProperties
 
 private const val ID_ATTRIBUTE = "urn:oasis:names:tc:SAML:attribute:subject-id"
 private const val MAIL_ATTRIBUTE = "urn:oid:0.9.2342.19200300.100.1.3"
