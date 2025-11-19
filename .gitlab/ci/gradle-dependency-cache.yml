@@ -1,5 +1,5 @@
 variables:
-  OPENJDK_IMAGE_TAG: 21-jdk-alpine
+  OPENJDK_IMAGE_TAG: 25-jdk-alpine
   DEPENDENCY_CACHE_IMAGE: $CI_REGISTRY/particify/dev/foss/arsnova-server/dependency-cache-gradle
   GRADLE_USER_HOME_DIR: .gradle-user-home
   GRADLE_DEPENDENCY_DIR: caches/modules-2

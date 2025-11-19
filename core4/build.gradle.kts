@@ -10,7 +10,7 @@ plugins {
   alias(libs.plugins.spring.boot)
 }
 
-java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
+java { toolchain { languageVersion = JavaLanguageVersion.of(25) } }
 
 val debugHost = System.getenv("DEBUG_HOST") ?: "127.0.0.1"
 val debugPort = System.getenv("DEBUG_PORT")?.toInt() ?: 5005
