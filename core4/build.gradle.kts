@@ -85,7 +85,7 @@ tasks.bootRun {
 
 tasks.withType<Test> { useJUnitPlatform() }
 
-tasks.jib { jib { from { image = "eclipse-temurin:21-alpine" } } }
+tasks.jib { jib { from { image = "eclipse-temurin:25-alpine" } } }
 
 tasks.jacocoTestReport { reports { csv.required.set(true) } }
 
