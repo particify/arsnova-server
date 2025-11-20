@@ -4,12 +4,15 @@
 package net.particify.arsnova.core4.user.internal
 
 import java.security.SecureRandom
+import java.text.MessageFormat
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Locale
+import java.util.UUID
 import kotlin.math.pow
 import kotlin.math.roundToLong
 import net.particify.arsnova.core4.system.MailService
+import net.particify.arsnova.core4.system.config.MailProperties
 import net.particify.arsnova.core4.user.User
 import org.slf4j.LoggerFactory
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -23,13 +26,15 @@ const val VERIFICATION_CODE_LENGTH = 6
 class LocalUserService(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val mailService: MailService
+    private val mailService: MailService,
+    mailProperties: MailProperties
 ) {
   companion object {
     private val logger = LoggerFactory.getLogger(this::class.java)
   }
 
   private val secureRandom = SecureRandom()
+  private val verificationUriPattern = mailProperties.verificationUriPattern
 
   fun claimUnverifiedUser(
       user: User,
@@ -57,7 +62,13 @@ class LocalUserService(
 
   private fun sendVerificationMail(user: User, template: String, locale: Locale) {
     val code = toFixedLength(user.verificationCode!!)
-    val templateData = mapOf("code" to code)
+    val verificationUri =
+        MessageFormat.format(
+            verificationUriPattern,
+            user.id,
+            code,
+            user.verificationExpiresAt?.epochSecond.toString())
+    val templateData = mapOf("code" to code, "verificationUri" to verificationUri)
     mailService.sendMail(user.unverifiedMailAddress!!, template, templateData, locale)
   }
 
@@ -73,6 +84,11 @@ class LocalUserService(
     user.resetVerification()
     userRepository.save(user)
     return true
+  }
+
+  fun completeMailVerification(userId: UUID, verificationCode: Int): Boolean {
+    val user = userRepository.findByIdOrNull(userId) ?: error("User not found")
+    return completeMailVerification(user, verificationCode)
   }
 
   fun initiatePasswordReset(user: User, locale: Locale): Boolean {

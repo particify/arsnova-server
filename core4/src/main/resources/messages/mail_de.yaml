@@ -4,4 +4,6 @@ mail:
   password-reset-your-code: "Hier ist der Verifizierungscode, den du zum Setzen eines neuen Passworts benötigst:"
   verification-code-intro: "Hier ist der Code, den du für die Verifizierung deiner E-Mail-Adresse benötigst:"
   verification-code-subject: "{0} ist dein {1}-Verifizierungscode"
+  verification-link-intro: "Alternativ kannst du auch den folgenden Link verwenden:"
+  verification-link-text: Verifizieren
   welcome: Willkommen bei {0}!
