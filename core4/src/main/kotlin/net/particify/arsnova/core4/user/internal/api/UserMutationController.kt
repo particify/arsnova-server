@@ -83,4 +83,14 @@ class UserMutationController(
   fun deleteUser(@AuthenticationPrincipal user: User): Boolean {
     return userService.markAccountForDeletion(user)
   }
+
+  @MutationMapping
+  fun updateUserUiSettings(
+      @Argument input: MutableMap<String, Any>,
+      @AuthenticationPrincipal user: User
+  ): Boolean {
+    user.uiSettings.putAll(input)
+    userRepository.save(user)
+    return true
+  }
 }
