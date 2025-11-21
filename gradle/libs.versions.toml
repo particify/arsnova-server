@@ -25,7 +25,6 @@ querydsl = "6.12"
 spotbugs-plugin = "6.2.3"
 spotless = "7.0.4"
 spring-boot-plugin = "4.0.0"
-spring-cloud = "2025.0.0"
 spring-modulith = "2.0.0"
 springmockk = "4.0.2"
 
@@ -56,7 +55,6 @@ querydsl-apt = { module = "io.github.openfeign.querydsl:querydsl-apt", version.r
 spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugs-annotations" }
 spring-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 spring-cache = { module = "org.springframework.boot:spring-boot-starter-cache" }
-spring-cloud = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "spring-cloud" }
 spring-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
 spring-docker = { module = "org.springframework.boot:spring-boot-docker-compose" }
 spring-hal-explorer = { module = "org.springframework.data:spring-data-rest-hal-explorer" }
