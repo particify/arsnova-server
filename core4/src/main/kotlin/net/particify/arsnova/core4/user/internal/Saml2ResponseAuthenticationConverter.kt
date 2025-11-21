@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.convert.converter.Converter
 import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider.ResponseAuthenticationConverter
 import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider.ResponseToken
-import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal
+import org.springframework.security.saml2.provider.service.authentication.Saml2AssertionAuthentication
 import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -32,12 +32,15 @@ class Saml2ResponseAuthenticationConverter(
   @Transactional
   override fun convert(responseToken: ResponseToken): Saml2Authentication {
     logger.debug("Converting SAML response: {}", responseToken.response)
-    val authentication =
-        this.delegate.convert(responseToken) ?: error("Conversion of SAML response failed.")
-    val saml2Principal = authentication.principal as Saml2AuthenticatedPrincipal
-    val providerId = UUID.fromString(saml2Principal.relyingPartyRegistrationId)
+    val authentication = this.delegate.convert(responseToken)!!
+    check(authentication is Saml2AssertionAuthentication) {
+      "Unexpected type for Authentication object"
+    }
+    val credentials =
+        checkNotNull(authentication.credentials) { "Authentication credentials must not be null." }
+    val providerId = UUID.fromString(authentication.relyingPartyRegistrationId)
     val registration = saml2Properties.registration[providerId]!!
-    val attributes = saml2Principal.attributes
+    val attributes = credentials.attributes
     logger.debug("Received SAML attributes: {}", attributes.keys)
     val idMappingAttribute = registration.attributeMapping.id
     val externalId =
