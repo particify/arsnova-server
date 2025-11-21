@@ -31,6 +31,7 @@ routes:
     upstream_id: core-v4
   - id: core-v3-room
     uris:
+      - /api/room/*/answer/*
       - /api/room/*/content/*
       - /api/room/*/contentgroup/*
       - /api/room/*/roomsettings/*
