@@ -38,6 +38,7 @@ routes:
       - /api/room/*/stats
       - /api/room/*/survey
       - /api/room/*/survey/*
+      - /api/room/*/user-alias/*
     upstream_id: core-v3
     plugin_config_id: path-rewrite-and-authz
   - id: core-v3-misc
