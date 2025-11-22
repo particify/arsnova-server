@@ -11,6 +11,8 @@ import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.QMembership
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomRole
+import net.particify.arsnova.core4.room.exception.MembershipNotFoundException
+import net.particify.arsnova.core4.room.exception.RoomNotFoundException
 import net.particify.arsnova.core4.room.internal.MembershipRepository
 import net.particify.arsnova.core4.room.internal.RoomRepository
 import net.particify.arsnova.core4.user.User
@@ -39,8 +41,8 @@ class RoomQueryController(
   }
 
   @QueryMapping
-  fun roomById(@Argument id: UUID): Room? {
-    return roomRepository.findByIdOrNull(id)
+  fun roomById(@Argument id: UUID): Room {
+    return roomRepository.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
   }
 
   @QueryMapping
@@ -77,7 +79,7 @@ class RoomQueryController(
 
   @QueryMapping
   fun roomByShortId(@Argument shortId: String): Room {
-    return roomRepository.findOneByShortId(shortId.toInt())
+    return roomRepository.findOneByShortId(shortId.toInt()) ?: throw RoomNotFoundException()
   }
 
   @QueryMapping
@@ -86,6 +88,7 @@ class RoomQueryController(
       @AuthenticationPrincipal user: User
   ): Membership {
     return membershipRepository.findOneByUserIdAndRoomShortId(user?.id!!, shortId.toInt())
+        ?: throw MembershipNotFoundException()
   }
 
   @QueryMapping

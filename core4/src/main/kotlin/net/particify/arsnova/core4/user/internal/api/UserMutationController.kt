@@ -7,6 +7,7 @@ import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.common.LanguageIso639
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.exception.UserNotFoundException
 import net.particify.arsnova.core4.user.internal.LocalUserServiceImpl
 import net.particify.arsnova.core4.user.internal.UserRepository
 import net.particify.arsnova.core4.user.internal.UserServiceImpl
@@ -29,7 +30,7 @@ class UserMutationController(
       @Argument password: String,
       @AuthenticationPrincipal user: User,
       locale: Locale
-  ): Boolean {
+  ): User {
     return localUserService.claimUnverifiedUser(user, mailAddress, password, locale)
   }
 
@@ -38,16 +39,15 @@ class UserMutationController(
       @Argument mailAddress: String,
       @AuthenticationPrincipal user: User,
       locale: Locale
-  ): Boolean {
-    localUserService.initiateMailVerification(user, mailAddress, locale)
-    return true
+  ): User {
+    return localUserService.initiateMailVerification(user, mailAddress, locale)
   }
 
   @MutationMapping
   fun verifyUserMailAddress(
       @Argument verificationCode: String,
       @AuthenticationPrincipal user: User
-  ): Boolean {
+  ): User {
     return localUserService.completeMailVerification(user, verificationCode.toInt())
   }
 
@@ -56,8 +56,9 @@ class UserMutationController(
       @Argument verificationCode: String,
       @Argument userId: UUID,
       @Argument password: String?
-  ): Boolean {
-    return localUserService.completeMailVerification(userId, verificationCode.toInt(), password)
+  ): User {
+    val user = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException(userId)
+    return localUserService.completeMailVerification(user, verificationCode.toInt(), password)
   }
 
   @MutationMapping
@@ -65,7 +66,7 @@ class UserMutationController(
       @Argument oldPassword: String,
       @Argument newPassword: String,
       @AuthenticationPrincipal user: User
-  ): Boolean {
+  ): User {
     return localUserService.updatePassword(user, oldPassword, newPassword)
   }
 
@@ -73,42 +74,41 @@ class UserMutationController(
   fun updateUserDetails(
       @Argument input: UpdateUserDetailsInput,
       @AuthenticationPrincipal user: User
-  ): Boolean {
+  ): User {
     user.givenName = input.givenName
     user.surname = input.surname
-    userRepository.save(user)
-    return true
+    return userRepository.save(user)
   }
 
   @MutationMapping
   fun updateUserLanguage(
       @Argument @LanguageIso639 languageCode: String,
       @AuthenticationPrincipal user: User
-  ): Boolean {
+  ): User {
     user.language = languageCode
-    userRepository.save(user)
-    return true
+    return userRepository.save(user)
   }
 
   @MutationMapping
-  fun deleteUser(@AuthenticationPrincipal user: User): Boolean {
-    return userService.markAccountForDeletion(user)
+  fun deleteUser(@AuthenticationPrincipal user: User): UUID {
+    return userService.markAccountForDeletion(user).id!!
   }
 
   @MutationMapping
   fun updateUserUiSettings(
       @Argument input: MutableMap<String, Any>,
       @AuthenticationPrincipal user: User
-  ): Boolean {
+  ): Map<String, Any> {
     user.uiSettings.putAll(input)
-    userRepository.save(user)
-    return true
+    return userRepository.save(user).uiSettings
   }
 
   @MutationMapping
   fun requestUserPasswordReset(@Argument mailAddress: String, locale: Locale): Boolean {
-    val user = userRepository.findByMailAddress(mailAddress) ?: return false
-    return localUserService.initiatePasswordReset(user, locale)
+    val user = userRepository.findByMailAddress(mailAddress) ?: throw UserNotFoundException()
+    localUserService.initiatePasswordReset(user, locale)
+    // Returning the user would leak information to a third party
+    return true
   }
 
   @MutationMapping
@@ -116,8 +116,8 @@ class UserMutationController(
       @Argument mailAddress: String,
       @Argument password: String,
       @Argument verificationCode: String
-  ): Boolean {
-    val user = userRepository.findByMailAddress(mailAddress) ?: return false
+  ): User {
+    val user = userRepository.findByMailAddress(mailAddress) ?: throw UserNotFoundException()
     return localUserService.completePasswordReset(user, password, verificationCode.toInt())
   }
 

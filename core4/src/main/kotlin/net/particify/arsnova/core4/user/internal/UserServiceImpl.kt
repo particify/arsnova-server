@@ -12,6 +12,7 @@ import net.particify.arsnova.core4.user.Role
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserDeletedEvent
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.exception.UserNotFoundException
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Limit
 import org.springframework.data.domain.ScrollPosition
@@ -51,7 +52,7 @@ class UserServiceImpl(
   }
 
   override fun markAnnouncementsReadForUserId(id: UUID) {
-    val user = userRepository.findByIdOrNull(id) ?: error("User not found.")
+    val user = userRepository.findByIdOrNull(id) ?: throw UserNotFoundException(id)
     user.announcementsReadAt = Instant.now()
     userRepository.save(user)
   }
@@ -74,12 +75,11 @@ class UserServiceImpl(
     return userRepository.save(user)
   }
 
-  fun markAccountForDeletion(user: User): Boolean {
+  fun markAccountForDeletion(user: User): User {
     user.enabled = false
     user.auditMetadata.deletedAt = Instant.now()
     user.auditMetadata.deletedBy = user.id
-    userRepository.save(user)
-    return true
+    return userRepository.save(user)
   }
 
   @Transactional

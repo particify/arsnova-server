@@ -10,9 +10,7 @@ import org.springframework.graphql.data.GraphQlRepository
 
 @GraphQlRepository
 interface RoomRepository : JpaRepository<Room, UUID> {
-  fun findOneById(id: UUID): Room
-
-  fun findOneByShortId(shortId: Int): Room
+  fun findOneByShortId(shortId: Int): Room?
 
   fun countByShortId(shortId: Int): Int
 }

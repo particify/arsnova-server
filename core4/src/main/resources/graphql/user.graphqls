@@ -4,26 +4,26 @@ extend type Query {
 }
 
 extend type Mutation {
-  claimUnverifiedUser(mailAddress: String!, password: String!): Boolean
-  deleteUser: Boolean
+  claimUnverifiedUser(mailAddress: String!, password: String!): User
+  deleteUser: UUID
   requestUserPasswordReset(mailAddress: String!): Boolean
   resendVerificationMail: Boolean
   resetUserPassword(
     mailAddress: String!
     password: String!
     verificationCode: String!
-  ): Boolean
-  updateUserDetails(input: UpdateUserDetailsInput!): Boolean
-  updateUserLanguage(languageCode: String!): Boolean
-  updateUserMailAddress(mailAddress: String!): Boolean
-  updateUserPassword(oldPassword: String!, newPassword: String!): Boolean
-  updateUserUiSettings(input: UpdateUserUiSettingsInput!): Boolean
-  verifyUserMailAddress(verificationCode: String!): Boolean
+  ): User
+  updateUserDetails(input: UpdateUserDetailsInput!): User
+  updateUserLanguage(languageCode: String!): User
+  updateUserMailAddress(mailAddress: String!): User
+  updateUserPassword(oldPassword: String!, newPassword: String!): User
+  updateUserUiSettings(input: UpdateUserUiSettingsInput!): UserUiSettings
+  verifyUserMailAddress(verificationCode: String!): User
   verifyUserMailAddressUnauthenticated(
     verificationCode: String!
     userId: UUID!
     password: String
-  ): Boolean
+  ): User
 }
 
 type User {

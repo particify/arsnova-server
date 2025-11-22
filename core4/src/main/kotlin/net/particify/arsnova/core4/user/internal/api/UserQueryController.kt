@@ -3,9 +3,10 @@
  */
 package net.particify.arsnova.core4.user.internal.api
 
-import kotlin.jvm.optionals.getOrNull
+import java.util.Optional
 import net.particify.arsnova.core4.user.QUser
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.exception.UserNotFoundException
 import net.particify.arsnova.core4.user.internal.UserRepository
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
@@ -22,8 +23,10 @@ class UserQueryController(private val userRepository: UserRepository) {
   }
 
   @QueryMapping
-  fun userByDisplayId(@Argument displayId: String): User? {
-    return userRepository.findBy(QUser.user.username.eq(displayId)) { it.first().getOrNull() }
+  fun userByDisplayId(@Argument displayId: String): User {
+    // Using Optional as a workaround. There is a nullability issue with findBy.
+    val user: Optional<User> = userRepository.findBy(QUser.user.username.eq(displayId)) { it.one() }
+    return user.orElseThrow { UserNotFoundException() }
   }
 
   @SchemaMapping(typeName = "User", field = "verified")
