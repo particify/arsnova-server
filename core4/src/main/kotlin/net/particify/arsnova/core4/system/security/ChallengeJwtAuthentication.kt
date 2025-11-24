@@ -12,7 +12,7 @@ const val CHALLENGE_SOLVED_ROLE = "CHALLENGE_SOLVED"
 class ChallengeJwtAuthentication(
     private val token: String,
     private var principal: UUID? = null,
-    grantedAuthorities: Set<GrantedAuthority?> = emptySet()
+    grantedAuthorities: Set<GrantedAuthority> = emptySet()
 ) : AbstractAuthenticationToken(grantedAuthorities) {
   init {
     isAuthenticated = grantedAuthorities.isNotEmpty()

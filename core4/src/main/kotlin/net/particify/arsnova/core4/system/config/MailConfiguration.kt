@@ -75,7 +75,7 @@ class MailConfiguration {
     val messageSource = ReloadableResourceBundleMessageSource()
     messageSource.setBasename("classpath:messages/mail")
     messageSource.setPropertiesPersister(YamlPropertiesLoader())
-    messageSource.setFileExtensions(mutableListOf<String?>(".yml", ".yaml"))
+    messageSource.setFileExtensions(mutableListOf(".yml", ".yaml"))
     return messageSource
   }
 }

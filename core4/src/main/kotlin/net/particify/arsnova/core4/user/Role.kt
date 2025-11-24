@@ -15,7 +15,7 @@ import jakarta.persistence.Version
 import java.util.UUID
 
 @Entity
-@Table(schema = "user")
+@Table(schema = "`user`")
 class Role {
   @Id @GeneratedValue(strategy = GenerationType.UUID) var id: UUID? = null
   @Version var version: Int? = 0

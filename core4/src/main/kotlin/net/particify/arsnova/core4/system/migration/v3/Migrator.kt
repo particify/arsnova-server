@@ -55,7 +55,7 @@ class Migrator(
           }
           .build()
 
-  private inline fun <reified T> typeReference() = object : ParameterizedTypeReference<T>() {}
+  private inline fun <reified T : Any> typeReference() = object : ParameterizedTypeReference<T>() {}
 
   private inline fun <reified T : Entity> migrate(fn: (doc: T) -> Any?) {
     val design = T::class.simpleName

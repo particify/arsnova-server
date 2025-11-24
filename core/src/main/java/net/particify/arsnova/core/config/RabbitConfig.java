@@ -14,6 +14,7 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.config.StatelessRetryOperationsInterceptor;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -29,7 +30,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
-import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 import net.particify.arsnova.core.config.properties.MessageBrokerProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
@@ -219,11 +219,11 @@ public class RabbitConfig {
     return factory;
   }
 
-  public RetryOperationsInterceptor retryInterceptor(
-      final int maxAttempts
+  public StatelessRetryOperationsInterceptor retryInterceptor(
+      final int maxRetries
   ) {
     return RetryInterceptorBuilder.stateless()
-        .maxAttempts(maxAttempts)
+        .maxRetries(maxRetries)
         .recoverer(new RejectAndDontRequeueRecoverer())
         .build();
   }

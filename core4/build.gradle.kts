@@ -37,7 +37,6 @@ dependencies {
   implementation(libs.spring.security.saml)
   implementation(libs.spring.validation)
   implementation(libs.spring.websocket)
-  implementation(libs.jackson.jsr310)
   implementation(libs.jackson.kotlin)
   implementation(libs.graphql.scalars)
   implementation(libs.querydsl.jpa)

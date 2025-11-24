@@ -3,7 +3,6 @@
  */
 package net.particify.arsnova.core4.system.security
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import java.time.Instant
 import java.util.Base64
 import java.util.UUID
@@ -14,12 +13,13 @@ import net.particify.arsnova.core4.system.config.SecurityProperties
 import org.altcha.altcha.Altcha
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import tools.jackson.databind.json.JsonMapper
 
 @Service
 class ChallengeService(
     securityProperties: SecurityProperties,
     val jwtUtils: JwtUtils,
-    val objectMapper: ObjectMapper
+    val objectMapper: JsonMapper
 ) {
   val challengeProperties = securityProperties.challenge
   @Volatile var freshBlockedIds: MutableSet<UUID> = ConcurrentHashMap.newKeySet()

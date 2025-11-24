@@ -18,8 +18,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.dao.CannotAcquireLockException
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.data.domain.Pageable
-import org.springframework.retry.annotation.Backoff
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
@@ -41,7 +40,7 @@ class RoomAccessHandler(
   private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
   @Transactional(isolation = Isolation.SERIALIZABLE)
-  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  @Retryable(value = [CannotAcquireLockException::class])
   fun handleRequestRoomAccessSyncCommand(command: RequestRoomAccessSyncCommand): RoomAccessSyncTracker {
     logger.debug("Handling request: {}", command)
     val syncTracker =
@@ -67,7 +66,7 @@ class RoomAccessHandler(
   }
 
   @Transactional(isolation = Isolation.SERIALIZABLE)
-  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  @Retryable(value = [CannotAcquireLockException::class])
   fun handleSyncRoomAccessCommand(command: SyncRoomAccessCommand) {
     logger.debug("Handling event: {}", command)
     val syncTracker =
@@ -108,7 +107,7 @@ class RoomAccessHandler(
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  @Retryable(value = [CannotAcquireLockException::class])
   fun getByRoomIdAndUserId(
     roomId: UUID,
     userId: UUID,
@@ -119,7 +118,7 @@ class RoomAccessHandler(
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  @Retryable(value = [CannotAcquireLockException::class])
   fun getByRoomIdAndRole(
     roomId: UUID,
     roleParam: String?,
@@ -135,38 +134,38 @@ class RoomAccessHandler(
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  @Retryable(value = [CannotAcquireLockException::class])
   fun getOwnerRoomAccessByRoomId(roomId: UUID): RoomAccess? {
     logger.debug("Handling room access request with roomId: {}", roomId)
     return roomAccessRepository.findByRoomIdAndRole(roomId, ROLE_OWNER_STRING).firstOrNull()
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  @Retryable(value = [CannotAcquireLockException::class])
   fun getByUserId(userId: UUID): Iterable<RoomAccess> {
     logger.debug("Handling room access request by userId: {}", userId)
     return roomAccessRepository.findByUserId(userId)
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  @Retryable(value = [CannotAcquireLockException::class])
   fun getByPK(pk: RoomAccessPK): Optional<RoomAccess> = roomAccessRepository.findById(pk)
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  @Retryable(value = [CannotAcquireLockException::class])
   fun getUserIdsLastActiveBefore(lastActiveBefore: Date): Iterable<UUID> =
     roomAccessRepository.findUserIdsByLastAccessBefore(lastActiveBefore)
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  @Retryable(value = [CannotAcquireLockException::class])
   fun getAllLastActive(page: Int): List<LastAccess> = roomAccessRepository.findAllLastAccess(Pageable.ofSize(10).withPage(page)).toList()
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  @Retryable(value = [CannotAcquireLockException::class])
   fun getLastActiveByUserId(userId: UUID): LastAccess? = roomAccessRepository.findLastAccessByUserId(userId).firstOrNull()
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  @Retryable(value = [CannotAcquireLockException::class])
   fun create(roomAccess: RoomAccess): RoomAccess =
     try {
       if (roomAccess.role == ROLE_OWNER_STRING) {
@@ -199,7 +198,7 @@ class RoomAccessHandler(
     }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  @Retryable(value = [CannotAcquireLockException::class])
   fun createParticipantAccessWithLimit(
     roomAccess: RoomAccess,
     limit: Int,
@@ -216,7 +215,7 @@ class RoomAccessHandler(
   }
 
   @Transactional(isolation = Isolation.READ_COMMITTED)
-  @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+  @Retryable(value = [CannotAcquireLockException::class])
   fun migrateParticipantAccess(
     userId: UUID,
     roomIds: List<UUID>,

@@ -40,9 +40,11 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-validation")
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
+  implementation("org.springframework.boot:spring-boot-jackson2")
   implementation("org.springframework:spring-aop")
   implementation("org.springframework:spring-aspects")
   implementation("org.springframework.data:spring-data-commons")
+  implementation("org.springframework.security:spring-security-access")
   implementation("org.springframework.security:spring-security-aspects")
   implementation("org.springframework.security:spring-security-cas")
   implementation("org.springframework.security:spring-security-ldap")
@@ -68,9 +70,6 @@ dependencies {
   aspect("org.springframework.security:spring-security-aspects") {
     exclude(group = "io.micrometer", module = "micrometer-observation")
   }
-
-  // Jackson 2.19 causes issues with our migrations, see https://gitlab.com/particify/dev/foss/arsnova-server/-/issues/317
-  implementation(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.18.4.1"))
 }
 
 tasks.bootRun {
