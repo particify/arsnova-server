@@ -29,7 +29,7 @@ extend type Query {
 
 extend type Mutation {
   createRoom(input: CreateRoomInput!): Room!
-  deleteRoom(id: ID!): Boolean!
+  deleteRoom(id: ID!): UUID!
   duplicateDemoRoom: Room!
   duplicateRoom(input: DuplicateRoomInput!): Room!
   grantRoomRole(roomId: UUID!, userId: UUID!, role: RoomRole!): Boolean!

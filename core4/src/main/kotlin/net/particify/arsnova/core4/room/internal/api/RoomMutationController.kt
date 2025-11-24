@@ -102,9 +102,9 @@ class RoomMutationController(
   }
 
   @MutationMapping
-  fun deleteRoom(@Argument id: UUID): Boolean {
+  fun deleteRoom(@Argument id: UUID): UUID {
     roomRepository.deleteById(id)
-    return true
+    return id
   }
 
   @MutationMapping
