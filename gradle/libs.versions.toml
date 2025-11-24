@@ -61,6 +61,8 @@ spring-hal-explorer = { module = "org.springframework.data:spring-data-rest-hal-
 spring-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
 spring-graphql = { module = "org.springframework.boot:spring-boot-starter-graphql" }
 spring-graphql-test = { module = "org.springframework.graphql:spring-graphql-test" }
+spring-liquibase = { module = "org.springframework.boot:spring-boot-starter-liquibase" }
+spring-liquibase-test = { module = "org.springframework.boot:spring-boot-starter-liquibase-test" }
 spring-mail = { module = "org.springframework.boot:spring-boot-starter-mail" }
 spring-modulith = { module = "org.springframework.modulith:spring-modulith-starter-core" }
 spring-modulith-bom = { module = "org.springframework.modulith:spring-modulith-bom", version.ref = "spring-modulith" }
