@@ -42,7 +42,6 @@ import org.ektorp.DocumentNotFoundException;
 import org.ektorp.impl.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Profile;
@@ -55,8 +54,6 @@ import org.springframework.util.FileCopyUtils;
 
 import net.particify.arsnova.core.event.DatabaseInitializedEvent;
 import net.particify.arsnova.core.model.MigrationState;
-import net.particify.arsnova.core.persistence.couchdb.migrations.MigrationException;
-import net.particify.arsnova.core.persistence.couchdb.migrations.MigrationExecutor;
 import net.particify.arsnova.core.service.StatusService;
 
 @Component
@@ -64,10 +61,10 @@ import net.particify.arsnova.core.service.StatusService;
 public class CouchDbInitializer implements ApplicationEventPublisherAware {
   private static final TypeReference<HashMap<String, Object>> JSON_MAP_TYPE_REF = new TypeReference<>() {};
   private static final Logger logger = LoggerFactory.getLogger(CouchDbInitializer.class);
+  private static final String EXPECTED_MIGRATION_VERSION = "20250611162800";
   private final List<Map<String, Object>> docs = new ArrayList<>();
 
   private ApplicationEventPublisher applicationEventPublisher;
-  private MigrationExecutor migrationExecutor;
   private CouchDbConnector connector;
   private ObjectMapper objectMapper;
   private StatusService statusService;
@@ -148,7 +145,7 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware {
   }
 
   private MigrationState checkMigrationState() {
-    MigrationState state;
+    MigrationState state = null;
     try {
       state = connector.get(MigrationState.class, MigrationState.ID);
     } catch (final DocumentNotFoundException e) {
@@ -157,21 +154,9 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware {
         /* TODO: use a custom exception */
         throw new DbAccessException("Database is not empty.");
       }
-      state = new MigrationState();
-      connector.create(state);
     }
 
     return state;
-  }
-
-  protected void migrate(final MigrationState state) {
-    if (migrationExecutor != null) {
-      try {
-        migrationExecutor.runMigrations(state, () -> connector.update(state));
-      } catch (final MigrationException e) {
-        logger.error("Migration failed.", e);
-      }
-    }
   }
 
   protected void waitForDb() {
@@ -224,7 +209,10 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware {
       statusService.putMaintenanceReason(this.getClass(), "Data migration active");
       loadDesignDocFiles();
       createDesignDocs();
-      migrate(state);
+      if (state != null && (state.getActive() != null || !state.getCompleted().contains(EXPECTED_MIGRATION_VERSION))) {
+        throw new IllegalStateException(
+            "Invalid database migration state. Run migrations with latest 3.x release first.");
+      }
       statusService.removeMaintenanceReason(this.getClass());
       logger.info("Database initialization completed.");
       this.applicationEventPublisher.publishEvent(new DatabaseInitializedEvent(this));
@@ -232,10 +220,5 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware {
       logger.error("Database initialization failed.", e);
       statusService.putMaintenanceReason(this.getClass(), "Invalid database state");
     }
-  }
-
-  @Autowired
-  public void setMigrationExecutor(final MigrationExecutor migrationExecutor) {
-    this.migrationExecutor = migrationExecutor;
   }
 }
