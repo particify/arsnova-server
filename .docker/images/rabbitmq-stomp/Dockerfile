@@ -1,4 +1,4 @@
-FROM rabbitmq:4.1-alpine
+FROM rabbitmq:4.2-alpine
 
 RUN rabbitmq-plugins enable --offline rabbitmq_stomp
 
