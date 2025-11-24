@@ -33,6 +33,6 @@ class UserQueryController(private val userRepository: UserRepository) {
 
   @SchemaMapping(typeName = "User", field = "displayId")
   fun displayId(user: User): String? {
-    return user.username
+    return user.username ?: user.unverifiedMailAddress
   }
 }

@@ -6,7 +6,7 @@ package net.particify.arsnova.core4.user.internal.api
 import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.user.User
-import net.particify.arsnova.core4.user.internal.LocalUserService
+import net.particify.arsnova.core4.user.internal.LocalUserServiceImpl
 import net.particify.arsnova.core4.user.internal.UserRepository
 import net.particify.arsnova.core4.user.internal.UserServiceImpl
 import org.springframework.graphql.data.method.annotation.Argument
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Controller
 @SchemaMapping(typeName = "Mutation")
 class UserMutationController(
     private val userService: UserServiceImpl,
-    private val localUserService: LocalUserService,
+    private val localUserService: LocalUserServiceImpl,
     private val userRepository: UserRepository,
 ) {
   @MutationMapping
@@ -53,9 +53,10 @@ class UserMutationController(
   @MutationMapping
   fun verifyUserMailAddressUnauthenticated(
       @Argument verificationCode: String,
-      @Argument userId: UUID
+      @Argument userId: UUID,
+      @Argument password: String?
   ): Boolean {
-    return localUserService.completeMailVerification(userId, verificationCode.toInt())
+    return localUserService.completeMailVerification(userId, verificationCode.toInt(), password)
   }
 
   @MutationMapping
