@@ -21,7 +21,8 @@ spring:
 
   threads:
     virtual:
-      enabled: true
+      # Virtual threads currently cause issue with security context propagation for GraphQL requests.
+      enabled: false
 
   graphql:
     graphiql:
