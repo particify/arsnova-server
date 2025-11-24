@@ -14,6 +14,6 @@ class TestcontainersConfiguration {
   @Bean
   @ServiceConnection
   fun postgresqlContainer(): PostgreSQLContainer<*> {
-    return PostgreSQLContainer(DockerImageName.parse("postgres:17-alpine")).withUsername("arsnova")
+    return PostgreSQLContainer(DockerImageName.parse("postgres:18-alpine")).withUsername("arsnova")
   }
 }

@@ -8,23 +8,23 @@ services:
     volumes:
       - couchdb_data:/opt/couchdb/data
   postgresql-authz:
-    image: postgres:14.18-alpine
+    image: postgres:18.1-alpine
     restart: $RESTART_MODE
     environment:
       POSTGRES_DB: arsnovaauth
       POSTGRES_USER: arsnovaauth
       POSTGRES_PASSWORD: arsnovaauth
     volumes:
-      - postgresql_data_auth:/var/lib/postgresql/data
+      - postgresql_data_auth:/var/lib/postgresql/18/docker
   postgresql-comments:
-    image: postgres:14.18-alpine
+    image: postgres:18.1-alpine
     restart: $RESTART_MODE
     environment:
       POSTGRES_DB: arsnovacomment
       POSTGRES_USER: arsnovacomment
       POSTGRES_PASSWORD: arsnovacomment
     volumes:
-      - postgresql_data_comment:/var/lib/postgresql/data
+      - postgresql_data_comment:/var/lib/postgresql/18/docker
   rabbitmq:
     image: $IMAGE_NAMESPACE/${IMAGE_DEPENDENCY_PREFIX}rabbitmq-stomp:$RABBITMQ_TAG
     restart: $RESTART_MODE
