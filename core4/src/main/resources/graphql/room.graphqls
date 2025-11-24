@@ -39,6 +39,7 @@ extend type Mutation {
     role: RoomRole!
   ): Boolean!
   joinRoom(input: JoinRoomInput!): RoomMembership!
+  revokeRoomMembership(roomId: UUID!): UUID!
   revokeRoomRole(roomId: UUID!, userId: UUID!): Boolean!
   updateRoomDescription(id: ID!, description: String!): Room!
   updateRoomFocusMode(id: ID!, enabled: Boolean!): Room!

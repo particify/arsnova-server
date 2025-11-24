@@ -140,4 +140,16 @@ class RoomMutationController(
     membershipRepository.save(membership)
     return true
   }
+
+  @MutationMapping
+  fun revokeRoomMembership(@Argument roomId: UUID, @AuthenticationPrincipal user: User): UUID {
+    val membership =
+        membershipRepository.findByIdOrNull(Membership.RoomUserId(roomId, user.id))
+            ?: error("No membership found.")
+    if (membership.role == RoomRole.OWNER) {
+      error("Revoking membership as owner is not allowed.")
+    }
+    membershipRepository.delete(membership)
+    return roomId
+  }
 }
