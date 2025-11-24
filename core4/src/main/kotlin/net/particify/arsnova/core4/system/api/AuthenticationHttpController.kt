@@ -38,7 +38,7 @@ class AuthenticationHttpController(
         throw AccessDeniedException("Refresh not allowed for authentication")
     val subject = authentication.principal!!.id.toString()
     val accessToken = jwtUtils.encodeJwt(subject, user.roles.map { it.name!! })
-    refreshCookieComponent.add(subject, user.version!!, response)
+    refreshCookieComponent.add(subject, user.tokenVersion!!, response)
     return AuthenticationWrapper(accessToken)
   }
 
@@ -53,7 +53,7 @@ class AuthenticationHttpController(
     val user = authenticatedToken.principal as User
     val subject = user.id.toString()
     val accessToken = jwtUtils.encodeJwt(subject, user.roles.map { it.name!! })
-    refreshCookieComponent.add(subject, user.version!!, response)
+    refreshCookieComponent.add(subject, user.tokenVersion!!, response)
     return AuthenticationWrapper(accessToken)
   }
 
@@ -67,7 +67,7 @@ class AuthenticationHttpController(
     val user = userService.createAccount()
     val subject = user.id.toString()
     val accessToken = jwtUtils.encodeJwt(subject, user.roles.map { it.name!! })
-    refreshCookieComponent.add(subject, user.version!!, response)
+    refreshCookieComponent.add(subject, user.tokenVersion!!, response)
     return AuthenticationWrapper(accessToken)
   }
 }
