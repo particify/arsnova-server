@@ -1,13 +1,13 @@
 services:
   postgresql-core4:
-    image: postgres:17.5-alpine
+    image: postgres:18.1-alpine
     restart: $RESTART_MODE
     environment:
       POSTGRES_DB: arsnova
       POSTGRES_USER: arsnova
       POSTGRES_PASSWORD: arsnova
     volumes:
-      - core-postgresql-data:/var/lib/postgresql/data
+      - core-postgresql-data:/var/lib/postgresql/18/docker
   arsnova-server-core4:
     image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}core4:$CORE_TAG
     restart: $RESTART_MODE
