@@ -114,7 +114,7 @@ class Migrator(
               mailAddress = it.person?.mail,
               givenName = it.person?.firstName,
               surname = it.person?.lastName,
-              settings = settings,
+              uiSettings = settings,
               announcementsReadAt = it.announcementReadTimestamp,
               roles = mutableListOf(defaultRole))
       if (!migrateExternalLogins(newUser, it)) {

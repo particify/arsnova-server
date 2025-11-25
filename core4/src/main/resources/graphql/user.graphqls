@@ -9,6 +9,7 @@ extend type Mutation {
   updateUserMailAddress(mailAddress: String!): Boolean
   updateUserPassword(oldPassword: String!, newPassword: String!): Boolean
   updateUserDetails(input: UpdateUserDetailsInput!): Boolean
+  updateUserUiSettings(input: UpdateUserUiSettingsInput!): Boolean
   verifyUserMailAddress(verificationCode: String!): Boolean
   verifyUserMailAddressUnauthenticated(
     verificationCode: String!
@@ -23,9 +24,24 @@ type User {
   displayId: String
   displayName: String
   unverifiedMailAddress: String
+  uiSettings: UserUiSettings
 }
 
 input UpdateUserDetailsInput {
   givenName: String
   surname: String
+}
+
+type UserUiSettings {
+  contentAnswersDirectlyBelowChart: Boolean
+  contentVisualizationUnitPercent: Boolean
+  showContentResultsDirectly: Boolean
+  rotateWordcloudItems: Boolean
+}
+
+input UpdateUserUiSettingsInput {
+  contentAnswersDirectlyBelowChart: Boolean
+  contentVisualizationUnitPercent: Boolean
+  showContentResultsDirectly: Boolean
+  rotateWordcloudItems: Boolean
 }

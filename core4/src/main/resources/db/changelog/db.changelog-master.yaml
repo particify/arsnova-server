@@ -73,7 +73,7 @@ databaseChangeLog:
                     nullable: false
                   defaultValue: true
               - column:
-                  name: settings
+                  name: ui_settings
                   type: jsonb
                   constraints:
                     nullable: false
