@@ -120,4 +120,9 @@ class UserMutationController(
     val user = userRepository.findByMailAddress(mailAddress) ?: return false
     return localUserService.completePasswordReset(user, password, verificationCode.toInt())
   }
+
+  @MutationMapping
+  fun resendVerificationMail(@AuthenticationPrincipal user: User, locale: Locale): Boolean {
+    return localUserService.restartVerification(user, locale)
+  }
 }
