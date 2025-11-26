@@ -25,4 +25,6 @@ interface UserRepository : JpaRepository<User, UUID>, QuerydslPredicateExecutor<
       scrollPosition: ScrollPosition,
       limit: Limit
   ): Window<User>
+
+  fun findByMailAddress(mailAddress: String): User?
 }
