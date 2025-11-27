@@ -3,4 +3,6 @@
  */
 package net.particify.arsnova.core4.room.internal.api
 
-data class RoomQueryInput(val shortId: String?, val name: String?)
+import net.particify.arsnova.core4.room.RoomRole
+
+data class RoomQueryInput(val shortId: String?, val name: String?, val role: RoomRole?)
