@@ -103,7 +103,7 @@ class LocalUserServiceImpl(
   fun completeMailVerification(user: User, verificationCode: Int): Boolean {
     if (!user.isMailAddressVerificationActive()) return false
     if (user.verificationCode != verificationCode) {
-      user.verificationErrors!!.inc()
+      user.verificationErrors = user.verificationErrors!!.inc()
       userRepository.save(user)
       return false
     }
@@ -118,7 +118,7 @@ class LocalUserServiceImpl(
     val user = requireNotNull(userRepository.findByIdOrNull(userId)) { "User not found" }
     check(user.isMailAddressVerificationActive()) { "Verification is not active" }
     if (user.verificationCode != verificationCode) {
-      user.verificationErrors!!.inc()
+      user.verificationErrors = user.verificationErrors!!.inc()
       userRepository.save(user)
       return false
     }
@@ -152,7 +152,7 @@ class LocalUserServiceImpl(
       return false
     }
     if (verificationCode != user.verificationCode) {
-      user.verificationErrors!!.inc()
+      user.verificationErrors = user.verificationErrors!!.inc()
       userRepository.save(user)
       return false
     }
