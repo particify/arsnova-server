@@ -1,7 +1,9 @@
 mail:
   greeting: Hello!
   password-reset-intro: You requested to reset your {0} password.
-  password-reset-subject: Verifizierungscode für Passwortrücksetzung
+  password-reset-link-intro: "Use the following link to set a new password:"
+  password-reset-link-text: "Set new password"
+  password-reset-subject: Verification code for password reset
   password-reset-your-code: "Here is the verification code you need to set a new password:"
   room-invitation-link-text: Accept invitation
   room-invitation-subject: Invitation for {0} room "{1}"

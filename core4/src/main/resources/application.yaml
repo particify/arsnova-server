@@ -51,6 +51,7 @@ persistence:
 mail:
   invitation-uri-pattern: /user/{0}/accept-invitation?code={1}&expires={2}
   verification-uri-pattern: /user/{0}/verify?code={1}&expires={2}
+  password-reset-uri-pattern: /password-reset/{0}
 
 common:
   text-rendering:
