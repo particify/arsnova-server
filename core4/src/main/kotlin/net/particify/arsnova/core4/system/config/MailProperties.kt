@@ -18,5 +18,6 @@ data class MailProperties(
     val password: String? = null,
     val localhost: String? = null,
     val invitationUriPattern: String,
-    val verificationUriPattern: String
+    val verificationUriPattern: String,
+    val passwordResetUriPattern: String,
 )

@@ -93,4 +93,20 @@ class UserMutationController(
     userRepository.save(user)
     return true
   }
+
+  @MutationMapping
+  fun requestUserPasswordReset(@Argument mailAddress: String, locale: Locale): Boolean {
+    val user = userRepository.findByMailAddress(mailAddress) ?: return false
+    return localUserService.initiatePasswordReset(user, locale)
+  }
+
+  @MutationMapping
+  fun resetUserPassword(
+      @Argument mailAddress: String,
+      @Argument password: String,
+      @Argument verificationCode: String
+  ): Boolean {
+    val user = userRepository.findByMailAddress(mailAddress) ?: return false
+    return localUserService.completePasswordReset(user, password, verificationCode.toInt())
+  }
 }

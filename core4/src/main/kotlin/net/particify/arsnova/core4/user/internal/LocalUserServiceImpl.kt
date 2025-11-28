@@ -39,6 +39,7 @@ class LocalUserServiceImpl(
   private val secureRandom = SecureRandom()
   private val invitationUriPattern = mailProperties.invitationUriPattern
   private val verificationUriPattern = mailProperties.verificationUriPattern
+  private val passwordResetUriPattern = mailProperties.passwordResetUriPattern
 
   fun claimUnverifiedUser(
       user: User,
@@ -143,7 +144,8 @@ class LocalUserServiceImpl(
 
   private fun sendPasswordResetMail(user: User, locale: Locale) {
     val code = toFixedLength(user.verificationCode!!)
-    val templateData = mapOf("code" to code)
+    val passwordResetUri = MessageFormat.format(passwordResetUriPattern, user.mailAddress!!)
+    val templateData = mapOf("code" to code, "passwordResetUri" to passwordResetUri)
     mailService.sendMail(user.mailAddress!!, "password-reset", templateData, locale)
   }
 

@@ -6,6 +6,12 @@ extend type Query {
 extend type Mutation {
   claimUnverifiedUser(mailAddress: String!, password: String!): Boolean
   deleteUser: Boolean
+  requestUserPasswordReset(mailAddress: String!): Boolean
+  resetUserPassword(
+    mailAddress: String!
+    password: String!
+    verificationCode: String!
+  ): Boolean
   updateUserMailAddress(mailAddress: String!): Boolean
   updateUserPassword(oldPassword: String!, newPassword: String!): Boolean
   updateUserDetails(input: UpdateUserDetailsInput!): Boolean
