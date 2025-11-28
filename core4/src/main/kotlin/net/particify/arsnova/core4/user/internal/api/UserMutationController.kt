@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.user.internal.api
 
 import java.util.Locale
 import java.util.UUID
+import net.particify.arsnova.core4.common.LanguageIso639
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.internal.LocalUserServiceImpl
 import net.particify.arsnova.core4.user.internal.UserRepository
@@ -75,6 +76,16 @@ class UserMutationController(
   ): Boolean {
     user.givenName = input.givenName
     user.surname = input.surname
+    userRepository.save(user)
+    return true
+  }
+
+  @MutationMapping
+  fun updateUserLanguage(
+      @Argument @LanguageIso639 languageCode: String,
+      @AuthenticationPrincipal user: User
+  ): Boolean {
+    user.language = languageCode
     userRepository.save(user)
     return true
   }

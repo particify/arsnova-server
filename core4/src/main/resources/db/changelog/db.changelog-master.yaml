@@ -79,6 +79,9 @@ databaseChangeLog:
                     nullable: false
                   defaultValue: "{}"
               - column:
+                  name: language
+                  type: varchar(2)
+              - column:
                   name: token_version
                   type: smallint
                   constraints:
