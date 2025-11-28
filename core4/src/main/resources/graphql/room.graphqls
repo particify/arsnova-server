@@ -87,6 +87,7 @@ input RoomQueryInput {
   id: ID
   shortId: ID
   name: String
+  role: RoomRole
 }
 
 input RoomQueryUserInput {

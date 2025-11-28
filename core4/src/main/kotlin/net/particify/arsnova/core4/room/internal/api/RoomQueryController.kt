@@ -65,6 +65,9 @@ class RoomQueryController(
     if (query?.name != null) {
       queryBuilder.and(QMembership.membership.room.name.containsIgnoreCase(query.name))
     }
+    if (query?.role != null) {
+      queryBuilder.and(QMembership.membership.role.eq(query.role))
+    }
     return membershipRepository.findBy(queryBuilder) { q ->
       q.sortBy(Sort.by("lastActivityAt").descending())
           .limit(DEFAULT_QUERY_LIMIT)
