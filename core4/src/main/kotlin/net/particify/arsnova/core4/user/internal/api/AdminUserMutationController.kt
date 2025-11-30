@@ -12,10 +12,12 @@ import net.particify.arsnova.core4.user.internal.UserServiceImpl
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Controller
 
 @Controller
+@PreAuthorize("hasRole('ADMIN')")
 @SchemaMapping(typeName = "Mutation")
 class AdminUserMutationController(
     private val userService: UserServiceImpl,

@@ -19,10 +19,12 @@ import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.graphql.data.query.ScrollSubrange
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Controller
 
 @Controller
+@PreAuthorize("hasRole('USER')")
 @SchemaMapping(typeName = "Query")
 class AnnouncementQueryController(
     private val announcementService: AnnouncementServiceImpl,

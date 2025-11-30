@@ -34,7 +34,7 @@ class ChallengeAuthenticationProvider(
       if (!challengeService.useId(UUID.fromString(id)))
           throw BadCredentialsException("Challenge solution already used")
       return ChallengeJwtAuthentication(
-          token, UUID.fromString(id), setOf(SimpleGrantedAuthority(CHALLENGE_SOLVED_ROLE)))
+          token, UUID.fromString(id), setOf(SimpleGrantedAuthority("ROLE_$CHALLENGE_SOLVED_ROLE")))
     } catch (e: JwtException) {
       throw BadCredentialsException("Invalid JWT", e)
     } catch (e: IllegalArgumentException) {
