@@ -154,6 +154,9 @@ public class CouchDbInitializer implements ApplicationEventPublisherAware {
         /* TODO: use a custom exception */
         throw new DbAccessException("Database is not empty.");
       }
+      state = new MigrationState();
+      state.setCompleted(List.of(EXPECTED_MIGRATION_VERSION));
+      connector.create(state);
     }
 
     return state;
