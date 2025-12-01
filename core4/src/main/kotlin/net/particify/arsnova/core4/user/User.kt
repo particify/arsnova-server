@@ -16,6 +16,7 @@ import jakarta.persistence.Version
 import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
+import net.particify.arsnova.core4.common.LanguageIso639
 import net.particify.arsnova.core4.common.UuidGenerator
 import net.particify.arsnova.core4.user.internal.ExternalLogin
 import net.particify.arsnova.core4.user.internal.VERIFICATION_MAX_ERRORS
@@ -59,6 +60,7 @@ class User(
     @Embedded val auditMetadata: AuditMetadata = AuditMetadata(),
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL])
     val externalLogins: MutableList<ExternalLogin> = mutableListOf(),
+    @field:LanguageIso639 var language: String? = null,
 ) : AuthenticatedPrincipal, UserDetails {
   override fun getName(): String = username ?: ""
 

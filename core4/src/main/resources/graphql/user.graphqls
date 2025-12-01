@@ -12,9 +12,10 @@ extend type Mutation {
     password: String!
     verificationCode: String!
   ): Boolean
+  updateUserDetails(input: UpdateUserDetailsInput!): Boolean
+  updateUserLanguage(languageCode: String!): Boolean
   updateUserMailAddress(mailAddress: String!): Boolean
   updateUserPassword(oldPassword: String!, newPassword: String!): Boolean
-  updateUserDetails(input: UpdateUserDetailsInput!): Boolean
   updateUserUiSettings(input: UpdateUserUiSettingsInput!): Boolean
   verifyUserMailAddress(verificationCode: String!): Boolean
   verifyUserMailAddressUnauthenticated(
@@ -31,6 +32,7 @@ type User {
   displayName: String
   unverifiedMailAddress: String
   uiSettings: UserUiSettings
+  language: String
 }
 
 input UpdateUserDetailsInput {
