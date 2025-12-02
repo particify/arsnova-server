@@ -25,7 +25,17 @@ class LegacyConfigurationController(
                         listOf(
                             LegacyAuthenticationProvider.Role.MODERATOR,
                             LegacyAuthenticationProvider.Role.PARTICIPANT),
-                    type = LegacyAuthenticationProvider.Type.USERNAME_PASSWORD)))
+                    type = LegacyAuthenticationProvider.Type.USERNAME_PASSWORD))
+            .plus(
+                LegacyAuthenticationProvider(
+                    id = "guest",
+                    title = "guest",
+                    order = 0,
+                    allowedRoles =
+                        listOf(
+                            LegacyAuthenticationProvider.Role.MODERATOR,
+                            LegacyAuthenticationProvider.Role.PARTICIPANT),
+                    type = LegacyAuthenticationProvider.Type.ANONYMOUS)))
   }
 
   private fun buildSaml2ProviderList(): List<LegacyAuthenticationProvider> {
@@ -62,7 +72,8 @@ class LegacyConfigurationController(
 
       enum class Type {
         USERNAME_PASSWORD,
-        SSO
+        SSO,
+        ANONYMOUS
       }
     }
   }
