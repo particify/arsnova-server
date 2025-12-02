@@ -196,4 +196,18 @@ class LocalUserServiceImpl(
         .nextLong(10.0.pow(VERIFICATION_CODE_LENGTH.toDouble()).roundToLong() - 1)
         .toInt()
   }
+
+  fun restartVerification(user: User, locale: Locale): Boolean {
+    if (user.unverifiedMailAddress == null) {
+      return false
+    }
+    if (Instant.now() > user.verificationExpiresAt) {
+      user.verificationErrors = 0
+      user.verificationCode = generateNumericCode()
+      user.verificationExpiresAt = Instant.now().plus(VERIFICATION_VALIDITY_HOURS, ChronoUnit.HOURS)
+      userRepository.save(user)
+    }
+    sendVerificationMail(user, "welcome-verification", locale)
+    return true
+  }
 }
