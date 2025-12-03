@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class MembershipServiceImpl(private val membershipRepository: MembershipRepository) :
-    MembershipService {
+    MembershipService, MembershipRepository by membershipRepository {
   override fun findOneByRoomIdAndUserId(roomId: UUID, userId: UUID): Membership? {
     return membershipRepository.findOneByRoomIdAndUserId(roomId, userId)
   }
@@ -20,4 +20,9 @@ class MembershipServiceImpl(private val membershipRepository: MembershipReposito
   override fun findByUserId(userId: UUID, scrollPosition: ScrollPosition): Window<Membership> {
     return membershipRepository.findByUserId(userId, scrollPosition)
   }
+
+  @Deprecated(
+      "Deprecated by base implementation", replaceWith = ReplaceWith("deleteAllInBatch(entities)"))
+  override fun deleteInBatch(entities: Iterable<Membership>) =
+      membershipRepository.deleteInBatch(entities)
 }

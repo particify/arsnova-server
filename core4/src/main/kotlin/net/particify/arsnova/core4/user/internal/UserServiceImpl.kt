@@ -29,7 +29,7 @@ class UserServiceImpl(
     private val userRepository: UserRepository,
     private val roleRepository: RoleRepository,
     private val eventPublisher: ApplicationEventPublisher
-) : UserService {
+) : UserService, UserRepository by userRepository {
   private val userRole = roleRepository.findByName("USER")
 
   override fun loadUserByUsername(username: String): User {
@@ -101,4 +101,8 @@ class UserServiceImpl(
       userRepository.delete(it)
     }
   }
+
+  @Deprecated(
+      "Deprecated by base implementation", replaceWith = ReplaceWith("deleteAllInBatch(entities)"))
+  override fun deleteInBatch(entities: Iterable<User>) = userRepository.deleteInBatch(entities)
 }
