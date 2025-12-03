@@ -32,15 +32,15 @@ extend type Mutation {
   deleteRoom(id: ID!): UUID!
   duplicateDemoRoom: Room!
   duplicateRoom(input: DuplicateRoomInput!): Room!
-  grantRoomRole(roomId: UUID!, userId: UUID!, role: RoomRole!): Boolean!
+  grantRoomRole(roomId: UUID!, userId: UUID!, role: RoomRole!): RoomMember!
   grantRoomRoleByInvitation(
     roomId: UUID!
     mailAddress: String!
     role: RoomRole!
-  ): Boolean!
+  ): RoomMember!
   joinRoom(input: JoinRoomInput!): RoomMembership!
-  revokeRoomMembership(roomId: UUID!): UUID!
-  revokeRoomRole(roomId: UUID!, userId: UUID!): Boolean!
+  revokeRoomMembership(roomId: UUID!): RoomMembership!
+  revokeRoomRole(roomId: UUID!, userId: UUID!): RoomMember!
   updateRoomDescription(id: ID!, description: String!): Room!
   updateRoomFocusMode(id: ID!, enabled: Boolean!): Room!
   updateRoomLanguage(id: ID!, languageCode: String): Room!
@@ -65,6 +65,7 @@ type RoomMembership {
 }
 
 type RoomMember {
+  room: Room!
   user: User!
   role: RoomRole
 }

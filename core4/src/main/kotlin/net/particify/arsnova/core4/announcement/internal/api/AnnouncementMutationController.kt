@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.announcement.internal.api
 
 import java.util.UUID
 import net.particify.arsnova.core4.announcement.Announcement
+import net.particify.arsnova.core4.announcement.exception.AnnouncementNotFoundException
 import net.particify.arsnova.core4.announcement.internal.AnnouncementRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.method.annotation.Argument
@@ -23,7 +24,8 @@ class AnnouncementMutationController(private val announcementRepository: Announc
   @MutationMapping
   fun updateAnnouncement(@Argument input: UpdateAnnouncementInput): Announcement {
     val announcement =
-        announcementRepository.findByIdOrNull(input.id) ?: error("No announcement found.")
+        announcementRepository.findByIdOrNull(input.id)
+            ?: throw AnnouncementNotFoundException(input.id)
     if (input.title != null) {
       announcement.title = input.title
     }

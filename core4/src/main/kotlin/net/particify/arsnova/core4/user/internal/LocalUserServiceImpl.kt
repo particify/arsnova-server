@@ -8,14 +8,16 @@ import java.text.MessageFormat
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Locale
-import java.util.UUID
 import kotlin.math.pow
 import kotlin.math.roundToLong
+import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.system.MailService
 import net.particify.arsnova.core4.system.config.MailProperties
 import net.particify.arsnova.core4.user.LocalUserService
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.exception.InvalidUserStateException
+import net.particify.arsnova.core4.user.exception.InvalidVerificationCodeException
 import org.slf4j.LoggerFactory
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -41,28 +43,24 @@ class LocalUserServiceImpl(
   private val verificationUriPattern = mailProperties.verificationUriPattern
   private val passwordResetUriPattern = mailProperties.passwordResetUriPattern
 
-  fun claimUnverifiedUser(
-      user: User,
-      mailAddress: String,
-      password: String,
-      locale: Locale
-  ): Boolean {
+  fun claimUnverifiedUser(user: User, mailAddress: String, password: String, locale: Locale): User {
     if (user.mailAddress != null || user.password != null) {
-      return false
+      throw InvalidUserStateException("Account not claimable", user.id!!)
     }
     initiateVerification(user)
     user.unverifiedMailAddress = mailAddress
     user.password = passwordEncoder.encode(password)
-    userRepository.save(user)
-    sendVerificationMail(user, "welcome-verification", locale)
-    return true
+    val persistedUser = userRepository.save(user)
+    sendVerificationMail(persistedUser, "welcome-verification", locale)
+    return persistedUser
   }
 
-  fun initiateMailVerification(user: User, mailAddress: String, locale: Locale) {
+  fun initiateMailVerification(user: User, mailAddress: String, locale: Locale): User {
     initiateVerification(user)
     user.unverifiedMailAddress = mailAddress
-    userRepository.save(user)
-    sendVerificationMail(user, "mail-verification", locale)
+    val persistedUser = userRepository.save(user)
+    sendVerificationMail(persistedUser, "mail-verification", locale)
+    return persistedUser
   }
 
   private fun sendVerificationMail(user: User, template: String, locale: Locale) {
@@ -87,59 +85,53 @@ class LocalUserServiceImpl(
     val invitee = userService.createAccount()
     initiateVerification(invitee)
     invitee.unverifiedMailAddress = mailAddress
-    userRepository.save(invitee)
+    val persistedInvitee = userRepository.save(invitee)
     val code = toFixedLength(invitee.verificationCode!!)
     val invitationUri =
         MessageFormat.format(
             invitationUriPattern,
             invitee.id,
             code,
-            invitee.verificationExpiresAt?.epochSecond.toString())
+            persistedInvitee.verificationExpiresAt?.epochSecond.toString())
     val templateData =
         data.plus(mapOf("code" to code, "inviter" to inviter, "invitationUri" to invitationUri))
-    mailService.sendMail(invitee.unverifiedMailAddress!!, template, templateData, locale)
-    return invitee
+    mailService.sendMail(persistedInvitee.unverifiedMailAddress!!, template, templateData, locale)
+    return persistedInvitee
   }
 
-  fun completeMailVerification(user: User, verificationCode: Int): Boolean {
-    if (!user.isMailAddressVerificationActive()) return false
-    if (user.verificationCode != verificationCode) {
-      user.verificationErrors = user.verificationErrors!!.inc()
-      userRepository.save(user)
-      return false
+  fun completeMailVerification(user: User, verificationCode: Int): User {
+    if (!user.isMailAddressVerificationActive()) {
+      throw InvalidUserStateException("Mail verification not initiated", user.id!!)
     }
+    checkVerificationCode(user, verificationCode)
     user.mailAddress = user.unverifiedMailAddress
     user.username = user.unverifiedMailAddress
     user.resetVerification()
-    userRepository.save(user)
-    return true
+    return userRepository.save(user)
   }
 
-  fun completeMailVerification(userId: UUID, verificationCode: Int, password: String?): Boolean {
-    val user = requireNotNull(userRepository.findByIdOrNull(userId)) { "User not found" }
-    check(user.isMailAddressVerificationActive()) { "Verification is not active" }
-    if (user.verificationCode != verificationCode) {
-      user.verificationErrors = user.verificationErrors!!.inc()
-      userRepository.save(user)
-      return false
+  fun completeMailVerification(user: User, verificationCode: Int, password: String?): User {
+    if (!user.isMailAddressVerificationActive()) {
+      throw InvalidUserStateException("Mail verification not initiated", user.id!!)
     }
+    checkVerificationCode(user, verificationCode)
     if (!password.isNullOrEmpty()) {
       if (!user.password.isNullOrEmpty()) {
-        error("Password is already set")
+        throw InvalidInputException("Password is already set")
       }
       user.password = passwordEncoder.encode(password)
     }
     return completeMailVerification(user, verificationCode)
   }
 
-  fun initiatePasswordReset(user: User, locale: Locale): Boolean {
+  fun initiatePasswordReset(user: User, locale: Locale): User {
     if (user.password == null || user.mailAddress == null) {
-      return false
+      throw InvalidUserStateException("No local login credentials", user.id!!)
     }
     initiateVerification(user)
-    userRepository.save(user)
-    sendPasswordResetMail(user, locale)
-    return true
+    val persistedUser = userRepository.save(user)
+    sendPasswordResetMail(persistedUser, locale)
+    return persistedUser
   }
 
   private fun sendPasswordResetMail(user: User, locale: Locale) {
@@ -149,20 +141,15 @@ class LocalUserServiceImpl(
     mailService.sendMail(user.mailAddress!!, "password-reset", templateData, locale)
   }
 
-  fun completePasswordReset(user: User, password: String, verificationCode: Int): Boolean {
+  fun completePasswordReset(user: User, password: String, verificationCode: Int): User {
     if (!user.isPasswordResetVerificationActive()) {
-      return false
+      throw InvalidUserStateException("Password reset not initiated", user.id!!)
     }
-    if (verificationCode != user.verificationCode) {
-      user.verificationErrors = user.verificationErrors!!.inc()
-      userRepository.save(user)
-      return false
-    }
+    checkVerificationCode(user, verificationCode)
     user.password = passwordEncoder.encode(password)
     user.passwordChangedAt = Instant.now()
     user.resetVerification()
-    userRepository.save(user)
-    return true
+    return userRepository.save(user)
   }
 
   private fun initiateVerification(user: User) {
@@ -177,14 +164,24 @@ class LocalUserServiceImpl(
         user.verificationExpiresAt)
   }
 
-  fun updatePassword(user: User, oldPassword: String, newPassword: String): Boolean {
-    if (user.password != null && !passwordEncoder.matches(oldPassword, user.password)) {
-      return false
+  private fun checkVerificationCode(user: User, verificationCode: Int) {
+    if (user.verificationCode != verificationCode) {
+      user.verificationErrors = user.verificationErrors!!.inc()
+      userRepository.save(user)
+      throw InvalidVerificationCodeException()
+    }
+  }
+
+  fun updatePassword(user: User, oldPassword: String, newPassword: String): User {
+    if (user.password != null) {
+      throw InvalidUserStateException("No local login credentials", user.id!!)
+    }
+    if (!passwordEncoder.matches(oldPassword, user.password)) {
+      throw InvalidInputException("Incorrect old password")
     }
     user.password = passwordEncoder.encode(newPassword)
     user.passwordChangedAt = Instant.now()
-    userRepository.save(user)
-    return true
+    return userRepository.save(user)
   }
 
   private fun toFixedLength(code: Int): String {
@@ -199,7 +196,7 @@ class LocalUserServiceImpl(
 
   fun restartVerification(user: User, locale: Locale): Boolean {
     if (user.unverifiedMailAddress == null) {
-      return false
+      throw InvalidUserStateException("Mail verification not initiated", user.id!!)
     }
     if (Instant.now() > user.verificationExpiresAt) {
       user.verificationErrors = 0

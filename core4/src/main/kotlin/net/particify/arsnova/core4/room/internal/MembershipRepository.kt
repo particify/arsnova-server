@@ -29,7 +29,7 @@ interface MembershipRepository :
     }
   }
 
-  fun findOneByUserIdAndRoomShortId(userId: UUID, shortId: Int): Membership
+  fun findOneByUserIdAndRoomShortId(userId: UUID, shortId: Int): Membership?
 
   fun findByUserId(userId: UUID, scrollPosition: ScrollPosition): Window<Membership>
 
