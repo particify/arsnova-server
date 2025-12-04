@@ -8,7 +8,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 import net.particify.arsnova.core4.announcement.Announcement
-import net.particify.arsnova.core4.announcement.internal.AnnouncementRepository
+import net.particify.arsnova.core4.announcement.internal.AnnouncementServiceImpl
 import net.particify.arsnova.core4.common.TextRenderingService
 import net.particify.arsnova.core4.room.MembershipService
 import net.particify.arsnova.core4.user.User
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Controller
 @Controller
 @SchemaMapping(typeName = "Query")
 class AnnouncementQueryController(
-    private val announcementRepository: AnnouncementRepository,
+    private val announcementService: AnnouncementServiceImpl,
     private val membershipService: MembershipService,
     private val userService: UserService,
     private val textRenderingService: TextRenderingService
@@ -35,7 +35,7 @@ class AnnouncementQueryController(
       @Argument roomId: UUID,
       subrange: ScrollSubrange
   ): Window<Announcement> {
-    return announcementRepository.findByRoomIdOrderByAuditMetadataCreatedAtDesc(
+    return announcementService.findByRoomIdOrderByAuditMetadataCreatedAtDesc(
         roomId, subrange.position().orElse(ScrollPosition.offset()))
   }
 
@@ -55,7 +55,7 @@ class AnnouncementQueryController(
     val memberships = membershipService.findByUserId(userId, ScrollPosition.offset())
     val roomIds = memberships.map { it.room?.id!! }.toSet()
     val announcements =
-        announcementRepository.findByRoomIdInOrderByAuditMetadataCreatedAtDesc(
+        announcementService.findByRoomIdInOrderByAuditMetadataCreatedAtDesc(
             roomIds, subrange.position().orElse(ScrollPosition.offset()))
     userService.markAnnouncementsReadForUserId(userId)
     return announcements
@@ -66,7 +66,7 @@ class AnnouncementQueryController(
     val memberships = membershipService.findByUserId(user.id!!, ScrollPosition.offset())
     val roomIds = memberships.map { it.room?.id!! }.toSet()
     val count =
-        announcementRepository.countByRoomIdInAndAuditMetadataCreatedAtGreaterThan(
+        announcementService.countByRoomIdInAndAuditMetadataCreatedAtGreaterThan(
             roomIds, user.announcementsReadAt ?: Instant.EPOCH)
     return AnnouncementMeta(count, user.announcementsReadAt?.atOffset(ZoneOffset.UTC))
   }

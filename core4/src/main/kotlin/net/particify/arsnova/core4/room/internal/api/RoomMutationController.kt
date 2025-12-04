@@ -15,8 +15,8 @@ import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomRole
 import net.particify.arsnova.core4.room.exception.MembershipNotFoundException
 import net.particify.arsnova.core4.room.exception.RoomNotFoundException
-import net.particify.arsnova.core4.room.internal.MembershipRepository
-import net.particify.arsnova.core4.room.internal.RoomRepository
+import net.particify.arsnova.core4.room.internal.MembershipServiceImpl
+import net.particify.arsnova.core4.room.internal.RoomServiceImpl
 import net.particify.arsnova.core4.user.LocalUserService
 import net.particify.arsnova.core4.user.User
 import org.springframework.data.repository.findByIdOrNull
@@ -29,8 +29,8 @@ import org.springframework.stereotype.Controller
 @Controller
 @SchemaMapping(typeName = "Mutation")
 class RoomMutationController(
-    private val roomRepository: RoomRepository,
-    private val membershipRepository: MembershipRepository,
+    private val roomService: RoomServiceImpl,
+    private val membershipService: MembershipServiceImpl,
     private val localUserService: LocalUserService
 ) {
   companion object {
@@ -50,13 +50,13 @@ class RoomMutationController(
             lastActivityAt = Instant.now(),
         )
     room.userRoles.add(membership)
-    val persistedRoom = roomRepository.save(room)
+    val persistedRoom = roomService.save(room)
     return persistedRoom
   }
 
   private fun generateShortId(): Int {
     val shortId = secureRandom.nextInt(0, (SHORT_ID_MAX))
-    if (roomRepository.countByShortId(shortId) == 0) {
+    if (roomService.countByShortId(shortId) == 0) {
       return shortId
     }
     return generateShortId()
@@ -68,29 +68,29 @@ class RoomMutationController(
       throw InvalidInputException("One of id or shortId is required.")
     }
     val room =
-        (if (input.id != null) roomRepository.findByIdOrNull(input.id)
-        else roomRepository.findOneByShortId(input.shortId!!.toInt()))
+        (if (input.id != null) roomService.findByIdOrNull(input.id)
+        else roomService.findOneByShortId(input.shortId!!.toInt()))
             ?: throw RoomNotFoundException(input.id)
-    var membership = membershipRepository.findOneByRoomIdAndUserId(room.id!!, user.id!!)
+    var membership = membershipService.findOneByRoomIdAndUserId(room.id!!, user.id!!)
     if (membership == null) {
       membership = Membership(room = room, user = user, role = RoomRole.PARTICIPANT)
-      membershipRepository.save(membership)
+      membershipService.save(membership)
     }
     return membership
   }
 
   @MutationMapping
   fun updateRoomName(@Argument id: UUID, @Argument name: String): Room {
-    val room = roomRepository.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
+    val room = roomService.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
     room.name = name
-    return roomRepository.save(room)
+    return roomService.save(room)
   }
 
   @MutationMapping
   fun updateRoomDescription(@Argument id: UUID, @Argument description: String): Room {
-    val room = roomRepository.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
+    val room = roomService.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
     room.description = description
-    return roomRepository.save(room)
+    return roomService.save(room)
   }
 
   @MutationMapping
@@ -98,21 +98,21 @@ class RoomMutationController(
       @Argument id: UUID,
       @Argument @LanguageIso639 languageCode: String?
   ): Room {
-    val room = roomRepository.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
+    val room = roomService.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
     room.language = languageCode
-    return roomRepository.save(room)
+    return roomService.save(room)
   }
 
   @MutationMapping
   fun updateRoomFocusMode(@Argument id: UUID, @Argument enabled: Boolean): Room {
-    val room = roomRepository.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
+    val room = roomService.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
     room.focusModeEnabled = enabled
-    return roomRepository.save(room)
+    return roomService.save(room)
   }
 
   @MutationMapping
   fun deleteRoom(@Argument id: UUID): UUID {
-    roomRepository.deleteById(id)
+    roomService.deleteById(id)
     return id
   }
 
@@ -125,7 +125,7 @@ class RoomMutationController(
     if (role == RoomRole.OWNER || role == RoomRole.PARTICIPANT) {
       throw InvalidInputException("Changing role to owner or participant is not allowed.")
     }
-    var membership = membershipRepository.findByIdOrNull(Membership.RoomUserId(roomId, userId))
+    var membership = membershipService.findByIdOrNull(Membership.RoomUserId(roomId, userId))
     if (membership == null) {
       membership = Membership(room = Room(id = roomId), user = User(id = userId))
     }
@@ -133,7 +133,7 @@ class RoomMutationController(
       throw InvalidInputException("Changing of current owner's role is not allowed.")
     }
     membership.role = role
-    return membershipRepository.save(membership)
+    return membershipService.save(membership)
   }
 
   @MutationMapping
@@ -147,25 +147,24 @@ class RoomMutationController(
     if (role == RoomRole.OWNER || role == RoomRole.PARTICIPANT) {
       throw InvalidInputException("Changing role to owner or participant is not allowed.")
     }
-    val room = roomRepository.findByIdOrNull(roomId) ?: error("Room not found.")
+    val room = roomService.findByIdOrNull(roomId) ?: error("Room not found.")
     val invitee =
         localUserService.inviteUser(
             user, mailAddress, "invitation-verification", mapOf("room" to room), locale)
     val membership = Membership(room = Room(id = roomId), user = User(id = invitee.id))
     membership.role = role
-    return membershipRepository.save(membership)
+    return membershipService.save(membership)
   }
 
   @MutationMapping
   fun revokeRoomRole(@Argument roomId: UUID, @Argument userId: UUID): Membership {
     val id = Membership.RoomUserId(roomId, userId)
-    val membership =
-        membershipRepository.findByIdOrNull(id) ?: throw MembershipNotFoundException(id)
+    val membership = membershipService.findByIdOrNull(id) ?: throw MembershipNotFoundException(id)
     if (membership.role == RoomRole.OWNER) {
       throw InvalidInputException("Revoking of current owner's role is not allowed.")
     }
     membership.role = RoomRole.PARTICIPANT
-    return membershipRepository.save(membership)
+    return membershipService.save(membership)
   }
 
   @MutationMapping
@@ -174,12 +173,11 @@ class RoomMutationController(
       @AuthenticationPrincipal user: User
   ): Membership {
     val id = Membership.RoomUserId(roomId, user.id)
-    val membership =
-        membershipRepository.findByIdOrNull(id) ?: throw MembershipNotFoundException(id)
+    val membership = membershipService.findByIdOrNull(id) ?: throw MembershipNotFoundException(id)
     if (membership.role == RoomRole.OWNER) {
       throw InvalidInputException("Revoking of current owner's membership is not allowed.")
     }
-    membershipRepository.delete(membership)
+    membershipService.delete(membership)
     return membership
   }
 }
