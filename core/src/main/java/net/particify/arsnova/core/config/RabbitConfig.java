@@ -182,18 +182,6 @@ public class RabbitConfig {
       name = RabbitConfigProperties.RABBIT_ENABLED,
       prefix = MessageBrokerProperties.PREFIX,
       havingValue = "true")
-  public OutgoingAmqpEventDispatcher eventToTopicPublisher(
-      final RabbitTemplate rabbitTemplate,
-      final MessageBrokerProperties messageBrokerProperties,
-      final SystemProperties systemProperties) {
-    return new OutgoingAmqpEventDispatcher(rabbitTemplate, messageBrokerProperties, systemProperties);
-  }
-
-  @Bean
-  @ConditionalOnProperty(
-      name = RabbitConfigProperties.RABBIT_ENABLED,
-      prefix = MessageBrokerProperties.PREFIX,
-      havingValue = "true")
   public MessageConverter jsonMessageConverter() {
     return new Jackson2JsonMessageConverter();
   }

@@ -33,4 +33,13 @@ class Room(
   companion object {
     const val SHORT_ID_LENGTH = 8
   }
+
+  fun copy(shortId: Int, name: String? = null): Room {
+    return Room(
+        shortId = shortId,
+        name = name ?: this.name,
+        description = description,
+        language = language,
+        focusModeEnabled = focusModeEnabled)
+  }
 }

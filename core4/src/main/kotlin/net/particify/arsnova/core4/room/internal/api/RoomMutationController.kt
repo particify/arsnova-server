@@ -154,4 +154,13 @@ class RoomMutationController(
     membershipService.delete(membership)
     return membership
   }
+
+  @MutationMapping
+  fun duplicateRoom(
+      @Argument input: DuplicateRoomInput,
+      @AuthenticationPrincipal user: User
+  ): Room {
+    val room = roomService.findByIdOrNull(input.id) ?: throw RoomNotFoundException(input.id)
+    return roomService.duplicate(room, input.newName, user)
+  }
 }
