@@ -28,6 +28,9 @@ spring:
     graphiql:
       enabled: true
 
+  rabbitmq:
+    host: rabbitmq
+
 docker:
   compose:
     file:

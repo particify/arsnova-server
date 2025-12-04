@@ -27,6 +27,7 @@ dependencies {
   implementation(project(":common"))
   implementation(libs.kotlin.reflect)
   implementation(libs.spring.actuator)
+  implementation(libs.spring.amqp)
   implementation(libs.spring.cache)
   implementation(libs.spring.graphql)
   implementation(libs.spring.jpa)
@@ -50,6 +51,8 @@ dependencies {
   developmentOnly(libs.spring.devtools)
   runtimeOnly(libs.postgresql)
   runtimeOnly(libs.spring.modulith.actuator)
+  runtimeOnly(libs.spring.modulith.events.amqp)
+  runtimeOnly(libs.spring.modulith.jpa)
   runtimeOnly(libs.spring.modulith.observability)
   testImplementation(libs.kotlin.junit)
   testImplementation(libs.spring.test) { exclude(module = "mockito-core") }

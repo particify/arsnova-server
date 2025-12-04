@@ -54,6 +54,7 @@ querydsl-jpa = { module = "io.github.openfeign.querydsl:querydsl-jpa", version.r
 querydsl-apt = { module = "io.github.openfeign.querydsl:querydsl-apt", version.ref = "querydsl" }
 spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugs-annotations" }
 spring-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+spring-amqp = { module = "org.springframework.boot:spring-boot-starter-amqp" }
 spring-cache = { module = "org.springframework.boot:spring-boot-starter-cache" }
 spring-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
 spring-docker = { module = "org.springframework.boot:spring-boot-docker-compose" }
@@ -65,8 +66,10 @@ spring-liquibase = { module = "org.springframework.boot:spring-boot-starter-liqu
 spring-liquibase-test = { module = "org.springframework.boot:spring-boot-starter-liquibase-test" }
 spring-mail = { module = "org.springframework.boot:spring-boot-starter-mail" }
 spring-modulith = { module = "org.springframework.modulith:spring-modulith-starter-core" }
-spring-modulith-bom = { module = "org.springframework.modulith:spring-modulith-bom", version.ref = "spring-modulith" }
 spring-modulith-actuator = { module = "org.springframework.modulith:spring-modulith-actuator" }
+spring-modulith-bom = { module = "org.springframework.modulith:spring-modulith-bom", version.ref = "spring-modulith" }
+spring-modulith-events-amqp = { module = "org.springframework.modulith:spring-modulith-events-amqp" }
+spring-modulith-jpa = { module = "org.springframework.modulith:spring-modulith-starter-jpa" }
 spring-modulith-observability = { module = "org.springframework.modulith:spring-modulith-observability" }
 spring-modulith-test = { module = "org.springframework.modulith:spring-modulith-starter-test" }
 spring-security = { module = "org.springframework.boot:spring-boot-starter-security" }
