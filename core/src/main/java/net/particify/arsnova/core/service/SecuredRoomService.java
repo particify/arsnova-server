@@ -5,10 +5,12 @@ import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.RoomMembership;
 
 @Service
+@ConditionalOnLegacyDataManagement
 public class SecuredRoomService extends AbstractSecuredEntityServiceImpl<Room>
     implements RoomService, SecuredService {
   private final RoomService roomService;

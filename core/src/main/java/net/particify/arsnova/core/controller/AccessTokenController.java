@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.model.AccessToken;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.serialization.View;
@@ -16,6 +17,7 @@ import net.particify.arsnova.core.service.AccessTokenService;
 import net.particify.arsnova.core.service.RoomService;
 
 @RestController
+@ConditionalOnLegacyDataManagement
 @RequestMapping(AccessTokenController.REQUEST_MAPPING)
 public class AccessTokenController extends AbstractEntityController<AccessToken> {
   public static final String REQUEST_MAPPING = "/room/{roomId}/access-token";

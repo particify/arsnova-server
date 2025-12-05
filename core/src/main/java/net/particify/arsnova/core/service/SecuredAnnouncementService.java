@@ -5,9 +5,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.stereotype.Service;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.model.Announcement;
 
 @Service
+@ConditionalOnLegacyDataManagement
 public class SecuredAnnouncementService extends AbstractSecuredEntityServiceImpl<Announcement>
     implements AnnouncementService, SecuredService {
   private AnnouncementService announcementService;

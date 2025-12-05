@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.model.Announcement;
 import net.particify.arsnova.core.service.AnnouncementService;
 
 @RestController
+@ConditionalOnLegacyDataManagement
 @EntityRequestMapping(AnnouncementController.REQUEST_MAPPING)
 public class AnnouncementController extends AbstractEntityController<Announcement> {
   public static final String REQUEST_MAPPING = "/room/{roomId}/announcement";

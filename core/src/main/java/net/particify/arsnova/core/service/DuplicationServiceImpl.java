@@ -6,12 +6,14 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.event.RoomDuplicationEvent;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
@@ -37,10 +39,14 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
   private ApplicationEventPublisher applicationEventPublisher;
 
   public DuplicationServiceImpl(
-      final RoomService roomService,
+      @Nullable final RoomService roomService,
       final RoomSettingsService roomSettingsService,
       final ContentGroupService contentGroupService,
-      final ContentService contentService) {
+      final ContentService contentService,
+      final SystemProperties systemProperties) {
+    if (roomService == null && !systemProperties.isExternalDataManagement()) {
+      throw new IllegalStateException("RoomService is null but external data management is disabled.");
+    }
     this.roomService = roomService;
     this.roomSettingsService = roomSettingsService;
     this.contentGroupService = contentGroupService;

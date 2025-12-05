@@ -7,7 +7,10 @@ import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Component;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
+
 @Component
+@ConditionalOnLegacyDataManagement
 public class PasswordUtils {
   private static final int BCRYPT_STRENGTH = 12;
 

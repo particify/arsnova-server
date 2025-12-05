@@ -116,11 +116,13 @@ public class PersistenceConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   public UserRepository userRepository() throws Exception {
     return new CouchDbUserRepository(couchDbConnector(), false);
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   public RoomRepository roomRepository() throws Exception {
     return new CouchDbRoomRepository(couchDbConnector(), false);
   }
@@ -151,11 +153,13 @@ public class PersistenceConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   public AnnouncementRepository announcementRepository() throws Exception {
     return new CouchDbAnnouncementRepository(couchDbConnector(), false);
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   public AccessTokenRepository accessTokenRepository() throws Exception {
     return new CouchDbAccessTokenRepository(couchDbConnector(), false);
   }

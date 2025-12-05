@@ -25,10 +25,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.model.FindQuery;
 import net.particify.arsnova.core.model.Room;
 
 @Service
+@ConditionalOnLegacyDataManagement
 public class RoomFindQueryService implements FindQueryService<Room> {
   private RoomService roomService;
 

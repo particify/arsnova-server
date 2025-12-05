@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.RoomMembership;
 import net.particify.arsnova.core.model.serialization.View;
@@ -40,6 +41,7 @@ import net.particify.arsnova.core.web.exceptions.NotFoundException;
 
 @RestController
 @EntityRequestMapping(RoomController.REQUEST_MAPPING)
+@ConditionalOnLegacyDataManagement
 public class RoomController extends AbstractEntityController<Room> {
   protected static final String REQUEST_MAPPING = "/room";
   private static final String PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/password";

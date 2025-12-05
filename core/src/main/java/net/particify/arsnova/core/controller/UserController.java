@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.model.LoginCredentials;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.model.serialization.View;
@@ -37,6 +38,7 @@ import net.particify.arsnova.core.web.exceptions.NotFoundException;
 
 @RestController
 @EntityRequestMapping(UserController.REQUEST_MAPPING)
+@ConditionalOnLegacyDataManagement
 public class UserController extends AbstractEntityController<UserProfile> {
   private static final String NIL_UUID = "00000000000000000000000000000000";
   protected static final String REQUEST_MAPPING = "/user";
