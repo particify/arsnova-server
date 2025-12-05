@@ -121,7 +121,7 @@ public class PersistenceConfig {
   }
 
   @Bean
-  public RoomRepository sessionRepository() throws Exception {
+  public RoomRepository roomRepository() throws Exception {
     return new CouchDbRoomRepository(couchDbConnector(), false);
   }
 

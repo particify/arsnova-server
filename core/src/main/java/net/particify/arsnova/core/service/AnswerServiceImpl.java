@@ -75,7 +75,6 @@ import net.particify.arsnova.core.model.NumericAnswerStatistics;
 import net.particify.arsnova.core.model.NumericContent;
 import net.particify.arsnova.core.model.PrioritizationAnswerStatistics;
 import net.particify.arsnova.core.model.PrioritizationChoiceContent;
-import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.RoomUserAlias;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
 import net.particify.arsnova.core.model.ShortAnswer;
@@ -104,19 +103,15 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
   private final Queue<AnswerUniqueKey> answerQueue = new ConcurrentLinkedQueue<>();
   private final Map<AnswerUniqueKey, Answer> queuedAnswers = new ConcurrentHashMap<>();
-  private RoomService roomService;
   private ContentService contentService;
   private RoomUserAliasService roomUserAliasService;
   private AnswerRepository answerRepository;
-  private UserService userService;
   private AuthenticationService authenticationService;
   private CacheManager cacheManager;
 
   public AnswerServiceImpl(
       final AnswerRepository repository,
       final DeletionRepository deletionRepository,
-      final RoomService roomService,
-      final UserService userService,
       final RoomUserAliasService roomUserAliasService,
       final AuthenticationService authenticationService,
       final CacheManager cacheManager,
@@ -125,8 +120,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
       final Validator validator) {
     super(Answer.class, repository, deletionRepository, jackson2HttpMessageConverter.getObjectMapper(), validator);
     this.answerRepository = repository;
-    this.roomService = roomService;
-    this.userService = userService;
     this.roomUserAliasService = roomUserAliasService;
     this.authenticationService = authenticationService;
     this.cacheManager = cacheManager;
@@ -652,9 +645,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
   @Override
   protected void prepareUpdate(final Answer answer) {
     final Content content = contentService.get(answer.getContentId());
-    final Room room = roomService.get(content.getRoomId());
     answer.setContentId(content.getId());
-    answer.setRoomId(room.getId());
+    answer.setRoomId(content.getRoomId());
     validate(answer);
   }
 

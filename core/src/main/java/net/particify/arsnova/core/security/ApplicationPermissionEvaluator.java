@@ -46,7 +46,6 @@ import net.particify.arsnova.core.service.ContentGroupService;
 import net.particify.arsnova.core.service.ContentGroupTemplateService;
 import net.particify.arsnova.core.service.ContentService;
 import net.particify.arsnova.core.service.ContentTemplateService;
-import net.particify.arsnova.core.service.RoomService;
 import net.particify.arsnova.core.service.RoomSettingsService;
 
 /**
@@ -71,7 +70,6 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
   private static final Logger logger = LoggerFactory.getLogger(ApplicationPermissionEvaluator.class);
 
-  private final RoomService roomService;
   private final RoomSettingsService roomSettingsService;
   private final ContentService contentService;
   private final ContentGroupService contentGroupService;
@@ -81,7 +79,6 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
   private final ContentTemplateService contentTemplateService;
 
   public ApplicationPermissionEvaluator(
-      final RoomService roomService,
       final RoomSettingsService roomSettingsService,
       final ContentService contentService,
       final ContentGroupService contentGroupService,
@@ -90,7 +87,6 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
       final ContentGroupTemplateService contentGroupTemplateService,
       final ContentTemplateService contentTemplateService
   ) {
-    this.roomService = roomService;
     this.roomSettingsService = roomSettingsService;
     this.contentService = contentService;
     this.contentGroupService = contentGroupService;
