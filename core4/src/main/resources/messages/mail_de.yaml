@@ -5,9 +5,11 @@ mail:
   password-reset-link-text: Neues Passwort setzen
   password-reset-subject: Verifizierungscode für Passwortrücksetzung
   password-reset-your-code: "Hier ist der Verifizierungscode, den du zum Setzen eines neuen Passworts benötigst:"
-  room-invitation-link-text: Einladung annehmen
+  invitation-link-text: Einladung annehmen
+  invitation-subject: Einladung zu {0}
+  invitation-verification-intro: "Du wurdest von {0} eingeladen, {1} zu nutzen. Verwende den folgenden Link, um deinen Account zu erstellen:"
   room-invitation-subject: Einladung für {0}-Raum "{1}"
-  room-invitation-verification-intro: 'Du wurdest für den {0}-Raum "{1}" von {2} eingeladen. Verwende den folgenden Link, um dein Konto zu erstellen und erweiterte Zugriffsrechte für den Raum zu erhalten:'
+  room-invitation-verification-intro: 'Du wurdest für den {0}-Raum "{1}" von {2} eingeladen. Verwende den folgenden Link, um deinen Account zu erstellen und erweiterte Zugriffsrechte für den Raum zu erhalten:'
   verification-code-intro: "Hier ist der Code, den du für die Verifizierung deiner E-Mail-Adresse benötigst:"
   verification-code-subject: "{0} ist dein {1}-Verifizierungscode"
   verification-link-intro: "Alternativ kannst du auch den folgenden Link verwenden:"

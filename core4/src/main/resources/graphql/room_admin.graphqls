@@ -1,0 +1,29 @@
+extend type Query {
+  adminRoomByIdOrShortId(input: AdminRoomQueryInput!): AdminRoom
+}
+
+extend type Mutation {
+  adminDeleteRoomById(id: ID!): UUID!
+  adminTransferRoom(roomId: ID!, userId: ID!): AdminRoom!
+}
+
+type AdminRoom {
+  id: ID!
+  shortId: ID!
+  name: String!
+  description: String
+  descriptionRendered: String
+  language: String
+  focusModeEnabled: Boolean
+  createdBy: ID
+  createdAt: DateTime
+  updatedBy: ID
+  updatedAt: DateTime
+  deletedBy: ID
+  deletedAt: DateTime
+}
+
+input AdminRoomQueryInput {
+  id: ID
+  shortId: Int
+}

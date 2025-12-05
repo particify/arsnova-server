@@ -8,6 +8,8 @@ import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.MembershipService
+import net.particify.arsnova.core4.room.RoomRole
+import net.particify.arsnova.core4.room.exception.MembershipNotFoundException
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Window
 import org.springframework.stereotype.Service
@@ -32,6 +34,11 @@ class MembershipServiceImpl(private val membershipRepository: MembershipReposito
     return counts.associate {
       Pair(it.get(0, UUID::class.java), it.get(1, Long::class.java).toInt())
     }
+  }
+
+  fun findOwnerMembershipByRoomId(roomId: UUID): Membership? {
+    return membershipRepository.findOneByRoomIdAndRole(roomId, RoomRole.OWNER)
+        ?: throw MembershipNotFoundException()
   }
 
   @Deprecated(

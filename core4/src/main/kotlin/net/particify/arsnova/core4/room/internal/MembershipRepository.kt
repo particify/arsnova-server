@@ -7,6 +7,7 @@ import jakarta.persistence.Tuple
 import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.room.Membership
+import net.particify.arsnova.core4.room.RoomRole
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Window
 import org.springframework.data.jpa.repository.JpaRepository
@@ -28,4 +29,6 @@ interface MembershipRepository :
       roomIds: List<UUID>,
       lastActivityAtAfter: Instant
   ): List<Tuple>
+
+  fun findOneByRoomIdAndRole(roomId: UUID, role: RoomRole): Membership?
 }

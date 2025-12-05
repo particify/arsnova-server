@@ -1,0 +1,7 @@
+[(#{mail.greeting})]
+
+[(#{mail.invitation-verification-intro(${inviter.displayName} ?: ${inviter.username}, ${productName})})]
+
+[(@{|${serviceUrl}${invitationUri}|})]
+
+[# th:insert="~{footer.txt}" /]
