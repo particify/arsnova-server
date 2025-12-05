@@ -31,12 +31,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.RoomMembership;
-import net.particify.arsnova.core.model.RoomStatistics;
 import net.particify.arsnova.core.model.serialization.View;
 import net.particify.arsnova.core.service.DataGenerationService;
 import net.particify.arsnova.core.service.DuplicationService;
 import net.particify.arsnova.core.service.RoomService;
-import net.particify.arsnova.core.service.RoomStatisticsService;
 import net.particify.arsnova.core.web.exceptions.ForbiddenException;
 import net.particify.arsnova.core.web.exceptions.NotFoundException;
 
@@ -44,7 +42,6 @@ import net.particify.arsnova.core.web.exceptions.NotFoundException;
 @EntityRequestMapping(RoomController.REQUEST_MAPPING)
 public class RoomController extends AbstractEntityController<Room> {
   protected static final String REQUEST_MAPPING = "/room";
-  private static final String STATS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
   private static final String PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/password";
   private static final String REQUEST_MEMBERSHIP_MAPPING = DEFAULT_ID_MAPPING + "/request-membership";
   private static final String DUPLICATE_MAPPING = DEFAULT_ID_MAPPING + "/duplicate";
@@ -53,18 +50,15 @@ public class RoomController extends AbstractEntityController<Room> {
   private static final String ROOM_ROLE_HEADER = "ARS-Room-Role";
 
   private RoomService roomService;
-  private RoomStatisticsService roomStatisticsService;
   private DuplicationService duplicationService;
   private DataGenerationService dataGenerationService;
 
   public RoomController(
       @Qualifier("securedRoomService") final RoomService roomService,
-      @Qualifier("securedRoomStatisticsService") final RoomStatisticsService roomStatisticsService,
       @Qualifier("securedDuplicationService") final DuplicationService duplicationService,
       @Qualifier("securedDataGenerationService") final DataGenerationService dataGenerationService) {
     super(roomService);
     this.roomService = roomService;
-    this.roomStatisticsService = roomStatisticsService;
     this.duplicationService = duplicationService;
     this.dataGenerationService = dataGenerationService;
   }
@@ -77,17 +71,6 @@ public class RoomController extends AbstractEntityController<Room> {
   @Override
   protected String resolveAlias(final String shortId) {
     return roomService.getIdByShortId(shortId);
-  }
-
-  @GetMapping(STATS_MAPPING)
-  public RoomStatistics getStats(
-      @PathVariable final String id,
-      @RequestParam(required = false) final String view) {
-    final RoomStatistics roomStatistics = "read-extended".equals(view)
-        ? roomStatisticsService.getAllRoomStatistics(id)
-        : roomStatisticsService.getPublicRoomStatistics(id);
-
-    return roomStatistics;
   }
 
   @GetMapping(value = PASSWORD_MAPPING)
