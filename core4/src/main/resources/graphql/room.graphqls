@@ -55,13 +55,13 @@ type Room {
   descriptionRendered: String
   language: String
   focusModeEnabled: Boolean
+  stats: RoomStats
 }
 
 type RoomMembership {
   room: Room!
   role: RoomRole!
   lastActivityAt: DateTime!
-  stats: RoomStats
 }
 
 type RoomMember {
@@ -79,9 +79,7 @@ enum RoomRole {
 }
 
 type RoomStats {
-  roomUserCount: Int
-  contentCount: Int
-  ackCommentCount: Int
+  activeMemberCount: Int
 }
 
 input RoomQueryInput {
