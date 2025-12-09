@@ -39,6 +39,7 @@ import org.springframework.validation.Validator;
 
 import net.particify.arsnova.connector.client.ConnectorClient;
 import net.particify.arsnova.connector.model.Membership;
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.event.BeforeDeletionEvent;
 import net.particify.arsnova.core.model.Deletion.Initiator;
 import net.particify.arsnova.core.model.Room;
@@ -56,6 +57,7 @@ import net.particify.arsnova.core.web.exceptions.NotFoundException;
  */
 @Service
 @Primary
+@ConditionalOnLegacyDataManagement
 public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements RoomService {
   private static final int SHORT_ID_LENGTH = 8;
   private static final long DELETE_SCHEDULED_ROOMS_INTERVAL_MS = 30 * 60 * 1000L;

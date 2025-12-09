@@ -24,11 +24,13 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
 import net.particify.arsnova.core.model.FindQuery;
 import net.particify.arsnova.core.model.UserProfile;
 
 @Service
+@ConditionalOnLegacyDataManagement
 public class UserFindQueryService implements FindQueryService<UserProfile> {
   private UserService userService;
   private final String displayIdAttribute;

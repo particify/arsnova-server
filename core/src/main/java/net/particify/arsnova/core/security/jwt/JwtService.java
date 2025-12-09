@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
@@ -63,11 +64,14 @@ public class JwtService {
   private List<GrantedAuthority> legacyAllowedAuthorities;
 
   public JwtService(
-      final UserService userService,
+      @Nullable final UserService userService,
       final SecurityProperties securityProperties,
       final SystemProperties systemProperties) {
-    this.userService = userService;
     this.externalUserManagement = systemProperties.isExternalDataManagement();
+    if (userService == null && !this.externalUserManagement) {
+      throw new IllegalStateException("UserService is null but external user management is disabled.");
+    }
+    this.userService = userService;
     this.serverId = securityProperties.getJwt().getServerId();
     this.defaultValidityPeriod = securityProperties.getJwt().getValidityPeriod();
     guestValidityPeriod = Duration.parse("P180D");

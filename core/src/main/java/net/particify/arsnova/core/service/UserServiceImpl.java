@@ -42,6 +42,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
 import net.particify.arsnova.core.config.properties.SecurityProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
@@ -60,6 +61,7 @@ import net.particify.arsnova.core.web.exceptions.NotFoundException;
  */
 @Service
 @Primary
+@ConditionalOnLegacyDataManagement
 public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> implements UserService {
   private static final int TRY_RESET_DELAY_MS = 30 * 1000;
 

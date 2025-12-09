@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.ektorp.DocumentNotFoundException;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.PermissionEvaluator;
@@ -31,6 +32,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.model.Announcement;
 import net.particify.arsnova.core.model.Answer;
 import net.particify.arsnova.core.model.Content;
@@ -46,7 +48,6 @@ import net.particify.arsnova.core.service.ContentGroupService;
 import net.particify.arsnova.core.service.ContentGroupTemplateService;
 import net.particify.arsnova.core.service.ContentService;
 import net.particify.arsnova.core.service.ContentTemplateService;
-import net.particify.arsnova.core.service.RoomService;
 import net.particify.arsnova.core.service.RoomSettingsService;
 
 /**
@@ -71,7 +72,6 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
   private static final Logger logger = LoggerFactory.getLogger(ApplicationPermissionEvaluator.class);
 
-  private final RoomService roomService;
   private final RoomSettingsService roomSettingsService;
   private final ContentService contentService;
   private final ContentGroupService contentGroupService;
@@ -81,16 +81,18 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
   private final ContentTemplateService contentTemplateService;
 
   public ApplicationPermissionEvaluator(
-      final RoomService roomService,
       final RoomSettingsService roomSettingsService,
       final ContentService contentService,
       final ContentGroupService contentGroupService,
       final AnswerService answerService,
-      final AnnouncementService announcementService,
+      @Nullable final AnnouncementService announcementService,
       final ContentGroupTemplateService contentGroupTemplateService,
-      final ContentTemplateService contentTemplateService
+      final ContentTemplateService contentTemplateService,
+      final SystemProperties systemProperties
   ) {
-    this.roomService = roomService;
+    if (announcementService == null && !systemProperties.isExternalDataManagement()) {
+      throw new IllegalStateException("AnnouncementService is null but external data management is disabled.");
+    }
     this.roomSettingsService = roomSettingsService;
     this.contentService = contentService;
     this.contentGroupService = contentGroupService;

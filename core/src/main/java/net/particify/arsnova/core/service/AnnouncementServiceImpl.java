@@ -7,6 +7,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.model.Announcement;
 import net.particify.arsnova.core.persistence.AnnouncementRepository;
 import net.particify.arsnova.core.persistence.DeletionRepository;
@@ -14,6 +15,7 @@ import net.particify.arsnova.core.security.AuthenticationService;
 
 @Service
 @Primary
+@ConditionalOnLegacyDataManagement
 public class AnnouncementServiceImpl extends DefaultEntityServiceImpl<Announcement> implements AnnouncementService {
   private AnnouncementRepository announcementRepository;
   private AuthenticationService authenticationService;

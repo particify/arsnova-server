@@ -32,6 +32,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.event.BeforeUserProfileAutoCreationEvent;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.service.UserService;
@@ -39,6 +40,7 @@ import net.particify.arsnova.core.service.UserService;
 /**
  * Class to load a user based on the results from CAS.
  */
+@ConditionalOnLegacyDataManagement
 public class CasUserDetailsService
     extends AbstractCasAssertionUserDetailsService
     implements ApplicationEventPublisherAware {

@@ -25,6 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.security.User;
 
 /**
@@ -33,6 +34,7 @@ import net.particify.arsnova.core.security.User;
  * @author Daniel Gerhardt
  */
 @Component
+@ConditionalOnLegacyDataManagement
 public class SsoAuthenticationProvider implements AuthenticationProvider {
   private SsoUserDetailsService ssoUserDetailsService;
 

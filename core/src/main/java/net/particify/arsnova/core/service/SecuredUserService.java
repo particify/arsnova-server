@@ -5,9 +5,11 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.model.UserProfile;
 
 @Service
+@ConditionalOnLegacyDataManagement
 public class SecuredUserService extends AbstractSecuredEntityServiceImpl<UserProfile>
     implements SecuredService, UserService {
   private final UserService userService;

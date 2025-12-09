@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.config.RabbitConfig;
 import net.particify.arsnova.core.config.properties.MessageBrokerProperties;
 import net.particify.arsnova.core.model.Room;
@@ -30,6 +31,7 @@ import net.particify.arsnova.core.service.RoomService;
     name = RabbitConfig.RabbitConfigProperties.RABBIT_ENABLED,
     prefix = MessageBrokerProperties.PREFIX,
     havingValue = "true")
+@ConditionalOnLegacyDataManagement
 public class RoomAccessEventDispatcher {
   private static final Logger logger = LoggerFactory.getLogger(RoomAccessEventDispatcher.class);
 

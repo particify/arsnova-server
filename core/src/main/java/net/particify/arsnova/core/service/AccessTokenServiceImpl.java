@@ -12,6 +12,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.config.properties.TemplateProperties;
 import net.particify.arsnova.core.model.AccessToken;
@@ -25,6 +26,7 @@ import net.particify.arsnova.core.security.User;
 
 @Service
 @Primary
+@ConditionalOnLegacyDataManagement
 public class AccessTokenServiceImpl extends DefaultEntityServiceImpl<AccessToken> implements AccessTokenService {
   private static final Logger logger = LoggerFactory.getLogger(AccessTokenServiceImpl.class);
 

@@ -28,6 +28,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.service.UserService;
 
@@ -38,6 +39,7 @@ import net.particify.arsnova.core.service.UserService;
  * @author Daniel Gerhardt
  */
 @Service
+@ConditionalOnLegacyDataManagement
 public class GuestUserDetailsService extends AbstractUserDetailsService
     implements UserDetailsService {
   public static final GrantedAuthority ROLE_GUEST_USER = new SimpleGrantedAuthority("ROLE_GUEST_USER");

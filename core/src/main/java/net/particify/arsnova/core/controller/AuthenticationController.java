@@ -53,6 +53,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.config.SecurityConfig;
 import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.model.ClientAuthentication;
@@ -64,6 +65,7 @@ import net.particify.arsnova.core.service.UserService;
 import net.particify.arsnova.core.web.exceptions.NotImplementedException;
 
 @RestController
+@ConditionalOnLegacyDataManagement
 @EntityRequestMapping("/auth")
 public class AuthenticationController {
   private AuthenticationService authenticationService;

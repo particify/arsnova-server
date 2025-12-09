@@ -170,12 +170,12 @@ public class SecurityConfig {
     this.jwtAuthenticationProvider = jwtAuthenticationProvider;
   }
 
-  @Autowired
+  @Autowired(required = false)
   public void setRegisteredUserDetailsService(final RegisteredUserDetailsService registeredUserDetailsService) {
     this.registeredUserDetailsService = registeredUserDetailsService;
   }
 
-  @Autowired
+  @Autowired(required = false)
   public void setSsoAuthenticationProvider(final SsoAuthenticationProvider ssoAuthenticationProvider) {
     this.ssoAuthenticationProvider = ssoAuthenticationProvider;
   }
@@ -198,15 +198,17 @@ public class SecurityConfig {
       http.headers(headers -> headers.addHeaderWriter(new HstsHeaderWriter(false)));
 
       http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-      if (providerProperties.getCas().isEnabled()) {
-        http.addFilter(casAuthenticationFilter());
-        http.addFilter(casLogoutFilter());
-      }
-      if (providerProperties.getSaml().isEnabled()) {
-        http.addFilterAfter(samlCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
-      }
-      if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
-        http.addFilterAfter(oauthCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
+      if (!systemProperties.isExternalDataManagement()) {
+        if (providerProperties.getCas().isEnabled()) {
+          http.addFilter(casAuthenticationFilter());
+          http.addFilter(casLogoutFilter());
+        }
+        if (providerProperties.getSaml().isEnabled()) {
+          http.addFilterAfter(samlCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
+        }
+        if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
+          http.addFilterAfter(oauthCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
+        }
       }
 
       return http;
@@ -280,29 +282,31 @@ public class SecurityConfig {
     final List<AuthenticationProvider> providers = new ArrayList<>();
     final List<String> providerIds = new ArrayList<>();
     providers.add(jwtAuthenticationProvider);
-    if (providerProperties.getLdap().stream().anyMatch(p -> p.isEnabled())) {
-      providerIds.add(LDAP_PROVIDER_ID);
-      providers.add(ldapAuthenticationProvider());
-    }
-    if (providerProperties.getCas().isEnabled()) {
-      providerIds.add(CAS_PROVIDER_ID);
-      providers.add(casAuthenticationProvider());
-    }
-    if (providerProperties.getRegistered().isEnabled()) {
-      providerIds.add(INTERNAL_PROVIDER_ID);
-      providers.add(daoAuthenticationProvider());
-    }
-    boolean ssoProvider = false;
-    if (providerProperties.getSaml().isEnabled()) {
-      ssoProvider = true;
-      providerIds.add(SAML_PROVIDER_ID);
-    }
-    if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
-      ssoProvider = true;
-      providerIds.add(OIDC_PROVIDER_ID);
-    }
-    if (ssoProvider) {
-      providers.add(ssoAuthenticationProvider);
+    if (!systemProperties.isExternalDataManagement()) {
+      if (providerProperties.getLdap().stream().anyMatch(p -> p.isEnabled())) {
+        providerIds.add(LDAP_PROVIDER_ID);
+        providers.add(ldapAuthenticationProvider());
+      }
+      if (providerProperties.getCas().isEnabled()) {
+        providerIds.add(CAS_PROVIDER_ID);
+        providers.add(casAuthenticationProvider());
+      }
+      if (providerProperties.getRegistered().isEnabled()) {
+        providerIds.add(INTERNAL_PROVIDER_ID);
+        providers.add(daoAuthenticationProvider());
+      }
+      boolean ssoProvider = false;
+      if (providerProperties.getSaml().isEnabled()) {
+        ssoProvider = true;
+        providerIds.add(SAML_PROVIDER_ID);
+      }
+      if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
+        ssoProvider = true;
+        providerIds.add(OIDC_PROVIDER_ID);
+      }
+      if (ssoProvider) {
+        providers.add(ssoAuthenticationProvider);
+      }
     }
     logger.info("Enabled authentication providers: {}", providerIds);
 
@@ -341,11 +345,13 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   LoginAuthenticationSucessHandler successHandler() {
     return new LoginAuthenticationSucessHandler(systemProperties, servletContext);
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   LoginAuthenticationFailureHandler failureHandler() {
     final LoginAuthenticationFailureHandler failureHandler = new LoginAuthenticationFailureHandler();
     failureHandler.setDefaultFailureUrl(rootUrl);
@@ -356,6 +362,7 @@ public class SecurityConfig {
   // Database Authentication Configuration
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   public DaoAuthenticationProvider daoAuthenticationProvider() {
     final DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(registeredUserDetailsService);
     authProvider.setPasswordEncoder(passwordEncoder());
@@ -364,11 +371,13 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   public SecurityContextLogoutHandler logoutHandler() {
     return new SecurityContextLogoutHandler();
   }
@@ -376,6 +385,7 @@ public class SecurityConfig {
   // LDAP Authentication Configuration
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "ldap[0].enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -389,6 +399,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "ldap[0].enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -410,6 +421,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "ldap[0].enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -431,6 +443,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "ldap[0].enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -440,6 +453,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "ldap[0].enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -452,6 +466,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "ldap[0].enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -463,6 +478,7 @@ public class SecurityConfig {
   // CAS Authentication Configuration
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "cas.enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -478,6 +494,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "cas.enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -487,6 +504,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "cas.enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -500,6 +518,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "cas.enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -509,6 +528,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "cas.enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -522,6 +542,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "cas.enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -538,6 +559,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "cas.enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -550,6 +572,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "cas.enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -565,6 +588,7 @@ public class SecurityConfig {
   // SAML Authentication Configuration
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "saml.enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -576,6 +600,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "saml.enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -590,6 +615,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "saml.enabled",
       prefix = AuthenticationProviderProperties.PREFIX,
@@ -636,6 +662,7 @@ public class SecurityConfig {
   // OAuth Authentication Configuration
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   public Config oauthConfig() {
     final List<Client> clients = new ArrayList<>();
     if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
@@ -648,6 +675,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   public SsoCallbackFilter oauthCallbackFilter() throws Exception {
     final SsoCallbackFilter callbackFilter = new SsoCallbackFilter(oauthConfig(), OAUTH_CALLBACK_PATH + "/**");
     callbackFilter.setAuthenticationManager(authenticationManager());
@@ -658,11 +686,13 @@ public class SecurityConfig {
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   public PathParameterCallbackUrlResolver pathParameterCallbackUrlResolver() {
     return new PathParameterCallbackUrlResolver();
   }
 
   @Bean
+  @ConditionalOnLegacyDataManagement
   @ConditionalOnProperty(
       name = "oidc[0].enabled",
       prefix = AuthenticationProviderProperties.PREFIX,

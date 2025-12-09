@@ -4,11 +4,13 @@ import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.model.AccessToken;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.security.RoomRole;
 
 @Service
+@ConditionalOnLegacyDataManagement
 public class SecuredAccessTokenService extends AbstractSecuredEntityServiceImpl<AccessToken>
     implements AccessTokenService, SecuredService {
   private final AccessTokenService accessTokenService;

@@ -31,6 +31,7 @@ import org.springframework.security.core.userdetails.AuthenticationUserDetailsSe
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.config.properties.AuthenticationProviderProperties;
 import net.particify.arsnova.core.model.UserProfile;
 import net.particify.arsnova.core.security.AbstractUserDetailsService;
@@ -44,6 +45,7 @@ import net.particify.arsnova.core.service.UserService;
  * @author Daniel Gerhardt
  */
 @Service
+@ConditionalOnLegacyDataManagement
 public class SsoUserDetailsService extends AbstractUserDetailsService
     implements AuthenticationUserDetailsService<SsoAuthenticationToken> {
   public static final GrantedAuthority ROLE_OAUTH_USER = new SimpleGrantedAuthority("ROLE_OAUTH_USER");
