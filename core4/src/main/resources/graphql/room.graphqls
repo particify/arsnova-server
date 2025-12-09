@@ -1,6 +1,6 @@
 extend type Query {
   roomById(id: ID!): Room
-  roomByShortId(shortId: ID!): Room
+  roomByShortId(shortId: String!): Room
   rooms(
     room: RoomQueryInput!
     first: Int
