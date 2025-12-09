@@ -3,11 +3,8 @@
  */
 package net.particify.arsnova.core4.room.internal.api
 
-import java.security.SecureRandom
-import java.time.Instant
 import java.util.Locale
 import java.util.UUID
-import kotlin.math.pow
 import net.particify.arsnova.core4.common.LanguageIso639
 import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.room.Membership
@@ -33,33 +30,10 @@ class RoomMutationController(
     private val membershipService: MembershipServiceImpl,
     private val localUserService: LocalUserService
 ) {
-  companion object {
-    private val SHORT_ID_MAX: Int = (10.0.pow(Room.SHORT_ID_LENGTH) - 1).toInt()
-  }
-
-  private val secureRandom = SecureRandom()
 
   @MutationMapping
   fun createRoom(@Argument input: CreateRoomInput, @AuthenticationPrincipal user: User): Room {
-    val room = input.toRoom(shortId = generateShortId())
-    val membership =
-        Membership(
-            room = room,
-            user = user,
-            role = RoomRole.OWNER,
-            lastActivityAt = Instant.now(),
-        )
-    room.userRoles.add(membership)
-    val persistedRoom = roomService.save(room)
-    return persistedRoom
-  }
-
-  private fun generateShortId(): Int {
-    val shortId = secureRandom.nextInt(0, (SHORT_ID_MAX))
-    if (roomService.countByShortId(shortId) == 0) {
-      return shortId
-    }
-    return generateShortId()
+    return roomService.create(input.toRoom(roomService.generateShortId()), user)
   }
 
   @MutationMapping
@@ -179,5 +153,14 @@ class RoomMutationController(
     }
     membershipService.delete(membership)
     return membership
+  }
+
+  @MutationMapping
+  fun duplicateRoom(
+      @Argument input: DuplicateRoomInput,
+      @AuthenticationPrincipal user: User
+  ): Room {
+    val room = roomService.findByIdOrNull(input.id) ?: throw RoomNotFoundException(input.id)
+    return roomService.duplicate(room, input.newName, user)
   }
 }

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import net.particify.arsnova.core.event.RoomDuplicationEvent;
@@ -55,7 +56,6 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
   public Room duplicateRoomCascading(final Room room, final boolean temporary, final String newName) {
     final Room roomCopy = duplicateRoom(room, temporary, newName);
     duplicateRoomSettings(room, roomCopy);
-    contentGroupService.getByRoomId(room.getRoomId()).forEach(cg -> duplicateContentGroup(cg, roomCopy));
     applicationEventPublisher.publishEvent(new RoomDuplicationEvent(this, room, roomCopy));
     return roomCopy;
   }
@@ -145,5 +145,11 @@ public class DuplicationServiceImpl implements ApplicationEventPublisherAware, D
     } else {
       throw new IllegalArgumentException("Unsupported subtype: " + content.getClass().getSimpleName());
     }
+  }
+
+  @EventListener
+  public void handleRoomDuplication(final RoomDuplicationEvent event) {
+    contentGroupService.getByRoomId(event.getOriginalRoom().getId())
+        .forEach(cg -> duplicateContentGroup(cg, event.getDuplicateRoom()));
   }
 }

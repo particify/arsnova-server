@@ -3,6 +3,8 @@ databaseChangeLog:
   - preConditions:
       - runningAs:
           username: arsnova
+  - include:
+      file: db/changelog/event-publication.yaml
   - changeSet:
       id: 1
       author: arsnova

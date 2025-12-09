@@ -18,8 +18,10 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 
 import net.particify.arsnova.core.config.RabbitConfig;
 import net.particify.arsnova.core.config.properties.MessageBrokerProperties;
@@ -36,6 +38,16 @@ import net.particify.arsnova.core.security.User;
  * @author Tom Käsler
  * @author Daniel Gerhardt
  */
+@Component
+@ConditionalOnProperty(
+    name = RabbitConfig.RabbitConfigProperties.RABBIT_ENABLED,
+    prefix = MessageBrokerProperties.PREFIX,
+    havingValue = "true")
+@ConditionalOnProperty(
+    name = "external-room-management",
+    prefix = SystemProperties.PREFIX,
+    havingValue = "false",
+    matchIfMissing = true)
 public class OutgoingAmqpEventDispatcher {
   @JsonFilter("amqpPropertyFilter")
   public static class AmqpPropertyFilter {

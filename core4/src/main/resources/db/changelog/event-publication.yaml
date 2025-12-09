@@ -1,0 +1,58 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: spring-modulith
+      labels: table,spring
+      context: default
+      comment: Create database for Spring Modulith event publication (see https://docs.spring.io/spring-modulith/reference/appendix.html#schemas)
+      changes:
+        - createTable:
+            tableName: event_publication
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: listener_id
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: event_type
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: serialized_event
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: publication_date
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+              - column:
+                  name: completion_date
+                  type: timestamp with time zone
+              - column:
+                  name: status
+                  type: text
+              - column:
+                  name: completion_attempts
+                  type: int
+              - column:
+                  name: last_resubmission_date
+                  type: timestamp with time zone
+        - createIndex:
+            tableName: event_publication
+            column:
+              - name: serialized_event
+            using: hash
+        - createIndex:
+            tableName: event_publication
+            column:
+              - name: completion_date
