@@ -67,7 +67,7 @@ public class JwtService {
       final SecurityProperties securityProperties,
       final SystemProperties systemProperties) {
     this.userService = userService;
-    this.externalUserManagement = systemProperties.isExternalUserManagement();
+    this.externalUserManagement = systemProperties.isExternalDataManagement();
     this.serverId = securityProperties.getJwt().getServerId();
     this.defaultValidityPeriod = securityProperties.getJwt().getValidityPeriod();
     guestValidityPeriod = Duration.parse("P180D");

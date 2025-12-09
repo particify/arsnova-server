@@ -8,9 +8,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import net.particify.arsnova.common.uuid.UuidHelper;
+import net.particify.arsnova.core.config.ConditionalOnV4DataManagement;
 import net.particify.arsnova.core.config.RabbitConfig;
 import net.particify.arsnova.core.config.properties.MessageBrokerProperties;
-import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.model.Room;
 
 @Component
@@ -18,10 +18,7 @@ import net.particify.arsnova.core.model.Room;
     name = RabbitConfig.RabbitConfigProperties.RABBIT_ENABLED,
     prefix = MessageBrokerProperties.PREFIX,
     havingValue = "true")
-@ConditionalOnProperty(
-    name = "external-room-management",
-    prefix = SystemProperties.PREFIX,
-    havingValue = "true")
+@ConditionalOnV4DataManagement
 public class IncomingAmqpRoomEventDispatcher {
   private static final Logger logger = LoggerFactory.getLogger(IncomingAmqpRoomEventDispatcher.class);
 

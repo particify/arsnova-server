@@ -19,8 +19,7 @@ services:
       SECURITY_JWT_ISSUER: arsnova.backend.v3:$JWT_DOMAIN
   arsnova-server-core:
     environment:
-      SYSTEM_EXTERNAL_USER_MANAGEMENT: "true"
-      SYSTEM_EXTERNAL_ROOM_MANAGEMENT: "true"
+      SYSTEM_EXTERNAL_DATA_MANAGEMENT: "true"
   arsnova-server-websocket:
     environment:
       SYSTEM_EXTERNAL_USER_MANAGEMENT: "true"

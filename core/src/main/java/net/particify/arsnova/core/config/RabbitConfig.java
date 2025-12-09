@@ -131,7 +131,7 @@ public class RabbitConfig {
     ));
     declarables.add(new Queue(AmqpMigrationEventDispatcher.PARTICIPANT_ACCESS_MIGRATION_QUEUE_NAME + ".dlq"));
 
-    if (systemProperties.isExternalRoomManagement()) {
+    if (systemProperties.isExternalDataManagement()) {
       // With external room management the event direction for rooms is inverted, so we need to receive them instead of
       // sending them. For this we need to bind queues to the exchanges.
 

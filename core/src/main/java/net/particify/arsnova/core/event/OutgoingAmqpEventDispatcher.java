@@ -23,12 +23,11 @@ import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
+import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.config.RabbitConfig;
 import net.particify.arsnova.core.config.properties.MessageBrokerProperties;
 import net.particify.arsnova.core.config.properties.SystemProperties;
 import net.particify.arsnova.core.model.Entity;
-import net.particify.arsnova.core.model.Room;
-import net.particify.arsnova.core.security.User;
 
 /**
  * AmqpEventDispatcher listens to application events, converts them to messages and sends them to RabbitMQ.
@@ -43,11 +42,7 @@ import net.particify.arsnova.core.security.User;
     name = RabbitConfig.RabbitConfigProperties.RABBIT_ENABLED,
     prefix = MessageBrokerProperties.PREFIX,
     havingValue = "true")
-@ConditionalOnProperty(
-    name = "external-room-management",
-    prefix = SystemProperties.PREFIX,
-    havingValue = "false",
-    matchIfMissing = true)
+@ConditionalOnLegacyDataManagement
 public class OutgoingAmqpEventDispatcher {
   @JsonFilter("amqpPropertyFilter")
   public static class AmqpPropertyFilter {
@@ -79,14 +74,6 @@ public class OutgoingAmqpEventDispatcher {
 
   @EventListener
   public <T extends CrudEvent, E extends Entity> void dispatchEntityCrudEvent(final T event) {
-    if (event.getClass().isAssignableFrom(User.class) && systemProperties.isExternalUserManagement()) {
-      logger.debug("Skipping user event dispatch due to external user management.");
-      return;
-    }
-    if (event.getClass().isAssignableFrom(Room.class) && systemProperties.isExternalRoomManagement()) {
-      logger.debug("Skipping room event dispatch due to external room management.");
-      return;
-    }
     String eventType = event.getClass().getSimpleName();
     eventType = eventType.substring(0, eventType.length() - 5);
     final String entityType = event.getEntity().getSupertype().getSimpleName();
