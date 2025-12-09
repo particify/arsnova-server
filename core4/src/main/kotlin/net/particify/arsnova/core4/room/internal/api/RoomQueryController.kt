@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Window
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.method.annotation.Argument
+import org.springframework.graphql.data.method.annotation.BatchMapping
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.graphql.data.query.ScrollSubrange
@@ -111,19 +112,18 @@ class RoomQueryController(
     return String.format(Locale.ROOT, "%0${Room.SHORT_ID_LENGTH}d", room.shortId)
   }
 
-  @SchemaMapping(typeName = "RoomMembership", field = "stats")
-  fun stats(): RoomStats {
-    return RoomStats()
-  }
-
   @SchemaMapping(typeName = "Room", field = "descriptionRendered")
   fun descriptionRendered(room: Room): String? {
     return textRenderingService.renderText(room.description)
   }
 
-  data class RoomStats(
-      val roomUserCount: Int = 0,
-      val contentCount: Int = 0,
-      val ackCommentCount: Int = 0
-  )
+  @SchemaMapping(typeName = "Room") fun stats(room: Room) = RoomStats(room.id!!)
+
+  @BatchMapping(typeName = "RoomStats")
+  fun activeMemberCount(roomStatsList: List<RoomStats>): Map<RoomStats, Int> {
+    val counts = membershipService.countActiveMembersByRoomIds(roomStatsList.map { it.id })
+    return roomStatsList.associateWith { counts.getOrDefault(it.id, 0) }
+  }
+
+  data class RoomStats(val id: UUID, val activeMemberCount: Int = 0)
 }
