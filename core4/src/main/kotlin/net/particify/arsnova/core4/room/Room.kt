@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.room
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
@@ -14,9 +15,11 @@ import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.common.LanguageIso639
 import net.particify.arsnova.core4.common.UuidGenerator
+import net.particify.arsnova.core4.room.event.RoomEntityEventDispatcher
 
 @Entity
 @Table(schema = "room")
+@EntityListeners(RoomEntityEventDispatcher::class)
 @Suppress("LongParameterList")
 class Room(
     @Id @UuidGenerator var id: UUID? = null,
