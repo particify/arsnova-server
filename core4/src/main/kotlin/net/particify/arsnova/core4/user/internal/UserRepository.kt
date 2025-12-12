@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user.internal
@@ -27,4 +27,8 @@ interface UserRepository : JpaRepository<User, UUID>, QuerydslPredicateExecutor<
   ): Window<User>
 
   fun findByMailAddress(mailAddress: String): User?
+
+  fun countByUsernameIsNotNull(): Long
+
+  fun countByUsernameIsNullAndUnverifiedMailAddressIsNotNull(): Long
 }
