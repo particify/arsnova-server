@@ -13,10 +13,12 @@ import net.particify.arsnova.core4.user.internal.UserServiceImpl
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Controller
 
 @Controller
+@PreAuthorize("hasRole('USER')")
 @SchemaMapping(typeName = "Mutation")
 class UserMutationController(
     private val userService: UserServiceImpl,
@@ -102,6 +104,7 @@ class UserMutationController(
   }
 
   @MutationMapping
+  @PreAuthorize("hasRole('CHALLENGE_SOLVED')")
   fun requestUserPasswordReset(@Argument mailAddress: String, locale: Locale): Boolean {
     val user = userService.findByMailAddress(mailAddress) ?: throw UserNotFoundException()
     localUserService.initiatePasswordReset(user, locale)
@@ -110,6 +113,7 @@ class UserMutationController(
   }
 
   @MutationMapping
+  @PreAuthorize("hasRole('CHALLENGE_SOLVED')")
   fun resetUserPassword(
       @Argument mailAddress: String,
       @Argument password: String,

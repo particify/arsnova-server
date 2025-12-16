@@ -27,10 +27,12 @@ import org.springframework.graphql.data.method.annotation.BatchMapping
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.graphql.data.query.ScrollSubrange
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Controller
 
 @Controller
+@PreAuthorize("hasRole('USER')")
 @SchemaMapping(typeName = "Query")
 class RoomQueryController(
     private val roomService: RoomServiceImpl,
@@ -42,11 +44,13 @@ class RoomQueryController(
   }
 
   @QueryMapping
+  @PreAuthorize("hasPermission(#id, 'Room', 'read')")
   fun roomById(@Argument id: UUID): Room {
     return roomService.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
   }
 
   @QueryMapping
+  @PreAuthorize("hasPermission(#room.id, 'Room', 'read')")
   fun rooms(@Argument room: Room, subrange: ScrollSubrange): Window<Room> {
     val matcher = ExampleMatcher.matchingAll().withIgnorePaths("version", "description")
     return roomService.findBy(Example.of(room, matcher)) { q ->
@@ -79,11 +83,13 @@ class RoomQueryController(
   }
 
   @QueryMapping
+  @PreAuthorize("hasPermission(#shortId, 'Room', 'read')")
   fun roomByShortId(@Argument shortId: String): Room {
     return roomService.findOneByShortId(shortId.toInt()) ?: throw RoomNotFoundException()
   }
 
   @QueryMapping
+  @PreAuthorize("hasPermission(#shortId, 'Room', 'read')")
   fun roomMembershipByShortId(
       @Argument shortId: String,
       @AuthenticationPrincipal user: User
@@ -93,6 +99,7 @@ class RoomQueryController(
   }
 
   @QueryMapping
+  @PreAuthorize("hasPermission(#roomId, 'Room', 'administer')")
   fun roomManagingMembersByRoomId(@Argument roomId: UUID): List<Membership> {
     val query =
         QMembership.membership.room.id
@@ -102,6 +109,7 @@ class RoomQueryController(
   }
 
   @QueryMapping
+  @PreAuthorize("denyAll")
   fun roomsByUserId(@Argument userId: UUID, subrange: ScrollSubrange): Window<Membership> {
     return membershipService.findByUserId(
         userId, subrange.position().orElse(ScrollPosition.offset()))

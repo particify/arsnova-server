@@ -22,12 +22,14 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Controller
 
 private const val LAST_ACTIVITY_MINIMUM_DIFFERENCE_SECONDS = 5L
 
 @Controller
+@PreAuthorize("hasRole('USER')")
 @SchemaMapping(typeName = "Mutation")
 class RoomMutationController(
     private val roomService: RoomServiceImpl,
@@ -65,6 +67,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
+  @PreAuthorize("hasPermission(#id, 'Room', 'write')")
   fun updateRoomName(@Argument id: UUID, @Argument name: String): Room {
     val room = roomService.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
     room.name = name
@@ -72,6 +75,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
+  @PreAuthorize("hasPermission(#id, 'Room', 'write')")
   fun updateRoomDescription(@Argument id: UUID, @Argument description: String): Room {
     val room = roomService.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
     room.description = description
@@ -79,6 +83,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
+  @PreAuthorize("hasPermission(#id, 'Room', 'write')")
   fun updateRoomLanguage(
       @Argument id: UUID,
       @Argument @LanguageIso639 languageCode: String?
@@ -89,6 +94,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
+  @PreAuthorize("hasPermission(#id, 'Room', 'write')")
   fun updateRoomFocusMode(@Argument id: UUID, @Argument enabled: Boolean): Room {
     val room = roomService.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
     room.focusModeEnabled = enabled
@@ -96,12 +102,14 @@ class RoomMutationController(
   }
 
   @MutationMapping
+  @PreAuthorize("hasPermission(#id, 'Room', 'delete')")
   fun deleteRoom(@Argument id: UUID): UUID {
     roomService.deleteById(id)
     return id
   }
 
   @MutationMapping
+  @PreAuthorize("hasPermission(#id, 'Room', 'administer')")
   fun grantRoomRole(
       @Argument roomId: UUID,
       @Argument userId: UUID,
@@ -122,6 +130,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
+  @PreAuthorize("hasPermission(#id, 'Room', 'administer')")
   fun grantRoomRoleByInvitation(
       @Argument roomId: UUID,
       @Argument mailAddress: String,
@@ -142,6 +151,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
+  @PreAuthorize("hasPermission(#id, 'Room', 'administer')")
   fun revokeRoomRole(@Argument roomId: UUID, @Argument userId: UUID): Membership {
     val id = Membership.RoomUserId(roomId, userId)
     val membership = membershipService.findByIdOrNull(id) ?: throw MembershipNotFoundException(id)
@@ -153,6 +163,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
+  @PreAuthorize("hasPermission(#id, 'Room', 'administer')")
   fun revokeRoomMembership(
       @Argument roomId: UUID,
       @AuthenticationPrincipal user: User
@@ -167,6 +178,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
+  @PreAuthorize("hasPermission(#id, 'Room', 'administer')")
   fun duplicateRoom(
       @Argument input: DuplicateRoomInput,
       @AuthenticationPrincipal user: User

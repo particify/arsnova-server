@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.system.security.RefreshJwtAuthentication
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/auth")
+@PreAuthorize("hasRole('USER')")
 class AuthenticationHttpController(
     private val authenticationManager: AuthenticationManager,
     private val jwtUtils: JwtUtils,
@@ -29,6 +31,7 @@ class AuthenticationHttpController(
 ) {
 
   @PostMapping("/refresh")
+  @PreAuthorize("hasRole('USER')")
   fun refreshAuthentication(
       @AuthenticationPrincipal user: User,
       authentication: Authentication,
@@ -43,6 +46,7 @@ class AuthenticationHttpController(
   }
 
   @PostMapping("/login")
+  @PreAuthorize("hasRole('CHALLENGE_SOLVED')")
   fun login(
       @RequestBody loginInput: LoginInput,
       response: HttpServletResponse
@@ -58,11 +62,13 @@ class AuthenticationHttpController(
   }
 
   @PostMapping("/logout")
+  @PreAuthorize("permitAll")
   fun logout(response: HttpServletResponse) {
     refreshCookieComponent.remove(response)
   }
 
   @PostMapping("/guest-account")
+  @PreAuthorize("hasRole('CHALLENGE_SOLVED')")
   fun createGuestAccount(response: HttpServletResponse): AuthenticationWrapper {
     val user = userService.createAccount()
     val subject = user.id.toString()
