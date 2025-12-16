@@ -1,0 +1,16 @@
+logging:
+  exception-depth: full
+
+security:
+  jwt:
+    issuer: arsnova.backend.v3:example.com
+    secret: weaksecret1234567890123456789012
+  challenge:
+    secret: weaksecret1234567890123456789012
+
+mail:
+  sender-address: arsnova@localhost
+  sender-name: arsnova
+
+service:
+  root-url: http://localhost:4200

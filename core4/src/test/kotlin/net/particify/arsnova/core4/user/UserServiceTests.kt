@@ -14,8 +14,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Import(TestcontainersConfiguration::class)
 class UserServiceTests {
   @Autowired lateinit var userDetailsService: UserServiceImpl
@@ -35,8 +37,8 @@ class UserServiceTests {
     val username = "admin@example.com"
     val user = userDetailsService.loadUserByUsername(username)
     Assertions.assertNotNull(user)
-    Assertions.assertEquals(userId, user!!.id)
-    Assertions.assertEquals(username, user!!.username)
+    Assertions.assertEquals(userId, user.id)
+    Assertions.assertEquals(username, user.username)
   }
 
   @Test
@@ -67,7 +69,7 @@ class UserServiceTests {
   @Test
   fun shouldNotDeleteMarkedUserBefore7Days() {
     val user = userDetailsService.createAccount()
-    user.username = "Delete Me"
+    user.username = "Do Not Delete Me"
     user.auditMetadata.deletedAt =
         Instant.now().minus(7, ChronoUnit.DAYS).plus(1, ChronoUnit.MINUTES)
     userRepository.save(user)

@@ -5,7 +5,9 @@ package net.particify.arsnova.core4.user
 
 import java.time.Instant
 import java.util.Locale
+import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
+import net.particify.arsnova.core4.system.MailService
 import net.particify.arsnova.core4.user.exception.InvalidUserStateException
 import net.particify.arsnova.core4.user.exception.InvalidVerificationCodeException
 import net.particify.arsnova.core4.user.internal.LocalUserServiceImpl
@@ -14,11 +16,15 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Import(TestcontainersConfiguration::class)
 class LocalUserServiceTests {
   @Autowired lateinit var localUserService: LocalUserServiceImpl
+  @MockitoBean lateinit var mailService: MailService
 
   @Test
   fun shouldClaimUnverifiedUser() {
@@ -85,6 +91,7 @@ class LocalUserServiceTests {
     val mailAddress = "shouldVerifyMail@example.com"
     val user =
         User(
+            id = UUID.nameUUIDFromBytes("Test User".toByteArray()),
             unverifiedMailAddress = mailAddress,
             verificationCode = 12345678,
             verificationExpiresAt = Instant.now().minusSeconds(10))
