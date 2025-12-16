@@ -26,6 +26,7 @@ const val VERIFICATION_VALIDITY_HOURS = 48L
 const val VERIFICATION_MAX_ERRORS = 10
 const val VERIFICATION_CODE_LENGTH = 6
 
+@Suppress("TooManyFunctions")
 @Service
 class LocalUserServiceImpl(
     private val userService: UserService,
@@ -206,5 +207,15 @@ class LocalUserServiceImpl(
     }
     sendVerificationMail(user, "welcome-verification", locale)
     return true
+  }
+
+  override fun verifyUser(user: User): User {
+    if (user.unverifiedMailAddress == null || user.username != null) {
+      throw InvalidUserStateException("No verification in process or already verified", user.id!!)
+    }
+    user.mailAddress = user.unverifiedMailAddress
+    user.username = user.unverifiedMailAddress
+    user.resetVerification()
+    return userRepository.save(user)
   }
 }

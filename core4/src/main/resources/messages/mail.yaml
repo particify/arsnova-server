@@ -5,7 +5,9 @@ mail:
   password-reset-link-text: "Set new password"
   password-reset-subject: Verification code for password reset
   password-reset-your-code: "Here is the verification code you need to set a new password:"
-  room-invitation-link-text: Accept invitation
+  invitation-link-text: Accept invitation
+  invitation-subject: Invitation to {0}
+  invitation-verification-intro: "You have been invited by {0} to join {1}. Please use the following link to create your account:"
   room-invitation-subject: Invitation for {0} room "{1}"
   room-invitation-verification-intro: 'You have been invited to the {0} room "{1}" by {2}. Please use the following link to create your account and gain extended access rights for the room:'
   verification-code-intro: "Here is the code you need to verify your mail address:"

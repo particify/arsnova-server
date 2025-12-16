@@ -13,4 +13,6 @@ interface LocalUserService {
       data: Map<String, Any> = mapOf(),
       locale: Locale
   ): User
+
+  fun verifyUser(user: User): User
 }

@@ -1,0 +1,29 @@
+extend type Query {
+  adminUserById(id: ID!): AdminUser
+  adminUsers(
+    search: String
+    exactSearchMode: Boolean
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): AdminUserConnection
+}
+
+extend type Mutation {
+  adminCreateUser(mailAddress: String!): AdminUser!
+  adminDeleteUserById(id: ID!): UUID!
+  adminVerifyUserById(id: ID!): AdminUser!
+}
+
+type AdminUser {
+  id: ID!
+  username: String
+  mailAddress: String
+  unverifiedMailAddress: String
+  uiSettings: UserUiSettings
+  language: String
+  verificationCode: Int
+  verificationErrors: Int
+  verificationExpiresAt: DateTime
+}
