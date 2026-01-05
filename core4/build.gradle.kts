@@ -1,3 +1,6 @@
+import dev.detekt.gradle.Detekt
+import org.gradle.kotlin.dsl.withType
+
 plugins {
   jacoco
   alias(libs.plugins.detekt)
@@ -135,4 +138,9 @@ spotless {
   }
 
   tasks.withType<Jar> { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+}
+
+tasks.withType<Detekt>().configureEach {
+  // Detekt does not yet support jvmTarget 25. Remove when updating Detekt.
+  jvmTarget = "21"
 }
