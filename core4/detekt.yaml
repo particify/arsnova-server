@@ -1,6 +1,9 @@
 complexity:
   TooManyFunctions:
-    thresholdInClasses: 16
+    allowedFunctionsPerClass: 15
 style:
   ReturnCount:
     excludeGuardClauses: true
+  ThrowsCount:
+    excludeGuardClauses: true
+    max: 5

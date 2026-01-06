@@ -4,14 +4,14 @@ aspectj-plugin = "9.1.0"
 aspectj-rt = "1.9.25"
 bucket4j = "8.15.0"
 checkstyle = "10.12.4"
-detekt = "1.23.8"
+detekt = "2.0.0-alpha.1"
 ektorp = "1.5.0"
 guava = "33.5.0-jre"
 graalvm-native-plugin = "0.11.3"
 graphql-scalars = "24.0"
 java-jwt = "4.5.0"
 jib-plugin = "3.5.1"
-kotlin = "2.2.21"
+kotlin = "2.3.0"
 ktfmt = "0.55"
 ktlint-plugin = "14.0.1"
 lms-connector = "1.0.2"
@@ -22,7 +22,7 @@ prettier = "3.5.3"
 prettier-toml = "2.0.5"
 prettier-xml = "3.4.1"
 querydsl = "7.1"
-spotbugs-plugin = "6.2.3"
+spotbugs-plugin = "6.4.8"
 spotless = "8.1.0"
 spring-boot-plugin = "4.0.0"
 spring-modulith = "2.0.0"
@@ -87,7 +87,7 @@ thymeleaf-spring = { module = "org.thymeleaf:thymeleaf-spring6" }
 
 [plugins]
 aspectj = { id = "io.freefair.aspectj.post-compile-weaving", version.ref = "aspectj-plugin" }
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
 graalvm-native = { id = "org.graalvm.buildtools.native", version.ref = "graalvm-native-plugin" }
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib-plugin" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }

@@ -2,7 +2,7 @@ ARG APP_IMAGE
 FROM $APP_IMAGE AS build
 RUN ls -l /app/*
 
-FROM registry.gitlab.com/particify/dev/foss/devcontainers/java:1-21-bookworm
+FROM registry.gitlab.com/particify/dev/foss/devcontainers/java-postgresql:3-25-trixie
 
 COPY --from=build /app/libs/ /app/libs/
 COPY --from=build /app/ /app/

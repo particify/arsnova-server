@@ -1,3 +1,6 @@
+import dev.detekt.gradle.Detekt
+import org.gradle.kotlin.dsl.withType
+
 plugins {
   jacoco
   alias(libs.plugins.detekt)
@@ -10,7 +13,7 @@ plugins {
   alias(libs.plugins.spring.boot)
 }
 
-java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
+java { toolchain { languageVersion = JavaLanguageVersion.of(25) } }
 
 val debugHost = System.getenv("DEBUG_HOST") ?: "127.0.0.1"
 val debugPort = System.getenv("DEBUG_PORT")?.toInt() ?: 5005
@@ -135,4 +138,9 @@ spotless {
   }
 
   tasks.withType<Jar> { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+}
+
+tasks.withType<Detekt>().configureEach {
+  // Detekt does not yet support jvmTarget 25. Remove when updating Detekt.
+  jvmTarget = "21"
 }

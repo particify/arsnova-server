@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
   jacoco
   id("com.github.spotbugs")
@@ -13,7 +11,7 @@ plugins {
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(21)
+    languageVersion = JavaLanguageVersion.of(25)
   }
 }
 
@@ -50,7 +48,6 @@ dependencies {
 kotlin {
   compilerOptions {
     freeCompilerArgs.addAll("-Xjsr305=strict")
-    jvmTarget = JvmTarget.JVM_21
   }
 }
 
