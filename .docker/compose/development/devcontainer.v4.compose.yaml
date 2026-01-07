@@ -14,12 +14,14 @@ services:
       DEBUG_HOST: 0.0.0.0
       DEBUG_PORT: $CORE4_DEBUG_PORT
       SERVER_PORT: ""
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_APPLICATION_JSON: '{"server": {"port": "8080"}}'
       GRADLE_RO_DEP_CACHE: /home/dev/.gradle-ro-dep-cache
     ports:
       - $CORE4_DEBUG_PORT:$CORE4_DEBUG_PORT
     volumes:
       - $ROOT_DIR:/workspace
+      - $ROOT_DIR/core4/src/main/resources/credentials:/app/resources/credentials
       - gradle-workspace-core4:/workspace/.gradle
       - gradle-cache-core4:/home/dev/.gradle/caches
       - gradle-ro-dep-cache:/home/dev/.gradle-ro-dep-cache:ro
