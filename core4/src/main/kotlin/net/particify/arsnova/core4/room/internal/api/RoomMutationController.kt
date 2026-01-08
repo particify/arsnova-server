@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.room.internal.api
@@ -109,7 +109,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Room', 'administer')")
+  @PreAuthorize("hasPermission(#roomId, 'Room', 'administer')")
   fun grantRoomRole(
       @Argument roomId: UUID,
       @Argument userId: UUID,
@@ -130,7 +130,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Room', 'administer')")
+  @PreAuthorize("hasPermission(#roomId, 'Room', 'administer')")
   fun grantRoomRoleByInvitation(
       @Argument roomId: UUID,
       @Argument mailAddress: String,
@@ -151,7 +151,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Room', 'administer')")
+  @PreAuthorize("hasPermission(#roomId, 'Room', 'administer')")
   fun revokeRoomRole(@Argument roomId: UUID, @Argument userId: UUID): Membership {
     val id = Membership.RoomUserId(roomId, userId)
     val membership = membershipService.findByIdOrNull(id) ?: throw MembershipNotFoundException(id)
@@ -163,7 +163,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Room', 'administer')")
+  @PreAuthorize("hasPermission(#roomId, 'Room', 'administer')")
   fun revokeRoomMembership(
       @Argument roomId: UUID,
       @AuthenticationPrincipal user: User
@@ -178,7 +178,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Room', 'administer')")
+  @PreAuthorize("hasPermission(#input.id, 'Room', 'administer')")
   fun duplicateRoom(
       @Argument input: DuplicateRoomInput,
       @AuthenticationPrincipal user: User
