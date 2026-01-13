@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.api
@@ -31,7 +31,7 @@ class AuthenticationHttpController(
 ) {
 
   @PostMapping("/refresh")
-  @PreAuthorize("hasRole('USER')")
+  @PreAuthorize("hasRole('REFRESH')")
   fun refreshAuthentication(
       @AuthenticationPrincipal user: User,
       authentication: Authentication,
