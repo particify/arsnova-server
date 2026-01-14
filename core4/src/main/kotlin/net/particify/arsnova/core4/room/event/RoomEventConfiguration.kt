@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.room.event
@@ -10,6 +10,11 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class RoomEventConfiguration {
+  @Bean
+  fun roomCreatedExchange(): Exchange {
+    return ExchangeBuilder.fanoutExchange(ROOM_CREATED_DESTINATION).build()
+  }
+
   @Bean
   fun roomDeletedExchange(): Exchange {
     return ExchangeBuilder.fanoutExchange(ROOM_DELETED_DESTINATION).build()
