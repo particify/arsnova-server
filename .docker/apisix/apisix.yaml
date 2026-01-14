@@ -93,8 +93,6 @@ plugin_configs:
           - Authorization
         upstream_headers:
           - Authorization
-        # keepalive connections currently cause a 400 response
-        keepalive: false
       proxy-rewrite:
         regex_uri:
           - ^/api/(.*)
