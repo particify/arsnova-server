@@ -1,0 +1,22 @@
+extend type Query {
+  adminRoomStats: AdminRoomStats
+  adminUserStats: AdminUserStats
+  adminAnnouncementStats: AdminAnnouncementStats
+}
+
+type AdminUserStats {
+  totalCount: Int!
+  verifiedCount: Int!
+  pendingCount: Int!
+  deletedCount: Int!
+}
+
+type AdminRoomStats {
+  totalCount: Int!
+  deletedCount: Int!
+}
+
+type AdminAnnouncementStats {
+  totalCount: Int!
+  deletedCount: Int!
+}

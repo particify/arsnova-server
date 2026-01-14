@@ -44,6 +44,7 @@ routes:
   - id: core-v3-misc
     uris:
       - /api/language/*
+      - /api/management/stats
       - /api/template/*
       - /api/violationreport/*
     upstream_id: core-v3
