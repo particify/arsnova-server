@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: arsnova
       POSTGRES_PASSWORD: arsnova
     volumes:
-      - core-postgresql-data:/var/lib/postgresql/18/docker
+      - core-postgresql-data:/var/lib/postgresql
   arsnova-server-core4:
     image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}core4:$CORE_TAG
     restart: $RESTART_MODE
