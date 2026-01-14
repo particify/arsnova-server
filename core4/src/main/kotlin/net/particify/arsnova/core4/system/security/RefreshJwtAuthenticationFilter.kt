@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.security
@@ -13,9 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
-/** Name for cookie to store the refresh token. Uses a cookie prefix for additional security. */
-const val REFRESH_TOKEN_COOKIE = "__HTTP_ARS_RT"
-const val REFRESH_AUTHORITY = "REFRESH"
 private const val REFRESH_URI = "/auth/refresh"
 
 @Component

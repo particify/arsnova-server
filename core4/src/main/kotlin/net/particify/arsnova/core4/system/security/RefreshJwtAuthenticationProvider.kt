@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.security
@@ -12,6 +12,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.jwt.JwtException
 import org.springframework.stereotype.Component
 
+const val REFRESH_ROLE = "REFRESH"
+
 @Component
 class RefreshJwtAuthenticationProvider(
     private var jwtUtils: JwtUtils,
@@ -22,14 +24,15 @@ class RefreshJwtAuthenticationProvider(
     try {
       val jwt = jwtUtils.decodeJwt(authentication.credentials as String)
       val roles = jwt.claims["roles"]
-      if (roles !is Collection<*> || !roles.contains(REFRESH_AUTHORITY))
+      if (roles !is Collection<*> || !roles.contains(REFRESH_ROLE))
           throw BadCredentialsException("Not a refresh token")
       val user =
           userService.loadUserById(UUID.fromString(jwt.subject))
               ?: throw BadCredentialsException("User for JWT not found.")
       val version = (jwt.claims["version"] as Long).toInt()
       if (version != user.tokenVersion) throw BadCredentialsException("Invalid token version")
-      return RefreshJwtAuthentication(token, user, setOf(SimpleGrantedAuthority(REFRESH_AUTHORITY)))
+      return RefreshJwtAuthentication(
+          token, user, setOf(SimpleGrantedAuthority("ROLE_$REFRESH_ROLE")))
     } catch (e: JwtException) {
       throw BadCredentialsException("Invalid JWT", e)
     } catch (e: IllegalArgumentException) {
