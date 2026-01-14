@@ -15,7 +15,7 @@ services:
       POSTGRES_USER: arsnovaauth
       POSTGRES_PASSWORD: arsnovaauth
     volumes:
-      - postgresql_data_auth:/var/lib/postgresql/18/docker
+      - postgresql_data_auth:/var/lib/postgresql
   postgresql-comments:
     image: postgres:18.1-alpine
     restart: $RESTART_MODE
@@ -24,7 +24,7 @@ services:
       POSTGRES_USER: arsnovacomment
       POSTGRES_PASSWORD: arsnovacomment
     volumes:
-      - postgresql_data_comment:/var/lib/postgresql/18/docker
+      - postgresql_data_comment:/var/lib/postgresql
   rabbitmq:
     image: $IMAGE_NAMESPACE/${IMAGE_DEPENDENCY_PREFIX}rabbitmq-stomp:$RABBITMQ_TAG
     restart: $RESTART_MODE
