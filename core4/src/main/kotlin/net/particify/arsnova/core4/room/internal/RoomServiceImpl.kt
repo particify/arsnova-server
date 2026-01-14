@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.room.internal
@@ -11,6 +11,7 @@ import kotlin.math.pow
 import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomRole
+import net.particify.arsnova.core4.room.event.RoomCreatedEvent
 import net.particify.arsnova.core4.room.event.RoomDeletedEvent
 import net.particify.arsnova.core4.room.event.RoomDuplicatedEvent
 import net.particify.arsnova.core4.user.User
@@ -28,6 +29,7 @@ class RoomServiceImpl(
 
   private val secureRandom = SecureRandom()
 
+  @Transactional
   fun create(room: Room, user: User): Room {
     val membership =
         Membership(
@@ -37,7 +39,9 @@ class RoomServiceImpl(
             lastActivityAt = Instant.now(),
         )
     room.userRoles.add(membership)
-    return save(room)
+    val persistedRoom = save(room)
+    applicationEventPublisher.publishEvent(RoomCreatedEvent(persistedRoom.id!!))
+    return persistedRoom
   }
 
   @Transactional
