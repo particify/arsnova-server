@@ -1,7 +1,7 @@
 HELP.md
 .gradle
 build/
-src/main/resources/credentials/
+credentials/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
