@@ -8,6 +8,8 @@ security:
   challenge:
     secret: weaksecret1234567890123456789012
   saml2:
+    # credentials-path is only used in dev environment to simplify overriding with environment variables.
+    credentials-path: file:credentials
     relyingparty:
       registration:
         fc62cd95-bea9-4aa3-987d-fa976ef300f3:
@@ -16,8 +18,8 @@ security:
             mail-address: urn:oid:1.2.840.113549.1.9.1
           signing:
             credentials:
-              - private-key-location: classpath:credentials/rp.key
-                certificate-location: classpath:credentials/rp.crt
+              - private-key-location: ${security.saml2.credentials-path}/rp.key
+                certificate-location: ${security.saml2.credentials-path}/rp.crt
           assertingparty:
             metadata-uri: http://keycloak:8080/realms/dev/protocol/saml/descriptor
 
