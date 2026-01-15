@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user.internal.api
@@ -52,6 +52,7 @@ class UserMutationController(
   }
 
   @MutationMapping
+  @PreAuthorize("hasRole('CHALLENGE_SOLVED')")
   fun verifyUserMailAddressUnauthenticated(
       @Argument verificationCode: String,
       @Argument userId: UUID,

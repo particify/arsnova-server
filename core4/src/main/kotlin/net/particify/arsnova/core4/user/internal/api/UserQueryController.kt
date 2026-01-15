@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user.internal.api
@@ -32,11 +32,13 @@ class UserQueryController(private val userService: UserServiceImpl) {
   }
 
   @SchemaMapping(typeName = "User", field = "verified")
+  @PreAuthorize("authenticated")
   fun verified(user: User): Boolean {
     return user.username != null
   }
 
   @SchemaMapping(typeName = "User", field = "displayId")
+  @PreAuthorize("authenticated")
   fun displayId(user: User): String? {
     return user.username ?: user.unverifiedMailAddress
   }
