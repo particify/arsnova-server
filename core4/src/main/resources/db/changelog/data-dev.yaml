@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: arsnova
+      labels: data,user,room,announcement
+      runAlways: true
+      comment: Load data fixtures for development
+      changes:
+        - loadUpdateData:
+            schemaName: user
+            tableName: user
+            primaryKey: id
+            file: db/data-dev/user/user.csv
+        - loadUpdateData:
+            schemaName: user
+            tableName: user_role_mapping
+            primaryKey: user_id,role_id
+            file: db/data-dev/user/user_role_mapping.csv
+        - loadUpdateData:
+            schemaName: room
+            tableName: room
+            primaryKey: id
+            file: db/data-dev/room/room.csv
+        - loadUpdateData:
+            schemaName: room
+            tableName: membership
+            primaryKey: room_id,user_id
+            file: db/data-dev/room/membership.csv
+        - loadUpdateData:
+            schemaName: announcement
+            tableName: announcement
+            primaryKey: id
+            file: db/data-dev/announcement/announcement.csv

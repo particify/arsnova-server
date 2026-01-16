@@ -19,6 +19,9 @@ spring:
       hibernate:
         default_schema: public
 
+  liquibase:
+    contexts: "!dev"
+
   threads:
     virtual:
       # Virtual threads currently cause issue with security context propagation for GraphQL requests.

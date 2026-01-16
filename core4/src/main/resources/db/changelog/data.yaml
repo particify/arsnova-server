@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: arsnova
+      labels: data,user
+      runAlways: true
+      comment: Load predefined data
+      changes:
+        - loadUpdateData:
+            schemaName: user
+            tableName: role
+            primaryKey: id
+            file: db/data/user/role.csv

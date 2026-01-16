@@ -1,0 +1,135 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: arsnova
+      labels: ddl,room
+      context: default
+      comment: Create initial definitions for room module
+      changes:
+        - sql: CREATE SCHEMA "room"
+        - sql: CREATE TYPE "room_role" AS ENUM ('OWNER', 'EDITOR', 'MODERATOR', 'PARTICIPANT')
+      rollback:
+        - sql: DROP TYPE "room_role"
+        - sql: DROP SCHEMA "announcement"
+  - changeSet:
+      id: 2
+      author: arsnova
+      labels: ddl,room
+      context: default
+      comment: Create initial definitions for room module
+      changes:
+        - createTable:
+            schemaName: room
+            tableName: room
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: short_id
+                  type: int
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(2000)
+                  constraints:
+                    nullable: false
+                  defaultValue: ""
+              - column:
+                  name: language
+                  type: varchar(2)
+              - column:
+                  name: focus_mode_enabled
+                  type: boolean
+                  constraints:
+                    nullable: false
+                  defaultValueBoolean: false
+              - column:
+                  name: created_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: created_by_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: updated_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+              - column:
+                  name: deleted_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: deleted_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: deleted_at
+                  type: timestamp with time zone
+        - createTable:
+            schemaName: room
+            tableName: membership
+            columns:
+              - column:
+                  name: room_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: room_id_fkey
+                    references: '"room"."room"(id)'
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: user_id_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: room_role
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_activity_at
+                  type: timestamp with time zone
+        - addPrimaryKey:
+            schemaName: room
+            tableName: membership
+            constraintName: membership_pkey
+            columnNames: room_id,user_id
+        - createIndex:
+            schemaName: room
+            tableName: membership
+            column:
+              - name: last_activity_at

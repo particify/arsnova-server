@@ -1,0 +1,250 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: arsnova
+      labels: ddl,user
+      context: default
+      comment: Create initial definitions for user module
+      changes:
+        - sql: CREATE SCHEMA "user"
+      rollback:
+        - sql: DROP SCHEMA "user"
+  - changeSet:
+      id: 2
+      author: arsnova
+      labels: ddl,user
+      context: default
+      comment: Create initial definitions for user module
+      changes:
+        - createTable:
+            schemaName: user
+            tableName: user
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: username
+                  type: varchar(100)
+                  constraints:
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(100)
+              - column:
+                  name: mail_address
+                  type: varchar(100)
+                  constraints:
+                    unique: true
+              - column:
+                  name: unverified_mail_address
+                  type: varchar(100)
+              - column:
+                  name: given_name
+                  type: varchar(50)
+              - column:
+                  name: surname
+                  type: varchar(50)
+              - column:
+                  name: enabled
+                  type: boolean
+                  constraints:
+                    nullable: false
+                  defaultValueBoolean: true
+              - column:
+                  name: ui_settings
+                  type: jsonb
+                  constraints:
+                    nullable: false
+                  defaultValue: "{}"
+              - column:
+                  name: language
+                  type: varchar(2)
+              - column:
+                  name: token_version
+                  type: smallint
+                  constraints:
+                    nullable: false
+                  defaultValueNumeric: 1
+              - column:
+                  name: password_changed_at
+                  type: timestamp with time zone
+              - column:
+                  name: announcements_read_at
+                  type: timestamp with time zone
+              - column:
+                  name: verification_code
+                  type: int
+              - column:
+                  name: verification_errors
+                  type: smallint
+              - column:
+                  name: verification_expires_at
+                  type: timestamp with time zone
+              - column:
+                  name: deleted
+                  type: boolean
+                  constraints:
+                    nullable: false
+                  defaultValueBoolean: false
+              - column:
+                  name: created_by
+                  type: uuid
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: updated_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+              - column:
+                  name: deleted_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: deleted_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: deleted_at
+                  type: timestamp with time zone
+        - createIndex:
+            schemaName: user
+            tableName: user
+            column:
+              - name: deleted_at
+        - createTable:
+            schemaName: user
+            tableName: role
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(50)
+                  constraints:
+                    unique: true
+                    nullable: false
+        - createTable:
+            schemaName: user
+            tableName: user_role_mapping
+            columns:
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: user_id_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: role_id_fkey
+                    references: '"user"."role"(id)'
+                    nullable: false
+        - addPrimaryKey:
+            schemaName: user
+            tableName: user_role_mapping
+            constraintName: user_role_mapping_pkey
+            columnNames: user_id,role_id
+        - createTable:
+            schemaName: user
+            tableName: external_login
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: user_id_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: provider_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: external_id
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_login_at
+                  type: timestamp with time zone
+              - column:
+                  name: created_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: created_by_fkey
+                    references: '"user"."user"(id)'
+                    # nullable: true - Can be created without authentication
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: updated_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+              - column:
+                  name: deleted_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: deleted_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: deleted_at
+                  type: timestamp with time zone
+        - addUniqueConstraint:
+            schemaName: user
+            tableName: external_login
+            columnNames: user_id,provider_id
+        - addUniqueConstraint:
+            schemaName: user
+            tableName: external_login
+            columnNames: provider_id,external_id
