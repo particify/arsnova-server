@@ -2,7 +2,7 @@
 altcha = "1.2.0"
 aspectj-plugin = "9.1.0"
 aspectj-rt = "1.9.25"
-bucket4j = "8.15.0"
+bucket4j = "8.16.0"
 checkstyle = "10.12.4"
 detekt = "2.0.0-alpha.1"
 ektorp = "1.5.0"
