@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@iktakahiro/markdown-it-katex": "4.0.1",
-    "express": "5.1.0",
+    "express": "5.2.1",
     "markdown-it": "14.1.0",
     "markdown-it-link-attributes": "4.0.1",
     "markdown-it-prism": "3.0.1"
