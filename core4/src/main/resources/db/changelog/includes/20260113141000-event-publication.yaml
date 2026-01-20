@@ -3,7 +3,6 @@ databaseChangeLog:
       id: 1
       author: spring-modulith
       labels: ddl,system
-      context: default
       comment: Create database for Spring Modulith event publication (see https://docs.spring.io/spring-modulith/reference/appendix.html#schemas)
       changes:
         - createTable:

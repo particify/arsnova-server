@@ -3,7 +3,7 @@ logging:
 
 spring:
   liquibase:
-    contexts: dev
+    contexts: default,dev
 
 security:
   jwt:

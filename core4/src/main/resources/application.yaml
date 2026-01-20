@@ -20,7 +20,7 @@ spring:
         default_schema: public
 
   liquibase:
-    contexts: "!dev"
+    contexts: default
 
   threads:
     virtual:

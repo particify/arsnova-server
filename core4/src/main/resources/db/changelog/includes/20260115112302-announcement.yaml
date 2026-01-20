@@ -3,7 +3,6 @@ databaseChangeLog:
       id: 1
       author: arsnova
       labels: ddl,announcement
-      context: default
       comment: Create initial definitions for announcement module
       changes:
         - sql: CREATE SCHEMA "announcement"

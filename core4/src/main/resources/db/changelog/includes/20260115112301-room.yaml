@@ -3,7 +3,6 @@ databaseChangeLog:
       id: 1
       author: arsnova
       labels: ddl,room
-      context: default
       comment: Create initial definitions for room module
       changes:
         - sql: CREATE SCHEMA "room"
