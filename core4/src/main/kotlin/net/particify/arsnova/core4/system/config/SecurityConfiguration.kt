@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.config
@@ -12,6 +12,7 @@ import net.particify.arsnova.core4.system.security.UserJwtAuthenticationFilter
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.internal.Saml2ResponseAuthenticationConverter
 import org.opensaml.security.x509.X509Support
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -32,6 +33,8 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint
 
+private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
+
 @Configuration
 @EnableWebSecurity
 class SecurityConfiguration(
@@ -45,7 +48,12 @@ class SecurityConfiguration(
       authenticationSuccessHandler: AuthenticationSuccessHandler,
       converter: Saml2ResponseAuthenticationConverter,
       saml2Properties: ExtendedSaml2RelyingPartyProperties,
+      publicRoutesList: List<PublicRoutes>
   ): SecurityFilterChain {
+    val publicRoutes = publicRoutesList.flatMap { it.routes }
+    if (publicRoutes.isNotEmpty()) {
+      logger.debug("Additional public routes: {}", publicRoutes)
+    }
     http
         .csrf(AbstractHttpConfigurer<*, *>::disable)
         .cors(AbstractHttpConfigurer<*, *>::disable)
@@ -58,7 +66,12 @@ class SecurityConfiguration(
               .permitAll()
               .requestMatchers("/graphql")
               .authenticated()
-              .requestMatchers("/challenge", "/configuration", "/auth/sso/**", "/jwt")
+              .requestMatchers(
+                  "/challenge",
+                  "/configuration",
+                  "/auth/sso/**",
+                  "/jwt",
+                  *publicRoutes.toTypedArray())
               .permitAll()
               .anyRequest()
               .authenticated()
