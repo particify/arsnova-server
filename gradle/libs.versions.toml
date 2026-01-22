@@ -1,7 +1,7 @@
 [versions]
 altcha = "1.3.0"
 aspectj-plugin = "9.2.0"
-aspectj-rt = "1.9.25"
+aspectj-rt = "1.9.25.1"
 bucket4j = "8.16.0"
 checkstyle = "10.12.4"
 detekt = "2.0.0-alpha.1"
