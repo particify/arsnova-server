@@ -1,7 +1,7 @@
 package net.particify.arsnova.websocket.management
 
 import com.ninjasquad.springmockk.MockkBean
-import com.ninjasquad.springmockk.SpykBean
+import com.ninjasquad.springmockk.MockkSpyBean
 import io.mockk.verify
 import net.particify.arsnova.websocket.event.RoomUserCountChangedEvent
 import net.particify.arsnova.websocket.service.RoomSubscriptionService
@@ -23,7 +23,7 @@ class MetricsServiceTest {
   @MockkBean
   private lateinit var roomSubscriptionService: RoomSubscriptionService
 
-  @SpykBean
+  @MockkSpyBean
   private lateinit var metricsService: MetricsService
 
   @Autowired
