@@ -90,8 +90,8 @@ build_dependency_image:
 dummy_job:
   rules:
     - changes:
-        - ".docker/**"
-        - "docs/**"
+        - ".docker/**/*"
+        - "docs/**/*"
       when: always
     - when: never
   script:
