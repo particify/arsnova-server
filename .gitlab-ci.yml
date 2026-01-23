@@ -24,7 +24,9 @@ build_project:
       changes:
         - "*"
         - ".gitlab/ci/**/*"
+        - "common/**/*"
         - "gradle/**/*"
+        - "platform/**/*"
         - "$PROJECT/**/*"
       when: on_success
     - if: $CI_COMMIT_BRANCH =~ /^renovate\//
@@ -32,7 +34,9 @@ build_project:
         paths:
           - "*"
           - ".gitlab/ci/**/*"
+          - "common/**/*"
           - "gradle/**/*"
+          - "platform/**/*"
           - "$PROJECT/**/*"
         # GitLab does not support variables in compare_to (tested against 15.5)
         #compare_to: $CI_DEFAULT_BRANCH
@@ -81,3 +85,15 @@ build_dependency_image:
   trigger:
     include: ".docker/images/.gitlab-ci.yml"
     strategy: depend
+
+# Ensure that a pipeline is created to allow merging.
+dummy_job:
+  rules:
+    - changes:
+        - ".docker/**"
+        - "docs/**"
+      when: always
+    - when: never
+  script:
+    # NOOP
+    - ":"
