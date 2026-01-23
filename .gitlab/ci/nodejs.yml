@@ -72,7 +72,7 @@ docker_image:
   dependencies:
     - yarn_install
   image:
-    name: gcr.io/kaniko-project/executor:debug
+    name: gcr.io/kaniko-project/executor:debug@sha256:2562c4fe551399514277ffff7dcca9a3b1628c4ea38cb017d7286dc6ea52f4cd
     entrypoint: [""]
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
