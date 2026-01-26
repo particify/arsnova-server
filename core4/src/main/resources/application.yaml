@@ -51,7 +51,10 @@ security:
 persistence:
   v3-migration:
     enabled: false
-    couchdb-url: http://couchdb:5984/arsnova3
+    couchdb:
+      url: http://couchdb:5984/arsnova3
+      username: arsnova
+      password: arsnova
     room-access-url: http://arsnova-server-authz:8080/roomaccess
 
 mail:

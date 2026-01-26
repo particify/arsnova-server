@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.migration.v3
@@ -38,9 +38,9 @@ class Migrator(
 
   private val couchdbClient =
       RestClient.builder()
-          .baseUrl(properties.couchdbUrl)
+          .baseUrl(properties.couchdb.url)
           .defaultHeaders {
-            it.setBasicAuth("arsnova", "arsnova")
+            it.setBasicAuth(properties.couchdb.username, properties.couchdb.password)
             it.accept = listOf(MediaType.APPLICATION_JSON)
             it.contentType = MediaType.APPLICATION_JSON
           }
@@ -49,7 +49,6 @@ class Migrator(
       RestClient.builder()
           .baseUrl(properties.roomAccessUrl)
           .defaultHeaders {
-            it.setBasicAuth("arsnova", "arsnova")
             it.accept = listOf(MediaType.APPLICATION_JSON)
             it.contentType = MediaType.APPLICATION_JSON
           }
