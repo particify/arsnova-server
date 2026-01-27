@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.system.migration.v3
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import net.particify.arsnova.core4.announcement.Announcement
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.room.Membership
@@ -34,6 +35,7 @@ class Migrator(
 ) {
   companion object {
     private const val COUCHDB_RESULT_LIMIT = 200
+    private const val COUCHDB_PROGRESS_INTERVAL = COUCHDB_RESULT_LIMIT * 5
     private val logger = LoggerFactory.getLogger(this::class.java)
   }
 
@@ -60,9 +62,12 @@ class Migrator(
   private inline fun <reified T : Entity> migrate(fn: (doc: T) -> Any?) {
     val design = T::class.simpleName
     var startKey = "\"\""
+    var count = 0
+    val migrationStart = Instant.now()
     do {
       logger.trace(
           "Loading CouchDB data for migration (design: {}, startkey: {})...", design, startKey)
+      val queryStart = Instant.now()
       val result =
           try {
             couchdbClient
@@ -81,18 +86,30 @@ class Migrator(
             logger.error("Failed to parse {} document (startkey: {})", design, startKey)
             throw e
           }
+      logger.debug("Query took {} ms.", queryStart.until(Instant.now(), ChronoUnit.MILLIS))
       result.rows.take(COUCHDB_RESULT_LIMIT).forEach {
-        logger.debug("Migrating {} {}...", design, it.doc.id)
+        logger.trace("Migrating {} {}...", design, it.doc.id)
         val newEntity = fn(it.doc)
         if (newEntity != null) {
           entityManager.persist(newEntity)
           entityManager.flush()
         }
       }
+      val flushStart = Instant.now()
       entityManager.flush()
+      logger.debug("Flush took {} ms.", flushStart.until(Instant.now(), ChronoUnit.MILLIS))
+      count += result.rows.size.coerceAtMost(COUCHDB_RESULT_LIMIT)
+      if (count % COUCHDB_PROGRESS_INTERVAL == 0) {
+        logger.info("Migration progress: {} {} documents migrated.", count, design)
+      }
       if (result.rows.size > COUCHDB_RESULT_LIMIT)
           startKey = "\"" + result.rows[COUCHDB_RESULT_LIMIT].doc.id + "\""
     } while (result.rows.size > COUCHDB_RESULT_LIMIT)
+    logger.info(
+        "Migration of {} {} documents completed in {} seconds.",
+        count,
+        design,
+        migrationStart.until(Instant.now(), ChronoUnit.SECONDS))
   }
 
   @Transactional
@@ -195,7 +212,7 @@ class Migrator(
 
   @Transactional
   fun migrateMemberships(room: Room) {
-    logger.debug("Migrating RoomAccess for Room {}...", room.id)
+    logger.trace("Migrating RoomAccess for Room {}...", room.id)
     val roomAccessList =
         authzClient
             .get()
@@ -203,7 +220,7 @@ class Migrator(
             .retrieve()
             .body(typeReference<List<RoomAccess>>())!!
     roomAccessList.forEach {
-      logger.debug("Migrating RoomAccess ({}, {})...", it.roomId, it.userId)
+      logger.trace("Migrating RoomAccess ({}, {})...", it.roomId, it.userId)
       val userId = UuidHelper.stringToUuid(it.userId)
       val user = entityManager.find(User::class.java, userId)
       if (user == null) {
