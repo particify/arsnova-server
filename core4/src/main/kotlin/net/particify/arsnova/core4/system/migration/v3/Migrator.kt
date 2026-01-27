@@ -17,6 +17,8 @@ import net.particify.arsnova.core4.system.migration.v3.Room as RoomV3
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
 import net.particify.arsnova.core4.user.internal.ExternalLogin
+import net.particify.arsnova.core4.user.internal.RoleRepository
+import org.hibernate.Session
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty
 import org.springframework.core.ParameterizedTypeReference
@@ -31,9 +33,11 @@ import org.springframework.web.client.RestClientException
 class Migrator(
     @PersistenceContext private val entityManager: EntityManager,
     private val userService: UserService,
+    private val roleRepository: RoleRepository,
     private val properties: MigrationProperties
 ) {
   companion object {
+    private const val JDBC_BATCH_SIZE = 50
     private const val COUCHDB_RESULT_LIMIT = 200
     private const val COUCHDB_PROGRESS_INTERVAL = COUCHDB_RESULT_LIMIT * 5
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -64,6 +68,7 @@ class Migrator(
     var startKey = "\"\""
     var count = 0
     val migrationStart = Instant.now()
+    entityManager.unwrap<Session>(Session::class.java).jdbcBatchSize = JDBC_BATCH_SIZE
     do {
       logger.trace(
           "Loading CouchDB data for migration (design: {}, startkey: {})...", design, startKey)
@@ -87,17 +92,19 @@ class Migrator(
             throw e
           }
       logger.debug("Query took {} ms.", queryStart.until(Instant.now(), ChronoUnit.MILLIS))
-      result.rows.take(COUCHDB_RESULT_LIMIT).forEach {
-        logger.trace("Migrating {} {}...", design, it.doc.id)
-        val newEntity = fn(it.doc)
-        if (newEntity != null) {
-          entityManager.persist(newEntity)
-          entityManager.flush()
+      result.rows.take(COUCHDB_RESULT_LIMIT).chunked(JDBC_BATCH_SIZE).forEach { chunk ->
+        chunk.forEach {
+          logger.trace("Migrating {} {}...", design, it.doc.id)
+          val newEntity = fn(it.doc)
+          if (newEntity != null) {
+            entityManager.persist(newEntity)
+          }
         }
+        val flushStart = Instant.now()
+        entityManager.flush()
+        entityManager.clear()
+        logger.debug("Flush took {} ms.", flushStart.until(Instant.now(), ChronoUnit.MILLIS))
       }
-      val flushStart = Instant.now()
-      entityManager.flush()
-      logger.debug("Flush took {} ms.", flushStart.until(Instant.now(), ChronoUnit.MILLIS))
       count += result.rows.size.coerceAtMost(COUCHDB_RESULT_LIMIT)
       if (count % COUCHDB_PROGRESS_INTERVAL == 0) {
         logger.info("Migration progress: {} {} documents migrated.", count, design)
@@ -115,7 +122,8 @@ class Migrator(
   @Transactional
   fun migrateUsers() {
     logger.info("Migrating UserProfile data...")
-    val defaultRole = userService.findRoleByName("USER")
+    val defaultRole = roleRepository.findByName("USER")
+    val defaultRoleRef = roleRepository.getReferenceById(defaultRole.id!!)
     migrate<UserProfile> {
       val settings = mutableMapOf<String, Any>()
       if (it.settings?.contentAnswersDirectlyBelowChart == true)
@@ -138,7 +146,7 @@ class Migrator(
               surname = it.person?.lastName,
               uiSettings = settings,
               announcementsReadAt = it.announcementReadTimestamp,
-              roles = mutableListOf(defaultRole))
+              roles = mutableListOf(defaultRoleRef))
       if (!migrateExternalLogins(newUser, it)) {
         return@migrate null
       }
