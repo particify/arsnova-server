@@ -23,6 +23,7 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.RestClient
+import org.springframework.web.client.RestClientException
 
 @Component
 @ConditionalOnBooleanProperty(name = ["persistence.v3-migration.enabled"])
@@ -63,18 +64,23 @@ class Migrator(
       logger.trace(
           "Loading CouchDB data for migration (design: {}, startkey: {})...", design, startKey)
       val result =
-          couchdbClient
-              .get()
-              .uri {
-                it.path("/_design/$design/_view/by_id")
-                    .queryParam("reduce", false)
-                    .queryParam("include_docs", true)
-                    .queryParam("startkey", startKey)
-                    .queryParam("limit", COUCHDB_RESULT_LIMIT + 1)
-                    .build()
-              }
-              .retrieve()
-              .body(typeReference<CouchdbResponse<T>>())!!
+          try {
+            couchdbClient
+                .get()
+                .uri {
+                  it.path("/_design/$design/_view/by_id")
+                      .queryParam("reduce", false)
+                      .queryParam("include_docs", true)
+                      .queryParam("startkey", startKey)
+                      .queryParam("limit", COUCHDB_RESULT_LIMIT + 1)
+                      .build()
+                }
+                .retrieve()
+                .body(typeReference<CouchdbResponse<T>>())!!
+          } catch (e: RestClientException) {
+            logger.error("Failed to parse {} document (startkey: {})", design, startKey)
+            throw e
+          }
       result.rows.take(COUCHDB_RESULT_LIMIT).forEach {
         logger.debug("Migrating {} {}...", design, it.doc.id)
         val newEntity = fn(it.doc)
@@ -109,7 +115,7 @@ class Migrator(
                   AuditMetadata(createdAt = it.creationTimestamp, updatedAt = it.updateTimestamp),
               username = it.loginId,
               password =
-                  if (it.account.password != null) "{bcrypt}" + it.account.password else null,
+                  if (it.account?.password != null) "{bcrypt}" + it.account.password else null,
               mailAddress = it.person?.mail,
               givenName = it.person?.firstName,
               surname = it.person?.lastName,

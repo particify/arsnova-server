@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.migration.v3
@@ -13,7 +13,7 @@ data class UserProfile(
     val lastActivityTimestamp: Instant,
     val authProvider: AuthProvider,
     val loginId: String,
-    val account: Account,
+    val account: Account?,
     val person: Person?,
     val settings: Settings?,
     val announcementReadTimestamp: Instant?
