@@ -61,7 +61,7 @@ import net.particify.arsnova.core.service.StatusService;
 public class CouchDbInitializer implements ApplicationEventPublisherAware {
   private static final TypeReference<HashMap<String, Object>> JSON_MAP_TYPE_REF = new TypeReference<>() {};
   private static final Logger logger = LoggerFactory.getLogger(CouchDbInitializer.class);
-  private static final String EXPECTED_MIGRATION_VERSION = "20250611162800";
+  private static final String EXPECTED_MIGRATION_VERSION = "20250519223300";
   private final List<Map<String, Object>> docs = new ArrayList<>();
 
   private ApplicationEventPublisher applicationEventPublisher;
