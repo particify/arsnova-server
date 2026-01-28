@@ -44,6 +44,7 @@ class Migrator(
     private const val JDBC_BATCH_SIZE = 50
     private const val COUCHDB_RESULT_LIMIT = 200
     private const val COUCHDB_PROGRESS_INTERVAL = COUCHDB_RESULT_LIMIT * 5
+    private const val GHOST_USER_NAME = "__ghost_user__"
     private val logger = LoggerFactory.getLogger(this::class.java)
   }
 
@@ -209,16 +210,20 @@ class Migrator(
       logger.warn("Room table not empty ({}), skipping migration.", count)
       return
     }
+    val ghostUser = getOrCreateGhostUser()
     migrate<RoomV3> {
-      val userId = UuidHelper.stringToUuid(it.ownerId)!!
+      val roomId = UuidHelper.stringToUuid(it.id)
+      var userId = UuidHelper.stringToUuid(it.ownerId)!!
       if (!userRepository.existsById(userId)) {
-        logger.warn("Cannot create Room. User not found: {}", userId)
-        return@migrate null
+        // Room might have been transferred to another user.
+        // Despite the property name "ownerId", v3 did not update it.
+        logger.info("Creator {} for room {} not found. Using ghost user.", userId, roomId)
+        userId = ghostUser.id!!
       }
       val userRef = userRepository.getReferenceById(userId)
       val newRoom =
           Room(
-              id = UuidHelper.stringToUuid(it.id),
+              id = roomId,
               auditMetadata =
                   AuditMetadata(
                       createdAt = it.creationTimestamp,
@@ -241,9 +246,22 @@ class Migrator(
             .uri("/by-room/${room.id}")
             .retrieve()
             .body(typeReference<List<RoomAccess>>())!!
+    // Bug: v3 did not delete mapping when a user was deleted.
+    // Retrieve user IDs so the creation of memberships can be skipped for non-existing users.
+    val userIds = roomAccessList.mapNotNull { UuidHelper.stringToUuid(it.userId) }
+    val existingUserIds = userRepository.findAllById(userIds).map { it.id }
     roomAccessList.forEach {
       logger.trace("Migrating RoomAccess ({}, {})...", it.roomId, it.userId)
       val userId = UuidHelper.stringToUuid(it.userId)!!
+      if (!existingUserIds.contains(userId)) {
+        val logMessage = "User {} does not exist. Skipping membership ({}) creation for room {}."
+        if (it.role.name == "OWNER") {
+          logger.warn(logMessage, userId, it.role.name, room.id)
+        } else {
+          logger.debug(logMessage, userId, it.role.name, room.id)
+        }
+        return@forEach
+      }
       val userRef = userRepository.getReferenceById(userId)
       val newMembership =
           Membership(
@@ -263,24 +281,44 @@ class Migrator(
       logger.warn("Announcement table not empty ({}), skipping migration.", count)
       return
     }
+    val ghostUser = getOrCreateGhostUser()
     migrate<AnnouncementV3> {
+      val announcementId = UuidHelper.stringToUuid(it.id)
       val roomId = UuidHelper.stringToUuid(it.roomId)!!
       if (!roomRepository.existsById(roomId)) {
         logger.warn(
-            "Room {} for announcement {} not found. Skipping announcement creation.", roomId, it.id)
+            "Room {} for announcement {} not found. Skipping announcement creation.",
+            roomId,
+            announcementId)
         return@migrate null
       }
       val roomRef = roomRepository.getReferenceById(roomId)
+      var userId = UuidHelper.stringToUuid(it.creatorId)!!
+      if (!userRepository.existsById(userId)) {
+        logger.info(
+            "Creator {} for announcement {} not found. Using ghost user.", userId, announcementId)
+        userId = ghostUser.id!!
+      }
       Announcement(
-          id = UuidHelper.stringToUuid(it.id),
+          id = announcementId,
           auditMetadata =
               AuditMetadata(
                   createdAt = it.creationTimestamp,
                   updatedAt = it.updateTimestamp,
-                  createdBy = UuidHelper.stringToUuid(it.creatorId)),
+                  createdBy = userId),
           room = roomRef,
           title = it.title,
           body = it.body)
     }
+  }
+
+  private fun getOrCreateGhostUser(): User {
+    var user = userRepository.findOneByUsername(GHOST_USER_NAME)
+    if (user == null) {
+      user =
+          User(username = GHOST_USER_NAME, auditMetadata = AuditMetadata(createdAt = Instant.now()))
+      entityManager.persist(user)
+    }
+    return user
   }
 }
