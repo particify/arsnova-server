@@ -8,6 +8,7 @@ import jakarta.persistence.PersistenceContext
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import net.particify.arsnova.core4.announcement.Announcement
+import net.particify.arsnova.core4.announcement.internal.AnnouncementRepository
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.Room
@@ -36,6 +37,7 @@ class Migrator(
     private val userRepository: UserRepository,
     private val roleRepository: RoleRepository,
     private val roomRepository: RoomRepository,
+    private val announcementRepository: AnnouncementRepository,
     private val properties: MigrationProperties,
 ) {
   companion object {
@@ -124,6 +126,11 @@ class Migrator(
   @Transactional
   fun migrateUsers() {
     logger.info("Migrating UserProfile data...")
+    val count = userRepository.count()
+    if (count > 0) {
+      logger.warn("User table not empty ({}), skipping migration.", count)
+      return
+    }
     val defaultRole = roleRepository.findByName("USER")
     val defaultRoleRef = roleRepository.getReferenceById(defaultRole.id!!)
     migrate<UserProfile> {
@@ -197,6 +204,11 @@ class Migrator(
   @Transactional
   fun migrateRooms() {
     logger.info("Migrating Room data...")
+    val count = roomRepository.count()
+    if (count > 0) {
+      logger.warn("Room table not empty ({}), skipping migration.", count)
+      return
+    }
     migrate<RoomV3> {
       val userId = UuidHelper.stringToUuid(it.ownerId)!!
       if (!userRepository.existsById(userId)) {
@@ -246,6 +258,11 @@ class Migrator(
   @Transactional
   fun migrateAnnouncements() {
     logger.info("Migrating Announcement data...")
+    val count = announcementRepository.count()
+    if (count > 0) {
+      logger.warn("Announcement table not empty ({}), skipping migration.", count)
+      return
+    }
     migrate<AnnouncementV3> {
       val roomId = UuidHelper.stringToUuid(it.roomId)!!
       if (!roomRepository.existsById(roomId)) {
