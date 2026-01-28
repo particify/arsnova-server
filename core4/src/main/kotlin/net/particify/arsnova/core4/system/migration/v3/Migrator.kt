@@ -45,6 +45,10 @@ class Migrator(
     private const val COUCHDB_RESULT_LIMIT = 200
     private const val COUCHDB_PROGRESS_INTERVAL = COUCHDB_RESULT_LIMIT * 5
     private const val GHOST_USER_NAME = "__ghost_user__"
+    private const val MAX_ROOM_NAME_LENGTH = 50
+    private const val MAX_ROOM_DESCRIPTION_LENGTH = 2000
+    private const val MAX_ANNOUNCEMENT_TITLE_LENGTH = 100
+    private const val MAX_ANNOUNCEMENT_BODY_LENGTH = 2000
     private val logger = LoggerFactory.getLogger(this::class.java)
   }
 
@@ -227,6 +231,16 @@ class Migrator(
           if (it.creationTimestamp != null && it.creationTimestamp > Instant.EPOCH)
               it.creationTimestamp
           else it.updateTimestamp
+      val name =
+          if (it.name.length > MAX_ROOM_NAME_LENGTH) {
+            logger.warn("Truncating name for room {}.", roomId)
+            it.name.substring(0, MAX_ROOM_NAME_LENGTH - 1)
+          } else it.name
+      val description =
+          if (it.description.length > MAX_ROOM_DESCRIPTION_LENGTH) {
+            logger.warn("Truncating description for room {}.", roomId)
+            it.description.substring(0, MAX_ROOM_DESCRIPTION_LENGTH - 1)
+          } else it.description
       val newRoom =
           Room(
               id = roomId,
@@ -236,8 +250,8 @@ class Migrator(
                       updatedAt = it.updateTimestamp,
                       createdBy = userRef.id),
               shortId = it.shortId.toInt(),
-              name = it.name,
-              description = it.description)
+              name = name,
+              description = description)
       migrateMemberships(newRoom)
       newRoom
     }
@@ -305,6 +319,16 @@ class Migrator(
             "Creator {} for announcement {} not found. Using ghost user.", userId, announcementId)
         userId = ghostUser.id!!
       }
+      val title =
+          if (it.title.length > MAX_ANNOUNCEMENT_TITLE_LENGTH) {
+            logger.warn("Truncating title for announcement {}.", announcementId)
+            it.title.substring(0, MAX_ANNOUNCEMENT_TITLE_LENGTH - 1)
+          } else it.title
+      val body =
+          if (it.body.length > MAX_ANNOUNCEMENT_BODY_LENGTH) {
+            logger.warn("Truncating body for announcement {}.", announcementId)
+            it.body.substring(0, MAX_ANNOUNCEMENT_BODY_LENGTH - 1)
+          } else it.body
       Announcement(
           id = announcementId,
           auditMetadata =
@@ -313,8 +337,8 @@ class Migrator(
                   updatedAt = it.updateTimestamp,
                   createdBy = userId),
           room = roomRef,
-          title = it.title,
-          body = it.body)
+          title = title,
+          body = body)
     }
   }
 
