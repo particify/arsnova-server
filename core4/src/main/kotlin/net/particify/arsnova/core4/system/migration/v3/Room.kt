@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.migration.v3
@@ -8,7 +8,7 @@ import java.time.Instant
 
 data class Room(
     @field:JsonProperty("_id") override val id: String,
-    override val creationTimestamp: Instant,
+    override val creationTimestamp: Instant?,
     override val updateTimestamp: Instant?,
     val shortId: String,
     val name: String,

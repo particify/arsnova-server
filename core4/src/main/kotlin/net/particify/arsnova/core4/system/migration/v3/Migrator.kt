@@ -221,12 +221,18 @@ class Migrator(
         userId = ghostUser.id!!
       }
       val userRef = userRepository.getReferenceById(userId)
+      // Bug: creationTimestamp might not have been set or incorrectly set to EPOCH.
+      // In those cases, updateTimestamp has been set and can be used as fallback.
+      val creationTimestamp =
+          if (it.creationTimestamp != null && it.creationTimestamp > Instant.EPOCH)
+              it.creationTimestamp
+          else it.updateTimestamp
       val newRoom =
           Room(
               id = roomId,
               auditMetadata =
                   AuditMetadata(
-                      createdAt = it.creationTimestamp,
+                      createdAt = creationTimestamp,
                       updatedAt = it.updateTimestamp,
                       createdBy = userRef.id),
               shortId = it.shortId.toInt(),
