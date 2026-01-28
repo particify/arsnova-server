@@ -12,12 +12,13 @@ import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomRole
+import net.particify.arsnova.core4.room.internal.RoomRepository
 import net.particify.arsnova.core4.system.migration.v3.Announcement as AnnouncementV3
 import net.particify.arsnova.core4.system.migration.v3.Room as RoomV3
 import net.particify.arsnova.core4.user.User
-import net.particify.arsnova.core4.user.UserService
 import net.particify.arsnova.core4.user.internal.ExternalLogin
 import net.particify.arsnova.core4.user.internal.RoleRepository
+import net.particify.arsnova.core4.user.internal.UserRepository
 import org.hibernate.Session
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty
@@ -32,9 +33,10 @@ import org.springframework.web.client.RestClientException
 @ConditionalOnBooleanProperty(name = ["persistence.v3-migration.enabled"])
 class Migrator(
     @PersistenceContext private val entityManager: EntityManager,
-    private val userService: UserService,
+    private val userRepository: UserRepository,
     private val roleRepository: RoleRepository,
-    private val properties: MigrationProperties
+    private val roomRepository: RoomRepository,
+    private val properties: MigrationProperties,
 ) {
   companion object {
     private const val JDBC_BATCH_SIZE = 50
@@ -196,12 +198,12 @@ class Migrator(
   fun migrateRooms() {
     logger.info("Migrating Room data...")
     migrate<RoomV3> {
-      val userId = UuidHelper.stringToUuid(it.ownerId)
-      val user = entityManager.find(User::class.java, userId)
-      if (user == null) {
+      val userId = UuidHelper.stringToUuid(it.ownerId)!!
+      if (!userRepository.existsById(userId)) {
         logger.warn("Cannot create Room. User not found: {}", userId)
         return@migrate null
       }
+      val userRef = userRepository.getReferenceById(userId)
       val newRoom =
           Room(
               id = UuidHelper.stringToUuid(it.id),
@@ -209,7 +211,7 @@ class Migrator(
                   AuditMetadata(
                       createdAt = it.creationTimestamp,
                       updatedAt = it.updateTimestamp,
-                      createdBy = user.id),
+                      createdBy = userRef.id),
               shortId = it.shortId.toInt(),
               name = it.name,
               description = it.description)
@@ -229,19 +231,15 @@ class Migrator(
             .body(typeReference<List<RoomAccess>>())!!
     roomAccessList.forEach {
       logger.trace("Migrating RoomAccess ({}, {})...", it.roomId, it.userId)
-      val userId = UuidHelper.stringToUuid(it.userId)
-      val user = entityManager.find(User::class.java, userId)
-      if (user == null) {
-        logger.warn("Cannot create Membership. User not found: {}", userId)
-        return@forEach
-      }
+      val userId = UuidHelper.stringToUuid(it.userId)!!
+      val userRef = userRepository.getReferenceById(userId)
       val newMembership =
           Membership(
               room = room,
-              user = user,
+              user = userRef,
               role = RoomRole.valueOf(it.role.name),
               lastActivityAt = it.lastAccess)
-      entityManager.persist(newMembership)
+      room.userRoles.add(newMembership)
     }
   }
 
@@ -249,12 +247,13 @@ class Migrator(
   fun migrateAnnouncements() {
     logger.info("Migrating Announcement data...")
     migrate<AnnouncementV3> {
-      val roomId = UuidHelper.stringToUuid(it.roomId)
-      val room = entityManager.find(Room::class.java, roomId)
-      if (room == null) {
-        logger.warn("Cannot create Announcement. Room not found: {}", roomId)
+      val roomId = UuidHelper.stringToUuid(it.roomId)!!
+      if (!roomRepository.existsById(roomId)) {
+        logger.warn(
+            "Room {} for announcement {} not found. Skipping announcement creation.", roomId, it.id)
         return@migrate null
       }
+      val roomRef = roomRepository.getReferenceById(roomId)
       Announcement(
           id = UuidHelper.stringToUuid(it.id),
           auditMetadata =
@@ -262,7 +261,7 @@ class Migrator(
                   createdAt = it.creationTimestamp,
                   updatedAt = it.updateTimestamp,
                   createdBy = UuidHelper.stringToUuid(it.creatorId)),
-          room = room,
+          room = roomRef,
           title = it.title,
           body = it.body)
     }
