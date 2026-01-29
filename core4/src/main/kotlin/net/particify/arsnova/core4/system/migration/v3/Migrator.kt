@@ -159,6 +159,7 @@ class Migrator(
               givenName = it.person?.firstName,
               surname = it.person?.lastName,
               uiSettings = settings,
+              lastActivityAt = it.lastActivityTimestamp,
               announcementsReadAt = it.announcementReadTimestamp,
               roles = mutableListOf(defaultRoleRef))
       if (!migrateExternalLogins(newUser, it)) {
@@ -178,7 +179,7 @@ class Migrator(
       UserProfile.AuthProvider.ARSNOVA_GUEST -> {
         newUser.username = null
       }
-      UserProfile.AuthProvider.ARSNOVA -> {}
+      UserProfile.AuthProvider.ARSNOVA -> newUser.mailAddress = userProfile.loginId
       UserProfile.AuthProvider.CAS,
       UserProfile.AuthProvider.LDAP,
       UserProfile.AuthProvider.OIDC,
