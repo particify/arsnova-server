@@ -3,11 +3,12 @@ arsnova:
     endpoints:
       web:
         base-path: /management
-        exposure:
-          include: "*"
     endpoint:
       health:
         show-details: when-authorized
         roles:
           - ADMIN
-          - MONITORING
+          - OBSERVABILITY
+    health:
+      ssl:
+        enabled: false

@@ -254,7 +254,7 @@ public class SecurityConfig {
           .requestMatchers(EndpointRequest.to("health", "info")).permitAll()
           .requestMatchers(
             EndpointRequest.to("metrics", "prometheus", "stats")
-          ).hasAnyRole("ADMIN", "MONITORING")
+          ).hasAnyRole("ADMIN", "OBSERVABILITY")
           .anyRequest().hasRole("ADMIN"));
       http.sessionManagement(sessionManagement ->
           sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

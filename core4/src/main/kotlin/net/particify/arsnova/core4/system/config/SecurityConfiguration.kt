@@ -13,6 +13,7 @@ import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProper
 import net.particify.arsnova.core4.user.internal.Saml2ResponseAuthenticationConverter
 import org.opensaml.security.x509.X509Support
 import org.slf4j.LoggerFactory
+import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -73,6 +74,12 @@ class SecurityConfiguration(
                   "/jwt",
                   *publicRoutes.toTypedArray())
               .permitAll()
+              .requestMatchers(EndpointRequest.to("health"))
+              .permitAll()
+              .requestMatchers(EndpointRequest.to("info", "metrics", "prometheus"))
+              .hasAnyRole("ADMIN", "OBSERVABILITY")
+              .requestMatchers(EndpointRequest.toAnyEndpoint())
+              .hasRole("ADMIN")
               .anyRequest()
               .authenticated()
         }

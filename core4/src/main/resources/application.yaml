@@ -66,3 +66,14 @@ common:
 
 service:
   product-name: arsnova
+
+management:
+  endpoints:
+    web:
+      base-path: /management
+  endpoint:
+    health:
+      show-details: when-authorized
+      roles:
+        - ADMIN
+        - OBSERVABILITY
