@@ -18,6 +18,7 @@ spring:
     properties:
       hibernate:
         default_schema: public
+        order_inserts: true
 
   liquibase:
     contexts: default
