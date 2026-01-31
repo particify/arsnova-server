@@ -6,7 +6,6 @@ package net.particify.arsnova.core4.system.migration.v3
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 import net.particify.arsnova.core4.announcement.Announcement
 import net.particify.arsnova.core4.announcement.internal.AnnouncementRepository
 import net.particify.arsnova.core4.common.AuditMetadata
@@ -15,25 +14,26 @@ import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomRole
 import net.particify.arsnova.core4.room.internal.RoomRepository
 import net.particify.arsnova.core4.system.migration.v3.Announcement as AnnouncementV3
+import net.particify.arsnova.core4.system.migration.v3.MigrationHelper.typeReference
 import net.particify.arsnova.core4.system.migration.v3.Room as RoomV3
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.internal.ExternalLogin
 import net.particify.arsnova.core4.user.internal.RoleRepository
 import net.particify.arsnova.core4.user.internal.UserRepository
-import org.hibernate.Session
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.RestClient
-import org.springframework.web.client.RestClientException
+
+const val JDBC_BATCH_SIZE = 50
 
 @Component
 @ConditionalOnBooleanProperty(name = ["persistence.v3-migration.enabled"])
 class Migrator(
     @PersistenceContext private val entityManager: EntityManager,
+    private val couchdbMigrator: CouchdbMigrator,
     private val userRepository: UserRepository,
     private val roleRepository: RoleRepository,
     private val roomRepository: RoomRepository,
@@ -41,9 +41,6 @@ class Migrator(
     private val properties: MigrationProperties,
 ) {
   companion object {
-    private const val JDBC_BATCH_SIZE = 50
-    private const val COUCHDB_RESULT_LIMIT = 200
-    private const val COUCHDB_PROGRESS_INTERVAL = COUCHDB_RESULT_LIMIT * 5
     private const val GHOST_USER_NAME = "__ghost_user__"
     private const val MAX_ROOM_NAME_LENGTH = 50
     private const val MAX_ROOM_DESCRIPTION_LENGTH = 2000
@@ -52,15 +49,6 @@ class Migrator(
     private val logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  private val couchdbClient =
-      RestClient.builder()
-          .baseUrl(properties.couchdb.url)
-          .defaultHeaders {
-            it.setBasicAuth(properties.couchdb.username, properties.couchdb.password)
-            it.accept = listOf(MediaType.APPLICATION_JSON)
-            it.contentType = MediaType.APPLICATION_JSON
-          }
-          .build()
   private val authzClient =
       RestClient.builder()
           .baseUrl(properties.roomAccessUrl)
@@ -69,64 +57,6 @@ class Migrator(
             it.contentType = MediaType.APPLICATION_JSON
           }
           .build()
-
-  private inline fun <reified T : Any> typeReference() = object : ParameterizedTypeReference<T>() {}
-
-  private inline fun <reified T : Entity> migrate(fn: (doc: T) -> Any?) {
-    val design = T::class.simpleName
-    var startKey = "\"\""
-    var count = 0
-    val migrationStart = Instant.now()
-    entityManager.unwrap<Session>(Session::class.java).jdbcBatchSize = JDBC_BATCH_SIZE
-    do {
-      logger.trace(
-          "Loading CouchDB data for migration (design: {}, startkey: {})...", design, startKey)
-      val queryStart = Instant.now()
-      val result =
-          try {
-            couchdbClient
-                .get()
-                .uri {
-                  it.path("/_design/$design/_view/by_id")
-                      .queryParam("reduce", false)
-                      .queryParam("include_docs", true)
-                      .queryParam("startkey", startKey)
-                      .queryParam("limit", COUCHDB_RESULT_LIMIT + 1)
-                      .build()
-                }
-                .retrieve()
-                .body(typeReference<CouchdbResponse<T>>())!!
-          } catch (e: RestClientException) {
-            logger.error("Failed to parse {} document (startkey: {})", design, startKey)
-            throw e
-          }
-      logger.debug("Query took {} ms.", queryStart.until(Instant.now(), ChronoUnit.MILLIS))
-      result.rows.take(COUCHDB_RESULT_LIMIT).chunked(JDBC_BATCH_SIZE).forEach { chunk ->
-        chunk.forEach {
-          logger.trace("Migrating {} {}...", design, it.doc.id)
-          val newEntity = fn(it.doc)
-          if (newEntity != null) {
-            entityManager.persist(newEntity)
-          }
-        }
-        val flushStart = Instant.now()
-        entityManager.flush()
-        entityManager.clear()
-        logger.debug("Flush took {} ms.", flushStart.until(Instant.now(), ChronoUnit.MILLIS))
-      }
-      count += result.rows.size.coerceAtMost(COUCHDB_RESULT_LIMIT)
-      if (count % COUCHDB_PROGRESS_INTERVAL == 0) {
-        logger.info("Migration progress: {} {} documents migrated.", count, design)
-      }
-      if (result.rows.size > COUCHDB_RESULT_LIMIT)
-          startKey = "\"" + result.rows[COUCHDB_RESULT_LIMIT].doc.id + "\""
-    } while (result.rows.size > COUCHDB_RESULT_LIMIT)
-    logger.info(
-        "Migration of {} {} documents completed in {} seconds.",
-        count,
-        design,
-        migrationStart.until(Instant.now(), ChronoUnit.SECONDS))
-  }
 
   @Transactional
   fun migrateUsers() {
@@ -138,7 +68,7 @@ class Migrator(
     }
     val defaultRole = roleRepository.findByName("USER")
     val defaultRoleRef = roleRepository.getReferenceById(defaultRole.id!!)
-    migrate<UserProfile> {
+    couchdbMigrator.migrate<UserProfile> {
       val settings = mutableMapOf<String, Any>()
       if (it.settings?.contentAnswersDirectlyBelowChart == true)
           settings["contentAnswersDirectlyBelowChart"] = true
@@ -216,7 +146,7 @@ class Migrator(
       return
     }
     val ghostUser = getOrCreateGhostUser()
-    migrate<RoomV3> {
+    couchdbMigrator.migrate<RoomV3> {
       val roomId = UuidHelper.stringToUuid(it.id)
       var userId = UuidHelper.stringToUuid(it.ownerId)!!
       if (!userRepository.existsById(userId)) {
@@ -320,7 +250,7 @@ class Migrator(
       return
     }
     val ghostUser = getOrCreateGhostUser()
-    migrate<AnnouncementV3> {
+    couchdbMigrator.migrate<AnnouncementV3> {
       val announcementId = UuidHelper.stringToUuid(it.id)
       val roomId = UuidHelper.stringToUuid(it.roomId)!!
       if (!roomRepository.existsById(roomId)) {
