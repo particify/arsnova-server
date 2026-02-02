@@ -60,6 +60,12 @@ databaseChangeLog:
                     nullable: false
                   defaultValueBoolean: false
               - column:
+                  name: metadata
+                  type: jsonb
+                  constraints:
+                    nullable: false
+                  defaultValue: "{}"
+              - column:
                   name: created_by
                   type: uuid
                   constraints:

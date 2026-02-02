@@ -228,10 +228,12 @@ class Migrator(
       val userRef = userRepository.getReferenceById(userId)
       // Bug: creationTimestamp might not have been set or incorrectly set to EPOCH.
       // In those cases, updateTimestamp has been set and can be used as fallback.
-      val creationTimestamp =
+      var createdAt =
           if (it.creationTimestamp != null && it.creationTimestamp > Instant.EPOCH)
               it.creationTimestamp
-          else it.updateTimestamp
+          else
+              it.updateTimestamp
+                  ?: error("No suitable value for createdAt available for room $roomId.")
       val name =
           if (it.name.length > MAX_ROOM_NAME_LENGTH) {
             logger.warn("Truncating name for room {}.", roomId)
@@ -242,17 +244,32 @@ class Migrator(
             logger.warn("Truncating description for room {}.", roomId)
             it.description.substring(0, MAX_ROOM_DESCRIPTION_LENGTH - 1)
           } else it.description
+      val metadata = mutableMapOf<String, Any>()
+      if (it.importMetadata != null) {
+        when (it.importMetadata.source) {
+          "DUPLICATION" -> metadata["duplicated"] = true
+          "V2_IMPORT" -> {
+            // The original timestamp was used by v3 as creationTimestamp.
+            // Using the creation in the system makes more sense, so we swap them.
+            metadata["originallyCreatedAt"] = createdAt
+            metadata["importSource"] = "v2"
+            createdAt = it.importMetadata.timestamp
+          }
+        }
+      }
       val newRoom =
           Room(
               id = roomId,
               auditMetadata =
                   AuditMetadata(
-                      createdAt = creationTimestamp,
+                      createdAt = createdAt,
                       updatedAt = it.updateTimestamp,
                       createdBy = userRef.id),
               shortId = it.shortId.toInt(),
               name = name,
-              description = description)
+              description = description,
+              metadata = metadata)
+
       migrateMemberships(newRoom)
       newRoom
     }
