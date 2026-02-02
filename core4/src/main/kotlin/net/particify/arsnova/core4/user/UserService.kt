@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user
@@ -14,4 +14,6 @@ interface UserService : UserDetailsService {
   fun findRoleByName(name: String): Role
 
   fun createAccount(): User
+
+  fun updateLastActivityAt(user: User): User
 }

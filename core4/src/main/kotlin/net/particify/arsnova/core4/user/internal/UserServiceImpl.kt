@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user.internal
@@ -100,6 +100,11 @@ class UserServiceImpl(
       userRepository.saveAndFlush(it)
       userRepository.delete(it)
     }
+  }
+
+  override fun updateLastActivityAt(user: User): User {
+    user.lastActivityAt = Instant.now()
+    return userRepository.save(user)
   }
 
   @Deprecated(

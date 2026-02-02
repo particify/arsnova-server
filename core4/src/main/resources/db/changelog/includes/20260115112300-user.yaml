@@ -75,6 +75,9 @@ databaseChangeLog:
                     nullable: false
                   defaultValueNumeric: 1
               - column:
+                  name: last_activity_at
+                  type: timestamp with time zone
+              - column:
                   name: password_changed_at
                   type: timestamp with time zone
               - column:
