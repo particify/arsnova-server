@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user
@@ -52,6 +52,7 @@ class User(
     val roles: MutableList<Role> = mutableListOf(),
     @JdbcTypeCode(SqlTypes.JSON) val uiSettings: MutableMap<String, Any> = mutableMapOf(),
     var tokenVersion: Int? = 1,
+    var lastActivityAt: Instant? = null,
     var passwordChangedAt: Instant? = null,
     var announcementsReadAt: Instant? = null,
     var verificationCode: Int? = null,
