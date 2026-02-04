@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.migration.v3
@@ -6,16 +6,21 @@ package net.particify.arsnova.core4.system.migration.v3
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import net.particify.arsnova.core4.announcement.Announcement
+import net.particify.arsnova.core4.announcement.internal.AnnouncementRepository
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomRole
+import net.particify.arsnova.core4.room.internal.RoomRepository
 import net.particify.arsnova.core4.system.migration.v3.Announcement as AnnouncementV3
 import net.particify.arsnova.core4.system.migration.v3.Room as RoomV3
 import net.particify.arsnova.core4.user.User
-import net.particify.arsnova.core4.user.UserService
 import net.particify.arsnova.core4.user.internal.ExternalLogin
+import net.particify.arsnova.core4.user.internal.RoleRepository
+import net.particify.arsnova.core4.user.internal.UserRepository
+import org.hibernate.Session
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty
 import org.springframework.core.ParameterizedTypeReference
@@ -23,24 +28,35 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.RestClient
+import org.springframework.web.client.RestClientException
 
 @Component
 @ConditionalOnBooleanProperty(name = ["persistence.v3-migration.enabled"])
 class Migrator(
     @PersistenceContext private val entityManager: EntityManager,
-    private val userService: UserService,
-    private val properties: MigrationProperties
+    private val userRepository: UserRepository,
+    private val roleRepository: RoleRepository,
+    private val roomRepository: RoomRepository,
+    private val announcementRepository: AnnouncementRepository,
+    private val properties: MigrationProperties,
 ) {
   companion object {
+    private const val JDBC_BATCH_SIZE = 50
     private const val COUCHDB_RESULT_LIMIT = 200
+    private const val COUCHDB_PROGRESS_INTERVAL = COUCHDB_RESULT_LIMIT * 5
+    private const val GHOST_USER_NAME = "__ghost_user__"
+    private const val MAX_ROOM_NAME_LENGTH = 50
+    private const val MAX_ROOM_DESCRIPTION_LENGTH = 2000
+    private const val MAX_ANNOUNCEMENT_TITLE_LENGTH = 100
+    private const val MAX_ANNOUNCEMENT_BODY_LENGTH = 2000
     private val logger = LoggerFactory.getLogger(this::class.java)
   }
 
   private val couchdbClient =
       RestClient.builder()
-          .baseUrl(properties.couchdbUrl)
+          .baseUrl(properties.couchdb.url)
           .defaultHeaders {
-            it.setBasicAuth("arsnova", "arsnova")
+            it.setBasicAuth(properties.couchdb.username, properties.couchdb.password)
             it.accept = listOf(MediaType.APPLICATION_JSON)
             it.contentType = MediaType.APPLICATION_JSON
           }
@@ -49,7 +65,6 @@ class Migrator(
       RestClient.builder()
           .baseUrl(properties.roomAccessUrl)
           .defaultHeaders {
-            it.setBasicAuth("arsnova", "arsnova")
             it.accept = listOf(MediaType.APPLICATION_JSON)
             it.contentType = MediaType.APPLICATION_JSON
           }
@@ -60,40 +75,69 @@ class Migrator(
   private inline fun <reified T : Entity> migrate(fn: (doc: T) -> Any?) {
     val design = T::class.simpleName
     var startKey = "\"\""
+    var count = 0
+    val migrationStart = Instant.now()
+    entityManager.unwrap<Session>(Session::class.java).jdbcBatchSize = JDBC_BATCH_SIZE
     do {
       logger.trace(
           "Loading CouchDB data for migration (design: {}, startkey: {})...", design, startKey)
+      val queryStart = Instant.now()
       val result =
-          couchdbClient
-              .get()
-              .uri {
-                it.path("/_design/$design/_view/by_id")
-                    .queryParam("reduce", false)
-                    .queryParam("include_docs", true)
-                    .queryParam("startkey", startKey)
-                    .queryParam("limit", COUCHDB_RESULT_LIMIT + 1)
-                    .build()
-              }
-              .retrieve()
-              .body(typeReference<CouchdbResponse<T>>())!!
-      result.rows.take(COUCHDB_RESULT_LIMIT).forEach {
-        logger.debug("Migrating {} {}...", design, it.doc.id)
-        val newEntity = fn(it.doc)
-        if (newEntity != null) {
-          entityManager.persist(newEntity)
-          entityManager.flush()
+          try {
+            couchdbClient
+                .get()
+                .uri {
+                  it.path("/_design/$design/_view/by_id")
+                      .queryParam("reduce", false)
+                      .queryParam("include_docs", true)
+                      .queryParam("startkey", startKey)
+                      .queryParam("limit", COUCHDB_RESULT_LIMIT + 1)
+                      .build()
+                }
+                .retrieve()
+                .body(typeReference<CouchdbResponse<T>>())!!
+          } catch (e: RestClientException) {
+            logger.error("Failed to parse {} document (startkey: {})", design, startKey)
+            throw e
+          }
+      logger.debug("Query took {} ms.", queryStart.until(Instant.now(), ChronoUnit.MILLIS))
+      result.rows.take(COUCHDB_RESULT_LIMIT).chunked(JDBC_BATCH_SIZE).forEach { chunk ->
+        chunk.forEach {
+          logger.trace("Migrating {} {}...", design, it.doc.id)
+          val newEntity = fn(it.doc)
+          if (newEntity != null) {
+            entityManager.persist(newEntity)
+          }
         }
+        val flushStart = Instant.now()
+        entityManager.flush()
+        entityManager.clear()
+        logger.debug("Flush took {} ms.", flushStart.until(Instant.now(), ChronoUnit.MILLIS))
       }
-      entityManager.flush()
+      count += result.rows.size.coerceAtMost(COUCHDB_RESULT_LIMIT)
+      if (count % COUCHDB_PROGRESS_INTERVAL == 0) {
+        logger.info("Migration progress: {} {} documents migrated.", count, design)
+      }
       if (result.rows.size > COUCHDB_RESULT_LIMIT)
           startKey = "\"" + result.rows[COUCHDB_RESULT_LIMIT].doc.id + "\""
     } while (result.rows.size > COUCHDB_RESULT_LIMIT)
+    logger.info(
+        "Migration of {} {} documents completed in {} seconds.",
+        count,
+        design,
+        migrationStart.until(Instant.now(), ChronoUnit.SECONDS))
   }
 
   @Transactional
   fun migrateUsers() {
     logger.info("Migrating UserProfile data...")
-    val defaultRole = userService.findRoleByName("USER")
+    val count = userRepository.count()
+    if (count > 0) {
+      logger.warn("User table not empty ({}), skipping migration.", count)
+      return
+    }
+    val defaultRole = roleRepository.findByName("USER")
+    val defaultRoleRef = roleRepository.getReferenceById(defaultRole.id!!)
     migrate<UserProfile> {
       val settings = mutableMapOf<String, Any>()
       if (it.settings?.contentAnswersDirectlyBelowChart == true)
@@ -110,13 +154,14 @@ class Migrator(
                   AuditMetadata(createdAt = it.creationTimestamp, updatedAt = it.updateTimestamp),
               username = it.loginId,
               password =
-                  if (it.account.password != null) "{bcrypt}" + it.account.password else null,
+                  if (it.account?.password != null) "{bcrypt}" + it.account.password else null,
               mailAddress = it.person?.mail,
               givenName = it.person?.firstName,
               surname = it.person?.lastName,
               uiSettings = settings,
+              lastActivityAt = it.lastActivityTimestamp,
               announcementsReadAt = it.announcementReadTimestamp,
-              roles = mutableListOf(defaultRole))
+              roles = mutableListOf(defaultRoleRef))
       if (!migrateExternalLogins(newUser, it)) {
         return@migrate null
       }
@@ -134,7 +179,7 @@ class Migrator(
       UserProfile.AuthProvider.ARSNOVA_GUEST -> {
         newUser.username = null
       }
-      UserProfile.AuthProvider.ARSNOVA -> {}
+      UserProfile.AuthProvider.ARSNOVA -> newUser.mailAddress = userProfile.loginId
       UserProfile.AuthProvider.CAS,
       UserProfile.AuthProvider.LDAP,
       UserProfile.AuthProvider.OIDC,
@@ -165,24 +210,66 @@ class Migrator(
   @Transactional
   fun migrateRooms() {
     logger.info("Migrating Room data...")
+    val count = roomRepository.count()
+    if (count > 0) {
+      logger.warn("Room table not empty ({}), skipping migration.", count)
+      return
+    }
+    val ghostUser = getOrCreateGhostUser()
     migrate<RoomV3> {
-      val userId = UuidHelper.stringToUuid(it.ownerId)
-      val user = entityManager.find(User::class.java, userId)
-      if (user == null) {
-        logger.warn("Cannot create Room. User not found: {}", userId)
-        return@migrate null
+      val roomId = UuidHelper.stringToUuid(it.id)
+      var userId = UuidHelper.stringToUuid(it.ownerId)!!
+      if (!userRepository.existsById(userId)) {
+        // Room might have been transferred to another user.
+        // Despite the property name "ownerId", v3 did not update it.
+        logger.info("Creator {} for room {} not found. Using ghost user.", userId, roomId)
+        userId = ghostUser.id!!
+      }
+      val userRef = userRepository.getReferenceById(userId)
+      // Bug: creationTimestamp might not have been set or incorrectly set to EPOCH.
+      // In those cases, updateTimestamp has been set and can be used as fallback.
+      var createdAt =
+          if (it.creationTimestamp != null && it.creationTimestamp > Instant.EPOCH)
+              it.creationTimestamp
+          else
+              it.updateTimestamp
+                  ?: error("No suitable value for createdAt available for room $roomId.")
+      val name =
+          if (it.name.length > MAX_ROOM_NAME_LENGTH) {
+            logger.warn("Truncating name for room {}.", roomId)
+            it.name.substring(0, MAX_ROOM_NAME_LENGTH - 1)
+          } else it.name
+      val description =
+          if (it.description.length > MAX_ROOM_DESCRIPTION_LENGTH) {
+            logger.warn("Truncating description for room {}.", roomId)
+            it.description.substring(0, MAX_ROOM_DESCRIPTION_LENGTH - 1)
+          } else it.description
+      val metadata = mutableMapOf<String, Any>()
+      if (it.importMetadata != null) {
+        when (it.importMetadata.source) {
+          "DUPLICATION" -> metadata["duplicated"] = true
+          "V2_IMPORT" -> {
+            // The original timestamp was used by v3 as creationTimestamp.
+            // Using the creation in the system makes more sense, so we swap them.
+            metadata["originallyCreatedAt"] = createdAt
+            metadata["importSource"] = "v2"
+            createdAt = it.importMetadata.timestamp
+          }
+        }
       }
       val newRoom =
           Room(
-              id = UuidHelper.stringToUuid(it.id),
+              id = roomId,
               auditMetadata =
                   AuditMetadata(
-                      createdAt = it.creationTimestamp,
+                      createdAt = createdAt,
                       updatedAt = it.updateTimestamp,
-                      createdBy = user.id),
+                      createdBy = userRef.id),
               shortId = it.shortId.toInt(),
-              name = it.name,
-              description = it.description)
+              name = name,
+              description = description,
+              metadata = metadata)
+
       migrateMemberships(newRoom)
       newRoom
     }
@@ -190,51 +277,96 @@ class Migrator(
 
   @Transactional
   fun migrateMemberships(room: Room) {
-    logger.debug("Migrating RoomAccess for Room {}...", room.id)
+    logger.trace("Migrating RoomAccess for Room {}...", room.id)
     val roomAccessList =
         authzClient
             .get()
             .uri("/by-room/${room.id}")
             .retrieve()
             .body(typeReference<List<RoomAccess>>())!!
+    // Bug: v3 did not delete mapping when a user was deleted.
+    // Retrieve user IDs so the creation of memberships can be skipped for non-existing users.
+    val userIds = roomAccessList.mapNotNull { UuidHelper.stringToUuid(it.userId) }
+    val existingUserIds = userRepository.findAllById(userIds).map { it.id }
     roomAccessList.forEach {
-      logger.debug("Migrating RoomAccess ({}, {})...", it.roomId, it.userId)
-      val userId = UuidHelper.stringToUuid(it.userId)
-      val user = entityManager.find(User::class.java, userId)
-      if (user == null) {
-        logger.warn("Cannot create Membership. User not found: {}", userId)
+      logger.trace("Migrating RoomAccess ({}, {})...", it.roomId, it.userId)
+      val userId = UuidHelper.stringToUuid(it.userId)!!
+      if (!existingUserIds.contains(userId)) {
+        val logMessage = "User {} does not exist. Skipping membership ({}) creation for room {}."
+        if (it.role.name == "OWNER") {
+          logger.warn(logMessage, userId, it.role.name, room.id)
+        } else {
+          logger.debug(logMessage, userId, it.role.name, room.id)
+        }
         return@forEach
       }
+      val userRef = userRepository.getReferenceById(userId)
       val newMembership =
           Membership(
               room = room,
-              user = user,
+              user = userRef,
               role = RoomRole.valueOf(it.role.name),
               lastActivityAt = it.lastAccess)
-      entityManager.persist(newMembership)
+      room.userRoles.add(newMembership)
     }
   }
 
   @Transactional
   fun migrateAnnouncements() {
     logger.info("Migrating Announcement data...")
+    val count = announcementRepository.count()
+    if (count > 0) {
+      logger.warn("Announcement table not empty ({}), skipping migration.", count)
+      return
+    }
+    val ghostUser = getOrCreateGhostUser()
     migrate<AnnouncementV3> {
-      val roomId = UuidHelper.stringToUuid(it.roomId)
-      val room = entityManager.find(Room::class.java, roomId)
-      if (room == null) {
-        logger.warn("Cannot create Announcement. Room not found: {}", roomId)
+      val announcementId = UuidHelper.stringToUuid(it.id)
+      val roomId = UuidHelper.stringToUuid(it.roomId)!!
+      if (!roomRepository.existsById(roomId)) {
+        logger.warn(
+            "Room {} for announcement {} not found. Skipping announcement creation.",
+            roomId,
+            announcementId)
         return@migrate null
       }
+      val roomRef = roomRepository.getReferenceById(roomId)
+      var userId = UuidHelper.stringToUuid(it.creatorId)!!
+      if (!userRepository.existsById(userId)) {
+        logger.info(
+            "Creator {} for announcement {} not found. Using ghost user.", userId, announcementId)
+        userId = ghostUser.id!!
+      }
+      val title =
+          if (it.title.length > MAX_ANNOUNCEMENT_TITLE_LENGTH) {
+            logger.warn("Truncating title for announcement {}.", announcementId)
+            it.title.substring(0, MAX_ANNOUNCEMENT_TITLE_LENGTH - 1)
+          } else it.title
+      val body =
+          if (it.body.length > MAX_ANNOUNCEMENT_BODY_LENGTH) {
+            logger.warn("Truncating body for announcement {}.", announcementId)
+            it.body.substring(0, MAX_ANNOUNCEMENT_BODY_LENGTH - 1)
+          } else it.body
       Announcement(
-          id = UuidHelper.stringToUuid(it.id),
+          id = announcementId,
           auditMetadata =
               AuditMetadata(
                   createdAt = it.creationTimestamp,
                   updatedAt = it.updateTimestamp,
-                  createdBy = UuidHelper.stringToUuid(it.creatorId)),
-          room = room,
-          title = it.title,
-          body = it.body)
+                  createdBy = userId),
+          room = roomRef,
+          title = title,
+          body = body)
     }
+  }
+
+  private fun getOrCreateGhostUser(): User {
+    var user = userRepository.findOneByUsername(GHOST_USER_NAME)
+    if (user == null) {
+      user =
+          User(username = GHOST_USER_NAME, auditMetadata = AuditMetadata(createdAt = Instant.now()))
+      entityManager.persist(user)
+    }
+    return user
   }
 }
