@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.announcement.internal
@@ -27,4 +27,6 @@ interface AnnouncementRepository :
       roomIds: Collection<UUID>,
       createdAt: Instant
   ): Int
+
+  fun deleteByRoomId(roomId: UUID): Int
 }
