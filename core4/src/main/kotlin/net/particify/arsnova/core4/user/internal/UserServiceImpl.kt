@@ -12,6 +12,7 @@ import net.particify.arsnova.core4.user.Role
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserDeletedEvent
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.event.UserCreatedEvent
 import net.particify.arsnova.core4.user.exception.UserNotFoundException
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Limit
@@ -63,7 +64,9 @@ class UserServiceImpl(
 
   override fun createAccount(): User {
     val user = User(roles = mutableListOf(userRole))
-    return userRepository.save(user)
+    val persistedUser = userRepository.save(user)
+    eventPublisher.publishEvent(UserCreatedEvent(persistedUser.id!!))
+    return persistedUser
   }
 
   @Transactional
@@ -99,6 +102,7 @@ class UserServiceImpl(
       it.roles.clear()
       userRepository.saveAndFlush(it)
       userRepository.delete(it)
+      eventPublisher.publishEvent(UserDeletedEvent(it.id!!))
     }
   }
 

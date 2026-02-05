@@ -1,7 +1,7 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.common
+package net.particify.arsnova.core4.common.event
 
 import java.util.UUID
 import kotlin.reflect.KClass
