@@ -1,9 +1,9 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.compat
 
-import net.particify.arsnova.core4.common.EntityChangeEvent
+import net.particify.arsnova.core4.common.event.EntityChangeEvent
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component

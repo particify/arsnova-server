@@ -4,8 +4,12 @@
 package net.particify.arsnova.core4.room.event
 
 import java.util.UUID
+import net.particify.arsnova.core4.common.event.EntityCreatedEvent
+import org.jmolecules.event.annotation.DomainEvent
 import org.jmolecules.event.annotation.Externalized
 
 const val ROOM_CREATED_DESTINATION = "backend.event.room.aftercreation"
 
-@Externalized(target = ROOM_CREATED_DESTINATION) data class RoomCreatedEvent(val id: UUID)
+@DomainEvent
+@Externalized(target = ROOM_CREATED_DESTINATION)
+data class RoomCreatedEvent(override val entityId: UUID) : RoomEvent, EntityCreatedEvent<UUID>
