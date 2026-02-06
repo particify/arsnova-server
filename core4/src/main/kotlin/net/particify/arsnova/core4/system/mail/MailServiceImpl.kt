@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.mail
@@ -60,9 +60,13 @@ class MailServiceImpl(
       templateMode: TemplateMode,
       locale: Locale
   ): String {
+    val footer =
+        mailProperties.footer.find { it.language == locale.language }
+            ?: mailProperties.footer.find { it.language == null }
     val context = Context(locale)
     context.setVariable("productName", serviceProperties.productName)
     context.setVariable("serviceUrl", serviceProperties.rootUrl)
+    context.setVariable("footer", footer)
     context.setVariables(data)
     val engine =
         when (templateMode) {

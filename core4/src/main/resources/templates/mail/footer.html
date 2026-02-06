@@ -1,1 +1,17 @@
-<p><a th:href="@{${serviceUrl}}" th:text="${productName}"></a></p>
+<th:block th:if="${footer}">
+<p class="info-line" th:each="line : ${footer.lines}" th:text="${#strings.listJoin(line, ', ')}"></p>
+<p th:if="${footer.links}">
+<th:block th:each="link : ${footer.links}">
+<a th:href="@{${link.url}}" th:text="${link.text}"></a>
+<th:block th:unless="${linkStat.last}"> • </th:block>
+</th:block>
+</p>
+<p th:if="${footer.logo}">
+<a th:href="@{${footer.logo.linkUrl}}">
+<img th:src="@{${footer.logo.imageUrl}}" th:alt="${footer.logo.altText}" th:width="${footer.logo.width}" th:height="${footer.logo.height}"/>
+</a>
+</p>
+</th:block>
+<p th:unless="${footer}">
+<a th:href="@{${serviceUrl}}" th:text="${productName}"></a>
+</p>

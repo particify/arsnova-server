@@ -1,2 +1,6 @@
-[(${"-- "})]
-[(${serviceUrl})]
+-- /*[- Signature delimiter - keep trailing whitespace -]*/
+[# th:if="${footer}"][# th:each="line : ${footer.lines}"][# th:each="item : ${line}"][(${item})]
+[/][/]
+[# th:each="link : ${footer.links}"][(${link.text})]: [(${link.url})]
+[/][# th:if="${footer.logo}"][(${footer.logo.altText})]: [(${footer.logo.linkUrl})][/][/]
+[# th:unless="${footer}"][(${productName})][(${serviceUrl})][/]
