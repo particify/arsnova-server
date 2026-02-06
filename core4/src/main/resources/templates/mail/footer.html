@@ -1,17 +1,19 @@
+<p class="hidden">&nbsp;</p><!--/* Adds margin if CSS is completely ignored. */-->
+<p>
+<small>
 <th:block th:if="${footer}">
-<p class="info-line" th:each="line : ${footer.lines}" th:text="${#strings.listJoin(line, ', ')}"></p>
-<p th:if="${footer.links}">
+<th:block th:each="line : ${footer.lines}"><th:block th:text="${#strings.listJoin(line, ', ')}"></th:block><br/></th:block>
 <th:block th:each="link : ${footer.links}">
 <a th:href="@{${link.url}}" th:text="${link.text}"></a>
 <th:block th:unless="${linkStat.last}"> • </th:block>
+<br th:if="${linkStat.last}"/>
 </th:block>
-</p>
-<p th:if="${footer.logo}">
+<th:block th:if="${footer.logo}">
 <a th:href="@{${footer.logo.linkUrl}}">
 <img th:src="@{${footer.logo.imageUrl}}" th:alt="${footer.logo.altText}" th:width="${footer.logo.width}" th:height="${footer.logo.height}"/>
 </a>
-</p>
 </th:block>
-<p th:unless="${footer}">
-<a th:href="@{${serviceUrl}}" th:text="${productName}"></a>
+</th:block>
+<a th:unless="${footer}" th:href="@{${serviceUrl}}" th:text="${productName}"></a>
+</small>
 </p>
