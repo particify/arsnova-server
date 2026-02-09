@@ -4,5 +4,5 @@
 package net.particify.arsnova.core4.common.event
 
 interface EntityEvent<ID> {
-  val entityId: ID
+  val id: ID
 }

@@ -21,7 +21,7 @@ class RoomDeletedEventHandler(
   @EventListener
   fun handleRoomDeleted(event: RoomDeletedEvent) {
     logger.debug("Deleting announcements due to room deletion: {}", event)
-    val count = announcementService.deleteByRoomId(event.entityId)
-    applicationEventPublisher.publishEvent(AnnouncementsDeletedEvent(event.entityId, count))
+    val count = announcementService.deleteByRoomId(event.id)
+    applicationEventPublisher.publishEvent(AnnouncementsDeletedEvent(event.id, count))
   }
 }

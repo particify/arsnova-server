@@ -12,4 +12,4 @@ const val ROOM_DELETED_DESTINATION = "backend.event.room.afterdeletion"
 
 @DomainEvent
 @Externalized(target = ROOM_DELETED_DESTINATION)
-data class RoomDeletedEvent(override val entityId: UUID) : RoomEvent, EntityDeletedEvent<UUID>
+data class RoomDeletedEvent(override val id: UUID) : RoomEvent, EntityDeletedEvent<UUID>

@@ -8,4 +8,4 @@ import net.particify.arsnova.core4.common.event.EntityDeletedEvent
 import org.jmolecules.event.annotation.DomainEvent
 
 @DomainEvent
-data class UserDeletedEvent(override val entityId: UUID) : UserEvent, EntityDeletedEvent<UUID>
+data class UserDeletedEvent(override val id: UUID) : UserEvent, EntityDeletedEvent<UUID>
