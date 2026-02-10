@@ -186,4 +186,9 @@ class RoomMutationController(
     val room = roomService.findByIdOrNull(input.id) ?: throw RoomNotFoundException(input.id)
     return roomService.duplicate(room, input.newName, user)
   }
+
+  @MutationMapping
+  fun duplicateDemoRoom(@AuthenticationPrincipal user: User, locale: Locale): Room {
+    return roomService.duplicateDemo(user, locale)
+  }
 }
