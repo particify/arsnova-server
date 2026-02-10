@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.common.exception
@@ -21,6 +21,7 @@ class CommonExceptionResolverAdapter : DataFetcherExceptionResolverAdapter() {
               builder
                   .errorType(ErrorType.BAD_REQUEST)
                   .message(ex.bindingResult.allErrors.toString())
+          is AccessDeniedException -> builder.errorType(ErrorType.FORBIDDEN).message(ex.message)
           is InvalidInputException -> builder.errorType(ErrorType.BAD_REQUEST).message(ex.message)
           else -> return super.resolveToSingleError(ex, env)
         }

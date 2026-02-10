@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.room.internal
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID
+import net.particify.arsnova.core4.common.exception.AccessDeniedException
 import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.MembershipService
 import net.particify.arsnova.core4.room.Room
@@ -20,8 +21,12 @@ private const val LAST_ACTIVITY_THRESHOLD_MINUTES = 5L
 private const val LAST_ACTIVITY_MINIMUM_DIFFERENCE_SECONDS = 5L
 
 @Service
-class MembershipServiceImpl(private val membershipRepository: MembershipRepository) :
-    MembershipService, MembershipRepository by membershipRepository {
+class MembershipServiceImpl(
+    private val membershipRepository: MembershipRepository,
+    roomProperties: RoomProperties
+) : MembershipService, MembershipRepository by membershipRepository {
+  val demoShortIds = roomProperties.demo.map { it.shortId }
+
   override fun findOneByRoomIdAndUserId(roomId: UUID, userId: UUID): Membership? {
     return membershipRepository.findOneByRoomIdAndUserId(roomId, userId)
   }
@@ -48,6 +53,9 @@ class MembershipServiceImpl(private val membershipRepository: MembershipReposito
     var membership = findOneByRoomIdAndUserId(room.id!!, user.id!!)
     val persistedMembership =
         if (membership == null) {
+          if (demoShortIds.contains(room.shortId)) {
+            throw AccessDeniedException("Room cannot be joined.")
+          }
           membership =
               Membership(
                   room = room,
