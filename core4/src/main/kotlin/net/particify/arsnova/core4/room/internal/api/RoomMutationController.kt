@@ -3,8 +3,6 @@
  */
 package net.particify.arsnova.core4.room.internal.api
 
-import java.time.Duration
-import java.time.Instant
 import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.common.LanguageIso639
@@ -25,8 +23,6 @@ import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Controller
-
-private const val LAST_ACTIVITY_MINIMUM_DIFFERENCE_SECONDS = 5L
 
 @Controller
 @PreAuthorize("hasRole('USER')")
@@ -49,21 +45,8 @@ class RoomMutationController(
     }
     val room =
         (if (input.id != null) roomService.findByIdOrNull(input.id)
-        else roomService.findOneByShortId(input.shortId!!.toInt()))
-            ?: throw RoomNotFoundException(input.id)
-    var membership = membershipService.findOneByRoomIdAndUserId(room.id!!, user.id!!)
-    if (membership == null) {
-      membership =
-          Membership(
-              room = room, user = user, role = RoomRole.PARTICIPANT, lastActivityAt = Instant.now())
-      membershipService.save(membership)
-    } else if (membership.lastActivityAt == null ||
-        membership.lastActivityAt!! <
-            Instant.now().minus(Duration.ofSeconds(LAST_ACTIVITY_MINIMUM_DIFFERENCE_SECONDS))) {
-      membership.lastActivityAt = Instant.now()
-      membershipService.save(membership)
-    }
-    return membership
+        else roomService.findOneByShortId(input.shortId!!)) ?: throw RoomNotFoundException(input.id)
+    return membershipService.joinRoom(room, user)
   }
 
   @MutationMapping
