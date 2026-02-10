@@ -8,5 +8,5 @@ import net.particify.arsnova.core4.common.event.EntityDeletedEvent
 import org.jmolecules.event.annotation.DomainEvent
 
 @DomainEvent
-data class AnnouncementDeletedEvent(override val entityId: UUID) :
+data class AnnouncementDeletedEvent(override val id: UUID) :
     AnnouncementEvent, EntityDeletedEvent<UUID>
