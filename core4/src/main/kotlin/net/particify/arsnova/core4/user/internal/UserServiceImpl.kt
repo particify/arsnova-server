@@ -111,6 +111,11 @@ class UserServiceImpl(
     return userRepository.save(user)
   }
 
+  override fun invalidateToken(user: User): User {
+    user.tokenVersion = user.tokenVersion!! + 1
+    return userRepository.save(user)
+  }
+
   @Deprecated(
       "Deprecated by base implementation", replaceWith = ReplaceWith("deleteAllInBatch(entities)"))
   override fun deleteInBatch(entities: Iterable<User>) = userRepository.deleteInBatch(entities)

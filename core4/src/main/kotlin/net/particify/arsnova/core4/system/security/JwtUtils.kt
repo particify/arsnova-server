@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.security
@@ -24,6 +24,7 @@ class JwtUtils(securityProperties: SecurityProperties, private val jwtDecoder: J
   private val header = JWSHeader(JWSAlgorithm.HS256)
   private val defaultValidityPeriod: TemporalAmount = securityProperties.jwt.validityPeriod
   private val issuer: String = securityProperties.jwt.issuer
+  private val headerRegex = "^Bearer (.*)".toRegex(RegexOption.IGNORE_CASE)
 
   fun createSignedInternalToken(
       userId: UUID,
@@ -86,9 +87,7 @@ class JwtUtils(securityProperties: SecurityProperties, private val jwtDecoder: J
 
   fun extractJwtString(headerValue: String): String? {
     val jwt =
-        "^Bearer (.*)".toRegex(RegexOption.IGNORE_CASE).replace(headerValue) {
-          if (it.groupValues.size > 1) it.groupValues[1] else ""
-        }
+        headerRegex.replace(headerValue) { if (it.groupValues.size > 1) it.groupValues[1] else "" }
     return jwt.ifEmpty { null }
   }
 

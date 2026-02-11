@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.jwt.JwtException
 import org.springframework.stereotype.Component
 
 const val REFRESH_ROLE = "REFRESH"
+const val LEGACY_GUEST_ROLE = "GUEST_USER"
 
 @Component
 class RefreshJwtAuthenticationProvider(
@@ -23,16 +24,18 @@ class RefreshJwtAuthenticationProvider(
     val token = authentication.credentials as String
     try {
       val jwt = jwtUtils.decodeJwt(authentication.credentials as String)
-      val roles = jwt.claims["roles"]
-      if (roles !is Collection<*> || !roles.contains(REFRESH_ROLE))
+      val roles = jwt.claims["roles"] as? Collection<*> ?: emptyList<String>()
+      val isLegacy = roles.contains(LEGACY_GUEST_ROLE)
+      if (!roles.contains(REFRESH_ROLE) && !isLegacy)
           throw BadCredentialsException("Not a refresh token")
       val user =
           userService.loadUserById(UUID.fromString(jwt.subject))
               ?: throw BadCredentialsException("User for JWT not found.")
-      val version = (jwt.claims["version"] as Long).toInt()
+      val version = (jwt.claims["version"] as? Long)?.toInt() ?: 1
       if (version != user.tokenVersion) throw BadCredentialsException("Invalid token version")
+      val updatedUser = if (isLegacy) userService.invalidateToken(user) else user
       return RefreshJwtAuthentication(
-          token, user, setOf(SimpleGrantedAuthority("ROLE_$REFRESH_ROLE")))
+          token, updatedUser, setOf(SimpleGrantedAuthority("ROLE_$REFRESH_ROLE")))
     } catch (e: JwtException) {
       throw BadCredentialsException("Invalid JWT", e)
     } catch (e: IllegalArgumentException) {

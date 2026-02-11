@@ -16,4 +16,6 @@ interface UserService : UserDetailsService {
   fun createAccount(): User
 
   fun updateLastActivityAt(user: User): User
+
+  fun invalidateToken(user: User): User
 }
