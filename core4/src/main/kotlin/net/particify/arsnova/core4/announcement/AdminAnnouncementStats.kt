@@ -3,4 +3,4 @@
  */
 package net.particify.arsnova.core4.announcement
 
-data class AdminAnnouncementStats(val totalCount: Long = 0, val deletedCount: Long = 0)
+data class AdminAnnouncementStats(val totalCount: Long = 0)

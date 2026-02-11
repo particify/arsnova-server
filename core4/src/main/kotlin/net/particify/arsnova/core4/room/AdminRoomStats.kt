@@ -3,4 +3,4 @@
  */
 package net.particify.arsnova.core4.room
 
-data class AdminRoomStats(val totalCount: Long = 0, val deletedCount: Long = 0)
+data class AdminRoomStats(val totalCount: Long = 0)

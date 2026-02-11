@@ -7,5 +7,4 @@ data class AdminUserStats(
     val totalCount: Long = 0,
     val verifiedCount: Long = 0,
     val pendingCount: Long = 0,
-    val deletedCount: Long = 0
 )
