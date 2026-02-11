@@ -163,7 +163,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#roomId, 'Room', 'administer')")
+  @PreAuthorize("hasPermission(#roomId, 'Room', 'read')")
   fun revokeRoomMembership(
       @Argument roomId: UUID,
       @AuthenticationPrincipal user: User
