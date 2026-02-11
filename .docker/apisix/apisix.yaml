@@ -65,6 +65,14 @@ routes:
         regex_uri:
           - ^/api/(.*)
           - /$1
+  - id: websocket-management
+    uri: /api/management/websocket
+    upstream_id: websocket
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - .*
+          - /stats
   - id: focus
     uri: /api/room/*/focus-event
     upstream_id: websocket
