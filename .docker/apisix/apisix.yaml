@@ -34,6 +34,7 @@ routes:
       - /api/room/*/answer/*
       - /api/room/*/content/*
       - /api/room/*/contentgroup/*
+      - /api/room/*/generate-random-data
       - /api/room/*/roomsettings/*
       - /api/room/*/stats
       - /api/room/*/survey

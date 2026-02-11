@@ -19,7 +19,6 @@ import net.particify.arsnova.core.model.ChoiceAnswer;
 import net.particify.arsnova.core.model.ChoiceQuestionContent;
 import net.particify.arsnova.core.model.Content;
 import net.particify.arsnova.core.model.MultipleTextsAnswer;
-import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.ScaleChoiceContent;
 import net.particify.arsnova.core.model.TextAnswerStatistics;
 import net.particify.arsnova.core.model.TextAnswerStatistics.TextRoundStatistics;
@@ -56,8 +55,8 @@ public class DataGenerationServiceImpl implements DataGenerationService {
    * {@link ChoiceQuestionContent}s and {@link WordcloudContent}s of the room.
    * The generation algorithm is biased towards correct options.
    */
-  public void generateRandomAnswers(final Room room) {
-    final List<Content> contents = contentService.getByRoomId(room.getRoomId());
+  public void generateRandomAnswers(final String roomId) {
+    final List<Content> contents = contentService.getByRoomId(roomId);
     final List<Answer> answers = new ArrayList<>();
     for (final Content content : contents) {
       answers.addAll(generateRandomAnswersForContent(content, AVG_ANSWER_COUNT));

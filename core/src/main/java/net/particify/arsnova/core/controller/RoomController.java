@@ -33,7 +33,6 @@ import net.particify.arsnova.core.config.ConditionalOnLegacyDataManagement;
 import net.particify.arsnova.core.model.Room;
 import net.particify.arsnova.core.model.RoomMembership;
 import net.particify.arsnova.core.model.serialization.View;
-import net.particify.arsnova.core.service.DataGenerationService;
 import net.particify.arsnova.core.service.DuplicationService;
 import net.particify.arsnova.core.service.RoomService;
 import net.particify.arsnova.core.web.exceptions.ForbiddenException;
@@ -47,22 +46,18 @@ public class RoomController extends AbstractEntityController<Room> {
   private static final String PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/password";
   private static final String REQUEST_MEMBERSHIP_MAPPING = DEFAULT_ID_MAPPING + "/request-membership";
   private static final String DUPLICATE_MAPPING = DEFAULT_ID_MAPPING + "/duplicate";
-  private static final String GENERATE_RANDOM_DATA_MAPPING = DEFAULT_ID_MAPPING + "/generate-random-data";
 
   private static final String ROOM_ROLE_HEADER = "ARS-Room-Role";
 
   private RoomService roomService;
   private DuplicationService duplicationService;
-  private DataGenerationService dataGenerationService;
 
   public RoomController(
       @Qualifier("securedRoomService") final RoomService roomService,
-      @Qualifier("securedDuplicationService") final DuplicationService duplicationService,
-      @Qualifier("securedDataGenerationService") final DataGenerationService dataGenerationService) {
+      @Qualifier("securedDuplicationService") final DuplicationService duplicationService) {
     super(roomService);
     this.roomService = roomService;
     this.duplicationService = duplicationService;
-    this.dataGenerationService = dataGenerationService;
   }
 
   @Override
@@ -128,15 +123,6 @@ public class RoomController extends AbstractEntityController<Room> {
       throw new NotFoundException();
     }
     return duplicationService.duplicateRoomCascading(room, temporary, name);
-  }
-
-  @PostMapping(GENERATE_RANDOM_DATA_MAPPING)
-  public void generateRandomData(@PathVariable final String id) {
-    final Room room = roomService.get(id);
-    if (room == null) {
-      throw new NotFoundException();
-    }
-    dataGenerationService.generateRandomAnswers(room);
   }
 
   private static class PasswordEntity {

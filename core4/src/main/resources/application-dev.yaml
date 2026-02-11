@@ -40,3 +40,10 @@ mail:
 
 service:
   root-url: http://localhost:4200
+
+room:
+  demo:
+    - language: en
+      short-id: 11111111
+    - language: de
+      short-id: 22222222
