@@ -1,9 +1,17 @@
 <meta name="color-scheme" content="light dark">
-<style>
-body { font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif }
-h1 { font-size: 1.4em }
-.code { margin-left: 2em; font-size: 1.2em; font-weight: bold }
+<style><!--/* Some clients ignore styling for the body element. */-->
+body, .body { color: #212121; background: #fdfdfd; font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif }
+.body { max-width: 40em; margin: auto; padding: .5em }
+h1 { font-size: 1.4em; margin-top: 0 }
+.footer { color: #666; border-top: 1px solid #666; margin-top: 2em; padding-top: .5em; text-align: center }
+.footer p { margin: 0; line-height: 1em }
+.footer smaller { font-size: .8em }
+.footer a { opacity: .8 }
+.footer img { margin-top: 0.5em }
+.hidden { display: none }
+.code { margin-left: 2em; font-size: 1.2em; letter-spacing: .2em; speak-as: digits }
 @media (prefers-color-scheme: dark) {
-  body { color: #fff; background: #000 }
+  body, .body { color: #fdfdfd; background: #212121 }
+  .footer { color: #999; border-top: 1px solid #999 }
 }
 </style>

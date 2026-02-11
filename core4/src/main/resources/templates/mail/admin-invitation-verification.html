@@ -1,9 +1,14 @@
-<html xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
 <head th:insert="~{head.html}"></head>
 <body>
+<div class="body">
+<div class="main" role="main">
 <h1 th:text="#{mail.greeting}"></h1>
 <p th:text="#{mail.invitation-verification-intro(${inviter.displayName} ?: ${inviter.username}, ${productName})}"></p>
 <p><a th:href="@{|${serviceUrl}${invitationUri}|}" th:text="#{mail.invitation-link-text}"></a></p>
-<footer th:insert="~{footer.html}"></footer>
+</div>
+<div class="footer" role="contentinfo" th:insert="~{footer.html}"></div>
+</div>
 </body>
 </html>
