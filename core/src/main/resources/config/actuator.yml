@@ -3,6 +3,8 @@ arsnova:
     endpoints:
       web:
         base-path: /management
+        exposure:
+          include: health,stats
     endpoint:
       health:
         show-details: when-authorized
