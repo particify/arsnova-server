@@ -20,7 +20,7 @@ interface UserRepository : JpaRepository<User, UUID>, QuerydslPredicateExecutor<
   @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.username = :username")
   fun findOneByUsername(username: String): User?
 
-  fun findByAuditMetadataDeletedAtBefore(
+  fun findByDeletedAtBefore(
       deletedAtBefore: Instant,
       scrollPosition: ScrollPosition,
       limit: Limit

@@ -20,8 +20,6 @@ type AdminRoom {
   createdAt: DateTime
   updatedBy: ID
   updatedAt: DateTime
-  deletedBy: ID
-  deletedAt: DateTime
 }
 
 input AdminRoomQueryInput {

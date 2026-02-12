@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.common
@@ -18,6 +18,4 @@ data class AuditMetadata(
     @CreatedDate @Column(updatable = false) var createdAt: Instant? = null,
     @LastModifiedBy @Column(insertable = false) var updatedBy: UUID? = null,
     @LastModifiedDate @Column(insertable = false) var updatedAt: Instant? = null,
-    @Column(insertable = false) var deletedBy: UUID? = null,
-    @Column(insertable = false) var deletedAt: Instant? = null,
 )

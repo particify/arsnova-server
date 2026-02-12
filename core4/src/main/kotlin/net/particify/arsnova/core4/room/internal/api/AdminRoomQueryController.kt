@@ -66,16 +66,6 @@ class AdminRoomQueryController(
     return room.auditMetadata.updatedAt?.atOffset(ZoneOffset.UTC)
   }
 
-  @SchemaMapping(typeName = "AdminRoom")
-  fun deletedBy(room: Room): UUID? {
-    return room.auditMetadata.deletedBy
-  }
-
-  @SchemaMapping(typeName = "AdminRoom")
-  fun deletedAt(room: Room): OffsetDateTime? {
-    return room.auditMetadata.deletedAt?.atOffset(ZoneOffset.UTC)
-  }
-
   @QueryMapping
   fun adminMembershipsByUserId(
       @Argument userId: UUID,

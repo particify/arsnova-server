@@ -80,8 +80,7 @@ class UserServiceImpl(
 
   fun markAccountForDeletion(user: User): User {
     user.enabled = false
-    user.auditMetadata.deletedAt = Instant.now()
-    user.auditMetadata.deletedBy = user.id
+    user.deletedAt = Instant.now()
     return userRepository.save(user)
   }
 
@@ -89,7 +88,7 @@ class UserServiceImpl(
   fun deleteMarkedUsers() {
     val users =
         WindowIterator.of {
-              userRepository.findByAuditMetadataDeletedAtBefore(
+              userRepository.findByDeletedAtBefore(
                   Instant.now().minus(DELETE_AFTER_DAYS, ChronoUnit.DAYS),
                   it,
                   Limit.of(DELETE_BATCH_SIZE))

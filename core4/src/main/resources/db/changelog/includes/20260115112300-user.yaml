@@ -234,12 +234,6 @@ databaseChangeLog:
                   name: updated_at
                   type: timestamp with time zone
               - column:
-                  name: deleted_by
-                  type: uuid
-                  constraints:
-                    foreignKeyName: deleted_by_fkey
-                    references: '"user"."user"(id)'
-              - column:
                   name: deleted_at
                   type: timestamp with time zone
         - addUniqueConstraint:
