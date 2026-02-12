@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletContext
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.http.HttpHeaders
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
@@ -18,6 +19,7 @@ private const val REFRESH_URI = "/auth/refresh"
 @Component
 class RefreshAuthenticationFilter(
     private val authenticationProvider: RefreshJwtAuthenticationProvider,
+    private val jwtUtils: JwtUtils,
     servletContext: ServletContext
 ) : OncePerRequestFilter() {
   private val contextPath = servletContext.contextPath
@@ -27,11 +29,16 @@ class RefreshAuthenticationFilter(
       response: HttpServletResponse,
       chain: FilterChain
   ) {
-    val cookie = request.cookies?.find { it.name == REFRESH_TOKEN_COOKIE }
-    if (cookie == null) return chain.doFilter(request, response)
+    val header = request.getHeader(HttpHeaders.AUTHORIZATION)
+    val token =
+        if (header != null) jwtUtils.extractJwtString(header)
+        else request.cookies?.find { it.name == REFRESH_TOKEN_COOKIE }?.value
+    if (token == null) {
+      return chain.doFilter(request, response)
+    }
 
     logger.trace("Token refresh requested.")
-    val authentication = RefreshJwtAuthentication(cookie.value)
+    val authentication = RefreshJwtAuthentication(token)
     try {
       val authenticatedToken: Authentication = authenticationProvider.authenticate(authentication)
       logger.debug("Storing RefreshJwtAuthentication to SecurityContext: $authenticatedToken")
