@@ -7,6 +7,7 @@ import jakarta.servlet.DispatcherType
 import java.util.function.Consumer
 import net.particify.arsnova.core4.system.security.AuthenticationSuccessHandler
 import net.particify.arsnova.core4.system.security.ChallengeJwtAuthenticationFilter
+import net.particify.arsnova.core4.system.security.Http401UnauthenticatedEntryPoint
 import net.particify.arsnova.core4.system.security.RefreshAuthenticationFilter
 import net.particify.arsnova.core4.system.security.UserJwtAuthenticationFilter
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.ProviderManager
 import org.springframework.security.config.Customizer
@@ -32,7 +34,6 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint
 
 private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
 
@@ -45,6 +46,7 @@ class SecurityConfiguration(
 ) {
   @Bean
   fun filterChain(
+      environment: Environment,
       http: HttpSecurity,
       authenticationSuccessHandler: AuthenticationSuccessHandler,
       converter: Saml2ResponseAuthenticationConverter,
@@ -55,12 +57,15 @@ class SecurityConfiguration(
     if (publicRoutes.isNotEmpty()) {
       logger.debug("Additional public routes: {}", publicRoutes)
     }
+    if (environment.activeProfiles.contains("dev")) {
+      http.httpBasic(Customizer.withDefaults()).authorizeHttpRequests { authorize ->
+        authorize.requestMatchers("/graphiql").permitAll()
+      }
+    }
     http
         .csrf(AbstractHttpConfigurer<*, *>::disable)
         .cors(AbstractHttpConfigurer<*, *>::disable)
         .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
-        .formLogin(Customizer.withDefaults())
-        .httpBasic(Customizer.withDefaults())
         .authorizeHttpRequests { authorize ->
           authorize
               .dispatcherTypeMatchers(DispatcherType.ERROR)
@@ -89,7 +94,7 @@ class SecurityConfiguration(
             challengeJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
         .addFilterBefore(
             userJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
-        .exceptionHandling { it.authenticationEntryPoint(BasicAuthenticationEntryPoint()) }
+        .exceptionHandling { it.authenticationEntryPoint(Http401UnauthenticatedEntryPoint()) }
     if (saml2Properties.registration.isNotEmpty()) {
       val samlAuthenticationProvider = OpenSaml5AuthenticationProvider()
       samlAuthenticationProvider.setResponseAuthenticationConverter(converter)
