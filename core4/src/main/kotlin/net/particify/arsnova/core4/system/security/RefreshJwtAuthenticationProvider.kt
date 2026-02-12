@@ -4,6 +4,9 @@
 package net.particify.arsnova.core4.system.security
 
 import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
 import net.particify.arsnova.core4.user.UserService
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.BadCredentialsException
@@ -20,6 +23,7 @@ class RefreshJwtAuthenticationProvider(
     private var jwtUtils: JwtUtils,
     private val userService: UserService
 ) : AuthenticationProvider {
+  @OptIn(ExperimentalUuidApi::class)
   override fun authenticate(authentication: Authentication): Authentication {
     val token = authentication.credentials as String
     try {
@@ -28,8 +32,10 @@ class RefreshJwtAuthenticationProvider(
       val isLegacy = roles.contains(LEGACY_GUEST_ROLE)
       if (!roles.contains(REFRESH_ROLE) && !isLegacy)
           throw BadCredentialsException("Not a refresh token")
+      val userId =
+          if (isLegacy) Uuid.parseHex(jwt.subject).toJavaUuid() else UUID.fromString(jwt.subject)
       val user =
-          userService.loadUserById(UUID.fromString(jwt.subject))
+          userService.loadUserById(userId)
               ?: throw BadCredentialsException("User for JWT not found.")
       val version = (jwt.claims["version"] as? Long)?.toInt() ?: 1
       if (version != user.tokenVersion) throw BadCredentialsException("Invalid token version")
