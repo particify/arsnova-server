@@ -1,16 +1,18 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.compat
 
 import net.particify.arsnova.core4.system.compat.LegacyConfigurationController.LegacyConfiguration.LegacyAuthenticationProvider
+import net.particify.arsnova.core4.system.config.UiProperties
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class LegacyConfigurationController(
-    private val saml2Properties: ExtendedSaml2RelyingPartyProperties
+    private val saml2Properties: ExtendedSaml2RelyingPartyProperties,
+    private val uiProperties: UiProperties
 ) {
   @GetMapping("/configuration")
   fun configuration(): LegacyConfiguration {
@@ -35,7 +37,9 @@ class LegacyConfigurationController(
                         listOf(
                             LegacyAuthenticationProvider.Role.MODERATOR,
                             LegacyAuthenticationProvider.Role.PARTICIPANT),
-                    type = LegacyAuthenticationProvider.Type.ANONYMOUS)))
+                    type = LegacyAuthenticationProvider.Type.ANONYMOUS)),
+        mapOf(),
+        uiProperties.ui)
   }
 
   private fun buildSaml2ProviderList(): List<LegacyAuthenticationProvider> {
