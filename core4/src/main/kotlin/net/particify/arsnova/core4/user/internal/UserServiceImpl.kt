@@ -102,7 +102,6 @@ class UserServiceImpl(
       it.roles.clear()
       userRepository.saveAndFlush(it)
       userRepository.delete(it)
-      eventPublisher.publishEvent(UserDeletedEvent(it.id!!))
     }
   }
 
