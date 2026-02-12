@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user
@@ -52,14 +52,14 @@ class UserServiceTests {
   fun shouldMarkUserForDeletion() {
     val user = userDetailsService.createAccount()
     userDetailsService.markAccountForDeletion(user)
-    Assertions.assertNotNull(user.auditMetadata.deletedAt)
+    Assertions.assertNotNull(user.deletedAt)
   }
 
   @Test
   fun shouldDeleteMarkedUserAfter7Days() {
     val user = userDetailsService.createAccount()
     user.username = "Delete Me"
-    user.auditMetadata.deletedAt = Instant.now().minus(7, ChronoUnit.DAYS)
+    user.deletedAt = Instant.now().minus(7, ChronoUnit.DAYS)
     userRepository.save(user)
     userDetailsService.deleteMarkedUsers()
     val retrievedUser = userDetailsService.loadUserById(user.id!!)
@@ -70,8 +70,7 @@ class UserServiceTests {
   fun shouldNotDeleteMarkedUserBefore7Days() {
     val user = userDetailsService.createAccount()
     user.username = "Do Not Delete Me"
-    user.auditMetadata.deletedAt =
-        Instant.now().minus(7, ChronoUnit.DAYS).plus(1, ChronoUnit.MINUTES)
+    user.deletedAt = Instant.now().minus(7, ChronoUnit.DAYS).plus(1, ChronoUnit.MINUTES)
     userRepository.save(user)
     userDetailsService.deleteMarkedUsers()
     val retrievedUser = userDetailsService.loadUserById(user.id!!)

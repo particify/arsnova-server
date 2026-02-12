@@ -104,7 +104,7 @@ class Migrator(
     when (userProfile.authProvider) {
       UserProfile.AuthProvider.ANONYMIZED -> {
         newUser.clearForSoftDelete()
-        newUser.auditMetadata.deletedAt = Instant.now()
+        newUser.deletedAt = Instant.now()
       }
       UserProfile.AuthProvider.ARSNOVA_GUEST -> {
         newUser.username = null

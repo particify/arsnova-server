@@ -4,6 +4,7 @@
 package net.particify.arsnova.core4.user
 
 import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -59,6 +60,7 @@ class User(
     var verificationErrors: Int? = 0,
     var verificationExpiresAt: Instant? = null,
     @Embedded val auditMetadata: AuditMetadata = AuditMetadata(),
+    @Column(insertable = false) var deletedAt: Instant? = null,
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL])
     val externalLogins: MutableList<ExternalLogin> = mutableListOf(),
     @field:LanguageIso639 var language: String? = null,
