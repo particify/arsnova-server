@@ -1,5 +1,6 @@
 extend type Query {
   adminRoomByIdOrShortId(input: AdminRoomQueryInput!): AdminRoom
+  adminMembershipsByUserId(userId: UUID!): RoomMembershipConnection
 }
 
 extend type Mutation {
