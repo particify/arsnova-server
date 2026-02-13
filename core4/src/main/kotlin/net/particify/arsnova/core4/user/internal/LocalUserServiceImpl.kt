@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user.internal
@@ -16,9 +16,12 @@ import net.particify.arsnova.core4.system.config.MailProperties
 import net.particify.arsnova.core4.user.LocalUserService
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.event.UserMailVerifiedEvent
+import net.particify.arsnova.core4.user.event.UserPasswordChangedEvent
 import net.particify.arsnova.core4.user.exception.InvalidUserStateException
 import net.particify.arsnova.core4.user.exception.InvalidVerificationCodeException
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -33,6 +36,7 @@ class LocalUserServiceImpl(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
     private val mailService: MailService,
+    private val eventPublisher: ApplicationEventPublisher,
     mailProperties: MailProperties
 ) : LocalUserService {
   companion object {
@@ -108,7 +112,9 @@ class LocalUserServiceImpl(
     user.mailAddress = user.unverifiedMailAddress
     user.username = user.unverifiedMailAddress
     user.resetVerification()
-    return userRepository.save(user)
+    val persistedUser = userRepository.save(user)
+    eventPublisher.publishEvent(UserMailVerifiedEvent(persistedUser.id!!))
+    return persistedUser
   }
 
   fun completeMailVerification(user: User, verificationCode: Int, password: String?): User {
@@ -150,7 +156,9 @@ class LocalUserServiceImpl(
     user.password = passwordEncoder.encode(password)
     user.passwordChangedAt = Instant.now()
     user.resetVerification()
-    return userRepository.save(user)
+    val persistedUser = userRepository.save(user)
+    eventPublisher.publishEvent(UserPasswordChangedEvent(persistedUser.id!!))
+    return persistedUser
   }
 
   private fun initiateVerification(user: User) {
@@ -182,7 +190,9 @@ class LocalUserServiceImpl(
     }
     user.password = passwordEncoder.encode(newPassword)
     user.passwordChangedAt = Instant.now()
-    return userRepository.save(user)
+    val persistedUser = userRepository.save(user)
+    eventPublisher.publishEvent(UserPasswordChangedEvent(persistedUser.id!!))
+    return persistedUser
   }
 
   private fun toFixedLength(code: Int): String {
@@ -216,6 +226,8 @@ class LocalUserServiceImpl(
     user.mailAddress = user.unverifiedMailAddress
     user.username = user.unverifiedMailAddress
     user.resetVerification()
-    return userRepository.save(user)
+    val persistedUser = userRepository.save(user)
+    eventPublisher.publishEvent(UserMailVerifiedEvent(persistedUser.id!!))
+    return persistedUser
   }
 }
