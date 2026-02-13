@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.room.internal.api
@@ -122,7 +122,13 @@ class RoomQueryController(
 
   @SchemaMapping(typeName = "Room", field = "descriptionRendered")
   fun descriptionRendered(room: Room): String? {
-    return textRenderingService.renderText(room.description)
+    return textRenderingService.renderText(
+        room.description,
+        TextRenderingService.TextRenderingOptions(
+            true,
+            true,
+            true,
+            TextRenderingService.TextRenderingOptions.MarkdownFeatureset.EXTENDED))
   }
 
   @SchemaMapping(typeName = "Room") fun stats(room: Room) = RoomStats(room.id!!)
