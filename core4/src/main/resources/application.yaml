@@ -41,6 +41,8 @@ docker:
       - .containers/compose.yaml
 
 security:
+  password:
+    bcrypt-strength: 12
   jwt:
     validity-period: 6H
   challenge:
