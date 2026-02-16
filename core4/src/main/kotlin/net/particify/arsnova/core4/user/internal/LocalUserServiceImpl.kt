@@ -49,7 +49,7 @@ class LocalUserServiceImpl(
   private val passwordResetUriPattern = mailProperties.passwordResetUriPattern
 
   fun claimUnverifiedUser(user: User, mailAddress: String, password: String, locale: Locale): User {
-    if (user.mailAddress != null || user.password != null) {
+    if (user.mailAddress != null) {
       throw InvalidUserStateException("Account not claimable", user.id!!)
     }
     initiateVerification(user)
@@ -61,6 +61,9 @@ class LocalUserServiceImpl(
   }
 
   fun initiateMailVerification(user: User, mailAddress: String, locale: Locale): User {
+    if (user.mailAddress == null) {
+      throw InvalidUserStateException("No local login credentials", user.id!!)
+    }
     initiateVerification(user)
     user.unverifiedMailAddress = mailAddress
     val persistedUser = userRepository.save(user)
