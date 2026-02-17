@@ -6,14 +6,18 @@ package net.particify.arsnova.core4.system.mail
 import jakarta.mail.internet.MimeMessage
 import java.io.UnsupportedEncodingException
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 import net.particify.arsnova.core4.system.MailService
 import net.particify.arsnova.core4.system.config.MailProperties
 import net.particify.arsnova.core4.system.config.ServiceProperties
+import net.particify.arsnova.core4.system.exception.MailAddressTemporarilyBlockedException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
@@ -27,7 +31,13 @@ class MailServiceImpl(
     private val textTemplateEngine: TemplateEngine,
     private val htmlTemplateEngine: TemplateEngine,
 ) : MailService {
+  @Volatile var freshBlockedAddresses: MutableSet<String> = ConcurrentHashMap.newKeySet()
+  @Volatile var staleBlockedAddresses: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
   override fun sendMail(address: String, template: String, data: Map<String, Any>, locale: Locale) {
+    if (!tryBlockAddress(address)) {
+      throw MailAddressTemporarilyBlockedException()
+    }
     val msg: MimeMessage = mailSender.createMimeMessage()
     val helper = MimeMessageHelper(msg, true, "UTF-8")
     try {
@@ -77,6 +87,27 @@ class MailServiceImpl(
     val result = engine.process(template, context)
     logger.debug("Processed template {} for data ({}):\n{}", template, data, result)
     return result
+  }
+
+  private fun tryBlockAddress(address: String): Boolean {
+    return !staleBlockedAddresses.contains(address) && freshBlockedAddresses.add(address)
+  }
+
+  /**
+   * Clears the list of stale addresses and swaps it with the list of fresh addresses.
+   *
+   * Address blocking uses two separate lists, one for fresh addresses, which is used for inserting,
+   * and one for stale addresses. These lists are swapped after a fixed interval. Since we do not
+   * keep track of individual expiration times, the time an address is blocked may vary between the
+   * configured number and 2x the number.
+   */
+  @Scheduled(
+      fixedRateString = $$"${mail.address-blocklist-minimum-seconds}", timeUnit = TimeUnit.SECONDS)
+  fun clearStaleBlockedAddresses() {
+    staleBlockedAddresses.clear()
+    val swap = freshBlockedAddresses
+    freshBlockedAddresses = staleBlockedAddresses
+    staleBlockedAddresses = swap
   }
 
   companion object {

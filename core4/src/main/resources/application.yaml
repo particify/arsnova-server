@@ -61,6 +61,7 @@ persistence:
     room-access-url: http://arsnova-server-authz:8080/roomaccess
 
 mail:
+  address-blocklist-minimum-seconds: 30
   invitation-uri-pattern: /user/{0}/accept-invitation?code={1}&expires={2}
   verification-uri-pattern: /user/{0}/verify?code={1}&expires={2}
   password-reset-uri-pattern: /password-reset/{0}
