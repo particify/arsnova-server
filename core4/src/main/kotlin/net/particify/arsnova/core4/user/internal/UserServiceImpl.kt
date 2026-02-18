@@ -11,6 +11,7 @@ import net.particify.arsnova.core4.user.Role
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
 import net.particify.arsnova.core4.user.event.UserCreatedEvent
+import net.particify.arsnova.core4.user.event.UserMarkedForDeletionEvent
 import net.particify.arsnova.core4.user.exception.UserNotFoundException
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -70,10 +71,13 @@ class UserServiceImpl(
     return userRepository.save(user)
   }
 
+  @Transactional
   fun markAccountForDeletion(user: User): User {
     user.enabled = false
     user.deletedAt = Instant.now()
-    return userRepository.save(user)
+    val updatedUser = userRepository.save(user)
+    eventPublisher.publishEvent(UserMarkedForDeletionEvent(updatedUser.id!!))
+    return updatedUser
   }
 
   override fun updateLastActivityAt(user: User): User {
