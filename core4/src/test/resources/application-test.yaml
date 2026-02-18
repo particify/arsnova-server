@@ -1,6 +1,10 @@
 logging:
   exception-depth: full
 
+spring:
+  liquibase:
+    contexts: default,dev
+
 security:
   jwt:
     issuer: arsnova.backend.v3:example.com
