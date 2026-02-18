@@ -3,8 +3,6 @@
  */
 package net.particify.arsnova.core4.user
 
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
 import net.particify.arsnova.core4.user.internal.UserRepository
@@ -53,27 +51,5 @@ class UserServiceTests {
     val user = userDetailsService.createAccount()
     userDetailsService.markAccountForDeletion(user)
     Assertions.assertNotNull(user.deletedAt)
-  }
-
-  @Test
-  fun shouldDeleteMarkedUserAfter7Days() {
-    val user = userDetailsService.createAccount()
-    user.username = "Delete Me"
-    user.deletedAt = Instant.now().minus(7, ChronoUnit.DAYS)
-    userRepository.save(user)
-    userDetailsService.deleteMarkedUsers()
-    val retrievedUser = userDetailsService.loadUserById(user.id!!)
-    Assertions.assertNull(retrievedUser)
-  }
-
-  @Test
-  fun shouldNotDeleteMarkedUserBefore7Days() {
-    val user = userDetailsService.createAccount()
-    user.username = "Do Not Delete Me"
-    user.deletedAt = Instant.now().minus(7, ChronoUnit.DAYS).plus(1, ChronoUnit.MINUTES)
-    userRepository.save(user)
-    userDetailsService.deleteMarkedUsers()
-    val retrievedUser = userDetailsService.loadUserById(user.id!!)
-    Assertions.assertNotNull(retrievedUser)
   }
 }

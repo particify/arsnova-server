@@ -8,6 +8,10 @@ security:
   challenge:
     secret: weaksecret1234567890123456789012
 
+user:
+  inactivity-thresholds:
+    verified: 730d
+
 mail:
   sender-address: arsnova@localhost
   sender-name: arsnova
