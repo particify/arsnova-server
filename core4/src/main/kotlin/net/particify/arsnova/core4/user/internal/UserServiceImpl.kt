@@ -4,26 +4,19 @@
 package net.particify.arsnova.core4.user.internal
 
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 import net.particify.arsnova.core4.user.QUser
 import net.particify.arsnova.core4.user.Role
 import net.particify.arsnova.core4.user.User
-import net.particify.arsnova.core4.user.UserDeletedEvent
 import net.particify.arsnova.core4.user.UserService
 import net.particify.arsnova.core4.user.event.UserCreatedEvent
+import net.particify.arsnova.core4.user.event.UserMarkedForDeletionEvent
 import net.particify.arsnova.core4.user.exception.UserNotFoundException
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.data.domain.Limit
-import org.springframework.data.domain.ScrollPosition
-import org.springframework.data.support.WindowIterator
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-
-private const val DELETE_AFTER_DAYS = 7L
-private const val DELETE_BATCH_SIZE = 10
 
 @Service
 class UserServiceImpl(
@@ -78,30 +71,13 @@ class UserServiceImpl(
     return userRepository.save(user)
   }
 
+  @Transactional
   fun markAccountForDeletion(user: User): User {
     user.enabled = false
     user.deletedAt = Instant.now()
-    return userRepository.save(user)
-  }
-
-  @Transactional
-  fun deleteMarkedUsers() {
-    val users =
-        WindowIterator.of {
-              userRepository.findByDeletedAtBefore(
-                  Instant.now().minus(DELETE_AFTER_DAYS, ChronoUnit.DAYS),
-                  it,
-                  Limit.of(DELETE_BATCH_SIZE))
-            }
-            .startingAt(ScrollPosition.offset())
-    users.forEachRemaining {
-      eventPublisher.publishEvent(UserDeletedEvent(it.id!!))
-      it.clearForSoftDelete()
-      it.enabled = false
-      it.roles.clear()
-      userRepository.saveAndFlush(it)
-      userRepository.delete(it)
-    }
+    val updatedUser = userRepository.save(user)
+    eventPublisher.publishEvent(UserMarkedForDeletionEvent(updatedUser.id!!))
+    return updatedUser
   }
 
   override fun updateLastActivityAt(user: User): User {

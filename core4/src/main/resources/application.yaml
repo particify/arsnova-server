@@ -60,6 +60,12 @@ persistence:
       password: arsnova
     room-access-url: http://arsnova-server-authz:8080/roomaccess
 
+tasks:
+  time-zone: UTC
+  schedule:
+    inactive-user-deletion: "0 10 * * * *"
+    marked-user-deletion: "0 15 * * * *"
+
 mail:
   address-blocklist-minimum-seconds: 30
   invitation-uri-pattern: /user/{0}/accept-invitation?code={1}&expires={2}
@@ -73,6 +79,12 @@ common:
 
 service:
   product-name: arsnova
+
+user:
+  inactivity-thresholds:
+    unverified: 365d
+    unverified-single-visit: 90d
+    verified: ~
 
 management:
   endpoints:
