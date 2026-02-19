@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 
@@ -25,6 +26,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 class LocalUserServiceTests {
   @Autowired lateinit var localUserService: LocalUserServiceImpl
   @MockitoBean lateinit var mailService: MailService
+  @Autowired lateinit var passwordEncoder: PasswordEncoder
 
   @Test
   fun shouldClaimUnverifiedUser() {
@@ -52,10 +54,11 @@ class LocalUserServiceTests {
   @Test
   fun shouldInitiateMailVerification() {
     val mailAddress = "shouldInitiateMailVerification@example.com"
-    val user = User()
-    localUserService.initiateMailVerification(user, mailAddress, Locale.ENGLISH)
+    val password = "password"
+    val user =
+        User(mailAddress = "oldMailAdress@example.com", password = passwordEncoder.encode(password))
+    localUserService.initiateMailVerification(user, mailAddress, password, Locale.ENGLISH)
     Assertions.assertEquals(mailAddress, user.unverifiedMailAddress)
-    Assertions.assertNull(user.mailAddress)
     Assertions.assertNotNull(user.verificationCode)
     Assertions.assertNotNull(user.verificationExpiresAt)
   }

@@ -60,9 +60,17 @@ class LocalUserServiceImpl(
     return persistedUser
   }
 
-  fun initiateMailVerification(user: User, mailAddress: String, locale: Locale): User {
+  fun initiateMailVerification(
+      user: User,
+      mailAddress: String,
+      password: String,
+      locale: Locale
+  ): User {
     if (user.mailAddress == null) {
       throw InvalidUserStateException("No local login credentials", user.id!!)
+    }
+    if (!passwordEncoder.matches(password, user.password)) {
+      throw InvalidInputException("Incorrect password")
     }
     initiateVerification(user)
     user.unverifiedMailAddress = mailAddress
@@ -185,7 +193,7 @@ class LocalUserServiceImpl(
   }
 
   fun updatePassword(user: User, oldPassword: String, newPassword: String): User {
-    if (user.password != null) {
+    if (user.password == null) {
       throw InvalidUserStateException("No local login credentials", user.id!!)
     }
     if (!passwordEncoder.matches(oldPassword, user.password)) {
