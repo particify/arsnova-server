@@ -60,9 +60,17 @@ class LocalUserServiceImpl(
     return persistedUser
   }
 
-  fun initiateMailVerification(user: User, mailAddress: String, locale: Locale): User {
+  fun initiateMailVerification(
+      user: User,
+      mailAddress: String,
+      password: String,
+      locale: Locale
+  ): User {
     if (user.mailAddress == null) {
       throw InvalidUserStateException("No local login credentials", user.id!!)
+    }
+    if (!passwordEncoder.matches(password, user.password)) {
+      throw InvalidInputException("Incorrect password")
     }
     initiateVerification(user)
     user.unverifiedMailAddress = mailAddress

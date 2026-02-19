@@ -37,10 +37,11 @@ class UserMutationController(
   @MutationMapping
   fun updateUserMailAddress(
       @Argument mailAddress: String,
+      @Argument password: String,
       @AuthenticationPrincipal user: User,
       locale: Locale
   ): User {
-    return localUserService.initiateMailVerification(user, mailAddress, locale)
+    return localUserService.initiateMailVerification(user, mailAddress, password, locale)
   }
 
   @MutationMapping
