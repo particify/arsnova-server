@@ -4,8 +4,8 @@
 package net.particify.arsnova.core4.user.event
 
 import java.util.UUID
-import net.particify.arsnova.core4.common.event.EntityDeletedEvent
+import net.particify.arsnova.core4.common.event.EntityEvent
 import org.jmolecules.event.annotation.DomainEvent
 
 @DomainEvent
-data class UserMarkedForDeletionEvent(override val id: UUID) : UserEvent, EntityDeletedEvent<UUID>
+data class UserMarkedForDeletionEvent(override val id: UUID) : UserEvent, EntityEvent<UUID>
