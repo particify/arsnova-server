@@ -185,7 +185,7 @@ class LocalUserServiceImpl(
   }
 
   fun updatePassword(user: User, oldPassword: String, newPassword: String): User {
-    if (user.password != null) {
+    if (user.password == null) {
       throw InvalidUserStateException("No local login credentials", user.id!!)
     }
     if (!passwordEncoder.matches(oldPassword, user.password)) {
