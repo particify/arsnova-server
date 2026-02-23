@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.room.internal
@@ -8,6 +8,7 @@ import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.RoomRole
+import org.springframework.data.domain.Limit
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Window
 import org.springframework.data.jpa.repository.JpaRepository
@@ -19,6 +20,8 @@ interface MembershipRepository :
   fun findOneByUserIdAndRoomShortId(userId: UUID, shortId: Int): Membership?
 
   fun findByUserId(userId: UUID, scrollPosition: ScrollPosition): Window<Membership>
+
+  fun findByIdUserId(userId: UUID, scrollPosition: ScrollPosition, limit: Limit): Window<Membership>
 
   fun findOneByRoomIdAndUserId(roomId: UUID, userId: UUID): Membership?
 

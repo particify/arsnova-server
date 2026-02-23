@@ -7,7 +7,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlin.collections.forEach
 import net.particify.arsnova.core4.user.User
-import net.particify.arsnova.core4.user.UserDeletedEvent
+import net.particify.arsnova.core4.user.event.UserDeletedEvent
 import net.particify.arsnova.core4.user.event.UsersMarkedForDeletionEvent
 import net.particify.arsnova.core4.user.event.UsersMarkedForDeletionEvent.Kind
 import org.slf4j.LoggerFactory
@@ -41,6 +41,7 @@ class UserBulkDeletionService(
                   Limit.of(DELETE_BATCH_SIZE))
             }
             .startingAt(ScrollPosition.offset())
+    var total = 0
     users.forEachRemaining {
       eventPublisher.publishEvent(UserDeletedEvent(it.id!!))
       it.clearForSoftDelete()
@@ -48,6 +49,10 @@ class UserBulkDeletionService(
       it.roles.clear()
       userService.saveAndFlush(it)
       userService.delete(it)
+      total++
+      if (total > DELETE_MAX_TOTAL_SIZE) {
+        return@forEachRemaining
+      }
     }
   }
 
