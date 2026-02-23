@@ -7,7 +7,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlin.collections.forEach
 import net.particify.arsnova.core4.user.User
-import net.particify.arsnova.core4.user.UserDeletedEvent
+import net.particify.arsnova.core4.user.event.UserDeletedEvent
 import net.particify.arsnova.core4.user.event.UsersMarkedForDeletionEvent
 import net.particify.arsnova.core4.user.event.UsersMarkedForDeletionEvent.Kind
 import org.slf4j.LoggerFactory
