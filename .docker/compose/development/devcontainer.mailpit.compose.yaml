@@ -1,6 +1,6 @@
 services:
   mailpit:
-    image: axllent/mailpit:v1.29@sha256:7c38788069433ba9d2d9131abac8d17da0fb18f09b689207ec7a773dcb8d6eee
+    image: axllent/mailpit:v1.29@sha256:030f06031ce5c60913ac9363da1ab0d4be6fd2a78147dd0e1ca0fcac665d6b34
     ports:
       - 127.0.0.1:8025:8025
     volumes:
