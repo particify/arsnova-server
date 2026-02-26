@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user.exception
@@ -22,7 +22,8 @@ class UserExceptionResolverAdapter : DataFetcherExceptionResolverAdapter() {
                   .message(if (ex.id != null) "${ex.message}: ${ex.id}" else ex.message)
           is InvalidUserStateException ->
               builder.errorType(ErrorType.BAD_REQUEST).message("${ex.message}: ${ex.id}")
-          is InvalidVerificationCodeException ->
+          is InvalidVerificationCodeException,
+          is MailAddressAlreadyInUseException ->
               builder.errorType(ErrorType.BAD_REQUEST).message(ex.message)
           else -> return super.resolveToSingleError(ex, env)
         }
