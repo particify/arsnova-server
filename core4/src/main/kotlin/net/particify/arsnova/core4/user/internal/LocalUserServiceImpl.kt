@@ -20,6 +20,7 @@ import net.particify.arsnova.core4.user.event.UserMailVerifiedEvent
 import net.particify.arsnova.core4.user.event.UserPasswordChangedEvent
 import net.particify.arsnova.core4.user.exception.InvalidUserStateException
 import net.particify.arsnova.core4.user.exception.InvalidVerificationCodeException
+import net.particify.arsnova.core4.user.exception.MailAddressAlreadyInUseException
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -115,20 +116,7 @@ class LocalUserServiceImpl(
     return persistedInvitee
   }
 
-  fun completeMailVerification(user: User, verificationCode: Int): User {
-    if (!user.isMailAddressVerificationActive()) {
-      throw InvalidUserStateException("Mail verification not initiated", user.id!!)
-    }
-    checkVerificationCode(user, verificationCode)
-    user.mailAddress = user.unverifiedMailAddress
-    user.username = user.unverifiedMailAddress
-    user.resetVerification()
-    val persistedUser = userRepository.save(user)
-    eventPublisher.publishEvent(UserMailVerifiedEvent(persistedUser.id!!))
-    return persistedUser
-  }
-
-  fun completeMailVerification(user: User, verificationCode: Int, password: String?): User {
+  fun completeMailVerification(user: User, verificationCode: Int, password: String? = null): User {
     if (!user.isMailAddressVerificationActive()) {
       throw InvalidUserStateException("Mail verification not initiated", user.id!!)
     }
@@ -139,7 +127,7 @@ class LocalUserServiceImpl(
       }
       user.password = passwordEncoder.encode(password)
     }
-    return completeMailVerification(user, verificationCode)
+    return updateMailAddressFromUnverified(user)
   }
 
   fun initiatePasswordReset(user: User, locale: Locale): User {
@@ -233,6 +221,13 @@ class LocalUserServiceImpl(
   override fun verifyUser(user: User): User {
     if (user.unverifiedMailAddress == null || user.username != null) {
       throw InvalidUserStateException("No verification in process or already verified", user.id!!)
+    }
+    return updateMailAddressFromUnverified(user)
+  }
+
+  private fun updateMailAddressFromUnverified(user: User): User {
+    if (userRepository.existsByMailAddress(user.unverifiedMailAddress!!)) {
+      throw MailAddressAlreadyInUseException()
     }
     user.mailAddress = user.unverifiedMailAddress
     user.username = user.unverifiedMailAddress

@@ -54,4 +54,6 @@ interface UserRepository : JpaRepository<User, UUID>, QuerydslPredicateExecutor<
   fun countByUsernameIsNotNull(): Long
 
   fun countByUsernameIsNullAndUnverifiedMailAddressIsNotNull(): Long
+
+  fun existsByMailAddress(mailAddress: String): Boolean
 }
