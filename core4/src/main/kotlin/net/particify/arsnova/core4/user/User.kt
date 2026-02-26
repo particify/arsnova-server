@@ -38,8 +38,8 @@ class User(
     @Version var version: Int? = 0,
     @JvmField var username: String? = null,
     @JvmField var password: String? = null,
-    var mailAddress: String? = null,
-    var unverifiedMailAddress: String? = null,
+    mailAddress: String? = null,
+    unverifiedMailAddress: String? = null,
     var givenName: String? = null,
     var surname: String? = null,
     var enabled: Boolean? = true,
@@ -65,6 +65,16 @@ class User(
     val externalLogins: MutableList<ExternalLogin> = mutableListOf(),
     @field:LanguageIso639 var language: String? = null,
 ) : AuthenticatedPrincipal, UserDetails {
+  var mailAddress: String? = mailAddress?.lowercase()
+    set(value) {
+      field = value?.lowercase()
+    }
+
+  var unverifiedMailAddress: String? = unverifiedMailAddress?.lowercase()
+    set(value) {
+      field = value?.lowercase()
+    }
+
   override fun getName(): String = username ?: ""
 
   override fun getAuthorities(): Set<GrantedAuthority> =
