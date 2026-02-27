@@ -57,7 +57,8 @@ class LocalUserServiceImpl(
     user.unverifiedMailAddress = mailAddress
     user.password = passwordEncoder.encode(password)
     val persistedUser = userRepository.save(user)
-    sendVerificationMail(persistedUser, "welcome-verification", locale)
+    val template = determineMailVerificationTemplate(user)
+    sendVerificationMail(persistedUser, template, locale)
     return persistedUser
   }
 
@@ -214,8 +215,15 @@ class LocalUserServiceImpl(
       user.verificationExpiresAt = Instant.now().plus(VERIFICATION_VALIDITY_HOURS, ChronoUnit.HOURS)
       userRepository.save(user)
     }
-    sendVerificationMail(user, "welcome-verification", locale)
+    val template = determineMailVerificationTemplate(user)
+    sendVerificationMail(user, template, locale)
     return true
+  }
+
+  private fun determineMailVerificationTemplate(user: User): String {
+    return if (user.mailAddress != null) "mail-verification"
+    else if (userRepository.existsByMailAddress(user.unverifiedMailAddress!!)) "welcome-back"
+    else "welcome-verification"
   }
 
   override fun verifyUser(user: User): User {

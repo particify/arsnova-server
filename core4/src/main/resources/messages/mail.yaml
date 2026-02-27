@@ -15,3 +15,7 @@ mail:
   verification-link-intro: "Alternatively, you can use the following link:"
   verification-link-text: Verify
   welcome: Welcome to {0}!
+  welcome-back: Welcome back to {0}!
+  welcome-back-subject: Welcome back
+  welcome-back-account-already-exists: There is already an account for your mail address you tried to register with.
+  welcome-back-login-instead: Please use your existing credentials to login instead.
