@@ -1,0 +1,6 @@
+[(#{mail.welcome-back(${productName})})]
+
+[(#{mail.welcome-back-account-already-exists})]
+[(#{mail.welcome-back-login-instead})]
+
+[# th:insert="~{footer.txt}" /]

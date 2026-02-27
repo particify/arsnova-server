@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:insert="~{head.html}"></head>
+<body>
+<div class="body">
+<div class="main" role="main">
+<h1 th:text="#{mail.welcome-back(${productName})}"></h1>
+<p>
+<th:block th:text="#{mail.welcome-back-account-already-exists}"></th:block>
+<th:block th:text="#{mail.welcome-back-login-instead}"></th:block>
+</p>
+</div>
+<div class="footer" role="contentinfo" th:insert="~{footer.html}"></div>
+</div>
+</body>
+</html>
