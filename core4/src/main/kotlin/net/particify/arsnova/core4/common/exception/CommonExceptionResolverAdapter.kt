@@ -22,9 +22,8 @@ class CommonExceptionResolverAdapter : DataFetcherExceptionResolverAdapter() {
               builder
                   .errorType(ErrorType.BAD_REQUEST)
                   .message(ex.bindingResult.allErrors.toString())
-          is ConstraintViolationException ->
-              builder.errorType(ErrorType.BAD_REQUEST).message(ex.message)
           is AccessDeniedException -> builder.errorType(ErrorType.FORBIDDEN).message(ex.message)
+          is ConstraintViolationException,
           is InvalidInputException -> builder.errorType(ErrorType.BAD_REQUEST).message(ex.message)
           else -> return super.resolveToSingleError(ex, env)
         }
