@@ -3,6 +3,7 @@
  */
 package net.particify.arsnova.core4.user.internal.api
 
+import jakarta.validation.constraints.Pattern
 import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.common.LanguageIso639
@@ -46,7 +47,7 @@ class UserMutationController(
 
   @MutationMapping
   fun verifyUserMailAddress(
-      @Argument verificationCode: String,
+      @Argument @Pattern(regexp = "\\d+") verificationCode: String,
       @AuthenticationPrincipal user: User
   ): User {
     return localUserService.completeMailVerification(user, verificationCode.toInt())
@@ -55,7 +56,7 @@ class UserMutationController(
   @MutationMapping
   @PreAuthorize("hasRole('CHALLENGE_SOLVED')")
   fun verifyUserMailAddressUnauthenticated(
-      @Argument verificationCode: String,
+      @Argument @Pattern(regexp = "\\d+") verificationCode: String,
       @Argument userId: UUID,
       @Argument password: String?
   ): User {
@@ -119,7 +120,11 @@ class UserMutationController(
   fun resetUserPassword(
       @Argument mailAddress: String,
       @Argument password: String,
-      @Argument verificationCode: String
+      @Argument
+      @Pattern(
+          regexp = "\\d+",
+      )
+      verificationCode: String
   ): User {
     val user = userService.findByMailAddress(mailAddress) ?: throw UserNotFoundException()
     return localUserService.completePasswordReset(user, password, verificationCode.toInt())
