@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.common.exception
 import graphql.GraphQLError
 import graphql.GraphqlErrorBuilder
 import graphql.schema.DataFetchingEnvironment
+import jakarta.validation.ConstraintViolationException
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter
 import org.springframework.graphql.execution.ErrorType
 import org.springframework.stereotype.Component
@@ -21,6 +22,8 @@ class CommonExceptionResolverAdapter : DataFetcherExceptionResolverAdapter() {
               builder
                   .errorType(ErrorType.BAD_REQUEST)
                   .message(ex.bindingResult.allErrors.toString())
+          is ConstraintViolationException ->
+              builder.errorType(ErrorType.BAD_REQUEST).message(ex.message)
           is AccessDeniedException -> builder.errorType(ErrorType.FORBIDDEN).message(ex.message)
           is InvalidInputException -> builder.errorType(ErrorType.BAD_REQUEST).message(ex.message)
           else -> return super.resolveToSingleError(ex, env)
