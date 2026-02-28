@@ -27,7 +27,8 @@ class UserQueryController(private val userService: UserServiceImpl) {
   @QueryMapping
   fun userByDisplayId(@Argument displayId: String): User {
     // Using Optional as a workaround. There is a nullability issue with findBy.
-    val user: Optional<User> = userService.findBy(QUser.user.username.eq(displayId)) { it.one() }
+    val user: Optional<User> =
+        userService.findBy(QUser.user.username.eq(displayId.lowercase())) { it.one() }
     return user.orElseThrow { UserNotFoundException() }
   }
 
