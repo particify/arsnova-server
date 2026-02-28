@@ -3,6 +3,7 @@
  */
 package net.particify.arsnova.core4.user.internal
 
+import jakarta.persistence.EntityManager
 import java.time.Instant
 import kotlin.collections.forEach
 import net.particify.arsnova.core4.user.User
@@ -14,42 +15,48 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Limit
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.ScrollPosition
-import org.springframework.data.support.WindowIterator
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+private const val DELETE_BATCH_COUNT = 100
 private const val DELETE_BATCH_SIZE = 10
-private const val DELETE_MAX_TOTAL_SIZE = 1000
+private const val DELETE_MAX_TOTAL_SIZE = DELETE_BATCH_COUNT * DELETE_BATCH_SIZE
 
 @Service
 class UserBulkDeletionService(
     private val userService: UserServiceImpl,
     private val userProperties: UserProperties,
-    private val eventPublisher: ApplicationEventPublisher
+    private val eventPublisher: ApplicationEventPublisher,
+    private val entityManager: EntityManager
 ) {
   private val logger = LoggerFactory.getLogger(UserServiceImpl::class.java)
 
   @Transactional
   fun deleteMarkedUsers() {
     logger.debug("Performing scheduled deletion of previously marked users...")
-    val users =
-        WindowIterator.of {
-              userService.findByDeletedAtBefore(
-                  Instant.now().minus(userProperties.deleteDelay), it, Limit.of(DELETE_BATCH_SIZE))
-            }
-            .startingAt(ScrollPosition.offset())
-    var total = 0
-    users.forEachRemaining {
-      eventPublisher.publishEvent(UserDeletedEvent(it.id!!))
-      it.clearForSoftDelete()
-      it.enabled = false
-      it.roles.clear()
-      userService.saveAndFlush(it)
-      userService.delete(it)
-      total++
-      if (total > DELETE_MAX_TOTAL_SIZE) {
-        return@forEachRemaining
+    val deletedAtBefore = Instant.now().minus(userProperties.deleteDelay)
+    var totalCount = 0
+    for (i in 0..<DELETE_BATCH_COUNT) {
+      val position = ScrollPosition.offset(i.toLong())
+      val window =
+          userService.findByDeletedAtBefore(deletedAtBefore, position, Limit.of(DELETE_BATCH_SIZE))
+      totalCount += window.size()
+      window.forEach {
+        eventPublisher.publishEvent(UserDeletedEvent(it.id!!))
+        it.clearForSoftDelete()
+        it.enabled = false
+        it.roles.clear()
+        userService.saveAndFlush(it)
+        userService.delete(it)
       }
+      entityManager.flush()
+      entityManager.clear()
+      if (!window.hasNext()) {
+        break
+      }
+    }
+    if (totalCount > 0) {
+      logger.info("Deleted {} previously marked users.", totalCount)
     }
   }
 
