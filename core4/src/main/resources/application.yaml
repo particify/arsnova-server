@@ -81,6 +81,7 @@ service:
   product-name: arsnova
 
 user:
+  delete-delay: 7d
   inactivity-thresholds:
     unverified: 365d
     unverified-single-visit: 90d

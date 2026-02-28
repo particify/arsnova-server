@@ -9,7 +9,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.convert.DurationUnit
 
 @ConfigurationProperties("user")
-data class UserProperties(val inactivityThresholds: InactivityThresholds) {
+data class UserProperties(
+    @param:DurationUnit(ChronoUnit.DAYS) val deleteDelay: Duration,
+    val inactivityThresholds: InactivityThresholds
+) {
   data class InactivityThresholds(
       @param:DurationUnit(ChronoUnit.DAYS) val unverified: Duration? = null,
       @param:DurationUnit(ChronoUnit.DAYS) val unverifiedSingleVisit: Duration? = null,
