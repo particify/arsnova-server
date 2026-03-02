@@ -1,6 +1,6 @@
 services:
   postgresql-core4:
-    image: postgres:18.3-alpine@sha256:97e0c20847f5fe90be7e002ce2619be71f037e898f6c7364ad59e3826d60fee5
+    image: postgres:18.3-alpine@sha256:4da1a4828be12604092fa55311276f08f9224a74a62dcb4708bd7439e2a03911
     restart: $RESTART_MODE
     environment:
       POSTGRES_DB: arsnova
