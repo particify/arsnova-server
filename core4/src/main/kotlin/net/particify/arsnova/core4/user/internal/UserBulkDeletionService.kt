@@ -4,7 +4,6 @@
 package net.particify.arsnova.core4.user.internal
 
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 import kotlin.collections.forEach
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.event.UserDeletedEvent
@@ -19,7 +18,6 @@ import org.springframework.data.support.WindowIterator
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-private const val DELETE_AFTER_DAYS = 7L
 private const val DELETE_BATCH_SIZE = 10
 private const val DELETE_MAX_TOTAL_SIZE = 1000
 
@@ -33,12 +31,11 @@ class UserBulkDeletionService(
 
   @Transactional
   fun deleteMarkedUsers() {
+    logger.debug("Performing scheduled deletion of previously marked users...")
     val users =
         WindowIterator.of {
               userService.findByDeletedAtBefore(
-                  Instant.now().minus(DELETE_AFTER_DAYS, ChronoUnit.DAYS),
-                  it,
-                  Limit.of(DELETE_BATCH_SIZE))
+                  Instant.now().minus(userProperties.deleteDelay), it, Limit.of(DELETE_BATCH_SIZE))
             }
             .startingAt(ScrollPosition.offset())
     var total = 0
