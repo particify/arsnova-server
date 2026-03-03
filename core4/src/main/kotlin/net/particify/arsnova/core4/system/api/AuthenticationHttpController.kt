@@ -9,6 +9,8 @@ import net.particify.arsnova.core4.system.security.RefreshCookieComponent
 import net.particify.arsnova.core4.system.security.RefreshJwtAuthentication
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
+import org.springframework.http.HttpStatus
+import org.springframework.orm.ObjectOptimisticLockingFailureException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.authentication.AuthenticationManager
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/auth")
@@ -39,7 +42,14 @@ class AuthenticationHttpController(
   ): AuthenticationWrapper {
     if (authentication !is RefreshJwtAuthentication)
         throw AccessDeniedException("Refresh not allowed for authentication")
-    userService.updateLastActivityAt(user)
+    try {
+      userService.updateLastActivityAt(user)
+    } catch (e: ObjectOptimisticLockingFailureException) {
+      // Mapping this exception to a TOO_MANY_REQUESTS error because concurrent requests from the
+      // client are the most probable cause.
+      throw ResponseStatusException(
+          HttpStatus.TOO_MANY_REQUESTS, "Request rejected due to optimistic locking failure.", e)
+    }
     val subject = authentication.principal!!.id.toString()
     val accessToken = jwtUtils.encodeJwt(subject, user.roles.map { it.name!! })
     refreshCookieComponent.add(subject, user.tokenVersion!!, response)
