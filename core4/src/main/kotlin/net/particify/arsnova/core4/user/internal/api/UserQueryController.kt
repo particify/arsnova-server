@@ -25,6 +25,7 @@ class UserQueryController(private val userService: UserServiceImpl) {
   }
 
   @QueryMapping
+  @PreAuthorize("hasRole('VERIFIED')")
   fun userByDisplayId(@Argument displayId: String): User {
     // Using Optional as a workaround. There is a nullability issue with findBy.
     val user: Optional<User> =
