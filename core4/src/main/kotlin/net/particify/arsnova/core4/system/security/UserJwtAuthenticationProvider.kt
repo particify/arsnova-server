@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.security
@@ -8,8 +8,11 @@ import net.particify.arsnova.core4.user.UserService
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.jwt.JwtException
 import org.springframework.stereotype.Component
+
+private val ROLE_VERIFIED = SimpleGrantedAuthority("ROLE_VERIFIED")
 
 @Component
 class UserJwtAuthenticationProvider(
@@ -23,7 +26,11 @@ class UserJwtAuthenticationProvider(
       val user =
           userService.loadUserById(UUID.fromString(jwt.subject))
               ?: throw BadCredentialsException("User for JWT not found.")
-      return UserJwtAuthentication(token, user, user.authorities.plus(authentication.authorities))
+      var authorities = user.authorities.plus(authentication.authorities)
+      if (user.username != null) {
+        authorities = authorities.plus(ROLE_VERIFIED)
+      }
+      return UserJwtAuthentication(token, user, authorities)
     } catch (e: JwtException) {
       throw BadCredentialsException("Invalid JWT", e)
     } catch (e: IllegalArgumentException) {

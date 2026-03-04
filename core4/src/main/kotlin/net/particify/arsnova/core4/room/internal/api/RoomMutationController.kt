@@ -92,7 +92,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#roomId, 'Room', 'administer')")
+  @PreAuthorize("hasRole('VERIFIED') and hasPermission(#roomId, 'Room', 'administer')")
   fun grantRoomRole(
       @Argument roomId: UUID,
       @Argument userId: UUID,
@@ -113,7 +113,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#roomId, 'Room', 'administer')")
+  @PreAuthorize("hasRole('VERIFIED') and hasPermission(#roomId, 'Room', 'administer')")
   fun grantRoomRoleByInvitation(
       @Argument roomId: UUID,
       @Argument mailAddress: String,
