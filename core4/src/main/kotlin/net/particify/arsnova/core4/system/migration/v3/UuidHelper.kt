@@ -9,6 +9,7 @@ import java.util.random.RandomGenerator
 import java.util.regex.Pattern
 
 object UuidHelper {
+  val NIL = UUID.fromString("00000000-0000-0000-0000-000000000000")
   private const val REPLACEMENT_PATTERN = "$1-$2-$3-$4-$5"
   private const val UUIDV7_MAX_RANDOM_SEQUENCE = 0x3FFFFFFFFFFFFFFFL
   private const val BITSHIFT_MILLIS = 16

@@ -70,9 +70,11 @@ class CouchdbMigrator(
       result.rows.take(COUCHDB_RESULT_LIMIT).chunked(JDBC_BATCH_SIZE).forEach { chunk ->
         chunk.forEach {
           logger.trace("Migrating {} {}...", design, it.doc.id)
-          val newEntity = fn(it.doc)
-          if (newEntity != null) {
-            entityManager.persist(newEntity)
+          val entityOrEntities = fn(it.doc)
+          if (entityOrEntities is Iterable<*>) {
+            entityOrEntities.forEach(entityManager::persist)
+          } else if (entityOrEntities != null) {
+            entityManager.persist(entityOrEntities)
           }
         }
         val flushStart = Instant.now()

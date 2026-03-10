@@ -61,6 +61,11 @@ persistence:
       username: arsnova
       password: arsnova
     room-access-url: http://arsnova-server-authz:8080/roomaccess
+    qna:
+      datasource:
+        url: jdbc:postgresql://postgresql-comments:5432/arsnovacomment
+        username: arsnovacomment
+        password: arsnovacomment
 
 tasks:
   time-zone: UTC
