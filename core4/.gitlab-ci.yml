@@ -16,7 +16,7 @@ spotless:
   script:
     # git fetch is needed for Spotless' ratchetFrom
     - git fetch origin master
-    - ../gradlew $GRADLE_CLI_OPTS spotlessKotlinApply spotlessKotlinGradleApply -x classes
+    - ../gradlew $GRADLE_CLI_OPTS spotlessKotlinApply spotlessKotlinGradleApply -x classes -x processAot -x processTestAot
 
 detekt:
   extends: .gradle
