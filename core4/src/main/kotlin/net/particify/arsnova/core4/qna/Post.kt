@@ -15,8 +15,8 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.Version
 import java.util.UUID
-import net.particify.arsnova.core4.common.AuditMetadata
-import net.particify.arsnova.core4.common.UuidGenerator
+import net.particify.arsnova.core4.common.AuditMetadataUuidV7
+import net.particify.arsnova.core4.common.UuidV7Generator
 import org.hibernate.annotations.Formula
 import org.hibernate.annotations.JdbcType
 import org.hibernate.dialect.type.PostgreSQLEnumJdbcType
@@ -24,7 +24,7 @@ import org.hibernate.dialect.type.PostgreSQLEnumJdbcType
 @Entity
 @Table(schema = "qna")
 class Post(
-    @Id @UuidGenerator var id: UUID? = null,
+    @Id @UuidV7Generator var id: UUID? = null,
     @Version var version: Int? = 0,
     @ManyToOne var qna: Qna? = null,
     var body: String? = null,
@@ -43,5 +43,5 @@ class Post(
     var moderationState: ModerationState = ModerationState.PENDING,
     @Formula("(SELECT COALESCE(SUM(v.value), 0) FROM qna.vote v WHERE v.post_id = id)")
     var score: Int = 0,
-    @Embedded val auditMetadata: AuditMetadata = AuditMetadata()
+    @Embedded val auditMetadata: AuditMetadataUuidV7 = AuditMetadataUuidV7()
 )

@@ -13,7 +13,11 @@ databaseChangeLog:
       author: arsnova
       labels: ddl,qna
       context: default
-      comment: Create qna database tables
+      comment: Create initial definitions for qna module
+      modifySql:
+        replace:
+          replace: GENERATED_UUIDV7_TIMESTAMP
+          with: timestamp with time zone GENERATED ALWAYS AS (uuid_extract_timestamp(id))
       changes:
         - sql: CREATE TYPE "qna_state" AS ENUM ('STARTED', 'PAUSED', 'STOPPED')
         - createTable:
@@ -139,10 +143,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: created_at
-                  type: timestamp with time zone
-                  constraints:
-                    nullable: false
-                  defaultValueComputed: CURRENT_TIMESTAMP
+                  type: GENERATED_UUIDV7_TIMESTAMP
               - column:
                   name: updated_by
                   type: uuid
@@ -258,10 +259,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: created_at
-                  type: timestamp with time zone
-                  constraints:
-                    nullable: false
-                  defaultValueComputed: CURRENT_TIMESTAMP
+                  type: GENERATED_UUIDV7_TIMESTAMP
               - column:
                   name: updated_by
                   type: uuid
