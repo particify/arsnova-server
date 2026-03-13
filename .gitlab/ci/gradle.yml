@@ -119,7 +119,7 @@ docker_image:
   script:
     - "echo Creation time for image: `git log -1 --format=%cI`"
     - "echo Tag for image: $DOCKER_TAG"
-    - ../gradlew $GRADLE_CLI_OPTS jib -x classes
+    - ../gradlew $GRADLE_CLI_OPTS jib --no-configuration-cache -x classes
       -Djib.to.auth.username="$CI_REGISTRY_USER"
       -Djib.to.auth.password="$CI_REGISTRY_PASSWORD"
       -Djib.to.image="$DOCKER_IMAGE:$DOCKER_TAG"
