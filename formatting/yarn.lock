@@ -24,18 +24,11 @@
     minimatch "^10.2.4"
 
 "@eslint/config-helpers@^0.5.2":
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/@eslint/config-helpers/-/config-helpers-0.5.2.tgz#314c7b03d02a371ad8c0a7f6821d5a8a8437ba9d"
-  integrity sha512-a5MxrdDXEvqnIq+LisyCX6tQMPF/dSJpCfBgBauY+pNZ28yCtSsTvyTYrMhaI+LK26bVyCJfJkT0u8KIj2i1dQ==
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/@eslint/config-helpers/-/config-helpers-0.5.3.tgz#721fe6bbb90d74b0c80d6ff2428e5bbcb002becb"
+  integrity sha512-lzGN0onllOZCGroKJmRwY6QcEHxbjBw1gwB8SgRSqK8YbbtEXMvKynsXc3553ckIEBxsbMBU7oOZXKIPGZNeZw==
   dependencies:
-    "@eslint/core" "^1.1.0"
-
-"@eslint/core@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@eslint/core/-/core-1.1.0.tgz#51f5cd970e216fbdae6721ac84491f57f965836d"
-  integrity sha512-/nr9K9wkr3P1EzFTdFdMoLuo1PmIxjmwvPozwoSodjNBdefGujXQUF93u1DDZpEaTuDvMsIQddsd35BwtrW9Xw==
-  dependencies:
-    "@types/json-schema" "^7.0.15"
+    "@eslint/core" "^1.1.1"
 
 "@eslint/core@^1.1.1":
   version "1.1.1"
@@ -692,9 +685,9 @@ eslint@10.0.3:
     optionator "^0.9.3"
 
 espree@^11.1.1:
-  version "11.1.1"
-  resolved "https://registry.yarnpkg.com/espree/-/espree-11.1.1.tgz#866f6bc9ccccd6f28876b7a6463abb281b9cb847"
-  integrity sha512-AVHPqQoZYc+RUM4/3Ly5udlZY/U4LS8pIG05jEjWM2lQMU/oaZ7qshzAl2YP1tfNmXfftH3ohurfwNAug+MnsQ==
+  version "11.2.0"
+  resolved "https://registry.yarnpkg.com/espree/-/espree-11.2.0.tgz#01d5e47dc332aaba3059008362454a8cc34ccaa5"
+  integrity sha512-7p3DrVEIopW1B1avAGLuCSh1jubc01H2JHc8B4qqGblmg5gI9yumBgACjWo4JlIc04ufug4xJ3SQI8HkS/Rgzw==
   dependencies:
     acorn "^8.16.0"
     acorn-jsx "^5.3.2"
@@ -814,9 +807,9 @@ flat-cache@^4.0.0:
     keyv "^4.5.4"
 
 flatted@^3.2.9:
-  version "3.3.4"
-  resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.3.4.tgz#0986e681008f0f13f58e18656c47967682db5ff6"
-  integrity sha512-3+mMldrTAPdta5kjX2G2J7iX4zxtnwpdA8Tr2ZSjkyPSanvbZAcy6flmtnXbEybHrDcU9641lxrMfFuUxVz9vA==
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.4.1.tgz#84ccd9579e76e9cc0d246c11d8be0beb019143e6"
+  integrity sha512-IxfVbRFVlV8V/yRaGzk0UVIcsKKHMSfYw66T/u4nTwlWteQePsxe//LjudR1AMX4tZW3WFCh3Zqa/sjlqpbURQ==
 
 for-each@^0.3.3, for-each@^0.3.5:
   version "0.3.5"
