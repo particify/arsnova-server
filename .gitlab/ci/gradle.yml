@@ -5,8 +5,7 @@ variables:
   GRADLE_USER_HOME_DIR: .gradle-user-home
   GRADLE_USER_HOME: $CI_PROJECT_DIR/$GRADLE_USER_HOME_DIR
   GRADLE_RO_DEP_CACHE: /root/.gradle-ro-cache
-  GRADLE_OPTS: -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false
-  GRADLE_CLI_OPTS: --no-daemon --console=plain --build-cache
+  GRADLE_CLI_OPTS: --no-daemon --console=plain
 
 # Override rules from parent CI config
 workflow:
