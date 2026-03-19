@@ -1,0 +1,307 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: arsnova
+      labels: ddl,qna
+      comment: Create initial definitions for qna module
+      changes:
+        - sql: CREATE SCHEMA "qna"
+      rollback:
+        - sql: DROP SCHEMA "qna"
+  - changeSet:
+      id: 2
+      author: arsnova
+      labels: ddl,qna
+      context: default
+      comment: Create qna database tables
+      changes:
+        - sql: CREATE TYPE "qna_state" AS ENUM ('STARTED', 'PAUSED', 'STOPPED')
+        - createTable:
+            schemaName: qna
+            tableName: qna
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: room_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: room_id_fkey
+                    references: '"room"."room"(id)'
+                    nullable: false
+              - column:
+                  name: topic
+                  type: varchar(100)
+              - column:
+                  name: auto_publish
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: state
+                  type: qna_state
+                  constraints:
+                    nullable: false
+              - column:
+                  name: threshold
+                  type: smallint
+              - column:
+                  name: active_post_id
+                  type: uuid
+              - column:
+                  name: created_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: created_by_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: updated_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+        - createIndex:
+            schemaName: qna
+            tableName: qna
+            column:
+              - name: room_id
+        - sql: CREATE TYPE "qna_moderation_state" AS ENUM ('ACCEPTED', 'PENDING', 'REJECTED')
+        - createTable:
+            schemaName: qna
+            tableName: post
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: qna_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: qna_id_fkey
+                    references: '"qna"."qna"(id)'
+                    nullable: false
+              - column:
+                  name: body
+                  type: varchar(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: correct
+                  type: boolean
+              - column:
+                  name: favorite
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: moderation_state
+                  type: qna_moderation_state
+                  defaultValue: "PENDING"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: created_by_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: updated_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+        - addForeignKeyConstraint:
+            baseTableSchemaName: qna
+            baseTableName: qna
+            baseColumnNames: active_post_id
+            referencedTableSchemaName: qna
+            referencedTableName: post
+            referencedColumnNames: id
+            constraintName: qna_active_post_fkey
+        - createIndex:
+            schemaName: qna
+            tableName: post
+            column:
+              - name: qna_id
+        - createTable:
+            schemaName: qna
+            tableName: tag
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: qna_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: qna_id_fkey
+                    references: '"qna"."qna"(id)'
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+        - createTable:
+            schemaName: qna
+            tableName: post_tag
+            columns:
+              - column:
+                  name: post_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: post_id_fkey
+                    references: '"qna"."post"(id)'
+                    nullable: false
+              - column:
+                  name: tag_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: tag_id_fkey
+                    references: '"qna"."tag"(id)'
+                    nullable: false
+        - addPrimaryKey:
+            schemaName: qna
+            tableName: post_tag
+            columnNames: post_id, tag_id
+        - createIndex:
+            schemaName: qna
+            tableName: tag
+            columns:
+              - column:
+                  name: qna_id
+        - createIndex:
+            schemaName: qna
+            tableName: post_tag
+            columns:
+              - column:
+                  name: tag_id
+        - createTable:
+            schemaName: qna
+            tableName: reply
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: post_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: post_id_fkey
+                    references: '"qna"."post"(id)'
+                    nullable: false
+              - column:
+                  name: body
+                  type: varchar(1000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: created_by_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: updated_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+        - createTable:
+            schemaName: qna
+            tableName: vote
+            columns:
+              - column:
+                  name: post_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: post_id_fkey
+                    references: '"qna"."post"(id)'
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: user_id_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: value
+                  type: smallint
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - createIndex:
+            schemaName: qna
+            tableName: vote
+            column:
+              - name: post_id
+        - addPrimaryKey:
+            schemaName: qna
+            tableName: vote
+            constraintName: vote_pkey
+            columnNames: post_id,user_id

@@ -1,0 +1,14 @@
+extend type Mutation {
+  createQnaTag(input: CreateTagInput): Tag!
+  deleteQnaTag(id: ID!): ID!
+}
+
+type Tag {
+  id: ID!
+  name: String!
+}
+
+input CreateTagInput {
+  qnaId: UUID!
+  name: String!
+}

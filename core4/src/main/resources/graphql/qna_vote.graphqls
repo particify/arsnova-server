@@ -1,0 +1,8 @@
+extend type Mutation {
+  voteQnaPost(input: VoteInput): Post!
+}
+
+input VoteInput {
+  postId: UUID!
+  value: Int!
+}

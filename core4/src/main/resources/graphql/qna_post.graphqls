@@ -1,0 +1,91 @@
+extend type Query {
+  qnaPostsByQnaId(
+    query: PostQueryInput
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): PostConnection
+  qnaPostCountsByQnaId(qnaId: UUID!): PostCountSummary
+}
+
+extend type Mutation {
+  createQnaPost(input: CreatePostInput!): Post!
+  updateQnaPostFavorite(id: ID!, favorite: Boolean!): Post!
+  updateQnaPostCorrect(id: ID!, correct: CorrectState!): Post!
+  acceptQnaPost(id: ID!): Post!
+  rejectQnaPost(id: ID!): Post!
+  deleteQnaPost(id: ID!): ID!
+  deleteQnaPostsByQnaId(qnaId: UUID!, moderationState: ModerationState): Int!
+}
+
+extend type Subscription {
+  qnaPostCreated(qnaId: UUID!): Post!
+  qnaPostDeleted(qnaId: UUID!): Post!
+  qnaPostAccepted(qnaId: UUID!): Post!
+  qnaPostRejected(qnaId: UUID!): Post!
+  qnaPostReplied(qnaId: UUID!): CreateReplyEvent!
+  qnaPostMarkedFavorite(qnaId: UUID!): Post!
+  qnaPostMarkedCorrect(qnaId: UUID!): Post!
+  qnaPostVoted(qnaId: UUID!): Post!
+  qnaPostCountSummary(qnaId: UUID!): PostCountSummary!
+}
+
+type CreateReplyEvent {
+  postId: ID!
+  reply: Reply!
+}
+
+enum ModerationState {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+type Post {
+  id: ID!
+  body: String!
+  correct: CorrectState
+  favorite: Boolean
+  tags: [Tag!]
+  replies: [Reply!]
+  score: Int
+  userVote: Int
+  moderationState: ModerationState!
+  createdAt: DateTime!
+}
+
+input CreatePostInput {
+  qnaId: UUID!
+  body: String!
+  tagIds: [UUID!]
+}
+
+type PostCountSummary {
+  accepted: Int!
+  rejected: Int!
+}
+
+enum PostSortOrder {
+  NEWEST
+  HIGHEST_SCORE
+  LOWEST_SCORE
+}
+
+input PostQueryInput {
+  qnaId: UUID!
+  moderationState: ModerationState
+  period: Int
+  favorite: Boolean
+  correct: CorrectState
+  replied: Boolean
+  tagIds: [UUID!]
+  search: String
+  sortOrder: PostSortOrder
+}
+
+enum CorrectState {
+  UNSET
+  CORRECT
+  WRONG
+}

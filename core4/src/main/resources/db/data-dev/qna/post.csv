@@ -1,0 +1,3 @@
+id,qna_id,body,created_by,moderation_state,favorite
+63a49e1a-8a6d-44b9-85f2-05cedbf8d399,4664a865-2413-4cc7-bfb8-349dd37ade5d,"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.",9c778494-9b52-424d-8c7f-f4936629facb,ACCEPTED,false
+63a49e1a-8a6d-44b9-85f2-05cedbf8d400,4664a865-2413-4cc7-bfb8-349dd37ade5d,"This is my favorite post.",9c778494-9b52-424d-8c7f-f4936629facb,ACCEPTED,true
