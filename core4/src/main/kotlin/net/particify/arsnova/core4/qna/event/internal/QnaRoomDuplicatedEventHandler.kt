@@ -4,22 +4,20 @@
 package net.particify.arsnova.core4.qna.event.internal
 
 import net.particify.arsnova.core4.qna.internal.QnaServiceImpl
-import net.particify.arsnova.core4.room.event.RoomCreatedEvent
+import net.particify.arsnova.core4.room.event.RoomDuplicatedEvent
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 
 @Component
-class QnaRoomCreatedEventHandler(
+class QnaRoomDuplicatedEventHandler(
     private val qnaService: QnaServiceImpl,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   @EventListener
-  fun handleRoomCreated(event: RoomCreatedEvent) {
-    logger.debug("Create default qna due to room creation: {}", event)
-    if (!event.isDuplicated) {
-      qnaService.create(event.id)
-    }
+  fun handleRoomDuplicated(event: RoomDuplicatedEvent) {
+    logger.debug("Duplicate qnas due to room duplication: {}", event)
+    qnaService.duplicateForRoom(event.originalRoomId, event.duplicatedRoomId)
   }
 }

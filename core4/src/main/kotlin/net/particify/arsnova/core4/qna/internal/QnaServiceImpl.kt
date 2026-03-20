@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.qna.QnaService
 import net.particify.arsnova.core4.qna.QnaState
 import net.particify.arsnova.core4.qna.event.QnaCreatedEvent
 import net.particify.arsnova.core4.qna.event.QnaDeletedEvent
+import net.particify.arsnova.core4.qna.event.QnaDuplicatedEvent
 import net.particify.arsnova.core4.qna.exception.QnaNotFoundException
 import net.particify.arsnova.core4.qna.internal.api.QnaEventPublisher
 import org.springframework.context.ApplicationEventPublisher
@@ -22,7 +23,8 @@ class QnaServiceImpl(
     private val qnaRepository: QnaRepository,
     private val postRepository: PostRepository,
     private val qnaEventPublisher: QnaEventPublisher,
-    private val applicationEventPublisher: ApplicationEventPublisher
+    private val applicationEventPublisher: ApplicationEventPublisher,
+    private val tagServiceImpl: TagServiceImpl
 ) : QnaService {
 
   @Transactional
@@ -93,6 +95,16 @@ class QnaServiceImpl(
       updateActivePost(it, null)
       applicationEventPublisher.publishEvent(QnaDeletedEvent(it))
       qnaRepository.deleteById(it)
+    }
+  }
+
+  @Transactional
+  fun duplicateForRoom(originalRoomId: UUID, duplicatedRoomId: UUID) {
+    val qnas = qnaRepository.findByRoomId(originalRoomId, ScrollPosition.offset()).content
+    qnas.forEach {
+      val newQna = it.copy(duplicatedRoomId)
+      val newQnaPersisted = qnaRepository.save(newQna)
+      applicationEventPublisher.publishEvent(QnaDuplicatedEvent(it.id!!, newQnaPersisted.id!!))
     }
   }
 }

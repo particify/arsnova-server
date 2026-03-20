@@ -9,4 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface TagRepository : JpaRepository<Tag, UUID> {
   fun deleteByQnaId(qnaId: UUID): Int
+
+  fun findByQnaId(qnaId: UUID): List<Tag>
 }

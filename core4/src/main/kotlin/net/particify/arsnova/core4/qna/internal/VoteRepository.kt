@@ -15,4 +15,6 @@ interface VoteRepository : JpaRepository<Vote, Vote.PostUserId> {
   @Modifying
   @Query("DELETE FROM Vote v WHERE v.id.postId = :postId")
   fun deleteByPostId(postId: UUID): Int
+
+  fun countByPostId(postId: UUID): Int
 }

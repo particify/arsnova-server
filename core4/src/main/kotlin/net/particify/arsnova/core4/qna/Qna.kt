@@ -39,4 +39,13 @@ class Qna(
     @OneToMany(mappedBy = "qna", fetch = FetchType.EAGER)
     var tags: MutableSet<Tag> = mutableSetOf(),
     @Embedded val auditMetadata: AuditMetadata = AuditMetadata(),
-)
+) {
+  fun copy(roomId: UUID): Qna {
+    return Qna(
+        topic = topic,
+        autoPublish = autoPublish,
+        state = state,
+        threshold = threshold,
+        roomId = roomId)
+  }
+}

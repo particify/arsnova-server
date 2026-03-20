@@ -37,4 +37,14 @@ class ReplyServiceImpl(
   fun update(reply: Reply): Reply = replyRepository.save(reply)
 
   fun delete(id: UUID) = replyRepository.deleteById(id)
+
+  @Transactional
+  fun duplicateForPost(originalPostId: UUID, duplicatedPostId: UUID) {
+    val replies = replyRepository.findByPostId(originalPostId)
+    replies.forEach {
+      val newReply = it.copy(duplicatedPostId)
+      val newReplyPersisted = replyRepository.save(newReply)
+      applicationEventPublisher.publishEvent(ReplyCreatedEvent(newReplyPersisted.id!!))
+    }
+  }
 }

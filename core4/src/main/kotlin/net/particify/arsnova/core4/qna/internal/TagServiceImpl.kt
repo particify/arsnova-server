@@ -34,4 +34,21 @@ class TagServiceImpl(
     applicationEventPublisher.publishEvent(TagsDeletedEvent(id, count))
     return count
   }
+
+  @Transactional
+  fun duplicateForQna(originalQnaId: UUID, duplicatedQnaId: UUID): List<Tag> {
+    val tags = findByQnaId(originalQnaId)
+    val newTags = mutableListOf<Tag>()
+    tags.forEach {
+      val newTag = it.copy(duplicatedQnaId)
+      val newTagPersisted = tagRepository.save(newTag)
+      newTags.add(newTagPersisted)
+      applicationEventPublisher.publishEvent(TagCreatedEvent(newTagPersisted.id!!))
+    }
+    return newTags
+  }
+
+  fun findByQnaId(qnaId: UUID): List<Tag> {
+    return tagRepository.findByQnaId(qnaId)
+  }
 }

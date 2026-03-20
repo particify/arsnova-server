@@ -12,4 +12,5 @@ const val ROOM_CREATED_DESTINATION = "backend.event.room.aftercreation"
 
 @DomainEvent
 @Externalized(target = ROOM_CREATED_DESTINATION)
-data class RoomCreatedEvent(override val id: UUID) : RoomEvent, EntityCreatedEvent<UUID>
+data class RoomCreatedEvent(override val id: UUID, val isDuplicated: Boolean = false) :
+    RoomEvent, EntityCreatedEvent<UUID>
