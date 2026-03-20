@@ -13,4 +13,6 @@ import org.springframework.graphql.data.GraphQlRepository
 @GraphQlRepository
 interface QnaRepository : JpaRepository<Qna, UUID> {
   fun findByRoomId(roomId: UUID, scrollPosition: ScrollPosition): Window<Qna>
+
+  fun findFirstByRoomId(roomId: UUID): Qna?
 }

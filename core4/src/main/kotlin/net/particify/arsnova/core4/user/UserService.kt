@@ -18,4 +18,6 @@ interface UserService : UserDetailsService {
   fun updateLastActivityAt(user: User): User
 
   fun invalidateToken(user: User): User
+
+  fun getOrCreateGhostUser(): User
 }

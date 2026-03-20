@@ -10,15 +10,15 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Version
 import java.util.UUID
-import net.particify.arsnova.core4.common.AuditMetadata
-import net.particify.arsnova.core4.common.UuidGenerator
+import net.particify.arsnova.core4.common.AuditMetadataUuidV7
+import net.particify.arsnova.core4.common.UuidV7Generator
 
 @Entity
 @Table(schema = "qna")
 class Reply(
-    @Id @UuidGenerator var id: UUID? = null,
+    @Id @UuidV7Generator var id: UUID? = null,
     @Version var version: Int? = 0,
     @ManyToOne var post: Post? = null,
     var body: String? = null,
-    @Embedded val auditMetadata: AuditMetadata = AuditMetadata()
+    @Embedded val auditMetadata: AuditMetadataUuidV7 = AuditMetadataUuidV7()
 )

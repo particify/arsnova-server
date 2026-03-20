@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component
 @ConditionalOnBooleanProperty(name = ["persistence.v3-migration.enabled"])
 class MigrationExecutor(
     private val migrator: Migrator,
+    private val qnaMigrator: QnaMigrator,
     private val applicationContext: ApplicationContext,
     private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
@@ -36,6 +37,8 @@ class MigrationExecutor(
     migrator.migrateUsers()
     migrator.migrateRooms()
     migrator.migrateAnnouncements()
+    qnaMigrator.migrateSettings()
+    qnaMigrator.migratePostsAndRelatedData()
     applicationEventPublisher.publishEvent(MigrationCompletedEvent())
     logger.info("Migration completed.")
     SpringApplication.exit(applicationContext)

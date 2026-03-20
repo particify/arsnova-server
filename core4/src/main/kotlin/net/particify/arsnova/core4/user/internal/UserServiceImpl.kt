@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.user.internal
 import java.time.Instant
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
+import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.user.QUser
 import net.particify.arsnova.core4.user.Role
 import net.particify.arsnova.core4.user.User
@@ -17,6 +18,8 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+
+private const val GHOST_USER_NAME = "__ghost_user__"
 
 @Service
 class UserServiceImpl(
@@ -88,6 +91,18 @@ class UserServiceImpl(
   override fun invalidateToken(user: User): User {
     user.tokenVersion = user.tokenVersion!! + 1
     return userRepository.save(user)
+  }
+
+  @Transactional
+  override fun getOrCreateGhostUser(): User {
+    var user = userRepository.findOneByUsername(GHOST_USER_NAME)
+    if (user == null) {
+      // Setting createdAt explicitly to ensure this also works during v3 migrations.
+      user =
+          User(username = GHOST_USER_NAME, auditMetadata = AuditMetadata(createdAt = Instant.now()))
+      userRepository.save(user)
+    }
+    return user
   }
 
   @Deprecated(

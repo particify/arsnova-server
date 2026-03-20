@@ -45,34 +45,15 @@ class CouchdbMigrator(
     val migrationStart = Instant.now()
     entityManager.unwrap<Session>(Session::class.java).jdbcBatchSize = JDBC_BATCH_SIZE
     do {
-      logger.trace(
-          "Loading CouchDB data for migration (design: {}, startkey: {})...", design, startKey)
-      val queryStart = Instant.now()
-      val result =
-          try {
-            couchdbClient
-                .get()
-                .uri {
-                  it.path("/_design/$design/_view/by_id")
-                      .queryParam("reduce", false)
-                      .queryParam("include_docs", true)
-                      .queryParam("startkey", startKey)
-                      .queryParam("limit", COUCHDB_RESULT_LIMIT + 1)
-                      .build()
-                }
-                .retrieve()
-                .body(typeReference<CouchdbResponse<T>>())!!
-          } catch (e: RestClientException) {
-            logger.error("Failed to parse {} document (startkey: {})", design, startKey)
-            throw e
-          }
-      logger.debug("Query took {} ms.", queryStart.until(Instant.now(), ChronoUnit.MILLIS))
+      val result = queryData<T>(startKey)
       result.rows.take(COUCHDB_RESULT_LIMIT).chunked(JDBC_BATCH_SIZE).forEach { chunk ->
         chunk.forEach {
           logger.trace("Migrating {} {}...", design, it.doc.id)
-          val newEntity = fn(it.doc)
-          if (newEntity != null) {
-            entityManager.persist(newEntity)
+          val entityOrEntities = fn(it.doc)
+          if (entityOrEntities is Iterable<*>) {
+            entityOrEntities.forEach(entityManager::persist)
+          } else if (entityOrEntities != null) {
+            entityManager.persist(entityOrEntities)
           }
         }
         val flushStart = Instant.now()
@@ -92,5 +73,33 @@ class CouchdbMigrator(
         count,
         design,
         migrationStart.until(Instant.now(), ChronoUnit.SECONDS))
+  }
+
+  @PublishedApi
+  internal final inline fun <reified T : Entity> queryData(startKey: String): CouchdbResponse<T> {
+    val design = T::class.simpleName
+    logger.trace(
+        "Loading CouchDB data for migration (design: {}, startkey: {})...", design, startKey)
+    val queryStart = Instant.now()
+    val result =
+        try {
+          couchdbClient
+              .get()
+              .uri {
+                it.path("/_design/$design/_view/by_id")
+                    .queryParam("reduce", false)
+                    .queryParam("include_docs", true)
+                    .queryParam("startkey", startKey)
+                    .queryParam("limit", COUCHDB_RESULT_LIMIT + 1)
+                    .build()
+              }
+              .retrieve()
+              .body(typeReference<CouchdbResponse<T>>())!!
+        } catch (e: RestClientException) {
+          logger.error("Failed to parse {} document (startkey: {})", design, startKey)
+          throw e
+        }
+    logger.debug("Query took {} ms.", queryStart.until(Instant.now(), ChronoUnit.MILLIS))
+    return result
   }
 }

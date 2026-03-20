@@ -19,7 +19,7 @@ import net.particify.arsnova.core4.system.migration.v3.Room as RoomV3
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.internal.ExternalLogin
 import net.particify.arsnova.core4.user.internal.RoleRepository
-import net.particify.arsnova.core4.user.internal.UserRepository
+import net.particify.arsnova.core4.user.internal.UserServiceImpl
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty
 import org.springframework.http.MediaType
@@ -29,19 +29,19 @@ import org.springframework.web.client.RestClient
 
 const val JDBC_BATCH_SIZE = 50
 
+/** Handles migration of data for users, rooms and announcements from v3. */
 @Component
 @ConditionalOnBooleanProperty(name = ["persistence.v3-migration.enabled"])
 class Migrator(
     @PersistenceContext private val entityManager: EntityManager,
     private val couchdbMigrator: CouchdbMigrator,
-    private val userRepository: UserRepository,
+    private val userService: UserServiceImpl,
     private val roleRepository: RoleRepository,
     private val roomRepository: RoomRepository,
     private val announcementRepository: AnnouncementRepository,
     private val properties: MigrationProperties,
 ) {
   companion object {
-    private const val GHOST_USER_NAME = "__ghost_user__"
     private const val MAX_ROOM_NAME_LENGTH = 50
     private const val MAX_ROOM_DESCRIPTION_LENGTH = 2000
     private const val MAX_ANNOUNCEMENT_TITLE_LENGTH = 100
@@ -61,7 +61,7 @@ class Migrator(
   @Transactional
   fun migrateUsers() {
     logger.info("Migrating UserProfile data...")
-    val count = userRepository.count()
+    val count = userService.count()
     if (count > 0) {
       logger.warn("User table not empty ({}), skipping migration.", count)
       return
@@ -145,17 +145,17 @@ class Migrator(
       logger.warn("Room table not empty ({}), skipping migration.", count)
       return
     }
-    val ghostUser = getOrCreateGhostUser()
+    val ghostUser = userService.getOrCreateGhostUser()
     couchdbMigrator.migrate<RoomV3> {
       val roomId = UuidHelper.stringToUuid(it.id)
       var userId = UuidHelper.stringToUuid(it.ownerId)!!
-      if (!userRepository.existsById(userId)) {
+      if (!userService.existsById(userId)) {
         // Room might have been transferred to another user.
         // Despite the property name "ownerId", v3 did not update it.
         logger.info("Creator {} for room {} not found. Using ghost user.", userId, roomId)
         userId = ghostUser.id!!
       }
-      val userRef = userRepository.getReferenceById(userId)
+      val userRef = userService.getReferenceById(userId)
       // Bug: creationTimestamp might not have been set or incorrectly set to EPOCH.
       // In those cases, updateTimestamp has been set and can be used as fallback.
       var createdAt =
@@ -217,7 +217,7 @@ class Migrator(
     // Bug: v3 did not delete mapping when a user was deleted.
     // Retrieve user IDs so the creation of memberships can be skipped for non-existing users.
     val userIds = roomAccessList.mapNotNull { UuidHelper.stringToUuid(it.userId) }
-    val existingUserIds = userRepository.findAllById(userIds).map { it.id }
+    val existingUserIds = userService.findAllById(userIds).map { it.id }
     roomAccessList.forEach {
       logger.trace("Migrating RoomAccess ({}, {})...", it.roomId, it.userId)
       val userId = UuidHelper.stringToUuid(it.userId)!!
@@ -230,7 +230,7 @@ class Migrator(
         }
         return@forEach
       }
-      val userRef = userRepository.getReferenceById(userId)
+      val userRef = userService.getReferenceById(userId)
       val newMembership =
           Membership(
               room = room,
@@ -249,7 +249,7 @@ class Migrator(
       logger.warn("Announcement table not empty ({}), skipping migration.", count)
       return
     }
-    val ghostUser = getOrCreateGhostUser()
+    val ghostUser = userService.getOrCreateGhostUser()
     couchdbMigrator.migrate<AnnouncementV3> {
       val announcementId = UuidHelper.stringToUuid(it.id)
       val roomId = UuidHelper.stringToUuid(it.roomId)!!
@@ -262,7 +262,7 @@ class Migrator(
       }
       val roomRef = roomRepository.getReferenceById(roomId)
       var userId = UuidHelper.stringToUuid(it.creatorId)!!
-      if (!userRepository.existsById(userId)) {
+      if (!userService.existsById(userId)) {
         logger.info(
             "Creator {} for announcement {} not found. Using ghost user.", userId, announcementId)
         userId = ghostUser.id!!
@@ -288,15 +288,5 @@ class Migrator(
           title = title,
           body = body)
     }
-  }
-
-  private fun getOrCreateGhostUser(): User {
-    var user = userRepository.findOneByUsername(GHOST_USER_NAME)
-    if (user == null) {
-      user =
-          User(username = GHOST_USER_NAME, auditMetadata = AuditMetadata(createdAt = Instant.now()))
-      entityManager.persist(user)
-    }
-    return user
   }
 }
