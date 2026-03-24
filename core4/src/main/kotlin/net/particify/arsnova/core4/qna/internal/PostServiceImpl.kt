@@ -141,4 +141,8 @@ class PostServiceImpl(
     val rejected = postRepository.countByQnaIdAndModerationState(qnaId, ModerationState.REJECTED)
     return PostCountSummary(accepted, rejected)
   }
+
+  fun countAll(): Long {
+    return postRepository.count()
+  }
 }
