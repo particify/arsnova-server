@@ -13,6 +13,10 @@ type AdminUserStats {
 
 type AdminRoomStats {
   totalCount: Int!
+  membershipCount: Int!
+  activeRoomCount: Int!
+  managingUserCount: Int!
+  participantCount: Int!
 }
 
 type AdminAnnouncementStats {
