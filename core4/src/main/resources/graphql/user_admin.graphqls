@@ -19,6 +19,7 @@ extend type Mutation {
 type AdminUser {
   id: ID!
   username: String
+  displayId: String
   mailAddress: String
   unverifiedMailAddress: String
   uiSettings: UserUiSettings
@@ -26,4 +27,7 @@ type AdminUser {
   verificationCode: Int
   verificationErrors: Int
   verificationExpiresAt: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
+  lastActivityAt: DateTime
 }
