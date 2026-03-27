@@ -21,4 +21,8 @@ class Vote(
     var value: Int = 0,
 ) {
   @Embeddable data class PostUserId(var postId: UUID? = null, var userId: UUID? = null)
+
+  fun copy(postId: UUID, userId: UUID): Vote {
+    return Vote(post = Post(id = postId), user = User(id = userId), value = value)
+  }
 }

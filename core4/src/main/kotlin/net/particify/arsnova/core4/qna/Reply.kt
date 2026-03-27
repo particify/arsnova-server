@@ -21,4 +21,8 @@ class Reply(
     @ManyToOne var post: Post? = null,
     var body: String? = null,
     @Embedded val auditMetadata: AuditMetadataUuidV7 = AuditMetadataUuidV7()
-)
+) {
+  fun copy(postId: UUID): Reply {
+    return Reply(post = Post(id = postId), body = body)
+  }
+}

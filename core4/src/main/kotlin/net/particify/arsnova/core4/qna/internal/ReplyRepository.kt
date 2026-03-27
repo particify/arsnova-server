@@ -9,4 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface ReplyRepository : JpaRepository<Reply, UUID> {
   fun deleteByPostId(postId: UUID): Int
+
+  fun findByPostId(postId: UUID): List<Reply>
 }

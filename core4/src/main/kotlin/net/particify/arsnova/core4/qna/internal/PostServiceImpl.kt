@@ -9,8 +9,10 @@ import net.particify.arsnova.core4.qna.CorrectState
 import net.particify.arsnova.core4.qna.ModerationState
 import net.particify.arsnova.core4.qna.Post
 import net.particify.arsnova.core4.qna.PostCountSummary
+import net.particify.arsnova.core4.qna.Tag
 import net.particify.arsnova.core4.qna.event.PostCreatedEvent
 import net.particify.arsnova.core4.qna.event.PostDeletedEvent
+import net.particify.arsnova.core4.qna.event.PostDuplicatedEvent
 import net.particify.arsnova.core4.qna.event.PostsDeletedEvent
 import net.particify.arsnova.core4.qna.exception.PostNotFoundException
 import net.particify.arsnova.core4.qna.exception.QnaNotFoundException
@@ -144,5 +146,16 @@ class PostServiceImpl(
 
   fun countAll(): Long {
     return postRepository.count()
+  }
+
+  @Transactional
+  fun duplicateForQna(originalQnaId: UUID, duplicatedQnaId: UUID, duplicatedTags: List<Tag>) {
+    val posts = postRepository.findByQnaId(originalQnaId)
+    posts.forEach {
+      val tags = duplicatedTags.filter { dt -> it.tags.map { t -> t.name }.contains(dt.name) }
+      val newPost = it.copy(duplicatedQnaId, tags.toMutableSet())
+      val newPostPersisted = postRepository.save(newPost)
+      applicationEventPublisher.publishEvent(PostDuplicatedEvent(it.id!!, newPostPersisted.id!!))
+    }
   }
 }

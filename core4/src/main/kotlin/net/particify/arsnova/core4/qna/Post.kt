@@ -44,4 +44,15 @@ class Post(
     @Formula("(SELECT COALESCE(SUM(v.value), 0) FROM qna.vote v WHERE v.post_id = id)")
     var score: Int = 0,
     @Embedded val auditMetadata: AuditMetadataUuidV7 = AuditMetadataUuidV7()
-)
+) {
+  fun copy(qnaId: UUID, tags: MutableSet<Tag>): Post {
+    return Post(
+        qna = Qna(id = qnaId),
+        body = body,
+        correct = correct,
+        favorite = favorite,
+        tags = tags,
+        replies = replies,
+        moderationState = moderationState)
+  }
+}

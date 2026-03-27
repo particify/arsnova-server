@@ -16,4 +16,8 @@ class Tag(
     @Id @UuidGenerator var id: UUID? = null,
     @ManyToOne var qna: Qna? = null,
     var name: String? = null
-)
+) {
+  fun copy(qnaId: UUID): Tag {
+    return Tag(qna = Qna(id = qnaId), name = name)
+  }
+}

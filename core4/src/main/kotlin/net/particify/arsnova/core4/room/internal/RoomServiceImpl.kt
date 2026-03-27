@@ -34,7 +34,7 @@ class RoomServiceImpl(
   private val secureRandom = SecureRandom()
 
   @Transactional
-  fun create(room: Room, user: User): Room {
+  fun create(room: Room, user: User, isDuplication: Boolean = false): Room {
     val membership =
         Membership(
             room = room,
@@ -44,7 +44,7 @@ class RoomServiceImpl(
         )
     room.userRoles.add(membership)
     val persistedRoom = save(room)
-    applicationEventPublisher.publishEvent(RoomCreatedEvent(persistedRoom.id!!))
+    applicationEventPublisher.publishEvent(RoomCreatedEvent(persistedRoom.id!!, isDuplication))
     return persistedRoom
   }
 
@@ -57,7 +57,7 @@ class RoomServiceImpl(
   @Transactional
   fun duplicate(room: Room, newName: String, user: User): Room {
     val newRoom = room.copy(generateShortId(), newName)
-    val persistedRoom = create(newRoom, user)
+    val persistedRoom = create(newRoom, user, true)
     applicationEventPublisher.publishEvent(RoomDuplicatedEvent(room.id!!, persistedRoom.id!!))
     return persistedRoom
   }
