@@ -2,6 +2,7 @@ extend type Query {
   adminRoomStats: AdminRoomStats
   adminUserStats: AdminUserStats
   adminAnnouncementStats: AdminAnnouncementStats
+  adminQnaStats: AdminQnaStats
 }
 
 type AdminUserStats {
@@ -12,8 +13,16 @@ type AdminUserStats {
 
 type AdminRoomStats {
   totalCount: Int!
+  membershipCount: Int!
+  activeRoomCount: Int!
+  managingUserCount: Int!
+  participantCount: Int!
 }
 
 type AdminAnnouncementStats {
   totalCount: Int!
+}
+
+type AdminQnaStats {
+  postCount: Int!
 }

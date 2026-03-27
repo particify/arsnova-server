@@ -40,4 +40,18 @@ interface MembershipRepository :
   fun findOneByRoomIdAndRole(roomId: UUID, role: RoomRole): Membership?
 
   fun deleteAllByIdUserId(userId: UUID): Int
+
+  @Query(
+      "SELECT COUNT(roomId) FROM (" +
+          "SELECT m.room.id roomId FROM Membership m " +
+          "WHERE m.lastActivityAt > :lastActivityAtAfter " +
+          "GROUP BY m.room " +
+          "HAVING COUNT(m) >= 10)")
+  fun countAllActiveRoomsAndLastActivityAtAfter(lastActivityAtAfter: Instant): Long
+
+  @Query("SELECT COUNT(DISTINCT m.user) FROM Membership m " + "WHERE m.role != 'PARTICIPANT'")
+  fun countAllManagingUsers(): Long
+
+  @Query("SELECT COUNT(DISTINCT m.user) FROM Membership m " + "WHERE m.role = 'PARTICIPANT'")
+  fun countAllParticipantUsers(): Long
 }

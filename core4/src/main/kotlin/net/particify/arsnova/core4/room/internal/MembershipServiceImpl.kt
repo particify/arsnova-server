@@ -76,4 +76,9 @@ class MembershipServiceImpl(
       "Deprecated by base implementation", replaceWith = ReplaceWith("deleteAllInBatch(entities)"))
   override fun deleteInBatch(entities: Iterable<Membership>) =
       membershipRepository.deleteInBatch(entities)
+
+  fun countAllActiveRooms(): Long {
+    return membershipRepository.countAllActiveRoomsAndLastActivityAtAfter(
+        Instant.now().minus(Duration.ofMinutes(LAST_ACTIVITY_THRESHOLD_MINUTES)))
+  }
 }
