@@ -39,14 +39,15 @@ class AuthenticationWebSocketInterceptor(
     }
     val authentication = UserJwtAuthentication(tokenMatcher.group(1))
 
-    try {
+    return try {
       val authenticatedToken: Authentication =
           userJwtAuthenticationProvider.authenticate(authentication)
-      logger.debug("Storing UserJwtAuthentication to session: $authenticatedToken")
+      logger.debug("Storing UserJwtAuthentication to session: {}", authenticatedToken)
       SecurityContextHolder.getContext().authentication = authenticatedToken
+      Mono.empty()
     } catch (e: AuthenticationException) {
       logger.debug("User JWT authentication failed", e)
+      Mono.error(e)
     }
-    return Mono.just(authentication)
   }
 }
