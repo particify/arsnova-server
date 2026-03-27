@@ -130,7 +130,7 @@ alias-adjectives:
   generous: "{0} généreu{1, choice, f#se|m#x}"
   giant: "{0} géant{1, choice, f#e|m#}"
   helpful: "{0} serviable"
-  happy: "{0} heureu{1, choice, f#se|m#x"
+  happy: "{0} heureu{1, choice, f#se|m#x}"
   hilarious: "{0} hilarant{1, choice, f#e|m#}"
   imaginative: "{0} imaginati{1, choice, f#ve|m#f}"
   ingenious: "{0} ingénieu{1, choice, f#se|m#x}"
