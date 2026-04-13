@@ -1,6 +1,6 @@
 services:
   apisix:
-    image: apache/apisix:3.15.0-debian@sha256:4c201af4f6887def17c22be19e38f64cedf507db8bcc43991089778ad1188b9c
+    image: apache/apisix:3.16.0-debian@sha256:b921bdef3cfb2ca72e483d643f40e7843683ff8e188984489c2020f17654ee88
     ports:
       - 9080:9080
     volumes:
