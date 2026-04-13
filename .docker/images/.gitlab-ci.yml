@@ -43,7 +43,7 @@ tag_docker_image:
       variables:
         IMAGE_TAG_ALIAS: next
   image:
-    name: gcr.io/go-containerregistry/crane:debug@sha256:b198e12257c537a2c703627883914a5647d7501dae8e879b1cb018cbd511cd7a
+    name: gcr.io/go-containerregistry/crane:debug@sha256:22de5fee4326edae01a568c5a53b69c755901c5f5aa1c06a7c907bef18937356
     entrypoint: [""]
   allow_failure: true
   script:
