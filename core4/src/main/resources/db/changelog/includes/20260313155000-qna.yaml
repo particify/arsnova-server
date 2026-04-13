@@ -190,7 +190,7 @@ databaseChangeLog:
                     nullable: false
         - createTable:
             schemaName: qna
-            tableName: post_tag
+            tableName: post_tag_mapping
             columns:
               - column:
                   name: post_id
@@ -208,7 +208,7 @@ databaseChangeLog:
                     nullable: false
         - addPrimaryKey:
             schemaName: qna
-            tableName: post_tag
+            tableName: post_tag_mapping
             columnNames: post_id, tag_id
         - createIndex:
             schemaName: qna
@@ -218,7 +218,7 @@ databaseChangeLog:
                   name: qna_id
         - createIndex:
             schemaName: qna
-            tableName: post_tag
+            tableName: post_tag_mapping
             columns:
               - column:
                   name: tag_id
