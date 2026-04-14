@@ -7,7 +7,7 @@ extend type Query {
     last: Int
     before: String
   ): AdminRoomConnection
-  adminMembershipsByUserId(userId: UUID!): RoomMembershipConnection
+  adminRoomMembershipsByUserId(userId: UUID!): RoomMembershipConnection
   adminRoomManagingMembersByRoomId(roomId: UUID!): [RoomMember!]
 }
 

@@ -92,7 +92,7 @@ class AdminRoomQueryController(
   }
 
   @QueryMapping
-  fun adminMembershipsByUserId(
+  fun adminRoomMembershipsByUserId(
       @Argument userId: UUID,
       subrange: ScrollSubrange,
   ): Window<Membership> {
