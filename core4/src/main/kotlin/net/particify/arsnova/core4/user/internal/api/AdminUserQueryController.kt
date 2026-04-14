@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user.internal.api
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Controller
 @SchemaMapping(typeName = "Query")
 class AdminUserQueryController(private val userService: UserServiceImpl) {
   companion object {
-    const val DEFAULT_QUERY_LIMIT = 10
+    const val DEFAULT_QUERY_LIMIT = 50
   }
 
   @QueryMapping
@@ -68,5 +68,25 @@ class AdminUserQueryController(private val userService: UserServiceImpl) {
   @SchemaMapping(typeName = "AdminUser")
   fun verificationExpiresAt(user: User): OffsetDateTime? {
     return user.verificationExpiresAt?.atOffset(ZoneOffset.UTC)
+  }
+
+  @SchemaMapping(typeName = "AdminUser")
+  fun createdAt(user: User): OffsetDateTime? {
+    return user.auditMetadata.createdAt?.atOffset(ZoneOffset.UTC)
+  }
+
+  @SchemaMapping(typeName = "AdminUser")
+  fun updatedAt(user: User): OffsetDateTime? {
+    return user.auditMetadata.updatedAt?.atOffset(ZoneOffset.UTC)
+  }
+
+  @SchemaMapping(typeName = "AdminUser")
+  fun lastActivityAt(user: User): OffsetDateTime? {
+    return user.lastActivityAt?.atOffset(ZoneOffset.UTC)
+  }
+
+  @SchemaMapping(typeName = "AdminUser")
+  fun displayId(user: User): String? {
+    return user.username ?: user.unverifiedMailAddress
   }
 }
