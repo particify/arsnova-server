@@ -178,14 +178,17 @@ class QnaMigrator(
     } else if (!comment.tag.isNullOrBlank()) {
       missingTag = true
     }
-    post.replies.add(
-        Reply(
-            id = UuidHelper.generateUuidV7(comment.timestamp, randomGenerator),
-            post = post,
-            body = comment.body,
-            auditMetadata = AuditMetadataUuidV7(createdBy = ghostUser.id),
-        ))
     entityManager.persist(post)
+    if (!comment.answer.isNullOrBlank()) {
+      val reply =
+          Reply(
+              id = UuidHelper.generateUuidV7(comment.timestamp, randomGenerator),
+              post = post,
+              body = comment.answer.trim(),
+              auditMetadata = AuditMetadataUuidV7(createdBy = ghostUser.id),
+          )
+      entityManager.persist(reply)
+    }
     migrateVotes(post, comment.id)
     logger.trace("Migrating Comment {} -> {}...", comment.id, post.id)
     return CommentMigrationResult(missingTag)
@@ -233,10 +236,10 @@ class QnaMigrator(
       if (!it.commentThresholdEnabled && it.commentTags.isEmpty()) {
         return@migrate null
       }
-      val roomId = UuidHelper.stringToUuid(it.id)!!
+      val roomId = UuidHelper.stringToUuid(it.roomId)!!
       val qna = qnaRepository.findFirstByRoomId(roomId)
       if (qna == null) {
-        logger.warn("Room {} does not exist. Skipping qna creation.", roomId)
+        logger.warn("Room {} does not exist. Skipping qna settings update.", roomId)
         return@migrate null
       }
       logger.trace("Migrating additional qna settings for room {}...", roomId)
