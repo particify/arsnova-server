@@ -7,6 +7,8 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Positive
+import jakarta.validation.constraints.Size
 import java.net.URL
 import java.time.Duration
 import org.hibernate.validator.constraints.Length
@@ -37,8 +39,10 @@ data class SecurityProperties(
   )
 
   data class Challenge(
-      @field:Length(min = 32) val secret: String,
-      val maxNumber: Long,
-      val validitySeconds: Long
+      @field:Positive val validitySeconds: Long,
+      val algorithm: String,
+      @field:Size(min = 32) val secret: String,
+      @field:Positive val iterationCost: Int,
+      @field:Positive val maxIterations: Int,
   )
 }
