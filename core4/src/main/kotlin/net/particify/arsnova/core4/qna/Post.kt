@@ -32,7 +32,7 @@ class Post(
     var favorite: Boolean = false,
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "post_tag",
+        name = "post_tag_mapping",
         schema = "qna",
         joinColumns = [JoinColumn(name = "post_id")],
         inverseJoinColumns = [JoinColumn(name = "tag_id")])
