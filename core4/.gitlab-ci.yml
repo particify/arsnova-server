@@ -31,3 +31,7 @@ detekt:
 unit_test:
   rules:
     - when: never
+
+docker_image:
+  variables:
+    GRADLE_JIB_OPTS: -x processAot -x processTestAot
