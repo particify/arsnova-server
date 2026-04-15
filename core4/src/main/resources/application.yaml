@@ -48,8 +48,10 @@ security:
   jwt:
     validity-period: 6H
   challenge:
-    max-number: 100_000
     validity-seconds: 60
+    algorithm: PBKDF2/SHA-256
+    iteration-cost: 5_000
+    max-iterations: 5_000
   authorize-uri-header: X-Forwarded-Uri
   authorize-uri-prefix: /api
 

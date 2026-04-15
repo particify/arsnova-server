@@ -3,7 +3,6 @@
  */
 package net.particify.arsnova.core4.system.security
 
-import org.altcha.altcha.Altcha
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,14 +15,23 @@ import org.springframework.web.server.ResponseStatusException
 @RestController
 class ChallengeController(val challengeService: ChallengeService) {
   @GetMapping("/challenge")
-  fun challenge(): Altcha.Challenge {
-    return challengeService.generateChallenge()
+  fun challenge(): String {
+    return challengeService.generateChallenge().toJson()
   }
 
   @PostMapping("/challenge")
   fun verifyChallenge(@RequestBody encodedPayload: ChallengePayload): TokenResponse {
-    if (!challengeService.verifySolution(encodedPayload.solution))
-        throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid challenge solution")
+    val result = challengeService.verifySolution(encodedPayload.solution)
+    if (!result.verified) {
+      throw ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          when {
+            result.expired -> "Challenge expired"
+            result.invalidSignature -> "Invalid signature"
+            result.invalidSolution -> "Invalid solution"
+            else -> "Verification failed"
+          })
+    }
     return TokenResponse(challengeService.createJwtForSolution(encodedPayload.solution))
   }
 
