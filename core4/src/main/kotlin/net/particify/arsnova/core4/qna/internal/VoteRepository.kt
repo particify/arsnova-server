@@ -16,5 +16,6 @@ interface VoteRepository : JpaRepository<Vote, Vote.PostUserId> {
   @Query("DELETE FROM Vote v WHERE v.id.postId = :postId")
   fun deleteByPostId(postId: UUID): Int
 
-  fun countByPostId(postId: UUID): Int
+  @Query("SELECT COALESCE(SUM(v.value), 0) FROM Vote v WHERE v.id.postId = :postId")
+  fun sumValueByPostId(postId: UUID): Int
 }
