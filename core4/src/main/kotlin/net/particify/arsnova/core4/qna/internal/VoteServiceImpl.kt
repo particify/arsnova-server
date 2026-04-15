@@ -12,8 +12,8 @@ import net.particify.arsnova.core4.qna.event.VoteDeletedEvent
 import net.particify.arsnova.core4.qna.event.VotesDeletedEvent
 import net.particify.arsnova.core4.qna.exception.PostNotFoundException
 import net.particify.arsnova.core4.qna.internal.api.PostEventPublisher
-import net.particify.arsnova.core4.system.migration.v3.UuidHelper
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.UserService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service
 class VoteServiceImpl(
     private val voteRepository: VoteRepository,
     private val postRepository: PostRepository,
+    private val userService: UserService,
     private val postEventPublisher: PostEventPublisher,
     private val applicationEventPublisher: ApplicationEventPublisher
 ) {
@@ -61,12 +62,16 @@ class VoteServiceImpl(
 
   @Transactional
   fun duplicateForPost(originalPostId: UUID, duplicatedPostId: UUID) {
-    val score = voteRepository.countByPostId(originalPostId)
+    val score = voteRepository.sumValueByPostId(originalPostId)
+    if (score == 0) {
+      return
+    }
+    val ghostUser = userService.getOrCreateGhostUser()
     voteRepository.save(
         Vote(
-            id = Vote.PostUserId(duplicatedPostId, UuidHelper.NIL),
+            id = Vote.PostUserId(duplicatedPostId, ghostUser.id),
             post = Post(id = duplicatedPostId),
-            user = User(id = UuidHelper.NIL),
+            user = ghostUser,
             value = score))
     applicationEventPublisher.publishEvent(VoteCreatedEvent(duplicatedPostId))
   }
