@@ -1,1 +1,4 @@
+workflow:
+  name: formatting
+
 include: .gitlab/ci/nodejs.yml

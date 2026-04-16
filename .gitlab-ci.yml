@@ -12,35 +12,51 @@ build_project:
   parallel:
     matrix:
       - PROJECT: authz
+        TYPE: legacy
       - PROJECT: comments
+        TYPE: legacy
       - PROJECT: core
+        TYPE: gradle
       - PROJECT: core4
+        TYPE: gradle
       - PROJECT: formatting
+        TYPE: nodejs
       - PROJECT: websocket
+        TYPE: gradle
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: never
-    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/
+    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/ && $TYPE == "legacy"
       changes:
-        - "*"
-        - ".gitlab/ci/**/*"
+        - "$PROJECT/**/*"
+      when: on_success
+    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/ && $TYPE == "gradle"
+      changes:
+        - "*gradle*"
+        - ".gitlab-ci.yml"
+        - ".gitlab/ci/gradle.yml"
         - "common/**/*"
         - "gradle/**/*"
         - "platform/**/*"
         - "$PROJECT/**/*"
       when: on_success
-    - if: $CI_COMMIT_BRANCH =~ /^renovate\//
+    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/ && $TYPE == "nodejs"
+      changes:
+        - ".gitlab-ci.yml"
+        - ".gitlab/ci/nodejs.yml"
+        - "$PROJECT/**/*"
+      when: on_success
+    - if: $CI_COMMIT_BRANCH =~ /^renovate\// && $TYPE != "legacy"
       changes:
         paths:
-          - "*"
+          - "*gradle*"
+          - ".gitlab-ci.yml"
           - ".gitlab/ci/**/*"
           - "common/**/*"
           - "gradle/**/*"
           - "platform/**/*"
           - "$PROJECT/**/*"
-        # GitLab does not support variables in compare_to (tested against 15.5)
-        #compare_to: $CI_DEFAULT_BRANCH
-        compare_to: master
+        compare_to: $CI_DEFAULT_BRANCH
       when: on_success
     - if: $CI_PIPELINE_SOURCE == "web"
       when: manual
@@ -90,6 +106,7 @@ build_dependency_image:
 dummy_job:
   rules:
     - changes:
+        - "*"
         - ".docker/**/*"
         - "docs/**/*"
       when: always

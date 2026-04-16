@@ -1,3 +1,6 @@
+workflow:
+  name: websocket
+
 variables:
   ENABLE_KTLINT: 1
 

@@ -1,3 +1,6 @@
+workflow:
+  name: core
+
 variables:
   ENABLE_CHECKSTYLE: 1
 
