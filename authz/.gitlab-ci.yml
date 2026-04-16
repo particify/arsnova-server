@@ -1,3 +1,6 @@
+workflow:
+  name: authz
+
 variables:
   ENABLE_KTLINT: 1
 

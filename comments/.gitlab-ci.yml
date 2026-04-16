@@ -1,1 +1,4 @@
+workflow:
+  name: comments
+
 include: .gitlab/ci/gradle.yml
