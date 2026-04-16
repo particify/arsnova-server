@@ -104,8 +104,11 @@ build_dependency_image:
 
 # Ensure that a pipeline is created to allow merging.
 dummy_job:
+  stage: .post
+  needs: []
   rules:
-    - changes:
+    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH =~ /^renovate\//
+      changes:
         - "*"
         - ".docker/**/*"
         - "docs/**/*"
