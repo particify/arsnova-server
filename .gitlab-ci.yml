@@ -26,11 +26,11 @@ build_project:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: never
-    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/ && $TYPE == "legacy"
+    - if: ($CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/) && $TYPE == "legacy"
       changes:
         - "$PROJECT/**/*"
       when: on_success
-    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/ && $TYPE == "gradle"
+    - if: ($CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/) && $TYPE == "gradle"
       changes:
         - "*gradle*"
         - ".gitlab-ci.yml"
@@ -40,7 +40,7 @@ build_project:
         - "platform/**/*"
         - "$PROJECT/**/*"
       when: on_success
-    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/ && $TYPE == "nodejs"
+    - if: ($CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+$/ || $CI_COMMIT_TAG =~ /^v[0-9]+/) && $TYPE == "nodejs"
       changes:
         - ".gitlab-ci.yml"
         - ".gitlab/ci/nodejs.yml"
