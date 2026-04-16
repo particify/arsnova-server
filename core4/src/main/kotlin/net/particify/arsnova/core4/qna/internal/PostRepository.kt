@@ -23,6 +23,6 @@ interface PostRepository : JpaRepository<Post, UUID>, QuerydslPredicateExecutor<
   fun deleteByQnaId(qnaId: UUID): Int
 
   @Modifying
-  @Query(value = "DELETE FROM qna.post_tag WHERE tag_id = :tagId", nativeQuery = true)
+  @Query(value = "DELETE FROM qna.post_tag_mapping WHERE tag_id = :tagId", nativeQuery = true)
   fun removeTagFromPostsByTagId(tagId: UUID): Int
 }
