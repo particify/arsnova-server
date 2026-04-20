@@ -109,6 +109,7 @@ class PostServiceImpl(
     return if (moderationState != null) {
       val postIds =
           postRepository.findByQnaIdAndModerationState(id, moderationState).map { it.id!! }
+      resetActivePostIfDeleted(id, postIds)
       deleteVotesAndRepliesByPostIds(postIds)
       applicationEventPublisher.publishEvent(PostsDeletedEvent(id, postIds.size))
       postRepository.deleteByQnaIdAndModerationState(id, moderationState)
@@ -120,6 +121,7 @@ class PostServiceImpl(
   @Transactional
   fun deletePostsByQnaId(id: UUID): Int {
     val postIds = postRepository.findByQnaId(id).map { it.id!! }
+    resetActivePostIfDeleted(id, postIds)
     postIds.chunked(DELETE_CHUNK_SIZE).forEach { ids -> deleteVotesAndRepliesByPostIds(ids) }
     applicationEventPublisher.publishEvent(PostsDeletedEvent(id, postIds.size))
     return postRepository.deleteByQnaId(id)
@@ -156,6 +158,13 @@ class PostServiceImpl(
       val newPost = it.copy(duplicatedQnaId, tags.toMutableSet())
       val newPostPersisted = postRepository.save(newPost)
       applicationEventPublisher.publishEvent(PostDuplicatedEvent(it.id!!, newPostPersisted.id!!))
+    }
+  }
+
+  private fun resetActivePostIfDeleted(qnaId: UUID, deletedIds: List<UUID>) {
+    val qna = this.qnaRepository.findByIdOrNull(qnaId)
+    if (qna?.activePost != null && deletedIds.contains(qna.activePost?.id)) {
+      qnaServiceImpl.updateActivePost(qnaId, null)
     }
   }
 }
