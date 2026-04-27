@@ -8,7 +8,7 @@ services:
     volumes:
       - couchdb_data:/opt/couchdb/data
   postgresql-authz:
-    image: postgres:18.3-alpine@sha256:52098013b4b64a746626437d38afc03cabff6cdeb4d3d92e2342aa95f0ce56ea
+    image: postgres:18.3-alpine@sha256:54451ecb8ab38c24c3ec123f2fd501303a3a1856a5c66e98cecf2460d5e1e9d7
     restart: $RESTART_MODE
     environment:
       POSTGRES_DB: arsnovaauth
@@ -17,7 +17,7 @@ services:
     volumes:
       - postgresql_data_auth:/var/lib/postgresql
   postgresql-comments:
-    image: postgres:18.3-alpine@sha256:52098013b4b64a746626437d38afc03cabff6cdeb4d3d92e2342aa95f0ce56ea
+    image: postgres:18.3-alpine@sha256:54451ecb8ab38c24c3ec123f2fd501303a3a1856a5c66e98cecf2460d5e1e9d7
     restart: $RESTART_MODE
     environment:
       POSTGRES_DB: arsnovacomment
