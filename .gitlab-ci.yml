@@ -101,6 +101,7 @@ build_dependency_image:
   trigger:
     include: ".docker/images/.gitlab-ci.yml"
     strategy: depend
+  allow_failure: true
 
 # Ensure that a pipeline is created to allow merging.
 dummy_job:
