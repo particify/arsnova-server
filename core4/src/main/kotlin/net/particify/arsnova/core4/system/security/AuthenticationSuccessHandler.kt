@@ -1,4 +1,4 @@
-/* Copyright 2019-2025 Particify GmbH
+/* Copyright 2019-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.security
@@ -37,7 +37,7 @@ class AuthenticationSuccessHandler(private val refreshCookieComponent: RefreshCo
     if (session == null || session.getAttribute(URL_ATTRIBUTE) == null) {
       val user = authentication.principal as User
       val subject = user.id.toString()
-      refreshCookieComponent.add(subject, user.version!!, response)
+      refreshCookieComponent.add(subject, user.tokenVersion!!, response)
       response.contentType = MediaType.TEXT_HTML_VALUE
       response.writer.println(
           "<!DOCTYPE html><script>if (window.opener) window.close(); else location.href='/login/complete'</script>")
