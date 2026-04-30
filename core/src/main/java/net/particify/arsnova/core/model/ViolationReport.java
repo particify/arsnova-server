@@ -102,10 +102,10 @@ public class ViolationReport extends Entity {
     }
     final ViolationReport that = (ViolationReport) o;
     return Objects.equals(targetType, that.targetType)
-      && Objects.equals(targetId, that.targetId)
-      && reason == that.reason && Objects.equals(description, that.description)
-      && Objects.equals(creatorId, that.creatorId)
-      && decision == that.decision;
+        && Objects.equals(targetId, that.targetId)
+        && reason == that.reason && Objects.equals(description, that.description)
+        && Objects.equals(creatorId, that.creatorId)
+        && decision == that.decision;
   }
 
   @Override

@@ -105,8 +105,8 @@ public abstract class AbstractUserDetailsService implements ApplicationEventPubl
     }
 
     return new User(
-      userProfile,
-      grantedAuthorities);
+        userProfile,
+        grantedAuthorities);
   }
 
   private Optional<UserProfile> getUserProfile(

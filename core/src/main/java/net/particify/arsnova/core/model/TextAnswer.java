@@ -78,7 +78,6 @@ public class TextAnswer extends Answer {
     this.read = read;
   }
 
-
   @JsonView(View.Persistence.class)
   public boolean isHidden() {
     return hidden;

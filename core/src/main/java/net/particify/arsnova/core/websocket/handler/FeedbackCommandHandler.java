@@ -44,7 +44,7 @@ public class FeedbackCommandHandler {
     this.roomSettingsService = roomSettingsService;
   }
 
-  /* ToDo: Listen to a more specific event */
+  /* TODO: Listen to a more specific event */
   @EventListener
   public void handleLockFeedback(final AfterPatchEvent<Room> event) {
     if (event.getRequestedChanges().containsKey("settings")) {

@@ -349,7 +349,6 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
       case OWNER_PERMISSION:
         return getUserId(auth).equals(targetAnswer.getCreatorId());
       case UPDATE_PERMISSION:
-        /* TODO */
         return false;
       case MODERATE_PERMISSION:
         return hasAuthenticationRoomModeratingRole(auth, roomId);

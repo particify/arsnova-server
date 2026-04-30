@@ -741,5 +741,5 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
     cacheManager.getCache("leaderboard-contentgroup").clear();
   }
 
-  private record AnswerUniqueKey(String userId, String contentId) { }
+  private record AnswerUniqueKey(String userId, String contentId) {}
 }

@@ -80,8 +80,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
   }
 
   /**
-    * Retrieves all contents of a room.
-    */
+   * Retrieves all contents of a room.
+   */
   @Override
   public List<Content> getByRoomId(final String roomId) {
     return get(contentRepository.findIdsByRoomId(roomId));
