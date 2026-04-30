@@ -201,5 +201,5 @@ public class ContentController extends AbstractEntityController<Content> {
     }
   }
 
-  private record BannedKeywordRequestEntity(String keyword) { }
+  private record BannedKeywordRequestEntity(String keyword) {}
 }

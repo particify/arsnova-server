@@ -343,7 +343,6 @@ public class Statistics {
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int deleted;
 
-
     public int getTotalCount() {
       return totalCount;
     }

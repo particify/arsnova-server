@@ -79,7 +79,8 @@ public class LoginAuthenticationSucessHandler extends
       cookie.setHttpOnly(true);
       response.addCookie(cookie);
       response.setContentType(MediaType.TEXT_HTML_VALUE);
-      response.getWriter().println("<!DOCTYPE html><script>if (window.opener) window.close(); else location.href='/login/complete'</script>");
+      response.getWriter().println(
+          "<!DOCTYPE html><script>if (window.opener) window.close(); else location.href='/login/complete'</script>");
 
       return;
     }
