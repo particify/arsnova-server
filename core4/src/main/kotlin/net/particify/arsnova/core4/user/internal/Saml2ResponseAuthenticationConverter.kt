@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user.internal
@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.user.internal
 import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.convert.converter.Converter
@@ -47,28 +48,73 @@ class Saml2ResponseAuthenticationConverter(
         attributes[idMappingAttribute]?.firstOrNull()?.toString()
             ?: error("Required SAML attribute $idMappingAttribute is missing.")
     logger.debug("Using SAML attribute {} as ID: {}", idMappingAttribute, externalId)
-    var principal = this.userService.loadUserByProviderIdAndExternalId(providerId, externalId)
-    if (principal == null) {
-      logger.info("Creating new account for SAML user {}...", externalId)
-      principal = updateUserFromAttributes(providerId, User(), attributes)
-      val externalLogin = ExternalLogin(providerId = providerId, externalId = externalId)
-      userService.createForExternalLogin(principal, externalLogin)
-    } else {
-      val externalLogin = principal.externalLogins.find { it.providerId == providerId }!!
-      externalLogin.lastLoginAt = Instant.now()
-      externalLoginRepository.save(externalLogin)
-      updateUserFromAttributes(providerId, principal, attributes)
-      userRepository.save(principal)
-    }
+    val existingUser = this.userService.loadUserByProviderIdAndExternalId(providerId, externalId)
+    val principal =
+        if (existingUser == null) createUser(providerId, registration, externalId, attributes)
+        else updateUser(providerId, registration, existingUser, externalId, attributes)
     return Saml2Authentication(principal, authentication.saml2Response, principal.authorities)
   }
 
-  private fun updateUserFromAttributes(
+  private fun createUser(
       providerId: UUID,
+      registration: ExtendedRegistration,
+      externalId: String,
+      attributes: Map<String, List<Any>>
+  ): User {
+    logger.info("Creating new account for SAML user {}...", externalId)
+    val user = User()
+    updateUserFromAttributes(registration, user, attributes)
+    assignUsername(user, registration, externalId)
+    val externalLogin = ExternalLogin(providerId = providerId, externalId = externalId)
+    return userService.createForExternalLogin(user, externalLogin)
+  }
+
+  @Suppress("LongParameterList")
+  private fun updateUser(
+      providerId: UUID,
+      registration: ExtendedRegistration,
+      user: User,
+      externalId: String,
+      attributes: Map<String, List<Any>>
+  ): User {
+    val externalLogin = user.externalLogins.first { it.providerId == providerId }
+    externalLogin.lastLoginAt = Instant.now()
+    externalLoginRepository.save(externalLogin)
+    updateUserFromAttributes(registration, user, attributes)
+    // Accounts imported from v3 and accounts created before a mapping was configured have no
+    // username, so it is backfilled on the next login.
+    if (user.username == null) {
+      assignUsername(user, registration, externalId)
+    }
+    return userRepository.save(user)
+  }
+
+  /** Setting the username marks the account as verified. */
+  internal fun assignUsername(user: User, registration: ExtendedRegistration, externalId: String) {
+    val username = resolveUsername(registration.usernameMapping, externalId, user.mailAddress)
+    if (username == null) {
+      logger.warn(
+          "No value available for username mapping {}. Leaving the account of the SAML user {} " +
+              "unverified.",
+          registration.usernameMapping,
+          externalId)
+      return
+    }
+    if (userRepository.existsByUsername(username)) {
+      logger.warn(
+          "Username {} is already in use. Leaving the account of the SAML user unverified.",
+          username)
+      return
+    }
+    user.username = username
+  }
+
+  private fun updateUserFromAttributes(
+      registration: ExtendedRegistration,
       user: User,
       attributes: Map<String, List<Any>>
   ): User {
-    val mapping = saml2Properties.registration[providerId]!!.attributeMapping
+    val mapping = registration.attributeMapping
     user.mailAddress = attributes[mapping.mailAddress]?.firstOrNull()?.toString()
     logger.debug(
         "Mapped SAML attribute {} to mailAddress: {}", mapping.mailAddress, user.mailAddress)

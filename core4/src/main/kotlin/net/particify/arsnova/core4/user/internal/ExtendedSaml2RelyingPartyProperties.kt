@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user.internal
@@ -18,6 +18,12 @@ data class ExtendedSaml2RelyingPartyProperties(
 ) {
   class ExtendedRegistration : Saml2RelyingPartyProperties.Registration() {
     val attributeMapping = AttributeMapping()
+
+    /**
+     * Needs a setter, unlike [attributeMapping]: the inherited base class is bound as a JavaBean,
+     * and for a getter-only scalar that binding fails for every value except the default.
+     */
+    var usernameMapping = UsernameMapping.MAIL_ADDRESS
 
     data class AttributeMapping(
         var id: String = ID_ATTRIBUTE,
