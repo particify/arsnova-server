@@ -16,7 +16,7 @@ services:
     volumes:
       - $ROOT_DIR/.docker/keycloak/import:/opt/keycloak/data/import
   postgresql-keycloak:
-    image: pgautoupgrade/pgautoupgrade:18-alpine@sha256:669ced02f31161f6bda9b15b83bd7fca2de619fbd2b91af1fb4a3e0c8e3da2ca
+    image: pgautoupgrade/pgautoupgrade:18-alpine@sha256:2eb232a3dcc6022687419758660e3a6e74ed9f28a5a124051997d6dc482ee95c
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
