@@ -1,6 +1,6 @@
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:26.6@sha256:dea26401d06341095cc4ea9d66896200b55de5ca1daa1d2fcbe58493afa6e0ad
+    image: quay.io/keycloak/keycloak:26.6@sha256:e712055eab50036a06dda2921ee5158e4fdf8d362402ae3886cc0eb97012cffb
     command: start-dev --import-realm
     environment:
       KC_DB: postgres
