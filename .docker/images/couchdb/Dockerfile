@@ -1,3 +1,3 @@
-FROM couchdb:3.5@sha256:ccea1e8035bf7afd68336e24056a1ca9c1c46d7abe42da686322c0ac7218e5c2
+FROM couchdb:3.5@sha256:9a84b943671e9587a690e0c4418e0bd89984b5045db84532add2e560e6b76127
 
 COPY --chown=couchdb:couchdb custom.ini /opt/couchdb/etc/local.d/99-custom.ini
