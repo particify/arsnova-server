@@ -24,7 +24,7 @@ prettier-xml = "3.4.1"
 querydsl = "7.3.0"
 spotbugs-plugin = "6.5.6"
 spotless = "8.6.0"
-spring-boot-plugin = "4.0.7"
+spring-boot-plugin = "4.1.0"
 spring-modulith = "2.0.6"
 springmockk = "5.0.1"
 
