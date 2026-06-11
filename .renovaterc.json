@@ -3,6 +3,7 @@
   "extends": [
     "local>particify/dev/devops/renovate-dependency-bot//presets/default"
   ],
+  "baseBranchPatterns": ["master", "3.13"],
   "packageRules": [
     {
       "matchPackageNames": ["com.graphql-java:graphql-java-extended-scalars"],
