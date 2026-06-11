@@ -43,7 +43,8 @@ class JwtController(
   ): ResponseEntity<Unit> {
     val roomId = extractRoomId(request)
     val publicJwt = extractJwt(authorization)
-    val userId = stringToUuid(publicJwt.subject)
+    val subject = requireNotNull(publicJwt.subject)
+    val userId = stringToUuid(subject)
     val membership =
         membershipService.findOneByRoomIdAndUserId(roomId, userId)
             ?: throw AccessDeniedException("No membership found")

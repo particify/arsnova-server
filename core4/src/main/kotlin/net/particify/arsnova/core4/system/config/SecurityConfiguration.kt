@@ -131,7 +131,7 @@ class SecurityConfiguration(
                 val certificate = X509Support.decodeCertificate(c.certificateLocation!!.file)
                 Saml2X509Credential.signing(key, certificate)
               }
-          RelyingPartyRegistrations.fromMetadataLocation(it.value.assertingparty.metadataUri)
+          RelyingPartyRegistrations.fromMetadataLocation(it.value.assertingparty.metadataUri!!)
               .registrationId(it.key.toString())
               .entityId(it.value.entityId)
               .signingX509Credentials(Consumer { c -> c.addAll(credentials) })
