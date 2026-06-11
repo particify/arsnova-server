@@ -28,12 +28,13 @@ class RefreshJwtAuthenticationProvider(
     val token = authentication.credentials as String
     try {
       val jwt = jwtUtils.decodeJwt(authentication.credentials as String)
+      val subject = requireNotNull(jwt.subject)
       val roles = jwt.claims["roles"] as? Collection<*> ?: emptyList<String>()
       val isLegacy = roles.contains(LEGACY_GUEST_ROLE)
       if (!roles.contains(REFRESH_ROLE) && !isLegacy)
           throw BadCredentialsException("Not a refresh token")
       val userId =
-          if (isLegacy) Uuid.parseHex(jwt.subject).toJavaUuid() else UUID.fromString(jwt.subject)
+          if (isLegacy) Uuid.parseHex(subject).toJavaUuid() else UUID.fromString(jwt.subject)
       val user =
           userService.loadUserById(userId)
               ?: throw BadCredentialsException("User for JWT not found.")

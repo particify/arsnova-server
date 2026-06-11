@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.security
@@ -30,10 +30,11 @@ class DelegatingPermissionEvaluator(
 
   override fun hasPermission(
       authentication: Authentication,
-      targetDomainObject: Any,
+      targetDomainObject: Any?,
       permission: Any
   ): Boolean {
     logger.debug("hasPermission({}, {}, {})", authentication, targetDomainObject, permission)
+    requireNotNull(targetDomainObject)
     val user = authentication.principal as? User ?: error("Unexpected principal type")
     val evaluator =
         permissionEvaluators.find { it.supports(targetDomainObject::class) }
