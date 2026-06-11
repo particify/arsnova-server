@@ -26,6 +26,7 @@ repositories {
 dependencies {
   implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   implementation(platform(libs.spring.modulith.bom))
+  implementation(enforcedPlatform(libs.hibernate.bom))
   implementation(project(":common"))
   implementation(libs.kotlin.reflect)
   implementation(libs.spring.actuator)
