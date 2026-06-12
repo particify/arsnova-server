@@ -18,7 +18,7 @@ default:
 build_docker_image:
   stage: build
   image:
-    name: gcr.io/kaniko-project/executor:debug
+    name: gcr.io/kaniko-project/executor:debug@sha256:2562c4fe551399514277ffff7dcca9a3b1628c4ea38cb017d7286dc6ea52f4cd
     entrypoint: [""]
   variables:
     IMAGE_CONTEXT: $CI_PROJECT_DIR/.docker/images/$IMAGE_NAME
@@ -43,7 +43,7 @@ tag_docker_image:
       variables:
         IMAGE_TAG_ALIAS: next
   image:
-    name: gcr.io/go-containerregistry/crane:debug
+    name: gcr.io/go-containerregistry/crane:debug@sha256:0822c676be1de102abe689aa60f0d24b328e2fdb41005c2ab84231715f89ca2c
     entrypoint: [""]
   allow_failure: true
   script:
