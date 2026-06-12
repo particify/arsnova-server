@@ -11,9 +11,9 @@
   "dependencies": {
     "@iktakahiro/markdown-it-katex": "4.0.1",
     "express": "5.1.0",
-    "markdown-it": "14.1.0",
+    "markdown-it": "14.1.1",
     "markdown-it-link-attributes": "4.0.1",
-    "markdown-it-prism": "3.0.0"
+    "markdown-it-prism": "3.0.1"
   },
   "devDependencies": {
     "eslint": "9.34.0",
@@ -22,6 +22,6 @@
     "eslint-plugin-promise": "7.2.1"
   },
   "resolutions": {
-    "katex": "^0.16.0"
+    "katex": "^0.16.22"
   }
 }
