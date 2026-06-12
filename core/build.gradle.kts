@@ -98,6 +98,12 @@ checkstyle {
   maxWarnings = 0
 }
 
+configurations.all {
+  resolutionStrategy.capabilitiesResolution.withCapability("com.google.collections:google-collections") {
+    select("com.google.guava:guava:0")
+  }
+}
+
 spotbugs {
   excludeFilter.set(file("../spotbugs-exclude.xml"))
 }
