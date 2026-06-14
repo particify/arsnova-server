@@ -8,8 +8,6 @@ import kotlin.reflect.KClass
 import net.particify.arsnova.core4.qna.Post
 import net.particify.arsnova.core4.qna.QnaState
 import net.particify.arsnova.core4.qna.exception.PostNotFoundException
-import net.particify.arsnova.core4.room.MembershipService
-import net.particify.arsnova.core4.room.RoomRole
 import net.particify.arsnova.core4.system.DomainPermissionEvaluation
 import net.particify.arsnova.core4.system.DomainPermissionEvaluator
 import net.particify.arsnova.core4.user.User
@@ -18,10 +16,8 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 
 @Component
-class PostPermissionEvaluator(
-    private val postRepository: PostRepository,
-    private val membershipService: MembershipService
-) : DomainPermissionEvaluator<Post> {
+class PostPermissionEvaluator(private val postRepository: PostRepository) :
+    DomainPermissionEvaluator<Post> {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun hasPermission(
@@ -30,22 +26,18 @@ class PostPermissionEvaluator(
       permission: Any
   ): DomainPermissionEvaluation {
     logger.debug("hasPermission({}, {}, {})", user, targetDomainObject, permission)
-    val permission = if (permission == "delete") "write" else permission
-    return DomainPermissionEvaluation(
+    val parentPermission =
         when (permission) {
-          "write" ->
-              membershipService
-                  .findOneByRoomIdAndUserId(targetDomainObject.qna!!.roomId!!, user.id!!)
-                  ?.role !== RoomRole.PARTICIPANT
-          "read" ->
-              targetDomainObject.qna!!.state !== QnaState.STOPPED ||
-                  membershipService
-                      .findOneByRoomIdAndUserId(targetDomainObject.qna!!.roomId!!, user.id!!)
-                      ?.role !== RoomRole.PARTICIPANT
-          else -> false
-        },
+          // Post permission -> Qna permission
+          "write" -> "write"
+          "read" -> if (targetDomainObject.qna!!.state !== QnaState.STOPPED) "read" else "write"
+          "delete" -> "write"
+          else -> return DomainPermissionEvaluation(false)
+        }
+    return DomainPermissionEvaluation(
+        null,
         DomainPermissionEvaluation.PermissionReference(
-            "Qna", targetDomainObject.qna!!.id!!, permission))
+            "Qna", targetDomainObject.qna!!.id!!, parentPermission))
   }
 
   override fun findOneByKey(key: Any): Post {
