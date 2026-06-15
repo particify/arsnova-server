@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system
@@ -14,4 +14,12 @@ data class DomainPermissionEvaluation(
     val permissionReference: PermissionReference? = null
 ) {
   data class PermissionReference(val targetClassName: String, val id: UUID, val permission: Any)
+
+  init {
+    require(
+        (hasPermission == null && permissionReference != null) ||
+            (hasPermission != null && permissionReference == null)) {
+          "Only one, either hasPermission or permissionReference, may be defined."
+        }
+  }
 }
