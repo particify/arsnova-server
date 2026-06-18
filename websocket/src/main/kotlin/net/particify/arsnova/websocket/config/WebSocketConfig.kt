@@ -33,6 +33,7 @@ class WebSocketConfig(
       .setRelayPort(webSocketProperties.stomp.relay.port)
       .setClientLogin(webSocketProperties.stomp.relay.user)
       .setClientPasscode(webSocketProperties.stomp.relay.password)
+      .setVirtualHost(webSocketProperties.rabbitmq.virtualHost)
   }
 
   override fun registerStompEndpoints(registry: StompEndpointRegistry) {
