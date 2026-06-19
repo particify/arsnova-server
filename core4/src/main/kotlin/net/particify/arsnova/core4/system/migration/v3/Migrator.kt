@@ -91,7 +91,7 @@ class Migrator(
               uiSettings = settings,
               lastActivityAt = it.lastActivityTimestamp,
               announcementsReadAt = it.announcementReadTimestamp,
-              roles = mutableListOf(defaultRoleRef))
+              roles = mutableSetOf(defaultRoleRef))
       if (!migrateExternalLogins(newUser, it)) {
         return@migrate null
       }

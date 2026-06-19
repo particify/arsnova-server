@@ -50,7 +50,7 @@ class User(
         joinColumns = [JoinColumn(name = "user_id")],
         inverseJoinColumns = [JoinColumn(name = "role_id")],
     )
-    val roles: MutableList<Role> = mutableListOf(),
+    val roles: MutableSet<Role> = mutableSetOf(),
     @JdbcTypeCode(SqlTypes.JSON) val uiSettings: MutableMap<String, Any> = mutableMapOf(),
     var tokenVersion: Int? = 1,
     var lastActivityAt: Instant? = null,

@@ -59,7 +59,7 @@ class UserServiceImpl(
   }
 
   override fun createAccount(): User {
-    val user = User(roles = mutableListOf(userRole))
+    val user = User(roles = mutableSetOf(userRole))
     val persistedUser = userRepository.save(user)
     eventPublisher.publishEvent(UserCreatedEvent(persistedUser.id!!))
     return persistedUser
