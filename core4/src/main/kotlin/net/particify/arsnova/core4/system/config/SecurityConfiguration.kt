@@ -21,6 +21,7 @@ import org.springframework.core.env.Environment
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.ProviderManager
 import org.springframework.security.config.Customizer
+import org.springframework.security.config.annotation.SecurityConfigurerAdapter
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -32,6 +33,7 @@ import org.springframework.security.saml2.provider.service.authentication.OpenSa
 import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations
+import org.springframework.security.web.DefaultSecurityFilterChain
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
@@ -39,6 +41,7 @@ private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
 
 @Configuration
 @EnableWebSecurity
+@Suppress("LongMethod")
 class SecurityConfiguration(
     private val refreshAuthenticationFilter: RefreshAuthenticationFilter,
     private val challengeJwtAuthenticationFilter: ChallengeJwtAuthenticationFilter,
@@ -51,7 +54,8 @@ class SecurityConfiguration(
       authenticationSuccessHandler: AuthenticationSuccessHandler,
       converter: Saml2ResponseAuthenticationConverter,
       saml2Properties: ExtendedSaml2RelyingPartyProperties,
-      publicRoutesList: List<PublicRoutes>
+      publicRoutesList: List<PublicRoutes>,
+      configurers: List<SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity>>
   ): SecurityFilterChain {
     val publicRoutes = publicRoutesList.flatMap { it.routes }
     if (publicRoutes.isNotEmpty()) {
@@ -61,6 +65,9 @@ class SecurityConfiguration(
       http.httpBasic(Customizer.withDefaults()).authorizeHttpRequests { authorize ->
         authorize.requestMatchers("/graphiql").permitAll()
       }
+    }
+    for (configurer in configurers) {
+      http.with(configurer, Customizer.withDefaults())
     }
     http
         .csrf(AbstractHttpConfigurer<*, *>::disable)
@@ -86,8 +93,6 @@ class SecurityConfiguration(
               .hasAnyRole("ADMIN", "OBSERVABILITY")
               .requestMatchers(EndpointRequest.toAnyEndpoint())
               .hasRole("ADMIN")
-              .anyRequest()
-              .authenticated()
         }
         .addFilterBefore(
             refreshAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
@@ -96,6 +101,14 @@ class SecurityConfiguration(
         .addFilterBefore(
             userJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
         .exceptionHandling { it.authenticationEntryPoint(Http401UnauthenticatedEntryPoint()) }
+    // Use separate Configurer to ensure that the catch-all is executed last after other
+    // Configurers.
+    http.with(
+        object : AbstractHttpConfigurer<Nothing, HttpSecurity>() {
+          override fun configure(http: HttpSecurity) {
+            http.authorizeHttpRequests { it.anyRequest().authenticated() }
+          }
+        })
     if (saml2Properties.registration.isNotEmpty()) {
       val samlAuthenticationProvider = OpenSaml5AuthenticationProvider()
       samlAuthenticationProvider.setResponseAuthenticationConverter(converter)
