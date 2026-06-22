@@ -1,4 +1,4 @@
-FROM rabbitmq:4.3-alpine@sha256:8489bba72d91465b2ed422394966d270858252844cc7bd91dfb8ab3dd43fdaea
+FROM rabbitmq:4.3-alpine@sha256:36941a6d0e07669181d0bfed70eb78d2a650d81cd5da770a06d49eec461e88f8
 
 RUN rabbitmq-plugins enable --offline rabbitmq_stomp
 
