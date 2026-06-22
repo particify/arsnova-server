@@ -137,6 +137,7 @@ update_config() {
   docker compose --project-directory "$LOCAL_COMPOSE_DIR" \
     $COMPOSE_FILE_ARGS \
     -f "$LOCAL_COMPOSE_DIR/local.compose.yaml" \
+    --profile "*" \
     config >> "$PDK_COMPOSE_FILE"
 }
 
