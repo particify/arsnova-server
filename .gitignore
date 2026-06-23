@@ -4,6 +4,9 @@
 # specific to the local environment should be added to the local Git config
 # instead.
 
+# Local configuration
+application-local.yaml
+
 # JVM/Gradle
 *.class
 .classpath

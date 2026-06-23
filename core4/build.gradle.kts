@@ -82,7 +82,10 @@ dependencies {
 kotlin { compilerOptions { freeCompilerArgs.addAll("-Xjsr305=strict") } }
 
 tasks.bootRun {
-  setArgs(listOf("--spring.profiles.active=dev"))
+  args =
+      listOf(
+          "--spring.profiles.active=dev",
+          "--spring.config.additional-location=optional:classpath:application-local.yaml")
   debugOptions {
     host = debugHost
     port = debugPort
