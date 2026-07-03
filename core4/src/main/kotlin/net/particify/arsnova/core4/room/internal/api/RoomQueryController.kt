@@ -72,8 +72,8 @@ class RoomQueryController(
     if (query?.name != null) {
       queryBuilder.and(QMembership.membership.room.name.containsIgnoreCase(query.name))
     }
-    if (query?.role != null) {
-      queryBuilder.and(QMembership.membership.role.eq(query.role))
+    if (!query?.anyRole.isNullOrEmpty()) {
+      queryBuilder.and(QMembership.membership.role.`in`(query.anyRole))
     }
     return membershipService.findBy(queryBuilder) { q ->
       q.sortBy(Sort.by("lastActivityAt").descending())
