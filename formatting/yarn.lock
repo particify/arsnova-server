@@ -444,7 +444,7 @@ enhanced-resolve@^5.17.1:
     graceful-fs "^4.2.4"
     tapable "^2.3.3"
 
-entities@^4.4.0:
+entities@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/entities/-/entities-4.5.0.tgz#5d268ea5e7113ec74c4d033b79ea5a35a488fb48"
   integrity sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==
@@ -1287,7 +1287,7 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-linkify-it@^5.0.1:
+linkify-it@^5.0.2:
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/linkify-it/-/linkify-it-5.0.2.tgz#d3be0a693af3da9df3883f1e346a0e97461a8c19"
   integrity sha512-ONTm2jCMAVZjgQa/Fy1kScXsuOoF5NPTsoFBdE1KVIZ2vAh/r9+Bqo+0jINCBYnavTPQZz38QzFTme79ENoN3Q==
@@ -1313,14 +1313,14 @@ markdown-it-prism@3.0.1:
   dependencies:
     prismjs "1.30.0"
 
-markdown-it@14.2.0:
-  version "14.2.0"
-  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-14.2.0.tgz#06d48d9035e77d5b1c85adb315482fc8240289ef"
-  integrity sha512-1TGiQiJVRQ3NPmZH6sx5Cfnmg6GQm9jvC1ch4TK511NjSJvjzKLzn5pPfZRNZkRPZP0HqCioSndqH8v2nRaWVQ==
+markdown-it@14.3.0:
+  version "14.3.0"
+  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-14.3.0.tgz#8542fa5506e3530f7e2b08dc3885630135c5620e"
+  integrity sha512-RCEsPjR+sr0x+AuYp601tKTkgFG4YEPLCzHST3cQ/fhlJkqAkz1L2/Qbp1j9qw5SBwQHFBoW8+hoN5xssOF0Tw==
   dependencies:
     argparse "^2.0.1"
-    entities "^4.4.0"
-    linkify-it "^5.0.1"
+    entities "^4.5.0"
+    linkify-it "^5.0.2"
     mdurl "^2.0.0"
     punycode.js "^2.3.1"
     uc.micro "^2.1.0"
