@@ -67,7 +67,7 @@ dependencies {
   }
 
   // Jackson 2.19 causes issues with our migrations, see https://gitlab.com/particify/dev/foss/arsnova-server/-/issues/317
-  implementation(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.18.8"))
+  implementation(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.18.9"))
 }
 
 tasks.withType<Test> {
