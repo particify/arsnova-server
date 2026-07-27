@@ -112,7 +112,7 @@ public class RoomStatistics {
 
   public RoomStatistics updateFromContentGroups(final Collection<ContentGroup> contentGroups) {
     setGroupStats(contentGroups.stream()
-        .map(cg ->  new RoomStatistics.ContentGroupStatistics(cg)).collect(Collectors.toList()));
+        .map(cg -> new RoomStatistics.ContentGroupStatistics(cg)).collect(Collectors.toList()));
     setContentCount(contentGroups.stream()
         .mapToInt(cg -> cg.getContentIds().size()).reduce((a, b) -> a + b).orElse(0));
 

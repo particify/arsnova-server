@@ -28,7 +28,7 @@ import net.particify.arsnova.core.service.UserService;
 @RestController
 @EntityRequestMapping(LmsCourseController.REQUEST_MAPPING)
 @ConditionalOnProperty(
-    name =  "enabled",
+    name = "enabled",
     prefix = SystemProperties.PREFIX + ".lms-connector"
 )
 public class LmsCourseController {

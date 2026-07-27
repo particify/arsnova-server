@@ -137,7 +137,7 @@ public class DataGenerationServiceImpl implements DataGenerationService {
       answers.add(generateRandomizedSortAnswer(content, permutations, biasedRandom));
     }
 
-    return  answers;
+    return answers;
   }
 
   private Answer generateRandomizedSortAnswer(

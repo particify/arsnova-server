@@ -18,7 +18,7 @@ import net.particify.arsnova.core.persistence.RoomRepository;
 @Service
 @Primary
 @ConditionalOnProperty(
-    name =  "enabled",
+    name = "enabled",
     prefix = SystemProperties.PREFIX + ".lms-connector"
 )
 public class LmsCourseServiceImpl implements LmsCourseService {

@@ -12,7 +12,7 @@ import net.particify.arsnova.core.model.UserProfile;
 
 @Service
 @ConditionalOnProperty(
-    name =  "enabled",
+    name = "enabled",
     prefix = SystemProperties.PREFIX + ".lms-connector"
 )
 public class SecuredLmsCourseService implements LmsCourseService {

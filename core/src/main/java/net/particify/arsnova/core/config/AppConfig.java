@@ -201,7 +201,7 @@ public class AppConfig implements WebMvcConfigurer {
 
   @Bean(name = LMS_CONNECTOR_BEAN_NAME)
   @ConditionalOnProperty(
-      name =  "enabled",
+      name = "enabled",
       prefix = SystemProperties.PREFIX + ".lms-connector"
   )
   public ConnectorClient connectorClient() {
