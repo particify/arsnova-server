@@ -85,7 +85,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
   @Override
   public List<String> findIdsByCreatorIdContentIdsRound(
       final String creatorId, final List<String> contentIds, final int round) {
-    final ViewResult result =  db.queryView(
+    final ViewResult result = db.queryView(
         createQuery("by_contentid_creatorid_round")
             .keys(contentIds.stream()
                 .map(contentId -> ComplexKey.of(contentId, creatorId, round))

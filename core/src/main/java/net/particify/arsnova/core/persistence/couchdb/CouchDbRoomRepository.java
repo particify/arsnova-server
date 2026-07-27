@@ -45,14 +45,14 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
   @Override
   public List<Room> findByOwnerId(final String ownerId, final int start, final int limit) {
-    final int qSkip = start > 0 ? start : -1;
-    final int qLimit = limit > 0 ? limit : -1;
+    final int querySkip = start > 0 ? start : -1;
+    final int queryLimit = limit > 0 ? limit : -1;
 
     /* TODO: Only load IDs and check against cache for data. */
     return db.queryView(
         createQuery("partial_by_pool_ownerid_name")
-            .skip(qSkip)
-            .limit(qLimit)
+            .skip(querySkip)
+            .limit(queryLimit)
             .startKey(ComplexKey.of(false, ownerId))
             .endKey(ComplexKey.of(false, ownerId, ComplexKey.emptyObject()))
             .includeDocs(true),
