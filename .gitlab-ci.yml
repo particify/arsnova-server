@@ -82,3 +82,19 @@ build_dependency_image:
   trigger:
     include: ".docker/images/.gitlab-ci.yml"
     strategy: depend
+
+# Ensure that a pipeline is created to allow merging.
+dummy_job:
+  stage: build
+  needs: []
+  rules:
+    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH =~ /^renovate\//
+      changes:
+        - "*"
+        - ".docker/**/*"
+        - "docs/**/*"
+      when: always
+    - when: never
+  script:
+    # NOOP
+    - ":"
