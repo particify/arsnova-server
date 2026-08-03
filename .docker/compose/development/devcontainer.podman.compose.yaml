@@ -1,0 +1,46 @@
+services:
+  # userns_mode and podman-compose's default per-project pod are mutually exclusive
+  # ("--userns and --pod cannot be set together") - pod: "" opts each of these containers
+  # out of the shared project pod (podman-compose only assigns the project pod name as a
+  # default; a service's own "pod" key overrides it, confirmed in its source) without
+  # affecting any other service's pod membership.
+  arsnova-server-core:
+    userns_mode: keep-id
+    pod: ""
+  arsnova-server-core4:
+    userns_mode: keep-id
+    pod: ""
+  arsnova-server-websocket:
+    userns_mode: keep-id
+    pod: ""
+  arsnova-server-authz:
+    userns_mode: keep-id
+    pod: ""
+  arsnova-server-comments:
+    userns_mode: keep-id
+    pod: ""
+  # These don't need userns_mode themselves - they're plain infra containers, not
+  # Gradle/bind-mount write targets. They need pod: "" ONLY because core/authz/comments/
+  # websocket above (all non-pod now) depend on them via "depends_on" in
+  # base/.docker/compose/production/base.compose.yaml - podman rejects a non-pod container
+  # depending on a pod-member one ("container dependency ... is part of a pod, but
+  # container is not: invalid argument"), confirmed the hard way when recreating
+  # arsnova-server-websocket alone cascaded into removing both it and arsnova-server-authz
+  # entirely. Keeping the whole depends_on chain consistently non-pod avoids that mismatch.
+  couchdb:
+    pod: ""
+  rabbitmq:
+    pod: ""
+  postgresql-authz:
+    pod: ""
+  postgresql-comments:
+    pod: ""
+  # Confirmed the mismatch breaks in BOTH directions, not just non-pod-depends-on-pod: once
+  # rabbitmq above went non-pod, arsnova-extras-assets (still pod-member, depends_on rabbitmq
+  # + postgresql-assets per .docker/compose/production/saas.compose.yaml) failed the same way
+  # in reverse ("container has joined pod X and dependency container Y is not a member of the
+  # pod"). Nothing depends on arsnova-extras-assets in turn, so this closes the chain.
+  arsnova-extras-assets:
+    pod: ""
+  postgresql-assets:
+    pod: ""
