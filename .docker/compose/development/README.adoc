@@ -86,7 +86,33 @@ The `pdk` script supports the following commands:
 
 |`build`
 |(Re-)build Devcontainers. This command is automatically run when needed.
+
+|`set-engine`
+|Show which container engine `pdk` uses, or switch it: `set-engine docker\|podman`.
+Switching to Podman sets up a project-scoped instance first.
 |===
+
+=== Using Podman instead of Docker
+
+By default, `pdk` uses Docker.
+Running `./pdk set-engine podman` sets up a Podman instance whose storage and runtime state
+live entirely under `.podman/` in this repository, isolated from any other Podman usage on
+the same machine, and persists `PDK_ENGINE=podman` to `local.env` so subsequent `pdk`
+invocations use it automatically.
+`./pdk set-engine docker` switches back, undoing the VS Code setting described below;
+`./pdk set-engine` on its own reports which engine is in effect and what is stored.
+It also points VS Code's `dev.containers.dockerPath` setting at `podman` (in your User
+Settings, so it applies regardless of which project you open) unless that setting is
+already customized to something else, in which case it warns instead of overwriting it and
+leaves `PDK_ENGINE` unchanged.
+
+Requirements beyond Docker's: Podman, a working Docker Compose provider for it (the
+`docker-compose`/`docker compose` CLI is recommended over `podman-compose` for
+compatibility with this script's volume-naming assumptions), and a Linux host with a
+`systemd --user` session.
+
+You can override the stored choice per-invocation with `PDK_ENGINE=docker ./pdk ...` or
+`PDK_ENGINE=podman ./pdk ...` without editing `local.env`.
 
 === Known issues
 
@@ -96,3 +122,15 @@ The `pdk` script supports the following commands:
   The plugin currently used for the devcontainers of Kotlin-based services has grave performance issues.
   Therefore, the use of another IDE is recommended for Kotlin development.
   A development server can be started with the `dev-server` command.
+* Switching `PDK_ENGINE` for an existing checkout is data isolation, not migration.
+  Podman's storage lives entirely under `.podman/`, separate from Docker's.
+  Named volumes (PostgreSQL data, Gradle/VS Code extension caches, CouchDB, RabbitMQ) start
+  fresh under the new engine; there is no automatic migration between them.
+* Both engines publish to the same host ports.
+  Run `./pdk compose down` under the previous engine before switching, since nothing
+  auto-detects or stops the other engine's already-running containers.
+* `./pdk open <project>` relies on VS Code's `dev.containers.dockerPath` (set by
+  `set-engine podman`, see above) applying to whichever process ends up creating the container.
+  If VS Code is already running when `open` is called, that creation call could happen
+  inside the already-running process's environment rather than a fresh one; if you notice
+  `pdk open` still using Docker after switching to Podman, try restarting VS Code first.

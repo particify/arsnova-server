@@ -64,7 +64,7 @@ services:
       - rabbitmq
       - arsnova-server-authz
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: "8080"
       STOMP_RELAY_HOST: rabbitmq
       STOMP_RELAY_USER: guest
       STOMP_RELAY_PASSWORD: guest
@@ -80,7 +80,7 @@ services:
       - postgresql-authz
       - rabbitmq
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: "8080"
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql-authz:5432/arsnovaauth
       SPRING_DATASOURCE_USERNAME: arsnovaauth
       SPRING_DATASOURCE_PASSWORD: arsnovaauth
@@ -97,7 +97,7 @@ services:
       - postgresql-comments
       - rabbitmq
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: "8080"
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql-comments:5432/arsnovacomment
       SPRING_DATASOURCE_USERNAME: arsnovacomment
       SPRING_DATASOURCE_PASSWORD: arsnovacomment
