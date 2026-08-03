@@ -237,6 +237,41 @@ ensure_podman_service() {
   [ -S "$PODMAN_SOCKET" ]
 }
 
+# Stop and forget this project's transient Podman service unit, so the next command that
+# needs it (set-engine podman, or any podman-engine command while PDK_ENGINE is podman)
+# starts a genuinely fresh instance instead of tripping ensure_podman_service's "already
+# active" early-return against a unit whose backing storage is gone or corrupted.
+#
+# .podman/ is moved aside with a timestamp, never deleted - it may still hold images,
+# volumes or config worth recovering by hand. Safe to run whether or not the unit or the
+# directory currently exist; deliberately skips the whole Docker/Podman preflight block
+# below (see its early-exit call site) since that's exactly what a broken instance can't
+# get through.
+reset_podman() {
+  PODMAN_STATE_DIR="$LOCAL_ROOT_DIR/.podman"
+  INSTANCE_HASH=$(echo -n "$LOCAL_ROOT_DIR" | sha256sum | cut -c1-16)
+  UNIT_NAME="pdk-podman-$INSTANCE_HASH.service"
+
+  if command -v systemctl &> /dev/null; then
+    systemctl --user stop "$UNIT_NAME" 2>/dev/null
+    systemctl --user reset-failed "$UNIT_NAME" 2>/dev/null
+    echo "Stopped (or confirmed not running) $UNIT_NAME."
+  else
+    echo "NOTE: no systemctl here - if $UNIT_NAME is running on another host/session, stop it there too."
+  fi
+
+  if [ -d "$PODMAN_STATE_DIR" ]; then
+    BACKUP_DIR="$PODMAN_STATE_DIR.bak-$(date +%Y%m%d%H%M%S)"
+    mv "$PODMAN_STATE_DIR" "$BACKUP_DIR"
+    echo "Moved $PODMAN_STATE_DIR to $BACKUP_DIR (not deleted - remove it yourself once you're"
+    echo "sure you don't need anything from it)."
+  else
+    echo "$PODMAN_STATE_DIR does not exist - nothing to move."
+  fi
+
+  echo "Run './pdk set-engine podman' to start a fresh instance."
+}
+
 # Only needed by the `open` command (installs the Dev Containers extension it relies on) -
 # kept out of the unconditional preflight so a plain client (no VS Code installed at all,
 # e.g. a headless devcontainer only reading logs/status) isn't blocked by it.
@@ -548,6 +583,14 @@ fi
 refresh_local_env
 resolve_engine
 
+# Deliberately runs before the Docker/Podman preflight below - a broken Podman instance
+# (the exact case this command exists for) can fail that preflight outright, which would
+# make reset-podman unreachable via the case statement further down.
+if [ "$COMMAND" = "reset-podman" ]; then
+  reset_podman
+  exit $?
+fi
+
 if [ "$PDK_ENGINE" = "docker" ]; then
   if ! command -v docker &> /dev/null; then
     echo ERROR: Docker Engine is not installed.
@@ -714,5 +757,6 @@ case $COMMAND in
     echo "    $PDK_CMD update-config    Update the configuration for Docker Compose"
     echo "    $PDK_CMD build            (Re-)build Devcontainers"
     echo "    $PDK_CMD set-engine       Show the container engine in use, or switch it: set-engine docker|podman"
+    echo "    $PDK_CMD reset-podman     Stop this project's Podman service unit and move aside its .podman/ state"
     ;;
 esac
