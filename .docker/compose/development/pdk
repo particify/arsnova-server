@@ -95,6 +95,44 @@ refresh_local_env() {
   merge_env
 }
 
+# Records one line per invocation in a local, gitignored history file. Exists because the same
+# command can behave differently depending on where it is run from - the engine and, under
+# podman, the compose provider are both environment-dependent - and because a session inside a
+# devcontainer has no other way to see that something was run against this workspace from the
+# host. Hence the origin tag: it is what makes the log readable when host and container
+# invocations are interleaved.
+PDK_HISTORY_FILE="$LOCAL_COMPOSE_DIR/.pdk-history.log"
+
+log_invocation() {
+  # Both engines' marker files are checked, since either runtime may have created the container.
+  if [ -e /run/.containerenv ] || [ -e /.dockerenv ]; then
+    PDK_ORIGIN=container
+  else
+    PDK_ORIGIN=host
+  fi
+  PDK_INVOCATION="$*"
+  # "native" means the engine's own compose implementation - the provider is only ambiguous
+  # under podman, see resolve_engine.
+  printf '%s %s engine=%s provider=%s cmd="%s"\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$PDK_ORIGIN" "$PDK_ENGINE" \
+    "${PODMAN_COMPOSE_PROVIDER:-native}" "$PDK_INVOCATION" >> "$PDK_HISTORY_FILE" 2>/dev/null
+  # Trimmed on the way in so it happens once per invocation rather than twice. Only the last
+  # few commands are ever of interest, so the cap stays deliberately small.
+  if [ "$(wc -l < "$PDK_HISTORY_FILE" 2>/dev/null || echo 0)" -gt 200 ]; then
+    tail -n 100 "$PDK_HISTORY_FILE" > "$PDK_HISTORY_FILE.tmp" 2>/dev/null \
+      && mv "$PDK_HISTORY_FILE.tmp" "$PDK_HISTORY_FILE"
+  fi
+}
+
+# Written from a trap, so a start line left without a matching exit line is itself the signal
+# that the invocation was killed rather than having finished - which a single line assembled at
+# exit could not convey, since SIGKILL bypasses traps entirely.
+log_invocation_exit() {
+  printf '%s %s exit=%s cmd="%s"\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$PDK_ORIGIN" "$1" "$PDK_INVOCATION" \
+    >> "$PDK_HISTORY_FILE" 2>/dev/null
+}
+
 # Resolve which container engine to use. Precedence: shell env PDK_ENGINE -> value stored
 # in local.env (loaded into the shell by the refresh_local_env call right before this) ->
 # default "docker". "set-engine" resolves to the engine it was asked for, whatever is stored,
@@ -617,6 +655,11 @@ fi
 
 refresh_local_env
 resolve_engine
+
+# After resolve_engine so the engine and provider are already known, and before the
+# reset-podman shortcut below so that nothing escapes being recorded.
+log_invocation "$@"
+trap 'log_invocation_exit $?' EXIT
 
 # Deliberately runs before the Docker/Podman preflight below - a broken Podman instance
 # (the exact case this command exists for) can fail that preflight outright, which would
