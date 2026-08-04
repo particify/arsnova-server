@@ -121,6 +121,15 @@ resolve_engine() {
       # strings (ComposeWarningLogs / PODMAN_COMPOSE_WARNING_LOGS) and by testing the env var
       # directly, no containers.conf equivalent needed.
       export PODMAN_COMPOSE_WARNING_LOGS=false
+      # "podman compose" picks its provider from the invoking environment's PATH and prefers
+      # docker-compose when both are present (per its own --help), so the same command
+      # resolves to a different implementation depending on where it runs - the host and a
+      # devcontainer disagree in exactly that way here. Pinning makes the engine choice decide
+      # the compose implementation too, which also keeps the generated file's Podman-only keys
+      # ("pod", "userns_mode: keep-id") with the provider they were written for.
+      # An already-set value wins, so a podman-compose installed somewhere off PATH can still
+      # be pointed at - the default only rules out the silent docker-compose fallback.
+      export PODMAN_COMPOSE_PROVIDER=${PODMAN_COMPOSE_PROVIDER:-podman-compose}
       # podman-compose (unlike Docker Compose v2) has no --project-directory flag at all -
       # passing it makes argument parsing fail outright (the path ends up misparsed as the
       # positional subcommand). The env/project-name resolution that flag would otherwise
@@ -475,12 +484,23 @@ update_config() {
   echo Updating configuration for Docker Compose...
   refresh_local_env
   determine_image_tags
-  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > "$PDK_COMPOSE_FILE"
-  $DOCKER_BIN compose $PROJECT_DIR_ARG \
+  # Staged through a temp file and moved into place only on success. Writing the destination
+  # directly leaves it existing but holding nothing except the header when "config" fails, and
+  # since every other subcommand regenerates only when the file is *missing*, that broken state
+  # survives silently until the next explicit update-config.
+  compose_file_tmp="$PDK_COMPOSE_FILE.tmp"
+  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > "$compose_file_tmp"
+  if ! $DOCKER_BIN compose $PROJECT_DIR_ARG \
     $COMPOSE_FILE_ARGS \
     -f "$LOCAL_COMPOSE_DIR/local.compose.yaml" \
     --profile "*" \
-    config >> "$PDK_COMPOSE_FILE"
+    config >> "$compose_file_tmp"; then
+    rm -f "$compose_file_tmp"
+    echo ERROR: Failed to generate the Docker Compose configuration. >&2
+    echo "Kept the previous $PDK_COMPOSE_FILE, which may now be out of date." >&2
+    exit 1
+  fi
+  mv "$compose_file_tmp" "$PDK_COMPOSE_FILE"
 }
 
 build() {
@@ -650,18 +670,23 @@ else
     exit 1
   fi
 
+  # Checks the provider pinned in resolve_engine, not merely whichever one PATH offers, so a
+  # host that happens to have docker-compose installed fails here with a clear cause instead
+  # of somewhere further in.
   if ! podman compose version &> /dev/null; then
-    echo ERROR: No working Docker Compose provider found for Podman.
+    echo ERROR: podman-compose is not installed or not working.
     echo
-    echo "podman compose" delegates to an external provider - install the Docker Compose
-    echo v2 CLI \(recommended for compatibility with this script\'s volume-naming assumptions\)
-    echo or podman-compose, then retry.
+    echo Podman mode pins it as the compose provider so that commands behave the same
+    echo wherever they run, and because the generated Compose file uses Podman-only keys.
+    echo Set PODMAN_COMPOSE_PROVIDER to override, e.g. for an install outside PATH.
+    echo
+    echo On Debian-based systems:
+    echo apt install podman-compose
     exit 1
   fi
 
   # Note: the legacy Docker Compose v1 rejection above is intentionally skipped for
-  # Podman - a v1 docker-compose binary may be exactly the (valid) provider "podman
-  # compose" delegates to.
+  # Podman - it is irrelevant once the provider is pinned to podman-compose.
 fi
 
 if ! command -v pip &> /dev/null; then
