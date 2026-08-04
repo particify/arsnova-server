@@ -17,6 +17,11 @@ services:
       args:
         APP_IMAGE: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEBCLIENT_TAG
     command: /bin/sh -c "while sleep 1000; do :; done"
+    environment:
+      # Corepack fetches the pinned yarn release into a non-persisted cache, so the first
+      # yarn call in a fresh container needs it again - and it asks for confirmation whenever
+      # it has a TTY, which blocks any non-interactive caller indefinitely.
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
     volumes:
       - $ROOT_DIR/.git:/workspace/.git
       - $ROOT_DIR/webclient:/workspace/webclient

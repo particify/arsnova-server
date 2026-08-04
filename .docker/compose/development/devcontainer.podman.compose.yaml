@@ -19,6 +19,13 @@ services:
   arsnova-server-comments:
     userns_mode: keep-id
     pod: ""
+  # Not a Gradle project, but the same bind-mount write target: "ng serve" writes its build
+  # cache to .angular/ in the mounted webclient directory, and "yarn install" writes
+  # node_modules/. Nothing depends_on arsnova-webclient and it depends on nothing itself, so
+  # taking it out of the pod pulls no other service out with it.
+  arsnova-webclient:
+    userns_mode: keep-id
+    pod: ""
   # These don't need userns_mode themselves - they're plain infra containers, not
   # Gradle/bind-mount write targets. They need pod: "" ONLY because core/authz/comments/
   # websocket above (all non-pod now) depend on them via "depends_on" in
