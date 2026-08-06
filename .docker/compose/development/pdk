@@ -1,6 +1,9 @@
 #!/bin/bash
 export PATH=$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin/:$PATH
 COMMAND=$1
+# Read before resolve_engine, which needs the engine "set-engine" was asked for in order to
+# preflight that one rather than the one currently in effect.
+ENGINE_ARG=$2
 
 COMPOSE_DIR=$(dirname $(readlink -f $0))
 LOCAL_COMPOSE_DIR=$COMPOSE_DIR
@@ -77,6 +80,400 @@ merge_env() {
   export $CURRENT_ENV >/dev/null
 }
 
+# Regenerate the merged .env from $ENV_FILES, devcontainer.env and local.env (last one
+# wins), then source it via merge_env. Extracted out of update_config() so engine
+# resolution can call it early (before preflight) without having to duplicate this logic.
+refresh_local_env() {
+  if [ ! -f "$LOCAL_COMPOSE_DIR/local.env" ]; then
+    echo "# Custom environment configuration overrides" > "$LOCAL_COMPOSE_DIR/local.env"
+  fi
+  if [ ! -f "$LOCAL_COMPOSE_DIR/local.compose.yaml" ]; then
+    echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > "$LOCAL_COMPOSE_DIR/local.compose.yaml"
+  fi
+  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > "$LOCAL_COMPOSE_DIR/.env"
+  cat $ENV_FILES devcontainer.env "$LOCAL_COMPOSE_DIR/local.env" | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> "$LOCAL_COMPOSE_DIR/.env"
+  merge_env
+}
+
+# Records one line per invocation in a local, gitignored history file. Exists because the same
+# command can behave differently depending on where it is run from - the engine and, under
+# podman, the compose provider are both environment-dependent - and because a session inside a
+# devcontainer has no other way to see that something was run against this workspace from the
+# host. Hence the origin tag: it is what makes the log readable when host and container
+# invocations are interleaved.
+PDK_HISTORY_FILE="$LOCAL_COMPOSE_DIR/.pdk-history.log"
+
+log_invocation() {
+  # Both engines' marker files are checked, since either runtime may have created the container.
+  if [ -e /run/.containerenv ] || [ -e /.dockerenv ]; then
+    PDK_ORIGIN=container
+  else
+    PDK_ORIGIN=host
+  fi
+  PDK_INVOCATION="$*"
+  # "native" means the engine's own compose implementation - the provider is only ambiguous
+  # under podman, see resolve_engine.
+  printf '%s %s engine=%s provider=%s cmd="%s"\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$PDK_ORIGIN" "$PDK_ENGINE" \
+    "${PODMAN_COMPOSE_PROVIDER:-native}" "$PDK_INVOCATION" >> "$PDK_HISTORY_FILE" 2>/dev/null
+  # Trimmed on the way in so it happens once per invocation rather than twice. Only the last
+  # few commands are ever of interest, so the cap stays deliberately small.
+  if [ "$(wc -l < "$PDK_HISTORY_FILE" 2>/dev/null || echo 0)" -gt 200 ]; then
+    tail -n 100 "$PDK_HISTORY_FILE" > "$PDK_HISTORY_FILE.tmp" 2>/dev/null \
+      && mv "$PDK_HISTORY_FILE.tmp" "$PDK_HISTORY_FILE"
+  fi
+}
+
+# Written from a trap, so a start line left without a matching exit line is itself the signal
+# that the invocation was killed rather than having finished - which a single line assembled at
+# exit could not convey, since SIGKILL bypasses traps entirely.
+log_invocation_exit() {
+  printf '%s %s exit=%s cmd="%s"\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$PDK_ORIGIN" "$1" "$PDK_INVOCATION" \
+    >> "$PDK_HISTORY_FILE" 2>/dev/null
+}
+
+# Resolve which container engine to use. Precedence: shell env PDK_ENGINE -> value stored
+# in local.env (loaded into the shell by the refresh_local_env call right before this) ->
+# default "docker". "set-engine" resolves to the engine it was asked for, whatever is stored,
+# since its whole job is to switch: that way it preflights the engine being switched *to* and
+# fails before changing anything, and the very first podman run (nothing in local.env yet)
+# doesn't preflight-check Docker instead.
+resolve_engine() {
+  if [ "$COMMAND" = "set-engine" ] && [ -n "$ENGINE_ARG" ]; then
+    PDK_ENGINE=$ENGINE_ARG
+  fi
+  PDK_ENGINE=${PDK_ENGINE:-docker}
+  export PDK_ENGINE
+  case "$PDK_ENGINE" in
+    docker)
+      DOCKER_BIN=docker
+      PROJECT_DIR_ARG="--project-directory $LOCAL_COMPOSE_DIR"
+      EXEC_TTY_ARG="-it"
+      ;;
+    podman)
+      DOCKER_BIN=podman
+      export CONTAINER_HOST="unix://$LOCAL_ROOT_DIR/.podman/run/podman.sock"
+      # Suppresses the ">>>> Executing external compose provider ..." banner "podman compose"
+      # prints on every single invocation - purely cosmetic, confirmed via podman's own binary
+      # strings (ComposeWarningLogs / PODMAN_COMPOSE_WARNING_LOGS) and by testing the env var
+      # directly, no containers.conf equivalent needed.
+      export PODMAN_COMPOSE_WARNING_LOGS=false
+      # "podman compose" picks its provider from the invoking environment's PATH and prefers
+      # docker-compose when both are present (per its own --help), so the same command
+      # resolves to a different implementation depending on where it runs - the host and a
+      # devcontainer disagree in exactly that way here. Pinning makes the engine choice decide
+      # the compose implementation too, which also keeps the generated file's Podman-only keys
+      # ("pod", "userns_mode: keep-id") with the provider they were written for.
+      # An already-set value wins, so a podman-compose installed somewhere off PATH can still
+      # be pointed at - the default only rules out the silent docker-compose fallback.
+      export PODMAN_COMPOSE_PROVIDER=${PODMAN_COMPOSE_PROVIDER:-podman-compose}
+      # podman-compose (unlike Docker Compose v2) has no --project-directory flag at all -
+      # passing it makes argument parsing fail outright (the path ends up misparsed as the
+      # positional subcommand). The env/project-name resolution that flag would otherwise
+      # provide is already covered here: refresh_local_env exports the generated .env into
+      # this shell (`set -a; . .env; set +a`), and podman-compose's own env handling gives
+      # already-exported shell vars priority over anything it reads from a dotenv file.
+      PROJECT_DIR_ARG=""
+      # Likewise, podman-compose's `exec` has no -i/-t flags at all (confirmed via its own
+      # --help: only -d/--privileged/-u/-T/--index/-e/-w) - passing "-it" fails argument
+      # parsing outright ("unrecognized arguments: -it"). It allocates a pseudo-tty by
+      # default already (only -T *disables* one), so the flag is simply unneeded here.
+      EXEC_TTY_ARG=""
+      # Rootless Podman remaps container UIDs into a subordinate range by default, so a
+      # bind-mounted host file owned by the real host UID isn't writable by the
+      # numerically-"matching" UID inside the container's own user namespace (confirmed via
+      # `id` reporting uid=1000(dev) while writes to the $ROOT_DIR/$LOCAL_ROOT_DIR-mounted
+      # /workspace still hit Permission denied - a user-namespace mapping gap, not a real UID
+      # mismatch). `userns_mode: keep-id` (podman-compose maps this straight to `podman run
+      # --userns keep-id`, confirmed in its source) makes the invoking host UID appear as
+      # itself inside the container, fixing writes to the host-owned Gradle build directory
+      # under /workspace (e.g. core4/core's dev-server). This is Podman-only: Docker Compose
+      # doesn't accept "keep-id" as a userns_mode value, so it's loaded as a separate compose
+      # file here rather than added to the shared devcontainer.base.compose.yaml/v4 files.
+      # That file also sets pod: "" (podman rejects --userns combined with podman-compose's
+      # default per-project pod) for these services and everything their depends_on chain
+      # touches.
+      PODMAN_ONLY_COMPOSE_FILE="$COMPOSE_DIR/devcontainer.podman.compose.yaml"
+      if [ -f "$PODMAN_ONLY_COMPOSE_FILE" ]; then
+        COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f $PODMAN_ONLY_COMPOSE_FILE"
+      fi
+      ;;
+    *)
+      echo "ERROR: Unsupported PDK_ENGINE=$PDK_ENGINE (expected 'docker' or 'podman')."
+      exit 1
+      ;;
+  esac
+  export DOCKER_BIN PROJECT_DIR_ARG EXEC_TTY_ARG
+}
+
+# Ensure the project-scoped Podman instance's API service is reachable, starting it (via a
+# transient systemd --user unit) if it isn't. Idempotent, and self-heals after a reboot
+# (the transient unit doesn't survive that) without requiring "set-engine podman" to be re-run.
+#
+# systemd is only required in the branch that actually starts the service - a plain client
+# that just wants to talk to an already-running instance (e.g. a devcontainer with no
+# systemd --user session of its own) never needs it, since CONTAINER_HOST already points
+# `podman` at the right socket regardless of who started the service on the other end.
+ensure_podman_service() {
+  PODMAN_STATE_DIR="$LOCAL_ROOT_DIR/.podman"
+  PODMAN_SOCKET="$PODMAN_STATE_DIR/run/podman.sock"
+  INSTANCE_HASH=$(echo -n "$LOCAL_ROOT_DIR" | sha256sum | cut -c1-16)
+
+  if [ -S "$PODMAN_SOCKET" ] && podman system info &>/dev/null; then
+    return 0
+  fi
+
+  if ! { command -v systemd-run &> /dev/null && systemctl --user status &> /dev/null; }; then
+    echo "ERROR: podman socket at $PODMAN_SOCKET is not reachable, and this environment" >&2
+    echo "cannot start it (that requires Linux with a systemd --user session: systemd-run," >&2
+    echo "systemctl --user). If this is meant to be a client only, ask whoever manages the" >&2
+    echo "host to run './pdk set-engine podman' or otherwise start the service there." >&2
+    return 1
+  fi
+
+  UNIT_NAME="pdk-podman-$INSTANCE_HASH.service"
+  if systemctl --user is-active --quiet "$UNIT_NAME"; then
+    return 0
+  fi
+
+  # Only data/config (persistent storage) go under the project directory - that's what
+  # actually provides the container/image isolation this feature exists for (podman ps/logs
+  # etc. all key off graphroot/XDG_DATA_HOME, not the runtime dir). The socket's listen
+  # address (below) is passed explicitly and stays project-scoped independent of this.
+  #
+  # XDG_RUNTIME_DIR/runroot is deliberately left as the REAL, unredirected /run/user/<uid> -
+  # NOT a project-specific subdirectory of it. That was tried first (a per-instance
+  # subdirectory) and reliably broke two different rootless-networking subsystems in ways no
+  # environment-variable-level fix could touch:
+  #   - pasta: "Permission denied" opening the netns file - needs the real tmpfs mount
+  #     propagation semantics of /run/user/<uid> itself, not merely somewhere under it.
+  #   - aardvark-dns: "Failed to connect to user scope bus" - a rootless-netns process
+  #     presents uid=0 (root inside its own shifted user namespace) in the DBus AUTH
+  #     EXTERNAL handshake, which only authenticates successfully against the *real*
+  #     /run/user/<uid> tree; a subdirectory hits this even with every plausible file
+  #     symlinked in (confirmed 2026-08-01, matches containers/netavark#473 upstream).
+  # Podman's rootless network namespace + pause process are meant to be shared per-user
+  # across ALL of that user's podman storage instances regardless of graphroot - trying to
+  # give this project its own runtime subdirectory fought that design rather than working
+  # with it. Storage isolation alone (XDG_DATA_HOME/XDG_CONFIG_HOME above) is what this
+  # feature actually needs; the runtime dir doesn't need to be project-scoped at all.
+  PODMAN_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+  mkdir -p "$PODMAN_STATE_DIR"/data "$PODMAN_STATE_DIR"/config/containers "$PODMAN_STATE_DIR"/run
+  # Image short-name resolution (containers/image, not containers/storage) does NOT honor
+  # XDG_CONFIG_HOME for registries.conf the way storage.conf honors it - confirmed
+  # 2026-08-01: `podman info --format '{{.Registries}}'` stayed `map[]` even after a full
+  # restart with registries.conf sitting under XDG_CONFIG_HOME. It resolves via $HOME
+  # instead (left as the real, unredirected home here), so point it explicitly at this
+  # project's file instead of guessing at HOME-based path conventions.
+  if [ ! -f "$PODMAN_STATE_DIR/config/containers/registries.conf" ]; then
+    echo 'unqualified-search-registries = ["docker.io"]' > "$PODMAN_STATE_DIR/config/containers/registries.conf"
+  fi
+  systemctl --user reset-failed "$UNIT_NAME" 2>/dev/null
+  systemd-run --user --unit="$UNIT_NAME" \
+    --setenv=XDG_DATA_HOME="$PODMAN_STATE_DIR/data" \
+    --setenv=XDG_CONFIG_HOME="$PODMAN_STATE_DIR/config" \
+    --setenv=XDG_RUNTIME_DIR="$PODMAN_RUNTIME_DIR" \
+    --setenv=CONTAINERS_REGISTRIES_CONF="$PODMAN_STATE_DIR/config/containers/registries.conf" \
+    -- podman --runroot "$PODMAN_RUNTIME_DIR/containers" system service --time=0 "unix://$PODMAN_SOCKET"
+
+  for i in $(seq 1 30); do
+    [ -S "$PODMAN_SOCKET" ] && break
+    sleep 0.5
+  done
+  [ -S "$PODMAN_SOCKET" ]
+}
+
+# Stop and forget this project's transient Podman service unit, so the next command that
+# needs it (set-engine podman, or any podman-engine command while PDK_ENGINE is podman)
+# starts a genuinely fresh instance instead of tripping ensure_podman_service's "already
+# active" early-return against a unit whose backing storage is gone or corrupted.
+#
+# .podman/ is moved aside with a timestamp, never deleted - it may still hold images,
+# volumes or config worth recovering by hand. Safe to run whether or not the unit or the
+# directory currently exist; deliberately skips the whole Docker/Podman preflight block
+# below (see its early-exit call site) since that's exactly what a broken instance can't
+# get through.
+reset_podman() {
+  PODMAN_STATE_DIR="$LOCAL_ROOT_DIR/.podman"
+  INSTANCE_HASH=$(echo -n "$LOCAL_ROOT_DIR" | sha256sum | cut -c1-16)
+  UNIT_NAME="pdk-podman-$INSTANCE_HASH.service"
+
+  if command -v systemctl &> /dev/null; then
+    systemctl --user stop "$UNIT_NAME" 2>/dev/null
+    systemctl --user reset-failed "$UNIT_NAME" 2>/dev/null
+    echo "Stopped (or confirmed not running) $UNIT_NAME."
+  else
+    echo "NOTE: no systemctl here - if $UNIT_NAME is running on another host/session, stop it there too."
+  fi
+
+  if [ -d "$PODMAN_STATE_DIR" ]; then
+    BACKUP_DIR="$PODMAN_STATE_DIR.bak-$(date +%Y%m%d%H%M%S)"
+    mv "$PODMAN_STATE_DIR" "$BACKUP_DIR"
+    echo "Moved $PODMAN_STATE_DIR to $BACKUP_DIR (not deleted - remove it yourself once you're"
+    echo "sure you don't need anything from it)."
+  else
+    echo "$PODMAN_STATE_DIR does not exist - nothing to move."
+  fi
+
+  echo "Run './pdk set-engine podman' to start a fresh instance."
+}
+
+# Only needed by the `open` command (installs the Dev Containers extension it relies on) -
+# kept out of the unconditional preflight so a plain client (no VS Code installed at all,
+# e.g. a headless devcontainer only reading logs/status) isn't blocked by it.
+ensure_vscode() {
+  if ! command -v code &> /dev/null; then
+    echo ERROR: Visual Studio Code is not installed.
+    echo
+    echo https://code.visualstudio.com
+    exit 1
+  fi
+
+  if ! code --list-extensions | grep ms-vscode-remote.remote-containers &> /dev/null; then
+    code --install-extension ms-vscode-remote.remote-containers
+  fi
+}
+
+# Point VS Code's Dev Containers extension at podman globally (User Settings, not a
+# per-project workspace setting - avoids repeating this across every service folder and
+# forcing the choice on teammates). Mirrors existing precedent in this script: it already
+# runs `code --install-extension` unconditionally when the extension is missing. Returns 0
+# only if dockerPath is confirmed set to podman (just now, or already); 1 otherwise, so the
+# caller can decide whether it's safe to persist PDK_ENGINE=podman.
+configure_vscode_docker_path() {
+  settings_file="${XDG_CONFIG_HOME:-$HOME/.config}/Code/User/settings.json"
+  if [ ! -f "$settings_file" ]; then
+    mkdir -p "$(dirname "$settings_file")"
+    echo '{}' > "$settings_file"
+  fi
+
+  # VS Code's settings.json is JSONC (comments/trailing commas allowed), which a strict
+  # JSON parser like jq can't handle at all - a jq-based round-trip fails on ANY file with
+  # a comment in it, regardless of what's near the key itself. Match/insert the one key we
+  # care about as plain text instead, so existing comments are never at risk of being
+  # silently stripped, and this doesn't depend on the rest of the file being strict JSON.
+  current=$(grep -oP '"dev\.containers\.dockerPath"\s*:\s*"\K[^"]*' "$settings_file" | tail -n1)
+  if [ "$current" = "podman" ]; then
+    return 0
+  elif [ -n "$current" ]; then
+    echo "WARNING: dev.containers.dockerPath is already '$current' in $settings_file - leaving it as-is so we don't break whatever else relies on it."
+    return 1
+  fi
+
+  if grep -q '"dev\.containers\.dockerPath"' "$settings_file"; then
+    echo "WARNING: found a dev.containers.dockerPath entry in $settings_file that doesn't look like a plain active string value (commented out? unusual formatting?) - set it to \"podman\" there manually."
+    return 1
+  fi
+
+  sed -i '0,/{/ s//{\n  "dev.containers.dockerPath": "podman",/' "$settings_file"
+  if grep -qP '"dev\.containers\.dockerPath"\s*:\s*"podman"' "$settings_file"; then
+    echo "Set dev.containers.dockerPath=podman in VS Code User Settings ($settings_file)."
+    return 0
+  else
+    echo "WARNING: could not edit $settings_file automatically - set \"dev.containers.dockerPath\": \"podman\" there manually."
+    return 1
+  fi
+}
+
+# Reverts what configure_vscode_docker_path did, and only that: a value other than "podman"
+# was not set by us (a Colima or Rancher Desktop path, say), so it is left alone. Removing the
+# whole line can leave a trailing comma before the closing brace, which is valid JSONC and
+# accepted by VS Code.
+unconfigure_vscode_docker_path() {
+  settings_file="${XDG_CONFIG_HOME:-$HOME/.config}/Code/User/settings.json"
+  if [ ! -f "$settings_file" ]; then
+    return 0
+  fi
+
+  current=$(grep -oP '"dev\.containers\.dockerPath"\s*:\s*"\K[^"]*' "$settings_file" | tail -n1)
+  if [ -z "$current" ]; then
+    return 0
+  elif [ "$current" != podman ]; then
+    echo "Leaving dev.containers.dockerPath='$current' in $settings_file as-is - we did not set that."
+    return 0
+  fi
+
+  # Only a line holding nothing but this key can be dropped wholesale; anything else is
+  # hand-formatted and better left to its owner.
+  if grep -qP '^\s*"dev\.containers\.dockerPath"\s*:\s*"podman",?\s*$' "$settings_file"; then
+    sed -i '/^\s*"dev\.containers\.dockerPath"\s*:\s*"podman",\?\s*$/d' "$settings_file"
+    echo "Removed dev.containers.dockerPath from VS Code User Settings ($settings_file)."
+  else
+    echo "WARNING: dev.containers.dockerPath=podman in $settings_file is not on a line of its own - remove it there manually, or 'pdk open' will keep using Podman."
+  fi
+}
+
+persist_engine() {
+  [ -f "$LOCAL_COMPOSE_DIR/local.env" ] || echo "# Custom environment configuration overrides" > "$LOCAL_COMPOSE_DIR/local.env"
+  sed -i -n -e "/^PDK_ENGINE=/!p" -e '$a'"PDK_ENGINE=$1" "$LOCAL_COMPOSE_DIR/local.env"
+  echo "PDK_ENGINE=$1 persisted to $LOCAL_COMPOSE_DIR/local.env."
+}
+
+# Reports the effective engine and what is stored, since the two can disagree and neither is
+# otherwise discoverable without reading this script.
+show_engine() {
+  echo "Engine in effect: $PDK_ENGINE"
+  stored=$(grep -m1 '^PDK_ENGINE=' "$LOCAL_COMPOSE_DIR/local.env" 2>/dev/null | cut -d= -f2-)
+  if [ -z "$stored" ]; then
+    echo "Nothing stored in $LOCAL_COMPOSE_DIR/local.env, so the default (docker) applies."
+  else
+    echo "Stored in $LOCAL_COMPOSE_DIR/local.env: $stored"
+    if [ "$stored" != "$PDK_ENGINE" ]; then
+      echo "NOTE: a PDK_ENGINE in the environment is overriding the stored value."
+    fi
+  fi
+  echo
+  echo "Change it with: $PDK_CMD set-engine docker|podman"
+}
+
+set_engine() {
+  if [ -z "$1" ]; then
+    show_engine
+    return 0
+  fi
+
+  # Each engine keeps its own storage, so named volumes (databases, Gradle and VS Code
+  # caches) do not carry over, and both engines publish to the same host ports. Said here
+  # because switching is the one moment it matters, and the moment it looks like data loss.
+  echo "NOTE: volumes are per-engine and do not migrate; the other engine's data stays where it is."
+  echo "NOTE: containers already running on the other engine are not stopped and will fight over"
+  echo "      host ports - run '$PDK_CMD compose down' there first if you have not."
+  echo
+
+  case "$1" in
+    podman)
+      echo "Podman service ready at unix://$LOCAL_ROOT_DIR/.podman/run/podman.sock."
+      echo "Compose provider: $(podman compose version 2>&1 | head -n1)"
+
+      if [ "$(loginctl show-user "$USER" --property=Linger --value 2>/dev/null)" != "yes" ]; then
+        echo "NOTE: the Podman service may not survive logout. Consider: loginctl enable-linger $USER"
+      fi
+
+      # Gate persisting PDK_ENGINE on VS Code actually being configured to use podman first -
+      # otherwise `pdk` itself would switch to podman while `pdk open` silently kept using
+      # Docker (split-brain: two engines, two sets of containers, very confusing to debug).
+      if configure_vscode_docker_path; then
+        persist_engine podman
+      else
+        echo "PDK_ENGINE was NOT changed, to avoid 'pdk' using podman while 'pdk open' keeps using Docker."
+        echo "Resolve the VS Code settings warning above and retry - or, if you accept that"
+        echo "'pdk open' will keep using Docker, add PDK_ENGINE=podman to"
+        echo "$LOCAL_COMPOSE_DIR/local.env yourself. The podman service above is already running either way."
+        exit 1
+      fi
+      ;;
+    docker)
+      # Order mirrors the podman direction: the VS Code setting is machine-wide, so leaving it
+      # pointing at podman while pdk goes back to Docker is the same split-brain in reverse.
+      unconfigure_vscode_docker_path
+      persist_engine docker
+      ;;
+    # No catch-all: resolve_engine has already rejected anything that is not docker or podman,
+    # since it resolves to this argument in order to preflight it.
+  esac
+}
+
 # Expects argument to be either a project path or service name. Determines path
 # from service name and vice versa. Sets PROJECT and SERVICE variables
 # accordingly.
@@ -123,22 +520,25 @@ prompt_image_tags() {
 
 update_config() {
   echo Updating configuration for Docker Compose...
-  if [ ! -f "$LOCAL_COMPOSE_DIR/local.env" ]; then
-    echo "# Custom environment configuration overrides" > "$LOCAL_COMPOSE_DIR/local.env"
-  fi
-  if [ ! -f "$LOCAL_COMPOSE_DIR/local.compose.yaml" ]; then
-    echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > "$LOCAL_COMPOSE_DIR/local.compose.yaml"
-  fi
-  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > "$LOCAL_COMPOSE_DIR/.env"
-  cat $ENV_FILES devcontainer.env "$LOCAL_COMPOSE_DIR/local.env" | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> "$LOCAL_COMPOSE_DIR/.env"
-  merge_env
+  refresh_local_env
   determine_image_tags
-  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > "$PDK_COMPOSE_FILE"
-  docker compose --project-directory "$LOCAL_COMPOSE_DIR" \
+  # Staged through a temp file and moved into place only on success. Writing the destination
+  # directly leaves it existing but holding nothing except the header when "config" fails, and
+  # since every other subcommand regenerates only when the file is *missing*, that broken state
+  # survives silently until the next explicit update-config.
+  compose_file_tmp="$PDK_COMPOSE_FILE.tmp"
+  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > "$compose_file_tmp"
+  if ! $DOCKER_BIN compose $PROJECT_DIR_ARG \
     $COMPOSE_FILE_ARGS \
     -f "$LOCAL_COMPOSE_DIR/local.compose.yaml" \
     --profile "*" \
-    config >> "$PDK_COMPOSE_FILE"
+    config >> "$compose_file_tmp"; then
+    rm -f "$compose_file_tmp"
+    echo ERROR: Failed to generate the Docker Compose configuration. >&2
+    echo "Kept the previous $PDK_COMPOSE_FILE, which may now be out of date." >&2
+    exit 1
+  fi
+  mv "$compose_file_tmp" "$PDK_COMPOSE_FILE"
 }
 
 build() {
@@ -148,7 +548,7 @@ build() {
   pull_devcontainer_base_images
   echo Building Devcontainers...
   shift 1
-  docker compose -f "$PDK_COMPOSE_FILE" build $@
+  $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" build $@
 }
 
 pull_devcontainer_base_images() {
@@ -162,14 +562,14 @@ pull_devcontainer_base_images() {
   done
   devimgs=($devimgs)
   for devimg in "${devimgs[@]}"; do
-    docker pull "$devimg"
+    $DOCKER_BIN pull "$devimg"
   done
 }
 
 seed_gradle_ro_cache() {
   echo Seeding Gradle read-only dependency cache...
   mkdir -p "$LOCAL_ROOT_DIR/.gradle"
-  docker run --rm \
+  $DOCKER_BIN run --rm \
     -v "$LOCAL_ROOT_DIR:/project" \
     -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache:/root/.gradle-ro-dep-cache" \
     -v "${COMPOSE_PROJECT_NAME}_gradle-ro-dep-cache-home:/root/.gradle" \
@@ -184,8 +584,23 @@ seed_gradle_ro_cache() {
 
 start_dev_server() {
   if [ -f "$LOCAL_ROOT_DIR/$PROJECT/build.gradle.kts" ]; then
-    docker compose -f "$PDK_COMPOSE_FILE" restart "$SERVICE"
-    docker compose -f "$PDK_COMPOSE_FILE" exec -it -u dev "$SERVICE" sh -c "/post-attach.sh && trap '{ echo; echo \"Starting production server...\"; }' INT && cd /workspace/$PROJECT && ../gradlew bootRun $*; exit"
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" restart "$SERVICE"
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u dev "$SERVICE" sh -c "/post-attach.sh && trap '{ echo; echo \"Starting production server...\"; }' INT && cd /workspace/$PROJECT && ../gradlew bootRun $*; exit"
+  # No production server takes over on exit here (unlike the Gradle services, this
+  # devcontainer overrides the image's command with a plain sleep loop), so there is
+  # nothing for an INT trap to announce. The argument selects the yarn script rather than
+  # being appended to it, so a different build flavour can be served with
+  # "dev-server webclient start:particify".
+  #
+  # --host overrides angular.json's 127.0.0.1, which suits attaching an IDE to this container
+  # and forwarding the port, but leaves the dev server unreachable for the gateway routing
+  # "/*" to it - i.e. exactly the case this command exists for. --allowed-hosts then stops it
+  # answering 403 "Blocked request" to what the gateway forwards, which carries whatever Host
+  # the browser used. Neither widens exposure: the port is not published, so only the Compose
+  # network reaches it either way.
+  elif [ -f "$LOCAL_ROOT_DIR/$PROJECT/package.json" ]; then
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" restart "$SERVICE"
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u dev "$SERVICE" sh -c "/post-attach.sh && cd /workspace/$PROJECT && yarn install && yarn ${*:-start:all} --host 0.0.0.0 --allowed-hosts; exit"
   else
     echo "Service $SERVICE is not supported."
   fi
@@ -200,8 +615,8 @@ migrate_postgresql_data() {
   if [ -z "$postgresql_target_version" ]; then
     return
   fi
-  for postgresql_volume in $(docker volume ls -q | grep $postgresql_volume_prefix); do
-    postgresql_version=$(docker run --rm -v "$postgresql_volume:/mnt" busybox cat /mnt/PG_VERSION)
+  for postgresql_volume in $($DOCKER_BIN volume ls -q | grep $postgresql_volume_prefix); do
+    postgresql_version=$($DOCKER_BIN run --rm -v "$postgresql_volume:/mnt" busybox cat /mnt/PG_VERSION)
     if [ -z "$postgresql_version" ]; then
       echo "Failed to detect current PostgreSQL version for volume $postgresql_volume."
       exit 1
@@ -209,16 +624,16 @@ migrate_postgresql_data() {
     if [ "$postgresql_version" = "$postgresql_target_version" ]; then
       continue
     fi
-    docker compose -f "$PDK_COMPOSE_FILE" down
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" down
     postgresql_user=arsnova${postgresql_volume#"$postgresql_volume_prefix"}
     echo "Running migration for volume $postgresql_volume..."
-    docker compose pull "$postgresql_migration_image:$postgresql_version-to-$postgresql_target_version"
+    $DOCKER_BIN compose pull "$postgresql_migration_image:$postgresql_version-to-$postgresql_target_version"
     echo Adjusting directory layout for migration...
-    docker run --rm -v $postgresql_volume:$postgresql_path -w $postgresql_path alpine sh -c "export src=\`echo *\` && mkdir -p $postgresql_version/data && echo mv \$src $postgresql_version/data && mv \$src $postgresql_version/data && mkdir -p $postgresql_target_version/data"
+    $DOCKER_BIN run --rm -v $postgresql_volume:$postgresql_path -w $postgresql_path alpine sh -c "export src=\`echo *\` && mkdir -p $postgresql_version/data && echo mv \$src $postgresql_version/data && mv \$src $postgresql_version/data && mkdir -p $postgresql_target_version/data"
     echo Running migration...
-    docker run --rm -v $postgresql_volume:$postgresql_path -e PGUSER="$postgresql_user" -e POSTGRES_INITDB_ARGS="-U $postgresql_user" "$postgresql_migration_image:$postgresql_version-to-$postgresql_target_version" --link
+    $DOCKER_BIN run --rm -v $postgresql_volume:$postgresql_path -e PGUSER="$postgresql_user" -e POSTGRES_INITDB_ARGS="-U $postgresql_user" "$postgresql_migration_image:$postgresql_version-to-$postgresql_target_version" --link
     echo Restoring directory layout...
-    docker run --rm -v $postgresql_volume:$postgresql_path -w $postgresql_path alpine sh -c "mv $postgresql_target_version/data/* ./ && rm -rf $postgresql_version $postgresql_target_version && printf \"\\nhost all all all md5\\n\" >> pg_hba.conf"
+    $DOCKER_BIN run --rm -v $postgresql_volume:$postgresql_path -w $postgresql_path alpine sh -c "mv $postgresql_target_version/data/* ./ && rm -rf $postgresql_version $postgresql_target_version && printf \"\\nhost all all all md5\\n\" >> pg_hba.conf"
     echo "Migration for volume $postgresql_volume completed."
   done
   set +e
@@ -229,39 +644,92 @@ if ! command -v git &> /dev/null; then
   exit 1
 fi
 
-if ! command -v docker &> /dev/null; then
-  echo ERROR: Docker Engine is not installed.
-  echo
-  echo https://docs.docker.com/engine/install/
-  exit 1
+load_prod_config "$COMPOSE_DIR"
+if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
+  load_prod_config "$ADDITIONAL_COMPOSE_DIR"
+fi
+load_dev_config "$COMPOSE_DIR"
+if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
+  load_dev_config "$ADDITIONAL_COMPOSE_DIR"
 fi
 
-if ! docker compose &> /dev/null; then
-  echo ERROR: Docker Compose v2 is not installed.
-  echo
-  echo https://docs.docker.com/compose/install/compose-plugin/
-  echo
-  echo On Debian-based systems:
-  echo apt install docker-compose-plugin
-  exit 1
+refresh_local_env
+resolve_engine
+
+# After resolve_engine so the engine and provider are already known, and before the
+# reset-podman shortcut below so that nothing escapes being recorded.
+log_invocation "$@"
+trap 'log_invocation_exit $?' EXIT
+
+# Deliberately runs before the Docker/Podman preflight below - a broken Podman instance
+# (the exact case this command exists for) can fail that preflight outright, which would
+# make reset-podman unreachable via the case statement further down.
+if [ "$COMMAND" = "reset-podman" ]; then
+  reset_podman
+  exit $?
 fi
 
-if command docker-compose &> /dev/null && docker-compose --version | grep "docker-compose version" &> /dev/null; then
-  echo ERROR: Legacy Docker Compose v1 is installed.
-  echo
-  echo Please remove this version to avoid issues.
-  exit 1
-fi
+if [ "$PDK_ENGINE" = "docker" ]; then
+  if ! command -v docker &> /dev/null; then
+    echo ERROR: Docker Engine is not installed.
+    echo
+    echo https://docs.docker.com/engine/install/
+    exit 1
+  fi
 
-if ! command -v code &> /dev/null; then
-  echo ERROR: Visual Studio Code is not installed.
-  echo
-  echo https://code.visualstudio.com
-  exit 1
-fi
+  if ! docker compose &> /dev/null; then
+    echo ERROR: Docker Compose v2 is not installed.
+    echo
+    echo https://docs.docker.com/compose/install/compose-plugin/
+    echo
+    echo On Debian-based systems:
+    echo apt install docker-compose-plugin
+    exit 1
+  fi
 
-if ! code --list-extensions | grep ms-vscode-remote.remote-containers &> /dev/null; then
-  code --install-extension ms-vscode-remote.remote-containers
+  if command docker-compose &> /dev/null && docker-compose --version | grep "docker-compose version" &> /dev/null; then
+    echo ERROR: Legacy Docker Compose v1 is installed.
+    echo
+    echo Please remove this version to avoid issues.
+    exit 1
+  fi
+else
+  if ! command -v podman &> /dev/null; then
+    echo ERROR: Podman is not installed.
+    echo
+    echo https://podman.io/docs/installation
+    exit 1
+  fi
+
+  # ensure_podman_service prints its own diagnostics and only requires systemd tooling
+  # when the service actually needs (re)starting, not for an already-reachable client.
+  #
+  # This must run BEFORE the compose-provider check below: "podman compose version"
+  # doesn't just check for a local provider binary, it also dials the socket to gather
+  # server-side version info - on a first-ever bootstrap nothing is listening yet, so
+  # checking compose first would fail regardless of how correctly podman/podman-compose
+  # are installed.
+  if ! ensure_podman_service; then
+    exit 1
+  fi
+
+  # Checks the provider pinned in resolve_engine, not merely whichever one PATH offers, so a
+  # host that happens to have docker-compose installed fails here with a clear cause instead
+  # of somewhere further in.
+  if ! podman compose version &> /dev/null; then
+    echo ERROR: podman-compose is not installed or not working.
+    echo
+    echo Podman mode pins it as the compose provider so that commands behave the same
+    echo wherever they run, and because the generated Compose file uses Podman-only keys.
+    echo Set PODMAN_COMPOSE_PROVIDER to override, e.g. for an install outside PATH.
+    echo
+    echo On Debian-based systems:
+    echo apt install podman-compose
+    exit 1
+  fi
+
+  # Note: the legacy Docker Compose v1 rejection above is intentionally skipped for
+  # Podman - it is irrelevant once the provider is pinned to podman-compose.
 fi
 
 if ! command -v pip &> /dev/null; then
@@ -280,15 +748,6 @@ if [ -f .pre-commit-config.yaml ]; then
   pre-commit install >/dev/null
 fi
 
-load_prod_config "$COMPOSE_DIR"
-if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
-  load_prod_config "$ADDITIONAL_COMPOSE_DIR"
-fi
-load_dev_config "$COMPOSE_DIR"
-if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
-  load_dev_config "$ADDITIONAL_COMPOSE_DIR"
-fi
-
 init_gitmodules
 if [ -n "$2" ]; then
   set_project_variables "$2"
@@ -303,7 +762,7 @@ case $COMMAND in
     fi
     update_config
     echo Updating base images for Devcontainers...
-    docker compose --project-directory "$LOCAL_COMPOSE_DIR" \
+    $DOCKER_BIN compose $PROJECT_DIR_ARG \
       $BASE_COMPOSE_FILE_ARGS \
       pull $@
     build $@
@@ -318,6 +777,7 @@ case $COMMAND in
     prompt_image_tags
     ;;
   open|o)
+    ensure_vscode
     if [ -n "$PROJECT" ] && [ -d "$LOCAL_ROOT_DIR/$PROJECT" ]; then
       update_config
       devcontainer open "$LOCAL_ROOT_DIR/$PROJECT"
@@ -330,7 +790,7 @@ case $COMMAND in
     update_config
     echo Starting Devcontainers...
     shift 1
-    docker compose -f "$PDK_COMPOSE_FILE" up $@
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" up $@
     ;;
   build|b)
     update_config
@@ -341,14 +801,14 @@ case $COMMAND in
       update_config
     fi
     shift 1
-    docker compose -f "$PDK_COMPOSE_FILE" logs $@
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" logs $@
     ;;
   compose|c)
     if [ ! -f "$PDK_COMPOSE_FILE" ]; then
       update_config
     fi
     shift 1
-    docker compose -f "$PDK_COMPOSE_FILE" $@
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" $@
     ;;
   dev-server|d)
     if [ -z "$SERVICE" ]; then
@@ -360,6 +820,9 @@ case $COMMAND in
     fi
     shift 2
     start_dev_server $@
+    ;;
+  set-engine)
+    set_engine "$ENGINE_ARG"
     ;;
   *)
     echo Usage:
@@ -376,5 +839,7 @@ case $COMMAND in
     echo "    $PDK_CMD update           Update Git repositories, Docker Compose configuration, Devcontainers and the Gradle dependency cache"
     echo "    $PDK_CMD update-config    Update the configuration for Docker Compose"
     echo "    $PDK_CMD build            (Re-)build Devcontainers"
+    echo "    $PDK_CMD set-engine       Show the container engine in use, or switch it: set-engine docker|podman"
+    echo "    $PDK_CMD reset-podman     Stop this project's Podman service unit and move aside its .podman/ state"
     ;;
 esac

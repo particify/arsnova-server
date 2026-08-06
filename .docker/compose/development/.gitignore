@@ -1,4 +1,5 @@
 /.compose.yaml
 /.env
+/.pdk-history.log
 /local.compose.yaml
 /local.env

@@ -7,6 +7,9 @@
 # Local configuration
 application-local.yaml
 
+# pdk-managed project-scoped Podman instance (./pdk set-engine podman)
+/.podman/
+
 # JVM/Gradle
 *.class
 .classpath
