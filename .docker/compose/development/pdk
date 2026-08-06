@@ -585,7 +585,7 @@ seed_gradle_ro_cache() {
 start_dev_server() {
   if [ -f "$LOCAL_ROOT_DIR/$PROJECT/build.gradle.kts" ]; then
     $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" restart "$SERVICE"
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u dev "$SERVICE" sh -c "/post-attach.sh && trap '{ echo; echo \"Starting production server...\"; }' INT && cd /workspace/$PROJECT && ../gradlew bootRun $*; exit"
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u 1000:1000 "$SERVICE" sh -c "/post-attach.sh && trap '{ echo; echo \"Starting production server...\"; }' INT && cd /workspace/$PROJECT && ../gradlew bootRun $*; exit"
   # No production server takes over on exit here (unlike the Gradle services, this
   # devcontainer overrides the image's command with a plain sleep loop), so there is
   # nothing for an INT trap to announce. The argument selects the yarn script rather than
@@ -600,7 +600,7 @@ start_dev_server() {
   # network reaches it either way.
   elif [ -f "$LOCAL_ROOT_DIR/$PROJECT/package.json" ]; then
     $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" restart "$SERVICE"
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u dev "$SERVICE" sh -c "/post-attach.sh && cd /workspace/$PROJECT && yarn install && yarn ${*:-start:all} --host 0.0.0.0 --allowed-hosts; exit"
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u 1000:1000 "$SERVICE" sh -c "/post-attach.sh && cd /workspace/$PROJECT && yarn install && yarn ${*:-start:all} --host 0.0.0.0 --allowed-hosts; exit"
   else
     echo "Service $SERVICE is not supported."
   fi
