@@ -5,6 +5,9 @@ COMMAND=$1
 # preflight that one rather than the one currently in effect.
 ENGINE_ARG=$2
 
+# Can be set by a wrapper script to name the command the user actually ran.
+PDK_CMD=${PDK_CMD:-$0}
+
 COMPOSE_DIR=$(dirname $(readlink -f $0))
 LOCAL_COMPOSE_DIR=$COMPOSE_DIR
 export ROOT_DIR=$(readlink -f $COMPOSE_DIR/../../..)
@@ -215,12 +218,75 @@ resolve_engine() {
 # that just wants to talk to an already-running instance (e.g. a devcontainer with no
 # systemd --user session of its own) never needs it, since CONTAINER_HOST already points
 # `podman` at the right socket regardless of who started the service on the other end.
+# A running service keeps the settings it was started with, so ensure_podman_service's "socket
+# already answers" early return would otherwise report success while the old engine kept
+# serving. Warns rather than restarting: the unit may be backing containers in use.
+#
+# Skipped in a container, where XDG_RUNTIME_DIR is the container's own /run/user/<uid> and never
+# the host path the service was started with, so the comparison would always mismatch.
+warn_if_runroot_drifted() {
+  if [ -e /run/.containerenv ] || [ -e /.dockerenv ]; then
+    return 0
+  fi
+  if ! command -v systemctl &> /dev/null; then
+    return 0
+  fi
+  running_runroot=$(podman info --format '{{.Store.RunRoot}}' 2>/dev/null)
+  if [ -z "$running_runroot" ] || [ "$running_runroot" = "$PODMAN_RUNROOT" ]; then
+    return 0
+  fi
+  echo "WARNING: the running Podman service uses runroot" >&2
+  echo "  $running_runroot" >&2
+  echo "but this pdk would start it with" >&2
+  echo "  $PODMAN_RUNROOT" >&2
+  echo "A running service keeps its original settings, so this command changed nothing." >&2
+  echo "To apply the new value:" >&2
+  echo "  systemctl --user stop $UNIT_NAME && $PDK_CMD set-engine podman" >&2
+}
+
 ensure_podman_service() {
   PODMAN_STATE_DIR="$LOCAL_ROOT_DIR/.podman"
   PODMAN_SOCKET="$PODMAN_STATE_DIR/run/podman.sock"
   INSTANCE_HASH=$(echo -n "$LOCAL_ROOT_DIR" | sha256sum | cut -c1-16)
+  UNIT_NAME="pdk-podman-$INSTANCE_HASH.service"
+
+  # Only data/config (persistent storage) go under the project directory - that's what
+  # actually provides the container/image isolation this feature exists for (podman ps/logs
+  # etc. all key off graphroot/XDG_DATA_HOME, not the runtime dir). The socket's listen
+  # address (below) is passed explicitly and stays project-scoped independent of this.
+  #
+  # XDG_RUNTIME_DIR is deliberately left as the REAL, unredirected /run/user/<uid> - NOT a
+  # project-specific subdirectory of it. That was tried first and reliably broke two different
+  # rootless-networking subsystems in ways no environment-variable-level fix could touch:
+  #   - pasta: "Permission denied" opening the netns file - needs the real tmpfs mount
+  #     propagation semantics of /run/user/<uid> itself, not merely somewhere under it.
+  #   - aardvark-dns: "Failed to connect to user scope bus" - a rootless-netns process
+  #     presents uid=0 (root inside its own shifted user namespace) in the DBus AUTH
+  #     EXTERNAL handshake, which only authenticates successfully against the *real*
+  #     /run/user/<uid> tree; a subdirectory hits this even with every plausible file
+  #     symlinked in (confirmed 2026-08-01, matches containers/netavark#473 upstream).
+  # Podman's rootless network namespace + pause process are meant to be shared per-user across
+  # ALL of that user's podman storage instances regardless of graphroot, so fighting that is
+  # what broke; the runtime dir itself does not need to be project-scoped.
+  #
+  # containers/storage's --runroot is a SEPARATE knob from XDG_RUNTIME_DIR, and unlike it the
+  # runroot must pair 1:1 with graphroot - so it DOES have to be per-instance. It holds
+  # overlay-layers/mountpoints.json, the single file recording which layers are mounted and
+  # their mount counts; two stores sharing one runroot rewrite that file wholesale and drop
+  # each other's entries. An engine that has lost its record can no longer resolve a
+  # container's rootfs to read /etc/passwd out of it, so `podman exec` by user NAME fails with
+  # "unable to find user <name>: no matching entries in passwd file" while numeric -u 0 still
+  # works. If that symptom reappears, check `podman info` for a runRoot shared across two
+  # graphroots before looking anywhere else.
+  #
+  # The runroot stays under the real /run/user/<uid> so it keeps tmpfs semantics and clears on
+  # reboot; putting it in .podman/ would persist stale mount records across reboots and cause
+  # the same failure from the other direction.
+  PODMAN_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+  PODMAN_RUNROOT="$PODMAN_RUNTIME_DIR/pdk-$INSTANCE_HASH/containers"
 
   if [ -S "$PODMAN_SOCKET" ] && podman system info &>/dev/null; then
+    warn_if_runroot_drifted
     return 0
   fi
 
@@ -232,33 +298,10 @@ ensure_podman_service() {
     return 1
   fi
 
-  UNIT_NAME="pdk-podman-$INSTANCE_HASH.service"
   if systemctl --user is-active --quiet "$UNIT_NAME"; then
     return 0
   fi
 
-  # Only data/config (persistent storage) go under the project directory - that's what
-  # actually provides the container/image isolation this feature exists for (podman ps/logs
-  # etc. all key off graphroot/XDG_DATA_HOME, not the runtime dir). The socket's listen
-  # address (below) is passed explicitly and stays project-scoped independent of this.
-  #
-  # XDG_RUNTIME_DIR/runroot is deliberately left as the REAL, unredirected /run/user/<uid> -
-  # NOT a project-specific subdirectory of it. That was tried first (a per-instance
-  # subdirectory) and reliably broke two different rootless-networking subsystems in ways no
-  # environment-variable-level fix could touch:
-  #   - pasta: "Permission denied" opening the netns file - needs the real tmpfs mount
-  #     propagation semantics of /run/user/<uid> itself, not merely somewhere under it.
-  #   - aardvark-dns: "Failed to connect to user scope bus" - a rootless-netns process
-  #     presents uid=0 (root inside its own shifted user namespace) in the DBus AUTH
-  #     EXTERNAL handshake, which only authenticates successfully against the *real*
-  #     /run/user/<uid> tree; a subdirectory hits this even with every plausible file
-  #     symlinked in (confirmed 2026-08-01, matches containers/netavark#473 upstream).
-  # Podman's rootless network namespace + pause process are meant to be shared per-user
-  # across ALL of that user's podman storage instances regardless of graphroot - trying to
-  # give this project its own runtime subdirectory fought that design rather than working
-  # with it. Storage isolation alone (XDG_DATA_HOME/XDG_CONFIG_HOME above) is what this
-  # feature actually needs; the runtime dir doesn't need to be project-scoped at all.
-  PODMAN_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
   mkdir -p "$PODMAN_STATE_DIR"/data "$PODMAN_STATE_DIR"/config/containers "$PODMAN_STATE_DIR"/run
   # Image short-name resolution (containers/image, not containers/storage) does NOT honor
   # XDG_CONFIG_HOME for registries.conf the way storage.conf honors it - confirmed
@@ -275,13 +318,28 @@ ensure_podman_service() {
     --setenv=XDG_CONFIG_HOME="$PODMAN_STATE_DIR/config" \
     --setenv=XDG_RUNTIME_DIR="$PODMAN_RUNTIME_DIR" \
     --setenv=CONTAINERS_REGISTRIES_CONF="$PODMAN_STATE_DIR/config/containers/registries.conf" \
-    -- podman --runroot "$PODMAN_RUNTIME_DIR/containers" system service --time=0 "unix://$PODMAN_SOCKET"
+    -- podman --runroot "$PODMAN_RUNROOT" system service --time=0 "unix://$PODMAN_SOCKET"
 
   for i in $(seq 1 30); do
     [ -S "$PODMAN_SOCKET" ] && break
     sleep 0.5
   done
-  [ -S "$PODMAN_SOCKET" ]
+  if [ ! -S "$PODMAN_SOCKET" ]; then
+    # systemd-run is fire-and-forget, so without this the only visible symptom is a socket that
+    # never appears while the actual reason stays in the journal. Matching on podman's own error
+    # text is brittle across versions; if it ever stops matching, this degrades to the silent
+    # failure it replaced rather than to a misleading message.
+    if systemctl --user status "$UNIT_NAME" 2>&1 | grep -q "database configuration mismatch"; then
+      echo "ERROR: this project's Podman storage was initialized with a different runroot." >&2
+      echo "libpod records graphroot/runroot in" >&2
+      echo "  $PODMAN_STATE_DIR/data/containers/storage/db.sql" >&2
+      echo "and refuses to start when they disagree. Options:" >&2
+      echo "  - point the runroot back at the value recorded there, or" >&2
+      echo "  - stop and remove all containers, then update DBConfig.RunRoot to match, or" >&2
+      echo "  - '$PDK_CMD reset-podman' (DESTRUCTIVE: discards this project's images and volumes)" >&2
+    fi
+    return 1
+  fi
 }
 
 # Stop and forget this project's transient Podman service unit, so the next command that
@@ -314,6 +372,16 @@ reset_podman() {
     echo "sure you don't need anything from it)."
   else
     echo "$PODMAN_STATE_DIR does not exist - nothing to move."
+  fi
+
+  # The runroot pairs 1:1 with the graphroot just moved aside, so it has to go as well or the
+  # fresh instance starts against mount records for layers that no longer exist. Deleted rather
+  # than backed up: it is tmpfs, rebuilt on demand, and holds nothing not derivable from the
+  # graphroot. Targeting it by name is only safe because the runroot is per-instance.
+  PODMAN_RUNROOT_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/pdk-$INSTANCE_HASH"
+  if [ -d "$PODMAN_RUNROOT_DIR" ]; then
+    rm -rf "$PODMAN_RUNROOT_DIR"
+    echo "Removed runtime state at $PODMAN_RUNROOT_DIR."
   fi
 
   echo "Run './pdk set-engine podman' to start a fresh instance."
@@ -826,10 +894,6 @@ case $COMMAND in
     ;;
   *)
     echo Usage:
-    # PDK_CMD can be set by a wrapper script
-    if [ -z "$PDK_CMD" ]; then
-      PDK_CMD=$0
-    fi
     echo "    $PDK_CMD run              Start Devcontainers for all services"
     echo "    $PDK_CMD dev-server       Start a development server"
     echo "    $PDK_CMD open <project>   Open project in Devcontainer with Visual Studio Code"
