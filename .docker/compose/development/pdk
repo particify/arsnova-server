@@ -616,7 +616,7 @@ build() {
   pull_devcontainer_base_images
   echo Building Devcontainers...
   shift 1
-  $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" build $@
+  $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" build "$@"
 }
 
 pull_devcontainer_base_images() {
@@ -832,8 +832,8 @@ case $COMMAND in
     echo Updating base images for Devcontainers...
     $DOCKER_BIN compose $PROJECT_DIR_ARG \
       $BASE_COMPOSE_FILE_ARGS \
-      pull $@
-    build $@
+      pull "$@"
+    build "$@"
     seed_gradle_ro_cache
     migrate_postgresql_data
     ;;
@@ -858,7 +858,7 @@ case $COMMAND in
     update_config
     echo Starting Devcontainers...
     shift 1
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" up $@
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" up "$@"
     ;;
   build|b)
     update_config
@@ -869,14 +869,14 @@ case $COMMAND in
       update_config
     fi
     shift 1
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" logs $@
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" logs "$@"
     ;;
   compose|c)
     if [ ! -f "$PDK_COMPOSE_FILE" ]; then
       update_config
     fi
     shift 1
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" $@
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" "$@"
     ;;
   dev-server|d)
     if [ -z "$SERVICE" ]; then
@@ -887,7 +887,7 @@ case $COMMAND in
       update_config
     fi
     shift 2
-    start_dev_server $@
+    start_dev_server "$@"
     ;;
   set-engine)
     set_engine "$ENGINE_ARG"
