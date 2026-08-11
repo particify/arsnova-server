@@ -712,6 +712,20 @@ if ! command -v git &> /dev/null; then
   exit 1
 fi
 
+# When this repo is used as a submodule, the parent's wrapper is the only correct entry point:
+# it exports ADDITIONAL_COMPOSE_DIR, without which the config it layers on top is silently
+# omitted from the generated compose file.
+if [ -z "$ADDITIONAL_COMPOSE_DIR" ] \
+    && SUPERPROJECT_DIR=$(git -C "$ROOT_DIR" rev-parse --show-superproject-working-tree 2>/dev/null) \
+    && [ -n "$SUPERPROJECT_DIR" ]; then
+  echo "ERROR: $ROOT_DIR is a Git submodule of $SUPERPROJECT_DIR, so this is not the right" >&2
+  echo "entry point - it would configure only this repo's own services." >&2
+  echo >&2
+  echo "Run the parent project's wrapper instead:" >&2
+  echo "  cd $SUPERPROJECT_DIR && ./pdk${*:+ $*}" >&2
+  exit 1
+fi
+
 load_prod_config "$COMPOSE_DIR"
 if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
   load_prod_config "$ADDITIONAL_COMPOSE_DIR"
