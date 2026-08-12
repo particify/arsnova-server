@@ -590,12 +590,17 @@ update_config() {
   echo Updating configuration for Docker Compose...
   refresh_local_env
   determine_image_tags
-  # Staged through a temp file and moved into place only on success. Writing the destination
-  # directly leaves it existing but holding nothing except the header when "config" fails, and
-  # since every other subcommand regenerates only when the file is *missing*, that broken state
-  # survives silently until the next explicit update-config.
+  # Staged through a temp file and moved into place only on success, so a failed "config" run
+  # leaves the previous good file in place rather than overwriting it with a broken/empty one.
   compose_file_tmp="$PDK_COMPOSE_FILE.tmp"
-  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > "$compose_file_tmp"
+  {
+    echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE"
+    # For diagnosing a stale-looking .compose.yaml at a glance.
+    echo "# timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "# engine: $PDK_ENGINE"
+    echo "# provider: ${PODMAN_COMPOSE_PROVIDER:-native}"
+    echo "# compose command: $DOCKER_BIN compose $PROJECT_DIR_ARG $COMPOSE_FILE_ARGS -f $LOCAL_COMPOSE_DIR/local.compose.yaml --profile '*' config"
+  } > "$compose_file_tmp"
   if ! $DOCKER_BIN compose $PROJECT_DIR_ARG \
     $COMPOSE_FILE_ARGS \
     -f "$LOCAL_COMPOSE_DIR/local.compose.yaml" \
@@ -879,16 +884,12 @@ case $COMMAND in
     build
     ;;
   logs|l)
-    if [ ! -f "$PDK_COMPOSE_FILE" ]; then
-      update_config
-    fi
+    update_config
     shift 1
     $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" logs "$@"
     ;;
   compose|c)
-    if [ ! -f "$PDK_COMPOSE_FILE" ]; then
-      update_config
-    fi
+    update_config
     shift 1
     $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" "$@"
     ;;
@@ -897,9 +898,7 @@ case $COMMAND in
       echo Missing or invalid service arg.
       exit 1
     fi
-    if [ ! -f "$PDK_COMPOSE_FILE" ]; then
-      update_config
-    fi
+    update_config
     shift 2
     start_dev_server "$@"
     ;;
