@@ -114,7 +114,7 @@ refresh_local_env() {
   if [ ! -f "$LOCAL_COMPOSE_DIR/local.compose.yaml" ]; then
     echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > "$LOCAL_COMPOSE_DIR/local.compose.yaml"
   fi
-  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > "$LOCAL_COMPOSE_DIR/.env"
+  echo "# GENERATED - DO NOT EDIT - RUN $PDK_CMD update-config TO UPDATE" > "$LOCAL_COMPOSE_DIR/.env"
   cat $ENV_FILES devcontainer.env "$LOCAL_COMPOSE_DIR/local.env" | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> "$LOCAL_COMPOSE_DIR/.env"
   merge_env
 }
@@ -615,7 +615,7 @@ update_config() {
   # leaves the previous good file in place rather than overwriting it with a broken/empty one.
   compose_file_tmp="$PDK_COMPOSE_FILE.tmp"
   {
-    echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE"
+    echo "# GENERATED - DO NOT EDIT - RUN $PDK_CMD update-config TO UPDATE"
     # For diagnosing a stale-looking .compose.yaml at a glance.
     echo "# timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
     echo "# engine: $PDK_ENGINE"
