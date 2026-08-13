@@ -1,5 +1,26 @@
 #!/bin/bash
 export PATH=$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin/:$PATH
+
+# Stripped before COMMAND and ENGINE_ARG are read below: everything after this point addresses
+# arguments positionally, so a flag left in place would shift every later reference. Leading
+# position only, which is also what keeps "compose -v" reaching Compose rather than being eaten
+# here. Honoured from the environment too, so the parent project's wrapper can strip it itself
+# without having to splice it back into the arguments it forwards.
+if [ "$1" = "-v" ] || [ "$1" = "--verbose" ]; then
+  PDK_VERBOSE=1
+  shift 1
+fi
+export PDK_VERBOSE
+
+# pdk's own progress narration shares stdout with whatever command is being passed through, so it
+# is opt-in rather than suppressible. An "if" rather than "[ ... ] && echo" so the function cannot
+# return non-zero when quiet - seed_gradle_ro_cache and migrate_postgresql_data run under "set -e".
+log_verbose() {
+  if [ -n "$PDK_VERBOSE" ]; then
+    echo "$@"
+  fi
+}
+
 COMMAND=$1
 # Read before resolve_engine, which needs the engine "set-engine" was asked for in order to
 # preflight that one rather than the one currently in effect.
@@ -564,12 +585,12 @@ set_project_variables() {
 # 1. *_TAG environment variables (shell env -> local.env -> *.env)
 # 2. next
 determine_image_tags() {
-  echo Image tags:
+  log_verbose Image tags:
   for project in "${!TAG_VARS[@]}"; do
     if [ -z "${!TAG_VARS[$project]}" ]; then
       export ${TAG_VARS[$project]}=next
     fi
-    echo "$project -> ${!TAG_VARS[$project]}"
+    log_verbose "$project -> ${!TAG_VARS[$project]}"
   done
 }
 
@@ -587,7 +608,7 @@ prompt_image_tags() {
 }
 
 update_config() {
-  echo Updating configuration for Docker Compose...
+  log_verbose Updating configuration for Docker Compose...
   refresh_local_env
   determine_image_tags
   # Staged through a temp file and moved into place only on success, so a failed "config" run
@@ -918,5 +939,8 @@ case $COMMAND in
     echo "    $PDK_CMD build            (Re-)build Devcontainers"
     echo "    $PDK_CMD set-engine       Show the container engine in use, or switch it: set-engine docker|podman"
     echo "    $PDK_CMD reset-podman     Stop this project's Podman service unit and move aside its .podman/ state"
+    echo
+    echo Options:
+    echo "    -v, --verbose   Show the configuration and image tags in use (must precede the command)"
     ;;
 esac
