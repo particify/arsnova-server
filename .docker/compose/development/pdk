@@ -700,6 +700,43 @@ start_dev_server() {
   fi
 }
 
+# Stopping whatever started a dev server does not stop the dev server. Podman never signals the
+# remote process group when an exec client goes away, so backgrounding this command - or just
+# closing its terminal - leaves bootRun, the Gradle daemon and the port held, while from the
+# outside it looks stopped. Ctrl+C works interactively only because the terminal generates SIGINT;
+# this generates the same signal against the same process group.
+stop_dev_server() {
+  local pgid attempt
+  # /post-attach.sh anchors both the Gradle and the yarn command line, and its shell leads the
+  # process group. The bracket stops awk matching its own command line.
+  pgid=$($DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec -T -u 1000:1000 "$SERVICE" \
+    sh -c "ps -e -o pgid=,args= | awk '/[p]ost-attach\.sh/ {print \$1; exit}'" 2>/dev/null |
+    tr -cd '0-9')
+  if [ -z "$pgid" ]; then
+    echo "No development server is running for $SERVICE."
+    return 1
+  fi
+
+  echo "Stopping development server for $SERVICE..."
+  # Signalling the whole group, not just its leader: the Gradle client is what receives SIGINT and
+  # asks the daemon to cancel the build, so signalling the shell alone only fires its INT trap.
+  $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec -T -u 1000:1000 "$SERVICE" \
+    sh -c "kill -INT -$pgid" || return 1
+
+  # Wait on the signalled group rather than on the container going quiet: the Gradle daemon sits in
+  # a group of its own and is meant to survive, keeping the next build warm.
+  for attempt in $(seq 30); do
+    sleep 1
+    if ! $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec -T -u 1000:1000 "$SERVICE" \
+        sh -c "kill -0 -$pgid" 2>/dev/null; then
+      echo "Development server stopped."
+      return 0
+    fi
+  done
+  echo "ERROR: development server for $SERVICE is still running after 30s (process group $pgid)." >&2
+  return 1
+}
+
 migrate_postgresql_data() {
   set -e
   postgresql_migration_image=tianon/postgres-upgrade
@@ -923,6 +960,14 @@ case $COMMAND in
     shift 2
     start_dev_server "$@"
     ;;
+  stop-dev-server)
+    if [ -z "$SERVICE" ]; then
+      echo Missing or invalid service arg.
+      exit 1
+    fi
+    update_config
+    stop_dev_server
+    ;;
   set-engine)
     set_engine "$ENGINE_ARG"
     ;;
@@ -930,6 +975,7 @@ case $COMMAND in
     echo Usage:
     echo "    $PDK_CMD run              Start Devcontainers for all services"
     echo "    $PDK_CMD dev-server       Start a development server"
+    echo "    $PDK_CMD stop-dev-server  Stop a development server"
     echo "    $PDK_CMD open <project>   Open project in Devcontainer with Visual Studio Code"
     echo "    $PDK_CMD tags             Set the image tags of projects to use with Docker Compose"
     echo "    $PDK_CMD logs             Show logs or the log for a specific service"
