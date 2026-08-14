@@ -10,6 +10,13 @@ services:
   arsnova-server-core4:
     userns_mode: keep-id
     pod: ""
+    # Testcontainers does not look inside the /workspace bind mount for the project engine's
+    # socket. Ryuk gets the override path bind-mounted, so that one must be the host path; the
+    # host override is for reaching the published ports of sibling containers.
+    environment:
+      DOCKER_HOST: unix:///workspace/.podman/run/podman.sock
+      TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: $LOCAL_ROOT_DIR/.podman/run/podman.sock
+      TESTCONTAINERS_HOST_OVERRIDE: host.containers.internal
   arsnova-server-websocket:
     userns_mode: keep-id
     pod: ""
