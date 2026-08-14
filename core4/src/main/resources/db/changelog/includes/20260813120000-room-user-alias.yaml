@@ -1,0 +1,51 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: arsnova
+      labels: ddl,room
+      context: default
+      comment: Create table for room user aliases
+      changes:
+        - createTable:
+            schemaName: room
+            tableName: user_alias
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: room_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: room_id_fkey
+                    references: '"room"."room"(id)'
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: user_id_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: alias
+                  type: varchar(30)
+              - column:
+                  name: seed
+                  type: int
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            schemaName: room
+            tableName: user_alias
+            constraintName: user_alias_room_id_user_id_key
+            columnNames: room_id,user_id

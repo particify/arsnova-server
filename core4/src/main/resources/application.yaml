@@ -11,6 +11,9 @@ spring:
   application:
     name: arsnova-core4
 
+  config:
+    import: classpath:config/alias-words.yaml
+
   datasource:
     hikari:
       schema: public

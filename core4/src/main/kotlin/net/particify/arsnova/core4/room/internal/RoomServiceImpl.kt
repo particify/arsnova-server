@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service
 @Service
 class RoomServiceImpl(
     private val roomRepository: RoomRepository,
+    private val roomUserAliasRepository: RoomUserAliasRepository,
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val roomProperties: RoomProperties
 ) : RoomService, RoomRepository by roomRepository {
@@ -57,6 +58,7 @@ class RoomServiceImpl(
   @Transactional
   override fun deleteById(id: UUID) {
     applicationEventPublisher.publishEvent(RoomDeletedEvent(id))
+    roomUserAliasRepository.deleteAllByRoomId(id)
     roomRepository.deleteById(id)
   }
 

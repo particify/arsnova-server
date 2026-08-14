@@ -1,0 +1,20 @@
+extend type Query {
+  roomUserAliasByRoomId(roomId: UUID!): RoomUserAlias!
+}
+
+extend type Mutation {
+  setRoomUserAlias(input: SetRoomUserAliasInput!): RoomUserAlias!
+}
+
+type RoomUserAlias {
+  "Not set for aliases which have not been persisted yet."
+  id: ID
+  alias: String!
+  seed: Int!
+}
+
+input SetRoomUserAliasInput {
+  roomId: UUID!
+  alias: String
+  seed: Int
+}
