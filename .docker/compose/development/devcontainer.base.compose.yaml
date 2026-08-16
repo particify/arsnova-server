@@ -22,6 +22,10 @@ services:
       # yarn call in a fresh container needs it again - and it asks for confirmation whenever
       # it has a TTY, which blocks any non-interactive caller indefinitely.
       COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+    # The 64 MB default is not enough for the Chromium instances Playwright runs in parallel:
+    # a renderer that exhausts it is OOM-killed, which surfaces as a test or hook timeout
+    # rather than as a crash.
+    shm_size: 1gb
     volumes:
       - $ROOT_DIR/.git:/workspace/.git
       - $ROOT_DIR/webclient:/workspace/webclient
