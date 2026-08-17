@@ -1,5 +1,26 @@
 #!/bin/bash
 export PATH=$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin/:$PATH
+
+# Stripped before COMMAND and ENGINE_ARG are read below: everything after this point addresses
+# arguments positionally, so a flag left in place would shift every later reference. Leading
+# position only, which is also what keeps "compose -v" reaching Compose rather than being eaten
+# here. Honoured from the environment too, so the parent project's wrapper can strip it itself
+# without having to splice it back into the arguments it forwards.
+if [ "$1" = "-v" ] || [ "$1" = "--verbose" ]; then
+  PDK_VERBOSE=1
+  shift 1
+fi
+export PDK_VERBOSE
+
+# pdk's own progress narration shares stdout with whatever command is being passed through, so it
+# is opt-in rather than suppressible. An "if" rather than "[ ... ] && echo" so the function cannot
+# return non-zero when quiet - seed_gradle_ro_cache and migrate_postgresql_data run under "set -e".
+log_verbose() {
+  if [ -n "$PDK_VERBOSE" ]; then
+    echo "$@"
+  fi
+}
+
 COMMAND=$1
 # Read before resolve_engine, which needs the engine "set-engine" was asked for in order to
 # preflight that one rather than the one currently in effect.
@@ -93,7 +114,7 @@ refresh_local_env() {
   if [ ! -f "$LOCAL_COMPOSE_DIR/local.compose.yaml" ]; then
     echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > "$LOCAL_COMPOSE_DIR/local.compose.yaml"
   fi
-  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > "$LOCAL_COMPOSE_DIR/.env"
+  echo "# GENERATED - DO NOT EDIT - RUN $PDK_CMD update-config TO UPDATE" > "$LOCAL_COMPOSE_DIR/.env"
   cat $ENV_FILES devcontainer.env "$LOCAL_COMPOSE_DIR/local.env" | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> "$LOCAL_COMPOSE_DIR/.env"
   merge_env
 }
@@ -564,12 +585,12 @@ set_project_variables() {
 # 1. *_TAG environment variables (shell env -> local.env -> *.env)
 # 2. next
 determine_image_tags() {
-  echo Image tags:
+  log_verbose Image tags:
   for project in "${!TAG_VARS[@]}"; do
     if [ -z "${!TAG_VARS[$project]}" ]; then
       export ${TAG_VARS[$project]}=next
     fi
-    echo "$project -> ${!TAG_VARS[$project]}"
+    log_verbose "$project -> ${!TAG_VARS[$project]}"
   done
 }
 
@@ -587,15 +608,20 @@ prompt_image_tags() {
 }
 
 update_config() {
-  echo Updating configuration for Docker Compose...
+  log_verbose Updating configuration for Docker Compose...
   refresh_local_env
   determine_image_tags
-  # Staged through a temp file and moved into place only on success. Writing the destination
-  # directly leaves it existing but holding nothing except the header when "config" fails, and
-  # since every other subcommand regenerates only when the file is *missing*, that broken state
-  # survives silently until the next explicit update-config.
+  # Staged through a temp file and moved into place only on success, so a failed "config" run
+  # leaves the previous good file in place rather than overwriting it with a broken/empty one.
   compose_file_tmp="$PDK_COMPOSE_FILE.tmp"
-  echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > "$compose_file_tmp"
+  {
+    echo "# GENERATED - DO NOT EDIT - RUN $PDK_CMD update-config TO UPDATE"
+    # For diagnosing a stale-looking .compose.yaml at a glance.
+    echo "# timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "# engine: $PDK_ENGINE"
+    echo "# provider: ${PODMAN_COMPOSE_PROVIDER:-native}"
+    echo "# compose command: $DOCKER_BIN compose $PROJECT_DIR_ARG $COMPOSE_FILE_ARGS -f $LOCAL_COMPOSE_DIR/local.compose.yaml --profile '*' config"
+  } > "$compose_file_tmp"
   if ! $DOCKER_BIN compose $PROJECT_DIR_ARG \
     $COMPOSE_FILE_ARGS \
     -f "$LOCAL_COMPOSE_DIR/local.compose.yaml" \
@@ -616,7 +642,7 @@ build() {
   pull_devcontainer_base_images
   echo Building Devcontainers...
   shift 1
-  $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" build $@
+  $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" build "$@"
 }
 
 pull_devcontainer_base_images() {
@@ -674,6 +700,43 @@ start_dev_server() {
   fi
 }
 
+# Stopping whatever started a dev server does not stop the dev server. Podman never signals the
+# remote process group when an exec client goes away, so backgrounding this command - or just
+# closing its terminal - leaves bootRun, the Gradle daemon and the port held, while from the
+# outside it looks stopped. Ctrl+C works interactively only because the terminal generates SIGINT;
+# this generates the same signal against the same process group.
+stop_dev_server() {
+  local pgid attempt
+  # /post-attach.sh anchors both the Gradle and the yarn command line, and its shell leads the
+  # process group. The bracket stops awk matching its own command line.
+  pgid=$($DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec -T -u 1000:1000 "$SERVICE" \
+    sh -c "ps -e -o pgid=,args= | awk '/[p]ost-attach\.sh/ {print \$1; exit}'" 2>/dev/null |
+    tr -cd '0-9')
+  if [ -z "$pgid" ]; then
+    echo "No development server is running for $SERVICE."
+    return 1
+  fi
+
+  echo "Stopping development server for $SERVICE..."
+  # Signalling the whole group, not just its leader: the Gradle client is what receives SIGINT and
+  # asks the daemon to cancel the build, so signalling the shell alone only fires its INT trap.
+  $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec -T -u 1000:1000 "$SERVICE" \
+    sh -c "kill -INT -$pgid" || return 1
+
+  # Wait on the signalled group rather than on the container going quiet: the Gradle daemon sits in
+  # a group of its own and is meant to survive, keeping the next build warm.
+  for attempt in $(seq 30); do
+    sleep 1
+    if ! $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec -T -u 1000:1000 "$SERVICE" \
+        sh -c "kill -0 -$pgid" 2>/dev/null; then
+      echo "Development server stopped."
+      return 0
+    fi
+  done
+  echo "ERROR: development server for $SERVICE is still running after 30s (process group $pgid)." >&2
+  return 1
+}
+
 migrate_postgresql_data() {
   set -e
   postgresql_migration_image=tianon/postgres-upgrade
@@ -709,6 +772,20 @@ migrate_postgresql_data() {
 
 if ! command -v git &> /dev/null; then
   echo ERROR: Git is not installed.
+  exit 1
+fi
+
+# When this repo is used as a submodule, the parent's wrapper is the only correct entry point:
+# it exports ADDITIONAL_COMPOSE_DIR, without which the config it layers on top is silently
+# omitted from the generated compose file.
+if [ -z "$ADDITIONAL_COMPOSE_DIR" ] \
+    && SUPERPROJECT_DIR=$(git -C "$ROOT_DIR" rev-parse --show-superproject-working-tree 2>/dev/null) \
+    && [ -n "$SUPERPROJECT_DIR" ]; then
+  echo "ERROR: $ROOT_DIR is a Git submodule of $SUPERPROJECT_DIR, so this is not the right" >&2
+  echo "entry point - it would configure only this repo's own services." >&2
+  echo >&2
+  echo "Run the parent project's wrapper instead:" >&2
+  echo "  cd $SUPERPROJECT_DIR && ./pdk${*:+ $*}" >&2
   exit 1
 fi
 
@@ -832,8 +909,8 @@ case $COMMAND in
     echo Updating base images for Devcontainers...
     $DOCKER_BIN compose $PROJECT_DIR_ARG \
       $BASE_COMPOSE_FILE_ARGS \
-      pull $@
-    build $@
+      pull "$@"
+    build "$@"
     seed_gradle_ro_cache
     migrate_postgresql_data
     ;;
@@ -858,36 +935,38 @@ case $COMMAND in
     update_config
     echo Starting Devcontainers...
     shift 1
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" up $@
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" up "$@"
     ;;
   build|b)
     update_config
     build
     ;;
   logs|l)
-    if [ ! -f "$PDK_COMPOSE_FILE" ]; then
-      update_config
-    fi
+    update_config
     shift 1
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" logs $@
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" logs "$@"
     ;;
   compose|c)
-    if [ ! -f "$PDK_COMPOSE_FILE" ]; then
-      update_config
-    fi
+    update_config
     shift 1
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" $@
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" "$@"
     ;;
   dev-server|d)
     if [ -z "$SERVICE" ]; then
       echo Missing or invalid service arg.
       exit 1
     fi
-    if [ ! -f "$PDK_COMPOSE_FILE" ]; then
-      update_config
-    fi
+    update_config
     shift 2
-    start_dev_server $@
+    start_dev_server "$@"
+    ;;
+  stop-dev-server)
+    if [ -z "$SERVICE" ]; then
+      echo Missing or invalid service arg.
+      exit 1
+    fi
+    update_config
+    stop_dev_server
     ;;
   set-engine)
     set_engine "$ENGINE_ARG"
@@ -896,6 +975,7 @@ case $COMMAND in
     echo Usage:
     echo "    $PDK_CMD run              Start Devcontainers for all services"
     echo "    $PDK_CMD dev-server       Start a development server"
+    echo "    $PDK_CMD stop-dev-server  Stop a development server"
     echo "    $PDK_CMD open <project>   Open project in Devcontainer with Visual Studio Code"
     echo "    $PDK_CMD tags             Set the image tags of projects to use with Docker Compose"
     echo "    $PDK_CMD logs             Show logs or the log for a specific service"
@@ -905,5 +985,8 @@ case $COMMAND in
     echo "    $PDK_CMD build            (Re-)build Devcontainers"
     echo "    $PDK_CMD set-engine       Show the container engine in use, or switch it: set-engine docker|podman"
     echo "    $PDK_CMD reset-podman     Stop this project's Podman service unit and move aside its .podman/ state"
+    echo
+    echo Options:
+    echo "    -v, --verbose   Show the configuration and image tags in use (must precede the command)"
     ;;
 esac
