@@ -14,7 +14,7 @@ public class PatchedHttpClientFactoryBean extends HttpClientFactoryBean {
       (new DirectFieldAccessor(this)).setPropertyValues(this.couchDBProperties);
     }
 
-    logger.info("Starting couchDb connector on {}:{}...", new Object[]{this.host, this.port});
+    logger.info("Starting couchDb connector on {}:{}...", new Object[] {this.host, this.port});
     logger.debug("host: {}", this.host);
     logger.debug("port: {}", this.port);
     logger.debug("url: {}", this.url);
