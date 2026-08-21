@@ -52,6 +52,9 @@ security:
     algorithm: PBKDF2/SHA-256
     iteration-cost: 5_000
     max-iterations: 5_000
+  login:
+    attempt-limit: 20
+    attempt-window: 2m
   authorize-uri-header: X-Forwarded-Uri
   authorize-uri-prefix: /api
 
