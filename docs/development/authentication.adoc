@@ -34,7 +34,7 @@ challenge in front of the endpoint.
 That challenge puts a cost on every attempt, but the resulting rate follows from how quickly the
 client solves one, which is a property of its hardware rather than a bound we set.
 
-The exposure is worst against an external directory,
+The exposure is worst against an external directory (see link:ldap.adoc[]),
 where repeated failures usually lock the account, but it is not specific to any one provider.
 
 `security.login.attempt-limit`:: Attempts allowed per window, `20` by default.
@@ -117,3 +117,9 @@ deactivate Server
 Browser -->> User: Logged out
 deactivate Browser
 ----
+
+== LDAP
+
+Directory accounts can be used to log in through an explicitly selectable provider.
+See link:ldap.adoc[] for the configuration, the identity model, the development setup and the known
+limitations.

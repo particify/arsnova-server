@@ -6,11 +6,13 @@ package net.particify.arsnova.core4.system.compat
 import net.particify.arsnova.core4.system.compat.LegacyConfigurationController.LegacyConfiguration.LegacyAuthenticationProvider
 import net.particify.arsnova.core4.system.config.UiProperties
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.internal.LdapProperties
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class LegacyConfigurationController(
+    private val ldapProperties: LdapProperties,
     private val saml2Properties: ExtendedSaml2RelyingPartyProperties,
     private val uiProperties: UiProperties
 ) {
@@ -28,6 +30,7 @@ class LegacyConfigurationController(
                             LegacyAuthenticationProvider.Role.MODERATOR,
                             LegacyAuthenticationProvider.Role.PARTICIPANT),
                     type = LegacyAuthenticationProvider.Type.USERNAME_PASSWORD))
+            .plus(buildLdapProviderList())
             .plus(
                 LegacyAuthenticationProvider(
                     id = "guest",
@@ -40,6 +43,21 @@ class LegacyConfigurationController(
                     type = LegacyAuthenticationProvider.Type.ANONYMOUS)),
         mapOf(),
         uiProperties.ui)
+  }
+
+  private fun buildLdapProviderList(): List<LegacyAuthenticationProvider> {
+    return ldapProperties.registration.map {
+      LegacyAuthenticationProvider(
+          id = it.key.toString(),
+          title = it.value.title,
+          order = it.value.order,
+          allowedRoles =
+              listOf(
+                  LegacyAuthenticationProvider.Role.MODERATOR,
+                  LegacyAuthenticationProvider.Role.PARTICIPANT),
+          type = LegacyAuthenticationProvider.Type.USERNAME_PASSWORD,
+      )
+    }
   }
 
   private fun buildSaml2ProviderList(): List<LegacyAuthenticationProvider> {
