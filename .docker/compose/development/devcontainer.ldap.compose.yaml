@@ -1,0 +1,27 @@
+# Opt-in: the service is profile-gated, so merging this overlay does not start it.
+# Bring it up with `--profile ldap`, and give core4 a matching `security.ldap` registration
+# in `application-local.yaml` (see docs/development/ldap.adoc).
+services:
+  lldap:
+    profiles:
+      - ldap
+    image: lldap/lldap:2026-08-10-debian@sha256:ed029c39878afbe518f1fb57b91aa297aef3ed2978a4d6084d84520be90d48d2
+    environment:
+      LLDAP_JWT_SECRET: development-only-jwt-secret
+      LLDAP_KEY_SEED: development-only-key-seed
+      LLDAP_LDAP_BASE_DN: dc=example,dc=com
+      LLDAP_LDAP_USER_DN: admin
+      LLDAP_LDAP_USER_EMAIL: admin@example.com
+      LLDAP_LDAP_USER_PASS: adminadmin
+      LLDAP_VERBOSE: "true"
+    ports:
+      # LDAP itself is only reached over the Compose network; both ports are published for
+      # ldapsearch and for the admin UI, which is how additional test users get created —
+      # nothing here is seeded declaratively.
+      - 127.0.0.1:3890:3890
+      - 127.0.0.1:17170:17170
+    volumes:
+      - lldap-data:/data
+
+volumes:
+  lldap-data:
