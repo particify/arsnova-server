@@ -58,3 +58,6 @@ services:
     pod: ""
   postgresql-assets:
     pod: ""
+  # A service gated behind a compose profile is deliberately absent above and so stays a pod member.
+  # That holds only while its depends_on chain stays inside its own profile - one reaching into the
+  # services above would hit the mismatch described further up, in the same direction.

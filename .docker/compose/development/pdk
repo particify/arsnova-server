@@ -607,10 +607,61 @@ prompt_image_tags() {
   done
 }
 
+# Sets PROFILE_ARGS to the repeatable --profile flags a compose invocation needs: the profiles of
+# whichever services its arguments name, or with --all every profile the sources declare, which is
+# what generating the merged config takes.
+#
+# Empty on Docker, which expands --profile '*' and enables a targeted service's own profiles by
+# itself. podman-compose does neither - its profile filter is an exact-string set intersection, so
+# the wildcard matches nothing, every profile-gated service drops out of the generated config, and a
+# later "up" naming one of them starts nothing while still exiting 0.
+#
+# Activating only what the arguments name relies on a gated service never depending on one in a
+# different profile: dependencies are resolved after the filter has run, so such a dependency would
+# be dropped from the model and never started. No gated service does that today.
+#
+# An array rather than a string so that no profiles at all expands to zero words, and so a profile
+# named "*" cannot be globbed against the working directory.
+set_profile_args() {
+  PROFILE_ARGS=()
+  [ "$PDK_ENGINE" = "podman" ] || return 0
+
+  local arg profile
+  local -a sources=()
+  for arg in $COMPOSE_FILE_ARGS; do
+    [ "$arg" = "-f" ] || sources+=("$arg")
+  done
+  # update_config passes this one separately, so it never appears in COMPOSE_FILE_ARGS.
+  sources+=("$LOCAL_COMPOSE_DIR/local.compose.yaml")
+
+  local -a query=("$COMPOSE_DIR/pdk-profiles")
+  if [ "${1:-}" = "--all" ]; then
+    query+=(--all)
+    shift 1
+  fi
+  while IFS= read -r profile; do
+    PROFILE_ARGS+=(--profile "$profile")
+  done < <(printf '%s\n' "$@" | "${query[@]}" "${sources[@]}")
+}
+
+# Passes a compose command through to the generated config with the profiles its arguments need.
+# The flags have to precede the subcommand: podman-compose registers --profile on its top-level
+# parser only, so anything after the subcommand is an unrecognized argument.
+#
+# A command naming no service activates nothing, which keeps a whole-stack start from sweeping the
+# profile-gated services in - and, the other way round, leaves a running one untouched by a plain
+# "compose down". "--remove-orphans" reaches it, working from the project label rather than the
+# service list.
+compose_cmd() {
+  set_profile_args "$@"
+  $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" "${PROFILE_ARGS[@]}" "$@"
+}
+
 update_config() {
   log_verbose Updating configuration for Docker Compose...
   refresh_local_env
   determine_image_tags
+  set_profile_args --all
   # Staged through a temp file and moved into place only on success, so a failed "config" run
   # leaves the previous good file in place rather than overwriting it with a broken/empty one.
   compose_file_tmp="$PDK_COMPOSE_FILE.tmp"
@@ -620,12 +671,13 @@ update_config() {
     echo "# timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
     echo "# engine: $PDK_ENGINE"
     echo "# provider: ${PODMAN_COMPOSE_PROVIDER:-native}"
-    echo "# compose command: $DOCKER_BIN compose $PROJECT_DIR_ARG $COMPOSE_FILE_ARGS -f $LOCAL_COMPOSE_DIR/local.compose.yaml --profile '*' config"
+    echo "# compose command: $DOCKER_BIN compose $PROJECT_DIR_ARG $COMPOSE_FILE_ARGS -f $LOCAL_COMPOSE_DIR/local.compose.yaml --profile '*' ${PROFILE_ARGS[*]} config"
   } > "$compose_file_tmp"
   if ! $DOCKER_BIN compose $PROJECT_DIR_ARG \
     $COMPOSE_FILE_ARGS \
     -f "$LOCAL_COMPOSE_DIR/local.compose.yaml" \
     --profile "*" \
+    "${PROFILE_ARGS[@]}" \
     config >> "$compose_file_tmp"; then
     rm -f "$compose_file_tmp"
     echo ERROR: Failed to generate the Docker Compose configuration. >&2
@@ -1052,7 +1104,7 @@ case $COMMAND in
     update_config
     echo Starting Devcontainers...
     shift 1
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" up "$@"
+    compose_cmd up "$@"
     ;;
   build|b)
     update_config
@@ -1061,12 +1113,12 @@ case $COMMAND in
   logs|l)
     update_config
     shift 1
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" logs "$@"
+    compose_cmd logs "$@"
     ;;
   compose|c)
     update_config
     shift 1
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" "$@"
+    compose_cmd "$@"
     ;;
   dev-server|d)
     if [ -z "$SERVICE" ]; then
