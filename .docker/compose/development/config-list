@@ -1,5 +1,6 @@
 base
 keycloak
+ldap
 mailpit
 v4
 v4-apisix

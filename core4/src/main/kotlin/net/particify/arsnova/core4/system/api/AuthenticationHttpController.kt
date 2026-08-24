@@ -4,7 +4,9 @@
 package net.particify.arsnova.core4.system.api
 
 import jakarta.servlet.http.HttpServletResponse
+import java.util.UUID
 import net.particify.arsnova.core4.system.security.JwtUtils
+import net.particify.arsnova.core4.system.security.LdapAuthenticationProviderRegistry
 import net.particify.arsnova.core4.system.security.LoginAttemptService
 import net.particify.arsnova.core4.system.security.RefreshCookieComponent
 import net.particify.arsnova.core4.system.security.RefreshJwtAuthentication
@@ -29,6 +31,7 @@ import org.springframework.web.server.ResponseStatusException
 @PreAuthorize("hasRole('USER')")
 class AuthenticationHttpController(
     private val authenticationManager: AuthenticationManager,
+    private val ldapAuthenticationProviderRegistry: LdapAuthenticationProviderRegistry,
     private val loginAttemptService: LoginAttemptService,
     private val jwtUtils: JwtUtils,
     private val userService: UserService,
@@ -65,19 +68,27 @@ class AuthenticationHttpController(
       response: HttpServletResponse
   ): AuthenticationWrapper {
     val username = loginInput.username.lowercase()
-    if (!loginAttemptService.tryConsumeAttempt(null, username)) {
+    val providerId = loginInput.providerId
+    if (!loginAttemptService.tryConsumeAttempt(providerId, username)) {
       throw ResponseStatusException(
           HttpStatus.TOO_MANY_REQUESTS, "Too many failed login attempts. Try again later.")
     }
     val passwordToken = UsernamePasswordAuthenticationToken(username, loginInput.password)
-    val authenticatedToken = authenticationManager.authenticate(passwordToken)
-    loginAttemptService.resetAttempts(null, username)
+    val authenticatedToken = resolveAuthenticationManager(providerId).authenticate(passwordToken)
+    loginAttemptService.resetAttempts(providerId, username)
     val user = authenticatedToken.principal as User
     userService.updateLastActivityAt(user)
     val subject = user.id.toString()
     val accessToken = jwtUtils.encodeJwt(subject, user.roles.map { it.name!! })
     refreshCookieComponent.add(subject, user.tokenVersion!!, response)
     return AuthenticationWrapper(accessToken)
+  }
+
+  private fun resolveAuthenticationManager(providerId: UUID?): AuthenticationManager {
+    if (providerId == null) return authenticationManager
+    return ldapAuthenticationProviderRegistry.findByProviderId(providerId)
+        ?: throw ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Unknown authentication provider $providerId.")
   }
 
   @PostMapping("/logout")

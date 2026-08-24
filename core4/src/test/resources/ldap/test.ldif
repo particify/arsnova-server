@@ -1,0 +1,119 @@
+# Every user backs exactly one test, so that the tests stay independent of each other while
+# sharing a context and a database. The purpose is noted per entry; see LdapTestConfiguration.
+#
+# Three user IDs have to stay absent from this file, because tests expect a rejection for them and
+# would pass for the wrong reason if they ever gained an entry: `no-such-directory-user`,
+# `throttled-user`, and the dev fixtures' account `user@example.com`, whose credentials are
+# submitted to the LDAP provider on purpose. LdapAuthenticationTests asserts their absence.
+dn: dc=example,dc=com
+objectClass: top
+objectClass: domain
+dc: example
+
+dn: ou=people,dc=example,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: people
+
+# Collides with the dev fixtures' account on the username, hence no mail attribute here.
+dn: uid=admin@example.com,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: admin@example.com
+cn: Ines Falkenrath
+sn: Falkenrath
+givenName: Ines
+userPassword: fixture-password-only
+
+# Authenticated with a wrong password, so the password below is never submitted.
+dn: uid=bkuiper,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: bkuiper
+cn: Britt Kuiper
+sn: Kuiper
+givenName: Britt
+mail: britt.kuiper@example.com
+userPassword: never-submitted
+
+# Logs in through the login endpoint.
+dn: uid=dsalvatierra,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: dsalvatierra
+cn: Dario Salvatierra
+sn: Salvatierra
+givenName: Dario
+mail: dario.salvatierra@example.com
+userPassword: bind-me-please
+
+# Credentials are submitted to the local provider, which must not accept them.
+dn: uid=haruka.oyelaran,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: haruka.oyelaran
+cn: Haruka Oyelaran
+sn: Oyelaran
+givenName: Haruka
+mail: haruka.oyelaran@example.com
+userPassword: just-for-tests
+
+# Logs in twice to check that the account is reused.
+dn: uid=jorunn,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: jorunn
+cn: Jorunn Aaltonen
+sn: Aaltonen
+givenName: Jorunn
+mail: jorunn.aaltonen@example.com
+userPassword: plaintext-on-purpose
+
+# Carries a full profile for the attribute import.
+dn: uid=mwendland,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: mwendland
+cn: Marit Wendland
+sn: Wendland
+givenName: Marit
+mail: marit.wendland@example.com
+userPassword: not-a-real-password
+
+# Collides with the dev fixtures' account on the mail address.
+dn: uid=nikko.pham,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: nikko.pham
+cn: Nikko Pham
+sn: Pham
+givenName: Nikko
+mail: admin@example.com
+userPassword: throwaway-credential
+
+# Bound with an upper-case user id to check that the directory's own value is stored.
+dn: uid=tilda.brekke,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: tilda.brekke
+cn: Tilda Brekke
+sn: Brekke
+givenName: Tilda
+mail: tilda.brekke@example.com
+userPassword: dev-fixture-secret

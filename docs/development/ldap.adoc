@@ -1,0 +1,163 @@
+= LDAP authentication
+
+LDAP is available as an explicitly selectable login provider.
+Every configured registration is advertised through `GET /api/configuration` and rendered as an
+additional username and password provider on the login screen.
+Clients send the registration's UUID as `providerId` in the `POST /api/auth/login` payload and omit
+the field for the local provider.
+Credentials are only ever passed to the provider that ID names, so a submission meant for one
+registration is never retried against another one.
+Tokens are issued exactly as they are for the local provider, and failed logins are throttled per
+registration and submitted username;
+link:authentication.adoc[] covers both.
+
+Users are authenticated by binding against the directory.
+On the first successful login, an account is created and linked to the registration through an
+external login.
+The user ID is read from the directory rather than taken from the submitted username, so it stays
+stable no matter which case a user typed.
+It also becomes the account's username, which is what makes the account verified.
+Two consequences follow from that, and neither of them fails the login:
+a username which is already in use leaves the account unverified,
+and a mail address which is already in use is not imported.
+
+== Configuration
+
+Registrations are keyed by a UUID, which is also the provider ID sent on login.
+An empty map -- the default -- disables LDAP, so nothing has to be configured to keep it off.
+
+[source,yaml]
+----
+security:
+  ldap:
+    registration:
+      2c62a4a8-9a1a-4e0e-9c4b-2f7fd2e0f0f5:
+        url: ldap://ldap.example.com/dc=example,dc=com
+        user-dn-pattern: uid={0},ou=people
+        user-id-attribute: uid
+        imported-attributes: [mail, givenName, sn]
+----
+
+`url`:: URL of the directory, including the base DN.
+  All other DNs are relative to it.
+`user-dn-pattern`:: Pattern for the user's DN, where `{0}` is the submitted username.
+  Mutually exclusive with `user-search-filter`.
+`user-search-base`:: Subtree the user search starts from.
+  Defaults to the base DN itself.
+`user-search-filter`:: Filter locating the user, e.g. `(uid={0})`.
+  Mutually exclusive with `user-dn-pattern`.
+`manager-user-dn`, `manager-password`:: Credentials for the bind which performs the user search.
+  Only needed if the directory does not allow anonymous searches.
+`user-id-attribute`:: Attribute holding the canonical user ID.
+  Defaults to `uid`; Active Directory uses `sAMAccountName`.
+`imported-attributes`:: Attributes imported into the user's profile, see below.
+  Empty by default, so only the user ID attribute is requested.
+`connect-timeout`, `read-timeout`:: Socket timeouts for the directory connection, `5s` and `10s` by
+  default.
+  These also bound the bind itself, which a search time limit cannot.
+`search-time-limit`:: Server-side time limit for the user search.
+  Unlimited by default, and not applicable to the DN pattern path.
+`title`:: Label shown on the login screen, `LDAP` by default.
+`order`:: Sort order among the advertised providers, `0` by default,
+  which is what the local provider uses as well.
+  Providers sharing an order keep the order they are advertised in, and LDAP registrations are
+  advertised after the local provider.
+
+== Locating users
+
+Exactly one of `user-dn-pattern` and `user-search-filter` has to be set;
+a registration with both or with neither of them fails at startup.
+
+The DN pattern binds directly to a DN derived from the submitted username and needs no read access
+to the directory before authenticating.
+The search filter looks the user up first and then binds to the DN it found, which is the only
+option if the DN cannot be derived from the username.
+It does require a directory which permits that search, either anonymously or with the manager
+credentials.
+
+== Profile import
+
+`imported-attributes` lists standard attribute names,
+and that list is also exactly what is requested from the directory,
+so what is asked for and what is consumed cannot drift apart.
+An unknown name fails at startup instead of being silently requested and ignored.
+
+`mail`:: Mail address.
+  It is lowercased and has to be unique, so it is skipped if another account already uses it.
+`givenName`:: Given name.
+`sn`:: Surname.
+
+A directory which keeps one of these under a nonstandard attribute cannot be expressed.
+An optional per-field override would be a backwards compatible addition once a real directory needs
+it.
+
+== Development environment
+
+The development environment includes an LDAP server as an opt-in service.
+It is https://github.com/lldap/lldap[lldap] rather than OpenLDAP, for which no maintained image is
+published any more.
+The service is gated behind the `ldap` Compose profile, so merging its overlay does not start it and
+it only comes up with `--profile ldap`.
+
+lldap serves the base DN `dc=example,dc=com` and is reachable from core4 over the Compose network as
+`ldap://lldap:3890/dc=example,dc=com`.
+Its admin UI is published on http://127.0.0.1:17170 (username: `admin`, password: `adminadmin`).
+Nothing is seeded declaratively:
+lldap creates the admin user and nothing else, so further test users are added by hand in the admin
+UI.
+The admin account alone is enough for a smoke test, but a real user is needed to see `givenName` and
+`sn` being imported.
+
+The matching registration belongs in `core4/src/main/resources/application-local.yaml`, which both
+`bootRun` tasks load as `optional:classpath:application-local.yaml` and which is not checked in.
+It must not go into `application-dev.yaml`:
+a registration there would add a second provider to every developer's login screen and break the
+end-to-end suite.
+
+[source,yaml]
+----
+security:
+  ldap:
+    registration:
+      2c62a4a8-9a1a-4e0e-9c4b-2f7fd2e0f0f5:
+        url: ldap://lldap:3890/dc=example,dc=com
+        user-search-base: ou=people
+        user-search-filter: (uid={0})
+        manager-user-dn: uid=admin,ou=people,dc=example,dc=com
+        manager-password: adminadmin
+        imported-attributes: [mail, givenName, sn]
+----
+
+The search path is the better fit here:
+lldap places users at `cn=<user>,ou=people,dc=example,dc=com` but accepts `uid=<user>` bind DNs as
+well, which makes a DN pattern ambiguous, and searching it requires an authenticated bind anyway.
+
+== Migration from v3
+
+The v3 migration writes `external_login.provider_id` from
+`persistence.v3-migration.authentication-provider-mapping.LDAP`.
+The registration's UUID has to be exactly that value.
+Otherwise the first login after the migration silently creates a second, empty account for every
+migrated user, and nothing reports it.
+`application-dev.yaml` demonstrates the intended pairing for SAML.
+
+`user-id-attribute` deliberately keeps the name and the meaning it had in v3, so the v3 value is
+carried across unchanged.
+Changing it gives every migrated user a duplicate account.
+
+Since `authentication-provider-mapping` is keyed by the v3 provider name, only one value can exist
+for `LDAP`.
+Configuring more than one LDAP registration while `persistence.v3-migration.enabled` is `true`
+therefore fails at startup, instead of migrating every v3 LDAP user into whichever registration
+happens to match the mapping.
+One registration during the migration phase is fine.
+
+== Limitations
+
+* `ldaps://` uses the JVM trust store.
+  Trust material cannot be configured per registration.
+* A UUID-keyed registration map cannot be configured through flat environment variables, because
+  Spring's relaxed binding cannot recover the UUID's hyphens from an environment variable name.
+  The production Compose stack configures core4 exclusively that way, so LDAP cannot be set up there
+  yet.
+  SAML shares this gap, and closing it is a task of its own.
