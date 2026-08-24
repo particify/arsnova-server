@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""Compose profile names that pdk has to name explicitly, one per line on stdout.
+
+Exists because podman-compose does not expand `--profile '*'`: its filter is an exact-string set
+intersection, so the wildcard matches no profile and every profile-gated service silently
+disappears from the generated compose file - and a later `up` naming one of them starts nothing
+while still exiting 0. Naming the profiles means reading the sources, which is this script.
+Docker Compose expands the wildcard and enables a targeted service's own profiles by itself, so
+pdk never calls this on that engine.
+
+Two questions, two forms:
+
+  pdk-profiles --all SOURCE...   every profile name any source declares
+  pdk-profiles SOURCE...         the profiles of the services named on stdin, one argument per line
+
+The command line arrives on stdin rather than as arguments so that a compose flag among them
+(`-d`, `--force-recreate`) can never be mistaken for an option of this script.
+
+Reads the overlay sources rather than the generated compose file, so the answer does not depend on
+what the last pdk invocation happened to materialize - the same input set pdk-state reads.
+
+PyYAML is safe to rely on: it is the dpkg package python3-yaml, a hard dependency of
+podman-compose, which is the very provider whose limitation this works around.
+"""
+
+import sys
+
+import yaml
+
+
+def profiles_by_service(paths):
+    """Service name -> the profiles gating it, merged across every source that mentions it."""
+    gated = {}
+    for path in paths:
+        try:
+            with open(path) as source:
+                document = yaml.safe_load(source) or {}
+        except FileNotFoundError:
+            # Compose reads the same list and will complain about a real absence itself.
+            continue
+        except (OSError, yaml.YAMLError) as error:
+            sys.exit(f"pdk-profiles: cannot read {path}: {error}")
+        for name, spec in (document.get("services") or {}).items():
+            profiles = (spec or {}).get("profiles")
+            if profiles:
+                gated.setdefault(name, set()).update(profiles)
+    return gated
+
+
+def named_on_stdin():
+    """Every argument that could be a service name. A leading dash marks a flag, never a service.
+
+    Deliberately no "skip the value of the preceding flag" rule: `pdk r -d <service>` puts the
+    service name directly after a flag, and that is the case this whole mechanism exists for. A
+    false positive costs nothing - compose starts and stops only the services actually named.
+    """
+    return {arg for arg in (line.strip() for line in sys.stdin) if arg and not arg.startswith("-")}
+
+
+def main(argv):
+    everything = bool(argv) and argv[0] == "--all"
+    paths = argv[1:] if everything else argv
+    unexpected = [path for path in paths if path.startswith("-")]
+    if unexpected:
+        # Left unchecked this would be read as a file name, skipped as absent, and answer nothing -
+        # which is the same silent emptiness the script exists to prevent.
+        sys.exit(f"pdk-profiles: unexpected option {unexpected[0]}")
+
+    gated = profiles_by_service(paths)
+    if everything:
+        wanted = set().union(*gated.values()) if gated else set()
+    else:
+        wanted = {profile for name in named_on_stdin() & set(gated) for profile in gated[name]}
+    for profile in sorted(wanted):
+        print(profile)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
