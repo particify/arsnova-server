@@ -10,6 +10,9 @@ application-local.yaml
 # pdk-managed project-scoped Podman instance (./pdk set-engine podman)
 /.podman/
 
+# Dev-server session logs written by ./pdk dev-server, rotated in place
+/.pdk-logs/
+
 # JVM/Gradle
 *.class
 .classpath

@@ -677,16 +677,25 @@ seed_gradle_ro_cache() {
 }
 
 start_dev_server() {
-  local force
+  local force log
   # Leading position only: everything after it is passed through, and for the webclient the first
   # of those selects the yarn script.
   if [ "$1" = "-f" ] || [ "$1" = "--force" ]; then
     force=1
     shift 1
   fi
+  # $LOCAL_ROOT_DIR is the parent project when a wrapper supplied ADDITIONAL_COMPOSE_DIR, and this
+  # repository otherwise, so the log lands beside whichever checkout the session belongs to.
+  log="$LOCAL_ROOT_DIR/.pdk-logs/$PROJECT.log"
   if [ -f "$LOCAL_ROOT_DIR/$PROJECT/build.gradle.kts" ]; then
     prepare_dev_server_slot "$force" || return 1
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u 1000:1000 "$SERVICE" sh -c "/post-attach.sh && trap '{ echo; echo \"Starting production server...\"; }' INT && cd /workspace/$PROJECT && ../gradlew bootRun $*; exit"
+    open_dev_server_log "$log" || return 1
+    # -Dorg.gradle.console: Gradle is handed a pty by the exec, so it would emit its rich console -
+    # a progress bar redrawn every second, which is four fifths of a captured log and unreadable in
+    # anything but a terminal. A --console argument still wins, so `--console=rich` restores it.
+    # Appended to GRADLE_OPTS inside the container rather than assigned, hence the escaped $.
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u 1000:1000 "$SERVICE" sh -c "/post-attach.sh && trap '{ echo; echo \"Starting production server...\"; }' INT && cd /workspace/$PROJECT && GRADLE_OPTS=\"\$GRADLE_OPTS -Dorg.gradle.console=plain\" ../gradlew bootRun $*; exit" 2>&1 | tee -a "$log"
+    announce_dev_server_end | tee -a "$log"
   # No production server takes over on exit here (unlike the Gradle services, this
   # devcontainer overrides the image's command with a plain sleep loop), so there is
   # nothing for an INT trap to announce. The argument selects the yarn script rather than
@@ -701,10 +710,52 @@ start_dev_server() {
   # network reaches it either way.
   elif [ -f "$LOCAL_ROOT_DIR/$PROJECT/package.json" ]; then
     prepare_dev_server_slot "$force" || return 1
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u 1000:1000 "$SERVICE" sh -c "/post-attach.sh && cd /workspace/$PROJECT && yarn install && yarn ${*:-start:all} --host 0.0.0.0 --allowed-hosts; exit"
+    open_dev_server_log "$log" || return 1
+    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u 1000:1000 "$SERVICE" sh -c "/post-attach.sh && cd /workspace/$PROJECT && yarn install && yarn ${*:-start:all} --host 0.0.0.0 --allowed-hosts; exit" 2>&1 | tee -a "$log"
+    announce_dev_server_end | tee -a "$log"
   else
     echo "Service $SERVICE is not supported."
   fi
+}
+
+# Bytes at which a dev-server log is rotated, and how many compressed generations survive. A session
+# contributes a few tens of kilobytes of real output, so this holds many of them, and gzip manages
+# about tenfold on this content - the whole set costs roughly 1 MiB live plus a little history.
+DEV_SERVER_LOG_MAX_BYTES=1048576
+DEV_SERVER_LOG_GENERATIONS=3
+
+# Readies the log a session is about to be captured to, rotating it first if it has grown past the
+# limit. Rotating here rather than in whoever invoked pdk is what makes it safe: a caller that had
+# already opened the file for its own redirect would keep writing to the renamed inode, and the
+# session's whole output would vanish with the archive.
+open_dev_server_log() {
+  local log=$1 generation previous
+  mkdir -p "$(dirname "$log")" || return 1
+  if [ ! -f "$log" ] || [ "$(stat -c%s "$log" 2>/dev/null || echo 0)" -le "$DEV_SERVER_LOG_MAX_BYTES" ]; then
+    return 0
+  fi
+  rm -f "$log.$DEV_SERVER_LOG_GENERATIONS.gz"
+  generation=$DEV_SERVER_LOG_GENERATIONS
+  while [ "$generation" -gt 1 ]; do
+    previous=$((generation - 1))
+    if [ -f "$log.$previous.gz" ]; then
+      mv "$log.$previous.gz" "$log.$generation.gz"
+    fi
+    generation=$previous
+  done
+  gzip -c "$log" > "$log.1.gz" && rm -f "$log"
+  echo "Rotated $(basename "$log"); the previous one is now $(basename "$log").1.gz."
+}
+
+# Marks the end of a session for whoever is tailing the log, who would otherwise see it freeze with
+# no indication why. Printed rather than written to the file directly, so it also reaches the
+# terminal, and reaches the log through the same pipe as everything else the session produced.
+# "Ended" rather than "stopped" because this is also the path a failed start and a crash take.
+announce_dev_server_end() {
+  local message rule
+  message="  DEV SERVER SESSION ENDED ($(date -u +%Y-%m-%dT%H:%M:%SZ))  "
+  rule=$(printf '%*s' "${#message}" '' | tr ' ' '-')
+  printf '\n%s\n%s\n%s\n' "$rule" "$message" "$rule"
 }
 
 # Brings the service to the one state a dev server can start in: its container running, and no dev
