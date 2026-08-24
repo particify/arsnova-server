@@ -677,8 +677,15 @@ seed_gradle_ro_cache() {
 }
 
 start_dev_server() {
+  local force
+  # Leading position only: everything after it is passed through, and for the webclient the first
+  # of those selects the yarn script.
+  if [ "$1" = "-f" ] || [ "$1" = "--force" ]; then
+    force=1
+    shift 1
+  fi
   if [ -f "$LOCAL_ROOT_DIR/$PROJECT/build.gradle.kts" ]; then
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" restart "$SERVICE"
+    prepare_dev_server_slot "$force" || return 1
     $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u 1000:1000 "$SERVICE" sh -c "/post-attach.sh && trap '{ echo; echo \"Starting production server...\"; }' INT && cd /workspace/$PROJECT && ../gradlew bootRun $*; exit"
   # No production server takes over on exit here (unlike the Gradle services, this
   # devcontainer overrides the image's command with a plain sleep loop), so there is
@@ -693,11 +700,75 @@ start_dev_server() {
   # the browser used. Neither widens exposure: the port is not published, so only the Compose
   # network reaches it either way.
   elif [ -f "$LOCAL_ROOT_DIR/$PROJECT/package.json" ]; then
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" restart "$SERVICE"
+    prepare_dev_server_slot "$force" || return 1
     $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u 1000:1000 "$SERVICE" sh -c "/post-attach.sh && cd /workspace/$PROJECT && yarn install && yarn ${*:-start:all} --host 0.0.0.0 --allowed-hosts; exit"
   else
     echo "Service $SERVICE is not supported."
   fi
+}
+
+# Brings the service to the one state a dev server can start in: its container running, and no dev
+# server already in it. A running one is stopped rather than the container restarted, so the Gradle
+# daemon survives to keep the next build warm. /post-attach.sh cannot do this job: it kills only
+# root-owned java, while a dev server runs as uid 1000.
+prepare_dev_server_slot() {
+  local force=$1
+  # A no-op on a running container, and starts a stopped one.
+  $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" start "$SERVICE" >/dev/null || return 1
+  dev_server_pgid >/dev/null || return 0
+  if [ -z "$force" ]; then
+    # Guarded, so a piped caller is told what to pass instead of blocking forever on an answer it
+    # has no way to give.
+    if [ ! -t 0 ]; then
+      echo "A development server is already running for $SERVICE. Pass -f to replace it." >&2
+      return 1
+    fi
+    read -p "A development server is already running for $SERVICE. Replace it? (Y/n) "
+    case "$REPLY" in
+      [nN]*) return 1 ;;
+    esac
+  fi
+  stop_dev_server || return 1
+  wait_for_app_exit
+}
+
+# bootRun's application JVM is forked by the Gradle daemon, so it is outside the process group
+# stop_dev_server signals and outlives that function's own wait - while still holding the port the
+# next dev server needs. Restarting the container is the only remedy left if it does not go.
+wait_for_app_exit() {
+  local attempt
+  for attempt in $(seq 15); do
+    if ! app_jvm_running; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "The previous application JVM is still running; restarting $SERVICE instead." >&2
+  $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" restart "$SERVICE"
+}
+
+# A java the dev server left behind, as opposed to one meant to survive it. The uid filter is what
+# excludes the prebuilt app: run.sh starts that one as root within ~5s of the last pty closing, so
+# matching it here would send every start down the restart path. The bracket keeps awk from matching
+# its own command line, which carries both daemon names as literal text.
+app_jvm_running() {
+  $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec -T -u 1000:1000 "$SERVICE" \
+    sh -c "ps -e -o uid=,args= | awk '\$1 == 1000 && /[j]ava/ && !/GradleDaemon/ && !/KotlinCompileDaemon/ {found = 1} END {exit !found}'" \
+    2>/dev/null
+}
+
+# Prints the process group of a running dev server, and returns non-zero when there is none.
+# /post-attach.sh anchors both the Gradle and the yarn command line, and its shell leads the group.
+# The bracket stops awk matching its own command line.
+dev_server_pgid() {
+  local pgid
+  pgid=$($DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec -T -u 1000:1000 "$SERVICE" \
+    sh -c "ps -e -o pgid=,args= | awk '/[p]ost-attach\.sh/ {print \$1; exit}'" 2>/dev/null |
+    tr -cd '0-9')
+  if [ -z "$pgid" ]; then
+    return 1
+  fi
+  echo "$pgid"
 }
 
 # Stopping whatever started a dev server does not stop the dev server. Podman never signals the
@@ -707,12 +778,7 @@ start_dev_server() {
 # this generates the same signal against the same process group.
 stop_dev_server() {
   local pgid attempt
-  # /post-attach.sh anchors both the Gradle and the yarn command line, and its shell leads the
-  # process group. The bracket stops awk matching its own command line.
-  pgid=$($DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec -T -u 1000:1000 "$SERVICE" \
-    sh -c "ps -e -o pgid=,args= | awk '/[p]ost-attach\.sh/ {print \$1; exit}'" 2>/dev/null |
-    tr -cd '0-9')
-  if [ -z "$pgid" ]; then
+  if ! pgid=$(dev_server_pgid); then
     echo "No development server is running for $SERVICE."
     return 1
   fi
@@ -974,7 +1040,7 @@ case $COMMAND in
   *)
     echo Usage:
     echo "    $PDK_CMD run              Start Devcontainers for all services"
-    echo "    $PDK_CMD dev-server       Start a development server"
+    echo "    $PDK_CMD dev-server       Start a development server (-f replaces a running one without asking)"
     echo "    $PDK_CMD stop-dev-server  Stop a development server"
     echo "    $PDK_CMD open <project>   Open project in Devcontainer with Visual Studio Code"
     echo "    $PDK_CMD tags             Set the image tags of projects to use with Docker Compose"
