@@ -24,6 +24,7 @@ data class SecurityProperties(
     @field:Valid val password: Password,
     @field:Valid val jwt: Jwt,
     @field:Valid val challenge: Challenge,
+    @field:Valid val login: Login,
     @field:NotBlank val authorizeUriHeader: String,
     @field:NotBlank val authorizeUriPrefix: String,
 ) {
@@ -44,5 +45,10 @@ data class SecurityProperties(
       @field:Size(min = 32) val secret: String,
       @field:Positive val iterationCost: Int,
       @field:Positive val maxIterations: Int,
+  )
+
+  data class Login(
+      @field:Positive val attemptLimit: Long,
+      val attemptWindow: Duration,
   )
 }

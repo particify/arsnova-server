@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.system.api
 
 import jakarta.servlet.http.HttpServletResponse
 import net.particify.arsnova.core4.system.security.JwtUtils
+import net.particify.arsnova.core4.system.security.LoginAttemptService
 import net.particify.arsnova.core4.system.security.RefreshCookieComponent
 import net.particify.arsnova.core4.system.security.RefreshJwtAuthentication
 import net.particify.arsnova.core4.user.User
@@ -28,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException
 @PreAuthorize("hasRole('USER')")
 class AuthenticationHttpController(
     private val authenticationManager: AuthenticationManager,
+    private val loginAttemptService: LoginAttemptService,
     private val jwtUtils: JwtUtils,
     private val userService: UserService,
     private val refreshCookieComponent: RefreshCookieComponent
@@ -62,9 +64,14 @@ class AuthenticationHttpController(
       @RequestBody loginInput: LoginInput,
       response: HttpServletResponse
   ): AuthenticationWrapper {
-    val passwordToken =
-        UsernamePasswordAuthenticationToken(loginInput.username.lowercase(), loginInput.password)
+    val username = loginInput.username.lowercase()
+    if (!loginAttemptService.tryConsumeAttempt(null, username)) {
+      throw ResponseStatusException(
+          HttpStatus.TOO_MANY_REQUESTS, "Too many failed login attempts. Try again later.")
+    }
+    val passwordToken = UsernamePasswordAuthenticationToken(username, loginInput.password)
     val authenticatedToken = authenticationManager.authenticate(passwordToken)
+    loginAttemptService.resetAttempts(null, username)
     val user = authenticatedToken.principal as User
     userService.updateLastActivityAt(user)
     val subject = user.id.toString()

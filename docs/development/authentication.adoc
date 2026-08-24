@@ -23,6 +23,26 @@ The client fetches a challenge via `GET` request to `/api/challenge` and sends i
 If the challenge is verified successfully, the server responds with an authentication token.
 This token has a short expiration time and is only accepted to authenticate a single request.
 
+== Login throttling
+
+`POST /api/auth/login` is rate limited per submitted username.
+Attempts are counted before the credentials are checked and discarded again after a successful
+login, so only failures accumulate.
+
+Without a limit of our own, how many passwords a client may try is bounded only by the proof of work
+challenge in front of the endpoint.
+That challenge puts a cost on every attempt, but the resulting rate follows from how quickly the
+client solves one, which is a property of its hardware rather than a bound we set.
+
+The exposure is worst against an external directory,
+where repeated failures usually lock the account, but it is not specific to any one provider.
+
+`security.login.attempt-limit`:: Attempts allowed per window, `20` by default.
+`security.login.attempt-window`:: Length of the window, `2m` by default.
+
+The counters are held in memory, so the limit applies per instance rather than across a deployment
+with several replicas.
+
 == Tokens
 
 JSON Web Tokens are used to authentication clients statelessly for use of the API.
