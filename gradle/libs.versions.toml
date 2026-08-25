@@ -26,7 +26,7 @@ querydsl = "7.6"
 spotbugs-plugin = "6.5.11"
 spotless = "8.10.0"
 spring-boot-plugin = "4.1.1"
-spring-modulith = "2.1.0"
+spring-modulith = "2.1.1"
 springmockk = "5.0.1"
 
 [libraries]
