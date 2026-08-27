@@ -86,5 +86,37 @@
         }
       ]
     }
+  ],
+  "users": [
+    {
+      "username": "saml-owner",
+      "email": "saml-owner@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "SAML",
+      "lastName": "Owner",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "saml-owner",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "saml-participant",
+      "email": "saml-participant@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "SAML",
+      "lastName": "Participant",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "saml-participant",
+          "temporary": false
+        }
+      ]
+    }
   ]
 }

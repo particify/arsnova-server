@@ -123,9 +123,18 @@ The development environment includes Keycloak to help with the development of SS
 A realm configuration is included and automatically imported at startup.
 The Keycloak service can be accessed at http://localhost:8080 (username: `admin`,
 password: `admin`).
-The imported dev realm needs to be enabled on the realm's settings page.
-Users which are created for the dev realm can be used to log in to the application using SSO.
-Such a user needs a mail address which is marked as verified, and a password.
+
+The realm ships two users which can log in through SSO, `saml-owner` and `saml-participant`,
+each with a verified mail address at `example.com` and a password equal to its username.
+Further users can be created by hand;
+such a user needs a mail address which is marked as verified, and a password.
+
+The import creates the realm only if it does not exist yet:
+the strategy is `IGNORE_EXISTING`, and an existing realm is logged as
+`Realm 'dev' already exists. Import skipped`.
+Changes to the template therefore do not reach an environment which imported the realm already,
+the users above included.
+Picking them up means dropping the realm or removing Keycloak's database volume.
 
 == Migration from v3
 
