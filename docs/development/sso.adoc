@@ -70,6 +70,11 @@ The mail address is lowercased and has to be unique,
 so it is not imported if another account already uses it.
 That does not fail the login;
 the account simply carries no mail address.
+An assertion which carries no mail address at all leaves a stored one unchanged,
+so an identity provider which stops releasing the attribute does not clear the address of every
+account logging in afterwards.
+The other side of that is deliberate:
+an address the identity provider removes on purpose does not propagate here either.
 
 == Identity model
 

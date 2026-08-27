@@ -88,6 +88,18 @@ class Saml2UserProvisioningTests {
     Assertions.assertEquals(own, user.mailAddress)
   }
 
+  /**
+   * An identity provider which stops releasing the mail attribute would otherwise clear the address
+   * of every account on its next login, turning a change to its configuration into data loss.
+   */
+  @Test
+  fun shouldKeepStoredMailAddressWithoutAssertedAddress() {
+    val stored = "saml-missing-attribute@example.com"
+    val user = User(mailAddress = stored)
+    converter.updateMailAddress(user, null)
+    Assertions.assertEquals(stored, user.mailAddress)
+  }
+
   private fun registration(usernameMapping: UsernameMapping): ExtendedRegistration {
     val registration = ExtendedRegistration()
     registration.usernameMapping = usernameMapping
