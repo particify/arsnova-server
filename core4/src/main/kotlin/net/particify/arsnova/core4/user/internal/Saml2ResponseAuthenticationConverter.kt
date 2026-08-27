@@ -115,7 +115,7 @@ class Saml2ResponseAuthenticationConverter(
       attributes: Map<String, List<Any>>
   ): User {
     val mapping = registration.attributeMapping
-    user.mailAddress = attributes[mapping.mailAddress]?.firstOrNull()?.toString()
+    updateMailAddress(user, attributes[mapping.mailAddress]?.firstOrNull()?.toString())
     logger.debug(
         "Mapped SAML attribute {} to mailAddress: {}", mapping.mailAddress, user.mailAddress)
     user.givenName = attributes[mapping.givenName]?.firstOrNull()?.toString()
@@ -123,5 +123,23 @@ class Saml2ResponseAuthenticationConverter(
     user.surname = attributes[mapping.surname]?.firstOrNull()?.toString()
     logger.debug("Mapped SAML attribute {} to surname: {}", mapping.surname, user.surname)
     return user
+  }
+
+  /**
+   * An asserted address which another account already holds is skipped instead of failing the
+   * login: the unique constraint would otherwise reject the account on every attempt.
+   */
+  internal fun updateMailAddress(user: User, mailAddress: String?) {
+    val normalized = mailAddress?.lowercase()
+    if (normalized == null || normalized == user.mailAddress) {
+      user.mailAddress = normalized
+      return
+    }
+    if (userRepository.existsByMailAddress(normalized)) {
+      logger.warn(
+          "Mail address {} is already in use. Not importing it for the SAML user.", normalized)
+      return
+    }
+    user.mailAddress = normalized
   }
 }
