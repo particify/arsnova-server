@@ -19,4 +19,12 @@ class UserTest {
     user.unverifiedMailAddress
     Assertions.assertEquals(lowerCaseMailAddress, user.unverifiedMailAddress)
   }
+
+  /** The v3 migration parks a mail address without initiating a verification for it. */
+  @Test
+  fun shouldNotConsiderVerificationActiveWithoutExpiry() {
+    val parked = User(unverifiedMailAddress = "parked@example.com")
+    Assertions.assertFalse(parked.isMailAddressVerificationActive())
+    Assertions.assertFalse(User().isPasswordResetVerificationActive())
+  }
 }

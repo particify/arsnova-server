@@ -102,4 +102,16 @@ class LocalUserServiceTests {
       localUserService.completeMailVerification(user, user.verificationCode!!)
     }
   }
+
+  /** A mail address parked by the v3 migration has no verification to restart. */
+  @Test
+  fun shouldNotRestartVerificationWithoutExpiry() {
+    val user =
+        User(
+            id = UUID.nameUUIDFromBytes("Parked User".toByteArray()),
+            unverifiedMailAddress = "parked@example.com")
+    Assertions.assertThrows(InvalidUserStateException::class.java) {
+      localUserService.restartVerification(user, Locale.ENGLISH)
+    }
+  }
 }
