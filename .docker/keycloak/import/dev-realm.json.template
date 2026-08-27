@@ -55,7 +55,7 @@
             "attribute.nameformat": "URI Reference",
             "user.attribute": "username",
             "friendly.name": "subjectId",
-            "attribute.name": " urn:oasis:names:tc:SAML:attribute:subject-id "
+            "attribute.name": "urn:oasis:names:tc:SAML:attribute:subject-id"
           }
         },
         {
