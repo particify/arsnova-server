@@ -206,10 +206,11 @@ class LocalUserServiceImpl(
   }
 
   fun restartVerification(user: User, locale: Locale): Boolean {
-    if (user.unverifiedMailAddress == null) {
+    val expiresAt = user.verificationExpiresAt
+    if (user.unverifiedMailAddress == null || expiresAt == null) {
       throw InvalidUserStateException("Mail verification not initiated", user.id!!)
     }
-    if (Instant.now() > user.verificationExpiresAt) {
+    if (Instant.now() > expiresAt) {
       user.verificationErrors = 0
       user.verificationCode = generateNumericCode()
       user.verificationExpiresAt = Instant.now().plus(VERIFICATION_VALIDITY_HOURS, ChronoUnit.HOURS)

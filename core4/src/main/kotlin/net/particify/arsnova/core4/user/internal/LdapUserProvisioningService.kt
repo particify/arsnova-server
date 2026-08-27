@@ -90,7 +90,8 @@ class LdapUserProvisioningService(
     val externalLogin = user.externalLogins.first { it.providerId == providerId }
     externalLogin.lastLoginAt = Instant.now()
     externalLoginRepository.save(externalLogin)
-    // Accounts imported from v3 have no username, so it is backfilled on the next login.
+    // The v3 migration leaves the username unset if the value was already in use, so it is
+    // backfilled once one is free.
     if (user.username == null) {
       assignUsername(user, externalId)
     }
