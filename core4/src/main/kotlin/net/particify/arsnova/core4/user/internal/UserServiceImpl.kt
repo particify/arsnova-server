@@ -5,9 +5,7 @@ package net.particify.arsnova.core4.user.internal
 
 import java.time.Instant
 import java.util.UUID
-import kotlin.jvm.optionals.getOrNull
 import net.particify.arsnova.core4.common.AuditMetadata
-import net.particify.arsnova.core4.user.QUser
 import net.particify.arsnova.core4.user.Role
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
@@ -39,13 +37,7 @@ class UserServiceImpl(
   }
 
   fun loadUserByProviderIdAndExternalId(providerId: UUID, externalId: String): User? {
-    val q =
-        QUser.user.externalLogins
-            .any()
-            .providerId
-            .eq(providerId)
-            .and(QUser.user.externalLogins.any().externalId.eq(externalId))
-    return userRepository.findOne(q).getOrNull()
+    return userRepository.findOneByExternalLogin(providerId, externalId)
   }
 
   override fun markAnnouncementsReadForUserId(id: UUID) {

@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.user
 
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
+import net.particify.arsnova.core4.user.internal.ExternalLogin
 import net.particify.arsnova.core4.user.internal.UserRepository
 import net.particify.arsnova.core4.user.internal.UserServiceImpl
 import org.junit.jupiter.api.Assertions
@@ -51,5 +52,30 @@ class UserServiceTests {
     val user = userDetailsService.createAccount()
     userDetailsService.markAccountForDeletion(user)
     Assertions.assertNotNull(user.deletedAt)
+  }
+
+  /**
+   * Each external login is only valid for the combination of its provider and external ID. A user
+   * holding logins at two providers must not be resolvable by mixing one provider with the other
+   * provider's external ID.
+   */
+  @Test
+  fun shouldNotFindUserForExternalLoginOfDifferentProvider() {
+    val firstProviderId = UUID.fromString("11111111-1111-4111-8111-111111111111")
+    val secondProviderId = UUID.fromString("22222222-2222-4222-8222-222222222222")
+    var user = userDetailsService.createAccount()
+    user =
+        userDetailsService.createForExternalLogin(
+            user, ExternalLogin(providerId = firstProviderId, externalId = "alice"))
+    user =
+        userDetailsService.createForExternalLogin(
+            user, ExternalLogin(providerId = secondProviderId, externalId = "bob"))
+
+    Assertions.assertEquals(
+        user.id, userDetailsService.loadUserByProviderIdAndExternalId(firstProviderId, "alice")?.id)
+    Assertions.assertEquals(
+        user.id, userDetailsService.loadUserByProviderIdAndExternalId(secondProviderId, "bob")?.id)
+    Assertions.assertNull(
+        userDetailsService.loadUserByProviderIdAndExternalId(firstProviderId, "bob"))
   }
 }
