@@ -43,7 +43,14 @@ data class LdapProperties(val registration: Map<UUID, Registration> = mapOf()) {
       /** Server-side limit for searches. Unlimited if unset. Not applicable to the bind itself. */
       val searchTimeLimit: Duration? = null,
       val title: String = DEFAULT_TITLE,
-      val order: Int = 0
+      val order: Int = 0,
+      /**
+       * Name of the `ExternalLoginLinkingStrategy` which selects the account a new login from this
+       * registration is attached to. Unset means that every new login creates an account of its
+       * own. No strategy is available unless one is registered, and a name none of the registered
+       * ones carries is rejected while the application starts.
+       */
+      val linkingStrategy: String? = null
   ) {
     /** Attributes requested from the directory: those consumed, and nothing else. */
     val requestedAttributes: List<String> =

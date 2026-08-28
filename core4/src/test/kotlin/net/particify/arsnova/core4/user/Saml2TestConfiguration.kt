@@ -35,6 +35,28 @@ val SAML_RETAINED_MAIL_USER =
     Saml2TestUser(
         subjectId = "saml-retained-mail-subject", mailAddress = "saml.retained@example.com")
 
+/** Its asserted address is given to another account before the login, so it cannot be imported. */
+val SAML_LINK_COLLISION_USER =
+    Saml2TestUser(
+        subjectId = "saml-link-collision-subject", mailAddress = "saml.link.collision@example.com")
+
+/** Linked into an account which has no username yet. */
+val SAML_LINK_TARGET_USER =
+    Saml2TestUser(
+        subjectId = "saml-link-target-subject", mailAddress = "saml.link.target@example.com")
+
+/** Linked, through the `ID` registration, into an account whose username has to survive. */
+val SAML_LINK_ID_USER =
+    Saml2TestUser(subjectId = "Saml-Link-Id-Subject", mailAddress = "saml.link.id@example.com")
+
+/** No link target is armed for it, so it is provisioned exactly as without any strategy. */
+val SAML_UNLINKED_USER =
+    Saml2TestUser(
+        subjectId = "saml-unlinked-subject",
+        mailAddress = "saml.unlinked@example.com",
+        givenName = "Ferdinand",
+        surname = "Okonkwo")
+
 /**
  * Registers two relying parties against the in-test identity provider. Two are needed because the
  * username mapping is per registration, and driving both through one context is cheaper than a

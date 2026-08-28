@@ -22,7 +22,8 @@ class Saml2ResponseAuthenticationConverter(
     private val userService: UserServiceImpl,
     private val userRepository: UserRepository,
     private val externalLoginRepository: ExternalLoginRepository,
-    private val saml2Properties: ExtendedSaml2RelyingPartyProperties
+    private val saml2Properties: ExtendedSaml2RelyingPartyProperties,
+    private val linkingStrategyRegistry: ExternalLoginLinkingStrategyRegistry
 ) : Converter<ResponseToken, Saml2Authentication> {
   companion object {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -61,12 +62,37 @@ class Saml2ResponseAuthenticationConverter(
       externalId: String,
       attributes: Map<String, List<Any>>
   ): User {
-    logger.info("Creating new account for SAML user {}...", externalId)
-    val user = User()
+    val mailAddress = assertedMailAddress(registration, attributes)
+    val user = findLinkTarget(registration, providerId, externalId, mailAddress) ?: User()
     updateUserFromAttributes(registration, user, attributes)
-    assignUsername(user, registration, externalId)
+    // A linked account keeps the username it is already known by, which is its public display ID.
+    if (user.username == null) {
+      assignUsername(user, registration, externalId)
+    }
     val externalLogin = ExternalLogin(providerId = providerId, externalId = externalId)
     return userService.createForExternalLogin(user, externalLogin)
+  }
+
+  /**
+   * The asserted address is passed on as it is. [updateMailAddress] drops one which another account
+   * already holds, so a strategy consulted after the account is populated never sees it.
+   */
+  private fun findLinkTarget(
+      registration: ExtendedRegistration,
+      providerId: UUID,
+      externalId: String,
+      mailAddress: String?
+  ): User? {
+    val linkTarget =
+        linkingStrategyRegistry
+            .find(registration.linkingStrategy)
+            ?.findLinkTarget(providerId, externalId, mailAddress)
+    if (linkTarget == null) {
+      logger.info("Creating new account for SAML user {}...", externalId)
+    } else {
+      logger.info("Attaching SAML user {} to existing account {}.", externalId, linkTarget.id)
+    }
+    return linkTarget
   }
 
   @Suppress("LongParameterList")
@@ -115,7 +141,7 @@ class Saml2ResponseAuthenticationConverter(
       attributes: Map<String, List<Any>>
   ): User {
     val mapping = registration.attributeMapping
-    updateMailAddress(user, attributes[mapping.mailAddress]?.firstOrNull()?.toString())
+    updateMailAddress(user, assertedMailAddress(registration, attributes))
     logger.debug(
         "Mapped SAML attribute {} to mailAddress: {}", mapping.mailAddress, user.mailAddress)
     user.givenName = attributes[mapping.givenName]?.firstOrNull()?.toString()
@@ -124,6 +150,11 @@ class Saml2ResponseAuthenticationConverter(
     logger.debug("Mapped SAML attribute {} to surname: {}", mapping.surname, user.surname)
     return user
   }
+
+  private fun assertedMailAddress(
+      registration: ExtendedRegistration,
+      attributes: Map<String, List<Any>>
+  ): String? = attributes[registration.attributeMapping.mailAddress]?.firstOrNull()?.toString()
 
   /**
    * An asserted address which another account already holds is skipped instead of failing the

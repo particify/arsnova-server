@@ -79,6 +79,19 @@ givenName: Jorunn
 mail: jorunn.aaltonen@example.com
 userPassword: plaintext-on-purpose
 
+# Its mail address is given to another account before the login, which the linking hook must see.
+dn: uid=lgrimaldi,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: lgrimaldi
+cn: Lucia Grimaldi
+sn: Grimaldi
+givenName: Lucia
+mail: lucia.grimaldi@example.com
+userPassword: directory-only-secret
+
 # Carries a full profile for the attribute import.
 dn: uid=mwendland,ou=people,dc=example,dc=com
 objectClass: top
@@ -105,6 +118,19 @@ givenName: Nikko
 mail: admin@example.com
 userPassword: throwaway-credential
 
+# Linked into an existing account by the test strategy.
+dn: uid=rmbeki,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: rmbeki
+cn: Rui Mbeki
+sn: Mbeki
+givenName: Rui
+mail: rui.mbeki@example.com
+userPassword: not-in-any-vault
+
 # Bound with an upper-case user id to check that the directory's own value is stored.
 dn: uid=tilda.brekke,ou=people,dc=example,dc=com
 objectClass: top
@@ -117,3 +143,29 @@ sn: Brekke
 givenName: Tilda
 mail: tilda.brekke@example.com
 userPassword: dev-fixture-secret
+
+# Linked into an account whose username must survive, while this user ID is free.
+dn: uid=tuomas.laine,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: tuomas.laine
+cn: Tuomas Laine
+sn: Laine
+givenName: Tuomas
+mail: tuomas.laine@example.com
+userPassword: fixture-secret-value
+
+# Logs in while no link target is armed, so it is provisioned as usual.
+dn: uid=wnakagawa,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: wnakagawa
+cn: Wakana Nakagawa
+sn: Nakagawa
+givenName: Wakana
+mail: wakana.nakagawa@example.com
+userPassword: another-throwaway

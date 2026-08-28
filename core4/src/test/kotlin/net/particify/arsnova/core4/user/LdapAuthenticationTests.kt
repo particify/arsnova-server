@@ -86,6 +86,10 @@ class LdapAuthenticationTests {
     Assertions.assertTrue(userOfSecondLogin.externalLogins.single().lastLoginAt!! >= firstLoginAt)
   }
 
+  /**
+   * No linking strategy is registered in this context, so this also pins the behaviour the FOSS
+   * build has to keep: a directory address which is taken is dropped, and no account is reused.
+   */
   @Test
   fun shouldNotImportMailAddressAlreadyInUse() {
     val user = authenticate(MAIL_COLLISION_USER).principal as User

@@ -25,6 +25,16 @@ data class ExtendedSaml2RelyingPartyProperties(
      */
     var usernameMapping = UsernameMapping.MAIL_ADDRESS
 
+    /**
+     * Name of the `ExternalLoginLinkingStrategy` which selects the account a new login from this
+     * registration is attached to. Unset means that every new login creates an account of its own.
+     * No strategy is available unless one is registered, and a name none of the registered ones
+     * carries is rejected while the application starts.
+     *
+     * Needs a setter for the same reason as [usernameMapping].
+     */
+    var linkingStrategy: String? = null
+
     data class AttributeMapping(
         var id: String = ID_ATTRIBUTE,
         var mailAddress: String = MAIL_ATTRIBUTE,

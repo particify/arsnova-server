@@ -66,7 +66,9 @@ class Saml2LoginHttpTests {
   /**
    * The asserted address belongs to another account, so it cannot be imported and the mapping has
    * no value left to derive a username from. Neither login may fail over it, and the second one is
-   * the update path, where re-asserting the address used to violate the unique constraint.
+   * the update path, where re-asserting the address used to violate the unique constraint. No
+   * linking strategy is registered in this context, so this is also what the FOSS build has to keep
+   * doing: no account is reused.
    */
   @Test
   fun shouldLeaveUserUnverifiedOnMailAddressCollision() {

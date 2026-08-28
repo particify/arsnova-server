@@ -47,6 +47,34 @@ val MAIL_COLLISION_USER = LdapTestUser(userId = "nikko.pham", password = "throwa
 val USERNAME_COLLISION_USER =
     LdapTestUser(userId = "admin@example.com", password = "fixture-password-only")
 
+/** Its mail address is given to another account before the login, so it cannot be imported. */
+val LINK_COLLISION_USER =
+    LdapTestUser(
+        userId = "lgrimaldi",
+        password = "directory-only-secret",
+        mailAddress = "lucia.grimaldi@example.com")
+
+/** Linked into an account which has no username yet. */
+val LINK_TARGET_USER =
+    LdapTestUser(
+        userId = "rmbeki", password = "not-in-any-vault", mailAddress = "rui.mbeki@example.com")
+
+/** Its user ID is free, so only the link target's own username can keep the account verified. */
+val LINK_USERNAME_USER =
+    LdapTestUser(
+        userId = "tuomas.laine",
+        password = "fixture-secret-value",
+        mailAddress = "tuomas.laine@example.com")
+
+/** No link target is armed for it, so it is provisioned exactly as without any strategy. */
+val UNLINKED_USER =
+    LdapTestUser(
+        userId = "wnakagawa",
+        password = "another-throwaway",
+        givenName = "Wakana",
+        surname = "Nakagawa",
+        mailAddress = "wakana.nakagawa@example.com")
+
 val LDAP_TEST_USERS =
     listOf(
         IMPORT_USER,
@@ -56,7 +84,11 @@ val LDAP_TEST_USERS =
         WRONG_PASSWORD_USER,
         LOCAL_PROVIDER_REJECTION_USER,
         MAIL_COLLISION_USER,
-        USERNAME_COLLISION_USER)
+        USERNAME_COLLISION_USER,
+        LINK_COLLISION_USER,
+        LINK_TARGET_USER,
+        LINK_USERNAME_USER,
+        UNLINKED_USER)
 
 /**
  * User IDs which tests expect to be rejected. An entry for any of them would invalidate those
