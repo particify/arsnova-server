@@ -2,6 +2,7 @@ import org.gradle.kotlin.dsl.withType
 
 plugins {
   jacoco
+  `java-test-fixtures`
   alias(libs.plugins.detekt)
   alias(libs.plugins.graalvm.native)
   alias(libs.plugins.kapt)
@@ -59,7 +60,10 @@ dependencies {
   runtimeOnly(libs.spring.modulith.events.amqp)
   runtimeOnly(libs.spring.modulith.jpa)
   runtimeOnly(libs.spring.modulith.observability)
-  testImplementation(libs.bouncycastle.pkix)
+  testFixturesApi(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
+  testFixturesApi(libs.spring.test) { exclude(module = "mockito-core") }
+  testFixturesImplementation(libs.bouncycastle.pkix)
+  testFixturesImplementation(libs.spring.security.saml)
   testImplementation(libs.kotlin.junit)
   testImplementation(libs.spring.test) { exclude(module = "mockito-core") }
   testImplementation(libs.spring.graphql.test)
@@ -82,6 +86,8 @@ dependencies {
   constraints {
     implementation(libs.opensaml.api)
     implementation(libs.opensaml.impl)
+    testFixturesImplementation(libs.opensaml.api)
+    testFixturesImplementation(libs.opensaml.impl)
   }
 }
 
@@ -108,6 +114,8 @@ detekt {
   toolVersion = libs.versions.detekt.get()
   buildUponDefaultConfig = true
   config.setFrom("detekt.yaml")
+  // Only the main and test source sets are analyzed by default.
+  source.from("src/testFixtures/kotlin")
 }
 
 spotless {

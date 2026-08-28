@@ -101,11 +101,11 @@ class LdapTestConfiguration {
   @Bean
   fun ldapPropertyRegistrar(directoryServer: InMemoryDirectoryServer) =
       DynamicPropertyRegistrar { registry ->
-        val prefix = "security.ldap.registration.$LDAP_PROVIDER_ID"
-        registry.add("$prefix.url") {
-          "ldap://127.0.0.1:${directoryServer.listenPort}/$LDAP_BASE_DN"
-        }
-        registry.add("$prefix.user-dn-pattern") { "uid={0},ou=people" }
-        registry.add("$prefix.imported-attributes") { "mail,givenName,sn" }
+        registerLdapDirectory(
+            registry,
+            LDAP_PROVIDER_ID,
+            "ldap://127.0.0.1:${directoryServer.listenPort}/$LDAP_BASE_DN",
+            "uid={0},ou=people",
+            listOf("mail", "givenName", "sn"))
       }
 }
