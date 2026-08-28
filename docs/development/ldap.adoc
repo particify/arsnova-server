@@ -96,6 +96,8 @@ so a directory which stops releasing the attribute does not clear the address of
 logging in afterwards.
 The other side of that is deliberate:
 an address the directory drops on purpose does not propagate here either.
+The names follow the same rule:
+an attribute which is absent or empty leaves whatever the account already carries.
 
 A directory which keeps one of these under a nonstandard attribute cannot be expressed.
 An optional per-field override would be a backwards compatible addition once a real directory needs

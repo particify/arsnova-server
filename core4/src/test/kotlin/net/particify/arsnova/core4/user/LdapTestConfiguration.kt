@@ -82,6 +82,15 @@ val RETAINED_MAIL_USER =
         password = "second-login-secret",
         mailAddress = "priya.marchetti@example.com")
 
+/** Its givenName attribute is removed between two logins, so the stored name has to survive. */
+val RETAINED_NAME_USER =
+    LdapTestUser(
+        userId = "ekowalczyk",
+        password = "name-retention-secret",
+        givenName = "Emilia",
+        surname = "Kowalczyk",
+        mailAddress = "emilia.kowalczyk@example.com")
+
 val LDAP_TEST_USERS =
     listOf(
         IMPORT_USER,
@@ -96,7 +105,8 @@ val LDAP_TEST_USERS =
         LINK_TARGET_USER,
         LINK_USERNAME_USER,
         UNLINKED_USER,
-        RETAINED_MAIL_USER)
+        RETAINED_MAIL_USER,
+        RETAINED_NAME_USER)
 
 /**
  * User IDs which tests expect to be rejected. An entry for any of them would invalidate those

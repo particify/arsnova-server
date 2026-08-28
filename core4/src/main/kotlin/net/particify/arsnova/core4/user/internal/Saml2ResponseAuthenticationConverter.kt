@@ -144,9 +144,15 @@ class Saml2ResponseAuthenticationConverter(
     updateMailAddress(user, assertedMailAddress(registration, attributes))
     logger.debug(
         "Mapped SAML attribute {} to mailAddress: {}", mapping.mailAddress, user.mailAddress)
-    user.givenName = attributes[mapping.givenName]?.firstOrNull()?.toString()
+    val givenName = attributes[mapping.givenName]?.firstOrNull()?.toString()
+    if (!givenName.isNullOrBlank()) {
+      user.givenName = givenName
+    }
     logger.debug("Mapped SAML attribute {} to givenName: {}", mapping.givenName, user.givenName)
-    user.surname = attributes[mapping.surname]?.firstOrNull()?.toString()
+    val surname = attributes[mapping.surname]?.firstOrNull()?.toString()
+    if (!surname.isNullOrBlank()) {
+      user.surname = surname
+    }
     logger.debug("Mapped SAML attribute {} to surname: {}", mapping.surname, user.surname)
     return user
   }

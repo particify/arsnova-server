@@ -53,6 +53,19 @@ givenName: Dario
 mail: dario.salvatierra@example.com
 userPassword: bind-me-please
 
+# Loses its givenName attribute between two logins.
+dn: uid=ekowalczyk,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: ekowalczyk
+cn: Emilia Kowalczyk
+sn: Kowalczyk
+givenName: Emilia
+mail: emilia.kowalczyk@example.com
+userPassword: name-retention-secret
+
 # Credentials are submitted to the local provider, which must not accept them.
 dn: uid=haruka.oyelaran,ou=people,dc=example,dc=com
 objectClass: top

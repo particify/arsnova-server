@@ -154,9 +154,9 @@ class LdapUserProvisioningService(
       val value = ctx.getStringAttribute(attributeName)
       logger.debug("Mapping LDAP attribute {}: {}", attributeName, value)
       when (ImportedAttribute.byAttributeName(attributeName)) {
-        ImportedAttribute.GIVEN_NAME -> user.givenName = value
+        ImportedAttribute.GIVEN_NAME -> if (!value.isNullOrBlank()) user.givenName = value
         ImportedAttribute.MAIL -> updateMailAddress(user, value)
-        ImportedAttribute.SURNAME -> user.surname = value
+        ImportedAttribute.SURNAME -> if (!value.isNullOrBlank()) user.surname = value
         // Unreachable: unsupported attributes are rejected when the properties are bound.
         null -> logger.warn("Skipping unsupported LDAP attribute {}.", attributeName)
       }

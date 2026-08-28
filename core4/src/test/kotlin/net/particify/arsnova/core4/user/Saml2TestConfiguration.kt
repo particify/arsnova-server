@@ -35,6 +35,16 @@ val SAML_RETAINED_MAIL_USER =
     Saml2TestUser(
         subjectId = "saml-retained-mail-subject", mailAddress = "saml.retained@example.com")
 
+/**
+ * Its name attributes are dropped from the second assertion, so the stored ones have to survive.
+ */
+val SAML_RETAINED_NAME_USER =
+    Saml2TestUser(
+        subjectId = "saml-retained-name-subject",
+        mailAddress = "saml.retained.name@example.com",
+        givenName = "Solveig",
+        surname = "Ibarra")
+
 /** Its asserted address is given to another account before the login, so it cannot be imported. */
 val SAML_LINK_COLLISION_USER =
     Saml2TestUser(

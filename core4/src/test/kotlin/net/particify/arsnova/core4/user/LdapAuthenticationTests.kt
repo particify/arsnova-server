@@ -138,6 +138,23 @@ class LdapAuthenticationTests {
     Assertions.assertEquals(directoryUser.mailAddress, userOfSecondLogin.mailAddress)
   }
 
+  /**
+   * A directory which stops releasing a name attribute must not clear the name the account already
+   * holds. Only `givenName` is dropped here, because the object class requires `sn`.
+   */
+  @Test
+  fun shouldKeepStoredGivenNameWhenDirectoryReleasesNone() {
+    val directoryUser = RETAINED_NAME_USER
+    val user = authenticate(directoryUser).principal as User
+    Assertions.assertEquals(directoryUser.givenName, user.givenName)
+
+    removeAttribute(directoryUser.userId, "givenName")
+
+    val userOfSecondLogin = authenticate(directoryUser).principal as User
+    Assertions.assertEquals(user.id, userOfSecondLogin.id)
+    Assertions.assertEquals(directoryUser.givenName, userOfSecondLogin.givenName)
+  }
+
   private fun removeAttribute(userId: String, attributeName: String) {
     directoryServer.connection.use {
       val result = it.modify(userDn(userId), Modification(ModificationType.DELETE, attributeName))
