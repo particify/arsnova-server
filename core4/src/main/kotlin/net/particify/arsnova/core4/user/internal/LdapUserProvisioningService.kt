@@ -163,10 +163,15 @@ class LdapUserProvisioningService(
     }
   }
 
+  /**
+   * An address which another account already holds is skipped instead of failing the login: the
+   * unique constraint would otherwise reject the account on every attempt. An entry carrying no
+   * address at all leaves the stored one untouched, so a directory which stops releasing the
+   * attribute does not clear the address of every account which logs in afterwards.
+   */
   private fun updateMailAddress(user: User, mailAddress: String?) {
-    val normalized = mailAddress?.lowercase()
-    if (normalized == null || normalized == user.mailAddress) {
-      user.mailAddress = normalized
+    val normalized = mailAddress?.lowercase() ?: return
+    if (normalized == user.mailAddress) {
       return
     }
     if (userRepository.existsByMailAddress(normalized)) {

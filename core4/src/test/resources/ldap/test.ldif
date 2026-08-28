@@ -118,6 +118,19 @@ givenName: Nikko
 mail: admin@example.com
 userPassword: throwaway-credential
 
+# Loses its mail attribute between two logins.
+dn: uid=pmarchetti,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: pmarchetti
+cn: Priya Marchetti
+sn: Marchetti
+givenName: Priya
+mail: priya.marchetti@example.com
+userPassword: second-login-secret
+
 # Linked into an existing account by the test strategy.
 dn: uid=rmbeki,ou=people,dc=example,dc=com
 objectClass: top

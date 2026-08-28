@@ -75,6 +75,13 @@ val UNLINKED_USER =
         surname = "Nakagawa",
         mailAddress = "wakana.nakagawa@example.com")
 
+/** Its mail attribute is removed between two logins, so the stored address has to survive. */
+val RETAINED_MAIL_USER =
+    LdapTestUser(
+        userId = "pmarchetti",
+        password = "second-login-secret",
+        mailAddress = "priya.marchetti@example.com")
+
 val LDAP_TEST_USERS =
     listOf(
         IMPORT_USER,
@@ -88,7 +95,8 @@ val LDAP_TEST_USERS =
         LINK_COLLISION_USER,
         LINK_TARGET_USER,
         LINK_USERNAME_USER,
-        UNLINKED_USER)
+        UNLINKED_USER,
+        RETAINED_MAIL_USER)
 
 /**
  * User IDs which tests expect to be rejected. An entry for any of them would invalidate those
