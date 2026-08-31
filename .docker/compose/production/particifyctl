@@ -31,6 +31,9 @@ if [ "$CONFIG_VERSION" -gt 2 ]; then
   exit 1
 fi
 
+CORE_CONFIG_DIR=${CORE_CONFIG_DIR:-./core-config}
+CORE4_CONFIG_DIR=${CORE4_CONFIG_DIR:-./core4-config}
+
 ENV_FILES=""
 COMPOSE_FILE_ARGS=""
 while read config_name; do
@@ -39,8 +42,13 @@ while read config_name; do
   fi
   COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f $config_name.compose.yaml"
 done <config-list
+# Only a starting point: the first match need not be the database this governs, so set
+# POSTGRESQL_TAG in local.env explicitly to override it. The digest is dropped deliberately -- this
+# pins the major version of a legacy data directory, so it has to stay something an operator can
+# read and edit, and it governs an image the shipped configuration pins by digest anyway. Splitting
+# on the last colon rather than the second survives both a digest and a registry port.
 POSTGRESQL_TAG=`docker compose $COMPOSE_FILE_ARGS config --images 2> /dev/null \
-  | grep -m 1 postgres: | cut -d : -f 2`
+  | grep -m 1 postgres: | sed -E 's|@.*$||; s|^.*:||'`
 while read config_name; do
   COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f production.$config_name.compose.yaml"
 done <config-list
@@ -71,6 +79,14 @@ case $COMMAND in
     fi
     echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .env
     cat $ENV_FILES production.env local.env | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
+    # Create the bind sources as the invoking user; the engine would create them root-owned.
+    mkdir -p "$CORE_CONFIG_DIR" "$CORE4_CONFIG_DIR"
+    if grep -qx v4 config-list && [ ! -f "$CORE4_CONFIG_DIR/application.yaml" ]; then
+      echo "WARNING: $CORE4_CONFIG_DIR/application.yaml does not exist."
+      echo "         core4 requires mail.sender-address, mail.sender-name, service.root-url and"
+      echo "         security.challenge.secret, none of which an environment variable provides."
+      echo "         See docs/admin/upgrading-to-v4.adoc."
+    fi
     echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .compose.yaml
     docker compose \
       $COMPOSE_FILE_ARGS \
@@ -79,6 +95,8 @@ case $COMMAND in
     if [ ! -f .version ]; then
       echo "$CONFIG_VERSION" > .version
     fi
+    # .env carries JWT_SECRET, so it must not be left at the ambient umask.
+    chmod 600 .env local.env
     ;;
   run|r)
     $0 update-config
