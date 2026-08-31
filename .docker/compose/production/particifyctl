@@ -55,6 +55,12 @@ while read config_name; do
   COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f production.$config_name.compose.yaml"
 done <config-list
 
+# particifyctl never sources .env, so a setting the gateway configuration needs is read from the
+# same merged view of the env files that update-config writes, where the last definition wins.
+read_env() {
+  cat $ENV_FILES production.env local.env 2> /dev/null | grep "^$1=" | tail -n 1 | cut -d = -f 2-
+}
+
 case $COMMAND in
   update|u)
     echo Updating Git repository...
@@ -114,27 +120,25 @@ case $COMMAND in
     chmod 600 .env local.env
     ;;
   update-gateway)
+    # Everything the gateway needs beyond its shipped routes is generated into apisix.yaml:
+    # the TLS certificates, the redirect from a hostname alias to the canonical host, and the
+    # content security policy. APISIX reads a static file, so none of it can be resolved from the
+    # environment at startup.
+    #
     # APISIX validates ssls.cert against a minimum length and then parses it as PEM, so a file
     # path is rejected - silently, leaving the gateway on plaintext. The certificates therefore
     # have to be inlined, which means apisix.yaml has to be generated rather than mounted.
     #
-    # Certificate layout is the one the v3 proxy used, so an upgraded installation needs no
-    # changes: <hostname>_key.pem and <hostname>_cer.pem, plus an optional <hostname>_ca.pem
-    # chain, which is concatenated into the certificate because APISIX has no separate setting
-    # for it. Re-run this after renewing; APISIX picks the change up without a restart.
+    # Certificates are read as <hostname>_key.pem and <hostname>_cer.pem, plus an optional
+    # <hostname>_ca.pem chain, which is concatenated into the certificate because APISIX has no
+    # separate setting for it. Re-run this after renewing; APISIX picks the change up without a
+    # restart.
     if [ ! -f "$APISIX_TEMPLATE" ]; then
       echo "ERROR: $APISIX_TEMPLATE not found."
       exit 1
     fi
     mkdir -p "$TLS_CERT_DIR"
     keys=`ls "$TLS_CERT_DIR"/*_key.pem 2> /dev/null`
-    if [ -z "$keys" ]; then
-      echo "No certificates in $TLS_CERT_DIR, so the gateway will serve plain HTTP only."
-      echo "Add <hostname>_key.pem and <hostname>_cer.pem there and run this again."
-      cp "$APISIX_TEMPLATE" apisix.yaml
-      echo Wrote apisix.yaml without TLS.
-      exit 0
-    fi
     # Checked up front, so a missing certificate cannot leave a half-written file behind.
     for key in $keys; do
       hostname=`basename "$key" _key.pem`
@@ -143,26 +147,106 @@ case $COMMAND in
         exit 1
       fi
     done
+
+    canonical_hostname=`read_env ARSNOVA_HOSTNAME`
+    hostname_aliases=`read_env ARSNOVA_HOSTNAME_ALIASES`
+    csp_frame_ancestors=`read_env CSP_FRAME_ANCESTORS`
+    if [ -n "$hostname_aliases" ] && [ -z "$canonical_hostname" ]; then
+      echo "ERROR: ARSNOVA_HOSTNAME_ALIASES is set but ARSNOVA_HOSTNAME is not."
+      exit 1
+    fi
+    # The redirect follows the gateway's own scheme: targeting https unconditionally would strand
+    # a plaintext installation on a scheme it does not serve.
+    if [ -n "$keys" ]; then
+      alias_scheme=https
+    else
+      alias_scheme=http
+    fi
+
+    # An alias would otherwise just serve the application: no route in the template matches on
+    # Host, so the gateway answers on every name it is reachable by. The priority is what makes
+    # this route win for these names -- every route in the template leaves it at the default of 0,
+    # including the /api/* ones, which have to be redirected as well. The uri form interpolates
+    # $request_uri, which carries the query string; regex_uri matches the path alone and would
+    # drop it.
+    alias_route=""
+    if [ -n "$hostname_aliases" ]; then
+      alias_hosts=""
+      for alias in $hostname_aliases; do
+        alias_hosts="$alias_hosts      - $alias
+"
+      done
+      alias_route="  - id: hostname-aliases
+    uris:
+      - /*
+    hosts:
+${alias_hosts}    priority: 100
+    plugins:
+      redirect:
+        uri: \"$alias_scheme://$canonical_hostname\$request_uri\"
+        ret_code: 301"
+    fi
+
+    # A global rule applies to every route without being repeated on each one. It runs before the
+    # matched route's own plugins, so a plaintext request to an alias is redirected to HTTPS first
+    # and reaches the alias route on its second hop.
+    global_plugins=""
+    if [ -n "$keys" ]; then
+      # The plugin answers 301 to GET and HEAD and 308 otherwise, so a request keeps its method
+      # and body.
+      global_plugins="$global_plugins      redirect:
+        http_to_https: true
+"
+    fi
+    if [ -n "$csp_frame_ancestors" ]; then
+      # The header goes on every response rather than only on the documents which can be framed.
+      # An installation embedding the application in an LMS has to list the LMS origins here, or
+      # the launch is blocked.
+      global_plugins="$global_plugins      response-rewrite:
+        headers:
+          set:
+            Content-Security-Policy: \"frame-ancestors $csp_frame_ancestors\"
+"
+    fi
+
     # A truncated file takes down all routing rather than just TLS, so build it aside first.
     {
       # The gateway reads this file directly, so it is easy to mistake for something to edit. The
-      # timestamp is what tells an operator whether it predates a certificate they have since
-      # installed, which is the case this command exists for.
+      # timestamp is what tells an operator whether it predates a certificate or a hostname change
+      # they have since made, which is the case this command exists for.
       echo "# GENERATED - DO NOT EDIT - RUN $0 update-gateway TO UPDATE"
-      echo "# Generated `date -u +%Y-%m-%dT%H:%M:%SZ` from the shipped routes and ./tls."
-      sed '/^#END[[:space:]]*$/d' "$APISIX_TEMPLATE"
-      echo 'ssls:'
-      for key in $keys; do
-        hostname=`basename "$key" _key.pem`
-        cert="$TLS_CERT_DIR/${hostname}_cer.pem"
-        echo "  - id: $hostname"
-        echo '    snis:'
-        echo "      - $hostname"
-        echo '    cert: |'
-        cat "$cert" "$TLS_CERT_DIR/${hostname}_ca.pem" 2> /dev/null | sed 's/^/      /'
-        echo '    key: |'
-        sed 's/^/      /' "$key"
-      done
+      echo "# Generated `date -u +%Y-%m-%dT%H:%M:%SZ` from the shipped routes, ./tls and the environment."
+      awk -v route="$alias_route" \
+        '/^routes:[[:space:]]*$/ { print; if (route != "") print route; next } 1' \
+        "$APISIX_TEMPLATE" | sed '/^#END[[:space:]]*$/d'
+      if [ -n "$global_plugins" ]; then
+        echo 'global_rules:'
+        echo '  - id: gateway'
+        echo '    plugins:'
+        printf '%s' "$global_plugins"
+      fi
+      if [ -n "$keys" ]; then
+        echo 'ssls:'
+        for key in $keys; do
+          hostname=`basename "$key" _key.pem`
+          cert="$TLS_CERT_DIR/${hostname}_cer.pem"
+          echo "  - id: $hostname"
+          echo '    snis:'
+          echo "      - $hostname"
+          # An alias only reaches its redirect if the handshake completes, and APISIX aborts that
+          # when the SNI matches no entry at all. The aliases get no entry of their own, so a
+          # certificate which does not cover them warns in the browser first.
+          if [ "$hostname" = "$canonical_hostname" ]; then
+            for alias in $hostname_aliases; do
+              echo "      - $alias"
+            done
+          fi
+          echo '    cert: |'
+          cat "$cert" "$TLS_CERT_DIR/${hostname}_ca.pem" 2> /dev/null | sed 's/^/      /'
+          echo '    key: |'
+          sed 's/^/      /' "$key"
+        done
+      fi
       # Required as the last line, or APISIX ignores the whole file.
       echo '#END'
     } > apisix.yaml.new
@@ -175,9 +259,19 @@ case $COMMAND in
     # replacing the file would leave APISIX reading the old one and never reloading.
     cat apisix.yaml.new > apisix.yaml
     rm -f apisix.yaml.new
+    if [ -z "$keys" ]; then
+      echo "No certificates in $TLS_CERT_DIR, so the gateway will serve plain HTTP only."
+      echo "Add <hostname>_key.pem and <hostname>_cer.pem there and run this again."
+    fi
     for key in $keys; do
       echo "Configured TLS for `basename \"$key\" _key.pem`."
     done
+    if [ -n "$hostname_aliases" ]; then
+      echo "Redirecting $hostname_aliases to $alias_scheme://$canonical_hostname."
+    fi
+    if [ -n "$csp_frame_ancestors" ]; then
+      echo "Restricting frame ancestors to $csp_frame_ancestors."
+    fi
     echo Wrote apisix.yaml. Run \"$0 update-config\" to apply it.
     ;;
   run|r)
@@ -204,7 +298,7 @@ case $COMMAND in
     echo Usage:
     echo "    $0 update           Update Git repositories, Docker Compose configuration and Docker images"
     echo "    $0 update-config    Update the configuration for Docker Compose"
-    echo "    $0 update-gateway   Load TLS certificates from ./tls into the gateway configuration"
+    echo "    $0 update-gateway   Generate the gateway configuration from ./tls and the environment"
     echo "    $0 run              Start Containers for all services"
     echo "    $0 logs             Show logs or the log for a specific service"
     echo "    $0 compose          Execute a Docker Compose command"

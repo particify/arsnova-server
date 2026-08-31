@@ -90,7 +90,14 @@ It is only needed for an installation which had a customised v3 configuration fi
 See link:../development/ldap.adoc[the LDAP documentation] and
 link:upgrading-to-v4.adoc[the upgrade guide] for the property structure.
 
-=== HTTPS
+=== Gateway
+
+`./particifyctl update-gateway` generates the gateway's `apisix.yaml` from the shipped route
+template, the certificates in `tls/`, and `ARSNOVA_HOSTNAME_ALIASES` and `CSP_FRAME_ANCESTORS`.
+Run it, followed by `./particifyctl update-config`, after changing any of those.
+The gateway picks the generated file up without a restart.
+
+==== HTTPS
 
 The gateway can terminate TLS.
 Put `<hostname>_key.pem` and `<hostname>_cer.pem` into `tls/`, plus an optional `<hostname>_ca.pem`
@@ -98,8 +105,31 @@ chain, then run `./particifyctl update-gateway` followed by `./particifyctl upda
 
 The certificates are inlined into the gateway's configuration, because it cannot load them from a
 path, so `update-gateway` has to be run again after each renewal.
-The gateway picks the change up without a restart.
-Without certificates it serves plain HTTP only.
+Without certificates the gateway serves plain HTTP only.
+With them, a plaintext request is redirected to HTTPS: `301` for `GET` and `HEAD`, `308` otherwise,
+so a request keeps its method and body.
+The redirect names no port, so an installation which publishes HTTPS somewhere other than 443 needs
+whatever terminates TLS in front of the gateway to handle it.
+
+==== Hostname aliases
+
+`ARSNOVA_HOSTNAME_ALIASES` is a space-separated list of further names the installation answers on.
+Each of them is redirected to `ARSNOVA_HOSTNAME` with a `301`.
+The gateway matches no `Host` header of its own accord, so a name left out of this list serves the
+application under itself rather than redirecting.
+
+An alias reached over HTTPS also needs a certificate which covers it.
+The aliases are added to the canonical hostname's certificate entry rather than getting one of their
+own, so that certificate has to name them too -- otherwise the browser warns before it ever sees the
+redirect.
+
+==== Framing
+
+`CSP_FRAME_ANCESTORS` is a space-separated list of origins allowed to embed the application in a
+frame, sent as the `frame-ancestors` directive of a `Content-Security-Policy` header.
+Left empty, no such header is sent at all and any origin may embed the application.
+An installation which embeds the application in a learning management system over LTI has to list
+that system's origins, or the launch is blocked.
 
 === Docker Compose overrides
 

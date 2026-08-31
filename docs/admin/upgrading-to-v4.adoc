@@ -245,9 +245,10 @@ of `/api/auth/callback/saml`, and metadata is served from
 `/api/saml2/service-provider-metadata/{registrationId}`.
 The identity provider has to be reconfigured accordingly, whatever happens to the key material.
 
-== HTTPS
+== Gateway
 
-v3 terminated TLS in an nginx proxy which no longer exists.
+v3 terminated TLS, redirected hostname aliases and set the content security policy in an nginx
+proxy which no longer exists.
 APISIX can terminate TLS instead, using the same certificate layout the v3 proxy used:
 
 . Put `<hostname>_key.pem` and `<hostname>_cer.pem` into `tls/`, plus an optional
@@ -260,10 +261,17 @@ Certificates have to be inlined rather than referenced, because APISIX rejects a
 `apisix.yaml` is generated from the shipped template.
 Re-run `update-gateway` after renewing a certificate; APISIX picks the change up without a restart.
 With no certificates present the gateway serves plain HTTP only.
+With them, plaintext requests are redirected to HTTPS as they were in v3.
 
 `PORT` and `HTTPS_PORT` select the published ports and default to 80 and 443.
 If something else already terminates TLS in front of the gateway, set them to whatever that proxy
 expects.
+
+`ARSNOVA_HOSTNAME_ALIASES` and `CSP_FRAME_ANCESTORS` keep their v3 meaning and are read by
+`update-gateway` as well, so an installation which used either of them has to run that command even
+with no certificates to install.
+One difference: v3 redirected an alias to `https://` whatever the installation actually served,
+which would strand a plaintext one, so the redirect now follows the gateway's own scheme.
 
 == Migrating the data
 
