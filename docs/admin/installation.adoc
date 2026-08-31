@@ -1,0 +1,154 @@
+= Installing arsnova
+
+arsnova is deployed as a set of containers orchestrated with Docker Compose.
+A release provides everything needed to run it:
+
+* Docker Compose configuration for all services and their dependencies
+* `particifyctl`, a helper script wrapping the Compose commands
+
+These files are published with each
+https://github.com/particify/arsnova-server/releases[release], so a production system does not need
+a clone of the repository.
+In the repository they live in `.docker/compose/production`.
+
+== Requirements
+
+=== Hardware
+
+* CPU: 4 Cores or vCPU
+* RAM: 8 GiB
+* Storage: 10 GiB for Docker images and containers, additional storage for volumes containing user data depends on usage
+
+=== Software
+
+* Linux (see https://docs.docker.com/engine/install/#server for availability of official Docker packages)
+* https://docs.docker.com/engine/install/[Docker Engine] >= 20.10 (older versions might work but are not tested for compatibility)
+* https://docs.docker.com/compose/install/linux/[Docker Compose] >= 2.0
+
+== Usage
+
+=== Preparations
+
+. link:https://github.com/particify/arsnova-server/releases[Download the latest release].
+. Extract the archive and switch to the extracted directory.
+. Run `./particifyctl` to list all available commands.
+
+=== Running
+
+. Run `./particifyctl run`. Append `-d` to run in detached mode for production.
+. Run `./particifyctl compose down` stop and remove the containers.
+
+=== Configuration
+
+The default configuration can be adjusted via environment variables.
+To persist the configuration, add those variable assignments to `local.env` (one assignment per line).
+
+|=======
+|Variable |Default value |Description
+|PORT |80 |Port on which the gateway serves HTTP
+|HTTPS_PORT |443 |Port on which the gateway serves HTTPS, if certificates are configured
+|JWT_SECRET | |Encryption token for authentication (MUST be changed for production, at least 32 characters)
+|JWT_DOMAIN |example.com |A domain usable as server ID (used for the JWT issuer/audience claim)
+|ARSNOVA_HOSTNAME |localhost |Hostname for the application
+|POSTGRESQL_TAG | |Version (Docker) tag for the PostgreSQL databases of the v3 services
+|WEBSOCKET_TAG |latest |Version (Docker) for the WebSocket service
+|AUTHZ_TAG |latest |Version (Docker) for the authz service
+|CORE_TAG |latest |Version (Docker) for the v3 core service
+|CORE4_TAG |latest |Version (Docker) for the core4 service
+|COMMENTS_TAG |latest |Version (Docker) for comments service
+|WEBCLIENT_TAG |latest |Version (Docker) for the webclient
+|FORMATTING_TAG |latest |Version (Docker) for the formatting service
+|COUCHDB_TAG |latest |Version (Docker) for CouchDB
+|RABBITMQ_TAG |latest |Version (Docker) for RabbitMQ
+|=======
+
+Mail is configured by `core4` rather than through the environment, so the `MAIL_*` variables of
+earlier versions no longer apply.
+See <<Configuration file>>.
+
+Example: `PORT=8100 ./particifyctl run`
+
+=== Configuration file
+
+Some settings cannot be expressed as environment variables, because Spring's relaxed binding cannot
+recover a UUID's hyphens or a camelCase key from a variable name.
+LDAP and SAML registrations and the `ui.*` settings are therefore configured in
+`core4-config/application.yaml`, which is mounted into the `core4` container.
+
+`core4` requires `mail.sender-address`, `mail.sender-name`, `service.root-url` and
+`security.challenge.secret`, none of which have a default, so that file has to exist before the
+service will start.
+`particifyctl` warns when it is missing.
+
+Environment variables take precedence over the file, so `JWT_SECRET` and `JWT_DOMAIN` stay in
+`local.env`; setting the corresponding properties in the file would have no effect.
+
+The v3 core, which still runs alongside `core4`, reads `core-config/application.yml` in the same
+way.
+It is only needed for an installation which had a customised v3 configuration file.
+
+See link:../development/ldap.adoc[the LDAP documentation] and
+link:upgrading-to-v4.adoc[the upgrade guide] for the property structure.
+
+=== HTTPS
+
+The gateway can terminate TLS.
+Put `<hostname>_key.pem` and `<hostname>_cer.pem` into `tls/`, plus an optional `<hostname>_ca.pem`
+chain, then run `./particifyctl update-gateway` followed by `./particifyctl update-config`.
+
+The certificates are inlined into the gateway's configuration, because it cannot load them from a
+path, so `update-gateway` has to be run again after each renewal.
+The gateway picks the change up without a restart.
+Without certificates it serves plain HTTP only.
+
+=== Docker Compose overrides
+
+If you need to override the default Docker Compose configuration, you can add your configuration in `local.compose.yaml`.
+The local configuration takes precedence over the other `*.compose.yaml` files a release provides.
+We recommend that you only use the `local.*` files to adjust the configuration, so you do not need to manually merge changes when updating.
+
+== Upgrading from version 3
+
+See link:upgrading-to-v4.adoc[].
+Read it before starting: an upgraded installation needs its legacy databases pinned to the
+PostgreSQL version they actually hold, and skipping that step makes PostgreSQL initialise an empty
+cluster beside the existing data without reporting an error.
+
+=== PostgreSQL updates
+
+`POSTGRESQL_TAG` pins the PostgreSQL version of the v3 services' databases.
+`particifyctl` writes a value into `local.env` on the first `update-config`, but do not rely on it:
+it takes the first `postgres:` image it finds across the merged configuration, which need not be the
+one governing these databases.
+Set the variable explicitly to the version the volumes actually hold:
+
+[source,shell]
+----
+docker run --rm -v particify_postgresql_data_auth:/d:ro alpine cat /d/PG_VERSION
+----
+
+Raising it to a new major version does not migrate the data.
+PostgreSQL will not read a cluster created by an older version, and from version 18 it also expects
+a different directory layout on the volume, so the data has to be converted first.
+
+**Back up the volumes before converting.**
+There is no rollback.
+
+To convert, override the image for both databases in `local.compose.yaml` and let it start once:
+
+[source,yaml]
+----
+services:
+  postgresql-authz:
+    image: pgautoupgrade/pgautoupgrade:18-alpine
+  postgresql-comments:
+    image: pgautoupgrade/pgautoupgrade:18-alpine
+----
+
+That image detects an existing cluster of an older version and upgrades it in place, adjusting the
+directory layout on the volume as needed.
+Remove any mount override for these services at the same time, so the volume is mounted where the
+current configuration expects it.
+
+Once the services are up and the data is intact, drop the image override again and set
+`POSTGRESQL_TAG` to the version that was migrated to.
