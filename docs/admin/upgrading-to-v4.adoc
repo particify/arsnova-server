@@ -1,0 +1,315 @@
+= Upgrading from version 3 to version 4
+
+Version 4 replaces the core service with `core4` and changes the configuration in three places at
+once: the services' own settings, the Docker Compose layout with its env files, and the certificates
+for HTTPS and SAML.
+The v3 core keeps running alongside `core4`, because contents, answers, live feedback, room user
+aliases, content templates and violation reports have not moved yet.
+
+This is a one-way, data-touching upgrade.
+Read it through before starting, and take backups of every volume first.
+
+== Before you start
+
+Two things will silently damage an installation if they are skipped.
+Neither reports an error at the time.
+
+=== The legacy databases may need their PostgreSQL version pinned
+
+PostgreSQL 18 changed where its data lives: `PGDATA` became version specific
+(`/var/lib/postgresql/18/docker`) and the image's declared volume moved from
+`/var/lib/postgresql/data` to `/var/lib/postgresql`.
+The shipped v4 configuration mounts the volume root accordingly.
+
+**This matters if the installation's databases are on PostgreSQL 17 or older.**
+Mounting such a volume at the root leaves PostgreSQL 18 with no data directory where it expects one,
+so it initialises an **empty** cluster beside the existing data.
+The container starts, reports itself healthy, and serves no rows.
+The old data is still on the volume, but only until something writes to the new cluster.
+
+Do not assume a version.
+v3 shipped PostgreSQL 13 by default, but the pin differed between v3 releases, and an installation
+may have overridden it.
+Read it off the volume:
+
+[source,shell]
+----
+docker run --rm -v particify_postgresql_data_auth:/d:ro alpine cat /d/PG_VERSION
+docker run --rm -v particify_postgresql_data_comment:/d:ro alpine cat /d/PG_VERSION
+----
+
+Substitute the Compose project name if it is not `particify`.
+
+If the result is 18 or newer, nothing needs doing -- the shipped configuration already matches.
+If it is 17 or older, pin that version and keep the old mount target until the data is actually
+upgraded:
+
+.local.env
+[source]
+----
+POSTGRESQL_TAG=13-alpine
+----
+
+.local.compose.yaml
+[source,yaml]
+----
+services:
+  postgresql-authz:
+    volumes:
+      - postgresql_data_auth:/var/lib/postgresql/data
+  postgresql-comments:
+    volumes:
+      - postgresql_data_comment:/var/lib/postgresql/data
+----
+
+Both belong together.
+Removing only one of them produces exactly the empty-cluster case above.
+
+To upgrade the data afterwards, point the two services at
+`pgautoupgrade/pgautoupgrade:18-alpine` in `local.compose.yaml` and let them start once; it converts
+the cluster and the directory layout on the volume.
+Remove the mount override at the same time, so the volume is mounted where the current configuration
+expects it.
+Then drop the image override too and set `POSTGRESQL_TAG` to the version that was migrated to.
+See link:installation.adoc#_postgresql_updates[the installation documentation] for the details.
+
+`postgresql-core4` is a new, empty database and is unaffected.
+It must not be given `POSTGRESQL_TAG`, which governs the legacy databases only.
+
+=== JWT_SECRET has to be at least 32 characters
+
+`core4` validates the secret and refuses to start if it is shorter.
+The same secret is read by `core4`, the v3 core, the WebSocket, authorization and Q&A services, so
+one change in `local.env` covers all of them -- but it invalidates every token those services have
+already issued.
+Change it during a maintenance window, not while the installation is in use.
+
+=== Remove the legacy JWT settings
+
+If the v3 configuration sets `arsnova.security.jwt.legacy-secret` or `legacy-server-id`, remove
+them.
+
+They are not merely obsolete.
+With the v3 core switched into its v4 mode, a token which falls through to the legacy verification
+path makes it look up a user through a service which is no longer created, and the resulting failure
+is caught and logged at debug level only.
+The request then continues **unauthenticated** rather than being rejected, which is both a security
+problem and close to undiagnosable from the logs.
+
+== Configuration file
+
+`core4` reads an optional configuration file from `core4-config/application.yaml`, mounted into the
+container at `/etc/arsnova/core4/`.
+It exists because some settings cannot be expressed as environment variables at all:
+LDAP and SAML registrations are keyed by UUID, and relaxed binding cannot recover the hyphens from a
+variable name, while `ui.*` keys are camelCase and lose their capitalisation the same way.
+
+Four properties are required and have no default, so `core4` will not start until the file supplies
+them:
+
+[source,yaml]
+----
+mail:
+  sender-address: arsnova@example.com
+  sender-name: arsnova
+security:
+  challenge:
+    # At least 32 characters. Generate one, for example with `openssl rand -base64 32`.
+    secret: ...
+service:
+  root-url: https://app.example.com
+----
+
+**Environment variables take precedence over this file.**
+`security.jwt.secret`, `security.jwt.issuer` and `spring.datasource.*` are set as container
+environment by `v4.compose.yaml`, so setting them in the file has no effect --
+configure them through `JWT_SECRET` and `JWT_DOMAIN` in `local.env` instead.
+
+The v3 core reads a file of its own from `core-config/application.yml`, rooted at `arsnova:` as
+before.
+It is only needed if the installation had a customised v3 `application.yml`;
+the environment `base.compose.yaml` passes already covers a default installation.
+
+== Settings that moved
+
+The v3 core no longer handles users, authentication or mail, so those settings belong to `core4`
+now.
+Do not carry them into the v3 core's file.
+
+[cols="2,2"]
+|===
+|v3 |v4
+
+|`arsnova.system.root-url` |`service.root-url`
+|`arsnova.system.mail.*` |`mail.*`, same leaf names
+|`arsnova.system.formatting-service.{enabled,host-url}` |`common.text-rendering.{enabled,service-url}`
+|`arsnova.system.message-broker.rabbitmq.*` |`spring.rabbitmq.*`
+|`arsnova.security.jwt.server-id` |`security.jwt.issuer`
+|`arsnova.security.login-try-limit` |`security.login.attempt-limit`
+|`arsnova.security.authentication-providers.ldap[0].*` |`security.ldap.registration.<uuid>.*`
+|`arsnova.security.authentication-providers.saml.*` |`security.saml2.relyingparty.registration.<uuid>.*`
+|`arsnova.system.auto-deletion-thresholds.user-inactivity-period` |`user.inactivity-thresholds.verified`
+|`arsnova.ui.*` |`ui.*`, unchanged
+|===
+
+Note that the service names changed as well, so URLs carried over from v3 need rewriting:
+`arsnova-formatting-service` became `arsnova-server-formatting`, `postgresql_comment` became
+`postgresql-comments`, and `arsnova-auth-service` became `arsnova-server-authz`.
+
+Image tag variables were renamed too: `WSGW_TAG` to `WEBSOCKET_TAG`, `AUTH_TAG` to `AUTHZ_TAG`,
+`COMMENT_TAG` to `COMMENTS_TAG` and `WEB_TAG` to `WEBCLIENT_TAG`.
+`HTTPGW_TAG` has no counterpart, because the HTTP gateway was replaced by APISIX.
+`CORE_TAG` still tags the v3 core, and `core4` has its own `CORE4_TAG` -- the two version series are
+not interchangeable.
+
+Some settings have no v4 equivalent and are simply gone: the guest and local provider can no longer
+be disabled or retitled, registration and password-reset mail texts are message bundles rather than
+configuration, `arsnova.templates.*` was replaced by `mail.*-uri-pattern` with **different
+placeholders**, and CAS and OIDC accounts are imported but cannot be used to log in.
+`arsnova.system.read-only` still works for the v3 core and the Q&A service, but `core4` has no
+read-only mode, so a read-only installation is only partly read-only under v4.
+
+=== LDAP
+
+v3 configured a list of providers; v4 uses a map keyed by a UUID you choose:
+
+[source,yaml]
+----
+security:
+  ldap:
+    registration:
+      2c62a4a8-9a1a-4e0e-9c4b-2f7fd2e0f0f5:
+        url: ldaps://example.com:636/dc=example,dc=com
+        user-dn-pattern: "uid={0},ou=arsnova"
+        user-id-attribute: uid
+        imported-attributes: [givenName, mail, sn]
+----
+
+Three things to get right.
+`user-dn-pattern` and `user-search-filter` are mutually exclusive, and v3's shipped configuration
+set both, so drop whichever one the installation did not actually use.
+`imported-attributes` is empty by default, which silently stops importing the attributes v3 imported
+unconditionally.
+And the same UUID has to appear under
+`persistence.v3-migration.authentication-provider-mapping.LDAP` -- see below.
+
+=== SAML
+
+v3 kept the signing key and its certificate together in one password-protected Java keystore,
+either JKS or PKCS#12.
+v4 reads them from two separate unencrypted PEM files instead, and takes no password:
+
+[source,shell]
+----
+openssl pkcs12 -in arsnova.p12 -nocerts -nodes -passin pass:... -out rp.key
+openssl pkcs12 -in arsnova.p12 -clcerts -nokeys -passin pass:... -out rp.crt
+----
+
+The key must end up as an unencrypted PKCS#8 RSA key (`-----BEGIN PRIVATE KEY-----`); PKCS#1 and
+elliptic-curve keys are rejected.
+Note that v3 never set a keystore type and its library defaulted to JKS, so a file named
+`arsnova.p12` may in fact be a JKS -- convert it with `keytool -importkeystore` first if `openssl`
+cannot open it.
+
+**Extract the existing key rather than generating a new one.**
+Its certificate is already registered with the identity provider, and a fresh keypair breaks that
+trust until new metadata is uploaded.
+
+[source,yaml]
+----
+security:
+  saml2:
+    relyingparty:
+      registration:
+        fc62cd95-bea9-4aa3-987d-fa976ef300f3:
+          entity-id: https://app.example.com/api/saml2/service-provider-metadata/{registrationId}
+          username-mapping: ID
+          signing:
+            credentials:
+              - private-key-location: file:/etc/arsnova/core4/saml/rp.key
+                certificate-location: file:/etc/arsnova/core4/saml/rp.crt
+          assertingparty:
+            metadata-uri: https://idp.example.com/metadata
+----
+
+`username-mapping` has to be set explicitly.
+v3 had one installation-wide `security.user-display-id-attribute` defaulting to `loginId`, and v4's
+per-registration default is the opposite value, so omitting it changes the public display ID of
+every user.
+A username the data migration writes is permanent, so this cannot be corrected afterwards.
+
+Note also that a bare path in `metadata-uri` is resolved on the classpath, not the filesystem --
+use a `file:` prefix or a URL.
+The endpoints changed as well: assertions now go to `/api/login/saml2/sso/{registrationId}` instead
+of `/api/auth/callback/saml`, and metadata is served from
+`/api/saml2/service-provider-metadata/{registrationId}`.
+The identity provider has to be reconfigured accordingly, whatever happens to the key material.
+
+== HTTPS
+
+v3 terminated TLS in an nginx proxy which no longer exists.
+APISIX can terminate TLS instead, using the same certificate layout the v3 proxy used:
+
+. Put `<hostname>_key.pem` and `<hostname>_cer.pem` into `tls/`, plus an optional
+  `<hostname>_ca.pem` chain.
+  These are the names v3 used, so certificates copied from a v3 installation need no renaming.
+. Run `./particifyctl update-gateway`.
+. Run `./particifyctl update-config`.
+
+Certificates have to be inlined rather than referenced, because APISIX rejects a path, so
+`apisix.yaml` is generated from the shipped template.
+Re-run `update-gateway` after renewing a certificate; APISIX picks the change up without a restart.
+With no certificates present the gateway serves plain HTTP only.
+
+`PORT` and `HTTPS_PORT` select the published ports and default to 80 and 443.
+If something else already terminates TLS in front of the gateway, set them to whatever that proxy
+expects.
+
+== Migrating the data
+
+The data migration is a one-off run of `core4` rather than a task of its own.
+It reads v3's CouchDB, the authorization service's room access and the Q&A service's database, so
+all three have to still be running.
+
+[source,yaml]
+----
+persistence:
+  v3-migration:
+    enabled: true
+    couchdb:
+      url: http://couchdb:5984/arsnova3
+      username: arsnova
+      password: arsnova
+    room-access-url: http://arsnova-server-authz:8080/roomaccess
+    qna:
+      datasource:
+        url: jdbc:postgresql://postgresql-comments:5432/arsnovacomment
+        username: arsnovacomment
+        password: arsnovacomment
+    authentication-provider-mapping:
+      LDAP: 2c62a4a8-9a1a-4e0e-9c4b-2f7fd2e0f0f5
+----
+
+Each identifier here has to be **exactly** the one its registration is configured under.
+Otherwise the first login after the migration does not find the imported account and silently
+creates a second, empty one for every user.
+Nothing reports it.
+
+Then:
+
+. `./particifyctl run arsnova-server-core4` and wait for it to exit on its own.
+. Set `enabled` back to `false`.
+. `./particifyctl run -d`.
+
+Each step is skipped with a warning if the table it writes already has rows, so a second run cannot
+half-overwrite an installation which is already in use.
+A partially failed migration therefore has to be cleaned up before it is retried.
+
+Migrated accounts keep their v3 timestamps, and v3's limit on how many accounts one deletion run may
+affect has no v4 counterpart.
+An installation which had inactive-account deletion enabled should check
+`user.inactivity-thresholds` before the first scheduled run.
+
+The migration also settles usernames and mail addresses in a pass of its own, and handles conflicts
+between a local and an external account holding the same address.
+Check the log it writes at the end: it reports the addresses it could not assign.

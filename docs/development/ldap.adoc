@@ -158,6 +158,6 @@ One registration during the migration phase is fine.
   Trust material cannot be configured per registration.
 * A UUID-keyed registration map cannot be configured through flat environment variables, because
   Spring's relaxed binding cannot recover the UUID's hyphens from an environment variable name.
-  The production Compose stack configures core4 exclusively that way, so LDAP cannot be set up there
-  yet.
-  SAML shares this gap, and closing it is a task of its own.
+  The production Compose stack therefore mounts a configuration file for core4, which is where a
+  registration has to be defined -- see
+  link:../admin/installation.adoc[the installation documentation].
