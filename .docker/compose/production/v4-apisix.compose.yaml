@@ -1,10 +1,17 @@
 services:
   apisix:
     image: apache/apisix:3.18.0-debian@sha256:84e6b5e787e9f889ebff88161cb9a16599bafcffa236c6b54c7f779a0655940d
+    # Docker Compose merges port lists by union rather than replacing them, so these cannot be
+    # overridden from production.v4-apisix.compose.yaml -- the published ports have to be
+    # parameterised here. The development environment pins both in its own base.env, because
+    # rootless Podman cannot bind below 1024.
     ports:
-      - 9080:9080
-    volumes:
-      - $ROOT_DIR/.docker/apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
-      - $ROOT_DIR/.docker/apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+      - $PORT:9080
+      - $HTTPS_PORT:9443
+    # The configuration mounts are not here: Docker Compose resolves a relative source against the
+    # project directory, which is this directory under particifyctl and the repository root under
+    # the development pdk, so the paths cannot be shared.
+    # Each environment's overlay supplies them -- production.v4-apisix.compose.yaml and
+    # development/devcontainer.v4-apisix.compose.yaml.
     extra_hosts:
       - host.containers.internal:host-gateway

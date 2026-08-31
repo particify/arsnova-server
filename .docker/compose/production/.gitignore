@@ -1,8 +1,10 @@
 /.compose.yaml
 /.env
 /.version
+/apisix.yaml
 /core-config/
 /core4-config/
 /docker-compose.override.yml
 /local.compose.yaml
 /local.env
+/tls/

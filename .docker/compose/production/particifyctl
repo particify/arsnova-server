@@ -31,6 +31,8 @@ if [ "$CONFIG_VERSION" -gt 2 ]; then
   exit 1
 fi
 
+TLS_CERT_DIR=${TLS_CERT_DIR:-./tls}
+APISIX_TEMPLATE="`dirname $0`/apisix.template.yaml"
 CORE_CONFIG_DIR=${CORE_CONFIG_DIR:-./core-config}
 CORE4_CONFIG_DIR=${CORE4_CONFIG_DIR:-./core4-config}
 
@@ -87,6 +89,19 @@ case $COMMAND in
       echo "         security.challenge.secret, none of which an environment variable provides."
       echo "         See docs/admin/upgrading-to-v4.adoc."
     fi
+    # apisix.yaml is generated as well, and the gateway mounts it as a file: with no file there the
+    # container engine creates a directory at that path instead, and APISIX exits unable to read its
+    # own routes. Generated only when absent -- regenerating it belongs to update-gateway, which
+    # would otherwise pick up certificate changes an operator has not finished making.
+    if [ -d apisix.yaml ]; then
+      echo "ERROR: apisix.yaml is a directory." >&2
+      echo "       A container engine creates one when a bind mount's source does not exist." >&2
+      echo "       Remove it and run this again." >&2
+      exit 1
+    fi
+    if [ ! -f apisix.yaml ]; then
+      $0 update-gateway
+    fi
     echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .compose.yaml
     docker compose \
       $COMPOSE_FILE_ARGS \
@@ -97,6 +112,73 @@ case $COMMAND in
     fi
     # .env carries JWT_SECRET, so it must not be left at the ambient umask.
     chmod 600 .env local.env
+    ;;
+  update-gateway)
+    # APISIX validates ssls.cert against a minimum length and then parses it as PEM, so a file
+    # path is rejected - silently, leaving the gateway on plaintext. The certificates therefore
+    # have to be inlined, which means apisix.yaml has to be generated rather than mounted.
+    #
+    # Certificate layout is the one the v3 proxy used, so an upgraded installation needs no
+    # changes: <hostname>_key.pem and <hostname>_cer.pem, plus an optional <hostname>_ca.pem
+    # chain, which is concatenated into the certificate because APISIX has no separate setting
+    # for it. Re-run this after renewing; APISIX picks the change up without a restart.
+    if [ ! -f "$APISIX_TEMPLATE" ]; then
+      echo "ERROR: $APISIX_TEMPLATE not found."
+      exit 1
+    fi
+    mkdir -p "$TLS_CERT_DIR"
+    keys=`ls "$TLS_CERT_DIR"/*_key.pem 2> /dev/null`
+    if [ -z "$keys" ]; then
+      echo "No certificates in $TLS_CERT_DIR, so the gateway will serve plain HTTP only."
+      echo "Add <hostname>_key.pem and <hostname>_cer.pem there and run this again."
+      cp "$APISIX_TEMPLATE" apisix.yaml
+      echo Wrote apisix.yaml without TLS.
+      exit 0
+    fi
+    # Checked up front, so a missing certificate cannot leave a half-written file behind.
+    for key in $keys; do
+      hostname=`basename "$key" _key.pem`
+      if [ ! -f "$TLS_CERT_DIR/${hostname}_cer.pem" ]; then
+        echo "ERROR: $key has no matching ${hostname}_cer.pem."
+        exit 1
+      fi
+    done
+    # A truncated file takes down all routing rather than just TLS, so build it aside first.
+    {
+      # The gateway reads this file directly, so it is easy to mistake for something to edit. The
+      # timestamp is what tells an operator whether it predates a certificate they have since
+      # installed, which is the case this command exists for.
+      echo "# GENERATED - DO NOT EDIT - RUN $0 update-gateway TO UPDATE"
+      echo "# Generated `date -u +%Y-%m-%dT%H:%M:%SZ` from the shipped routes and ./tls."
+      sed '/^#END[[:space:]]*$/d' "$APISIX_TEMPLATE"
+      echo 'ssls:'
+      for key in $keys; do
+        hostname=`basename "$key" _key.pem`
+        cert="$TLS_CERT_DIR/${hostname}_cer.pem"
+        echo "  - id: $hostname"
+        echo '    snis:'
+        echo "      - $hostname"
+        echo '    cert: |'
+        cat "$cert" "$TLS_CERT_DIR/${hostname}_ca.pem" 2> /dev/null | sed 's/^/      /'
+        echo '    key: |'
+        sed 's/^/      /' "$key"
+      done
+      # Required as the last line, or APISIX ignores the whole file.
+      echo '#END'
+    } > apisix.yaml.new
+    if [ "`tail -n 1 apisix.yaml.new`" != '#END' ]; then
+      echo "ERROR: the generated configuration is incomplete; apisix.yaml was left unchanged."
+      rm -f apisix.yaml.new
+      exit 1
+    fi
+    # Written in place rather than moved over: a single-file bind mount pins the inode, so
+    # replacing the file would leave APISIX reading the old one and never reloading.
+    cat apisix.yaml.new > apisix.yaml
+    rm -f apisix.yaml.new
+    for key in $keys; do
+      echo "Configured TLS for `basename \"$key\" _key.pem`."
+    done
+    echo Wrote apisix.yaml. Run \"$0 update-config\" to apply it.
     ;;
   run|r)
     $0 update-config
@@ -122,6 +204,7 @@ case $COMMAND in
     echo Usage:
     echo "    $0 update           Update Git repositories, Docker Compose configuration and Docker images"
     echo "    $0 update-config    Update the configuration for Docker Compose"
+    echo "    $0 update-gateway   Load TLS certificates from ./tls into the gateway configuration"
     echo "    $0 run              Start Containers for all services"
     echo "    $0 logs             Show logs or the log for a specific service"
     echo "    $0 compose          Execute a Docker Compose command"

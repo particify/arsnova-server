@@ -1,0 +1,7 @@
+services:
+  apisix:
+    volumes:
+      # $ROOT_DIR is exported by the development pdk script only, which is why these paths cannot
+      # live in the shared v4-apisix.compose.yaml.
+      - $ROOT_DIR/.docker/apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - $ROOT_DIR/.docker/apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
