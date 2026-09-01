@@ -2,6 +2,11 @@ services:
   couchdb:
     ports:
       - 127.0.0.1:5984:5984
+    volumes:
+      # Sorts before docker.ini deliberately: CouchDB persists configuration writes to the last
+      # ini file it read, and it rewrites the admin password as a hash on first start, so the last
+      # one has to be the entrypoint's writable docker.ini rather than this read-only mount.
+      - $ROOT_DIR/.docker/couchdb/custom.ini:/opt/couchdb/etc/local.d/10-custom.ini:ro
   postgresql-authz:
     image: pgautoupgrade/pgautoupgrade:18-alpine@sha256:823404dccffe3f8b92177b308455445aab86a0f343661d65e624099ae6780459
   postgresql-comments:
@@ -9,6 +14,12 @@ services:
   rabbitmq:
     ports:
       - 15672:15672
+    volumes:
+      - $ROOT_DIR/.docker/rabbitmq/advanced.config:/etc/rabbitmq/advanced.config:ro
+      # The management plugin is enabled in development only, which is what publishing 15672 above
+      # is for.
+      - $ROOT_DIR/.docker/rabbitmq/enabled_plugins-management:/etc/rabbitmq/enabled_plugins:ro
+      - $ROOT_DIR/.docker/rabbitmq/logging.conf:/etc/rabbitmq/conf.d/90-logging.conf:ro
   arsnova-webclient:
     image: devcontainer-arsnova-webclient:$WEBCLIENT_TAG
     init: true

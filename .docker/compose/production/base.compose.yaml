@@ -1,7 +1,12 @@
 services:
   couchdb:
-    image: $IMAGE_NAMESPACE/${IMAGE_DEPENDENCY_PREFIX}couchdb:$COUCHDB_TAG
+    image: couchdb:3.5@sha256:9ea24cbd76522fe845d1c32c7fd1dcfc8a3ba73dcc4817d62f8a7f7f1dfaffe3
     restart: $RESTART_MODE
+    # The entrypoint chowns everything under /opt/couchdb it does not already own, which fails on a
+    # read-only configuration mount -- silently, because chown -f suppresses the message but not the
+    # exit status, and set -e then takes the entrypoint down before CouchDB logs anything. Starting
+    # as couchdb skips that block; admin creation and the rest of the entrypoint run either way.
+    user: couchdb
     environment:
       COUCHDB_USER: arsnova
       COUCHDB_PASSWORD: arsnova
@@ -26,7 +31,10 @@ services:
     volumes:
       - postgresql_data_comment:/var/lib/postgresql
   rabbitmq:
-    image: $IMAGE_NAMESPACE/${IMAGE_DEPENDENCY_PREFIX}rabbitmq-stomp:$RABBITMQ_TAG
+    # The upstream image enables rabbitmq_prometheus and nothing else, so the STOMP plugin the
+    # websocket service relays through comes from an enabled_plugins file each environment's overlay
+    # mounts.
+    image: rabbitmq:4.3-alpine@sha256:3486d98205df3d6395ed70e7924baa13b561cbac54116c0ddae5b0b7382bbabd
     restart: $RESTART_MODE
     environment:
       RABBITMQ_NODENAME: rabbit@localhost
