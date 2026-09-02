@@ -31,34 +31,38 @@ if [ "$CONFIG_VERSION" -gt 2 ]; then
   exit 1
 fi
 
+# Everything the release ships and an operator is not meant to edit. Kept out of the deployment
+# root so that what is left there is the handful of files which are meant to be edited.
+PROVIDED_DIR=provided
 TLS_CERT_DIR=${TLS_CERT_DIR:-./tls}
-APISIX_TEMPLATE="`dirname $0`/apisix.template.yaml"
+APISIX_TEMPLATE="`dirname $0`/$PROVIDED_DIR/apisix-routes.yaml"
 CORE_CONFIG_DIR=${CORE_CONFIG_DIR:-./core-config}
 CORE4_CONFIG_DIR=${CORE4_CONFIG_DIR:-./core4-config}
 
 ENV_FILES=""
 COMPOSE_FILE_ARGS=""
 while read config_name; do
-  if [ -f "$config_name.env" ]; then
-    ENV_FILES="$ENV_FILES $config_name.env"
+  if [ -f "$PROVIDED_DIR/$config_name.env" ]; then
+    ENV_FILES="$ENV_FILES $PROVIDED_DIR/$config_name.env"
   fi
-  COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f $config_name.compose.yaml"
-done <config-list
+  COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f $PROVIDED_DIR/$config_name.compose.yaml"
+done <"$PROVIDED_DIR/config-list"
 # Only a starting point: the first match need not be the database this governs, so set
 # POSTGRESQL_TAG in local.env explicitly to override it. The digest is dropped deliberately -- this
 # pins the major version of a legacy data directory, so it has to stay something an operator can
 # read and edit, and it governs an image the shipped configuration pins by digest anyway. Splitting
 # on the last colon rather than the second survives both a digest and a registry port.
-POSTGRESQL_TAG=`docker compose $COMPOSE_FILE_ARGS config --images 2> /dev/null \
+POSTGRESQL_TAG=`docker compose --project-directory . $COMPOSE_FILE_ARGS config --images 2> /dev/null \
   | grep -m 1 postgres: | sed -E 's|@.*$||; s|^.*:||'`
 while read config_name; do
-  COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f production.$config_name.compose.yaml"
-done <config-list
+  COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f $PROVIDED_DIR/production.$config_name.compose.yaml"
+done <"$PROVIDED_DIR/config-list"
 
 # particifyctl never sources .env, so a setting the gateway configuration needs is read from the
 # same merged view of the env files that update-config writes, where the last definition wins.
 read_env() {
-  cat $ENV_FILES production.env local.env 2> /dev/null | grep "^$1=" | tail -n 1 | cut -d = -f 2-
+  cat $ENV_FILES "$PROVIDED_DIR/production.env" local.env 2> /dev/null \
+    | grep "^$1=" | tail -n 1 | cut -d = -f 2-
 }
 
 case $COMMAND in
@@ -86,10 +90,11 @@ case $COMMAND in
       echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > local.compose.yaml
     fi
     echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .env
-    cat $ENV_FILES production.env local.env | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
+    cat $ENV_FILES "$PROVIDED_DIR/production.env" local.env \
+      | grep -v ^# | tac | awk -F "=" '!a[$1]++' | tac >> .env
     # Create the bind sources as the invoking user; the engine would create them root-owned.
     mkdir -p "$CORE_CONFIG_DIR" "$CORE4_CONFIG_DIR"
-    if grep -qx v4 config-list && [ ! -f "$CORE4_CONFIG_DIR/application.yaml" ]; then
+    if grep -qx v4 "$PROVIDED_DIR/config-list" && [ ! -f "$CORE4_CONFIG_DIR/application.yaml" ]; then
       echo "WARNING: $CORE4_CONFIG_DIR/application.yaml does not exist."
       echo "         core4 requires mail.sender-address, mail.sender-name, service.root-url and"
       echo "         security.challenge.secret, none of which an environment variable provides."
@@ -109,7 +114,7 @@ case $COMMAND in
       $0 update-gateway
     fi
     echo "# GENERATED - DO NOT EDIT - RUN $0 $1 TO UPDATE" > .compose.yaml
-    docker compose \
+    docker compose --project-directory . \
       $COMPOSE_FILE_ARGS \
       -f local.compose.yaml \
       config >> .compose.yaml

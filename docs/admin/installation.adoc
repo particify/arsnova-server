@@ -33,6 +33,22 @@ In the repository they live in `.docker/compose/production`.
 . Extract the archive and switch to the extracted directory.
 . Run `./particifyctl` to list all available commands.
 
+=== Directory layout
+
+`particifyctl`:: The command you run.
+`local.env`:: Your environment overrides.
+`local.compose.yaml`:: Your Docker Compose overrides.
+`core4-config/`:: core4's `application.yaml`.
+`core-config/`:: The version 3 core's `application.yml`, if it was customised.
+`tls/`:: Your certificates.
+`provided/`:: What the release ships.
+
+Everything but `provided/` is yours to edit.
+`provided/` is replaced wholesale by the next release, so a change made there is lost on the next
+update; override the setting in `local.env` or `local.compose.yaml` instead.
+`particifyctl` additionally writes `.env`, `.compose.yaml`, `.version` and `apisix.yaml`, which are
+generated and should not be edited either.
+
 === Running
 
 . Run `./particifyctl run`. Append `-d` to run in detached mode for production.
@@ -92,8 +108,9 @@ link:upgrading-to-v4.adoc[the upgrade guide] for the property structure.
 
 === Gateway
 
-`./particifyctl update-gateway` generates the gateway's `apisix.yaml` from the shipped route
-template, the certificates in `tls/`, and `ARSNOVA_HOSTNAME_ALIASES` and `CSP_FRAME_ANCESTORS`.
+`./particifyctl update-gateway` generates the gateway's `apisix.yaml` from
+`provided/apisix-routes.yaml`, the certificates in `tls/`, and `ARSNOVA_HOSTNAME_ALIASES` and
+`CSP_FRAME_ANCESTORS`.
 Run it, followed by `./particifyctl update-config`, after changing any of those.
 The gateway picks the generated file up without a restart.
 
