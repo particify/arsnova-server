@@ -11,9 +11,6 @@ upstreams:
   - id: websocket
     nodes:
       "arsnova-server-websocket:8080": 1
-  - id: qna-v3
-    nodes:
-      "arsnova-server-comments:8080": 1
   - id: formatting
     nodes:
       "arsnova-server-formatting:3000": 1
@@ -52,13 +49,6 @@ routes:
       - /api/violationreport/*
     upstream_id: core-v3
     plugin_config_id: path-rewrite
-  - id: qna-v3
-    uris:
-      - /api/room/*/comment/*
-      - /api/room/*/settings/*
-      - /api/room/*/vote/*
-    upstream_id: qna-v3
-    plugin_config_id: path-rewrite-and-authz
   - id: websocket
     uri: /api/ws/*
     enable_websocket: true
