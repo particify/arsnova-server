@@ -69,7 +69,7 @@ case $COMMAND in
   update|u)
     echo Updating Git repository...
     git pull
-    $0 update-config
+    $0 update-config || exit $?
     echo Updating Docker images...
     docker compose --project-directory `dirname $0` \
       $COMPOSE_FILE_ARGS \
@@ -99,6 +99,16 @@ case $COMMAND in
       echo "         core4 requires mail.sender-address, mail.sender-name, service.root-url and"
       echo "         security.challenge.secret, none of which an environment variable provides."
       echo "         See docs/admin/upgrading-to-v4.adoc."
+    fi
+    # POSTGRESQL_TAG is the only variable an image reference needs which no shipped env file
+    # defines -- it is seeded into local.env above and owned by the operator from then on. Unset, it
+    # renders the legacy databases as the bare name postgres:, which Docker Compose interpolates
+    # without complaint and only rejects when the image is pulled.
+    if [ -z "`read_env POSTGRESQL_TAG`" ]; then
+      echo "ERROR: POSTGRESQL_TAG is not set in local.env." >&2
+      echo "       It pins the PostgreSQL version of the legacy databases' data directory." >&2
+      echo "       Set it to the tag matching that data, for example 13-alpine." >&2
+      exit 1
     fi
     # apisix.yaml is generated as well, and the gateway mounts it as a file: with no file there the
     # container engine creates a directory at that path instead, and APISIX exits unable to read its
@@ -280,21 +290,23 @@ ${alias_hosts}    priority: 100
     echo Wrote apisix.yaml. Run \"$0 update-config\" to apply it.
     ;;
   run|r)
-    $0 update-config
+    # Without this the containers come up on whatever configuration was generated last, which is
+    # the one update-config just refused to replace.
+    $0 update-config || exit $?
     echo Starting Containers...
     shift 1
     docker compose -f .compose.yaml up $@
     ;;
   logs|l)
     if [ ! -f .compose.yaml ]; then
-      $0 update-config
+      $0 update-config || exit $?
     fi
     shift 1
     docker compose -f .compose.yaml logs $@
     ;;
   compose|c)
     if [ ! -f .compose.yaml ]; then
-      $0 update-config
+      $0 update-config || exit $?
     fi
     shift 1
     docker compose -f .compose.yaml $@

@@ -167,6 +167,8 @@ cluster beside the existing data without reporting an error.
 `particifyctl` writes a value into `local.env` on the first `update-config`, but do not rely on it:
 it takes the first `postgres:` image it finds across the merged configuration, which need not be the
 one governing these databases.
+`update-config` refuses to generate a configuration while it is unset, because an image reference of
+`postgres:` with nothing after the colon is only rejected once the image is pulled.
 Set the variable explicitly to the version the volumes actually hold:
 
 [source,shell]
