@@ -66,12 +66,13 @@ To persist the configuration, add those variable assignments to `local.env` (one
 |JWT_SECRET | |Encryption token for authentication (MUST be changed for production, at least 32 characters)
 |JWT_DOMAIN |example.com |A domain usable as server ID (used for the JWT issuer/audience claim)
 |ARSNOVA_HOSTNAME |localhost |Hostname for the application
-|POSTGRESQL_TAG | |Version (Docker) tag for the PostgreSQL databases of the v3 services
+|COMPOSE_PROFILES | |Set to `v3-migration` to start the version 3 services a data migration reads
+|LEGACY_POSTGRESQL_TAG | |Version (Docker) tag for the PostgreSQL databases of the v3 services; required only with the `v3-migration` profile
 |WEBSOCKET_TAG |latest |Version (Docker) for the WebSocket service
-|AUTHZ_TAG |latest |Version (Docker) for the authz service
+|AUTHZ_TAG |latest |Version (Docker) for the authz service, which only a version 3 migration starts
 |CORE_TAG |latest |Version (Docker) for the v3 core service
 |CORE4_TAG |latest |Version (Docker) for the core4 service
-|COMMENTS_TAG |latest |Version (Docker) for comments service
+|COMMENTS_TAG |latest |Version (Docker) for comments service, which only a version 3 migration starts
 |WEBCLIENT_TAG |latest |Version (Docker) for the webclient
 |FORMATTING_TAG |latest |Version (Docker) for the formatting service
 |COUCHDB_TAG |latest |Version (Docker) for CouchDB
@@ -161,15 +162,28 @@ Read it before starting: an upgraded installation needs its legacy databases pin
 PostgreSQL version they actually hold, and skipping that step makes PostgreSQL initialise an empty
 cluster beside the existing data without reporting an error.
 
+=== Version 3 services
+
+A version 4 installation does not run the version 3 authorization and Q&A services or their
+databases.
+They are needed once, by the data migration, which reads room memberships from the authorization
+service and the Q&A data straight out of its database.
+
+Set `COMPOSE_PROFILES=v3-migration` in `local.env` to start them, and remove it once the migration
+has completed.
+Left running, the authorization service goes on mirroring room events into a database nothing reads.
+A clean installation never needs the setting at all.
+
 === PostgreSQL updates
 
-`POSTGRESQL_TAG` pins the PostgreSQL version of the v3 services' databases.
-`particifyctl` writes a value into `local.env` on the first `update-config`, but do not rely on it:
-it takes the first `postgres:` image it finds across the merged configuration, which need not be the
-one governing these databases.
-`update-config` refuses to generate a configuration while it is unset, because an image reference of
-`postgres:` with nothing after the colon is only rejected once the image is pulled.
-Set the variable explicitly to the version the volumes actually hold:
+`LEGACY_POSTGRESQL_TAG` pins the PostgreSQL version of the v3 services' databases.
+Those are the only images it governs and the `v3-migration` profile is the only thing which starts
+them, so an installation which never held version 3 data never needs it.
+Where the profile is set, `update-config` refuses to generate a configuration while the tag is not,
+because an image reference of `postgres:` with nothing after the colon is only rejected once the
+image is pulled.
+Set it to the version the volumes actually hold - nothing derives it for you, and a wrong value
+makes PostgreSQL create an empty cluster beside the existing data:
 
 [source,shell]
 ----
@@ -183,7 +197,8 @@ a different directory layout on the volume, so the data has to be converted firs
 **Back up the volumes before converting.**
 There is no rollback.
 
-To convert, override the image for both databases in `local.compose.yaml` and let it start once:
+To convert, set `COMPOSE_PROFILES=v3-migration` so the databases start at all, override the image
+for both in `local.compose.yaml`, and let them start once:
 
 [source,yaml]
 ----
@@ -200,4 +215,4 @@ Remove any mount override for these services at the same time, so the volume is 
 current configuration expects it.
 
 Once the services are up and the data is intact, drop the image override again and set
-`POSTGRESQL_TAG` to the version that was migrated to.
+`LEGACY_POSTGRESQL_TAG` to the version that was migrated to.

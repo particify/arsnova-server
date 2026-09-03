@@ -47,7 +47,7 @@ upgraded:
 .local.env
 [source]
 ----
-POSTGRESQL_TAG=13-alpine
+LEGACY_POSTGRESQL_TAG=13-alpine
 ----
 
 .local.compose.yaml
@@ -70,11 +70,11 @@ To upgrade the data afterwards, point the two services at
 the cluster and the directory layout on the volume.
 Remove the mount override at the same time, so the volume is mounted where the current configuration
 expects it.
-Then drop the image override too and set `POSTGRESQL_TAG` to the version that was migrated to.
+Then drop the image override too and set `LEGACY_POSTGRESQL_TAG` to the version that was migrated to.
 See link:installation.adoc#_postgresql_updates[the installation documentation] for the details.
 
 `postgresql-core4` is a new, empty database and is unaffected.
-It must not be given `POSTGRESQL_TAG`, which governs the legacy databases only.
+It must not be given `LEGACY_POSTGRESQL_TAG`, which governs the legacy databases only.
 
 === JWT_SECRET has to be at least 32 characters
 
@@ -276,38 +276,69 @@ which would strand a plaintext one, so the redirect now follows the gateway's ow
 == Migrating the data
 
 The data migration is a one-off run of `core4` rather than a task of its own.
-It reads v3's CouchDB, the authorization service's room access and the Q&A service's database, so
-all three have to still be running.
+It reads v3's CouchDB, the authorization service's room access over HTTP, and the Q&A service's
+database directly over JDBC.
+CouchDB and the authorization service therefore have to be running; the Q&A service itself does not,
+only its database.
+
+Those services are not part of a version 4 installation, so they are not started unless you ask for
+them.
+Add the profile to `local.env` before the migration, and remove it again afterwards - nothing
+queries those services once the data has moved,
+and the authorization service left running keeps mirroring room events into a database no longer
+read.
+
+[source,shell]
+----
+COMPOSE_PROFILES=v3-migration
+----
+
+`core4` already defaults to the coordinates of the shipped stack, so an installation which never
+moved those containers needs nothing but the provider mapping in
+`core4-config/application.yaml`:
 
 [source,yaml]
 ----
 persistence:
   v3-migration:
-    enabled: true
-    couchdb:
-      url: http://couchdb:5984/arsnova3
-      username: arsnova
-      password: arsnova
-    room-access-url: http://arsnova-server-authz:8080/roomaccess
-    qna:
-      datasource:
-        url: jdbc:postgresql://postgresql-comments:5432/arsnovacomment
-        username: arsnovacomment
-        password: arsnovacomment
     authentication-provider-mapping:
       LDAP: 2c62a4a8-9a1a-4e0e-9c4b-2f7fd2e0f0f5
 ----
+
+A deployment which did move one - a CouchDB or Q&A database of its own - has to point the import run
+at it, under `persistence.v3-migration.couchdb` and `persistence.v3-migration.qna.datasource`.
 
 Each identifier here has to be **exactly** the one its registration is configured under.
 Otherwise the first login after the migration does not find the imported account and silently
 creates a second, empty one for every user.
 Nothing reports it.
 
-Then:
+Start what the migration reads, then run it:
 
-. `./particifyctl run arsnova-server-core4` and wait for it to exit on its own.
-. Set `enabled` back to `false`.
-. `./particifyctl run -d`.
+[source,shell]
+----
+./particifyctl run -d couchdb postgresql-core4 arsnova-server-authz postgresql-comments
+./particifyctl compose run --rm -e PERSISTENCE_V3MIGRATION_ENABLED=true arsnova-server-core4
+----
+
+`arsnova-server-authz` brings its own database and RabbitMQ with it.
+The switch rides on that one command rather than living in a file:
+`core4` exits as soon as the migration is done, and `restart: unless-stopped` would restart it into
+the same run again and again for as long as a file kept the switch set.
+
+**Start nothing else while it runs**, and in particular not the gateway or a `core4` of its own.
+A step whose target table already has rows is skipped, so a single account registered through the
+gateway is enough to skip the entire user import.
+A second `core4` would also run the hourly account-deletion tasks against accounts which have just
+been imported carrying their version 3 timestamps.
+
+When it has exited, remove `COMPOSE_PROFILES=v3-migration` from `local.env` and start the
+installation:
+
+[source,shell]
+----
+./particifyctl run -d
+----
 
 Each step is skipped with a warning if the table it writes already has rows, so a second run cannot
 half-overwrite an installation which is already in use.

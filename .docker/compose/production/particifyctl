@@ -47,13 +47,6 @@ while read config_name; do
   fi
   COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f $PROVIDED_DIR/$config_name.compose.yaml"
 done <"$PROVIDED_DIR/config-list"
-# Only a starting point: the first match need not be the database this governs, so set
-# POSTGRESQL_TAG in local.env explicitly to override it. The digest is dropped deliberately -- this
-# pins the major version of a legacy data directory, so it has to stay something an operator can
-# read and edit, and it governs an image the shipped configuration pins by digest anyway. Splitting
-# on the last colon rather than the second survives both a digest and a registry port.
-POSTGRESQL_TAG=`docker compose --project-directory . $COMPOSE_FILE_ARGS config --images 2> /dev/null \
-  | grep -m 1 postgres: | sed -E 's|@.*$||; s|^.*:||'`
 while read config_name; do
   COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS -f $PROVIDED_DIR/production.$config_name.compose.yaml"
 done <"$PROVIDED_DIR/config-list"
@@ -80,7 +73,6 @@ case $COMMAND in
     echo Updating configuration for Docker Compose...
     if [ ! -f local.env ]; then
       echo "# Custom environment configuration overrides" > local.env
-      echo "POSTGRESQL_TAG=$POSTGRESQL_TAG" >> local.env
       if [ -L .env ]; then
         cat .env >> local.env
         rm .env
@@ -100,16 +92,23 @@ case $COMMAND in
       echo "         security.challenge.secret, none of which an environment variable provides."
       echo "         See docs/admin/upgrading-to-v4.adoc."
     fi
-    # POSTGRESQL_TAG is the only variable an image reference needs which no shipped env file
-    # defines -- it is seeded into local.env above and owned by the operator from then on. Unset, it
-    # renders the legacy databases as the bare name postgres:, which Docker Compose interpolates
-    # without complaint and only rejects when the image is pulled.
-    if [ -z "`read_env POSTGRESQL_TAG`" ]; then
-      echo "ERROR: POSTGRESQL_TAG is not set in local.env." >&2
-      echo "       It pins the PostgreSQL version of the legacy databases' data directory." >&2
-      echo "       Set it to the tag matching that data, for example 13-alpine." >&2
-      exit 1
-    fi
+    # LEGACY_POSTGRESQL_TAG is the only variable an image reference needs which no shipped env file
+    # defines. Unset, it renders the legacy databases as the bare name postgres:, which Docker
+    # Compose interpolates without complaint and only rejects when the image is pulled. They are
+    # the only images it governs and the v3-migration profile is the only thing which starts them,
+    # so an installation which never held version 3 data never needs it.
+    case ",`read_env COMPOSE_PROFILES`," in
+      *,v3-migration,*)
+        if [ -z "`read_env LEGACY_POSTGRESQL_TAG`" ]; then
+          echo "ERROR: COMPOSE_PROFILES names v3-migration but LEGACY_POSTGRESQL_TAG is not set." >&2
+          echo "       It pins the PostgreSQL version of the legacy databases' data directory," >&2
+          echo "       and the wrong one makes PostgreSQL create an empty cluster beside your" >&2
+          echo "       data and report itself healthy. Read the version off the volume as" >&2
+          echo "       docs/admin/installation.adoc describes, and set it in local.env." >&2
+          exit 1
+        fi
+        ;;
+    esac
     # apisix.yaml is generated as well, and the gateway mounts it as a file: with no file there the
     # container engine creates a directory at that path instead, and APISIX exits unable to read its
     # own routes. Generated only when absent -- regenerating it belongs to update-gateway, which

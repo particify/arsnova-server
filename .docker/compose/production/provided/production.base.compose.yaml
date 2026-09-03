@@ -12,10 +12,6 @@ services:
       # STOMP relay to connect to.
       - ./provided/rabbitmq-enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
       - ./provided/rabbitmq-logging.conf:/etc/rabbitmq/conf.d/90-logging.conf:ro
-  postgresql-authz:
-    image: postgres:$POSTGRESQL_TAG
-  postgresql-comments:
-    image: postgres:$POSTGRESQL_TAG
 
 volumes:
   tls_certs:
