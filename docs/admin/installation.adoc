@@ -63,7 +63,8 @@ To persist the configuration, add those variable assignments to `local.env` (one
 |Variable |Default value |Description
 |PORT |80 |Port on which the gateway serves HTTP
 |HTTPS_PORT |443 |Port on which the gateway serves HTTPS, if certificates are configured
-|JWT_SECRET | |Encryption token for authentication (MUST be changed for production, at least 32 characters)
+|JWT_SECRET |generated |Encryption token for authentication, shared by every service; generated into `local.env` when it is unset
+|CHALLENGE_SECRET |generated |Token for the registration challenge, generated into `local.env` when it is unset
 |JWT_DOMAIN |example.com |A domain usable as server ID (used for the JWT issuer/audience claim)
 |ARSNOVA_HOSTNAME |localhost |Hostname for the application
 |COMPOSE_PROFILES | |Set to `v3-migration` to start the version 3 services a data migration reads
@@ -92,13 +93,20 @@ recover a UUID's hyphens or a camelCase key from a variable name.
 LDAP and SAML registrations and the `ui.*` settings are therefore configured in
 `core4-config/application.yaml`, which is mounted into the `core4` container.
 
-`core4` requires `mail.sender-address`, `mail.sender-name`, `service.root-url` and
-`security.challenge.secret`, none of which have a default, so that file has to exist before the
-service will start.
+`core4` requires `mail.sender-address`, `mail.sender-name` and `service.root-url`, none of which
+have a default, so that file has to exist before the service will start.
 `particifyctl` warns when it is missing.
 
-Environment variables take precedence over the file, so `JWT_SECRET` and `JWT_DOMAIN` stay in
-`local.env`; setting the corresponding properties in the file would have no effect.
+`security.jwt.secret` and `security.challenge.secret` are required as well but are not configured
+there.
+`update-config` generates `JWT_SECRET` and `CHALLENGE_SECRET` into `local.env` whenever they are
+unset, so a new installation starts without anyone having to invent a value.
+Only the first is worth keeping a copy of: every service reads it, and replacing it invalidates
+every token they have issued.
+
+Environment variables take precedence over the file, so `JWT_SECRET`, `JWT_DOMAIN` and
+`CHALLENGE_SECRET` stay in `local.env`; setting the corresponding properties in the file would have
+no effect.
 
 The v3 core, which still runs alongside `core4`, reads `core-config/application.yml` in the same
 way.

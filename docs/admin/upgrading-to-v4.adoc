@@ -112,13 +112,13 @@ them:
 mail:
   sender-address: arsnova@example.com
   sender-name: arsnova
-security:
-  challenge:
-    # At least 32 characters. Generate one, for example with `openssl rand -base64 32`.
-    secret: ...
 service:
   root-url: https://app.example.com
 ----
+
+`core4` needs `security.challenge.secret` as well, and it is not set here: `update-config`
+generates `CHALLENGE_SECRET` into `local.env`, since nothing else reads it and nobody has to know
+it.
 
 **Environment variables take precedence over this file.**
 `security.jwt.secret`, `security.jwt.issuer` and `spring.datasource.*` are set as container

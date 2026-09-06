@@ -17,6 +17,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: arsnova
       SECURITY_JWT_SECRET: $JWT_SECRET
       SECURITY_JWT_ISSUER: arsnova.backend.v3:$JWT_DOMAIN
+      SECURITY_CHALLENGE_SECRET: $CHALLENGE_SECRET
   arsnova-server-core:
     environment:
       SYSTEM_EXTERNAL_DATA_MANAGEMENT: "true"

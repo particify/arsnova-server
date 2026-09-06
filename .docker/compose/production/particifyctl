@@ -58,6 +58,21 @@ read_env() {
     | grep "^$1=" | tail -n 1 | cut -d = -f 2-
 }
 
+# 32 random bytes as 43 characters, with + / = mapped away so the value needs no quoting wherever
+# it is read.
+generate_secret() {
+  head -c 32 /dev/urandom | base64 | tr -d '=\n' | tr '+/' '-_'
+}
+
+# An operator who has set one keeps it: this reads the merged environment rather than testing
+# whether a file exists.
+seed_secret() {
+  if [ -z "`read_env $1`" ]; then
+    echo "$1=`generate_secret`" >> local.env
+    echo Generated $1 in local.env.
+  fi
+}
+
 case $COMMAND in
   update|u)
     echo Updating Git repository...
@@ -78,6 +93,11 @@ case $COMMAND in
         rm .env
       fi
     fi
+    # Both are required and neither has a shipped default, so without this a new installation
+    # starts no services at all. Changing JWT_SECRET invalidates every token the services have
+    # issued, which is why it is generated only when there is none rather than rotated.
+    seed_secret JWT_SECRET
+    seed_secret CHALLENGE_SECRET
     if [ ! -f local.compose.yaml ]; then
       echo -e "# Custom Docker Compose configuration overrides\nservices: {}" > local.compose.yaml
     fi
@@ -88,8 +108,8 @@ case $COMMAND in
     mkdir -p "$CORE_CONFIG_DIR" "$CORE4_CONFIG_DIR"
     if grep -qx v4 "$PROVIDED_DIR/config-list" && [ ! -f "$CORE4_CONFIG_DIR/application.yaml" ]; then
       echo "WARNING: $CORE4_CONFIG_DIR/application.yaml does not exist."
-      echo "         core4 requires mail.sender-address, mail.sender-name, service.root-url and"
-      echo "         security.challenge.secret, none of which an environment variable provides."
+      echo "         core4 requires mail.sender-address, mail.sender-name and service.root-url,"
+      echo "         none of which an environment variable provides."
       echo "         See docs/admin/upgrading-to-v4.adoc."
     fi
     # LEGACY_POSTGRESQL_TAG is the only variable an image reference needs which no shipped env file
