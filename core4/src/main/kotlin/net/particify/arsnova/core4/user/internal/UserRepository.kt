@@ -14,12 +14,18 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.querydsl.QuerydslPredicateExecutor
 
+@Suppress("TooManyFunctions")
 interface UserRepository : JpaRepository<User, UUID>, QuerydslPredicateExecutor<User> {
   @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.id = :id")
   fun findByIdOrNull(id: UUID): User?
 
   @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.username = :username")
   fun findOneByUsername(username: String): User?
+
+  @Query(
+      "SELECT u FROM User u JOIN u.externalLogins el " +
+          "WHERE el.providerId = :providerId AND el.externalId = :externalId")
+  fun findOneByExternalLogin(providerId: UUID, externalId: String): User?
 
   fun findByDeletedAtBefore(
       deletedAtBefore: Instant,
