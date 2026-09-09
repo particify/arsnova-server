@@ -67,6 +67,10 @@ class Saml2UserProvisioningTests {
     Assertions.assertEquals("saml.import@example.com", user.mailAddress)
   }
 
+  /**
+   * No linking strategy is registered in this context, so this also pins the behaviour the FOSS
+   * build has to keep: an asserted address which is taken is dropped, and no account is reused.
+   */
   @Test
   fun shouldNotImportMailAddressAlreadyInUse() {
     val taken = "saml-mail-collision@example.com"

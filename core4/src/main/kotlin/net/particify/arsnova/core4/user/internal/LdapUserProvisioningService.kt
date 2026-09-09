@@ -25,7 +25,8 @@ class LdapUserProvisioningService(
     private val userService: UserServiceImpl,
     private val userRepository: UserRepository,
     private val externalLoginRepository: ExternalLoginRepository,
-    private val ldapProperties: LdapProperties
+    private val ldapProperties: LdapProperties,
+    private val linkingStrategyRegistry: ExternalLoginLinkingStrategyRegistry
 ) {
   companion object {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -71,12 +72,46 @@ class LdapUserProvisioningService(
       externalId: String,
       ctx: DirContextOperations
   ): User {
-    logger.info("Creating new account for LDAP user {}...", externalId)
-    val user = User()
-    assignUsername(user, externalId)
+    val mailAddress = assertedMailAddress(registration, ctx)
+    val user = findLinkTarget(registration, providerId, externalId, mailAddress) ?: User()
+    // A linked account keeps the username it is already known by, which is its public display ID.
+    if (user.username == null) {
+      assignUsername(user, externalId)
+    }
     updateUserFromAttributes(registration, user, ctx)
     val externalLogin = ExternalLogin(providerId = providerId, externalId = externalId)
     return userService.createForExternalLogin(user, externalLogin)
+  }
+
+  /** Only read if configured for import: anything else is not requested from the directory. */
+  private fun assertedMailAddress(registration: Registration, ctx: DirContextOperations): String? {
+    val attributeName = ImportedAttribute.MAIL.attributeName
+    if (attributeName !in registration.importedAttributes) {
+      return null
+    }
+    return ctx.getStringAttribute(attributeName)
+  }
+
+  /**
+   * The directory's address is passed on as it is. [updateMailAddress] drops one which another
+   * account already holds, so a strategy consulted after the account is populated never sees it.
+   */
+  private fun findLinkTarget(
+      registration: Registration,
+      providerId: UUID,
+      externalId: String,
+      mailAddress: String?
+  ): User? {
+    val linkTarget =
+        linkingStrategyRegistry
+            .find(registration.linkingStrategy)
+            ?.findLinkTarget(providerId, externalId, mailAddress)
+    if (linkTarget == null) {
+      logger.info("Creating new account for LDAP user {}...", externalId)
+    } else {
+      logger.info("Attaching LDAP user {} to existing account {}.", externalId, linkTarget.id)
+    }
+    return linkTarget
   }
 
   @Suppress("LongParameterList")
