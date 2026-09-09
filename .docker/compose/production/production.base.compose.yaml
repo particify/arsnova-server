@@ -1,8 +1,0 @@
-services:
-  postgresql-authz:
-    image: postgres:$POSTGRESQL_TAG
-  postgresql-comments:
-    image: postgres:$POSTGRESQL_TAG
-
-volumes:
-  tls_certs:

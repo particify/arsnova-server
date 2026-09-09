@@ -1,0 +1,64 @@
+# The version 3 services a version 4 installation needs only while migrating: the migrator reads
+# room memberships from authz over HTTP and the Q&A data out of the comments database over JDBC.
+# Nothing queries them once that is done -- the gateway and the websocket service both authorise
+# against core4, which is why no authz upstream exists in the gateway configuration at all.
+#
+# Production gates them behind a profile in production.v3-migration.compose.yaml. The development
+# environment loads this file without that overlay, so they are always available there, which is
+# what the comments and authz dev servers need.
+services:
+  arsnova-server-authz:
+    image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}authz:$AUTHZ_TAG
+    restart: $RESTART_MODE
+    depends_on:
+      - postgresql-authz
+      - rabbitmq
+    environment:
+      SERVER_PORT: "8080"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql-authz:5432/arsnovaauth
+      SPRING_DATASOURCE_USERNAME: arsnovaauth
+      SPRING_DATASOURCE_PASSWORD: arsnovaauth
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      SECURITY_JWT_SECRET: $JWT_SECRET
+      SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
+  arsnova-server-comments:
+    image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}comments:$COMMENTS_TAG
+    restart: $RESTART_MODE
+    depends_on:
+      - postgresql-comments
+      - rabbitmq
+    environment:
+      SERVER_PORT: "8080"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql-comments:5432/arsnovacomment
+      SPRING_DATASOURCE_USERNAME: arsnovacomment
+      SPRING_DATASOURCE_PASSWORD: arsnovacomment
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SECURITY_JWT_SECRET: $JWT_SECRET
+  postgresql-authz:
+    image: postgres:18.6-alpine@sha256:d3e1620b530c944afa6e887d22eb899824da68e19c52024bf98f5220c88a65b2
+    restart: $RESTART_MODE
+    environment:
+      POSTGRES_DB: arsnovaauth
+      POSTGRES_USER: arsnovaauth
+      POSTGRES_PASSWORD: arsnovaauth
+    volumes:
+      - postgresql_data_auth:/var/lib/postgresql
+  postgresql-comments:
+    image: postgres:18.6-alpine@sha256:d3e1620b530c944afa6e887d22eb899824da68e19c52024bf98f5220c88a65b2
+    restart: $RESTART_MODE
+    environment:
+      POSTGRES_DB: arsnovacomment
+      POSTGRES_USER: arsnovacomment
+      POSTGRES_PASSWORD: arsnovacomment
+    volumes:
+      - postgresql_data_comment:/var/lib/postgresql
+
+volumes:
+  postgresql_data_auth:
+  postgresql_data_comment:

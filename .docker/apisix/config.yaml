@@ -5,3 +5,10 @@ deployment:
   role: data_plane
   role_data_plane:
     config_provider: yaml
+
+plugin_attr:
+  redirect:
+    # The plugin would otherwise build its target from the container's own HTTPS port, which is not
+    # the one a client reached. 443 makes it emit a target without a port at all, so an installation
+    # publishing HTTPS elsewhere needs whatever fronts the gateway to handle the redirect.
+    https_port: 443

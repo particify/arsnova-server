@@ -9,7 +9,7 @@ services:
     volumes:
       - core-postgresql-data:/var/lib/postgresql
   arsnova-server-core4:
-    image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}core4:$CORE_TAG
+    image: $IMAGE_NAMESPACE/${IMAGE_SERVER_PREFIX}core4:$CORE4_TAG
     restart: $RESTART_MODE
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql-core4:5432/arsnova
@@ -17,12 +17,12 @@ services:
       SPRING_DATASOURCE_PASSWORD: arsnova
       SECURITY_JWT_SECRET: $JWT_SECRET
       SECURITY_JWT_ISSUER: arsnova.backend.v3:$JWT_DOMAIN
+      SECURITY_CHALLENGE_SECRET: $CHALLENGE_SECRET
   arsnova-server-core:
     environment:
       SYSTEM_EXTERNAL_DATA_MANAGEMENT: "true"
   arsnova-server-websocket:
     environment:
-      SYSTEM_EXTERNAL_USER_MANAGEMENT: "true"
       SECURITY_AUTHORIZE_URI_ENDPOINT: "/api/jwt"
       HTTP_CLIENT_AUTH_SERVICE: "http://arsnova-server-core4:8080"
 

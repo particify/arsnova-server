@@ -1,0 +1,17 @@
+services:
+  couchdb:
+    volumes:
+      # Symlinks, so that nothing outside the release is named: a release ships it alone. Sorts
+      # before the entrypoint's docker.ini, which is where CouchDB has to be able to persist
+      # configuration writes.
+      - ./provided/couchdb-custom.ini:/opt/couchdb/etc/local.d/10-custom.ini:ro
+  rabbitmq:
+    volumes:
+      - ./provided/rabbitmq-advanced.config:/etc/rabbitmq/advanced.config:ro
+      # Without this the broker enables rabbitmq_prometheus only, and the websocket service has no
+      # STOMP relay to connect to.
+      - ./provided/rabbitmq-enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
+      - ./provided/rabbitmq-logging.conf:/etc/rabbitmq/conf.d/90-logging.conf:ro
+
+volumes:
+  tls_certs:

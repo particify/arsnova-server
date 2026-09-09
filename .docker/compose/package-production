@@ -1,0 +1,303 @@
+#!/bin/bash
+# Packages the production configuration directory into a release archive.
+#
+# The directory is the whole artifact an operator downloads, so the archive has to be
+# self-contained: symlinks are dereferenced and nothing may name a path leading out of it.
+set -euo pipefail
+
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+SOURCE_DIR="$SCRIPT_DIR/production"
+
+# Built from this repository and released together, so one value pins them all. Anything on its own
+# release cadence -- the asset service, the upstream dependency images -- is not in here and needs
+# --tag if it is to be pinned at all.
+SERVICE_TAG_VARS="AUTHZ_TAG COMMENTS_TAG CORE4_TAG CORE_TAG FORMATTING_TAG WEBCLIENT_TAG WEBSOCKET_TAG"
+
+# Operator state which happens to be tracked. A merged directory adds its own with --exclude.
+EXCLUDED_FILES=".gitignore"
+
+# Bind sources naming a file particifyctl generates rather than one the release ships, so they are
+# legitimately absent from the archive and the bind-source check has to know them.
+GENERATED_BIND_SOURCES="./apisix.yaml"
+
+# Where --dev-images points the services this repository builds. Development publishes them under a
+# path of their own rather than under a different tag alone, so a test archive has to move the
+# namespace and the prefix as well as the tag. A build which publishes these services somewhere else
+# passes --dev-namespace and --dev-prefix rather than editing this: only what a release of *this*
+# repository would pull belongs here. Images pinned literally in a compose file, or on a release
+# cadence of their own, are governed by neither and stay wherever they are published.
+DEV_IMAGE_NAMESPACE=registry.gitlab.com/particify/dev/foss
+DEV_IMAGE_SERVER_PREFIX=arsnova-server/
+DEV_IMAGE_TAG=next
+
+ADDITIONAL_CONFIG_DIR=""
+ALLOW_DIRTY=false
+ARCHIVE_NAME=arsnova-server
+DEV_IMAGES=false
+KEEP_STAGING=false
+NAMESPACE=""
+OUTPUT_DIR=.
+STAGING=""
+TAG_OVERRIDES=""
+VERSION=""
+
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [options]
+
+Options:
+  --additional-config-dir DIR  Merge a second production directory over this repository's
+  --exclude NAME               Skip a tracked file by name, repeatable
+  --version TAG                Pin the service image tags in the packaged env files
+  --tag NAME=TAG               Pin one variable, repeatable; wins over --version
+  --namespace NS               Pin the image namespace a release pulls from
+  --dev-images                 Point the packaged configuration at the development registry,
+                               for testing this script rather than cutting a release
+  --dev-namespace NS           Image namespace --dev-images selects (default: $DEV_IMAGE_NAMESPACE)
+  --dev-prefix PREFIX          Image name prefix --dev-images selects (default: $DEV_IMAGE_SERVER_PREFIX)
+  --name NAME                  Archive base name (default: $ARCHIVE_NAME)
+  --output-dir DIR             Where to write the archive (default: $OUTPUT_DIR)
+  --allow-dirty                Package uncommitted changes instead of refusing
+  --keep-staging               Leave the staged directory behind for inspection
+  -h, --help                   Show this help
+
+Pins with --version: $SERVICE_TAG_VARS
+With --dev-images: $DEV_IMAGE_NAMESPACE/${DEV_IMAGE_SERVER_PREFIX}<service>:$DEV_IMAGE_TAG
+EOF
+}
+
+fail() {
+  echo "ERROR: $*" >&2
+  exit 1
+}
+
+parse_args() {
+  while [ $# -gt 0 ]; do
+    case $1 in
+      --additional-config-dir) ADDITIONAL_CONFIG_DIR=$(readlink -f "$2"); shift 2 ;;
+      --allow-dirty) ALLOW_DIRTY=true; shift ;;
+      --dev-images) DEV_IMAGES=true; shift ;;
+      --dev-namespace) DEV_IMAGE_NAMESPACE=$2; shift 2 ;;
+      --dev-prefix) DEV_IMAGE_SERVER_PREFIX=$2; shift 2 ;;
+      --exclude) EXCLUDED_FILES="$EXCLUDED_FILES $2"; shift 2 ;;
+      --keep-staging) KEEP_STAGING=true; shift ;;
+      --name) ARCHIVE_NAME=$2; shift 2 ;;
+      --namespace) NAMESPACE=$2; shift 2 ;;
+      --output-dir) OUTPUT_DIR=$2; shift 2 ;;
+      --tag) TAG_OVERRIDES="$TAG_OVERRIDES $2"; shift 2 ;;
+      --version) VERSION=$2; shift 2 ;;
+      -h|--help) usage; exit 0 ;;
+      *) usage >&2; fail "unknown argument: $1" ;;
+    esac
+  done
+}
+
+# git ls-files rather than a copy of everything: the directory accumulates operator state -- .env,
+# local.env, tls/, the generated apisix.yaml -- and an allowlist would go stale, while this picks up
+# a newly tracked file on its own and can never pick up a private key.
+tracked_files() {
+  git -C "$1" ls-files -z . | tr '\0' '\n'
+}
+
+require_clean() {
+  local dir=$1
+  $ALLOW_DIRTY && return 0
+  [ -z "$(git -C "$dir" status --porcelain -- .)" ] \
+    || fail "$dir has uncommitted changes; commit them or pass --allow-dirty"
+}
+
+is_excluded() {
+  local name=$1 excluded
+  for excluded in $EXCLUDED_FILES; do
+    [ "$name" = "$excluded" ] && return 0
+  done
+  return 1
+}
+
+# cp -L resolves a symlink and fails on a dangling one, which is what makes the archive standalone.
+copy_file() {
+  local source=$1 dest=$2
+  mkdir -p "$(dirname "$dest")"
+  cp -L --preserve=mode "$source" "$dest" \
+    || fail "cannot copy $source -- a symlink with no target cannot be packaged"
+}
+
+copy_config_dir() {
+  local dir=$1 target=$2 relative dest
+  require_clean "$dir"
+  for relative in $(tracked_files "$dir"); do
+    is_excluded "$relative" && continue
+    dest="$target/$relative"
+    # config-list is the one file both directories own: its entries become -f arguments in order, so
+    # the additional directory's have to follow rather than replace this repository's.
+    if [ "$relative" = provided/config-list ] && [ -f "$dest" ]; then
+      cat "$dir/$relative" >>"$dest"
+      continue
+    fi
+    [ -e "$dest" ] && fail "$relative exists in both configuration directories"
+    copy_file "$dir/$relative" "$dest"
+  done
+}
+
+pin_tag() {
+  local target=$1 name=$2 value=$3 file found=false
+  for file in "$target"/provided/*.env; do
+    grep -q "^$name=" "$file" || continue
+    sed -i "s|^$name=.*|$name=$value|" "$file"
+    found=true
+  done
+  # A renamed variable would otherwise ship unpinned, which nothing notices until a deployment
+  # drifts onto a newer image.
+  $found || fail "$name is not defined in any packaged env file"
+}
+
+# Where a release pulls its images from, and where --dev-images points them instead. The two are
+# alternatives rather than layers, so selecting development images replaces the release namespace
+# rather than competing with it -- otherwise a wrapper which always pins its own could never test.
+# Prepended, and --version left alone when it was given, so an explicit --tag or --version still
+# wins: this sets a default, it does not overrule what was asked for.
+apply_image_location() {
+  if $DEV_IMAGES; then
+    [ -n "$VERSION" ] || VERSION=$DEV_IMAGE_TAG
+    TAG_OVERRIDES="IMAGE_NAMESPACE=$DEV_IMAGE_NAMESPACE IMAGE_SERVER_PREFIX=$DEV_IMAGE_SERVER_PREFIX$TAG_OVERRIDES"
+  elif [ -n "$NAMESPACE" ]; then
+    TAG_OVERRIDES="IMAGE_NAMESPACE=$NAMESPACE$TAG_OVERRIDES"
+  fi
+}
+
+pin_tags() {
+  local target=$1 name override
+  if [ -n "$VERSION" ]; then
+    for name in $SERVICE_TAG_VARS; do
+      pin_tag "$target" "$name" "$VERSION"
+    done
+  fi
+  for override in $TAG_OVERRIDES; do
+    case $override in
+      *=*) pin_tag "$target" "${override%%=*}" "${override#*=}" ;;
+      *) fail "--tag expects NAME=TAG, got $override" ;;
+    esac
+  done
+}
+
+check_no_symlinks() {
+  local left
+  left=$(find "$1" -type l)
+  [ -z "$left" ] || fail "unresolved symlinks in the archive: $left"
+}
+
+# The regression guard: a path leading out of the directory works in a checkout and breaks in the
+# archive, where there is no parent to lead to.
+check_no_escaping_paths() {
+  local hits
+  hits=$(grep -rn -e '\.\./' -e 'ROOT_DIR' \
+    "$1"/provided/*.compose.yaml "$1"/particifyctl || true)
+  [ -z "$hits" ] || fail "paths leading out of the packaged directory: $hits"
+}
+
+# particifyctl passes both files for every entry without checking, so a missing one breaks every
+# Docker Compose invocation rather than just the feature it belongs to.
+check_config_list() {
+  local target=$1 name
+  [ -f "$target/provided/config-list" ] || fail "provided/config-list is missing"
+  while read -r name; do
+    [ -n "$name" ] || continue
+    for prefix in "" production.; do
+      [ -f "$target/provided/$prefix$name.compose.yaml" ] \
+        || fail "config-list names $name but provided/$prefix$name.compose.yaml is missing"
+    done
+  done <"$target/provided/config-list"
+}
+
+is_generated_bind_source() {
+  local name=$1 generated
+  for generated in $GENERATED_BIND_SOURCES; do
+    [ "$name" = "$generated" ] && return 0
+  done
+  return 1
+}
+
+# Short syntax (- ./source:/target), long syntax (source: ./source) and the configs/secrets file:
+# key, quoted or not, since any of them can name a path. A source containing a variable anywhere is
+# not matched: those reach an operator directory which particifyctl creates on demand, so its
+# absence here means nothing.
+#
+# This scans text rather than parsing YAML, which costs two things. It cannot see where in the
+# document a source: key sits, so one in an unrelated mapping would be demanded as well -- widen
+# this deliberately if that ever comes up, rather than loosening the pattern. And a mount written in
+# a form it does not recognise is left unchecked. Neither can yield a bad archive: the first fails
+# packaging loudly, the second only forgoes the check.
+bind_sources() {
+  sed -nE \
+    -e "s%^[[:space:]]*-[[:space:]]+[\"']?(\.[^:[:space:]\"'\$]*):.*%\1%p" \
+    -e "s%^[[:space:]]*(source|file):[[:space:]]+[\"']?(\.[^[:space:]\"'\$]*)[\"']?([[:space:]]+#.*)?[[:space:]]*\$%\2%p" \
+    "$1"
+}
+
+# The gap the other checks leave: a bind source is resolved only when a container starts, so a typo
+# packages successfully and surfaces on the operator's machine as a missing file. Paths are relative
+# to the deployment root, which particifyctl pins as the project directory.
+check_bind_sources() {
+  local target=$1 file source missing=""
+  for file in "$target"/provided/*.compose.yaml; do
+    for source in $(bind_sources "$file"); do
+      is_generated_bind_source "$source" && continue
+      [ -e "$target/$source" ] || missing="$missing ${file#"$target/"} names $source;"
+    done
+  done
+  [ -z "$missing" ] || fail "bind sources missing from the archive:$missing"
+}
+
+check_particifyctl() {
+  local target=$1
+  [ -x "$target/particifyctl" ] || fail "particifyctl is missing or not executable"
+  bash -n "$target/particifyctl" || fail "particifyctl is not valid shell"
+}
+
+verify() {
+  check_no_symlinks "$1"
+  check_no_escaping_paths "$1"
+  check_config_list "$1"
+  check_bind_sources "$1"
+  check_particifyctl "$1"
+}
+
+# The outer repository names the release: for the proprietary build that is the one merging its
+# overlays in, not base.
+primary_dir() {
+  echo "${ADDITIONAL_CONFIG_DIR:-$SOURCE_DIR}"
+}
+
+# Same commit, same bytes: the archive can be rebuilt and compared rather than trusted.
+archive() {
+  local target=$1 archive_path=$2 timestamp
+  timestamp=${SOURCE_DATE_EPOCH:-$(git -C "$(primary_dir)" log -1 --format=%ct)}
+  tar --create --gzip --file "$archive_path" \
+    --directory "$(dirname "$target")" \
+    --sort=name --mtime="@$timestamp" --owner=0 --group=0 --numeric-owner \
+    "$(basename "$target")"
+}
+
+main() {
+  parse_args "$@"
+  apply_image_location
+  local label target archive_path
+  label=${VERSION:-$(git -C "$(primary_dir)" rev-parse --short HEAD)}
+  STAGING=$(mktemp -d)
+  $KEEP_STAGING || trap 'rm -rf "$STAGING"' EXIT
+  target="$STAGING/$ARCHIVE_NAME-$label"
+  mkdir -p "$target" "$OUTPUT_DIR"
+
+  copy_config_dir "$SOURCE_DIR" "$target"
+  [ -n "$ADDITIONAL_CONFIG_DIR" ] && copy_config_dir "$ADDITIONAL_CONFIG_DIR" "$target"
+  pin_tags "$target"
+  verify "$target"
+
+  archive_path="$(readlink -f "$OUTPUT_DIR")/$ARCHIVE_NAME-$label.tar.gz"
+  archive "$target" "$archive_path"
+  echo "Wrote $archive_path"
+  $KEEP_STAGING && echo "Staged directory kept at $target"
+  return 0
+}
+
+main "$@"

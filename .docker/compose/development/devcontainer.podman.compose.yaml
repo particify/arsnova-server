@@ -36,7 +36,7 @@ services:
   # These don't need userns_mode themselves - they're plain infra containers, not
   # Gradle/bind-mount write targets. They need pod: "" ONLY because core/authz/comments/
   # websocket above (all non-pod now) depend on them via "depends_on" in
-  # base/.docker/compose/production/base.compose.yaml - podman rejects a non-pod container
+  # base/.docker/compose/services/base.compose.yaml - podman rejects a non-pod container
   # depending on a pod-member one ("container dependency ... is part of a pod, but
   # container is not: invalid argument"), confirmed the hard way when recreating
   # arsnova-server-websocket alone cascaded into removing both it and arsnova-server-authz
@@ -51,7 +51,7 @@ services:
     pod: ""
   # Confirmed the mismatch breaks in BOTH directions, not just non-pod-depends-on-pod: once
   # rabbitmq above went non-pod, arsnova-extras-assets (still pod-member, depends_on rabbitmq
-  # + postgresql-assets per .docker/compose/production/saas.compose.yaml) failed the same way
+  # + postgresql-assets per .docker/compose/services/saas.compose.yaml) failed the same way
   # in reverse ("container has joined pod X and dependency container Y is not a member of the
   # pod"). Nothing depends on arsnova-extras-assets in turn, so this closes the chain.
   arsnova-extras-assets:

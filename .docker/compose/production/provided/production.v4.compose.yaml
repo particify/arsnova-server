@@ -1,0 +1,14 @@
+services:
+  arsnova-server-core:
+    environment:
+      ARSNOVA_CONFIG_DIR: /etc/arsnova/core
+    volumes:
+      - ${CORE_CONFIG_DIR:-./core-config}:/etc/arsnova/core:ro
+  arsnova-server-core4:
+    environment:
+      # UUID-keyed registration maps (LDAP, SAML) and the camelCase keys of ui.* cannot be
+      # expressed as environment variables, because relaxed binding cannot recover the hyphens
+      # or the capitalisation. Environment still wins over this file.
+      SPRING_CONFIG_ADDITIONAL_LOCATION: optional:file:/etc/arsnova/core4/
+    volumes:
+      - ${CORE4_CONFIG_DIR:-./core4-config}:/etc/arsnova/core4:ro

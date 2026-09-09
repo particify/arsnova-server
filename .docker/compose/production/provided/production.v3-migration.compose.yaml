@@ -1,0 +1,24 @@
+# Started only while migrating a version 3 installation, by setting COMPOSE_PROFILES=v3-migration in
+# local.env. A clean version 4 installation never needs any of them, and Docker Compose leaves a
+# service whose profile is not active out of the generated configuration entirely, so nothing of
+# them reaches such a deployment at all.
+#
+# The gating lives here rather than beside the definitions because the development environment does
+# need them unconditionally, and it never loads a production.* overlay.
+services:
+  arsnova-server-authz:
+    profiles:
+      - v3-migration
+  arsnova-server-comments:
+    profiles:
+      - v3-migration
+  postgresql-authz:
+    # Pinned by the operator to the version the legacy volume actually holds, rather than by the
+    # digest the shipped configuration uses for a database created fresh.
+    image: postgres:$LEGACY_POSTGRESQL_TAG
+    profiles:
+      - v3-migration
+  postgresql-comments:
+    image: postgres:$LEGACY_POSTGRESQL_TAG
+    profiles:
+      - v3-migration

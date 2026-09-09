@@ -68,14 +68,18 @@ init_gitmodules() {
   git submodule foreach 'if [ -f .pre-commit-config.yaml ]; then pre-commit install; fi' >/dev/null
 }
 
-load_prod_config() {
+# The service definitions both environments share: the pinned images, the dependency containers and
+# everything neither one overrides. A release ships them too, reached through symlinks in provided/,
+# but the development environment reads them here rather than out of the release directory.
+load_shared_config() {
   config_dir=$(readlink -f "$1")
   while read config_name; do
-    if [ -f "$config_dir/../production/$config_name.env" ]; then
-      ENV_FILES="$ENV_FILES $config_dir/../production/$config_name.env"
+    shared_dir="$config_dir/../services"
+    if [ -f "$shared_dir/$config_name.env" ]; then
+      ENV_FILES="$ENV_FILES $shared_dir/$config_name.env"
     fi
-    if [ -f "$config_dir/../production/$config_name.compose.yaml" ]; then
-      BASE_COMPOSE_FILE_ARGS="$BASE_COMPOSE_FILE_ARGS -f $config_dir/../production/$config_name.compose.yaml"
+    if [ -f "$shared_dir/$config_name.compose.yaml" ]; then
+      BASE_COMPOSE_FILE_ARGS="$BASE_COMPOSE_FILE_ARGS -f $shared_dir/$config_name.compose.yaml"
     fi
   done <"$config_dir/config-list"
   COMPOSE_FILE_ARGS="$COMPOSE_FILE_ARGS $BASE_COMPOSE_FILE_ARGS"
@@ -958,9 +962,9 @@ if [ -z "$ADDITIONAL_COMPOSE_DIR" ] \
   exit 1
 fi
 
-load_prod_config "$COMPOSE_DIR"
+load_shared_config "$COMPOSE_DIR"
 if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
-  load_prod_config "$ADDITIONAL_COMPOSE_DIR"
+  load_shared_config "$ADDITIONAL_COMPOSE_DIR"
 fi
 load_dev_config "$COMPOSE_DIR"
 if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
