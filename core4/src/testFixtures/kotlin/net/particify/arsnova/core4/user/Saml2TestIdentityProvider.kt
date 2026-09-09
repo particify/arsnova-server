@@ -65,6 +65,7 @@ private const val PEM_LINE_LENGTH = 64
  * configuration, which is mandatory but never exercised here: no request is ever sent to the
  * identity provider.
  */
+@Suppress("TooManyFunctions")
 class Saml2TestIdentityProvider {
   private val credential: BasicX509Credential
   private val directory: Path = Files.createTempDirectory("core4-saml2-test")
