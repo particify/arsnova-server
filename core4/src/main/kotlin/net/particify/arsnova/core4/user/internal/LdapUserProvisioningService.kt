@@ -154,19 +154,24 @@ class LdapUserProvisioningService(
       val value = ctx.getStringAttribute(attributeName)
       logger.debug("Mapping LDAP attribute {}: {}", attributeName, value)
       when (ImportedAttribute.byAttributeName(attributeName)) {
-        ImportedAttribute.GIVEN_NAME -> user.givenName = value
+        ImportedAttribute.GIVEN_NAME -> if (!value.isNullOrBlank()) user.givenName = value
         ImportedAttribute.MAIL -> updateMailAddress(user, value)
-        ImportedAttribute.SURNAME -> user.surname = value
+        ImportedAttribute.SURNAME -> if (!value.isNullOrBlank()) user.surname = value
         // Unreachable: unsupported attributes are rejected when the properties are bound.
         null -> logger.warn("Skipping unsupported LDAP attribute {}.", attributeName)
       }
     }
   }
 
+  /**
+   * An address which another account already holds is skipped instead of failing the login: the
+   * unique constraint would otherwise reject the account on every attempt. An entry carrying no
+   * address at all leaves the stored one untouched, so a directory which stops releasing the
+   * attribute does not clear the address of every account which logs in afterwards.
+   */
   private fun updateMailAddress(user: User, mailAddress: String?) {
-    val normalized = mailAddress?.lowercase()
-    if (normalized == null || normalized == user.mailAddress) {
-      user.mailAddress = normalized
+    val normalized = mailAddress?.lowercase() ?: return
+    if (normalized == user.mailAddress) {
       return
     }
     if (userRepository.existsByMailAddress(normalized)) {

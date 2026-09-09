@@ -4,6 +4,8 @@
 package net.particify.arsnova.core4.user
 
 import com.unboundid.ldap.listener.InMemoryDirectoryServer
+import com.unboundid.ldap.sdk.Modification
+import com.unboundid.ldap.sdk.ModificationType
 import com.unboundid.ldap.sdk.ResultCode
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
@@ -117,6 +119,47 @@ class LdapAuthenticationTests {
     assertThrows<BadCredentialsException> { authenticate(UNKNOWN_USER_ID, "irrelevant") }
     val user = userService.loadUserByProviderIdAndExternalId(providerId, UNKNOWN_USER_ID)
     Assertions.assertNull(user)
+  }
+
+  /**
+   * A directory which stops releasing the mail attribute must not clear the address the account
+   * already holds, which would turn a change to its configuration into data loss.
+   */
+  @Test
+  fun shouldKeepStoredMailAddressWhenDirectoryReleasesNone() {
+    val directoryUser = RETAINED_MAIL_USER
+    val user = authenticate(directoryUser).principal as User
+    Assertions.assertEquals(directoryUser.mailAddress, user.mailAddress)
+
+    removeAttribute(directoryUser.userId, "mail")
+
+    val userOfSecondLogin = authenticate(directoryUser).principal as User
+    Assertions.assertEquals(user.id, userOfSecondLogin.id)
+    Assertions.assertEquals(directoryUser.mailAddress, userOfSecondLogin.mailAddress)
+  }
+
+  /**
+   * A directory which stops releasing a name attribute must not clear the name the account already
+   * holds. Only `givenName` is dropped here, because the object class requires `sn`.
+   */
+  @Test
+  fun shouldKeepStoredGivenNameWhenDirectoryReleasesNone() {
+    val directoryUser = RETAINED_NAME_USER
+    val user = authenticate(directoryUser).principal as User
+    Assertions.assertEquals(directoryUser.givenName, user.givenName)
+
+    removeAttribute(directoryUser.userId, "givenName")
+
+    val userOfSecondLogin = authenticate(directoryUser).principal as User
+    Assertions.assertEquals(user.id, userOfSecondLogin.id)
+    Assertions.assertEquals(directoryUser.givenName, userOfSecondLogin.givenName)
+  }
+
+  private fun removeAttribute(userId: String, attributeName: String) {
+    directoryServer.connection.use {
+      val result = it.modify(userDn(userId), Modification(ModificationType.DELETE, attributeName))
+      Assertions.assertEquals(ResultCode.SUCCESS, result.resultCode)
+    }
   }
 
   private fun userDn(userId: String) = "uid=$userId,ou=people,$LDAP_BASE_DN"

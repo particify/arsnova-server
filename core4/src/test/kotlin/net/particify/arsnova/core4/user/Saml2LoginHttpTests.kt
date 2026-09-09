@@ -102,6 +102,25 @@ class Saml2LoginHttpTests {
     Assertions.assertEquals(asserted.mailAddress, user.username)
   }
 
+  /**
+   * An identity provider which stops releasing the name attributes must not clear the names the
+   * account already holds.
+   */
+  @Test
+  fun shouldKeepStoredNamesWhenAssertionCarriesNone() {
+    val asserted = SAML_RETAINED_NAME_USER
+    login(mailRegistrationId, asserted)
+    val afterFirstLogin = loadUser(mailRegistrationId, asserted)
+    Assertions.assertEquals(asserted.givenName, afterFirstLogin.givenName)
+    Assertions.assertEquals(asserted.surname, afterFirstLogin.surname)
+
+    login(mailRegistrationId, asserted.copy(givenName = null, surname = null))
+
+    val user = loadUser(mailRegistrationId, asserted)
+    Assertions.assertEquals(asserted.givenName, user.givenName)
+    Assertions.assertEquals(asserted.surname, user.surname)
+  }
+
   private fun login(registrationId: UUID, user: Saml2TestUser) {
     val encodedResponse = identityProvider.encodedResponse(registrationId, user)
     mockMvc
