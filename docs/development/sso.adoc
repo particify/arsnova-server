@@ -1,15 +1,160 @@
 = Single Sign On
 
-== SAML service provider credentials
+SAML is available as a login provider.
+Every configured registration is advertised through `GET /api/configuration` and rendered as an
+additional SSO provider on the login screen.
+A login is started at `/api/saml2/authenticate/{registrationId}`,
+and the service provider metadata is served at
+`/api/saml2/service-provider-metadata/{registrationId}`.
+Tokens are issued exactly as they are for the local provider;
+link:authentication.adoc[] covers that.
+
+Users are authenticated by the identity provider.
+On the first successful login, an account is created and linked to the registration through an
+external login, keyed by the asserted ID attribute.
+Every later login updates the account from the asserted attributes.
+
+== Configuration
+
+Registrations are keyed by a UUID, which is also the provider ID the account's external login is
+stored under.
+An empty map -- the default -- disables SAML, so nothing has to be configured to keep it off.
+
+[source,yaml]
+----
+security:
+  saml2:
+    relyingparty:
+      registration:
+        fc62cd95-bea9-4aa3-987d-fa976ef300f3:
+          entity-id: https://example.com/api/saml2/service-provider-metadata/{registrationId}
+          username-mapping: MAIL_ADDRESS
+          attribute-mapping:
+            mail-address: urn:oid:0.9.2342.19200300.100.1.3
+          signing:
+            credentials:
+              - private-key-location: file:credentials/rp.key
+                certificate-location: file:credentials/rp.crt
+          assertingparty:
+            metadata-uri: https://idp.example.com/metadata
+----
+
+`entity-id`:: Entity ID of the service provider.
+  `{registrationId}` is substituted with the registration's UUID.
+`assertingparty.metadata-uri`:: Location of the identity provider's metadata.
+  Required, and fetched at startup.
+`signing.credentials`:: Key and certificate used to sign requests.
+  Signing is mandatory, so both locations have to be set;
+  a registration missing either of them fails at startup.
+`attribute-mapping`:: Names of the asserted attributes read into the account, see below.
+`username-mapping`:: Whether the username is the mapped ID or the mail address, see below.
+  `MAIL_ADDRESS` by default.
+
+Unlike an LDAP registration, a SAML registration has no `title` and no `order`:
+every registration is advertised as `SAML` with order `0`.
+
+== Attribute mapping
+
+Each entry names the asserted attribute a profile field is read from.
+The defaults are the SAML 2.0 subject ID and the LDAP-derived OIDs for mail address, given name and
+surname.
+
+`id`:: Attribute holding the ID which identifies the user to us.
+  `urn:oasis:names:tc:SAML:attribute:subject-id` by default.
+  A login fails if it is missing, because there is nothing left to key the account on.
+`mail-address`:: Mail address, `urn:oid:0.9.2342.19200300.100.1.3` by default.
+`given-name`:: Given name, `urn:oid:2.5.4.42` by default.
+`surname`:: Surname, `urn:oid:2.5.4.4` by default.
+
+The mail address is lowercased and has to be unique,
+so it is not imported if another account already uses it.
+That does not fail the login;
+the account simply carries no mail address.
+An assertion which carries no mail address at all leaves a stored one unchanged,
+so an identity provider which stops releasing the attribute does not clear the address of every
+account logging in afterwards.
+The other side of that is deliberate:
+an address the identity provider removes on purpose does not propagate here either.
+
+== Identity model
+
+The account's username is what makes it verified, and it is also its public display ID -- the
+identifier another user enters to share a room.
+It is not a credential: a SAML user is always located through their external login,
+never through the username.
+
+`username-mapping` decides where it comes from:
+
+`ID`:: The value of the `id` attribute, lowercased.
+  Correct when that attribute is something a person recognises, such as a login name or a scoped
+  identifier.
+`MAIL_ADDRESS`:: The mail address, which is the default.
+  Correct when the ID attribute is an opaque pairwise identifier, which no one could be expected to
+  type.
+
+Since the mail address is also what a local account's username is derived from, `MAIL_ADDRESS` puts
+SAML and local accounts into one namespace on purpose.
+
+Two consequences follow, and neither of them fails the login:
+a username which is already in use leaves the account unverified,
+and so does a mapping whose value is not available at all --
+`MAIL_ADDRESS` with an identity provider which does not release the mail attribute.
+An account left unverified this way is given a username by the next login which finds one free.
+
+There is deliberately no such option for LDAP.
+A directory always has a dedicated user ID attribute, and which attribute that is can already be
+configured, so the choice a SAML deployment has to make does not arise there.
+See link:ldap.adoc[].
+
+== Development environment
+
+=== Service provider credentials
+
 Signing of SAML requests is set up to be mandatory, so private and public keys need to be provided.
-We do not store credentials in the repository -- even if they are only used for local development purposes.
-Instead, they can be generated after cloning the repository using the link:core4/generate-credentials.sh[] script.
+We do not store credentials in the repository -- even if they are only used for local development
+purposes.
+Instead, they can be generated after cloning the repository using the
+link:core4/generate-credentials.sh[] script.
 This script also creates realm data for Keycloak from a template.
 
-== Keycloak
+=== Keycloak
+
 The development environment includes Keycloak to help with the development of SSO features.
 A realm configuration is included and automatically imported at startup.
-The Keycloak service can be accessed at http://localhost:8080 (username: `admin`, password: `admin`).
-The imported dev realm needs to be enabled on the realm's settings page.
-Users which are created for the dev realm can be used to log in to the application using SSO.
-Make sure to set the e-mail address and password for the new user needs to be marked as verified and a password.
+The Keycloak service can be accessed at http://localhost:8080 (username: `admin`,
+password: `admin`).
+
+The realm ships two users which can log in through SSO, `saml-owner` and `saml-participant`,
+each with a verified mail address at `example.com` and a password equal to its username.
+Further users can be created by hand;
+such a user needs a mail address which is marked as verified, and a password.
+
+The import creates the realm only if it does not exist yet:
+the strategy is `IGNORE_EXISTING`, and an existing realm is logged as
+`Realm 'dev' already exists. Import skipped`.
+Changes to the template therefore do not reach an environment which imported the realm already,
+the users above included.
+Picking them up means dropping the realm or removing Keycloak's database volume.
+
+== Migration from v3
+
+link:v3-migration.adoc[] covers the migration itself:
+the provider mapping a registration has to be paired with, how usernames and mail addresses are
+settled, and what happens to an account which shares its address with a local one.
+
+One thing is specific to SAML.
+v3 had one installation-wide `security.user-display-id-attribute`, with the values `loginId` and
+`mail` and `loginId` as its default.
+`username-mapping` replaces it per registration, and its default is the other one --
+so a v3 installation migrating with default configuration needs `username-mapping: ID` to keep the
+display IDs its users know.
+The v3 value the migration carries over is `loginId`,
+which for SAML was the value of v3's own `user-id-attribute`, not the mail address.
+
+== Limitations
+
+* A UUID-keyed registration map cannot be configured through flat environment variables, because
+  Spring's relaxed binding cannot recover the UUID's hyphens from an environment variable name.
+  The production Compose stack configures core4 exclusively that way, so SAML cannot be set up there
+  yet.
+  LDAP shares this gap, and closing it is a task of its own.

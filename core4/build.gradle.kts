@@ -59,6 +59,7 @@ dependencies {
   runtimeOnly(libs.spring.modulith.events.amqp)
   runtimeOnly(libs.spring.modulith.jpa)
   runtimeOnly(libs.spring.modulith.observability)
+  testImplementation(libs.bouncycastle.pkix)
   testImplementation(libs.kotlin.junit)
   testImplementation(libs.spring.test) { exclude(module = "mockito-core") }
   testImplementation(libs.spring.graphql.test)

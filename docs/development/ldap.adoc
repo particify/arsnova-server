@@ -17,6 +17,10 @@ external login.
 The user ID is read from the directory rather than taken from the submitted username, so it stays
 stable no matter which case a user typed.
 It also becomes the account's username, which is what makes the account verified.
+There is deliberately no option to use the mail address instead, as there is for SAML
+(link:sso.adoc[]):
+a directory always has a dedicated user ID attribute, and `user-id-attribute` already selects which
+one that is.
 Two consequences follow from that, and neither of them fails the login:
 a username which is already in use leaves the account unverified,
 and a mail address which is already in use is not imported.
@@ -134,16 +138,19 @@ well, which makes a DN pattern ambiguous, and searching it requires an authentic
 
 == Migration from v3
 
-The v3 migration writes `external_login.provider_id` from
-`persistence.v3-migration.authentication-provider-mapping.LDAP`.
-The registration's UUID has to be exactly that value.
-Otherwise the first login after the migration silently creates a second, empty account for every
-migrated user, and nothing reports it.
-`application-dev.yaml` demonstrates the intended pairing for SAML.
+link:v3-migration.adoc[] covers the migration itself:
+the provider mapping a registration has to be paired with, how usernames and mail addresses are
+settled, and what happens to an account which shares its address with a local one.
 
 `user-id-attribute` deliberately keeps the name and the meaning it had in v3, so the v3 value is
 carried across unchanged.
 Changing it gives every migrated user a duplicate account.
+
+The v3 login ID is lowercased on the way in, both as the external login's ID and as the account's
+username.
+v3 lowercased it for local accounts only, while we canonicalise it here, so a directory whose user
+IDs are not already lowercase would otherwise produce exactly the duplicate account the paragraph
+above warns about.
 
 Since `authentication-provider-mapping` is keyed by the v3 provider name, only one value can exist
 for `LDAP`.

@@ -55,7 +55,7 @@
             "attribute.nameformat": "URI Reference",
             "user.attribute": "username",
             "friendly.name": "subjectId",
-            "attribute.name": " urn:oasis:names:tc:SAML:attribute:subject-id "
+            "attribute.name": "urn:oasis:names:tc:SAML:attribute:subject-id"
           }
         },
         {
@@ -83,6 +83,38 @@
             "friendly.name": "email",
             "attribute.name": "urn:oid:1.2.840.113549.1.9.1"
           }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "saml-owner",
+      "email": "saml-owner@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "SAML",
+      "lastName": "Owner",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "saml-owner",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "saml-participant",
+      "email": "saml-participant@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "SAML",
+      "lastName": "Participant",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "saml-participant",
+          "temporary": false
         }
       ]
     }

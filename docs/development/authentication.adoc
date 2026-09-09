@@ -123,3 +123,9 @@ deactivate Browser
 Directory accounts can be used to log in through an explicitly selectable provider.
 See link:ldap.adoc[] for the configuration, the identity model, the development setup and the known
 limitations.
+
+== SAML
+
+Identity provider accounts can be used to log in through single sign on.
+See link:sso.adoc[] for the configuration, the attribute and username mapping,
+the identity model and the development setup.

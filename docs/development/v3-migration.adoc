@@ -1,0 +1,160 @@
+= Migration from v3
+
+Data from a v3 installation can be imported into core4:
+user profiles, rooms and their memberships, announcements, and the Q&A with its settings, posts and
+votes.
+The sources are v3's CouchDB database, the room access of the authorization service and the database
+of the Q&A service.
+
+The migration is a one-off run of the application rather than a task of its own.
+It is gated on `persistence.v3-migration.enabled`, which is `false` by default;
+with it enabled the migration runs once the application context is ready, and the application exits
+when it is done.
+So a migration is performed by starting core4 with that property set, waiting for it to terminate,
+and starting it normally afterwards.
+
+Each step is skipped with a warning if the table it writes already contains rows, so a second run
+cannot half-overwrite an installation which is already in use.
+That also means a partially failed migration has to be cleaned up before it is retried:
+the steps which succeeded will refuse to run again.
+
+Timestamps are carried over from v3 rather than being set to the time of the migration,
+so a migrated account keeps the creation and last activity dates it had.
+This matters for the account lifecycle: an account which was already inactive for years in v3 is
+inactive from the moment it is imported.
+
+== Configuration
+
+[source,yaml]
+----
+persistence:
+  v3-migration:
+    enabled: true
+    couchdb:
+      url: http://couchdb:5984/arsnova3
+      username: arsnova
+      password: arsnova
+    room-access-url: http://arsnova-server-authz:8080/roomaccess
+    qna:
+      datasource:
+        url: jdbc:postgresql://postgresql-comments:5432/arsnovacomment
+        username: arsnovacomment
+        password: arsnovacomment
+    authentication-provider-mapping:
+      SAML: fc62cd95-bea9-4aa3-987d-fa976ef300f3
+----
+
+`enabled`:: Whether the migration runs at startup.
+  `false` by default, and it has to stay that way for normal operation.
+`couchdb`:: Location and credentials of v3's database.
+`room-access-url`:: Room access endpoint of the v3 authorization service, which is where memberships
+  come from.
+`qna.datasource`:: Database of the v3 Q&A service.
+`authentication-provider-mapping`:: Maps a v3 authentication provider to a v4 provider ID,
+  see below.
+
+== Authentication provider mapping
+
+A v3 account authenticated by an external provider becomes an account with an external login, and
+that login needs the provider ID of the v4 registration it belongs to.
+The mapping is keyed by the v3 provider name -- `CAS`, `LDAP`, `OIDC` or `SAML` --
+so exactly one value can exist per provider.
+`application-dev.yaml` demonstrates the intended pairing for SAML.
+
+The UUID has to be exactly the one the corresponding registration is configured under.
+Otherwise the first login after the migration does not find the imported account,
+and silently creates a second, empty one for every migrated user.
+Nothing reports it.
+Since only one value per provider exists, more than one registration for the same provider cannot be
+expressed;
+link:ldap.adoc[] describes how that is enforced for LDAP.
+
+For SAML the registration also has to exist, not just be named:
+its `username-mapping` decides what the account's username becomes, and a username the migration
+writes is permanent.
+Rather than guess, the migration refuses to import users of a SAML provider whose registration it
+cannot find, and logs the provider ID it was looking for.
+
+== Identity settling
+
+An account's username is what marks it as verified, and it is also its public display ID.
+It is assigned during the migration rather than on the first login, and that is deliberate:
+an account without a username counts as unverified, and the deletion of inactive unverified accounts
+runs on a much shorter threshold than the one for verified accounts.
+Combined with the v3 timestamps above, a migrated account left without a username can be marked for
+deletion by the first scheduled run after the migration.
+Both the username and the mail address are unique, though, so not every account can be given the
+value it would prefer.
+
+The two values are therefore settled in a pass of their own, after every user exists.
+They cannot be settled while the accounts are being inserted:
+documents are read and written in chunks, and each chunk is flushed and detached before the next one
+is read, so a query during the import sees neither the rows still pending nor the rows an earlier
+chunk contributed.
+Which account keeps a value that several of them share cannot be decided from inside that stream.
+
+So an account with an external login is inserted without a username and without a mail address, its
+v3 mail address parked in `unverified_mail_address`, and two passes settle it afterwards:
+
+. Mail addresses are settled first.
+  A parked address which no account holds yet is promoted to the highest ranked account which parked
+  it, and stays parked on the others.
+  Accounts are ranked by most recent activity first, then by earliest creation, then by ID, so the
+  outcome does not depend on the order the documents were read in.
+. Usernames are settled second.
+  Each account is given its preferred candidate if that value is free, and the external ID if it is
+  not.
+
+The preferred candidate depends on the provider, and every candidate is lowercased because usernames
+are looked up lowercased.
+For SAML it follows the registration's `username-mapping`:
+the settled mail address for `MAIL_ADDRESS`, and the v3 login ID for `ID`.
+For LDAP, CAS and OIDC it is always the v3 login ID.
+
+Only SAML with the default mapping has a candidate other than the external ID, which is why the
+username pass reads the settled mail address and therefore has to run after the mail pass.
+
+An account for which neither candidate is free keeps no username and stays unverified.
+It is not left that way permanently: the next login which finds a free value assigns one.
+That only helps providers core4 can actually authenticate, though -- see below.
+
+== Mail address conflicts
+
+A v3 installation can hold a local and an external account for the same person, both carrying the
+same mail address.
+Only one of them can keep it, since the column is unique.
+
+The local account keeps it.
+That falls out of the import rather than being a rule of its own:
+a local account's v3 login ID is its mail address, and it is written directly during the import,
+so by the time the mail pass runs the address is already held.
+The external account keeps its copy in `unverified_mail_address`, so nothing is discarded, and the
+affected addresses are reported at the end of the migration.
+
+The two accounts are not merged, and will not be later either.
+The external account already has an external login, so a login for it finds the account directly and
+never reaches the point where it could attach itself to the local one.
+Merging two accounts which both hold data is a different problem from attaching a login,
+and it is not planned.
+
+Note that a parked address is still shown as the account's display ID while it has no username,
+so both accounts can appear under the same identifier until the username pass gives the external one
+its own.
+
+== Guest accounts
+
+A migrated guest account carries no mail address at all, not even an unverified one,
+and no username.
+v3 guest profiles are not expected to hold a mail address in the first place, but it is discarded
+either way rather than parked, because a parked address would surface as the account's display ID.
+
+== Providers without a v4 login path
+
+`CAS` and `OIDC` accounts are imported, including their external logins, but core4 has no CAS or
+OIDC login path, so those accounts cannot be used to log in.
+Only local accounts, LDAP and SAML can.
+
+They are still given a username, for the deletion reason above:
+without one they would be treated as unverified and removed on the short threshold.
+The consequence is that such an account exists, is counted, and is discoverable by its display ID,
+while nobody can authenticate as it until core4 gains a login path for that provider.

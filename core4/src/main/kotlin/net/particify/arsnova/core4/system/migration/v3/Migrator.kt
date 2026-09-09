@@ -17,7 +17,6 @@ import net.particify.arsnova.core4.system.migration.v3.Announcement as Announcem
 import net.particify.arsnova.core4.system.migration.v3.MigrationHelper.typeReference
 import net.particify.arsnova.core4.system.migration.v3.Room as RoomV3
 import net.particify.arsnova.core4.user.User
-import net.particify.arsnova.core4.user.internal.ExternalLogin
 import net.particify.arsnova.core4.user.internal.RoleRepository
 import net.particify.arsnova.core4.user.internal.UserServiceImpl
 import org.slf4j.LoggerFactory
@@ -32,6 +31,7 @@ const val JDBC_BATCH_SIZE = 50
 /** Handles migration of data for users, rooms and announcements from v3. */
 @Component
 @ConditionalOnBooleanProperty(name = ["persistence.v3-migration.enabled"])
+@Suppress("LongParameterList")
 class Migrator(
     @PersistenceContext private val entityManager: EntityManager,
     private val couchdbMigrator: CouchdbMigrator,
@@ -39,6 +39,8 @@ class Migrator(
     private val roleRepository: RoleRepository,
     private val roomRepository: RoomRepository,
     private val announcementRepository: AnnouncementRepository,
+    private val authProviderMigrator: AuthProviderMigrator,
+    private val postProcessor: UserMigrationPostProcessor,
     private val properties: MigrationProperties,
 ) {
   companion object {
@@ -92,49 +94,12 @@ class Migrator(
               lastActivityAt = it.lastActivityTimestamp,
               announcementsReadAt = it.announcementReadTimestamp,
               roles = mutableSetOf(defaultRoleRef))
-      if (!migrateExternalLogins(newUser, it)) {
+      if (!authProviderMigrator.migrateIdentity(newUser, it)) {
         return@migrate null
       }
       newUser
     }
-  }
-
-  private fun migrateExternalLogins(newUser: User, userProfile: UserProfile): Boolean {
-    var error = false
-    when (userProfile.authProvider) {
-      UserProfile.AuthProvider.ANONYMIZED -> {
-        newUser.clearForSoftDelete()
-        newUser.deletedAt = Instant.now()
-      }
-      UserProfile.AuthProvider.ARSNOVA_GUEST -> {
-        newUser.username = null
-      }
-      UserProfile.AuthProvider.ARSNOVA -> newUser.mailAddress = userProfile.loginId
-      UserProfile.AuthProvider.CAS,
-      UserProfile.AuthProvider.LDAP,
-      UserProfile.AuthProvider.OIDC,
-      UserProfile.AuthProvider.SAML -> {
-        val providerId = properties.authenticationProviderMapping[userProfile.authProvider.name]
-        if (providerId == null) {
-          logger.warn(
-              "No ID mapping for authentication provider found: {}", userProfile.authProvider)
-          error = true
-        }
-        val externalLogin =
-            ExternalLogin(
-                user = newUser,
-                providerId = providerId,
-                externalId = userProfile.loginId,
-                auditMetadata = AuditMetadata(createdAt = Instant.now()))
-        newUser.externalLogins += externalLogin
-        newUser.username = null
-      }
-      else -> {
-        logger.warn("Unsupported authentication provider: {}", userProfile.authProvider)
-        error = true
-      }
-    }
-    return !error
+    postProcessor.settleIdentities()
   }
 
   @Transactional

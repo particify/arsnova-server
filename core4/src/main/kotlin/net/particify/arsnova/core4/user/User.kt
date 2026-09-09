@@ -93,16 +93,22 @@ class User(
     verificationExpiresAt = null
   }
 
+  /**
+   * A mail address which the v3 migration parked has no expiry, so a missing one means that no
+   * verification is in flight rather than one which never expires.
+   */
   fun isMailAddressVerificationActive(): Boolean {
+    val expiresAt = verificationExpiresAt ?: return false
     return unverifiedMailAddress != null &&
         verificationErrors!! < VERIFICATION_MAX_ERRORS &&
-        Instant.now() < verificationExpiresAt!!
+        Instant.now() < expiresAt
   }
 
   fun isPasswordResetVerificationActive(): Boolean {
+    val expiresAt = verificationExpiresAt ?: return false
     return unverifiedMailAddress == null &&
         verificationErrors!! < VERIFICATION_MAX_ERRORS &&
-        Instant.now() < verificationExpiresAt!!
+        Instant.now() < expiresAt
   }
 
   fun clearForSoftDelete() {
