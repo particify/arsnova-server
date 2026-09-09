@@ -5,6 +5,7 @@ logging:
 server:
   servlet:
     contextPath: /api
+  forward-headers-strategy: NATIVE
 
 spring:
   application:
