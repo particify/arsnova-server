@@ -4,7 +4,9 @@
 package net.particify.arsnova.core4.system.compat
 
 import net.particify.arsnova.core4.system.compat.LegacyConfigurationController.LegacyConfiguration.LegacyAuthenticationProvider
+import net.particify.arsnova.core4.system.config.ServiceProperties
 import net.particify.arsnova.core4.system.config.UiProperties
+import net.particify.arsnova.core4.system.security.RoomCreationPolicy
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.internal.LdapProperties
 import org.springframework.web.bind.annotation.GetMapping
@@ -13,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class LegacyConfigurationController(
     private val ldapProperties: LdapProperties,
+    private val roomCreationPolicy: RoomCreationPolicy,
     private val saml2Properties: ExtendedSaml2RelyingPartyProperties,
+    private val serviceProperties: ServiceProperties,
     private val uiProperties: UiProperties
 ) {
   @GetMapping("/configuration")
@@ -23,12 +27,10 @@ class LegacyConfigurationController(
             .plus(
                 LegacyAuthenticationProvider(
                     id = "user-db",
-                    title = "arsnova",
+                    title = serviceProperties.productName,
                     order = 0,
                     allowedRoles =
-                        listOf(
-                            LegacyAuthenticationProvider.Role.MODERATOR,
-                            LegacyAuthenticationProvider.Role.PARTICIPANT),
+                        allowedRoles(roomCreationPolicy.mayVerifiedAccountsCreateRooms()),
                     type = LegacyAuthenticationProvider.Type.USERNAME_PASSWORD))
             .plus(buildLdapProviderList())
             .plus(
@@ -37,9 +39,7 @@ class LegacyConfigurationController(
                     title = "guest",
                     order = 0,
                     allowedRoles =
-                        listOf(
-                            LegacyAuthenticationProvider.Role.MODERATOR,
-                            LegacyAuthenticationProvider.Role.PARTICIPANT),
+                        allowedRoles(roomCreationPolicy.mayUnverifiedAccountsCreateRooms()),
                     type = LegacyAuthenticationProvider.Type.ANONYMOUS)),
         mapOf(),
         uiProperties.ui)
@@ -51,10 +51,7 @@ class LegacyConfigurationController(
           id = it.key.toString(),
           title = it.value.title,
           order = it.value.order,
-          allowedRoles =
-              listOf(
-                  LegacyAuthenticationProvider.Role.MODERATOR,
-                  LegacyAuthenticationProvider.Role.PARTICIPANT),
+          allowedRoles = allowedRoles(roomCreationPolicy.mayVerifiedAccountsCreateRooms()),
           type = LegacyAuthenticationProvider.Type.USERNAME_PASSWORD,
       )
     }
@@ -66,13 +63,19 @@ class LegacyConfigurationController(
           id = it.key.toString(),
           title = it.value.title,
           order = it.value.order,
-          allowedRoles =
-              listOf(
-                  LegacyAuthenticationProvider.Role.MODERATOR,
-                  LegacyAuthenticationProvider.Role.PARTICIPANT),
+          allowedRoles = allowedRoles(roomCreationPolicy.mayVerifiedAccountsCreateRooms()),
           type = LegacyAuthenticationProvider.Type.SSO,
       )
     }
+  }
+
+  /** The legacy moderator role is what clients read as permission to create rooms. */
+  private fun allowedRoles(mayCreateRooms: Boolean): List<LegacyAuthenticationProvider.Role> {
+    return if (mayCreateRooms)
+        listOf(
+            LegacyAuthenticationProvider.Role.MODERATOR,
+            LegacyAuthenticationProvider.Role.PARTICIPANT)
+    else listOf(LegacyAuthenticationProvider.Role.PARTICIPANT)
   }
 
   data class LegacyConfiguration(

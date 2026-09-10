@@ -25,6 +25,7 @@ data class SecurityProperties(
     @field:Valid val jwt: Jwt,
     @field:Valid val challenge: Challenge,
     @field:Valid val login: Login,
+    @field:Valid val roomCreatorRole: RoomCreatorRole,
     @field:NotBlank val authorizeUriHeader: String,
     @field:NotBlank val authorizeUriPrefix: String,
 ) {
@@ -51,4 +52,23 @@ data class SecurityProperties(
       @field:Positive val attemptLimit: Long,
       val attemptWindow: Duration,
   )
+
+  data class RoomCreatorRole(
+      /**
+       * Which accounts the room creator role is assigned to automatically. It does not govern roles
+       * assigned to an account by hand.
+       *
+       * [AutoAssignment.VERIFIED_ACCOUNTS] withholds the role from every account without a
+       * username. A local account whose registration has not been confirmed yet is unverified in
+       * that sense, and so is an account whose external login could not be assigned a username
+       * because another account already held it.
+       */
+      val autoAssignTo: AutoAssignment
+  ) {
+    enum class AutoAssignment {
+      ALL_ACCOUNTS,
+      VERIFIED_ACCOUNTS,
+      NONE
+    }
+  }
 }
