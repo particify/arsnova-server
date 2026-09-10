@@ -49,9 +49,10 @@ security:
 `attribute-mapping`:: Names of the asserted attributes read into the account, see below.
 `username-mapping`:: Whether the username is the mapped ID or the mail address, see below.
   `MAIL_ADDRESS` by default.
-
-Unlike an LDAP registration, a SAML registration has no `title` and no `order`:
-every registration is advertised as `SAML` with order `0`.
+`title`:: Name shown to users selecting this registration on the login page.
+  `SAML` by default, which leaves several registrations indistinguishable,
+  so an installation offering more than one should set it.
+`order`:: Position among the login options, `0` by default.
 
 == Attribute mapping
 

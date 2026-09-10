@@ -7,6 +7,7 @@ import java.util.UUID
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.security.saml2.autoconfigure.Saml2RelyingPartyProperties
 
+private const val DEFAULT_TITLE = "SAML"
 private const val ID_ATTRIBUTE = "urn:oasis:names:tc:SAML:attribute:subject-id"
 private const val MAIL_ATTRIBUTE = "urn:oid:0.9.2342.19200300.100.1.3"
 private const val GIVEN_NAME_ATTRIBUTE = "urn:oid:2.5.4.42"
@@ -34,6 +35,18 @@ data class ExtendedSaml2RelyingPartyProperties(
      * Needs a setter for the same reason as [usernameMapping].
      */
     var linkingStrategy: String? = null
+
+    /**
+     * Name shown to users selecting this registration on the login page. Needs a setter for the
+     * same reason as [usernameMapping].
+     */
+    var title = DEFAULT_TITLE
+
+    /**
+     * Position of this registration among the login options. Needs a setter for the same reason as
+     * [usernameMapping].
+     */
+    var order = 0
 
     data class AttributeMapping(
         var id: String = ID_ATTRIBUTE,

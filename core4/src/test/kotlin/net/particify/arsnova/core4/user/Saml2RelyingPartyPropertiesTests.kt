@@ -32,6 +32,21 @@ class Saml2RelyingPartyPropertiesTests {
   }
 
   @Test
+  fun shouldDefaultTitleAndOrder() {
+    val registration = bind(mapOf("entity-id" to "https://example.com"))
+    Assertions.assertEquals("SAML", registration.title)
+    Assertions.assertEquals(0, registration.order)
+  }
+
+  /** Fails for a getter-only `title` or `order`, which binds to nothing but its default. */
+  @Test
+  fun shouldBindConfiguredTitleAndOrder() {
+    val registration = bind(mapOf("title" to "Example IdP", "order" to "3"))
+    Assertions.assertEquals("Example IdP", registration.title)
+    Assertions.assertEquals(3, registration.order)
+  }
+
+  @Test
   fun shouldBindAttributeMappingWithoutLosingDefaults() {
     val registration = bind(mapOf("attribute-mapping.mail-address" to "urn:oid:1.2.3"))
     Assertions.assertEquals("urn:oid:1.2.3", registration.attributeMapping.mailAddress)
