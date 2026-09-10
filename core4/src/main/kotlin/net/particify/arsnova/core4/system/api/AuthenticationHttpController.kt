@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.system.api
 
 import jakarta.servlet.http.HttpServletResponse
 import java.util.UUID
+import net.particify.arsnova.core4.system.config.LocalAccountPolicy
 import net.particify.arsnova.core4.system.security.JwtUtils
 import net.particify.arsnova.core4.system.security.LdapAuthenticationProviderRegistry
 import net.particify.arsnova.core4.system.security.LoginAttemptService
@@ -32,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException
 class AuthenticationHttpController(
     private val authenticationManager: AuthenticationManager,
     private val ldapAuthenticationProviderRegistry: LdapAuthenticationProviderRegistry,
+    private val localAccountPolicy: LocalAccountPolicy,
     private val loginAttemptService: LoginAttemptService,
     private val jwtUtils: JwtUtils,
     private val userService: UserService,
@@ -85,7 +87,12 @@ class AuthenticationHttpController(
   }
 
   private fun resolveAuthenticationManager(providerId: UUID?): AuthenticationManager {
-    if (providerId == null) return authenticationManager
+    if (providerId == null) {
+      if (!localAccountPolicy.enabled) {
+        throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Local accounts are disabled.")
+      }
+      return authenticationManager
+    }
     return ldapAuthenticationProviderRegistry.findByProviderId(providerId)
         ?: throw ResponseStatusException(
             HttpStatus.BAD_REQUEST, "Unknown authentication provider $providerId.")
