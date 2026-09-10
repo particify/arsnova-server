@@ -56,6 +56,9 @@ security:
   login:
     attempt-limit: 20
     attempt-window: 2m
+  local-account:
+    enabled: true
+    self-registration-enabled: true
   room-creator-role:
     auto-assign-to: verified-accounts
   authorize-uri-header: X-Forwarded-Uri

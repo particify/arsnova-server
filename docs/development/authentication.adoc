@@ -118,6 +118,65 @@ Browser -->> User: Logged out
 deactivate Browser
 ----
 
+== Local accounts
+
+A local account authenticates with a username and a password, the username being the mail address
+its owner verified.
+Creating one is not a single request: the client first obtains a guest account
+(`POST /api/auth/guest-account`), then claims it with the `claimUnverifiedUser` mutation, which
+parks the address until the code sent to it is submitted.
+An account can also be created for someone else, by an administrator through `adminCreateUser` or
+by a room's owner through `grantRoomRoleByInvitation` -- both send an invitation and go through the
+same service.
+
+Two settings decide what is available:
+
+`security.local-account.enabled`:: Whether local accounts exist at all, `true` by default.
+`security.local-account.self-registration-enabled`:: Whether an account can be created by whoever
+wants one, `true` by default.
+Ignored while local accounts are disabled.
+
+[cols="2,1,1"]
+|===
+|Path |`enabled: false` |`self-registration-enabled: false`
+
+|`POST /api/auth/login` without a `providerId` |refused |unaffected
+|`user-db` entry in `GET /api/configuration` |omitted |unaffected
+|`claimUnverifiedUser` |refused |refused
+|`grantRoomRoleByInvitation` for an address with no account |refused |refused
+|`requestUserPasswordReset`, `resetUserPassword` |refused |unaffected
+|`updateUserMailAddress` |refused |unaffected
+|`adminCreateUser`, `adminVerifyUserById` |unaffected |unaffected
+|===
+
+Three of those paths carry a second check which neither column covers: `claimUnverifiedUser`,
+`grantRoomRoleByInvitation` and `updateUserMailAddress` test the address against the allowed
+domains below once a request gets past the settings above.
+A verification already in flight is unaffected by either setting, since completing one finishes an
+account rather than creating it.
+
+Administrative actions are never gated, so an administrator creates and verifies accounts whatever
+the settings say.
+That is decided from the account acting rather than from the mutation called, which is why the
+invitation is refused for a room owner and allowed for an administrator although both reach the
+same service method.
+
+A refusal is a domain exception rather than a denied `@PreAuthorize`, because the client cannot
+explain the opaque `FORBIDDEN` that GraphQL turns an authorization denial into.
+
+`security.local-account.allowed-mail-address-domains` restricts which addresses an account may be
+created for, and is empty by default.
+Each entry is a domain in which a `*` label matches exactly one label of the address' domain, so
+`*.example.com` covers `mail.example.com` but not `example.com`.
+The entries are checked and compiled while the application starts: a pattern which cannot match
+locks out everyone it was meant to serve, and reporting that as an error about the submitted
+address hides the actual mistake.
+Changing one's own address is checked against the list as well, since a restriction one can leave
+right after registering is no restriction.
+So is an invitation, which would otherwise let a room's owner create the account the restriction
+denies its holder -- unless an administrator sends it, administrative account creation being
+ungated here as everywhere else.
+
 == LDAP
 
 Directory accounts can be used to log in through an explicitly selectable provider.

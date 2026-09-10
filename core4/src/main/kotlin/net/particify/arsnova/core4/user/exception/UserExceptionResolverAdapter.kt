@@ -23,8 +23,11 @@ class UserExceptionResolverAdapter : DataFetcherExceptionResolverAdapter() {
           is InvalidUserStateException ->
               builder.errorType(ErrorType.BAD_REQUEST).message("${ex.message}: ${ex.id}")
           is InvalidVerificationCodeException,
-          is MailAddressAlreadyInUseException ->
+          is MailAddressAlreadyInUseException,
+          is MailAddressNotAllowedException ->
               builder.errorType(ErrorType.BAD_REQUEST).message(ex.message)
+          is AccountCreationNotAllowedException ->
+              builder.errorType(ErrorType.FORBIDDEN).message(ex.message)
           else -> return super.resolveToSingleError(ex, env)
         }
     return error.build()

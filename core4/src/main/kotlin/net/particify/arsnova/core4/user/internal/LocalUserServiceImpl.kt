@@ -10,17 +10,21 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.math.pow
 import kotlin.math.roundToLong
+import net.particify.arsnova.core4.common.exception.AccessDeniedException
 import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.system.MailService
+import net.particify.arsnova.core4.system.config.LocalAccountPolicy
 import net.particify.arsnova.core4.system.config.MailProperties
 import net.particify.arsnova.core4.user.LocalUserService
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
 import net.particify.arsnova.core4.user.event.UserMailVerifiedEvent
 import net.particify.arsnova.core4.user.event.UserPasswordChangedEvent
+import net.particify.arsnova.core4.user.exception.AccountCreationNotAllowedException
 import net.particify.arsnova.core4.user.exception.InvalidUserStateException
 import net.particify.arsnova.core4.user.exception.InvalidVerificationCodeException
 import net.particify.arsnova.core4.user.exception.MailAddressAlreadyInUseException
+import net.particify.arsnova.core4.user.exception.MailAddressNotAllowedException
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -38,6 +42,7 @@ class LocalUserServiceImpl(
     private val passwordEncoder: PasswordEncoder,
     private val mailService: MailService,
     private val eventPublisher: ApplicationEventPublisher,
+    private val localAccountPolicy: LocalAccountPolicy,
     mailProperties: MailProperties
 ) : LocalUserService {
   companion object {
@@ -50,6 +55,8 @@ class LocalUserServiceImpl(
   private val passwordResetUriPattern = mailProperties.passwordResetUriPattern
 
   fun claimUnverifiedUser(user: User, mailAddress: String, password: String, locale: Locale): User {
+    checkAccountCreationAllowed(user)
+    checkMailAddressAllowed(mailAddress)
     if (user.mailAddress != null) {
       throw InvalidUserStateException("Account not claimable", user.id!!)
     }
@@ -68,6 +75,8 @@ class LocalUserServiceImpl(
       password: String,
       locale: Locale
   ): User {
+    checkLocalAccountsEnabled()
+    checkMailAddressAllowed(mailAddress)
     if (user.mailAddress == null) {
       throw InvalidUserStateException("No local login credentials", user.id!!)
     }
@@ -100,6 +109,8 @@ class LocalUserServiceImpl(
       data: Map<String, Any>,
       locale: Locale
   ): User {
+    checkAccountCreationAllowed(inviter)
+    checkInvitedMailAddressAllowed(inviter, mailAddress)
     val invitee = userService.createAccount()
     initiateVerification(invitee)
     invitee.unverifiedMailAddress = mailAddress
@@ -132,6 +143,7 @@ class LocalUserServiceImpl(
   }
 
   fun initiatePasswordReset(user: User, locale: Locale): User {
+    checkLocalAccountsEnabled()
     if (user.password == null || user.mailAddress == null) {
       throw InvalidUserStateException("No local login credentials", user.id!!)
     }
@@ -149,6 +161,7 @@ class LocalUserServiceImpl(
   }
 
   fun completePasswordReset(user: User, password: String, verificationCode: Int): User {
+    checkLocalAccountsEnabled()
     if (!user.isPasswordResetVerificationActive()) {
       throw InvalidUserStateException("Password reset not initiated", user.id!!)
     }
@@ -159,6 +172,30 @@ class LocalUserServiceImpl(
     val persistedUser = userRepository.save(user)
     eventPublisher.publishEvent(UserPasswordChangedEvent(persistedUser.id!!))
     return persistedUser
+  }
+
+  private fun checkLocalAccountsEnabled() {
+    if (!localAccountPolicy.enabled) {
+      throw AccessDeniedException("Local accounts are disabled")
+    }
+  }
+
+  private fun checkAccountCreationAllowed(actor: User) {
+    if (!localAccountPolicy.mayCreateAccount(actor)) {
+      throw AccountCreationNotAllowedException()
+    }
+  }
+
+  private fun checkMailAddressAllowed(mailAddress: String) {
+    if (!localAccountPolicy.isMailAddressAllowed(mailAddress)) {
+      throw MailAddressNotAllowedException(localAccountPolicy.allowedMailAddressDomains)
+    }
+  }
+
+  private fun checkInvitedMailAddressAllowed(inviter: User, mailAddress: String) {
+    if (!localAccountPolicy.mayInviteMailAddress(inviter, mailAddress)) {
+      throw MailAddressNotAllowedException(localAccountPolicy.allowedMailAddressDomains)
+    }
   }
 
   private fun initiateVerification(user: User) {
