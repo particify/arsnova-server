@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user
@@ -13,6 +13,9 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.Table
 import jakarta.persistence.Version
 import java.util.UUID
+
+/** Name of the persisted role which grants administrative access. */
+const val ADMIN_ROLE = "ADMIN"
 
 @Entity
 @Table(schema = "`user`")

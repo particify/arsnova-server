@@ -12,11 +12,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.jwt.JwtException
 import org.springframework.stereotype.Component
 
+private val ROLE_ROOM_CREATOR = SimpleGrantedAuthority("ROLE_ROOM_CREATOR")
 private val ROLE_VERIFIED = SimpleGrantedAuthority("ROLE_VERIFIED")
 
 @Component
 class UserJwtAuthenticationProvider(
     private var jwtUtils: JwtUtils,
+    private val roomCreationPolicy: RoomCreationPolicy,
     private val userService: UserService
 ) : AuthenticationProvider {
   override fun authenticate(authentication: Authentication): Authentication {
@@ -29,6 +31,9 @@ class UserJwtAuthenticationProvider(
       var authorities = user.authorities.plus(authentication.authorities)
       if (user.username != null) {
         authorities = authorities.plus(ROLE_VERIFIED)
+      }
+      if (roomCreationPolicy.mayCreateRooms(user)) {
+        authorities = authorities.plus(ROLE_ROOM_CREATOR)
       }
       return UserJwtAuthentication(token, user, authorities)
     } catch (e: JwtException) {

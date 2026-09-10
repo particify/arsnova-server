@@ -148,6 +148,9 @@ Do not carry them into the v3 core's file.
 |`arsnova.security.login-try-limit` |`security.login.attempt-limit`
 |`arsnova.security.authentication-providers.ldap[0].*` |`security.ldap.registration.<uuid>.*`
 |`arsnova.security.authentication-providers.saml.*` |`security.saml2.relyingparty.registration.<uuid>.*`
+|`arsnova.security.authentication-providers.*.allowed-roles` |`security.room-creator-role.auto-assign-to`
+|`arsnova.security.authentication-providers.registered.enabled` |`security.local-account.enabled`
+|`arsnova.security.authentication-providers.registered.allowed-email-domains` |`security.local-account.allowed-mail-address-domains`
 |`arsnova.system.auto-deletion-thresholds.user-inactivity-period` |`user.inactivity-thresholds.verified`
 |`arsnova.ui.*` |`ui.*`, unchanged
 |===
@@ -162,12 +165,62 @@ Image tag variables were renamed too: `WSGW_TAG` to `WEBSOCKET_TAG`, `AUTH_TAG` 
 `CORE_TAG` still tags the v3 core, and `core4` has its own `CORE4_TAG` -- the two version series are
 not interchangeable.
 
-Some settings have no v4 equivalent and are simply gone: the guest and local provider can no longer
-be disabled or retitled, registration and password-reset mail texts are message bundles rather than
-configuration, `arsnova.templates.*` was replaced by `mail.*-uri-pattern` with **different
-placeholders**, and CAS and OIDC accounts are imported but cannot be used to log in.
+`allowed-roles` did not survive as a per-provider list.
+v4 decides by the account's verified state rather than by the provider it was created through,
+so the single `security.room-creator-role.auto-assign-to` replaces all of them:
+`all-accounts` matches a v3 installation which listed `moderator` for the guest provider,
+`verified-accounts` one which did not, and `none` withholds room creation from everyone.
+**Its default is `verified-accounts`, which is stricter than v3 was**, so an installation which let
+guests create rooms has to set `all-accounts` to carry that on.
+Note also that v4 enforces the setting on the server; in v3 only the web client honoured it.
+
+Some settings have no v4 equivalent and are simply gone: the guest provider can no longer be
+disabled, its title is fixed and the local provider's follows `service.product-name`, registration
+and password-reset mail texts are message bundles rather than configuration, `arsnova.templates.*`
+was replaced by `mail.*-uri-pattern` with **different placeholders**, and CAS and OIDC accounts are
+imported but cannot be used to log in.
 `arsnova.system.read-only` still works for the v3 core and the Q&A service, but `core4` has no
 read-only mode, so a read-only installation is only partly read-only under v4.
+
+=== Local accounts
+
+`security.local-account.enabled` replaces the v3 provider switch, and it now does what its name
+says.
+v3 removed the authentication provider, so a "disabled" installation refused logins but still
+accepted registrations and mailed verification codes; the accounts were simply unusable afterwards.
+v4 refuses the login, the registration, the password reset and the mail address change alike, and
+drops the local provider from the configuration the web client reads.
+Administrators keep creating and verifying accounts either way.
+
+`security.local-account.self-registration-enabled` is new and has no v3 counterpart.
+It leaves existing accounts working and only stops new ones from being created by whoever wants
+one, invitations from a room's settings included.
+`enabled: false` covers it, so setting it while local accounts are off changes nothing.
+
+Neither flag has to be paired with `ui.registrationDisabled` any more:
+`core4` adds that setting to the published configuration itself whenever self-registration is off.
+A deployment which set it by hand keeps working -- the value is only ever added, never overwritten,
+so the server can be more restrictive than the manual hint but never less.
+
+`allowed-email-domains` becomes `security.local-account.allowed-mail-address-domains`, and an entry
+keeps its v3 meaning: a `*` label matches exactly one label of the address' domain, so
+`*.example.com` covers `mail.example.com` but not `example.com` itself and an installation which
+wants both has to list both.
+Four things changed around that:
+
+* **An empty list no longer disables registration.**
+  In v3 it was the de-facto off switch; in v4 it means what it reads as, no restriction at all.
+  Use `self-registration-enabled: false` instead.
+* **A bare `*` entry is rejected while the application starts**, as is an entry consisting only of
+  wildcards such as `*.*`.
+  v3 silently discarded the whole list when it found a `*` anywhere in it and allowed every domain
+  -- omit the property to do that deliberately.
+* **Every entry is validated while the application starts** and a malformed one fails the start
+  with a message naming it.
+  v3 dropped an unparseable entry silently, and an installation whose entries were all unparseable
+  refused every registration with no hint as to why.
+* **Only the domain is matched.**
+  v3 also constrained the local part, which rejected `+`-tagged and non-ASCII addresses.
 
 === LDAP
 

@@ -4,32 +4,32 @@
 package net.particify.arsnova.core4.system.compat
 
 import net.particify.arsnova.core4.system.compat.LegacyConfigurationController.LegacyConfiguration.LegacyAuthenticationProvider
+import net.particify.arsnova.core4.system.config.LocalAccountPolicy
+import net.particify.arsnova.core4.system.config.ServiceProperties
 import net.particify.arsnova.core4.system.config.UiProperties
+import net.particify.arsnova.core4.system.security.RoomCreationPolicy
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.internal.LdapProperties
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
+/** UI setting the web client reads to hide its registration entry points. */
+private const val REGISTRATION_DISABLED = "registrationDisabled"
+
 @RestController
 class LegacyConfigurationController(
     private val ldapProperties: LdapProperties,
+    private val localAccountPolicy: LocalAccountPolicy,
+    private val roomCreationPolicy: RoomCreationPolicy,
     private val saml2Properties: ExtendedSaml2RelyingPartyProperties,
+    private val serviceProperties: ServiceProperties,
     private val uiProperties: UiProperties
 ) {
   @GetMapping("/configuration")
   fun configuration(): LegacyConfiguration {
     return LegacyConfiguration(
         buildSaml2ProviderList()
-            .plus(
-                LegacyAuthenticationProvider(
-                    id = "user-db",
-                    title = "arsnova",
-                    order = 0,
-                    allowedRoles =
-                        listOf(
-                            LegacyAuthenticationProvider.Role.MODERATOR,
-                            LegacyAuthenticationProvider.Role.PARTICIPANT),
-                    type = LegacyAuthenticationProvider.Type.USERNAME_PASSWORD))
+            .plus(buildLocalProviderList())
             .plus(buildLdapProviderList())
             .plus(
                 LegacyAuthenticationProvider(
@@ -37,12 +37,23 @@ class LegacyConfigurationController(
                     title = "guest",
                     order = 0,
                     allowedRoles =
-                        listOf(
-                            LegacyAuthenticationProvider.Role.MODERATOR,
-                            LegacyAuthenticationProvider.Role.PARTICIPANT),
+                        allowedRoles(roomCreationPolicy.mayUnverifiedAccountsCreateRooms()),
                     type = LegacyAuthenticationProvider.Type.ANONYMOUS)),
         mapOf(),
-        uiProperties.ui)
+        buildUiSettings())
+  }
+
+  private fun buildLocalProviderList(): List<LegacyAuthenticationProvider> {
+    if (!localAccountPolicy.enabled) {
+      return listOf()
+    }
+    return listOf(
+        LegacyAuthenticationProvider(
+            id = "user-db",
+            title = serviceProperties.productName,
+            order = 0,
+            allowedRoles = allowedRoles(roomCreationPolicy.mayVerifiedAccountsCreateRooms()),
+            type = LegacyAuthenticationProvider.Type.USERNAME_PASSWORD))
   }
 
   private fun buildLdapProviderList(): List<LegacyAuthenticationProvider> {
@@ -51,10 +62,7 @@ class LegacyConfigurationController(
           id = it.key.toString(),
           title = it.value.title,
           order = it.value.order,
-          allowedRoles =
-              listOf(
-                  LegacyAuthenticationProvider.Role.MODERATOR,
-                  LegacyAuthenticationProvider.Role.PARTICIPANT),
+          allowedRoles = allowedRoles(roomCreationPolicy.mayVerifiedAccountsCreateRooms()),
           type = LegacyAuthenticationProvider.Type.USERNAME_PASSWORD,
       )
     }
@@ -66,13 +74,30 @@ class LegacyConfigurationController(
           id = it.key.toString(),
           title = it.value.title,
           order = it.value.order,
-          allowedRoles =
-              listOf(
-                  LegacyAuthenticationProvider.Role.MODERATOR,
-                  LegacyAuthenticationProvider.Role.PARTICIPANT),
+          allowedRoles = allowedRoles(roomCreationPolicy.mayVerifiedAccountsCreateRooms()),
           type = LegacyAuthenticationProvider.Type.SSO,
       )
     }
+  }
+
+  /**
+   * The setting is only ever added, never set to `false`: a deployment which disabled registration
+   * by hand keeps doing so, and the server can only be more restrictive than that hint.
+   */
+  private fun buildUiSettings(): Map<String, Any> {
+    if (localAccountPolicy.selfRegistrationEnabled) {
+      return uiProperties.ui
+    }
+    return uiProperties.ui.plus(REGISTRATION_DISABLED to true)
+  }
+
+  /** The legacy moderator role is what clients read as permission to create rooms. */
+  private fun allowedRoles(mayCreateRooms: Boolean): List<LegacyAuthenticationProvider.Role> {
+    return if (mayCreateRooms)
+        listOf(
+            LegacyAuthenticationProvider.Role.MODERATOR,
+            LegacyAuthenticationProvider.Role.PARTICIPANT)
+    else listOf(LegacyAuthenticationProvider.Role.PARTICIPANT)
   }
 
   data class LegacyConfiguration(

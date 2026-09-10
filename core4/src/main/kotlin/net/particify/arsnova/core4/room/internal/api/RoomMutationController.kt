@@ -34,6 +34,7 @@ class RoomMutationController(
 ) {
 
   @MutationMapping
+  @PreAuthorize("hasRole('ROOM_CREATOR')")
   fun createRoom(@Argument input: CreateRoomInput, @AuthenticationPrincipal user: User): Room {
     return roomService.create(input.toRoom(roomService.generateShortId()), user)
   }
@@ -161,7 +162,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#input.id, 'Room', 'administer')")
+  @PreAuthorize("hasRole('ROOM_CREATOR') and hasPermission(#input.id, 'Room', 'administer')")
   fun duplicateRoom(
       @Argument input: DuplicateRoomInput,
       @AuthenticationPrincipal user: User
@@ -171,6 +172,7 @@ class RoomMutationController(
   }
 
   @MutationMapping
+  @PreAuthorize("hasRole('ROOM_CREATOR')")
   fun duplicateDemoRoom(@AuthenticationPrincipal user: User, locale: Locale): Room {
     return roomService.duplicateDemo(user, locale)
   }

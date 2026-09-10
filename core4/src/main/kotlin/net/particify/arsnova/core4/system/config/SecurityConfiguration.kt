@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.system.security.ChallengeJwtAuthenticationFil
 import net.particify.arsnova.core4.system.security.Http401UnauthenticatedEntryPoint
 import net.particify.arsnova.core4.system.security.RefreshAuthenticationFilter
 import net.particify.arsnova.core4.system.security.UserJwtAuthenticationFilter
+import net.particify.arsnova.core4.user.ADMIN_ROLE
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.internal.Saml2ResponseAuthenticationConverter
 import org.opensaml.security.x509.X509Support
@@ -90,9 +91,9 @@ class SecurityConfiguration(
               .requestMatchers(EndpointRequest.to("health"))
               .permitAll()
               .requestMatchers(EndpointRequest.to("info", "metrics", "prometheus"))
-              .hasAnyRole("ADMIN", "OBSERVABILITY")
+              .hasAnyRole(ADMIN_ROLE, "OBSERVABILITY")
               .requestMatchers(EndpointRequest.toAnyEndpoint())
-              .hasRole("ADMIN")
+              .hasRole(ADMIN_ROLE)
         }
         .addFilterBefore(
             refreshAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)

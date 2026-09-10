@@ -53,7 +53,7 @@ fun registerRelyingParty(
     registrationId: String,
     usernameMapping: String? = null
 ) {
-  val prefix = "security.saml2.relyingparty.registration.$registrationId"
+  val prefix = relyingPartyPrefix(registrationId)
   registry.add("$prefix.entity-id") { spEntityId(UUID.fromString(registrationId)) }
   registry.add("$prefix.signing.credentials[0].private-key-location") {
     identityProvider.privateKeyLocation
@@ -64,3 +64,18 @@ fun registerRelyingParty(
   registry.add("$prefix.assertingparty.metadata-uri") { identityProvider.metadataLocation }
   usernameMapping?.let { registry.add("$prefix.username-mapping") { it } }
 }
+
+/** How a registration is presented on the login page, which no login itself depends on. */
+fun registerRelyingPartyDisplay(
+    registry: DynamicPropertyRegistry,
+    registrationId: String,
+    title: String,
+    order: Int
+) {
+  val prefix = relyingPartyPrefix(registrationId)
+  registry.add("$prefix.title") { title }
+  registry.add("$prefix.order") { order }
+}
+
+private fun relyingPartyPrefix(registrationId: String) =
+    "security.saml2.relyingparty.registration.$registrationId"
