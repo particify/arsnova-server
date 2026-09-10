@@ -64,8 +64,8 @@ class LegacyConfigurationController(
     return saml2Properties.registration.map {
       LegacyAuthenticationProvider(
           id = it.key.toString(),
-          title = "SAML",
-          order = 0,
+          title = it.value.title,
+          order = it.value.order,
           allowedRoles =
               listOf(
                   LegacyAuthenticationProvider.Role.MODERATOR,
