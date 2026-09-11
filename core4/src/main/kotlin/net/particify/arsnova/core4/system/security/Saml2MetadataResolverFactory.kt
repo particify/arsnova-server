@@ -7,6 +7,9 @@ import java.io.File
 import java.io.InputStream
 import java.net.URI
 import java.net.URL
+import java.security.cert.X509Certificate
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
 import net.shibboleth.shared.component.DestructableComponent
@@ -20,11 +23,18 @@ import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport
 import org.opensaml.saml.metadata.resolver.MetadataResolver
 import org.opensaml.saml.metadata.resolver.RefreshableMetadataResolver
 import org.opensaml.saml.metadata.resolver.filter.MetadataFilter
+import org.opensaml.saml.metadata.resolver.filter.impl.SignatureValidationFilter
 import org.opensaml.saml.metadata.resolver.impl.AbstractReloadingMetadataResolver
 import org.opensaml.saml.metadata.resolver.impl.HTTPMetadataResolver
 import org.opensaml.saml.metadata.resolver.impl.ResourceBackedMetadataResolver
 import org.opensaml.saml.metadata.resolver.index.MetadataIndex
 import org.opensaml.saml.metadata.resolver.index.impl.RoleMetadataIndex
+import org.opensaml.security.credential.Credential
+import org.opensaml.security.credential.impl.StaticCredentialResolver
+import org.opensaml.security.x509.BasicX509Credential
+import org.opensaml.security.x509.X509Support
+import org.opensaml.xmlsec.config.impl.DefaultSecurityConfigurationBootstrap
+import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.DefaultResourceLoader
 import org.springframework.core.io.Resource
@@ -33,6 +43,7 @@ import org.springframework.security.saml2.provider.service.registration.Assertin
 import org.springframework.security.saml2.provider.service.registration.OpenSaml5AssertingPartyMetadataRepository
 
 private const val HTTP_TIMEOUT_SECONDS = 10L
+private const val CERTIFICATE_EXPIRY_WARNING_DAYS = 90L
 
 private val logger = LoggerFactory.getLogger(Saml2MetadataResolverFactory::class.java)
 
@@ -76,10 +87,13 @@ class Saml2MetadataResolverFactory(registrations: Map<UUID, ExtendedRegistration
         requireNotNull(registration.assertingparty.metadataUri) {
           "Incomplete SAML configuration $registrationId: no metadata URI"
         }
+    val certificates = verificationCertificates(registrationId, registration)
+    warnAboutUnverifiedMetadata(registrationId, location, certificates)
+    warnAboutExpiringCertificates(registrationId, certificates)
     val resolver = createResolver(location)
     resolver.setId("saml2-metadata-$registrationId")
     resolver.parserPool = XMLObjectProviderRegistrySupport.getParserPool()
-    resolver.metadataFilter = createMetadataFilter(registration)
+    resolver.metadataFilter = createMetadataFilter(certificates)
     // Restricts iteration to identity providers, which is what tells them apart from the service
     // providers a federation aggregate carries as well.
     resolver.setIndexes(setOf<MetadataIndex>(RoleMetadataIndex()))
@@ -129,11 +143,86 @@ class Saml2MetadataResolverFactory(registrations: Map<UUID, ExtendedRegistration
       ResourceBackedMetadataResolver(SpringMetadataResource(resourceLoader.getResource(location)))
 
   /**
-   * Seam for validating a metadata document before it is accepted. Nothing is validated yet, so the
-   * document is trusted on the strength of the connection it arrived over.
+   * Verifies the metadata document's own signature against the certificates pinned for the
+   * registration. No pinned certificate means no filter: the document is then accepted as read,
+   * which is all a location whose transport is already trusted needs.
+   *
+   * Pairing the pinned certificates with an inline-`KeyInfo` resolver is the point of the
+   * construction. The signing certificate travels inside the document's own
+   * `<ds:Signature><ds:KeyInfo>`, so the engine takes the key from there and then has to find it
+   * among the configured ones; checking a signature against the certificate it arrived with would
+   * prove nothing.
    */
-  @Suppress("FunctionOnlyReturningConstant", "UnusedParameter")
-  private fun createMetadataFilter(registration: ExtendedRegistration): MetadataFilter? = null
+  private fun createMetadataFilter(certificates: List<X509Certificate>): MetadataFilter? {
+    if (certificates.isEmpty()) {
+      return null
+    }
+    val credentials: List<Credential> = certificates.map { BasicX509Credential(it) }
+    val trustEngine =
+        ExplicitKeySignatureTrustEngine(
+            StaticCredentialResolver(credentials),
+            DefaultSecurityConfigurationBootstrap.buildBasicInlineKeyInfoCredentialResolver())
+    val filter = SignatureValidationFilter(trustEngine)
+    // An aggregate carries one signature over its root, and accepting an unsigned root would let
+    // the signature be stripped instead of forged.
+    filter.setRequireSignedRoot(true)
+    // The filter refuses to run uninitialized, and the resolver does not initialize it for us.
+    filter.initialize()
+    return filter
+  }
+
+  private fun verificationCertificates(
+      registrationId: UUID,
+      registration: ExtendedRegistration
+  ): List<X509Certificate> =
+      registration.metadataVerification.credentials.map {
+        val location =
+            requireNotNull(it.certificateLocation) {
+              "Incomplete SAML configuration $registrationId: metadata verification credential " +
+                  "without a certificate location"
+            }
+        X509Support.decodeCertificate(location.contentAsByteArray)
+      }
+
+  private fun warnAboutUnverifiedMetadata(
+      registrationId: UUID,
+      location: String,
+      certificates: List<X509Certificate>
+  ) {
+    if (certificates.isNotEmpty() || !isHttpLocation(location)) {
+      return
+    }
+    logger.warn(
+        "SAML registration {}: metadata is fetched from {} without its signature being verified. " +
+            "Configure security.saml2.relyingparty.registration.{}.metadata-verification" +
+            ".credentials with the certificates the document is signed with.",
+        registrationId,
+        location,
+        registrationId)
+  }
+
+  /**
+   * A metadata signing certificate outlives almost everything else in this configuration -- five
+   * years is a common federation cadence and some run to twenty -- so a rotation is easy to walk
+   * past. Missing it degrades quietly: a refresh which fails keeps the last good document, so
+   * logins go on working while the metadata silently stops moving, which is the failure the refresh
+   * exists to prevent.
+   */
+  private fun warnAboutExpiringCertificates(
+      registrationId: UUID,
+      certificates: List<X509Certificate>
+  ) {
+    val threshold = Instant.now().plus(CERTIFICATE_EXPIRY_WARNING_DAYS, ChronoUnit.DAYS)
+    certificates
+        .filter { it.notAfter.toInstant().isBefore(threshold) }
+        .forEach {
+          logger.warn(
+              "SAML registration {}: the metadata verification certificate {} expires on {}.",
+              registrationId,
+              it.subjectX500Principal.name,
+              it.notAfter.toInstant())
+        }
+  }
 
   private fun createHttpClient(): CloseableHttpClient {
     val requestConfig =

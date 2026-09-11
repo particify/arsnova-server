@@ -54,6 +54,29 @@ class Saml2RelyingPartyPropertiesTests {
         "urn:oasis:names:tc:SAML:attribute:subject-id", registration.attributeMapping.id)
   }
 
+  @Test
+  fun shouldDefaultMetadataVerificationToNoCredentials() {
+    val registration = bind(mapOf("entity-id" to "https://example.com"))
+    Assertions.assertTrue(registration.metadataVerification.credentials.isEmpty())
+  }
+
+  /**
+   * The list is what carries a federation's key rotation, so the order and the count both have to
+   * survive binding. It is bound into a getter-only collection, which only works while the getter
+   * hands back the mutable list itself.
+   */
+  @Test
+  fun shouldBindMetadataVerificationCredentials() {
+    val registration =
+        bind(
+            mapOf(
+                "metadata-verification.credentials[0].certificate-location" to "file:outgoing.crt",
+                "metadata-verification.credentials[1].certificate-location" to "file:incoming.crt"))
+    val locations =
+        registration.metadataVerification.credentials.map { it.certificateLocation?.filename }
+    Assertions.assertEquals(listOf("outgoing.crt", "incoming.crt"), locations)
+  }
+
   private fun bind(
       properties: Map<String, String>
   ): ExtendedSaml2RelyingPartyProperties.ExtendedRegistration {

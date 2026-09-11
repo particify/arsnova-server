@@ -45,8 +45,11 @@ import org.opensaml.saml.saml2.core.StatusCode
 import org.opensaml.saml.saml2.core.Subject
 import org.opensaml.saml.saml2.core.SubjectConfirmation
 import org.opensaml.saml.saml2.core.SubjectConfirmationData
+import org.opensaml.saml.saml2.metadata.EntitiesDescriptor
+import org.opensaml.saml.saml2.metadata.EntityDescriptor
 import org.opensaml.security.x509.BasicX509Credential
 import org.opensaml.xmlsec.keyinfo.impl.X509KeyInfoGeneratorFactory
+import org.opensaml.xmlsec.signature.SignableXMLObject
 import org.opensaml.xmlsec.signature.Signature
 import org.opensaml.xmlsec.signature.support.SignatureConstants
 import org.opensaml.xmlsec.signature.support.Signer
@@ -118,6 +121,30 @@ class Saml2TestIdentityProvider {
   }
 
   /**
+   * A signing credential of its own, unrelated to the identity provider's own key. Metadata is
+   * signed by whoever publishes it -- a federation operator -- not by the identity provider it
+   * describes.
+   */
+  fun generateCredential(): BasicX509Credential {
+    val keyPair = generateKeyPair()
+    return BasicX509Credential(selfSign(keyPair.private, keyPair.public), keyPair.private)
+  }
+
+  /**
+   * Signs a metadata document -- an entity descriptor or an aggregate of them -- with an enveloped
+   * signature over its root, the way a federation operator signs what it publishes.
+   */
+  fun signMetadata(document: String, signingCredential: BasicX509Credential): String {
+    val root = unmarshall(document)
+    assignId(root)
+    require(root is SignableXMLObject) { "Not a signable metadata document" }
+    root.signature = signature(signingCredential)
+    val element = marshall(root)
+    Signer.signObject(checkNotNull(root.signature))
+    return SerializeSupport.nodeToString(element)
+  }
+
+  /**
    * Encodes a signed response for the given user, ready to be posted to the assertion consumer.
    * [sessionNotOnOrAfter] bounds the session the assertion starts, which most identity providers
    * leave out and which is therefore absent by default.
@@ -167,7 +194,7 @@ class Saml2TestIdentityProvider {
     assertion.conditions = conditions(registrationId, now)
     assertion.authnStatements.add(authnStatement(now, sessionNotOnOrAfter))
     assertion.attributeStatements.add(attributeStatement(user))
-    assertion.signature = signature()
+    assertion.signature = signature(credential)
     return assertion
   }
 
@@ -245,21 +272,38 @@ class Saml2TestIdentityProvider {
     return issuer
   }
 
-  private fun signature(): Signature {
+  private fun signature(signingCredential: BasicX509Credential): Signature {
     val signature = buildSamlObject<Signature>(Signature.DEFAULT_ELEMENT_NAME)
-    signature.signingCredential = credential
+    signature.signingCredential = signingCredential
     signature.signatureAlgorithm = SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256
     signature.canonicalizationAlgorithm = SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS
     val keyInfoFactory = X509KeyInfoGeneratorFactory()
     keyInfoFactory.setEmitEntityCertificate(true)
-    signature.keyInfo = keyInfoFactory.newInstance().generate(credential)
+    signature.keyInfo = keyInfoFactory.newInstance().generate(signingCredential)
     return signature
   }
 
-  private fun marshall(response: Response): Element {
+  /** The signature references the root by ID, and the SAML profile rejects a root without one. */
+  private fun assignId(root: XMLObject) {
+    val id = "_${UUID.randomUUID()}"
+    when (root) {
+      is EntitiesDescriptor -> root.setID(root.getID() ?: id)
+      is EntityDescriptor -> root.setID(root.getID() ?: id)
+      else -> error("Unsupported metadata root: ${root.elementQName}")
+    }
+  }
+
+  private fun unmarshall(document: String): XMLObject {
+    val parserPool = checkNotNull(XMLObjectProviderRegistrySupport.getParserPool())
+    val element = parserPool.parse(document.reader()).documentElement
+    val unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory()
+    return checkNotNull(unmarshallerFactory.getUnmarshaller(element)).unmarshall(element)
+  }
+
+  private fun marshall(xmlObject: XMLObject): Element {
     val marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory()
-    val marshaller = checkNotNull(marshallerFactory.getMarshaller(response))
-    return marshaller.marshall(response)
+    val marshaller = checkNotNull(marshallerFactory.getMarshaller(xmlObject))
+    return marshaller.marshall(xmlObject)
   }
 
   private fun selfSign(privateKey: PrivateKey, publicKey: PublicKey): X509Certificate {

@@ -43,6 +43,9 @@ security:
                 certificate-location: file:credentials/rp.crt
           assertingparty:
             metadata-uri: https://idp.example.com/metadata
+          metadata-verification:
+            credentials:
+              - certificate-location: file:credentials/federation-metadata-signing.crt
 ----
 
 `entity-id`:: Entity ID of the service provider.
@@ -52,6 +55,10 @@ security:
   It is fetched while the application starts and re-read afterwards, see below.
 `assertingparty.entity-id`:: Entity ID of the identity provider.
   Only needed when the metadata describes more than one, see below.
+`metadata-verification.credentials`:: Certificates the metadata document's own signature is
+  verified against.
+  Optional;
+  unset accepts the document as read, see below.
 `signing.credentials`:: Key and certificate used to sign requests.
   Signing is mandatory, so both locations have to be set;
   a registration missing either of them fails at startup.
@@ -87,6 +94,42 @@ Metadata which describes more than one identity provider -- a federation aggrega
 `assertingparty.entity-id` to settle which one the registration binds to.
 Without it, metadata describing exactly one identity provider binds to that one,
 and metadata describing several fails at startup with a message listing them.
+
+=== Signature verification
+
+`metadata-verification.credentials` pins the certificates the metadata document's own signature is
+verified against.
+It is optional and unset by default, so a document is accepted unverified unless certificates are
+configured.
+A registration with an `http` or `https` metadata location and no pinned certificate is logged at
+`WARN` while the application starts, because the document's integrity then rests on the transport
+alone.
+A `file:` or `classpath:` location is trusted as read and is not warned about:
+it comes from the deployment itself rather than across a network.
+
+Verification is distinct from `assertingparty.verification.credentials`,
+which pins the certificates that verify *assertions*.
+A federation signs the aggregate it publishes with its operator's key,
+not with the key of any identity provider described in it,
+and the two rotate on unrelated cadences.
+
+Once certificates are pinned, the document's root element has to be signed;
+a document carrying no signature over its root is rejected, so a signature cannot simply be
+stripped.
+The signing certificate travels inside the document's own signature, and pinning is what makes
+checking it worth anything: the key is taken from the document and then has to match one of the
+configured certificates.
+
+The property is a list, and that is how a rotation is carried.
+When the federation announces its incoming metadata signing certificate, add it alongside the one
+in use;
+a signature matching any configured certificate is accepted, so both work throughout the announced
+overlap window.
+Remove the outgoing certificate once that window has passed.
+A configured certificate within 90 days of its expiry is logged at `WARN` while the application
+starts, because a missed rotation degrades quietly:
+the refresh fails, the last good document keeps being served, and logins go on working while the
+metadata silently stops moving.
 
 == Attribute mapping
 
