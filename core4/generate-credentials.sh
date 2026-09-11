@@ -38,10 +38,17 @@ cd "$(dirname "$0")"
 mkdir -p "$DEST"
 
 generate_keypair "$DEST/rp.key" "$DEST/rp.csr" "$DEST/rp.crt" "/CN=example.com"
+generate_keypair "$DEST/idp.key" "$DEST/idp.csr" "$DEST/idp.crt" "/CN=keycloak"
 
-SAML_SIGNING_CERTIFICATE="$(openssl x509 -in "$DEST/rp.crt" -outform der | base64 -w 0)"
-export SAML_SIGNING_CERTIFICATE
-envsubst '$SAML_SIGNING_CERTIFICATE' < "$KEYCLOAK_REALM_FILE.template" > "$KEYCLOAK_REALM_FILE"
+SAML_SP_SIGNING_CERTIFICATE="$(openssl x509 -in "$DEST/rp.crt" -outform der | base64 -w 0)"
+export SAML_SP_SIGNING_CERTIFICATE
+SAML_IDP_SIGNING_CERTIFICATE="$(openssl x509 -in "$DEST/idp.crt" -outform der | base64 -w 0)"
+export SAML_IDP_SIGNING_CERTIFICATE
+# Keycloak expects PKCS#8, which `openssl rsa` would not produce from a PKCS#1 key.
+SAML_IDP_SIGNING_PRIVATE_KEY="$(openssl pkey -in "$DEST/idp.key" -outform der | base64 -w 0)"
+export SAML_IDP_SIGNING_PRIVATE_KEY
+envsubst '$SAML_IDP_SIGNING_CERTIFICATE $SAML_IDP_SIGNING_PRIVATE_KEY $SAML_SP_SIGNING_CERTIFICATE' \
+  < "$KEYCLOAK_REALM_FILE.template" > "$KEYCLOAK_REALM_FILE"
 
 cat <<'MESSAGE'
 

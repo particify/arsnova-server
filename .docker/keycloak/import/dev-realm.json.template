@@ -2,6 +2,51 @@
   "id": "ea8de604-ebb3-4b34-bc40-035b97f6cba8",
   "realm": "dev",
   "enabled": true,
+  "attributes": {
+    "saml.descriptor.cache.seconds": "600",
+    "saml.signature.algorithm": "RSA_SHA256"
+  },
+  "components": {
+    "org.keycloak.keys.KeyProvider": [
+      {
+        "name": "aes-generated",
+        "providerId": "aes-generated",
+        "config": {
+          "priority": ["100"]
+        }
+      },
+      {
+        "name": "hmac-generated-hs512",
+        "providerId": "hmac-generated",
+        "config": {
+          "priority": ["100"],
+          "algorithm": ["HS512"]
+        }
+      },
+      {
+        "name": "rsa-enc-generated",
+        "providerId": "rsa-enc-generated",
+        "config": {
+          "priority": ["100"],
+          "algorithm": ["RSA-OAEP"],
+          "keyUse": ["ENC"]
+        }
+      },
+      {
+        "name": "rsa-imported",
+        "providerId": "rsa",
+        "config": {
+          "priority": ["200"],
+          "enabled": ["true"],
+          "active": ["true"],
+          "algorithm": ["RS256"],
+          "keyUse": ["SIG"],
+          "privateKey": ["$SAML_IDP_SIGNING_PRIVATE_KEY"],
+          "certificate": ["$SAML_IDP_SIGNING_CERTIFICATE"]
+        }
+      }
+    ]
+  },
   "clients": [
     {
       "id": "cb6d2c8c-7122-49c7-a677-61c4e38cf26d",
@@ -21,7 +66,7 @@
         "saml_assertion_consumer_url_post": "https://apisix:9443/api/login/saml2/sso/fc62cd95-bea9-4aa3-987d-fa976ef300f3",
         "saml.server.signature": "true",
         "saml.server.signature.keyinfo.ext": "false",
-        "saml.signing.certificate": "$SAML_SIGNING_CERTIFICATE",
+        "saml.signing.certificate": "$SAML_SP_SIGNING_CERTIFICATE",
         "realm_client": "false",
         "saml.artifact.binding.identifier": "car5H0Itl+DzojWMT9P5EGiKUcg=",
         "saml.signature.algorithm": "RSA_SHA256",
