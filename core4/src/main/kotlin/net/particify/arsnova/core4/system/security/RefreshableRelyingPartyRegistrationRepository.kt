@@ -4,6 +4,7 @@
 package net.particify.arsnova.core4.system.security
 
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
 import org.opensaml.security.x509.X509Support
@@ -75,24 +76,29 @@ class RefreshableRelyingPartyRegistrationRepository(
    * A federation aggregate describes more than one identity provider, and binding to whichever one
    * the document happens to list first is a misconfiguration nobody would notice. Settling the
    * entity ID here turns that into a startup failure, and it keeps a lookup to an indexed search.
+   *
+   * A document which describes none is a different case: nothing has loaded yet, which an endpoint
+   * that was unreachable while the application started recovers from on its own. That one is
+   * deferred to [assertingPartyEntityId] instead of being fatal, and reported from there --
+   * OpenSAML has already logged its own degraded-state error by this point.
    */
   private fun selectAssertingPartyEntityId(
       registrationId: UUID,
       registration: ExtendedRegistration,
       metadataRepository: AssertingPartyMetadataRepository
-  ): String {
+  ): String? {
     val configured = registration.assertingparty.entityId
     if (configured != null) {
       return configured
     }
     val candidates = metadataRepository.map { it.entityId }
-    require(candidates.size == 1) {
+    require(candidates.size <= 1) {
       "Ambiguous SAML configuration $registrationId: the metadata describes " +
           "${candidates.size} identity providers $candidates. Set " +
           "security.saml2.relyingparty.registration.$registrationId.assertingparty.entity-id " +
           "to select one of them."
     }
-    return candidates.single()
+    return candidates.singleOrNull()
   }
 
   private fun signingCredentials(
@@ -109,12 +115,13 @@ class RefreshableRelyingPartyRegistrationRepository(
       }
 
   private fun build(resolved: ResolvedRegistration): RelyingPartyRegistration? {
-    val metadata = resolved.metadataRepository.findByEntityId(resolved.assertingPartyEntityId)
+    val entityId = assertingPartyEntityId(resolved) ?: return null
+    val metadata = resolved.metadataRepository.findByEntityId(entityId)
     if (metadata == null) {
       logger.error(
           "SAML registration {}: the metadata no longer describes entity {}.",
           resolved.registrationId,
-          resolved.assertingPartyEntityId)
+          entityId)
       return null
     }
     return RelyingPartyRegistration.withAssertingPartyMetadata(metadata)
@@ -125,11 +132,64 @@ class RefreshableRelyingPartyRegistrationRepository(
         .build()
   }
 
+  /**
+   * Retries what startup could not settle, because the metadata may have loaded since. The first
+   * success is kept: resolving eagerly is what keeps a lookup to an indexed search rather than an
+   * iteration over the whole document.
+   *
+   * Failing here returns null rather than throwing, which leaves the registration unable to
+   * authenticate anyone. There is nothing to fall back to: without a document there is no
+   * verification certificate, so half a registration would be worse than none.
+   */
+  private fun assertingPartyEntityId(resolved: ResolvedRegistration): String? {
+    resolved.assertingPartyEntityId?.let {
+      return it
+    }
+    val candidates = resolved.metadataRepository.map { it.entityId }
+    val entityId = candidates.singleOrNull()
+    if (entityId == null) {
+      reportUnresolved(resolved, candidates)
+    } else {
+      resolved.assertingPartyEntityId = entityId
+      reportResolved(resolved, entityId)
+    }
+    return entityId
+  }
+
+  /** The count tells the two cases apart: nothing loaded yet, or an aggregate. */
+  private fun reportUnresolved(resolved: ResolvedRegistration, candidates: List<String>) {
+    if (resolved.unresolvedReported.compareAndSet(false, true)) {
+      logger.error(
+          "SAML registration {}: the metadata describes {} identity providers {}, so it " +
+              "authenticates nobody.",
+          resolved.registrationId,
+          candidates.size,
+          candidates)
+    }
+  }
+
+  /** Only reached while memoizing, so the recovery of an outage is announced exactly once. */
+  private fun reportResolved(resolved: ResolvedRegistration, entityId: String) {
+    if (resolved.unresolvedReported.compareAndSet(true, false)) {
+      logger.info(
+          "SAML registration {}: the metadata now describes entity {}, so it authenticates again.",
+          resolved.registrationId,
+          entityId)
+    }
+  }
+
   private class ResolvedRegistration(
       val registrationId: UUID,
       val entityId: String,
-      val assertingPartyEntityId: String,
+      @Volatile var assertingPartyEntityId: String?,
       val metadataRepository: AssertingPartyMetadataRepository,
       val signingCredentials: List<Saml2X509Credential>
-  )
+  ) {
+    /**
+     * Whether the unresolved state has been logged already. Spring's SAML configurer iterates the
+     * repository twice while it builds the filter chain and the metadata endpoint iterates it per
+     * request, so logging per lookup would turn one outage into a stream of identical lines.
+     */
+    val unresolvedReported = AtomicBoolean()
+  }
 }

@@ -98,8 +98,7 @@ class Saml2MetadataResolverFactory(registrations: Map<UUID, ExtendedRegistration
     // providers a federation aggregate carries as well.
     resolver.setIndexes(setOf<MetadataIndex>(RoleMetadataIndex()))
     resolvers.add(resolver)
-    // failFastInitialization stays at its default, so an identity provider which cannot be reached
-    // stops the application instead of leaving a registration which never works.
+    // Whether a failure here stops the application is decided per source, see createHttpResolver.
     resolver.initialize()
     return OpenSaml5AssertingPartyMetadataRepository(resolver)
   }
@@ -136,8 +135,20 @@ class Saml2MetadataResolverFactory(registrations: Map<UUID, ExtendedRegistration
         createResourceResolver(location)
       }
 
+  /**
+   * Fail-fast is off for an endpoint but stays on for a local resource. An endpoint which cannot be
+   * reached while the application starts is a transient condition OpenSAML recovers from on its own
+   * -- a failed refresh reschedules itself at the minimum delay and keeps trying -- so halting
+   * would take every other login method down with it over something that fixes itself. A path which
+   * does not resolve is a misconfiguration which never will.
+   *
+   * A file which is missing is fatal either way: [ResourceBackedMetadataResolver]'s constructor
+   * throws before `initialize()` is ever reached, so the flag has nothing to suppress.
+   */
   private fun createHttpResolver(location: String) =
-      HTTPMetadataResolver(checkNotNull(sharedHttpClient), location)
+      HTTPMetadataResolver(checkNotNull(sharedHttpClient), location).apply {
+        setFailFastInitialization(false)
+      }
 
   private fun createResourceResolver(location: String) =
       ResourceBackedMetadataResolver(SpringMetadataResource(resourceLoader.getResource(location)))

@@ -87,8 +87,26 @@ A refresh which fails -- the identity provider is unreachable, answers with an e
 or serves something which does not parse -- is logged at `ERROR`,
 and the last document which did parse stays in use.
 Logins therefore survive an outage of the metadata endpoint.
-The fetch during startup is the exception:
-it stops the application, so a registration which could never work is not left in place quietly.
+
+What the fetch during startup does depends on where the metadata comes from.
+A `file:` or `classpath:` source which cannot be read stops the application:
+a path which does not resolve is a misconfiguration, and no retry will ever fix it.
+An `http` or `https` source only logs at `ERROR`, and the application starts without it --
+whether it could not be fetched at all, or was fetched and then rejected because it does not
+parse or fails the signature verification below.
+An endpoint serving an error page while it is itself being deployed looks no different from one
+which is permanently misconfigured, so both are retried rather than either being fatal.
+Every other login method -- local accounts, LDAP, and the other SAML registrations -- is
+unaffected.
+
+A registration left in that state authenticates nobody until a refresh succeeds.
+It does not fall back to anything:
+with no document there is no signing certificate to verify an assertion against,
+so there is nothing it could safely accept.
+Recovery needs no intervention, because the retry is the ordinary refresh:
+the next attempt is due after the minimum delay of 5 minutes, and repeats until it succeeds.
+The registration itself is logged once at `ERROR` when it becomes unusable and once at `INFO`
+when it recovers, rather than on every lookup.
 
 Metadata which describes more than one identity provider -- a federation aggregate -- needs
 `assertingparty.entity-id` to settle which one the registration binds to.
