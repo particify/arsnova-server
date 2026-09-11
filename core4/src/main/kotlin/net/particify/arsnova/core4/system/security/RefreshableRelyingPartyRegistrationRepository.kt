@@ -65,25 +65,32 @@ class RefreshableRelyingPartyRegistrationRepository(
     return ResolvedRegistration(
         registrationId = registrationId,
         entityId = registration.entityId,
-        assertingPartyEntityId = selectAssertingPartyEntityId(registrationId, metadataRepository),
+        assertingPartyEntityId =
+            selectAssertingPartyEntityId(registrationId, registration, metadataRepository),
         metadataRepository = metadataRepository,
         signingCredentials = signingCredentials(registrationId, registration))
   }
 
   /**
    * A federation aggregate describes more than one identity provider, and binding to whichever one
-   * the document happens to list first is a misconfiguration nobody would notice, so a document
-   * describing several is rejected while the application starts. Resolving the entity ID once here
-   * also keeps a lookup to an indexed search rather than an iteration.
+   * the document happens to list first is a misconfiguration nobody would notice. Settling the
+   * entity ID here turns that into a startup failure, and it keeps a lookup to an indexed search.
    */
   private fun selectAssertingPartyEntityId(
       registrationId: UUID,
+      registration: ExtendedRegistration,
       metadataRepository: AssertingPartyMetadataRepository
   ): String {
+    val configured = registration.assertingparty.entityId
+    if (configured != null) {
+      return configured
+    }
     val candidates = metadataRepository.map { it.entityId }
     require(candidates.size == 1) {
       "Ambiguous SAML configuration $registrationId: the metadata describes " +
-          "${candidates.size} identity providers $candidates instead of exactly one."
+          "${candidates.size} identity providers $candidates. Set " +
+          "security.saml2.relyingparty.registration.$registrationId.assertingparty.entity-id " +
+          "to select one of them."
     }
     return candidates.single()
   }

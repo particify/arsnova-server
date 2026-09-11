@@ -50,6 +50,8 @@ security:
 `assertingparty.metadata-uri`:: Location of the identity provider's metadata.
   Required.
   It is fetched while the application starts and re-read afterwards, see below.
+`assertingparty.entity-id`:: Entity ID of the identity provider.
+  Only needed when the metadata describes more than one, see below.
 `signing.credentials`:: Key and certificate used to sign requests.
   Signing is mandatory, so both locations have to be set;
   a registration missing either of them fails at startup.
@@ -81,11 +83,10 @@ Logins therefore survive an outage of the metadata endpoint.
 The fetch during startup is the exception:
 it stops the application, so a registration which could never work is not left in place quietly.
 
-The metadata has to describe exactly one identity provider.
-A document describing several -- a federation aggregate -- is rejected while the application
-starts, with a message listing the ones it found,
-because binding to whichever of them the document happens to list first is a misconfiguration
-nobody would notice.
+Metadata which describes more than one identity provider -- a federation aggregate -- needs
+`assertingparty.entity-id` to settle which one the registration binds to.
+Without it, metadata describing exactly one identity provider binds to that one,
+and metadata describing several fails at startup with a message listing them.
 
 == Attribute mapping
 

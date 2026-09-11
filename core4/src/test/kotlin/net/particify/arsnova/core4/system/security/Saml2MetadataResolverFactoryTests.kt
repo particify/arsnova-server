@@ -44,17 +44,27 @@ class Saml2MetadataResolverFactoryTests {
   }
 
   @Test
-  fun shouldRejectAggregateDescribingSeveralIdentityProviders() {
-    val exception = assertThrows<IllegalArgumentException> { createRepository() }
+  fun shouldRejectAggregateWithoutConfiguredEntityId() {
+    val exception = assertThrows<IllegalArgumentException> { createRepository(null) }
     val message = checkNotNull(exception.message)
-    Assertions.assertTrue(message.contains("2 identity providers"), message)
     Assertions.assertTrue(message.contains(FIRST_ENTITY_ID), message)
     Assertions.assertTrue(message.contains(SECOND_ENTITY_ID), message)
+    Assertions.assertTrue(message.contains("assertingparty.entity-id"), message)
   }
 
-  private fun createRepository(): RefreshableRelyingPartyRegistrationRepository =
+  @Test
+  fun shouldSelectConfiguredEntityFromAggregate() {
+    val repository = createRepository(SECOND_ENTITY_ID)
+    val registration = checkNotNull(repository.findByRegistrationId(registrationId.toString()))
+    Assertions.assertEquals(SECOND_ENTITY_ID, registration.assertingPartyMetadata.entityId)
+  }
+
+  private fun createRepository(
+      assertingPartyEntityId: String?
+  ): RefreshableRelyingPartyRegistrationRepository =
       RefreshableRelyingPartyRegistrationRepository(
-              relyingPartyProperties(registrationId, identityProvider, aggregateLocation))
+              relyingPartyProperties(
+                  registrationId, identityProvider, aggregateLocation, assertingPartyEntityId))
           .also { repository = it }
 
   private fun aggregate(vararg entityIds: String): String {
