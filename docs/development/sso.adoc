@@ -48,7 +48,8 @@ security:
 `entity-id`:: Entity ID of the service provider.
   `{registrationId}` is substituted with the registration's UUID.
 `assertingparty.metadata-uri`:: Location of the identity provider's metadata.
-  Required, and fetched at startup.
+  Required.
+  It is fetched while the application starts and re-read afterwards, see below.
 `signing.credentials`:: Key and certificate used to sign requests.
   Signing is mandatory, so both locations have to be set;
   a registration missing either of them fails at startup.
@@ -59,6 +60,32 @@ security:
   `SAML` by default, which leaves several registrations indistinguishable,
   so an installation offering more than one should set it.
 `order`:: Position among the login options, `0` by default.
+
+== Metadata refresh
+
+The identity provider's metadata is fetched while the application starts and re-read on a schedule
+after that, so a rotated signing key is picked up without a restart.
+
+The schedule comes from the document itself:
+the next refresh is due after three quarters of the time left until its `cacheDuration` or
+`validUntil` runs out, clamped to at least 5 minutes and at most 4 hours.
+A document which states neither is re-read every 4 hours.
+None of this is configurable.
+Over HTTP the request is conditional, so a document which has not changed costs a `304` and
+nothing else.
+
+A refresh which fails -- the identity provider is unreachable, answers with an error,
+or serves something which does not parse -- is logged at `ERROR`,
+and the last document which did parse stays in use.
+Logins therefore survive an outage of the metadata endpoint.
+The fetch during startup is the exception:
+it stops the application, so a registration which could never work is not left in place quietly.
+
+The metadata has to describe exactly one identity provider.
+A document describing several -- a federation aggregate -- is rejected while the application
+starts, with a message listing the ones it found,
+because binding to whichever of them the document happens to list first is a misconfiguration
+nobody would notice.
 
 == Attribute mapping
 

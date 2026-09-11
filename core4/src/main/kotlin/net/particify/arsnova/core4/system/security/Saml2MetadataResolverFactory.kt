@@ -1,0 +1,184 @@
+/* Copyright 2026 Particify GmbH
+ * SPDX-License-Identifier: MIT
+ */
+package net.particify.arsnova.core4.system.security
+
+import java.io.File
+import java.io.InputStream
+import java.net.URI
+import java.net.URL
+import java.util.UUID
+import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.shibboleth.shared.component.DestructableComponent
+import net.shibboleth.shared.resolver.ResolverException
+import net.shibboleth.shared.resource.Resource as MetadataResource
+import org.apache.hc.client5.http.config.RequestConfig
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
+import org.apache.hc.client5.http.impl.classic.HttpClients
+import org.apache.hc.core5.util.Timeout
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport
+import org.opensaml.saml.metadata.resolver.MetadataResolver
+import org.opensaml.saml.metadata.resolver.RefreshableMetadataResolver
+import org.opensaml.saml.metadata.resolver.filter.MetadataFilter
+import org.opensaml.saml.metadata.resolver.impl.AbstractReloadingMetadataResolver
+import org.opensaml.saml.metadata.resolver.impl.HTTPMetadataResolver
+import org.opensaml.saml.metadata.resolver.impl.ResourceBackedMetadataResolver
+import org.opensaml.saml.metadata.resolver.index.MetadataIndex
+import org.opensaml.saml.metadata.resolver.index.impl.RoleMetadataIndex
+import org.slf4j.LoggerFactory
+import org.springframework.core.io.DefaultResourceLoader
+import org.springframework.core.io.Resource
+import org.springframework.security.saml2.core.OpenSamlInitializationService
+import org.springframework.security.saml2.provider.service.registration.AssertingPartyMetadataRepository
+import org.springframework.security.saml2.provider.service.registration.OpenSaml5AssertingPartyMetadataRepository
+
+private const val HTTP_TIMEOUT_SECONDS = 10L
+
+private val logger = LoggerFactory.getLogger(Saml2MetadataResolverFactory::class.java)
+
+/**
+ * Builds one metadata resolver per SAML registration, each of which re-reads its source on a
+ * schedule derived from the document's own `cacheDuration` and `validUntil`. The factory owns the
+ * resolvers, so whoever creates it has to [destroy] it.
+ *
+ * The resolvers are assembled by hand instead of through
+ * [OpenSaml5AssertingPartyMetadataRepository.withTrustedMetadataLocation], which always backs the
+ * location with a [ResourceBackedMetadataResolver]. That one only re-reads a document whose
+ * `lastModified()` moved past the last refresh, and for an `https` location that value is the
+ * `Last-Modified` response header -- or the epoch when the server sends none, in which case the
+ * timer fires forever without the document ever being read again. [HTTPMetadataResolver] instead
+ * issues a conditional request and re-fetches unconditionally when the server offered no validator
+ * to condition it on.
+ */
+class Saml2MetadataResolverFactory(registrations: Map<UUID, ExtendedRegistration>) {
+  private val resourceLoader = DefaultResourceLoader()
+  private val resolvers = mutableListOf<MetadataResolver>()
+  private val sharedHttpClient: CloseableHttpClient?
+
+  init {
+    // Registers the parser pool the resolvers are initialized with. Spring's SAML classes do this
+    // from their static initializers, but a resolver is built before any of them is touched, and
+    // without the pool it fails with an exception naming nothing that points here.
+    OpenSamlInitializationService.initialize()
+    sharedHttpClient =
+        if (registrations.values.any { isHttpLocation(it.assertingparty.metadataUri) }) {
+          createHttpClient()
+        } else {
+          null
+        }
+  }
+
+  fun create(
+      registrationId: UUID,
+      registration: ExtendedRegistration
+  ): AssertingPartyMetadataRepository {
+    val location =
+        requireNotNull(registration.assertingparty.metadataUri) {
+          "Incomplete SAML configuration $registrationId: no metadata URI"
+        }
+    val resolver = createResolver(location)
+    resolver.setId("saml2-metadata-$registrationId")
+    resolver.parserPool = XMLObjectProviderRegistrySupport.getParserPool()
+    resolver.metadataFilter = createMetadataFilter(registration)
+    // Restricts iteration to identity providers, which is what tells them apart from the service
+    // providers a federation aggregate carries as well.
+    resolver.setIndexes(setOf<MetadataIndex>(RoleMetadataIndex()))
+    resolvers.add(resolver)
+    // failFastInitialization stays at its default, so an identity provider which cannot be reached
+    // stops the application instead of leaving a registration which never works.
+    resolver.initialize()
+    return OpenSaml5AssertingPartyMetadataRepository(resolver)
+  }
+
+  /** Re-reads every metadata document instead of waiting for the next scheduled refresh. */
+  internal fun refresh() {
+    resolvers.filterIsInstance<RefreshableMetadataResolver>().forEach { refresh(it) }
+  }
+
+  /**
+   * Idempotent, because a resolver's own cleanup is not: each of them holds a timer which has to be
+   * cancelled exactly once, and a Spring context can be closed after a caller released the factory
+   * by hand.
+   */
+  fun destroy() {
+    resolvers.filterIsInstance<DestructableComponent>().forEach { it.destroy() }
+    resolvers.clear()
+    sharedHttpClient?.close()
+  }
+
+  /** A failed refresh keeps the last good document, which is what the scheduled one does too. */
+  private fun refresh(resolver: RefreshableMetadataResolver) {
+    try {
+      resolver.refresh()
+    } catch (e: ResolverException) {
+      logger.error("Failed to refresh SAML metadata.", e)
+    }
+  }
+
+  private fun createResolver(location: String): AbstractReloadingMetadataResolver =
+      if (isHttpLocation(location)) {
+        createHttpResolver(location)
+      } else {
+        createResourceResolver(location)
+      }
+
+  private fun createHttpResolver(location: String) =
+      HTTPMetadataResolver(checkNotNull(sharedHttpClient), location)
+
+  private fun createResourceResolver(location: String) =
+      ResourceBackedMetadataResolver(SpringMetadataResource(resourceLoader.getResource(location)))
+
+  /**
+   * Seam for validating a metadata document before it is accepted. Nothing is validated yet, so the
+   * document is trusted on the strength of the connection it arrived over.
+   */
+  @Suppress("FunctionOnlyReturningConstant", "UnusedParameter")
+  private fun createMetadataFilter(registration: ExtendedRegistration): MetadataFilter? = null
+
+  private fun createHttpClient(): CloseableHttpClient {
+    val requestConfig =
+        RequestConfig.custom()
+            .setConnectionRequestTimeout(Timeout.ofSeconds(HTTP_TIMEOUT_SECONDS))
+            // Without a response timeout an unresponsive identity provider holds the refresh
+            // timer's thread indefinitely.
+            .setResponseTimeout(Timeout.ofSeconds(HTTP_TIMEOUT_SECONDS))
+            .build()
+    return HttpClients.custom().setDefaultRequestConfig(requestConfig).build()
+  }
+
+  private fun isHttpLocation(location: String?) =
+      location != null && (location.startsWith("http://") || location.startsWith("https://"))
+}
+
+/**
+ * Adapts a Spring [Resource] to the resource abstraction OpenSAML reads a metadata document from.
+ * Spring Security carries an equivalent adapter, but it is private to its own builder.
+ */
+private class SpringMetadataResource(private val resource: Resource) : MetadataResource {
+  override fun exists() = resource.exists()
+
+  override fun isFile() = resource.isFile()
+
+  override fun isReadable() = resource.isReadable()
+
+  override fun isOpen() = resource.isOpen()
+
+  override fun getURL(): URL = resource.getURL()
+
+  override fun getURI(): URI = resource.getURI()
+
+  override fun getFile(): File = resource.getFile()
+
+  override fun getInputStream(): InputStream = resource.getInputStream()
+
+  override fun contentLength() = resource.contentLength()
+
+  override fun lastModified() = resource.lastModified()
+
+  override fun createRelativeResource(relativePath: String): MetadataResource =
+      SpringMetadataResource(resource.createRelative(relativePath))
+
+  override fun getFilename(): String? = resource.getFilename()
+
+  override fun getDescription(): String = resource.getDescription()
+}

@@ -4,6 +4,10 @@
 package net.particify.arsnova.core4.user
 
 import java.util.UUID
+import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import org.springframework.boot.security.saml2.autoconfigure.Saml2RelyingPartyProperties
+import org.springframework.core.io.DefaultResourceLoader
 import org.springframework.test.context.DynamicPropertyRegistry
 
 const val SAML_IDP_ENTITY_ID = "https://idp.example.com/saml2"
@@ -75,6 +79,32 @@ fun registerRelyingPartyDisplay(
   val prefix = relyingPartyPrefix(registrationId)
   registry.add("$prefix.title") { title }
   registry.add("$prefix.order") { order }
+}
+
+/**
+ * The same registration as [registerRelyingParty] describes, bound already, for a test which drives
+ * the registration repository without a Spring context.
+ */
+fun relyingPartyProperties(
+    registrationId: UUID,
+    identityProvider: Saml2TestIdentityProvider,
+    metadataUri: String = identityProvider.metadataLocation,
+    assertingPartyEntityId: String? = null
+): ExtendedSaml2RelyingPartyProperties {
+  val resourceLoader = DefaultResourceLoader()
+  val credential =
+      Saml2RelyingPartyProperties.Registration.Signing.Credential().apply {
+        privateKeyLocation = resourceLoader.getResource(identityProvider.privateKeyLocation)
+        certificateLocation = resourceLoader.getResource(identityProvider.certificateLocation)
+      }
+  val registration =
+      ExtendedRegistration().apply {
+        entityId = spEntityId(registrationId)
+        assertingparty.entityId = assertingPartyEntityId
+        assertingparty.metadataUri = metadataUri
+        signing.credentials.add(credential)
+      }
+  return ExtendedSaml2RelyingPartyProperties(mapOf(registrationId to registration))
 }
 
 private fun relyingPartyPrefix(registrationId: String) =

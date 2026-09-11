@@ -6,6 +6,8 @@ package net.particify.arsnova.core4.user
 import java.math.BigInteger
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.attribute.FileTime
+import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -54,6 +56,14 @@ private const val KEY_SIZE = 2048
 private const val CERTIFICATE_VALIDITY_DAYS = 365L
 private const val ASSERTION_VALIDITY_MINUTES = 5L
 private const val PEM_LINE_LENGTH = 64
+private const val METADATA_FILE_NAME = "idp-metadata.xml"
+
+/**
+ * How far ahead of now a rewritten metadata document is dated. `ResourceBackedMetadataResolver`
+ * skips a document whose modification time is not strictly after its last refresh, which a rewrite
+ * within the same millisecond is not.
+ */
+private const val MTIME_LOOKAHEAD_SECONDS = 2L
 
 /**
  * Fabricates signed SAML responses so the converter can be driven through the real filter chain
@@ -67,23 +77,44 @@ private const val PEM_LINE_LENGTH = 64
  */
 @Suppress("TooManyFunctions")
 class Saml2TestIdentityProvider {
-  private val credential: BasicX509Credential
+  private var credential: BasicX509Credential
   private val directory: Path = Files.createTempDirectory("core4-saml2-test")
+  private val metadataPath: Path = directory.resolve(METADATA_FILE_NAME)
 
   val privateKeyLocation: String
   val certificateLocation: String
-  val metadataLocation: String
+  val metadataLocation: String = "file:$metadataPath"
+
+  /** The certificate the responses are currently signed with. */
+  val signingCertificate: X509Certificate
+    get() = credential.entityCertificate
+
+  /** The metadata document as the identity provider currently publishes it. */
+  val metadataDocument: String
+    get() = buildMetadata(credential.entityCertificate)
 
   init {
     InitializationService.initialize()
-    val keyPair =
-        KeyPairGenerator.getInstance("RSA").apply { initialize(KEY_SIZE) }.generateKeyPair()
+    val keyPair = generateKeyPair()
     val certificate = selfSign(keyPair.private, keyPair.public)
     credential = BasicX509Credential(certificate, keyPair.private)
     privateKeyLocation = writePem("idp.key", "PRIVATE KEY", keyPair.private.encoded)
     certificateLocation = writePem("idp.crt", "CERTIFICATE", certificate.encoded)
-    metadataLocation = writeMetadata(certificate)
+    writeMetadata(certificate)
     directory.toFile().deleteOnExit()
+  }
+
+  /**
+   * Replaces the signing key and republishes the metadata, as an identity provider does when it
+   * rotates its key. Responses are signed with the new key from here on.
+   */
+  fun rotateSigningKey() {
+    val keyPair = generateKeyPair()
+    val certificate = selfSign(keyPair.private, keyPair.public)
+    credential = BasicX509Credential(certificate, keyPair.private)
+    writeMetadata(certificate)
+    Files.setLastModifiedTime(
+        metadataPath, FileTime.from(Instant.now().plusSeconds(MTIME_LOOKAHEAD_SECONDS)))
   }
 
   /**
@@ -252,7 +283,15 @@ class Saml2TestIdentityProvider {
     return writeFile(fileName, pem)
   }
 
-  private fun writeMetadata(certificate: X509Certificate): String {
+  private fun generateKeyPair(): KeyPair =
+      KeyPairGenerator.getInstance("RSA").apply { initialize(KEY_SIZE) }.generateKeyPair()
+
+  private fun writeMetadata(certificate: X509Certificate) {
+    Files.writeString(metadataPath, buildMetadata(certificate))
+    metadataPath.toFile().deleteOnExit()
+  }
+
+  private fun buildMetadata(certificate: X509Certificate): String {
     val encoded = Base64.getEncoder().encodeToString(certificate.encoded)
     val metadata =
         """
@@ -272,7 +311,7 @@ class Saml2TestIdentityProvider {
         </md:EntityDescriptor>
         """
             .trimIndent()
-    return writeFile("idp-metadata.xml", metadata)
+    return metadata
   }
 
   private fun writeFile(fileName: String, content: String): String {
