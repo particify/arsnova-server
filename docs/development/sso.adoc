@@ -248,6 +248,13 @@ That is realistic for a single identity provider.
 It does not reproduce a federation, whose aggregate is signed with a separate long-lived key
 belonging to the federation operator.
 
+core4's development configuration pins that certificate, the generated `idp.crt`,
+as the metadata verification certificate,
+so the development environment verifies the descriptor's signature rather than accepting it
+unverified.
+The credential script therefore has to have run before core4 starts:
+the certificate is a required file now, the same way the service provider's key already was.
+
 The import creates the realm only if it does not exist yet:
 the strategy is `IGNORE_EXISTING`, and an existing realm is logged as
 `Realm 'dev' already exists. Import skipped`.
@@ -280,6 +287,36 @@ so it should be looked up with `volume ls` rather than assumed.
 Credentials are affected by the same behaviour:
 regenerating them without dropping the realm leaves the realm holding the old signing certificate
 while core4 signs with the new key, and Keycloak rejects every request.
+
+=== Exercising metadata refresh and verification
+
+The refresh interval is derived from the descriptor's `cacheDuration` and clamped to at least five
+minutes, so the ten minutes the realm publishes result in a refresh roughly every seven and a half
+minutes.
+OpenSAML logs each refresh at `INFO`, naming the time the next one is due,
+so nothing needs to be configured to see that refreshes happen.
+
+`LOGGING_LEVEL_ORG_OPENSAML_SAML_METADATA_RESOLVER_IMPL=DEBUG` adds detail for each refresh,
+but that detail is weak evidence here:
+Keycloak sends neither `ETag` nor `Last-Modified` and stamps a fresh document ID onto every
+response, so this identity provider never gives the conditional request a condition it can satisfy
+and no refresh can end in a `304`.
+Every refresh is reported as new metadata, whether anything actually changed or not.
+
+What does prove a refresh took effect is changing the descriptor.
+Adding a second RSA signing key provider to the realm in the admin console changes what the
+descriptor advertises, and core4 picks that up within one refresh interval, without being restarted.
+Which change it is depends on the priority given to the new provider:
+
+* A *higher* priority than the seeded provider has Keycloak sign the descriptor with a key which is
+  not pinned, so verification fails and the refresh is logged at `ERROR`.
+  The last document which verified stays in use, so logins keep working until core4 is restarted.
+* A *lower* priority leaves the signature valid and simply adds a second signing key to the
+  descriptor.
+
+Take care with the admin console while doing this:
+saving the realm's general settings can write an empty signature algorithm back,
+which switches descriptor signing off with nothing said about it.
 
 == Migration from v3
 
