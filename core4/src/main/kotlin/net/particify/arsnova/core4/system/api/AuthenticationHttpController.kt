@@ -3,6 +3,7 @@
  */
 package net.particify.arsnova.core4.system.api
 
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import java.util.UUID
 import net.particify.arsnova.core4.system.config.LocalAccountPolicy
@@ -45,6 +46,7 @@ class AuthenticationHttpController(
   fun refreshAuthentication(
       @AuthenticationPrincipal user: User,
       authentication: Authentication,
+      request: HttpServletRequest,
       response: HttpServletResponse
   ): AuthenticationWrapper {
     if (authentication !is RefreshJwtAuthentication)
@@ -59,7 +61,7 @@ class AuthenticationHttpController(
     }
     val subject = authentication.principal!!.id.toString()
     val accessToken = jwtUtils.encodeJwt(subject, user.roles.map { it.name!! })
-    refreshCookieComponent.add(subject, user.tokenVersion!!, response)
+    refreshCookieComponent.renew(subject, user.tokenVersion!!, request, response)
     return AuthenticationWrapper(accessToken)
   }
 
