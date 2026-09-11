@@ -215,6 +215,12 @@ Instead, they can be generated after cloning the repository using the
 link:core4/generate-credentials.sh[] script.
 This script also creates realm data for Keycloak from a template.
 
+Re-running it is safe: an existing keypair is kept and only the realm data is rendered again,
+so a changed template can be picked up without invalidating the certificate an already imported
+realm holds.
+Pass `--force` to replace the keypair instead -- the realm then has to be dropped as well,
+see below.
+
 === Keycloak
 
 The development environment includes Keycloak to help with the development of SSO features.
@@ -232,7 +238,33 @@ the strategy is `IGNORE_EXISTING`, and an existing realm is logged as
 `Realm 'dev' already exists. Import skipped`.
 Changes to the template therefore do not reach an environment which imported the realm already,
 the users above included.
-Picking them up means dropping the realm or removing Keycloak's database volume.
+Deleting the realm makes the next start import it from the template again:
+
+[source,shell]
+----
+./pdk compose exec keycloak /opt/keycloak/bin/kcadm.sh delete realms/dev --no-config \
+  --server http://localhost:8080 --realm master --user admin --password admin
+./pdk compose restart keycloak
+----
+
+If that does not work, resetting Keycloak's database has the same effect:
+
+[source,shell]
+----
+./pdk compose stop keycloak
+./pdk compose exec postgresql-keycloak psql -U keycloak -d postgres -c 'DROP DATABASE keycloak'
+./pdk compose exec postgresql-keycloak psql -U keycloak -d postgres \
+  -c 'CREATE DATABASE keycloak OWNER keycloak'
+./pdk compose start keycloak
+----
+
+Removing Keycloak's database volume works as well.
+Its name carries a Compose project prefix which differs per workspace,
+so it should be looked up with `volume ls` rather than assumed.
+
+Credentials are affected by the same behaviour:
+regenerating them without dropping the realm leaves the realm holding the old signing certificate
+while core4 signs with the new key, and Keycloak rejects every request.
 
 == Migration from v3
 
