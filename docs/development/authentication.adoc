@@ -51,10 +51,34 @@ Following a common security practise, two separate tokens are used:
 * A short-lived access token which authorizes the client for API access.
   It cannot be revoked.
   The client sends this token in the `Authorization` header for further API requests.
-* A long-lived refresh token which allows the client to request new access tokens.
+* A refresh token which allows the client to request new access tokens.
   It can be revoked by increasing the users token version.
   To protect this token against XSS attacks, it is stored using an `HttpOnly` cookie.
   Therefore, it is not accessible through JavaScript.
+  It lives as long as the session it belongs to, see <<Session lifetime>>.
+
+=== Session lifetime
+
+A session lasts three hours, counted from its last refresh: each rotation of the refresh token
+extends it by that period again, so a session ends three hours after the client stopped using it.
+
+`POST /api/auth/login` accepts a `rememberMe` field to start a session lasting
+`security.login.remember-me-max-age` instead, `180d` by default.
+Only a login with a username and a password offers that choice;
+a session started through an external login always carries the short lifetime.
+A guest account is the exception: it exists as its refresh token alone,
+so ending its session would discard the account with it, and it therefore always gets the
+configured lifetime.
+
+Leaving `security.login.remember-me-max-age` unset withdraws the option altogether.
+`rememberMe` is then ignored, `GET /api/configuration` omits the `rememberMeEnabled` UI setting so
+that a client hides the choice, and every session, a guest account's included,
+is limited to three hours.
+
+The lifetime travels as a claim of the signed refresh token, so a rotation continues the session
+rather than deciding it anew.
+A token issued before that claim existed keeps the remembered lifetime,
+which is what it had been issued with.
 
 === Obtaining tokens
 

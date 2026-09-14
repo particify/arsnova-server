@@ -22,18 +22,27 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 
 private const val CONTEXT_PATH = "/api"
 private const val FLAG = "1"
+private const val VERSION_CLAIM = "version"
+
+/** The lifetime configured for a remembered session, 180 days. */
+private const val REMEMBERED_MAX_AGE = 15552000
+
+/** The fixed lifetime of a session which is not remembered, 3 hours. */
+private const val SESSION_MAX_AGE = 10800
 
 /**
  * A refresh rotates the cookie, so the policy has to be recovered from the cookies of the request.
  * It is signalled by [PARTITIONED_REFRESH_TOKEN_COOKIE] because the refresh request itself is
- * same-site and carries no indication of the context the cookie is used in.
+ * same-site and carries no indication of the context the cookie is used in. The lifetime is
+ * recovered from the token instead, which the refresh decodes anyway.
  */
 class RefreshCookieRotationTests {
   private val securityProperties = securityProperties()
   private val jwtUtils = JwtUtils(securityProperties, jwtDecoder(securityProperties.jwt.secret))
   private val user = User(id = UUID.randomUUID())
   private val servletContext = MockServletContext().apply { contextPath = CONTEXT_PATH }
-  private val refreshCookieComponent = RefreshCookieComponent(jwtUtils, servletContext)
+  private val refreshCookieComponent =
+      RefreshCookieComponent(jwtUtils, securityProperties, servletContext)
   private val provider = RefreshJwtAuthenticationProvider(jwtUtils, SingleUserService(user))
 
   @Test
@@ -68,6 +77,38 @@ class RefreshCookieRotationTests {
     Assertions.assertEquals(user, authentication.principal)
   }
 
+  /** A rotation continues the session, so it cannot decide the lifetime anew. */
+  @Test
+  fun shouldRenewWithRememberedLifetimeOfToken() {
+    assertRenewedWithMaxAge(
+        issuedCookies(RefreshCookiePolicy.STRICT, rememberMe = true), REMEMBERED_MAX_AGE)
+  }
+
+  @Test
+  fun shouldRenewWithSessionLifetimeOfToken() {
+    assertRenewedWithMaxAge(issuedCookies(RefreshCookiePolicy.STRICT), SESSION_MAX_AGE)
+  }
+
+  /** A token issued before the lifetime was part of one was promised the remembered lifetime. */
+  @Test
+  fun shouldRenewTokenWithoutLifetimeAsRemembered() {
+    val cookies = arrayOf(Cookie(REFRESH_TOKEN_COOKIE, tokenWithoutLifetime()))
+    assertRenewedWithMaxAge(cookies, REMEMBERED_MAX_AGE)
+  }
+
+  /** The lifetime reaches the rotation through the provider, which decodes the token for it. */
+  private fun assertRenewedWithMaxAge(cookies: Array<Cookie>, maxAge: Int) {
+    val token = cookies.single { it.name == REFRESH_TOKEN_COOKIE }.value
+    val authentication = provider.authenticate(RefreshJwtAuthentication(token))
+    val lifetime = (authentication as RefreshJwtAuthentication).sessionLifetime
+    val refreshCookie = headerFor(renew(cookies, lifetime), REFRESH_TOKEN_COOKIE)
+    Assertions.assertTrue(refreshCookie.contains("; Max-Age=$maxAge"), refreshCookie)
+  }
+
+  private fun tokenWithoutLifetime() =
+      jwtUtils.encodeJwt(
+          user.id.toString(), listOf(REFRESH_ROLE), mapOf(VERSION_CLAIM to user.tokenVersion!!))
+
   private fun assertRenewedWithStrictPolicy(headers: List<String>) {
     val refreshCookie = headerFor(headers, REFRESH_TOKEN_COOKIE)
     Assertions.assertTrue(refreshCookie.contains("; SameSite=Strict"), refreshCookie)
@@ -78,16 +119,24 @@ class RefreshCookieRotationTests {
   }
 
   /** A browser drops a deleted cookie, so it is not sent back with the next request. */
-  private fun issuedCookies(policy: RefreshCookiePolicy): Array<Cookie> {
+  private fun issuedCookies(
+      policy: RefreshCookiePolicy,
+      rememberMe: Boolean = false
+  ): Array<Cookie> {
     val response = MockHttpServletResponse()
-    refreshCookieComponent.add(user.id.toString(), user.tokenVersion!!, response, policy)
+    refreshCookieComponent.add(
+        user.id.toString(), user.tokenVersion!!, response, policy, rememberMe)
     return response.cookies.filter { it.maxAge != 0 }.toTypedArray()
   }
 
-  private fun renew(cookies: Array<Cookie>): List<String> {
+  private fun renew(
+      cookies: Array<Cookie>,
+      lifetime: RefreshSessionLifetime = RefreshSessionLifetime()
+  ): List<String> {
     val request = MockHttpServletRequest().apply { setCookies(*cookies) }
     val response = MockHttpServletResponse()
-    refreshCookieComponent.renew(user.id.toString(), user.tokenVersion!!, request, response)
+    refreshCookieComponent.renew(
+        user.id.toString(), user.tokenVersion!!, lifetime, request, response)
     return response.getHeaders(HttpHeaders.SET_COOKIE)
   }
 

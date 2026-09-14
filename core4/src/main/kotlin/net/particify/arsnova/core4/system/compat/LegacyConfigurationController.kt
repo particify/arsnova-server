@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.system.compat
 
 import net.particify.arsnova.core4.system.compat.LegacyConfigurationController.LegacyConfiguration.LegacyAuthenticationProvider
 import net.particify.arsnova.core4.system.config.LocalAccountPolicy
+import net.particify.arsnova.core4.system.config.SecurityProperties
 import net.particify.arsnova.core4.system.config.ServiceProperties
 import net.particify.arsnova.core4.system.config.UiProperties
 import net.particify.arsnova.core4.system.security.RoomCreationPolicy
@@ -16,12 +17,16 @@ import org.springframework.web.bind.annotation.RestController
 /** UI setting the web client reads to hide its registration entry points. */
 private const val REGISTRATION_DISABLED = "registrationDisabled"
 
+/** UI setting the web client reads to offer a session outliving the browsing of it. */
+private const val REMEMBER_ME_ENABLED = "rememberMeEnabled"
+
 @RestController
 class LegacyConfigurationController(
     private val ldapProperties: LdapProperties,
     private val localAccountPolicy: LocalAccountPolicy,
     private val roomCreationPolicy: RoomCreationPolicy,
     private val saml2Properties: ExtendedSaml2RelyingPartyProperties,
+    private val securityProperties: SecurityProperties,
     private val serviceProperties: ServiceProperties,
     private val uiProperties: UiProperties
 ) {
@@ -80,16 +85,21 @@ class LegacyConfigurationController(
     }
   }
 
+  private fun buildUiSettings(): Map<String, Any> =
+      uiProperties.ui.plus(registrationSetting()).plus(rememberMeSetting())
+
   /**
    * The setting is only ever added, never set to `false`: a deployment which disabled registration
    * by hand keeps doing so, and the server can only be more restrictive than that hint.
    */
-  private fun buildUiSettings(): Map<String, Any> {
-    if (localAccountPolicy.selfRegistrationEnabled) {
-      return uiProperties.ui
-    }
-    return uiProperties.ui.plus(REGISTRATION_DISABLED to true)
-  }
+  private fun registrationSetting(): Map<String, Any> =
+      if (localAccountPolicy.selfRegistrationEnabled) mapOf()
+      else mapOf(REGISTRATION_DISABLED to true)
+
+  /** The setting is absent unless the option exists, so that a client without it offers none. */
+  private fun rememberMeSetting(): Map<String, Any> =
+      if (securityProperties.login.rememberMeMaxAge != null) mapOf(REMEMBER_ME_ENABLED to true)
+      else mapOf()
 
   /** The legacy moderator role is what clients read as permission to create rooms. */
   private fun allowedRoles(mayCreateRooms: Boolean): List<LegacyAuthenticationProvider.Role> {

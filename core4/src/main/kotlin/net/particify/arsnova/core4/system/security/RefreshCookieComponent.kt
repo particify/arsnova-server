@@ -6,7 +6,9 @@ package net.particify.arsnova.core4.system.security
 import jakarta.servlet.ServletContext
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import java.time.Duration
 import java.time.Instant
+import net.particify.arsnova.core4.system.config.SecurityProperties
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseCookie
 import org.springframework.stereotype.Component
@@ -18,8 +20,12 @@ const val REFRESH_TOKEN_COOKIE = "__HTTP_ARS_RT"
 const val PARTITIONED_REFRESH_TOKEN_COOKIE = "__HTTP_ARS_RT_PARTITIONED"
 
 private const val PARTITIONED_FLAG = "1"
-private const val REFRESH_MAX_AGE = 3600L * 24 * 30 * 6
 private const val VERSION_CLAIM = "version"
+
+private const val DEFAULT_EXTEND_BY_HOURS = 3L
+
+/** Lifetime of a session which is not remembered. Every rotation slides it forward. */
+private val DEFAULT_EXTEND_BY: Duration = Duration.ofHours(DEFAULT_EXTEND_BY_HOURS)
 
 /**
  * Controls whether the refresh cookie is sent by the browser in a cross-site context. The cookie is
@@ -47,22 +53,22 @@ enum class RefreshCookiePolicy(internal val sameSite: String, internal val parti
 }
 
 @Component
-class RefreshCookieComponent(private val jwtUtils: JwtUtils, servletContext: ServletContext) {
+class RefreshCookieComponent(
+    private val jwtUtils: JwtUtils,
+    securityProperties: SecurityProperties,
+    servletContext: ServletContext
+) {
   private val contextPath = servletContext.contextPath
+  private val rememberMeMaxAge = securityProperties.login.rememberMeMaxAge
 
+  /** [rememberMe] is without effect unless a remembered lifetime is configured. */
   fun add(
       subject: String,
       version: Int,
       response: HttpServletResponse,
-      policy: RefreshCookiePolicy = RefreshCookiePolicy.STRICT
-  ) {
-    val expirationTime = Instant.now().plusSeconds(REFRESH_MAX_AGE)
-    val refreshToken =
-        jwtUtils.encodeJwt(
-            subject, listOf(REFRESH_ROLE), mapOf(VERSION_CLAIM to version), expirationTime)
-    addCookie(response, REFRESH_TOKEN_COOKIE, refreshToken, REFRESH_MAX_AGE, policy)
-    addFlagCookie(response, REFRESH_MAX_AGE, policy)
-  }
+      policy: RefreshCookiePolicy = RefreshCookiePolicy.STRICT,
+      rememberMe: Boolean = false
+  ) = addWithMaxAge(subject, version, response, policy, extendByFor(rememberMe))
 
   /**
    * Removes the cookies for every policy because a browser only replaces a cookie by one carrying
@@ -73,13 +79,37 @@ class RefreshCookieComponent(private val jwtUtils: JwtUtils, servletContext: Ser
     addCookie(response, PARTITIONED_REFRESH_TOKEN_COOKIE, "", 0, RefreshCookiePolicy.CROSS_SITE)
   }
 
-  /** Reissues the cookie with the policy the request's own cookies were added with. */
+  /**
+   * Reissues the cookie with the policy the request's own cookies were added with, continuing the
+   * session at the lifetime it has been started with.
+   */
   fun renew(
       subject: String,
       version: Int,
+      lifetime: RefreshSessionLifetime,
       request: HttpServletRequest,
       response: HttpServletResponse
-  ) = add(subject, version, response, policyOf(request))
+  ) = addWithMaxAge(subject, version, response, policyOf(request), extendByFor(lifetime))
+
+  private fun addWithMaxAge(
+      subject: String,
+      version: Int,
+      response: HttpServletResponse,
+      policy: RefreshCookiePolicy,
+      maxAge: Duration
+  ) {
+    val claims = mapOf(VERSION_CLAIM to version).plus(RefreshSessionLifetime(maxAge).toClaims())
+    val refreshToken =
+        jwtUtils.encodeJwt(subject, listOf(REFRESH_ROLE), claims, Instant.now().plus(maxAge))
+    addCookie(response, REFRESH_TOKEN_COOKIE, refreshToken, maxAge.seconds, policy)
+    addFlagCookie(response, maxAge.seconds, policy)
+  }
+
+  private fun extendByFor(rememberMe: Boolean) =
+      if (rememberMe) rememberMeMaxAge ?: DEFAULT_EXTEND_BY else DEFAULT_EXTEND_BY
+
+  /** A token issued before the lifetime was part of one keeps the lifetime promised back then. */
+  private fun extendByFor(lifetime: RefreshSessionLifetime) = lifetime.extendBy ?: extendByFor(true)
 
   /**
    * The flag is deleted rather than omitted for [RefreshCookiePolicy.STRICT]: a leftover from an

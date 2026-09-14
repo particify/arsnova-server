@@ -36,6 +36,13 @@ val IMPORT_USER =
 val CANONICAL_ID_USER = LdapTestUser(userId = "tilda.brekke", password = "dev-fixture-secret")
 val REPEAT_LOGIN_USER = LdapTestUser(userId = "jorunn", password = "plaintext-on-purpose")
 val HTTP_LOGIN_USER = LdapTestUser(userId = "dsalvatierra", password = "bind-me-please")
+
+/** Logs in without asking to be remembered, so its session carries the short lifetime. */
+val SHORT_SESSION_USER = LdapTestUser(userId = "kjohannsen", password = "short-session-secret")
+
+/** Logs in asking to be remembered, so its session carries the configured lifetime. */
+val REMEMBERED_SESSION_USER =
+    LdapTestUser(userId = "sfontaine", password = "remembered-session-secret")
 val WRONG_PASSWORD_USER = LdapTestUser(userId = "bkuiper", password = "never-submitted")
 val LOCAL_PROVIDER_REJECTION_USER =
     LdapTestUser(userId = "haruka.oyelaran", password = "just-for-tests")
@@ -97,6 +104,8 @@ val LDAP_TEST_USERS =
         CANONICAL_ID_USER,
         REPEAT_LOGIN_USER,
         HTTP_LOGIN_USER,
+        SHORT_SESSION_USER,
+        REMEMBERED_SESSION_USER,
         WRONG_PASSWORD_USER,
         LOCAL_PROVIDER_REJECTION_USER,
         MAIL_COLLISION_USER,

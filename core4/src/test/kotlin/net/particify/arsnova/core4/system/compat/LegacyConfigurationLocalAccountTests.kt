@@ -66,6 +66,7 @@ class LegacyConfigurationLocalAccountTests {
               LocalAccountPolicy(securityProperties(localAccount = localAccount)),
               RoomCreationPolicy(securityProperties()),
               ExtendedSaml2RelyingPartyProperties(),
+              securityProperties(),
               ServiceProperties("arsnova", "http://localhost"),
               UiProperties(ui))
           .configuration()

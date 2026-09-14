@@ -6,8 +6,8 @@ additional SSO provider on the login screen.
 A login is started at `/api/saml2/authenticate/{registrationId}`,
 and the service provider metadata is served at
 `/api/saml2/service-provider-metadata/{registrationId}`.
-Tokens are issued exactly as they are for the local provider;
-link:authentication.adoc[] covers that.
+A session started through SSO always carries the short lifetime and cannot ask to be remembered;
+link:authentication.adoc[] covers the tokens themselves.
 
 Users are authenticated by the identity provider.
 On the first successful login, an account is created and linked to the registration through an

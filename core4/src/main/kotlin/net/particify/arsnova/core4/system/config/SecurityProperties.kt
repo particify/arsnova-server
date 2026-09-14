@@ -54,6 +54,11 @@ data class SecurityProperties(
   data class Login(
       @field:Positive val attemptLimit: Long,
       val attemptWindow: Duration,
+      /**
+       * How long a session lasts which has been started with the option to be remembered. Leaving
+       * it unset withdraws that option, so every session is limited to the short lifetime instead.
+       */
+      val rememberMeMaxAge: Duration? = null,
   )
 
   data class LocalAccount(

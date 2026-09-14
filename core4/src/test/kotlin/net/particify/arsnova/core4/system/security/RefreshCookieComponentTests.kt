@@ -4,6 +4,8 @@
 package net.particify.arsnova.core4.system.security
 
 import java.util.Base64
+import net.particify.arsnova.core4.system.config.SecurityProperties
+import net.particify.arsnova.core4.system.config.login
 import net.particify.arsnova.core4.system.config.securityProperties
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -18,8 +20,7 @@ import tools.jackson.databind.json.JsonMapper
  */
 class RefreshCookieComponentTests {
   private val servletContext = MockServletContext().apply { contextPath = CONTEXT_PATH }
-  private val refreshCookieComponent =
-      RefreshCookieComponent(JwtUtils(securityProperties(), null), servletContext)
+  private val refreshCookieComponent = componentFor(securityProperties())
   private val jsonMapper = JsonMapper.builder().build()
 
   @Test
@@ -56,13 +57,37 @@ class RefreshCookieComponentTests {
 
   /** Max-Age is a duration, so it carries the cookie's lifetime and not its expiration instant. */
   @Test
-  fun shouldAddCookieWithLifetimeAsMaxAge() {
+  fun shouldAddCookieWithSessionLifetimeAsMaxAge() {
     val response = MockHttpServletResponse()
     refreshCookieComponent.add(SUBJECT, 1, response, RefreshCookiePolicy.CROSS_SITE)
-    listOf(REFRESH_TOKEN_COOKIE, PARTITIONED_REFRESH_TOKEN_COOKIE).forEach {
-      val header = setCookieHeader(response, it)
-      Assertions.assertTrue(header.contains("; Max-Age=$MAX_AGE"), header)
-    }
+    assertMaxAge(response, SESSION_MAX_AGE)
+  }
+
+  @Test
+  fun shouldAddCookieWithRememberedLifetimeAsMaxAge() {
+    val response = MockHttpServletResponse()
+    refreshCookieComponent.add(
+        SUBJECT, 1, response, RefreshCookiePolicy.CROSS_SITE, rememberMe = true)
+    assertMaxAge(response, REMEMBERED_MAX_AGE)
+  }
+
+  /** Without a configured lifetime the option does not exist, so a client cannot take it. */
+  @Test
+  fun shouldIgnoreRememberMeWithoutConfiguredLifetime() {
+    val response = MockHttpServletResponse()
+    val properties = securityProperties(login = login(rememberMeMaxAge = null))
+    val component = componentFor(properties)
+    component.add(SUBJECT, 1, response, RefreshCookiePolicy.CROSS_SITE, rememberMe = true)
+    assertMaxAge(response, SESSION_MAX_AGE)
+  }
+
+  /** The lifetime has to survive a rotation, so it is part of the token as well. */
+  @Test
+  fun shouldEncodeLifetimeAsClaim() {
+    val response = MockHttpServletResponse()
+    refreshCookieComponent.add(SUBJECT, 1, response, rememberMe = true)
+    val body = tokenBody(setCookieHeader(response, REFRESH_TOKEN_COOKIE))
+    Assertions.assertEquals(REMEMBERED_MAX_AGE, (body[EXTEND_BY_CLAIM] as Number).toInt())
   }
 
   /** The policy is signalled by the flag cookie alone, so it must not reach the token. */
@@ -99,6 +124,16 @@ class RefreshCookieComponentTests {
         "$headers")
   }
 
+  private fun assertMaxAge(response: MockHttpServletResponse, maxAge: Int) {
+    listOf(REFRESH_TOKEN_COOKIE, PARTITIONED_REFRESH_TOKEN_COOKIE).forEach {
+      val header = setCookieHeader(response, it)
+      Assertions.assertTrue(header.contains("; Max-Age=$maxAge"), header)
+    }
+  }
+
+  private fun componentFor(properties: SecurityProperties) =
+      RefreshCookieComponent(JwtUtils(properties, null), properties, servletContext)
+
   private fun String.isRefreshCookie(sameSite: String) =
       startsWith("$REFRESH_TOKEN_COOKIE=;") && contains("; SameSite=$sameSite")
 
@@ -117,10 +152,14 @@ class RefreshCookieComponentTests {
 
   private companion object {
     const val CONTEXT_PATH = "/api"
+    const val EXTEND_BY_CLAIM = "extendBy"
     const val FLAG = "1"
 
-    /** The configured refresh cookie lifetime, 180 days. */
-    const val MAX_AGE = 15552000
+    /** The lifetime configured for a remembered session, 180 days. */
+    const val REMEMBERED_MAX_AGE = 15552000
+
+    /** The fixed lifetime of a session which is not remembered, 3 hours. */
+    const val SESSION_MAX_AGE = 10800
     const val SUBJECT = "00000000-0000-0000-0000-000000000000"
     val TIMESTAMP_CLAIMS = setOf<Any?>("exp", "iat")
   }

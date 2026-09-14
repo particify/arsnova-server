@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.system.security
@@ -11,6 +11,7 @@ class RefreshJwtAuthentication(
     private val token: String,
     private var principal: User? = null,
     grantedAuthorities: Set<GrantedAuthority> = emptySet(),
+    val sessionLifetime: RefreshSessionLifetime = RefreshSessionLifetime(),
 ) : AbstractAuthenticationToken(grantedAuthorities) {
   init {
     isAuthenticated = grantedAuthorities.isNotEmpty()

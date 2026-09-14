@@ -61,7 +61,8 @@ class AuthenticationHttpController(
     }
     val subject = authentication.principal!!.id.toString()
     val accessToken = jwtUtils.encodeJwt(subject, user.roles.map { it.name!! })
-    refreshCookieComponent.renew(subject, user.tokenVersion!!, request, response)
+    refreshCookieComponent.renew(
+        subject, user.tokenVersion!!, authentication.sessionLifetime, request, response)
     return AuthenticationWrapper(accessToken)
   }
 
@@ -84,7 +85,8 @@ class AuthenticationHttpController(
     userService.updateLastActivityAt(user)
     val subject = user.id.toString()
     val accessToken = jwtUtils.encodeJwt(subject, user.roles.map { it.name!! })
-    refreshCookieComponent.add(subject, user.tokenVersion!!, response)
+    refreshCookieComponent.add(
+        subject, user.tokenVersion!!, response, rememberMe = loginInput.rememberMe)
     return AuthenticationWrapper(accessToken)
   }
 
@@ -112,7 +114,9 @@ class AuthenticationHttpController(
     val user = userService.createAccount()
     val subject = user.id.toString()
     val accessToken = jwtUtils.encodeJwt(subject, user.roles.map { it.name!! })
-    refreshCookieComponent.add(subject, user.tokenVersion!!, response)
+    // A guest account exists as the refresh cookie alone, so a short lifetime would discard the
+    // visitor's identity along with the session.
+    refreshCookieComponent.add(subject, user.tokenVersion!!, response, rememberMe = true)
     return AuthenticationWrapper(accessToken)
   }
 }
