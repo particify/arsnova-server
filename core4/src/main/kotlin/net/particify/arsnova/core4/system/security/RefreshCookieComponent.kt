@@ -60,9 +60,8 @@ class RefreshCookieComponent(private val jwtUtils: JwtUtils, servletContext: Ser
     val refreshToken =
         jwtUtils.encodeJwt(
             subject, listOf(REFRESH_ROLE), mapOf(VERSION_CLAIM to version), expirationTime)
-    val maxAgeSeconds = expirationTime.epochSecond.toInt().toLong()
-    addCookie(response, REFRESH_TOKEN_COOKIE, refreshToken, maxAgeSeconds, policy)
-    addFlagCookie(response, maxAgeSeconds, policy)
+    addCookie(response, REFRESH_TOKEN_COOKIE, refreshToken, REFRESH_MAX_AGE, policy)
+    addFlagCookie(response, REFRESH_MAX_AGE, policy)
   }
 
   /**

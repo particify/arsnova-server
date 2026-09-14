@@ -54,6 +54,17 @@ class RefreshCookieComponentTests {
     Assertions.assertTrue(flag.contains("; Partitioned"), flag)
   }
 
+  /** Max-Age is a duration, so it carries the cookie's lifetime and not its expiration instant. */
+  @Test
+  fun shouldAddCookieWithLifetimeAsMaxAge() {
+    val response = MockHttpServletResponse()
+    refreshCookieComponent.add(SUBJECT, 1, response, RefreshCookiePolicy.CROSS_SITE)
+    listOf(REFRESH_TOKEN_COOKIE, PARTITIONED_REFRESH_TOKEN_COOKIE).forEach {
+      val header = setCookieHeader(response, it)
+      Assertions.assertTrue(header.contains("; Max-Age=$MAX_AGE"), header)
+    }
+  }
+
   /** The policy is signalled by the flag cookie alone, so it must not reach the token. */
   @Test
   fun shouldEncodeIdenticalTokenBodyForEveryPolicy() {
@@ -107,6 +118,9 @@ class RefreshCookieComponentTests {
   private companion object {
     const val CONTEXT_PATH = "/api"
     const val FLAG = "1"
+
+    /** The configured refresh cookie lifetime, 180 days. */
+    const val MAX_AGE = 15552000
     const val SUBJECT = "00000000-0000-0000-0000-000000000000"
     val TIMESTAMP_CLAIMS = setOf<Any?>("exp", "iat")
   }
