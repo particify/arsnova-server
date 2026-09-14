@@ -46,8 +46,11 @@ interface MembershipRepository :
           "SELECT m.room.id roomId FROM Membership m " +
           "WHERE m.lastActivityAt > :lastActivityAtAfter " +
           "GROUP BY m.room " +
-          "HAVING COUNT(m) >= 10)")
-  fun countAllActiveRoomsAndLastActivityAtAfter(lastActivityAtAfter: Instant): Long
+          "HAVING COUNT(m) >= :minMemberCount)")
+  fun countAllActiveRoomsAndLastActivityAtAfter(
+      lastActivityAtAfter: Instant,
+      minMemberCount: Int
+  ): Long
 
   @Query("SELECT COUNT(DISTINCT m.user) FROM Membership m " + "WHERE m.role != 'PARTICIPANT'")
   fun countAllManagingUsers(): Long

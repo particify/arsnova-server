@@ -7,6 +7,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.common.exception.AccessDeniedException
+import net.particify.arsnova.core4.room.AdminActiveRoomStats
 import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.MembershipService
 import net.particify.arsnova.core4.room.Room
@@ -17,13 +18,12 @@ import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Window
 import org.springframework.stereotype.Service
 
-private const val LAST_ACTIVITY_THRESHOLD_MINUTES = 5L
 private const val LAST_ACTIVITY_MINIMUM_DIFFERENCE_SECONDS = 5L
 
 @Service
 class MembershipServiceImpl(
     private val membershipRepository: MembershipRepository,
-    roomProperties: RoomProperties
+    private val roomProperties: RoomProperties
 ) : MembershipService, MembershipRepository by membershipRepository {
   val demoShortIds = roomProperties.demo.map { it.shortId }
 
@@ -36,9 +36,7 @@ class MembershipServiceImpl(
   }
 
   fun countActiveMembersByRoomIds(roomIds: List<UUID>): Map<UUID, Int> {
-    val counts =
-        countByRoomIdsAndLastActivityAtAfter(
-            roomIds, Instant.now().minus(Duration.ofMinutes(LAST_ACTIVITY_THRESHOLD_MINUTES)))
+    val counts = countByRoomIdsAndLastActivityAtAfter(roomIds, activityWindowCutoff())
     return counts.associate {
       Pair(it.get(0, UUID::class.java), it.get(1, Long::class.java).toInt())
     }
@@ -79,6 +77,25 @@ class MembershipServiceImpl(
 
   fun countAllActiveRooms(): Long {
     return membershipRepository.countAllActiveRoomsAndLastActivityAtAfter(
-        Instant.now().minus(Duration.ofMinutes(LAST_ACTIVITY_THRESHOLD_MINUTES)))
+        activityWindowCutoff(), roomProperties.activity.minMemberCount)
   }
+
+  fun findAdminActiveRoomStats(
+      minMemberCount: Int?,
+      activityWindowMinutes: Int?
+  ): AdminActiveRoomStats {
+    val effectiveMinMemberCount = minMemberCount ?: roomProperties.activity.minMemberCount
+    val effectiveActivityWindow =
+        activityWindowMinutes?.let { Duration.ofMinutes(it.toLong()) }
+            ?: roomProperties.activity.window
+    val count =
+        membershipRepository.countAllActiveRoomsAndLastActivityAtAfter(
+            Instant.now().minus(effectiveActivityWindow), effectiveMinMemberCount)
+    return AdminActiveRoomStats(
+        count = count,
+        minMemberCount = effectiveMinMemberCount,
+        activityWindowMinutes = effectiveActivityWindow.toMinutes().toInt())
+  }
+
+  private fun activityWindowCutoff(): Instant = Instant.now().minus(roomProperties.activity.window)
 }
