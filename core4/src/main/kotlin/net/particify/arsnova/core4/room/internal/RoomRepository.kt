@@ -3,13 +3,27 @@
  */
 package net.particify.arsnova.core4.room.internal
 
+import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.room.Room
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.querydsl.QuerydslPredicateExecutor
 
 interface RoomRepository : JpaRepository<Room, UUID>, QuerydslPredicateExecutor<Room> {
   fun findOneByShortId(shortId: Int): Room?
 
   fun countByShortId(shortId: Int): Int
+
+  fun countByAuditMetadataCreatedAtGreaterThanEqualAndAuditMetadataCreatedAtLessThan(
+      from: Instant,
+      to: Instant
+  ): Long
+
+  @Query(
+      "SELECT COUNT(DISTINCT u.id) FROM Room r " +
+          "JOIN User u ON u.id = r.auditMetadata.createdBy " +
+          "WHERE r.auditMetadata.createdAt >= :from " +
+          "AND r.auditMetadata.createdAt < :to")
+  fun countAllCreatorsByCreatedAtRange(from: Instant, to: Instant): Long
 }

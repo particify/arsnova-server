@@ -57,4 +57,11 @@ interface MembershipRepository :
 
   @Query("SELECT COUNT(DISTINCT m.user) FROM Membership m " + "WHERE m.role = 'PARTICIPANT'")
   fun countAllParticipantUsers(): Long
+
+  @Query(
+      "SELECT COUNT(DISTINCT m.user) FROM Membership m " +
+          "WHERE m.role = 'PARTICIPANT' " +
+          "AND m.lastActivityAt >= :from " +
+          "AND m.lastActivityAt < :to")
+  fun countAllParticipantUsersByLastActivityAtRange(from: Instant, to: Instant): Long
 }
