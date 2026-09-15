@@ -17,6 +17,12 @@ private const val EXTEND_UNTIL_CLAIM = "extendUntil"
  * whatever happens in between. A session bounded that way outlives neither, so the last token
  * before [extendUntil] is shortened to reach exactly that far.
  *
+ * Neither value describes the token which carries them: it expires at whichever comes first of
+ * [extendBy] after its issuing and [extendUntil]. The two agree except on the last token of a
+ * bounded session, which is why [extendBy] is carried rather than read back as `exp - iat`: a
+ * rotation deriving the period from a shortened token would mistake the remainder for it and never
+ * widen the session again.
+ *
  * Every value is absent for a token issued before the lifetime became part of one.
  */
 data class RefreshSessionLifetime(

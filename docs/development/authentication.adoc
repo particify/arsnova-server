@@ -87,12 +87,31 @@ and that system does not tell us when it revokes one,
 so ending the session and repeating the login is what asks it again.
 A local account never carries a deadline:
 this application is the authority for it, so nothing about it can be revoked elsewhere.
-Leaving the setting unset withdraws the deadline.
+
+A system which ends the session itself is taken at its word where it is stricter than we are.
+The session then ends at whichever bound comes first, so such a system can shorten the configured
+period but never extend it, and an unset period withholds a bound of ours rather than discarding
+the one we were given.
+Only a bound on the session counts.
+An assertion's own validity is not one -- it limits how long the assertion may be replayed, which
+is a matter of minutes -- so it is deliberately left unread.
+A session is therefore unbounded only where neither a period is configured nor a bound asserted.
 
 The deadline travels as a second claim and a rotation does not move it along.
 It shortens the last period of a session so that the refresh token expires with the session, and a
 refresh arriving afterwards is rejected;
 the decoder tolerates some clock skew, so the token alone would still be accepted for a moment.
+
+So a refresh token carries two times which are not its own.
+The `extendBy` claim is the idle period the session is granted again at every rotation, and the
+`extendUntil` claim the instant it ends regardless of use;
+the token itself expires at whichever of the two comes first.
+Until the last token of a bounded session the period and the expiry agree,
+which is what makes the claim look like a restatement of `exp - iat`.
+It is not one, and reading it that way would be a defect:
+a rotation which derived the period from a token already shortened by the deadline would take the
+remainder for the session's period and hand out nothing longer ever again,
+so a session refreshed once near its end would stay as brief as that one refresh left it.
 
 === Obtaining tokens
 

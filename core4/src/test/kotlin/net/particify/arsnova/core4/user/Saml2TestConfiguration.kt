@@ -45,6 +45,17 @@ val SAML_RETAINED_NAME_USER =
         givenName = "Solveig",
         surname = "Ibarra")
 
+/** Its assertion carries a session bound, which has to decide the session's end. */
+val SAML_SESSION_BOUND_USER =
+    Saml2TestUser(
+        subjectId = "saml-session-bound-subject", mailAddress = "saml.session.bound@example.com")
+
+/** Its assertion carries no session bound, leaving the configured period in charge. */
+val SAML_UNBOUND_SESSION_USER =
+    Saml2TestUser(
+        subjectId = "saml-unbound-session-subject",
+        mailAddress = "saml.unbound.session@example.com")
+
 /** Its asserted address is given to another account before the login, so it cannot be imported. */
 val SAML_LINK_COLLISION_USER =
     Saml2TestUser(

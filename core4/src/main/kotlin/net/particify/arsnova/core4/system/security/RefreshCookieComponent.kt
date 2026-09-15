@@ -84,15 +84,25 @@ class RefreshCookieComponent(
       subject: String,
       version: Int,
       response: HttpServletResponse,
-      policy: RefreshCookiePolicy = RefreshCookiePolicy.STRICT
+      policy: RefreshCookiePolicy = RefreshCookiePolicy.STRICT,
+      extendUntil: Instant? = null
   ) =
       addWithLifetime(
           subject,
           version,
           response,
           policy,
-          RefreshSessionLifetime(
-              DEFAULT_EXTEND_BY, externalSessionMaxAge?.let { Instant.now().plus(it) }))
+          RefreshSessionLifetime(DEFAULT_EXTEND_BY, externalExtendUntil(extendUntil)))
+
+  /**
+   * The session ends at whichever bound comes first, so the system which authenticated the user can
+   * shorten our own but not extend it. Leaving `security.login.external-session-max-age` unset
+   * withholds a bound of ours rather than discarding one we were given.
+   */
+  private fun externalExtendUntil(asserted: Instant?): Instant? {
+    val configured = externalSessionMaxAge?.let { Instant.now().plus(it) }
+    return listOfNotNull(asserted, configured).minOrNull()
+  }
 
   /**
    * Removes the cookies for every policy because a browser only replaces a cookie by one carrying
@@ -121,6 +131,10 @@ class RefreshCookieComponent(
           policyOf(request),
           RefreshSessionLifetime(extendByFor(lifetime), lifetime.extendUntil))
 
+  /**
+   * The claims carry [lifetime] unshortened while the token and the cookie last only as long as
+   * [cappedMaxAge] allows, so a clamp remains a property of this token instead of the session.
+   */
   private fun addWithLifetime(
       subject: String,
       version: Int,

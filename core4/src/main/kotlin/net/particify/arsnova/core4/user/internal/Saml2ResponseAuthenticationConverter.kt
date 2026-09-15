@@ -53,8 +53,23 @@ class Saml2ResponseAuthenticationConverter(
     val principal =
         if (existingUser == null) createUser(providerId, registration, externalId, attributes)
         else updateUser(providerId, registration, existingUser, externalId, attributes)
-    return Saml2Authentication(principal, authentication.saml2Response, principal.authorities)
+    return Saml2SessionAuthentication(
+        principal,
+        authentication.saml2Response,
+        principal.authorities,
+        sessionEndsAt(responseToken))
   }
+
+  /**
+   * The earliest bound any assertion puts on the session itself. `Conditions.notOnOrAfter` is
+   * deliberately not consulted as a fallback: it bounds how long the assertion may be replayed
+   * rather than how long the session lasts, and is only minutes wide.
+   */
+  private fun sessionEndsAt(responseToken: ResponseToken): Instant? =
+      responseToken.response.assertions
+          .flatMap { it.authnStatements }
+          .mapNotNull { it.sessionNotOnOrAfter }
+          .minOrNull()
 
   private fun createUser(
       providerId: UUID,
