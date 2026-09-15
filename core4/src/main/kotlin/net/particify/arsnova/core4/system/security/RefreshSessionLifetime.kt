@@ -4,22 +4,43 @@
 package net.particify.arsnova.core4.system.security
 
 import java.time.Duration
+import java.time.Instant
 
 private const val EXTEND_BY_CLAIM = "extendBy"
+private const val EXTEND_UNTIL_CLAIM = "extendUntil"
 
 /**
  * How long the session a refresh token belongs to lasts, as decided when it was started. It travels
  * within the signed token so that a rotation continues the session instead of deciding it anew.
  *
+ * [extendBy] is the period a rotation slides forward, [extendUntil] the instant the session ends
+ * whatever happens in between. A session bounded that way outlives neither, so the last token
+ * before [extendUntil] is shortened to reach exactly that far.
+ *
+ * Neither value describes the token which carries them: it expires at whichever comes first of
+ * [extendBy] after its issuing and [extendUntil]. The two agree except on the last token of a
+ * bounded session, which is why [extendBy] is carried rather than read back as `exp - iat`: a
+ * rotation deriving the period from a shortened token would mistake the remainder for it and never
+ * widen the session again.
+ *
  * Every value is absent for a token issued before the lifetime became part of one.
  */
-data class RefreshSessionLifetime(val extendBy: Duration? = null) {
-  fun toClaims(): Map<String, Any> =
-      extendBy?.let { mapOf(EXTEND_BY_CLAIM to it.seconds) } ?: mapOf()
+data class RefreshSessionLifetime(
+    val extendBy: Duration? = null,
+    val extendUntil: Instant? = null
+) {
+  /** A session which was never given a deadline does not end this way. */
+  fun hasEnded() = extendUntil != null && !Instant.now().isBefore(extendUntil)
+
+  fun toClaims(): Map<String, Any> = buildMap {
+    extendBy?.let { put(EXTEND_BY_CLAIM, it.seconds) }
+    extendUntil?.let { put(EXTEND_UNTIL_CLAIM, it.epochSecond) }
+  }
 
   companion object {
     fun fromClaims(claims: Map<String, Any>) =
         RefreshSessionLifetime(
-            (claims[EXTEND_BY_CLAIM] as? Number)?.let { Duration.ofSeconds(it.toLong()) })
+            (claims[EXTEND_BY_CLAIM] as? Number)?.let { Duration.ofSeconds(it.toLong()) },
+            (claims[EXTEND_UNTIL_CLAIM] as? Number)?.let { Instant.ofEpochSecond(it.toLong()) })
   }
 }

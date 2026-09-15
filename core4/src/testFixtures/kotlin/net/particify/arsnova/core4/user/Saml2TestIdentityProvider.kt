@@ -86,9 +86,17 @@ class Saml2TestIdentityProvider {
     directory.toFile().deleteOnExit()
   }
 
-  /** Encodes a signed response for the given user, ready to be posted to the assertion consumer. */
-  fun encodedResponse(registrationId: UUID, user: Saml2TestUser): String {
-    val assertion = assertion(registrationId, user)
+  /**
+   * Encodes a signed response for the given user, ready to be posted to the assertion consumer.
+   * [sessionNotOnOrAfter] bounds the session the assertion starts, which most identity providers
+   * leave out and which is therefore absent by default.
+   */
+  fun encodedResponse(
+      registrationId: UUID,
+      user: Saml2TestUser,
+      sessionNotOnOrAfter: Instant? = null
+  ): String {
+    val assertion = assertion(registrationId, user, sessionNotOnOrAfter)
     val response = response(registrationId, assertion)
     val element = marshall(response)
     Signer.signObject(checkNotNull(assertion.signature))
@@ -114,7 +122,11 @@ class Saml2TestIdentityProvider {
     return status
   }
 
-  private fun assertion(registrationId: UUID, user: Saml2TestUser): Assertion {
+  private fun assertion(
+      registrationId: UUID,
+      user: Saml2TestUser,
+      sessionNotOnOrAfter: Instant?
+  ): Assertion {
     val now = Instant.now()
     val assertion = buildSamlObject<Assertion>(Assertion.DEFAULT_ELEMENT_NAME)
     assertion.id = "_${UUID.randomUUID()}"
@@ -122,7 +134,7 @@ class Saml2TestIdentityProvider {
     assertion.issuer = issuer()
     assertion.subject = subject(registrationId, user, now)
     assertion.conditions = conditions(registrationId, now)
-    assertion.authnStatements.add(authnStatement(now))
+    assertion.authnStatements.add(authnStatement(now, sessionNotOnOrAfter))
     assertion.attributeStatements.add(attributeStatement(user))
     assertion.signature = signature()
     return assertion
@@ -158,7 +170,7 @@ class Saml2TestIdentityProvider {
     return conditions
   }
 
-  private fun authnStatement(now: Instant): AuthnStatement {
+  private fun authnStatement(now: Instant, sessionNotOnOrAfter: Instant?): AuthnStatement {
     val classRef = buildSamlObject<AuthnContextClassRef>(AuthnContextClassRef.DEFAULT_ELEMENT_NAME)
     classRef.uri = AuthnContext.UNSPECIFIED_AUTHN_CTX
     val context = buildSamlObject<AuthnContext>(AuthnContext.DEFAULT_ELEMENT_NAME)
@@ -166,6 +178,7 @@ class Saml2TestIdentityProvider {
     val statement = buildSamlObject<AuthnStatement>(AuthnStatement.DEFAULT_ELEMENT_NAME)
     statement.authnInstant = now
     statement.sessionIndex = UUID.randomUUID().toString()
+    statement.sessionNotOnOrAfter = sessionNotOnOrAfter
     statement.authnContext = context
     return statement
   }

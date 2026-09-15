@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.system.security
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.internal.Saml2SessionAuthentication
 import org.springframework.http.MediaType
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
@@ -37,7 +38,9 @@ class AuthenticationSuccessHandler(private val refreshCookieComponent: RefreshCo
     if (session == null || session.getAttribute(URL_ATTRIBUTE) == null) {
       val user = authentication.principal as User
       val subject = user.id.toString()
-      refreshCookieComponent.add(subject, user.tokenVersion!!, response)
+      val endsAt = (authentication as? Saml2SessionAuthentication)?.endsAt
+      refreshCookieComponent.addForExternalLogin(
+          subject, user.tokenVersion!!, response, extendUntil = endsAt)
       response.contentType = MediaType.TEXT_HTML_VALUE
       response.writer.println(
           "<!DOCTYPE html><script>if (window.opener) window.close(); else location.href='/login/complete'</script>")

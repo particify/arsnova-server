@@ -3,6 +3,8 @@
  */
 package net.particify.arsnova.core4.system.security
 
+import java.time.Duration
+import java.time.Instant
 import java.util.Base64
 import net.particify.arsnova.core4.system.config.SecurityProperties
 import net.particify.arsnova.core4.system.config.login
@@ -90,6 +92,96 @@ class RefreshCookieComponentTests {
     Assertions.assertEquals(REMEMBERED_MAX_AGE, (body[EXTEND_BY_CLAIM] as Number).toInt())
   }
 
+  /**
+   * The deadline is far beyond the period a rotation slides forward, so it leaves the cookie alone
+   * until the session approaches its end.
+   */
+  @Test
+  fun shouldAddCookieForExternalLoginWithSessionLifetimeAsMaxAge() {
+    val response = MockHttpServletResponse()
+    refreshCookieComponent.addForExternalLogin(SUBJECT, 1, response, RefreshCookiePolicy.CROSS_SITE)
+    assertMaxAge(response, SESSION_MAX_AGE)
+  }
+
+  /**
+   * Without an asserted bound the configured period decides, and the deadline it produces has to
+   * survive a rotation, so it travels within the token like the period does.
+   */
+  @Test
+  fun shouldEncodeDeadlineOfExternalLoginAsClaim() {
+    val response = MockHttpServletResponse()
+    val issuedAt = Instant.now()
+    refreshCookieComponent.addForExternalLogin(SUBJECT, 1, response)
+    val deadline = deadlineOf(response)
+    assertAboutSeconds(Duration.between(issuedAt, deadline), EXTERNAL_SESSION_MAX_AGE, "$deadline")
+  }
+
+  /**
+   * The identity provider may end the session before we would, and then its bound is the one which
+   * counts. It travels unchanged, so the encoded deadline is the asserted instant to the second.
+   */
+  @Test
+  fun shouldEndExternalLoginAtAssertedBoundWhenItIsEarlier() {
+    val response = MockHttpServletResponse()
+    val assertedExtendUntil = Instant.now().plus(SHORT_EXTERNAL)
+    refreshCookieComponent.addForExternalLogin(
+        SUBJECT, 1, response, extendUntil = assertedExtendUntil)
+    Assertions.assertEquals(assertedExtendUntil.epochSecond, deadlineOf(response).epochSecond)
+  }
+
+  /** It may not end the session later than we would, so a generous assertion cannot widen ours. */
+  @Test
+  fun shouldEndExternalLoginAtConfiguredBoundWhenAssertedIsLater() {
+    val response = MockHttpServletResponse()
+    val issuedAt = Instant.now()
+    val assertedExtendUntil = issuedAt.plus(LATE_EXTERNAL)
+    refreshCookieComponent.addForExternalLogin(
+        SUBJECT, 1, response, extendUntil = assertedExtendUntil)
+    val deadline = deadlineOf(response)
+    assertAboutSeconds(Duration.between(issuedAt, deadline), EXTERNAL_SESSION_MAX_AGE, "$deadline")
+  }
+
+  /** An unset period withholds a bound of ours rather than discarding the one we were given. */
+  @Test
+  fun shouldEndExternalLoginAtAssertedBoundWithoutConfiguredPeriod() {
+    val response = MockHttpServletResponse()
+    val assertedExtendUntil = Instant.now().plus(LATE_EXTERNAL)
+    val properties = securityProperties(login = login(externalSessionMaxAge = null))
+    componentFor(properties)
+        .addForExternalLogin(SUBJECT, 1, response, extendUntil = assertedExtendUntil)
+    Assertions.assertEquals(assertedExtendUntil.epochSecond, deadlineOf(response).epochSecond)
+  }
+
+  /** A session shorter than the period it slides forward ends at the deadline instead. */
+  @Test
+  fun shouldCapCookieOfExternalLoginAtDeadline() {
+    val response = MockHttpServletResponse()
+    val properties = securityProperties(login = login(externalSessionMaxAge = SHORT_EXTERNAL))
+    componentFor(properties).addForExternalLogin(SUBJECT, 1, response)
+    assertCappedMaxAge(response, SHORT_EXTERNAL.toSeconds())
+  }
+
+  /** Without a configured period an external login is bounded no more than any other session. */
+  @Test
+  fun shouldNotBoundExternalLoginWithoutConfiguredPeriod() {
+    val response = MockHttpServletResponse()
+    val properties = securityProperties(login = login(externalSessionMaxAge = null))
+    componentFor(properties)
+        .addForExternalLogin(SUBJECT, 1, response, RefreshCookiePolicy.CROSS_SITE)
+    assertMaxAge(response, SESSION_MAX_AGE)
+    assertPeriodWithoutDeadline(response, SESSION_MAX_AGE)
+  }
+
+  /** This application is the authority for a local account, so its session is never bounded. */
+  @Test
+  fun shouldNotBoundSessionOfLocalLogin() {
+    val response = MockHttpServletResponse()
+    refreshCookieComponent.add(
+        SUBJECT, 1, response, RefreshCookiePolicy.CROSS_SITE, rememberMe = true)
+    assertMaxAge(response, REMEMBERED_MAX_AGE)
+    assertPeriodWithoutDeadline(response, REMEMBERED_MAX_AGE)
+  }
+
   /** The policy is signalled by the flag cookie alone, so it must not reach the token. */
   @Test
   fun shouldEncodeIdenticalTokenBodyForEveryPolicy() {
@@ -131,6 +223,35 @@ class RefreshCookieComponentTests {
     }
   }
 
+  /**
+   * The period has to be read back as well, so that a missing deadline is distinguishable from a
+   * token body which was never parsed.
+   */
+  private fun assertPeriodWithoutDeadline(response: MockHttpServletResponse, extendBy: Int) {
+    val body = tokenBody(setCookieHeader(response, REFRESH_TOKEN_COOKIE))
+    Assertions.assertEquals(extendBy, (body[EXTEND_BY_CLAIM] as Number).toInt())
+    Assertions.assertNull(body[EXTEND_UNTIL_CLAIM])
+  }
+
+  private fun deadlineOf(response: MockHttpServletResponse): Instant {
+    val body = tokenBody(setCookieHeader(response, REFRESH_TOKEN_COOKIE))
+    return Instant.ofEpochSecond((body[EXTEND_UNTIL_CLAIM] as Number).toLong())
+  }
+
+  private fun assertCappedMaxAge(response: MockHttpServletResponse, maxAge: Long) {
+    val header = setCookieHeader(response, REFRESH_TOKEN_COOKIE)
+    val actual = MAX_AGE_PATTERN.find(header)?.groupValues?.get(1)?.toLong()
+    assertAboutSeconds(Duration.ofSeconds(actual ?: 0), maxAge, header)
+  }
+
+  /**
+   * The deadline is an instant while the cookie carries a duration, so the partial second between
+   * minting the token and measuring against it is lost.
+   */
+  private fun assertAboutSeconds(actual: Duration, expected: Long, message: String) {
+    Assertions.assertTrue(actual.toSeconds() in expected - 1..expected, "$message: $actual")
+  }
+
   private fun componentFor(properties: SecurityProperties) =
       RefreshCookieComponent(JwtUtils(properties, null), properties, servletContext)
 
@@ -153,13 +274,24 @@ class RefreshCookieComponentTests {
   private companion object {
     const val CONTEXT_PATH = "/api"
     const val EXTEND_BY_CLAIM = "extendBy"
+    const val EXTEND_UNTIL_CLAIM = "extendUntil"
+
+    /** The deadline configured for a session resting on an external login, 30 days. */
+    const val EXTERNAL_SESSION_MAX_AGE = 2592000L
     const val FLAG = "1"
+
+    /** Later than the configured period, so it cannot be the bound which is applied. */
+    val LATE_EXTERNAL: Duration = Duration.ofDays(90)
+    val MAX_AGE_PATTERN = Regex("; Max-Age=(\\d+)")
 
     /** The lifetime configured for a remembered session, 180 days. */
     const val REMEMBERED_MAX_AGE = 15552000
 
     /** The fixed lifetime of a session which is not remembered, 3 hours. */
     const val SESSION_MAX_AGE = 10800
+
+    /** Short enough to end a session before the period it would otherwise slide forward. */
+    val SHORT_EXTERNAL: Duration = Duration.ofMinutes(30)
     const val SUBJECT = "00000000-0000-0000-0000-000000000000"
     val TIMESTAMP_CLAIMS = setOf<Any?>("exp", "iat")
   }
