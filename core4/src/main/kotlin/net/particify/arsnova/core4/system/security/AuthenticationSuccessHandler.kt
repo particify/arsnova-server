@@ -37,7 +37,7 @@ class AuthenticationSuccessHandler(private val refreshCookieComponent: RefreshCo
     if (session == null || session.getAttribute(URL_ATTRIBUTE) == null) {
       val user = authentication.principal as User
       val subject = user.id.toString()
-      refreshCookieComponent.add(subject, user.tokenVersion!!, response)
+      refreshCookieComponent.addForExternalLogin(subject, user.tokenVersion!!, response)
       response.contentType = MediaType.TEXT_HTML_VALUE
       response.writer.println(
           "<!DOCTYPE html><script>if (window.opener) window.close(); else location.href='/login/complete'</script>")

@@ -55,6 +55,14 @@ data class SecurityProperties(
       @field:Positive val attemptLimit: Long,
       val attemptWindow: Duration,
       /**
+       * How long a session lasts at most which rests on an external login, counted from the login
+       * rather than from its last refresh. The account behind such a session is owned by whichever
+       * system authenticated it, and nothing here is told when that system revokes one, so the
+       * session ends on its own and the login has to be repeated. Leaving it unset withdraws the
+       * limit, so the session continues for as long as it keeps being used.
+       */
+      val externalSessionMaxAge: Duration? = null,
+      /**
        * How long a session lasts which has been started with the option to be remembered. Leaving
        * it unset withdraws that option, so every session is limited to the short lifetime instead.
        */

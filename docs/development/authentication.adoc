@@ -80,6 +80,20 @@ rather than deciding it anew.
 A token issued before that claim existed keeps the remembered lifetime,
 which is what it had been issued with.
 
+A session resting on an external login ends after `security.login.external-session-max-age`, `30d` by
+default, counted from the login rather than from its last refresh.
+The account behind such a session is owned by whichever system authenticated it,
+and that system does not tell us when it revokes one,
+so ending the session and repeating the login is what asks it again.
+A local account never carries a deadline:
+this application is the authority for it, so nothing about it can be revoked elsewhere.
+Leaving the setting unset withdraws the deadline.
+
+The deadline travels as a second claim and a rotation does not move it along.
+It shortens the last period of a session so that the refresh token expires with the session, and a
+refresh arriving afterwards is rejected;
+the decoder tolerates some clock skew, so the token alone would still be accepted for a moment.
+
 === Obtaining tokens
 
 The following diagram visualizes the process of obtaining tokens when a user logs in.

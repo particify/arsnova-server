@@ -3,7 +3,15 @@
  */
 package net.particify.arsnova.core4.system.security
 
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.JWSHeader
+import com.nimbusds.jose.crypto.MACSigner
+import com.nimbusds.jwt.JWTClaimsSet
+import com.nimbusds.jwt.SignedJWT
 import jakarta.servlet.http.Cookie
+import java.time.Duration
+import java.time.Instant
+import java.util.Date
 import java.util.UUID
 import javax.crypto.spec.SecretKeySpec
 import net.particify.arsnova.core4.system.config.JwtConfiguration
@@ -17,11 +25,13 @@ import org.springframework.http.HttpHeaders
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.mock.web.MockServletContext
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 
 private const val CONTEXT_PATH = "/api"
 private const val FLAG = "1"
+private const val ROLES_CLAIM = "roles"
 private const val VERSION_CLAIM = "version"
 
 /** The lifetime configured for a remembered session, 180 days. */
@@ -29,6 +39,18 @@ private const val REMEMBERED_MAX_AGE = 15552000
 
 /** The fixed lifetime of a session which is not remembered, 3 hours. */
 private const val SESSION_MAX_AGE = 10800
+private val SESSION_LIFETIME: Duration = Duration.ofSeconds(SESSION_MAX_AGE.toLong())
+
+/** Within the 60 seconds of clock skew the decoder tolerates, so the token still decodes. */
+private const val SKEW_SECONDS = 30L
+
+/** Close enough to a deadline for it to shorten the period a rotation would otherwise hand out. */
+private const val NEAR_DEADLINE_SECONDS = 600L
+
+private val MAX_AGE_PATTERN = Regex("; Max-Age=(\\d+)")
+
+/** What the provider rejects an ended session with, as opposed to any other refusal. */
+private const val ENDED_SESSION_REJECTION = "Session has ended"
 
 /**
  * A refresh rotates the cookie, so the policy has to be recovered from the cookies of the request.
@@ -96,6 +118,52 @@ class RefreshCookieRotationTests {
     assertRenewedWithMaxAge(cookies, REMEMBERED_MAX_AGE)
   }
 
+  /** A rotation continues a session towards its deadline rather than moving the deadline along. */
+  @Test
+  fun shouldRenewWithDeadlineOfToken() {
+    val cookies = issuedExternalCookies()
+    val issued = lifetimeOf(cookies.single { it.name == REFRESH_TOKEN_COOKIE }.value)
+    val renewed = lifetimeOf(tokenIn(renew(cookies, issued)))
+    Assertions.assertNotNull(issued.extendUntil)
+    Assertions.assertEquals(issued.extendUntil, renewed.extendUntil)
+  }
+
+  /** The last token of a session reaches exactly as far as the session itself. */
+  @Test
+  fun shouldRenewWithMaxAgeCappedAtDeadline() {
+    val lifetime =
+        RefreshSessionLifetime(
+            Duration.ofSeconds(SESSION_MAX_AGE.toLong()),
+            Instant.now().plusSeconds(NEAR_DEADLINE_SECONDS))
+    val headers = renew(issuedCookies(RefreshCookiePolicy.STRICT), lifetime)
+    val refreshCookie = headerFor(headers, REFRESH_TOKEN_COOKIE)
+    val maxAge = maxAgeOf(refreshCookie)
+    Assertions.assertTrue(maxAge in NEAR_DEADLINE_SECONDS - 1..NEAR_DEADLINE_SECONDS, refreshCookie)
+  }
+
+  /**
+   * The decoder tolerates clock skew, so a token can still be decoded shortly after the session it
+   * belongs to has ended. Renewing it would hand out a cookie which deletes itself, so the deadline
+   * has to reject the refresh instead.
+   */
+  @Test
+  fun shouldRejectTokenOfSessionEndedWithinClockSkew() {
+    val endedAt = Instant.now().minusSeconds(SKEW_SECONDS)
+    val token = expiredToken(RefreshSessionLifetime(SESSION_LIFETIME, endedAt))
+    val rejection =
+        Assertions.assertThrows(BadCredentialsException::class.java) {
+          provider.authenticate(RefreshJwtAuthentication(token))
+        }
+    Assertions.assertEquals(ENDED_SESSION_REJECTION, rejection.message)
+  }
+
+  /** The same token without a deadline is accepted, so the deadline is what ends the session. */
+  @Test
+  fun shouldAcceptSkewedTokenWithoutDeadline() {
+    val token = expiredToken(RefreshSessionLifetime(SESSION_LIFETIME))
+    Assertions.assertTrue(provider.authenticate(RefreshJwtAuthentication(token)).isAuthenticated)
+  }
+
   /** The lifetime reaches the rotation through the provider, which decodes the token for it. */
   private fun assertRenewedWithMaxAge(cookies: Array<Cookie>, maxAge: Int) {
     val token = cookies.single { it.name == REFRESH_TOKEN_COOKIE }.value
@@ -108,6 +176,46 @@ class RefreshCookieRotationTests {
   private fun tokenWithoutLifetime() =
       jwtUtils.encodeJwt(
           user.id.toString(), listOf(REFRESH_ROLE), mapOf(VERSION_CLAIM to user.tokenVersion!!))
+
+  /**
+   * A token which expired [SKEW_SECONDS] ago and is therefore still within the tolerance of the
+   * decoder, issued a whole session before that so it is well-formed. It is signed here rather than
+   * by [JwtUtils], which stamps every token as issued now and so cannot produce one whose expiry
+   * has already passed: the decoder rejects an expiry preceding the issuing outright, before any
+   * tolerance applies.
+   */
+  private fun expiredToken(lifetime: RefreshSessionLifetime): String {
+    val expiresAt = Instant.now().minusSeconds(SKEW_SECONDS)
+    val claims =
+        JWTClaimsSet.Builder()
+            .issuer(securityProperties.jwt.issuer)
+            .audience(securityProperties.jwt.issuer)
+            .subject(user.id.toString())
+            .issueTime(Date.from(expiresAt.minus(SESSION_LIFETIME)))
+            .expirationTime(Date.from(expiresAt))
+            .claim(ROLES_CLAIM, listOf(REFRESH_ROLE))
+            .claim(VERSION_CLAIM, user.tokenVersion!!)
+    lifetime.toClaims().forEach { (name, value) -> claims.claim(name, value) }
+    val jwt = SignedJWT(JWSHeader(JWSAlgorithm.HS256), claims.build())
+    jwt.sign(MACSigner(securityProperties.jwt.secret))
+    return jwt.serialize()
+  }
+
+  private fun lifetimeOf(token: String) =
+      RefreshSessionLifetime.fromClaims(jwtUtils.decodeJwt(token).claims)
+
+  private fun tokenIn(headers: List<String>) =
+      headerFor(headers, REFRESH_TOKEN_COOKIE).substringAfter("=").substringBefore(";")
+
+  private fun maxAgeOf(setCookieHeader: String) =
+      MAX_AGE_PATTERN.find(setCookieHeader)!!.groupValues[1].toLong()
+
+  private fun issuedExternalCookies(): Array<Cookie> {
+    val response = MockHttpServletResponse()
+    refreshCookieComponent.addForExternalLogin(
+        user.id.toString(), user.tokenVersion!!, response, RefreshCookiePolicy.STRICT)
+    return response.cookies.filter { it.maxAge != 0 }.toTypedArray()
+  }
 
   private fun assertRenewedWithStrictPolicy(headers: List<String>) {
     val refreshCookie = headerFor(headers, REFRESH_TOKEN_COOKIE)

@@ -59,6 +59,7 @@ class RefreshCookieComponent(
     servletContext: ServletContext
 ) {
   private val contextPath = servletContext.contextPath
+  private val externalSessionMaxAge = securityProperties.login.externalSessionMaxAge
   private val rememberMeMaxAge = securityProperties.login.rememberMeMaxAge
 
   /** [rememberMe] is without effect unless a remembered lifetime is configured. */
@@ -68,7 +69,30 @@ class RefreshCookieComponent(
       response: HttpServletResponse,
       policy: RefreshCookiePolicy = RefreshCookiePolicy.STRICT,
       rememberMe: Boolean = false
-  ) = addWithMaxAge(subject, version, response, policy, extendByFor(rememberMe))
+  ) =
+      addWithLifetime(
+          subject, version, response, policy, RefreshSessionLifetime(extendByFor(rememberMe)))
+
+  /**
+   * Starts a session which rests on an external login, so that it ends after
+   * `security.login.external-session-max-age` however actively it is used until then. Whichever
+   * system owns the account can revoke it without this application ever hearing of it, and
+   * repeating the login is the only thing which asks that system again. Without a configured period
+   * the session is unbounded like any other.
+   */
+  fun addForExternalLogin(
+      subject: String,
+      version: Int,
+      response: HttpServletResponse,
+      policy: RefreshCookiePolicy = RefreshCookiePolicy.STRICT
+  ) =
+      addWithLifetime(
+          subject,
+          version,
+          response,
+          policy,
+          RefreshSessionLifetime(
+              DEFAULT_EXTEND_BY, externalSessionMaxAge?.let { Instant.now().plus(it) }))
 
   /**
    * Removes the cookies for every policy because a browser only replaces a cookie by one carrying
@@ -89,20 +113,37 @@ class RefreshCookieComponent(
       lifetime: RefreshSessionLifetime,
       request: HttpServletRequest,
       response: HttpServletResponse
-  ) = addWithMaxAge(subject, version, response, policyOf(request), extendByFor(lifetime))
+  ) =
+      addWithLifetime(
+          subject,
+          version,
+          response,
+          policyOf(request),
+          RefreshSessionLifetime(extendByFor(lifetime), lifetime.extendUntil))
 
-  private fun addWithMaxAge(
+  private fun addWithLifetime(
       subject: String,
       version: Int,
       response: HttpServletResponse,
       policy: RefreshCookiePolicy,
-      maxAge: Duration
+      lifetime: RefreshSessionLifetime
   ) {
-    val claims = mapOf(VERSION_CLAIM to version).plus(RefreshSessionLifetime(maxAge).toClaims())
+    val maxAge = cappedMaxAge(lifetime)
+    val claims = mapOf(VERSION_CLAIM to version).plus(lifetime.toClaims())
     val refreshToken =
         jwtUtils.encodeJwt(subject, listOf(REFRESH_ROLE), claims, Instant.now().plus(maxAge))
     addCookie(response, REFRESH_TOKEN_COOKIE, refreshToken, maxAge.seconds, policy)
     addFlagCookie(response, maxAge.seconds, policy)
+  }
+
+  /**
+   * The deadline shortens the last period of a session so that the token expires with it. A refresh
+   * arriving afterwards is rejected before it gets here, see [RefreshSessionLifetime.hasEnded].
+   */
+  private fun cappedMaxAge(lifetime: RefreshSessionLifetime): Duration {
+    val extendBy = extendByFor(lifetime)
+    return lifetime.extendUntil?.let { minOf(extendBy, Duration.between(Instant.now(), it)) }
+        ?: extendBy
   }
 
   private fun extendByFor(rememberMe: Boolean) =

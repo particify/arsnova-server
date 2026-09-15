@@ -6,7 +6,9 @@ additional SSO provider on the login screen.
 A login is started at `/api/saml2/authenticate/{registrationId}`,
 and the service provider metadata is served at
 `/api/saml2/service-provider-metadata/{registrationId}`.
-A session started through SSO always carries the short lifetime and cannot ask to be remembered;
+A session started through SSO always carries the short lifetime and cannot ask to be remembered.
+It also ends after `security.login.external-session-max-age` however actively it is used until then,
+because the identity provider does not tell us when it revokes an account.
 link:authentication.adoc[] covers the tokens themselves.
 
 Users are authenticated by the identity provider.

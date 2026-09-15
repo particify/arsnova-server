@@ -104,9 +104,17 @@ unset, so a new installation starts without anyone having to invent a value.
 Only the first is worth keeping a copy of: every service reads it, and replacing it invalidates
 every token they have issued.
 
-`security.login.remember-me-max-age` is optional: it sets how long a session lasts whose login
-asked to be remembered, `180d` by default.
+`security.login.remember-me-max-age` is optional: it sets how long a refresh token lasts whose
+login asked to be remembered, `180d` by default, and every use of the token grants that period
+again.
 Leaving it out withdraws that option, so every session ends three hours after it was last used.
+
+`security.login.external-session-max-age` is optional too, and bounds the session rather than the
+token: it sets how long a session started by an external login may last in total, `30d` by default,
+counted from the login itself instead of from the last use.
+Such a session ends then however actively it is used, because the system which authenticated the
+user does not tell this installation when it revokes an account.
+Leaving it out withdraws the deadline.
 
 Environment variables take precedence over the file, so `JWT_SECRET`, `JWT_DOMAIN` and
 `CHALLENGE_SECRET` stay in `local.env`; setting the corresponding properties in the file would have
