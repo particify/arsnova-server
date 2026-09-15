@@ -47,7 +47,7 @@ security:
   password:
     bcrypt-strength: 12
   jwt:
-    validity-period: 6H
+    validity-period: 100m
   challenge:
     validity-seconds: 60
     algorithm: PBKDF2/SHA-256
