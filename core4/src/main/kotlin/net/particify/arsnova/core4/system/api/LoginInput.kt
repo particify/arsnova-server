@@ -5,5 +5,13 @@ package net.particify.arsnova.core4.system.api
 
 import java.util.UUID
 
-/** [providerId] is absent for the local provider. */
-data class LoginInput(val username: String, val password: String, val providerId: UUID? = null)
+/**
+ * [providerId] is absent for the local provider. [rememberMe] is without effect unless the
+ * deployment offers a remembered session.
+ */
+data class LoginInput(
+    val username: String,
+    val password: String,
+    val providerId: UUID? = null,
+    val rememberMe: Boolean = false
+)

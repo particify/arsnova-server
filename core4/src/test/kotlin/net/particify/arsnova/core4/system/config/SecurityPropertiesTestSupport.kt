@@ -11,10 +11,12 @@ private const val BCRYPT_STRENGTH = 12
 private const val CHALLENGE_VALIDITY_SECONDS = 60L
 private const val CHALLENGE_ITERATIONS = 5000
 private const val LOGIN_ATTEMPT_LIMIT = 20L
+private const val REMEMBER_ME_DAYS = 180L
 
 /** Everything a test does not pass carries the value shipped in `application.yaml`. */
 fun securityProperties(
     localAccount: SecurityProperties.LocalAccount = localAccount(),
+    login: SecurityProperties.Login = login(),
     roomCreatorRole: SecurityProperties.RoomCreatorRole =
         SecurityProperties.RoomCreatorRole(AutoAssignment.VERIFIED_ACCOUNTS)
 ) =
@@ -28,11 +30,14 @@ fun securityProperties(
                 SECRET,
                 CHALLENGE_ITERATIONS,
                 CHALLENGE_ITERATIONS),
-        login = SecurityProperties.Login(LOGIN_ATTEMPT_LIMIT, Duration.ofMinutes(2)),
+        login = login,
         localAccount = localAccount,
         roomCreatorRole = roomCreatorRole,
         authorizeUriHeader = "X-Forwarded-Uri",
         authorizeUriPrefix = "/api")
+
+fun login(rememberMeMaxAge: Duration? = Duration.ofDays(REMEMBER_ME_DAYS)) =
+    SecurityProperties.Login(LOGIN_ATTEMPT_LIMIT, Duration.ofMinutes(2), rememberMeMaxAge)
 
 fun localAccount(
     enabled: Boolean = true,

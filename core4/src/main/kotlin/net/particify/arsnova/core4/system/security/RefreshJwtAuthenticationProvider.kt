@@ -42,7 +42,10 @@ class RefreshJwtAuthenticationProvider(
       if (version != user.tokenVersion) throw BadCredentialsException("Invalid token version")
       val updatedUser = if (isLegacy) userService.invalidateToken(user) else user
       return RefreshJwtAuthentication(
-          token, updatedUser, setOf(SimpleGrantedAuthority("ROLE_$REFRESH_ROLE")))
+          token,
+          updatedUser,
+          setOf(SimpleGrantedAuthority("ROLE_$REFRESH_ROLE")),
+          RefreshSessionLifetime.fromClaims(jwt.claims))
     } catch (e: JwtException) {
       throw BadCredentialsException("Invalid JWT", e)
     } catch (e: IllegalArgumentException) {

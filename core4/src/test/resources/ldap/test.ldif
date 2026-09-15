@@ -92,6 +92,19 @@ givenName: Jorunn
 mail: jorunn.aaltonen@example.com
 userPassword: plaintext-on-purpose
 
+# Logs in through the login endpoint without asking to be remembered.
+dn: uid=kjohannsen,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: kjohannsen
+cn: Kaisa Johannsen
+sn: Johannsen
+givenName: Kaisa
+mail: kaisa.johannsen@example.com
+userPassword: short-session-secret
+
 # Its mail address is given to another account before the login, which the linking hook must see.
 dn: uid=lgrimaldi,ou=people,dc=example,dc=com
 objectClass: top
@@ -156,6 +169,19 @@ sn: Mbeki
 givenName: Rui
 mail: rui.mbeki@example.com
 userPassword: not-in-any-vault
+
+# Logs in through the login endpoint asking to be remembered.
+dn: uid=sfontaine,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: sfontaine
+cn: Solveig Fontaine
+sn: Fontaine
+givenName: Solveig
+mail: solveig.fontaine@example.com
+userPassword: remembered-session-secret
 
 # Bound with an upper-case user id to check that the directory's own value is stored.
 dn: uid=tilda.brekke,ou=people,dc=example,dc=com
