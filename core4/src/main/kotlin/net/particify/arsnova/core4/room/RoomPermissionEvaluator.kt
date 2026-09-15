@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.room
@@ -35,11 +35,17 @@ class RoomPermissionEvaluator(
           RoomRole.OWNER -> true
           RoomRole.EDITOR ->
               when (permission) {
-                "read" -> true
+                "moderate",
+                "read",
                 "write" -> true
                 else -> false
               }
-          RoomRole.MODERATOR,
+          RoomRole.MODERATOR ->
+              when (permission) {
+                "moderate",
+                "read" -> true
+                else -> false
+              }
           RoomRole.PARTICIPANT ->
               when (permission) {
                 "read" -> true

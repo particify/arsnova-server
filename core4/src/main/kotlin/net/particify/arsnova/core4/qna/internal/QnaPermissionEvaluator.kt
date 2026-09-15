@@ -29,10 +29,11 @@ class QnaPermissionEvaluator(private val qnaRepository: QnaRepository) :
     val parentPermission =
         when (permission) {
           // Qna permission -> Room permission
-          "write" -> "write"
-          "create_post" -> if (targetDomainObject.state === QnaState.STARTED) "read" else "write"
-          "read" -> if (targetDomainObject.state !== QnaState.STOPPED) "read" else "write"
+          "create_post" -> if (targetDomainObject.state === QnaState.STARTED) "read" else "moderate"
           "delete" -> "write"
+          "moderate" -> "moderate"
+          "read" -> if (targetDomainObject.state !== QnaState.STOPPED) "read" else "moderate"
+          "write" -> "write"
           else -> return DomainPermissionEvaluation(false)
         }
     return DomainPermissionEvaluation(
