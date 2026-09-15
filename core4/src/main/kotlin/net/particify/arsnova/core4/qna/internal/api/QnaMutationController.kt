@@ -17,37 +17,37 @@ import org.springframework.stereotype.Controller
 @SchemaMapping(typeName = "Mutation")
 class QnaMutationController(private val qnaService: QnaServiceImpl) {
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Qna', 'write')")
+  @PreAuthorize("hasPermission(#id, 'Qna', 'moderate')")
   fun startQna(@Argument id: UUID): Qna {
     return qnaService.start(id)
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Qna', 'write')")
+  @PreAuthorize("hasPermission(#id, 'Qna', 'moderate')")
   fun pauseQna(@Argument id: UUID): Qna {
     return qnaService.pause(id)
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Qna', 'write')")
+  @PreAuthorize("hasPermission(#id, 'Qna', 'moderate')")
   fun stopQna(@Argument id: UUID): Qna {
     return qnaService.stop(id)
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Qna', 'write')")
+  @PreAuthorize("hasPermission(#id, 'Qna', 'moderate')")
   fun updateQnaThreshold(@Argument id: UUID, @Argument threshold: Int?): Qna {
     return qnaService.updateThreshold(id, threshold)
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Qna', 'write')")
+  @PreAuthorize("hasPermission(#id, 'Qna', 'moderate')")
   fun updateQnaAutoPublish(@Argument id: UUID, @Argument autoPublish: Boolean): Qna {
     return qnaService.updateAutoPublish(id, autoPublish)
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Qna', 'write')")
+  @PreAuthorize("hasPermission(#id, 'Qna', 'moderate')")
   fun updateQnaActivePostId(@Argument id: UUID, @Argument activePostId: UUID?): Qna {
     return qnaService.updateActivePost(id, activePostId)
   }

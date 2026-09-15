@@ -19,19 +19,19 @@ class ReplyMutationController(
     private val replyService: ReplyServiceImpl,
 ) {
   @MutationMapping
-  @PreAuthorize("hasPermission(#input.postId, 'Post', 'write')")
+  @PreAuthorize("hasPermission(#input.postId, 'Post', 'moderate')")
   fun createQnaReply(@Argument input: CreateReplyInput): Reply {
     return replyService.create(input.toReply())
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#input.postId, 'Post', 'write')")
+  @PreAuthorize("hasPermission(#input.postId, 'Post', 'moderate')")
   fun updateQnaReply(@Argument input: UpdateReplyInput): Reply {
     return replyService.update(input.toReply())
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Post', 'delete')")
+  @PreAuthorize("hasPermission(#id, 'Post', 'moderate')")
   fun deleteQnaReply(@Argument id: UUID): UUID {
     replyService.delete(id)
     return id

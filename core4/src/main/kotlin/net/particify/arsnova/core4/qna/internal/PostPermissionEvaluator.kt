@@ -29,9 +29,10 @@ class PostPermissionEvaluator(private val postRepository: PostRepository) :
     val parentPermission =
         when (permission) {
           // Post permission -> Qna permission
-          "write" -> "write"
-          "read" -> if (targetDomainObject.qna!!.state !== QnaState.STOPPED) "read" else "write"
           "delete" -> "write"
+          "moderate" -> "moderate"
+          "read" -> if (targetDomainObject.qna!!.state !== QnaState.STOPPED) "read" else "moderate"
+          "write" -> "write"
           else -> return DomainPermissionEvaluation(false)
         }
     return DomainPermissionEvaluation(

@@ -34,25 +34,25 @@ class PostMutationController(
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Post', 'write')")
+  @PreAuthorize("hasPermission(#id, 'Post', 'moderate')")
   fun updateQnaPostFavorite(@Argument id: UUID, @Argument favorite: Boolean): Post {
     return postService.updateFavorite(id, favorite)
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Post', 'write')")
+  @PreAuthorize("hasPermission(#id, 'Post', 'moderate')")
   fun updateQnaPostCorrect(@Argument id: UUID, @Argument correct: CorrectState): Post {
     return postService.updateCorrect(id, correct)
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Post', 'write')")
+  @PreAuthorize("hasPermission(#id, 'Post', 'moderate')")
   fun acceptQnaPost(@Argument id: UUID): Post {
     return postService.accept(id)
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Post', 'write')")
+  @PreAuthorize("hasPermission(#id, 'Post', 'moderate')")
   fun rejectQnaPost(@Argument id: UUID): Post {
     return postService.reject(id)
   }
