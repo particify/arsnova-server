@@ -8,8 +8,11 @@ import java.util.UUID
 import net.particify.arsnova.core4.qna.Reply
 import net.particify.arsnova.core4.qna.event.RepliesDeletedEvent
 import net.particify.arsnova.core4.qna.event.ReplyCreatedEvent
+import net.particify.arsnova.core4.qna.event.ReplyDeletedEvent
+import net.particify.arsnova.core4.qna.exception.ReplyNotFoundException
 import net.particify.arsnova.core4.qna.internal.api.PostEventPublisher
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
@@ -28,15 +31,28 @@ class ReplyServiceImpl(
   }
 
   @Transactional
+  fun update(id: UUID, body: String): Reply {
+    val reply = replyRepository.findByIdOrNull(id) ?: throw ReplyNotFoundException(id)
+    reply.body = body
+    val persistedReply = replyRepository.save(reply)
+    // Subscribers key the reply by its ID, so re-emitting it under the same ID patches their cache.
+    postEventPublisher.publishReplyCreate(reply.post!!.id!!, persistedReply)
+    return persistedReply
+  }
+
+  @Transactional
+  fun delete(id: UUID) {
+    val reply = replyRepository.findByIdOrNull(id) ?: throw ReplyNotFoundException(id)
+    replyRepository.delete(reply)
+    applicationEventPublisher.publishEvent(ReplyDeletedEvent(id))
+  }
+
+  @Transactional
   fun deleteByPostId(postId: UUID): Int {
     val count = replyRepository.deleteByPostId(postId)
     applicationEventPublisher.publishEvent(RepliesDeletedEvent(postId, count))
     return count
   }
-
-  fun update(reply: Reply): Reply = replyRepository.save(reply)
-
-  fun delete(id: UUID) = replyRepository.deleteById(id)
 
   @Transactional
   fun duplicateForPost(originalPostId: UUID, duplicatedPostId: UUID) {

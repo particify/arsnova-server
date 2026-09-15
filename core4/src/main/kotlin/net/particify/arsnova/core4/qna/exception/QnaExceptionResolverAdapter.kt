@@ -24,6 +24,10 @@ class QnaExceptionResolverAdapter : DataFetcherExceptionResolverAdapter() {
               builder
                   .errorType(ErrorType.NOT_FOUND)
                   .message(if (ex.id != null) "${ex.message}: ${ex.id}" else ex.message)
+          is ReplyNotFoundException ->
+              builder
+                  .errorType(ErrorType.NOT_FOUND)
+                  .message(if (ex.id != null) "${ex.message}: ${ex.id}" else ex.message)
           else -> return super.resolveToSingleError(ex, env)
         }
     return error.build()
