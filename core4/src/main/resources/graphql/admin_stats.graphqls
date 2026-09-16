@@ -1,4 +1,8 @@
 extend type Query {
+  adminActiveRoomStats(
+    minMemberCount: Int
+    activityWindowMinutes: Int
+  ): AdminActiveRoomStats
   adminRoomStats: AdminRoomStats
   adminUserStats: AdminUserStats
   adminAnnouncementStats: AdminAnnouncementStats
@@ -17,6 +21,12 @@ type AdminRoomStats {
   activeRoomCount: Int!
   managingUserCount: Int!
   participantCount: Int!
+}
+
+type AdminActiveRoomStats {
+  count: Int!
+  minMemberCount: Int!
+  activityWindowMinutes: Int!
 }
 
 type AdminAnnouncementStats {
