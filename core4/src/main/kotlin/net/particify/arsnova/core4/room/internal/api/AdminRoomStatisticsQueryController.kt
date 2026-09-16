@@ -5,7 +5,9 @@ package net.particify.arsnova.core4.room.internal.api
 
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
+import java.time.Instant
 import net.particify.arsnova.core4.room.AdminActiveRoomStats
+import net.particify.arsnova.core4.room.AdminRoomActivityStats
 import net.particify.arsnova.core4.room.AdminRoomStats
 import net.particify.arsnova.core4.room.internal.MembershipServiceImpl
 import net.particify.arsnova.core4.room.internal.RoomServiceImpl
@@ -36,6 +38,23 @@ class AdminRoomStatisticsQueryController(
       activityWindowMinutes: Int?
   ): AdminActiveRoomStats {
     return membershipServiceImpl.findAdminActiveRoomStats(minMemberCount, activityWindowMinutes)
+  }
+
+  @QueryMapping
+  fun adminRoomActivityStats(
+      @Argument from: Instant,
+      @Argument to: Instant
+  ): AdminRoomActivityStats {
+    val managingUserCount = roomService.countAllCreatorsByCreatedAtRange(from, to)
+    val participantCount =
+        membershipServiceImpl.countAllParticipantUsersByLastActivityAtRange(from, to)
+    val roomCount =
+        roomService.countByAuditMetadataCreatedAtGreaterThanEqualAndAuditMetadataCreatedAtLessThan(
+            from, to)
+    return AdminRoomActivityStats(
+        managingUserCount = managingUserCount,
+        participantCount = participantCount,
+        roomCount = roomCount)
   }
 
   @QueryMapping
