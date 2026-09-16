@@ -7,6 +7,7 @@ import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
 import net.particify.arsnova.core4.qna.internal.PostRepository
 import net.particify.arsnova.core4.qna.internal.QnaRepository
+import net.particify.arsnova.core4.qna.internal.ReplyRepository
 import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomRole
@@ -39,6 +40,7 @@ private const val MODERATE = "moderate"
 private const val POST = "Post"
 private const val QNA = "Qna"
 private const val READ = "read"
+private const val REPLY = "Reply"
 
 /**
  * Covers the Post -> Qna -> Room chain the delegating evaluator walks, because what a role may
@@ -51,6 +53,7 @@ class QnaModerationPermissionTests {
   @Autowired lateinit var permissionEvaluator: DelegatingPermissionEvaluator
   @Autowired lateinit var qnaRepository: QnaRepository
   @Autowired lateinit var postRepository: PostRepository
+  @Autowired lateinit var replyRepository: ReplyRepository
   @Autowired lateinit var membershipService: MembershipServiceImpl
   @Autowired lateinit var userService: UserService
 
@@ -94,16 +97,19 @@ class QnaModerationPermissionTests {
 
   /**
    * A reply is v3's answer to a post, and clearing one was part of answering it, so
-   * `deleteQnaReply` is gated on the post's `moderate` rather than on its `delete`.
+   * `deleteQnaReply` is gated on `moderate` rather than on `delete`. The reply's evaluator passes
+   * the permission through to its post.
    */
   @Test
   fun shouldGrantReplyDeletionToModerator() {
-    Assertions.assertTrue(hasPermission(member(RoomRole.MODERATOR), POST, post.id, MODERATE))
+    val replyId = createReply()
+    Assertions.assertTrue(hasPermission(member(RoomRole.MODERATOR), REPLY, replyId, MODERATE))
   }
 
   @Test
   fun shouldDenyReplyDeletionToParticipant() {
-    Assertions.assertFalse(hasPermission(member(RoomRole.PARTICIPANT), POST, post.id, MODERATE))
+    val replyId = createReply()
+    Assertions.assertFalse(hasPermission(member(RoomRole.PARTICIPANT), REPLY, replyId, MODERATE))
   }
 
   /** Post deletion stayed with the roles which had it in v3; moderators were not among them. */
@@ -138,6 +144,10 @@ class QnaModerationPermissionTests {
     Assertions.assertFalse(hasPermission(user, POST, post.id, READ), POST)
     Assertions.assertFalse(hasPermission(user, QNA, qna.id, CREATE_POST), CREATE_POST)
   }
+
+  /** Created before the member is, so that auditing still sees the owner's security context. */
+  private fun createReply(): UUID =
+      checkNotNull(replyRepository.save(Reply(post = post, body = "Answer")).id)
 
   private fun stopQna() {
     SecurityContextHolder.getContext().authentication = authentication(owner)

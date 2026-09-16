@@ -25,13 +25,12 @@ class ReplyMutationController(
   }
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#input.postId, 'Post', 'moderate')")
-  fun updateQnaReply(@Argument input: UpdateReplyInput): Reply {
-    return replyService.update(input.toReply())
-  }
+  @PreAuthorize("hasPermission(#id, 'Reply', 'moderate')")
+  fun updateQnaReply(@Argument id: UUID, @Argument body: String): Reply =
+      replyService.update(id, body)
 
   @MutationMapping
-  @PreAuthorize("hasPermission(#id, 'Post', 'moderate')")
+  @PreAuthorize("hasPermission(#id, 'Reply', 'moderate')")
   fun deleteQnaReply(@Argument id: UUID): UUID {
     replyService.delete(id)
     return id
