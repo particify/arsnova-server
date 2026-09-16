@@ -51,7 +51,8 @@ data class Saml2TestUser(
 
 /**
  * Points one relying party registration at [identityProvider]. The signing credential is mandatory
- * even though no request is ever sent to the identity provider.
+ * -- the repository refuses a registration without one -- even though no request is ever sent to
+ * the identity provider here.
  */
 fun registerRelyingParty(
     registry: DynamicPropertyRegistry,

@@ -50,18 +50,41 @@ security:
 
 `entity-id`:: Entity ID of the service provider.
   `{registrationId}` is substituted with the registration's UUID.
+`acs.location`:: Where assertions are posted,
+  `{baseUrl}/login/saml2/sso/{registrationId}` by default.
+`acs.binding`:: Binding the assertion consumer service is advertised with, `POST` by default.
+`name-id-format`:: `NameIDPolicy` requested in the authentication request.
+  Unset by default, which requests none.
+  Only one format can be configured.
 `assertingparty.metadata-uri`:: Location of the identity provider's metadata.
   Required.
   It is fetched while the application starts and re-read afterwards, see below.
 `assertingparty.entity-id`:: Entity ID of the identity provider.
   Only needed when the metadata describes more than one, see below.
+`assertingparty.singlesignon.sign-request`:: Whether authentication requests are signed.
+  Unset by default, which signs them --
+  the property is an opt-*out*, and only an explicit `false` turns signing off.
+  The published metadata declares `AuthnRequestsSigned` exactly when requests are signed,
+  so setting it to `false` drops that declaration as well;
+  the two can never disagree, which is what a conforming identity provider relies on.
+  It is applied to the relying party's own `AuthnRequestsSigned` rather than to the asserting
+  party's `WantAuthnRequestsSigned`, which is where stock Spring Boot puts it:
+  the asserting party's side is rebuilt from the metadata on every refresh,
+  so a value written there would not survive one.
+  A request is signed regardless whenever the identity provider's metadata declares
+  `WantAuthnRequestsSigned`, so turning signing off does not free a registration of its signing
+  credential.
 `metadata-verification.credentials`:: Certificates the metadata document's own signature is
   verified against.
   Optional;
   unset accepts the document as read, see below.
 `signing.credentials`:: Key and certificate used to sign requests.
-  Signing is mandatory, so both locations have to be set;
-  a registration missing either of them fails at startup.
+  Mandatory: a registration carrying none, or carrying one without both locations set,
+  fails at startup.
+`decryption.credentials`:: Key and certificate an encrypted assertion is decrypted with.
+  Optional, and configured like `signing.credentials` -- normally with the same pair.
+  Unset publishes no encryption key, so an identity provider has none to encrypt with;
+  an assertion encrypted anyway fails the login.
 `attribute-mapping`:: Names of the asserted attributes read into the account, see below.
 `username-mapping`:: Whether the username is the mapped ID or the mail address, see below.
   `MAIL_ADDRESS` by default.
