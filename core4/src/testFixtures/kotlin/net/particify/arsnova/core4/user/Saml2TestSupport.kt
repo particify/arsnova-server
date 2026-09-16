@@ -3,7 +3,13 @@
  */
 package net.particify.arsnova.core4.user
 
+import java.security.cert.X509Certificate
 import java.util.UUID
+import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import org.springframework.boot.security.saml2.autoconfigure.Saml2RelyingPartyProperties
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.DefaultResourceLoader
 import org.springframework.test.context.DynamicPropertyRegistry
 
 const val SAML_IDP_ENTITY_ID = "https://idp.example.com/saml2"
@@ -77,5 +83,40 @@ fun registerRelyingPartyDisplay(
   registry.add("$prefix.order") { order }
 }
 
+/**
+ * The same registration as [registerRelyingParty] describes, bound already, for a test which drives
+ * the registration repository without a Spring context.
+ */
+fun relyingPartyProperties(
+    registrationId: UUID,
+    identityProvider: Saml2TestIdentityProvider,
+    metadataUri: String = identityProvider.metadataLocation,
+    assertingPartyEntityId: String? = null,
+    metadataVerificationCertificates: List<X509Certificate> = emptyList()
+): ExtendedSaml2RelyingPartyProperties {
+  val resourceLoader = DefaultResourceLoader()
+  val credential =
+      Saml2RelyingPartyProperties.Registration.Signing.Credential().apply {
+        privateKeyLocation = resourceLoader.getResource(identityProvider.privateKeyLocation)
+        certificateLocation = resourceLoader.getResource(identityProvider.certificateLocation)
+      }
+  val registration =
+      ExtendedRegistration().apply {
+        entityId = spEntityId(registrationId)
+        assertingparty.entityId = assertingPartyEntityId
+        assertingparty.metadataUri = metadataUri
+        signing.credentials.add(credential)
+        metadataVerification.credentials.addAll(
+            metadataVerificationCertificates.map(::verificationCredential))
+      }
+  return ExtendedSaml2RelyingPartyProperties(mapOf(registrationId to registration))
+}
+
 private fun relyingPartyPrefix(registrationId: String) =
     "security.saml2.relyingparty.registration.$registrationId"
+
+/** Pins a certificate without writing it out: the binder accepts any Spring resource. */
+private fun verificationCredential(certificate: X509Certificate) =
+    ExtendedRegistration.MetadataVerification.Credential().apply {
+      certificateLocation = ByteArrayResource(certificate.encoded)
+    }

@@ -4,16 +4,15 @@
 package net.particify.arsnova.core4.system.config
 
 import jakarta.servlet.DispatcherType
-import java.util.function.Consumer
 import net.particify.arsnova.core4.system.security.AuthenticationSuccessHandler
 import net.particify.arsnova.core4.system.security.ChallengeJwtAuthenticationFilter
 import net.particify.arsnova.core4.system.security.Http401UnauthenticatedEntryPoint
 import net.particify.arsnova.core4.system.security.RefreshAuthenticationFilter
+import net.particify.arsnova.core4.system.security.RefreshableRelyingPartyRegistrationRepository
 import net.particify.arsnova.core4.system.security.UserJwtAuthenticationFilter
 import net.particify.arsnova.core4.user.ADMIN_ROLE
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.internal.Saml2ResponseAuthenticationConverter
-import org.opensaml.security.x509.X509Support
 import org.slf4j.LoggerFactory
 import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest
 import org.springframework.context.annotation.Bean
@@ -28,12 +27,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer
 import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.converter.RsaKeyConverters
-import org.springframework.security.saml2.core.Saml2X509Credential
 import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider
-import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository
-import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations
 import org.springframework.security.web.DefaultSecurityFilterChain
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
@@ -132,26 +127,7 @@ class SecurityConfiguration(
   @Bean
   fun relyingPartyRegistrations(
       saml2Properties: ExtendedSaml2RelyingPartyProperties
-  ): RelyingPartyRegistrationRepository? {
-    val registrations =
-        saml2Properties.registration.map {
-          val credentials =
-              it.value.signing.credentials.map { c ->
-                require(c.privateKeyLocation != null && c.certificateLocation != null) {
-                  "Incomplete SAML configuration ${it.key}"
-                }
-                val key =
-                    RsaKeyConverters.pkcs8().convert(c.privateKeyLocation!!.file.inputStream())
-                val certificate = X509Support.decodeCertificate(c.certificateLocation!!.file)
-                Saml2X509Credential.signing(key, certificate)
-              }
-          RelyingPartyRegistrations.fromMetadataLocation(it.value.assertingparty.metadataUri!!)
-              .registrationId(it.key.toString())
-              .entityId(it.value.entityId)
-              .signingX509Credentials(Consumer { c -> c.addAll(credentials) })
-              .build()
-        }
-    return if (registrations.isNotEmpty()) InMemoryRelyingPartyRegistrationRepository(registrations)
-    else null
-  }
+  ): RelyingPartyRegistrationRepository? =
+      if (saml2Properties.registration.isEmpty()) null
+      else RefreshableRelyingPartyRegistrationRepository(saml2Properties)
 }

@@ -26,6 +26,9 @@ security:
                 certificate-location: ${security.saml2.credentials-path}/rp.crt
           assertingparty:
             metadata-uri: http://keycloak:8080/realms/dev/protocol/saml/descriptor
+          metadata-verification:
+            credentials:
+              - certificate-location: ${security.saml2.credentials-path}/idp.crt
 
 persistence:
   v3-migration:

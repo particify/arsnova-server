@@ -6,6 +6,8 @@ package net.particify.arsnova.core4.user
 import java.math.BigInteger
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.attribute.FileTime
+import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -43,8 +45,11 @@ import org.opensaml.saml.saml2.core.StatusCode
 import org.opensaml.saml.saml2.core.Subject
 import org.opensaml.saml.saml2.core.SubjectConfirmation
 import org.opensaml.saml.saml2.core.SubjectConfirmationData
+import org.opensaml.saml.saml2.metadata.EntitiesDescriptor
+import org.opensaml.saml.saml2.metadata.EntityDescriptor
 import org.opensaml.security.x509.BasicX509Credential
 import org.opensaml.xmlsec.keyinfo.impl.X509KeyInfoGeneratorFactory
+import org.opensaml.xmlsec.signature.SignableXMLObject
 import org.opensaml.xmlsec.signature.Signature
 import org.opensaml.xmlsec.signature.support.SignatureConstants
 import org.opensaml.xmlsec.signature.support.Signer
@@ -54,6 +59,14 @@ private const val KEY_SIZE = 2048
 private const val CERTIFICATE_VALIDITY_DAYS = 365L
 private const val ASSERTION_VALIDITY_MINUTES = 5L
 private const val PEM_LINE_LENGTH = 64
+private const val METADATA_FILE_NAME = "idp-metadata.xml"
+
+/**
+ * How far ahead of now a rewritten metadata document is dated. `ResourceBackedMetadataResolver`
+ * skips a document whose modification time is not strictly after its last refresh, which a rewrite
+ * within the same millisecond is not.
+ */
+private const val MTIME_LOOKAHEAD_SECONDS = 2L
 
 /**
  * Fabricates signed SAML responses so the converter can be driven through the real filter chain
@@ -67,23 +80,68 @@ private const val PEM_LINE_LENGTH = 64
  */
 @Suppress("TooManyFunctions")
 class Saml2TestIdentityProvider {
-  private val credential: BasicX509Credential
+  private var credential: BasicX509Credential
   private val directory: Path = Files.createTempDirectory("core4-saml2-test")
+  private val metadataPath: Path = directory.resolve(METADATA_FILE_NAME)
 
   val privateKeyLocation: String
   val certificateLocation: String
-  val metadataLocation: String
+  val metadataLocation: String = "file:$metadataPath"
+
+  /** The certificate the responses are currently signed with. */
+  val signingCertificate: X509Certificate
+    get() = credential.entityCertificate
+
+  /** The metadata document as the identity provider currently publishes it. */
+  val metadataDocument: String
+    get() = buildMetadata(credential.entityCertificate)
 
   init {
     InitializationService.initialize()
-    val keyPair =
-        KeyPairGenerator.getInstance("RSA").apply { initialize(KEY_SIZE) }.generateKeyPair()
+    val keyPair = generateKeyPair()
     val certificate = selfSign(keyPair.private, keyPair.public)
     credential = BasicX509Credential(certificate, keyPair.private)
     privateKeyLocation = writePem("idp.key", "PRIVATE KEY", keyPair.private.encoded)
     certificateLocation = writePem("idp.crt", "CERTIFICATE", certificate.encoded)
-    metadataLocation = writeMetadata(certificate)
+    writeMetadata(certificate)
     directory.toFile().deleteOnExit()
+  }
+
+  /**
+   * Replaces the signing key and republishes the metadata, as an identity provider does when it
+   * rotates its key. Responses are signed with the new key from here on.
+   */
+  fun rotateSigningKey() {
+    val keyPair = generateKeyPair()
+    val certificate = selfSign(keyPair.private, keyPair.public)
+    credential = BasicX509Credential(certificate, keyPair.private)
+    writeMetadata(certificate)
+    Files.setLastModifiedTime(
+        metadataPath, FileTime.from(Instant.now().plusSeconds(MTIME_LOOKAHEAD_SECONDS)))
+  }
+
+  /**
+   * A signing credential of its own, unrelated to the identity provider's own key. Metadata is
+   * signed by whoever publishes it -- a federation operator -- not by the identity provider it
+   * describes.
+   */
+  fun generateCredential(): BasicX509Credential {
+    val keyPair = generateKeyPair()
+    return BasicX509Credential(selfSign(keyPair.private, keyPair.public), keyPair.private)
+  }
+
+  /**
+   * Signs a metadata document -- an entity descriptor or an aggregate of them -- with an enveloped
+   * signature over its root, the way a federation operator signs what it publishes.
+   */
+  fun signMetadata(document: String, signingCredential: BasicX509Credential): String {
+    val root = unmarshall(document)
+    assignId(root)
+    require(root is SignableXMLObject) { "Not a signable metadata document" }
+    root.signature = signature(signingCredential)
+    val element = marshall(root)
+    Signer.signObject(checkNotNull(root.signature))
+    return SerializeSupport.nodeToString(element)
   }
 
   /**
@@ -136,7 +194,7 @@ class Saml2TestIdentityProvider {
     assertion.conditions = conditions(registrationId, now)
     assertion.authnStatements.add(authnStatement(now, sessionNotOnOrAfter))
     assertion.attributeStatements.add(attributeStatement(user))
-    assertion.signature = signature()
+    assertion.signature = signature(credential)
     return assertion
   }
 
@@ -214,21 +272,38 @@ class Saml2TestIdentityProvider {
     return issuer
   }
 
-  private fun signature(): Signature {
+  private fun signature(signingCredential: BasicX509Credential): Signature {
     val signature = buildSamlObject<Signature>(Signature.DEFAULT_ELEMENT_NAME)
-    signature.signingCredential = credential
+    signature.signingCredential = signingCredential
     signature.signatureAlgorithm = SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256
     signature.canonicalizationAlgorithm = SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS
     val keyInfoFactory = X509KeyInfoGeneratorFactory()
     keyInfoFactory.setEmitEntityCertificate(true)
-    signature.keyInfo = keyInfoFactory.newInstance().generate(credential)
+    signature.keyInfo = keyInfoFactory.newInstance().generate(signingCredential)
     return signature
   }
 
-  private fun marshall(response: Response): Element {
+  /** The signature references the root by ID, and the SAML profile rejects a root without one. */
+  private fun assignId(root: XMLObject) {
+    val id = "_${UUID.randomUUID()}"
+    when (root) {
+      is EntitiesDescriptor -> root.setID(root.getID() ?: id)
+      is EntityDescriptor -> root.setID(root.getID() ?: id)
+      else -> error("Unsupported metadata root: ${root.elementQName}")
+    }
+  }
+
+  private fun unmarshall(document: String): XMLObject {
+    val parserPool = checkNotNull(XMLObjectProviderRegistrySupport.getParserPool())
+    val element = parserPool.parse(document.reader()).documentElement
+    val unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory()
+    return checkNotNull(unmarshallerFactory.getUnmarshaller(element)).unmarshall(element)
+  }
+
+  private fun marshall(xmlObject: XMLObject): Element {
     val marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory()
-    val marshaller = checkNotNull(marshallerFactory.getMarshaller(response))
-    return marshaller.marshall(response)
+    val marshaller = checkNotNull(marshallerFactory.getMarshaller(xmlObject))
+    return marshaller.marshall(xmlObject)
   }
 
   private fun selfSign(privateKey: PrivateKey, publicKey: PublicKey): X509Certificate {
@@ -252,7 +327,15 @@ class Saml2TestIdentityProvider {
     return writeFile(fileName, pem)
   }
 
-  private fun writeMetadata(certificate: X509Certificate): String {
+  private fun generateKeyPair(): KeyPair =
+      KeyPairGenerator.getInstance("RSA").apply { initialize(KEY_SIZE) }.generateKeyPair()
+
+  private fun writeMetadata(certificate: X509Certificate) {
+    Files.writeString(metadataPath, buildMetadata(certificate))
+    metadataPath.toFile().deleteOnExit()
+  }
+
+  private fun buildMetadata(certificate: X509Certificate): String {
     val encoded = Base64.getEncoder().encodeToString(certificate.encoded)
     val metadata =
         """
@@ -272,7 +355,7 @@ class Saml2TestIdentityProvider {
         </md:EntityDescriptor>
         """
             .trimIndent()
-    return writeFile("idp-metadata.xml", metadata)
+    return metadata
   }
 
   private fun writeFile(fileName: String, content: String): String {

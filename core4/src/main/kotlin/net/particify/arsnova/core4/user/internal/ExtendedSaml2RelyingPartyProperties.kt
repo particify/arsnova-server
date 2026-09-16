@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.user.internal
 import java.util.UUID
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.security.saml2.autoconfigure.Saml2RelyingPartyProperties
+import org.springframework.core.io.Resource
 
 private const val DEFAULT_TITLE = "SAML"
 private const val ID_ATTRIBUTE = "urn:oasis:names:tc:SAML:attribute:subject-id"
@@ -48,11 +49,41 @@ data class ExtendedSaml2RelyingPartyProperties(
      */
     var order = 0
 
+    /**
+     * Certificates the identity provider metadata's own signature is verified against. Getter-only
+     * like [attributeMapping], because the binder mutates the list it hands back.
+     *
+     * Deliberately not Boot's `assertingparty.verification.credentials`, which pins the
+     * certificates that verify *assertions*. A federation signs the aggregate it publishes with the
+     * operator's own key rather than with any member identity provider's, and the two rotate on
+     * unrelated cadences.
+     *
+     * It sits beside `assertingparty` rather than under it because Boot's `getAssertingparty()` is
+     * getter-only and the type it returns cannot be extended.
+     */
+    val metadataVerification = MetadataVerification()
+
     data class AttributeMapping(
         var id: String = ID_ATTRIBUTE,
         var mailAddress: String = MAIL_ATTRIBUTE,
         var givenName: String = GIVEN_NAME_ATTRIBUTE,
         var surname: String = SURNAME_ATTRIBUTE
     )
+
+    /**
+     * Unset -- the default -- accepts the metadata document as read, which is all a location whose
+     * transport is already trusted needs.
+     *
+     * A signature matching any one of the certificates is accepted, and that is what carries a
+     * rotation: during the federation's announced overlap window both the outgoing and the incoming
+     * certificate are configured, and the outgoing one is removed once it has passed.
+     */
+    class MetadataVerification {
+      val credentials: MutableList<Credential> = mutableListOf()
+
+      class Credential {
+        var certificateLocation: Resource? = null
+      }
+    }
   }
 }
