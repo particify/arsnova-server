@@ -52,6 +52,10 @@ security:
   `{registrationId}` is substituted with the registration's UUID.
 `acs.location`:: Where assertions are posted,
   `{baseUrl}/login/saml2/sso/{registrationId}` by default.
+  Pointing it elsewhere serves that path in addition to the default one, see below.
+  `{baseUrl}` covers scheme, host, port and the `/api` context path,
+  so the placeholder form is required: an absolute URL gives no way to tell where the context path
+  ends, and is rejected while the application starts.
 `acs.binding`:: Binding the assertion consumer service is advertised with, `POST` by default.
 `name-id-format`:: `NameIDPolicy` requested in the authentication request.
   Unset by default, which requests none.
