@@ -44,4 +44,14 @@ class UserQueryController(private val userService: UserServiceImpl) {
   fun displayId(user: User): String? {
     return user.username ?: user.unverifiedMailAddress
   }
+
+  /** How another account signs in is not disclosed, so the field stays unresolved for it. */
+  @SchemaMapping(typeName = "User", field = "localPasswordSet")
+  @PreAuthorize("authenticated")
+  fun localPasswordSet(user: User, @AuthenticationPrincipal principal: User?): Boolean? {
+    if (principal?.id != user.id) {
+      return null
+    }
+    return user.password != null
+  }
 }

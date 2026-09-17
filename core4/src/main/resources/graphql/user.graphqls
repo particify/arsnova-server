@@ -7,6 +7,7 @@ extend type Mutation {
   claimUnverifiedUser(mailAddress: String!, password: String!): User
   deleteUser: UUID
   requestUserPasswordReset(mailAddress: String!): Boolean
+  requestUserPasswordSetup: Boolean
   resendVerificationMail: Boolean
   resetUserPassword(
     mailAddress: String!
@@ -33,6 +34,7 @@ type User {
   displayName: String
   mailAddress: String
   unverifiedMailAddress: String
+  localPasswordSet: Boolean
   uiSettings: UserUiSettings
   language: String
 }

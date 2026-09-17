@@ -5,6 +5,11 @@ mail:
   password-reset-link-text: Neues Passwort setzen
   password-reset-subject: Verifizierungscode für Passwortrücksetzung
   password-reset-your-code: "Hier ist der Verifizierungscode, den du zum Setzen eines neuen Passworts benötigst:"
+  password-setup-intro: Du hast angefordert, ein Passwort für deinen {0}-Account zu setzen.
+  password-setup-link-intro: "Unter dem folgenden Link kannst du dein Passwort setzen:"
+  password-setup-link-text: Passwort setzen
+  password-setup-subject: Verifizierungscode zum Setzen deines Passworts
+  password-setup-your-code: "Hier ist der Verifizierungscode, den du zum Setzen deines Passworts benötigst:"
   invitation-link-text: Einladung annehmen
   invitation-subject: Einladung zu {0}
   invitation-verification-intro: "Du wurdest von {0} eingeladen, {1} zu nutzen. Verwende den folgenden Link, um deinen Account zu erstellen:"

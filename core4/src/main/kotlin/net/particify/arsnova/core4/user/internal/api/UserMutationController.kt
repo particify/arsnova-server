@@ -131,6 +131,12 @@ class UserMutationController(
   }
 
   @MutationMapping
+  fun requestUserPasswordSetup(@AuthenticationPrincipal user: User, locale: Locale): Boolean {
+    localUserService.initiatePasswordSetup(user, locale)
+    return true
+  }
+
+  @MutationMapping
   fun resendVerificationMail(@AuthenticationPrincipal user: User, locale: Locale): Boolean {
     return localUserService.restartVerification(user, locale)
   }
