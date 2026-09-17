@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.system.security.Http401UnauthenticatedEntryPo
 import net.particify.arsnova.core4.system.security.RefreshAuthenticationFilter
 import net.particify.arsnova.core4.system.security.RefreshableRelyingPartyRegistrationRepository
 import net.particify.arsnova.core4.system.security.Saml2AssertionConsumerServiceConfigurer
+import net.particify.arsnova.core4.system.security.Saml2SpMetadataFactory
 import net.particify.arsnova.core4.system.security.UserJwtAuthenticationFilter
 import net.particify.arsnova.core4.user.ADMIN_ROLE
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
@@ -30,6 +31,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.saml2.provider.service.authentication.AbstractSaml2AuthenticationRequest
 import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider
+import org.springframework.security.saml2.provider.service.metadata.Saml2MetadataResponseResolver
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository
 import org.springframework.security.saml2.provider.service.web.HttpSessionSaml2AuthenticationRequestRepository
 import org.springframework.security.saml2.provider.service.web.Saml2AuthenticationRequestRepository
@@ -161,6 +163,18 @@ class SecurityConfiguration(
   fun saml2AuthenticationRequestRepository():
       Saml2AuthenticationRequestRepository<AbstractSaml2AuthenticationRequest> =
       HttpSessionSaml2AuthenticationRequestRepository()
+
+  /** Picked up by `Saml2MetadataConfigurer`, which prefers a bean over its own default. */
+  @Bean
+  fun saml2MetadataResponseResolver(
+      relyingPartyRegistrations: RelyingPartyRegistrationRepository?,
+      serviceProperties: ServiceProperties,
+      saml2Properties: ExtendedSaml2RelyingPartyProperties
+  ): Saml2MetadataResponseResolver? =
+      relyingPartyRegistrations?.let {
+        Saml2SpMetadataFactory(serviceProperties.productName, saml2Properties)
+            .metadataResponseResolver(it)
+      }
 
   @Bean
   fun relyingPartyRegistrations(
