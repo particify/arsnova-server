@@ -25,9 +25,11 @@ fun spEntityId(registrationId: UUID) = "https://sp.example.com/saml2/metadata/$r
 /**
  * Where the assertion consumer sits for MockMvc, which serves on `localhost` without a context
  * path. Spring resolves the relying party's location from the request, so the asserted destination
- * and recipient have to match this exactly.
+ * and recipient have to match this exactly. [path] follows a registration which configures
+ * `acs.location`.
  */
-fun acsLocation(registrationId: UUID) = "http://localhost/login/saml2/sso/$registrationId"
+fun acsLocation(registrationId: UUID, path: String = "/login/saml2/sso/$registrationId") =
+    "http://localhost$path"
 
 /** A user the in-test identity provider can assert. A null attribute is left out entirely. */
 data class Saml2TestUser(
@@ -51,13 +53,16 @@ data class Saml2TestUser(
 
 /**
  * Points one relying party registration at [identityProvider]. The signing credential is mandatory
- * even though no request is ever sent to the identity provider.
+ * -- the repository refuses a registration without one -- even though no request is ever sent to
+ * the identity provider here.
  */
 fun registerRelyingParty(
     registry: DynamicPropertyRegistry,
     identityProvider: Saml2TestIdentityProvider,
     registrationId: String,
-    usernameMapping: String? = null
+    usernameMapping: String? = null,
+    acsLocation: String? = null,
+    metadataPath: String? = null
 ) {
   val prefix = relyingPartyPrefix(registrationId)
   registry.add("$prefix.entity-id") { spEntityId(UUID.fromString(registrationId)) }
@@ -69,6 +74,8 @@ fun registerRelyingParty(
   }
   registry.add("$prefix.assertingparty.metadata-uri") { identityProvider.metadataLocation }
   usernameMapping?.let { registry.add("$prefix.username-mapping") { it } }
+  acsLocation?.let { registry.add("$prefix.acs.location") { it } }
+  metadataPath?.let { registry.add("$prefix.metadata-path") { it } }
 }
 
 /** How a registration is presented on the login page, which no login itself depends on. */

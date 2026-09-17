@@ -9,6 +9,9 @@ import net.particify.arsnova.core4.system.security.ChallengeJwtAuthenticationFil
 import net.particify.arsnova.core4.system.security.Http401UnauthenticatedEntryPoint
 import net.particify.arsnova.core4.system.security.RefreshAuthenticationFilter
 import net.particify.arsnova.core4.system.security.RefreshableRelyingPartyRegistrationRepository
+import net.particify.arsnova.core4.system.security.Saml2AssertionConsumerServiceConfigurer
+import net.particify.arsnova.core4.system.security.Saml2ResponseValidation
+import net.particify.arsnova.core4.system.security.Saml2SpMetadataFactory
 import net.particify.arsnova.core4.system.security.UserJwtAuthenticationFilter
 import net.particify.arsnova.core4.user.ADMIN_ROLE
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
@@ -27,11 +30,23 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.saml2.provider.service.authentication.AbstractSaml2AuthenticationRequest
 import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider
+import org.springframework.security.saml2.provider.service.metadata.Saml2MetadataResponseResolver
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository
+import org.springframework.security.saml2.provider.service.web.HttpSessionSaml2AuthenticationRequestRepository
+import org.springframework.security.saml2.provider.service.web.Saml2AuthenticationRequestRepository
 import org.springframework.security.web.DefaultSecurityFilterChain
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+
+/**
+ * What the SAML login DSL redirects a failed authentication to. Stated rather than left to the DSL,
+ * because the assertion consumer services served next to it have to answer the same way and take
+ * the handler built from this.
+ */
+private const val SAML_LOGIN_FAILURE_URL = "/login?error"
 
 private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
 
@@ -50,6 +65,9 @@ class SecurityConfiguration(
       authenticationSuccessHandler: AuthenticationSuccessHandler,
       converter: Saml2ResponseAuthenticationConverter,
       saml2Properties: ExtendedSaml2RelyingPartyProperties,
+      relyingPartyRegistrations: RelyingPartyRegistrationRepository?,
+      saml2AuthenticationRequestRepository:
+          Saml2AuthenticationRequestRepository<AbstractSaml2AuthenticationRequest>,
       publicRoutesList: List<PublicRoutes>,
       configurers: List<SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity>>
   ): SecurityFilterChain {
@@ -107,14 +125,31 @@ class SecurityConfiguration(
         })
     if (saml2Properties.registration.isNotEmpty()) {
       val samlAuthenticationProvider = OpenSaml5AuthenticationProvider()
+      val responseValidation = Saml2ResponseValidation(saml2Properties)
+      samlAuthenticationProvider.setResponseValidator(responseValidation.responseValidator())
+      samlAuthenticationProvider.setAssertionValidator(responseValidation.assertionValidator())
       samlAuthenticationProvider.setResponseAuthenticationConverter(converter)
+      val samlAuthenticationManager = ProviderManager(samlAuthenticationProvider)
+      // One handler for both, so a change to how a failed login is answered lands once.
+      val samlAuthenticationFailureHandler =
+          SimpleUrlAuthenticationFailureHandler(SAML_LOGIN_FAILURE_URL)
       http
           .saml2Login {
-            it.authenticationManager(ProviderManager(samlAuthenticationProvider))
+            it.authenticationManager(samlAuthenticationManager)
                 .successHandler(authenticationSuccessHandler)
+                .failureHandler(samlAuthenticationFailureHandler)
           }
           .saml2Logout(Customizer.withDefaults())
           .saml2Metadata(Customizer.withDefaults())
+          .with(
+              Saml2AssertionConsumerServiceConfigurer(
+                  checkNotNull(relyingPartyRegistrations),
+                  saml2Properties,
+                  samlAuthenticationManager,
+                  authenticationSuccessHandler,
+                  samlAuthenticationFailureHandler,
+                  saml2AuthenticationRequestRepository),
+              Customizer.withDefaults())
     }
     return http.build()
   }
@@ -123,6 +158,27 @@ class SecurityConfiguration(
   fun authenticationManager(http: HttpSecurity): AuthenticationManager {
     return http.getSharedObject(AuthenticationManagerBuilder::class.java).build()
   }
+
+  /**
+   * Shared, so a configured assertion consumer service finds the authentication request the default
+   * one stored. Two instances would reject every response carrying an `InResponseTo`.
+   */
+  @Bean
+  fun saml2AuthenticationRequestRepository():
+      Saml2AuthenticationRequestRepository<AbstractSaml2AuthenticationRequest> =
+      HttpSessionSaml2AuthenticationRequestRepository()
+
+  /** Picked up by `Saml2MetadataConfigurer`, which prefers a bean over its own default. */
+  @Bean
+  fun saml2MetadataResponseResolver(
+      relyingPartyRegistrations: RelyingPartyRegistrationRepository?,
+      serviceProperties: ServiceProperties,
+      saml2Properties: ExtendedSaml2RelyingPartyProperties
+  ): Saml2MetadataResponseResolver? =
+      relyingPartyRegistrations?.let {
+        Saml2SpMetadataFactory(serviceProperties.productName, saml2Properties)
+            .metadataResponseResolver(it)
+      }
 
   @Bean
   fun relyingPartyRegistrations(

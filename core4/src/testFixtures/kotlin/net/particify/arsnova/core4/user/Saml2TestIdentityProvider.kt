@@ -147,25 +147,27 @@ class Saml2TestIdentityProvider {
   /**
    * Encodes a signed response for the given user, ready to be posted to the assertion consumer.
    * [sessionNotOnOrAfter] bounds the session the assertion starts, which most identity providers
-   * leave out and which is therefore absent by default.
+   * leave out and which is therefore absent by default. [acsLocation] is what the response is
+   * addressed to, which a registration serving a path of its own has to override.
    */
   fun encodedResponse(
       registrationId: UUID,
       user: Saml2TestUser,
-      sessionNotOnOrAfter: Instant? = null
+      sessionNotOnOrAfter: Instant? = null,
+      acsLocation: String = acsLocation(registrationId)
   ): String {
-    val assertion = assertion(registrationId, user, sessionNotOnOrAfter)
-    val response = response(registrationId, assertion)
+    val assertion = assertion(registrationId, user, sessionNotOnOrAfter, acsLocation)
+    val response = response(acsLocation, assertion)
     val element = marshall(response)
     Signer.signObject(checkNotNull(assertion.signature))
     return Base64.getEncoder().encodeToString(SerializeSupport.nodeToString(element).toByteArray())
   }
 
-  private fun response(registrationId: UUID, assertion: Assertion): Response {
+  private fun response(acsLocation: String, assertion: Assertion): Response {
     val response = buildSamlObject<Response>(Response.DEFAULT_ELEMENT_NAME)
     response.id = "_${UUID.randomUUID()}"
     response.issueInstant = Instant.now()
-    response.destination = acsLocation(registrationId)
+    response.destination = acsLocation
     response.issuer = issuer()
     response.status = status()
     response.assertions.add(assertion)
@@ -183,14 +185,15 @@ class Saml2TestIdentityProvider {
   private fun assertion(
       registrationId: UUID,
       user: Saml2TestUser,
-      sessionNotOnOrAfter: Instant?
+      sessionNotOnOrAfter: Instant?,
+      acsLocation: String
   ): Assertion {
     val now = Instant.now()
     val assertion = buildSamlObject<Assertion>(Assertion.DEFAULT_ELEMENT_NAME)
     assertion.id = "_${UUID.randomUUID()}"
     assertion.issueInstant = now
     assertion.issuer = issuer()
-    assertion.subject = subject(registrationId, user, now)
+    assertion.subject = subject(acsLocation, user, now)
     assertion.conditions = conditions(registrationId, now)
     assertion.authnStatements.add(authnStatement(now, sessionNotOnOrAfter))
     assertion.attributeStatements.add(attributeStatement(user))
@@ -198,14 +201,14 @@ class Saml2TestIdentityProvider {
     return assertion
   }
 
-  private fun subject(registrationId: UUID, user: Saml2TestUser, now: Instant): Subject {
+  private fun subject(acsLocation: String, user: Saml2TestUser, now: Instant): Subject {
     val nameId = buildSamlObject<NameID>(NameID.DEFAULT_ELEMENT_NAME)
     nameId.format = NameID.UNSPECIFIED
     nameId.value = user.subjectId
     val confirmationData =
         buildSamlObject<SubjectConfirmationData>(SubjectConfirmationData.DEFAULT_ELEMENT_NAME)
     confirmationData.notOnOrAfter = now.plus(ASSERTION_VALIDITY_MINUTES, ChronoUnit.MINUTES)
-    confirmationData.recipient = acsLocation(registrationId)
+    confirmationData.recipient = acsLocation
     val confirmation =
         buildSamlObject<SubjectConfirmation>(SubjectConfirmation.DEFAULT_ELEMENT_NAME)
     confirmation.method = SubjectConfirmation.METHOD_BEARER

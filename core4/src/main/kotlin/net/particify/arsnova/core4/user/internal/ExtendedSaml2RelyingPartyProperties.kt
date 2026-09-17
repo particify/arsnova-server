@@ -3,10 +3,13 @@
  */
 package net.particify.arsnova.core4.user.internal
 
+import jakarta.validation.Valid
+import jakarta.validation.constraints.NotBlank
 import java.util.UUID
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.security.saml2.autoconfigure.Saml2RelyingPartyProperties
 import org.springframework.core.io.Resource
+import org.springframework.validation.annotation.Validated
 
 private const val DEFAULT_TITLE = "SAML"
 private const val ID_ATTRIBUTE = "urn:oasis:names:tc:SAML:attribute:subject-id"
@@ -15,11 +18,31 @@ private const val GIVEN_NAME_ATTRIBUTE = "urn:oid:2.5.4.42"
 private const val SURNAME_ATTRIBUTE = "urn:oid:2.5.4.4"
 
 @ConfigurationProperties("security.saml2.relyingparty")
+@Validated
 data class ExtendedSaml2RelyingPartyProperties(
-    val registration: Map<UUID, ExtendedRegistration> = mapOf()
+    @field:Valid val registration: Map<UUID, ExtendedRegistration> = mapOf()
 ) {
   class ExtendedRegistration : Saml2RelyingPartyProperties.Registration() {
-    val attributeMapping = AttributeMapping()
+    @field:Valid val attributeMapping = AttributeMapping()
+
+    /**
+     * Attributes published in the service provider metadata beyond those [attributeMapping] names,
+     * for a federation which requires them to be requested even though nothing here reads them.
+     * Getter-only like [attributeMapping], because the binder mutates the list it hands back.
+     */
+    @field:Valid
+    val additionalRequestedAttributes: MutableList<RequestedAttribute> = mutableListOf()
+
+    /**
+     * A further path this registration's own metadata document is served at, besides
+     * `/saml2/service-provider-metadata/{registrationId}`, which is always served and cannot be
+     * turned off. A servlet path rather than a URL: nothing publishes it, so there is no
+     * `{baseUrl}` to resolve.
+     *
+     * Not to be confused with `assertingparty.metadata-uri`, which is where the identity provider's
+     * document is read from. Needs a setter for the same reason as [usernameMapping].
+     */
+    var metadataPath: String? = null
 
     /**
      * Needs a setter, unlike [attributeMapping]: the inherited base class is bound as a JavaBean,
@@ -63,10 +86,32 @@ data class ExtendedSaml2RelyingPartyProperties(
      */
     val metadataVerification = MetadataVerification()
 
+    /**
+     * A list of objects rather than of names because `required` is what an identity provider keys
+     * its release policy on, and it differs per attribute.
+     */
+    class RequestedAttribute {
+      @field:NotBlank(
+          message =
+              "must name the attribute to request, which cannot be derived from anything else")
+      var name: String = ""
+
+      /** Whether a login is expected to fail without it, which is never the case here. */
+      var required: Boolean = false
+    }
+
+    /**
+     * Blank is rejected rather than read as "do not map this": an empty name would be looked up in
+     * the assertion like any other and published as an empty requested attribute.
+     */
     data class AttributeMapping(
+        @field:NotBlank(message = "must name the asserted attribute holding the user ID")
         var id: String = ID_ATTRIBUTE,
+        @field:NotBlank(message = "must name the asserted attribute holding the mail address")
         var mailAddress: String = MAIL_ATTRIBUTE,
+        @field:NotBlank(message = "must name the asserted attribute holding the given name")
         var givenName: String = GIVEN_NAME_ATTRIBUTE,
+        @field:NotBlank(message = "must name the asserted attribute holding the surname")
         var surname: String = SURNAME_ATTRIBUTE
     )
 

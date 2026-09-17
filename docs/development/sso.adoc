@@ -37,6 +37,9 @@ security:
           username-mapping: MAIL_ADDRESS
           attribute-mapping:
             mail-address: urn:oid:0.9.2342.19200300.100.1.3
+          additional-requested-attributes:
+            - name: urn:oid:1.3.6.1.4.1.5923.1.1.1.9
+              required: true
           signing:
             credentials:
               - private-key-location: file:credentials/rp.key
@@ -50,25 +53,109 @@ security:
 
 `entity-id`:: Entity ID of the service provider.
   `{registrationId}` is substituted with the registration's UUID.
+`acs.location`:: The primary assertion consumer service -- where an authentication request asks for
+  assertions to be posted, `{baseUrl}/login/saml2/sso/{registrationId}` by default.
+  Pointing it elsewhere serves that path in addition to the default one, see below.
+  `{baseUrl}` covers scheme, host, port and the `/api` context path,
+  so the placeholder form is required: an absolute URL gives no way to tell where the context path
+  ends, and is rejected while the application starts.
+`acs.binding`:: Binding the assertion consumer service is advertised with, `POST` by default.
+`metadata-path`:: A further path this registration's metadata document is served at,
+  besides `/api/saml2/service-provider-metadata/{registrationId}`, see below.
+  Unset by default.
+  A servlet path below the context path rather than a URL, so it starts with `/` and carries no
+  `{baseUrl}`;
+  nothing publishes it, which is what makes it useful for a URL an identity provider already holds.
+`name-id-format`:: `NameIDPolicy` requested in the authentication request,
+  and the `NameIDFormat` the published metadata declares.
+  Unset by default, which requests none and declares none.
+  Only one format can be configured.
+  Nothing here reads the asserted name ID -- the account is keyed on `attribute-mapping.id` --
+  so this only matters to an identity provider which needs to be told.
 `assertingparty.metadata-uri`:: Location of the identity provider's metadata.
   Required.
   It is fetched while the application starts and re-read afterwards, see below.
 `assertingparty.entity-id`:: Entity ID of the identity provider.
   Only needed when the metadata describes more than one, see below.
+`assertingparty.singlesignon.sign-request`:: Whether authentication requests are signed.
+  Unset by default, which signs them --
+  the property is an opt-*out*, and only an explicit `false` turns signing off.
+  The published metadata declares `AuthnRequestsSigned` exactly when requests are signed,
+  so setting it to `false` drops that declaration as well;
+  the two can never disagree, which is what a conforming identity provider relies on.
+  It is applied to the relying party's own `AuthnRequestsSigned` rather than to the asserting
+  party's `WantAuthnRequestsSigned`, which is where stock Spring Boot puts it:
+  the asserting party's side is rebuilt from the metadata on every refresh,
+  so a value written there would not survive one.
+  A request is signed regardless whenever the identity provider's metadata declares
+  `WantAuthnRequestsSigned`, so turning signing off does not free a registration of its signing
+  credential.
 `metadata-verification.credentials`:: Certificates the metadata document's own signature is
   verified against.
   Optional;
   unset accepts the document as read, see below.
 `signing.credentials`:: Key and certificate used to sign requests.
-  Signing is mandatory, so both locations have to be set;
-  a registration missing either of them fails at startup.
+  Mandatory: a registration carrying none, or carrying one without both locations set,
+  fails at startup.
+`decryption.credentials`:: Key and certificate an encrypted assertion is decrypted with.
+  Optional, and configured like `signing.credentials` -- normally with the same pair.
+  Unset publishes no encryption key, so an identity provider has none to encrypt with;
+  an assertion encrypted anyway fails the login.
 `attribute-mapping`:: Names of the asserted attributes read into the account, see below.
+`additional-requested-attributes`:: Attributes the published metadata asks for
+  beyond those `attribute-mapping` names, see below.
+  Empty by default.
+  Each entry takes a `name` and an optional `required`, which is `false` unless set.
+  An entry without a name is rejected while the application starts.
 `username-mapping`:: Whether the username is the mapped ID or the mail address, see below.
   `MAIL_ADDRESS` by default.
 `title`:: Name shown to users selecting this registration on the login page.
   `SAML` by default, which leaves several registrations indistinguishable,
   so an installation offering more than one should set it.
 `order`:: Position among the login options, `0` by default.
+
+=== Assertion consumer services
+
+A registration accepts assertions at `acs.location` and always at
+`{baseUrl}/login/saml2/sso/{registrationId}` as well --
+the default needs no configuration and cannot be turned off,
+so a registration serving an endpoint of its own stays reachable at the one every other
+installation uses.
+Both are served, advertised in the published metadata and accepted as a response's `Destination`
+and as an assertion's `Recipient`.
+
+`acs.location` picks the *primary* of the two.
+That is the location an authentication request asks the identity provider to post to,
+and the one the metadata marks `isDefault="true"`;
+the default one is advertised with an index of its own and never becomes the default.
+So the two endpoints do not have to go live together:
+publish the pair, let the identity provider re-read the metadata whenever it does,
+and drop `acs.location` afterwards.
+Until it has re-read, it goes on posting where it always did.
+
+Two registrations cannot share an assertion consumer service path,
+and the application refuses to start when they do.
+The path carries no registration ID, so a response arriving there is matched to a registration by
+the authentication request the login stored, and by its `Issuer` when there is none -- an
+identity-provider-initiated login, or one whose session was lost.
+That fallback needs the asserting party's entity ID to identify exactly one registration,
+so such a registration should set `assertingparty.entity-id` --
+nothing else says which entity ID it has until the identity provider's metadata has been read --
+and no second registration may point at the same identity provider.
+
+=== Metadata paths
+
+The document is always served at `/api/saml2/service-provider-metadata/{registrationId}`.
+`metadata-path` adds a second path serving the same document,
+which is what lets an identity provider re-fetch from a URL it was configured with long ago instead
+of receiving a 404.
+No registration ID appears in that path, so it publishes exactly the one registration it is
+configured on -- an aggregate of several would be an `EntitiesDescriptor`,
+which not every identity provider can read.
+Two registrations cannot share a path here either,
+and the application refuses to start when they do.
+
+link:../admin/upgrading-to-v4.adoc[] works through the case both settings exist for.
 
 == Metadata refresh
 
@@ -173,6 +260,53 @@ The other side of that is deliberate:
 an address the identity provider removes on purpose does not propagate here either.
 The given name and surname follow the same rule:
 an assertion which does not carry them leaves the stored values alone.
+
+=== Requested attributes
+
+The published service provider metadata asks for exactly the attributes `attribute-mapping` names,
+so a federated deployment does not have to maintain a second list of them anywhere.
+Nothing has to be enabled for it;
+every registration publishes an `AttributeConsumingService`.
+
+`mail-address`, `given-name` and `surname` are requested with `isRequired="false"`,
+because a login succeeds without any of them.
+The `id` attribute depends on what it is mapped to:
+
+* A subject identifier -- `urn:oasis:names:tc:SAML:attribute:subject-id`,
+  which is the default, or `urn:oasis:names:tc:SAML:attribute:pairwise-id` --
+  is released through its own profile rather than through attribute filtering,
+  so requesting it as an attribute would achieve nothing.
+  The document instead carries an `mdattr:EntityAttributes` extension declaring
+  `urn:oasis:names:tc:SAML:profiles:subject-id:req`,
+  which is the channel federations implement,
+  and no requested attribute is published for `id`.
+* Anything else is an ordinary attribute and is requested with `isRequired="true"`:
+  the login genuinely fails without it.
+
+`additional-requested-attributes` appends to that set, for a federation which requires an attribute
+to be requested even though nothing here reads it.
+An entry whose `name` is missing or blank fails the application's startup rather than being skipped,
+because nothing else could say which attribute was meant.
+An attribute already derived from `attribute-mapping` is not published twice,
+and neither is one two mappings happen to share;
+the first entry wins, so a required attribute stays required.
+
+`NameFormat` is only stated for a name which is URI-shaped --
+one starting with `urn:` or containing `://` -- in which case it is
+`urn:oasis:names:tc:SAML:2.0:attrname-format:uri`.
+For anything else it is left off,
+which SAML 2.0 Core already defines as meaning `unspecified`,
+so a short name such as `uid` needs no format stated.
+
+No `FriendlyName` is published.
+Identity providers match on `Name`,
+and a friendly name disagreeing with the federation registry is a common validator complaint.
+
+The `ServiceName` is `service.product-name`, tagged `xml:lang="en"`.
+When no `mdui:DisplayName` is published,
+Shibboleth falls back to it as the display name on the consent screen.
+A deployment showing its entity ID or a registry name today will therefore show the product name.
+The language tag is not configurable yet, so a German product name is published tagged as English.
 
 == Identity model
 
