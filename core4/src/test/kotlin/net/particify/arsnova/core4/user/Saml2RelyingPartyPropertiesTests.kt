@@ -163,6 +163,19 @@ class Saml2RelyingPartyPropertiesTests {
   }
 
   @Test
+  fun shouldDefaultMetadataPathToUnset() {
+    val registration = bind(mapOf("entity-id" to "https://example.com"))
+    Assertions.assertNull(registration.metadataPath)
+  }
+
+  /** Fails for a getter-only scalar, which binds to nothing but its default. */
+  @Test
+  fun shouldBindConfiguredMetadataPath() {
+    val registration = bind(mapOf("metadata-path" to "/auth/config/saml/sp-metadata.xml"))
+    Assertions.assertEquals("/auth/config/saml/sp-metadata.xml", registration.metadataPath)
+  }
+
+  @Test
   fun shouldDefaultDecryptionToNoCredentials() {
     val registration = bind(mapOf("entity-id" to "https://example.com"))
     Assertions.assertTrue(registration.decryption.credentials.isEmpty())

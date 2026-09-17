@@ -34,6 +34,17 @@ data class ExtendedSaml2RelyingPartyProperties(
     val additionalRequestedAttributes: MutableList<RequestedAttribute> = mutableListOf()
 
     /**
+     * A further path this registration's own metadata document is served at, besides
+     * `/saml2/service-provider-metadata/{registrationId}`, which is always served and cannot be
+     * turned off. A servlet path rather than a URL: nothing publishes it, so there is no
+     * `{baseUrl}` to resolve.
+     *
+     * Not to be confused with `assertingparty.metadata-uri`, which is where the identity provider's
+     * document is read from. Needs a setter for the same reason as [usernameMapping].
+     */
+    var metadataPath: String? = null
+
+    /**
      * Needs a setter, unlike [attributeMapping]: the inherited base class is bound as a JavaBean,
      * and for a getter-only scalar that binding fails for every value except the default.
      */

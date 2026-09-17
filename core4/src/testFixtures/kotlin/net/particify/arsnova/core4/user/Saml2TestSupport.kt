@@ -61,7 +61,8 @@ fun registerRelyingParty(
     identityProvider: Saml2TestIdentityProvider,
     registrationId: String,
     usernameMapping: String? = null,
-    acsLocation: String? = null
+    acsLocation: String? = null,
+    metadataPath: String? = null
 ) {
   val prefix = relyingPartyPrefix(registrationId)
   registry.add("$prefix.entity-id") { spEntityId(UUID.fromString(registrationId)) }
@@ -74,6 +75,7 @@ fun registerRelyingParty(
   registry.add("$prefix.assertingparty.metadata-uri") { identityProvider.metadataLocation }
   usernameMapping?.let { registry.add("$prefix.username-mapping") { it } }
   acsLocation?.let { registry.add("$prefix.acs.location") { it } }
+  metadataPath?.let { registry.add("$prefix.metadata-path") { it } }
 }
 
 /** How a registration is presented on the login page, which no login itself depends on. */

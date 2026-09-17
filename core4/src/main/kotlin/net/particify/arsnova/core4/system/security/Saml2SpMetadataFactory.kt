@@ -27,9 +27,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.security.saml2.provider.service.metadata.OpenSaml5MetadataResolver
 import org.springframework.security.saml2.provider.service.metadata.OpenSaml5MetadataResolver.EntityDescriptorParameters
 import org.springframework.security.saml2.provider.service.metadata.Saml2MetadataResponseResolver
+import org.springframework.security.saml2.provider.service.registration.IterableRelyingPartyRegistrationRepository
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository
 import org.springframework.security.saml2.provider.service.web.metadata.RequestMatcherMetadataResponseResolver
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
 
 /**
  * Published alongside the requested attributes while the product name is the only display name we
@@ -53,9 +55,9 @@ private val SUBJECT_ID_REQUIREMENTS =
 private val logger = LoggerFactory.getLogger(Saml2SpMetadataFactory::class.java)
 
 /**
- * Builds the service provider metadata document and resolves it for the endpoint it is served at.
- * The product name and the SAML configuration are fixed for the lifetime of the application
- * context, so they are held here rather than handed to each declaration in turn.
+ * Builds the service provider metadata document and resolves it at every path it is served at. The
+ * product name and the SAML configuration are fixed for the lifetime of the application context, so
+ * they are held here rather than handed to each declaration in turn.
  */
 class Saml2SpMetadataFactory(
     private val productName: String,
@@ -63,11 +65,33 @@ class Saml2SpMetadataFactory(
 ) {
   private val assertionConsumerServices = Saml2AssertionConsumerServices(saml2Properties)
 
-  /** Resolves the document served at `/saml2/service-provider-metadata/{registrationId}`. */
+  /**
+   * Resolves the document served at `/saml2/service-provider-metadata/{registrationId}`, and at the
+   * path of its own that each registration configuring `metadata-path` adds. The same document is
+   * published at either, so which one an identity provider fetches from makes no difference.
+   *
+   * One resolver rather than a filter per path: `Saml2MetadataConfigurer` prefers a
+   * [Saml2MetadataResponseResolver] bean over the one it would build, so everything here rides on
+   * the filter it already adds. A second `Saml2MetadataFilter` could not serve the extra paths,
+   * because the filter keys its once-per-request attribute by class and the later of two instances
+   * never runs.
+   */
   fun metadataResponseResolver(
       registrations: RelyingPartyRegistrationRepository
-  ): Saml2MetadataResponseResolver =
-      RequestMatcherMetadataResponseResolver(registrations, metadataResolver())
+  ): Saml2MetadataResponseResolver {
+    val metadataResolver = metadataResolver()
+    val standard = RequestMatcherMetadataResponseResolver(registrations, metadataResolver)
+    val configured =
+        configuredMetadataPaths().map { (registrationId, path) ->
+          singleRegistrationResponseResolver(registrations, registrationId, path, metadataResolver)
+        }
+    if (configured.isEmpty()) {
+      return standard
+    }
+    return Saml2MetadataResponseResolver { request ->
+      configured.firstNotNullOfOrNull { it.resolve(request) } ?: standard.resolve(request)
+    }
+  }
 
   /**
    * Emits everything Spring builds itself plus the declarations only [declareServiceProvider]
@@ -79,6 +103,26 @@ class Saml2SpMetadataFactory(
     val resolver = OpenSaml5MetadataResolver()
     resolver.setEntityDescriptorCustomizer { declareServiceProvider(it) }
     return resolver
+  }
+
+  /**
+   * The path each registration configuring one publishes its document at, keyed by registration.
+   */
+  fun configuredMetadataPaths(): Map<UUID, String> {
+    val paths =
+        saml2Properties.registration
+            .mapNotNull { (registrationId, registration) ->
+              registration.metadataPath?.let {
+                registrationId to servedMetadataPath(registrationId, it)
+              }
+            }
+            .toMap()
+    val shared = paths.entries.groupBy({ it.value }, { it.key }).filterValues { it.size > 1 }
+    require(shared.isEmpty()) {
+      "Conflicting SAML configuration: a metadata path carries no registration ID, " +
+          "so registrations cannot share one: $shared."
+    }
+    return paths
   }
 
   /**
@@ -281,4 +325,49 @@ private fun attributeValue(value: String): XSAny {
       XSAnyBuilder().buildObject(element.namespaceURI, element.localPart, element.prefix)
   attributeValue.setTextContent(value)
   return attributeValue
+}
+
+/**
+ * The servlet context path is prepended by the container, so a configured path must not repeat it,
+ * and an absolute URL gives no way to tell where it ends.
+ */
+private fun servedMetadataPath(registrationId: UUID, path: String): String {
+  require(path.startsWith("/")) {
+    "Unsupported SAML configuration $registrationId: " +
+        "security.saml2.relyingparty.registration.$registrationId.metadata-path has to start " +
+        "with / to be served."
+  }
+  return path
+}
+
+private fun singleRegistrationResponseResolver(
+    registrations: RelyingPartyRegistrationRepository,
+    registrationId: UUID,
+    path: String,
+    metadataResolver: OpenSaml5MetadataResolver
+): Saml2MetadataResponseResolver {
+  val resolver =
+      RequestMatcherMetadataResponseResolver(
+          SingleRelyingPartyRegistrationRepository(registrations, registrationId.toString()),
+          metadataResolver)
+  resolver.setRequestMatcher(PathPatternRequestMatcher.pathPattern(path))
+  return resolver
+}
+
+/**
+ * A configured path carries no registration ID, so the registration it describes is the one the
+ * property sits on. Handed the whole repository, the resolver would wrap every registration in an
+ * `EntitiesDescriptor` instead -- a shape some identity providers cannot read, and never what a
+ * path naming a single registration should return.
+ */
+private class SingleRelyingPartyRegistrationRepository(
+    private val registrations: RelyingPartyRegistrationRepository,
+    private val registrationId: String
+) : IterableRelyingPartyRegistrationRepository {
+  override fun findByRegistrationId(registrationId: String): RelyingPartyRegistration? =
+      if (registrationId == this.registrationId) registrations.findByRegistrationId(registrationId)
+      else null
+
+  override fun iterator(): MutableIterator<RelyingPartyRegistration> =
+      listOfNotNull(registrations.findByRegistrationId(registrationId)).toMutableList().iterator()
 }

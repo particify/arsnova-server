@@ -60,9 +60,18 @@ security:
   so the placeholder form is required: an absolute URL gives no way to tell where the context path
   ends, and is rejected while the application starts.
 `acs.binding`:: Binding the assertion consumer service is advertised with, `POST` by default.
-`name-id-format`:: `NameIDPolicy` requested in the authentication request.
-  Unset by default, which requests none.
+`metadata-path`:: A further path this registration's metadata document is served at,
+  besides `/api/saml2/service-provider-metadata/{registrationId}`, see below.
+  Unset by default.
+  A servlet path below the context path rather than a URL, so it starts with `/` and carries no
+  `{baseUrl}`;
+  nothing publishes it, which is what makes it useful for a URL an identity provider already holds.
+`name-id-format`:: `NameIDPolicy` requested in the authentication request,
+  and the `NameIDFormat` the published metadata declares.
+  Unset by default, which requests none and declares none.
   Only one format can be configured.
+  Nothing here reads the asserted name ID -- the account is keyed on `attribute-mapping.id` --
+  so this only matters to an identity provider which needs to be told.
 `assertingparty.metadata-uri`:: Location of the identity provider's metadata.
   Required.
   It is fetched while the application starts and re-read afterwards, see below.
@@ -133,6 +142,20 @@ That fallback needs the asserting party's entity ID to identify exactly one regi
 so such a registration should set `assertingparty.entity-id` --
 nothing else says which entity ID it has until the identity provider's metadata has been read --
 and no second registration may point at the same identity provider.
+
+=== Metadata paths
+
+The document is always served at `/api/saml2/service-provider-metadata/{registrationId}`.
+`metadata-path` adds a second path serving the same document,
+which is what lets an identity provider re-fetch from a URL it was configured with long ago instead
+of receiving a 404.
+No registration ID appears in that path, so it publishes exactly the one registration it is
+configured on -- an aggregate of several would be an `EntitiesDescriptor`,
+which not every identity provider can read.
+Two registrations cannot share a path here either,
+and the application refuses to start when they do.
+
+link:../admin/upgrading-to-v4.adoc[] works through the case both settings exist for.
 
 == Metadata refresh
 

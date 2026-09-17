@@ -30,10 +30,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 private const val REGISTRATION_ID = "a2b7c4d9-3e51-4f68-9a02-5c8e7b1d3f42"
 
 /**
- * Where an ARSnova 3 installation received its assertions, used here because that is the case this
- * configuration exists for. Nothing outside this file knows it.
+ * The endpoints an ARSnova 3 installation was reachable at, used here because they are the case
+ * this configuration exists for. Nothing outside this file knows them.
  */
 private const val CONFIGURED_ACS_PATH = "/auth/callback/saml"
+private const val CONFIGURED_METADATA_PATH = "/auth/config/saml/sp-metadata.xml"
 
 private const val DEFAULT_ACS_PATH = "/login/saml2/sso/$REGISTRATION_ID"
 private const val DEFAULT_METADATA_PATH = "/saml2/service-provider-metadata/$REGISTRATION_ID"
@@ -72,14 +73,14 @@ class Saml2ConfiguredEndpointsTestConfiguration {
             registry,
             identityProvider,
             REGISTRATION_ID,
-            acsLocation = "{baseUrl}$CONFIGURED_ACS_PATH")
+            acsLocation = "{baseUrl}$CONFIGURED_ACS_PATH",
+            metadataPath = CONFIGURED_METADATA_PATH)
       }
 }
 
 /**
- * A registration serving an assertion consumer service of its own, which is what lets an identity
- * provider configured against an older deployment go on working while it has not read the current
- * metadata.
+ * A registration serving endpoints of its own, which is what lets an identity provider configured
+ * against an older deployment go on working while it has not read the current metadata.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -130,6 +131,27 @@ class Saml2ConfiguredEndpointsHttpTests {
       Assertions.assertTrue(
           metadata.contains("Location=\"${acsLocation(registrationId, path)}\""), metadata)
     }
+  }
+
+  /**
+   * An identity provider re-fetching from the URL it has on file gets the current document rather
+   * than a 404, and gets one entity: a path naming a single registration may not answer with the
+   * `EntitiesDescriptor` an aggregate would produce.
+   */
+  @Test
+  fun shouldServeMetadataAtConfiguredPath() {
+    val metadata = metadata(CONFIGURED_METADATA_PATH)
+    Assertions.assertFalse(metadata.contains("EntitiesDescriptor"), metadata)
+    Assertions.assertTrue(metadata.contains("AttributeConsumingService"), metadata)
+    Assertions.assertTrue(
+        metadata.contains("Location=\"${acsLocation(registrationId, CONFIGURED_ACS_PATH)}\""),
+        metadata)
+  }
+
+  /** The configured path is an additional way to the same document, not a document of its own. */
+  @Test
+  fun shouldServeMetadataAtDefaultPathAsWell() {
+    Assertions.assertTrue(metadata(DEFAULT_METADATA_PATH).contains("AttributeConsumingService"))
   }
 
   private fun metadata(path: String): String {

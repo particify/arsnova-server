@@ -296,7 +296,97 @@ use a `file:` prefix or a URL.
 The endpoints changed as well: assertions now go to `/api/login/saml2/sso/{registrationId}` instead
 of `/api/auth/callback/saml`, and metadata is served from
 `/api/saml2/service-provider-metadata/{registrationId}`.
-The identity provider has to be reconfigured accordingly, whatever happens to the key material.
+Either the identity provider reads the new metadata before the upgrade goes live,
+or the registration is configured to serve v3's endpoints as well.
+
+==== Serving v3's endpoints as well
+
+Getting the identity provider to re-read is not always something the operator can schedule.
+v3 published its metadata with a `validUntil` 7300 days -- roughly 20 years -- out,
+so the document an identity provider already holds never expires and nothing prompts it to fetch
+another one.
+A federated identity provider such as DFN-AAI or eduGAIN refreshes on the federation's schedule
+rather than on ours.
+Until it has read the new document it keeps posting assertions to v3's URL,
+and a redirect cannot rescue that: the response carries a `Destination`,
+which is checked against the location the registration itself advertises.
+
+Pointing the registration's own endpoints back at v3's is what makes such an installation
+authenticate again:
+
+[source,yaml]
+----
+security:
+  saml2:
+    relyingparty:
+      registration:
+        fc62cd95-bea9-4aa3-987d-fa976ef300f3:
+          entity-id: https://app.example.com/api/auth/callback/saml
+          username-mapping: ID
+          acs:
+            location: "{baseUrl}/auth/callback/saml"
+          signing:
+            credentials:
+              - private-key-location: file:/etc/arsnova/core4/saml/rp.key
+                certificate-location: file:/etc/arsnova/core4/saml/rp.crt
+          decryption:
+            credentials:
+              - private-key-location: file:/etc/arsnova/core4/saml/rp.key
+                certificate-location: file:/etc/arsnova/core4/saml/rp.crt
+          metadata-path: /auth/config/saml/sp-metadata.xml
+          assertingparty:
+            entity-id: https://idp.example.com/idp/shibboleth
+            metadata-uri: https://idp.example.com/metadata
+----
+
+`entity-id`:: The entity ID v3 published, character for character.
+  It is what the identity provider matches the service provider on, so a different value is a
+  different service provider to it and nothing will match.
+  Installations which set `arsnova.security.authentication-providers.saml.sp.entity-id` should
+  carry that value over;
+  the rest should read the `entityID` attribute out of the metadata document the identity provider
+  holds rather than deriving it.
+`acs.location`:: v3's assertion consumer service.
+  `{baseUrl}` already covers scheme, host, port and the `/api` context path,
+  so the placeholder form is what to write -- it is required rather than cosmetic,
+  because an absolute URL gives no way to tell where the context path ends.
+`metadata-path`:: Where v3 served the service provider metadata,
+  so an identity provider re-fetching from the URL it has on file gets the current document instead
+  of a 404.
+  A servlet path rather than a URL: write what follows the `/api` context path, starting with `/`,
+  and the document is then served at
+  `https://app.example.com/api/auth/config/saml/sp-metadata.xml`.
+`assertingparty.entity-id`:: The identity provider's entity ID.
+  Worth setting explicitly here: v3's assertion consumer service carries no registration ID in its
+  path, so a response is matched to a registration by its `Issuer`,
+  and while the identity provider's metadata is unreachable that lookup has nothing to match
+  against unless the entity ID was configured.
+`decryption.credentials`:: The same key and certificate the signing credential uses.
+  v3's metadata advertised an encryption key alongside the signing one,
+  so an identity provider which encrypts assertions when the service provider offers a key --
+  Shibboleth does -- goes on encrypting them until it reads new metadata,
+  and an assertion which cannot be decrypted fails the login.
+  The conversion commands above produce the pair;
+  no second extraction is needed.
+
+Authentication requests stay signed the way v3 signed them:
+v4 signs unless `assertingparty.singlesignon.sign-request` is set to `false`,
+so nothing has to be configured to keep an identity provider which expects a signature working.
+
+None of this is a compatibility mode the server knows about --
+it is ordinary configuration which happens to describe v3's endpoints,
+so there is nothing to switch off later.
+
+Getting back off it still needs the identity provider to re-read the metadata,
+but the two ends no longer have to change at the same moment.
+The document published under this configuration advertises v4's assertion consumer service
+alongside v3's, and assertions are accepted at either,
+so the identity provider can refresh whenever it does.
+Once it is known to have refreshed, drop `acs.location` and `metadata-path` and restart.
+`entity-id` stays as it is, permanently.
+`decryption.credentials` is a choice rather than a leftover:
+keeping it keeps the encryption key in the published metadata,
+and assertions encrypted.
 
 == Gateway
 
