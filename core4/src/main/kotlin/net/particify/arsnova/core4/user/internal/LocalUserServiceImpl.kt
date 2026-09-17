@@ -77,7 +77,7 @@ class LocalUserServiceImpl(
   ): User {
     checkLocalAccountsEnabled()
     checkMailAddressAllowed(mailAddress)
-    if (user.mailAddress == null) {
+    if (user.mailAddress == null || user.password == null) {
       throw InvalidUserStateException("No local login credentials", user.id!!)
     }
     if (!passwordEncoder.matches(password, user.password)) {

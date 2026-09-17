@@ -114,4 +114,16 @@ class LocalUserServiceTests {
       localUserService.restartVerification(user, Locale.ENGLISH)
     }
   }
+
+  @Test
+  fun shouldNotInitiateMailVerificationWithoutPassword() {
+    val user =
+        User(
+            id = UUID.nameUUIDFromBytes("Directory User".toByteArray()),
+            mailAddress = "shouldNotInitiateMailVerificationWithoutPassword@example.com")
+    Assertions.assertThrows(InvalidUserStateException::class.java) {
+      localUserService.initiateMailVerification(
+          user, "new-address@example.com", "password", Locale.ENGLISH)
+    }
+  }
 }
