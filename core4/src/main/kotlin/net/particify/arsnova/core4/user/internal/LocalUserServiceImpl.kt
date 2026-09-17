@@ -219,6 +219,7 @@ class LocalUserServiceImpl(
   }
 
   fun updatePassword(user: User, oldPassword: String, newPassword: String): User {
+    checkLocalAccountsEnabled()
     if (user.password == null) {
       throw InvalidUserStateException("No local login credentials", user.id!!)
     }

@@ -82,6 +82,9 @@ abstract class LocalAccountEnforcementTestSupport {
   protected fun completePasswordReset(): User =
       localUserService.completePasswordReset(localAccountUser(), PASSWORD, 0)
 
+  protected fun changePassword(): User =
+      localUserService.updatePassword(localAccountUser(), PASSWORD, PASSWORD)
+
   protected fun verifyUser(): User =
       localUserService.verifyUser(User(unverifiedMailAddress = address(ALLOWED_DOMAIN)))
 
@@ -132,6 +135,11 @@ class LocalAccountsDisabledTests : LocalAccountEnforcementTestSupport() {
   @Test
   fun shouldRefusePasswordReset() {
     assertThrows<AccessDeniedException> { completePasswordReset() }
+  }
+
+  @Test
+  fun shouldRefusePasswordChange() {
+    assertThrows<AccessDeniedException> { changePassword() }
   }
 
   @Test
