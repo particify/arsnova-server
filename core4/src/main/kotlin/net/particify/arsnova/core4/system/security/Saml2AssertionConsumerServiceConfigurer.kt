@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.system.security
 import jakarta.servlet.http.HttpServletRequest
 import java.util.UUID
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer
@@ -15,6 +16,7 @@ import org.springframework.security.saml2.core.Saml2Error
 import org.springframework.security.saml2.core.Saml2ErrorCodes
 import org.springframework.security.saml2.provider.service.authentication.AbstractSaml2AuthenticationRequest
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticationException
+import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository
 import org.springframework.security.saml2.provider.service.web.OpenSaml5AuthenticationTokenConverter
 import org.springframework.security.saml2.provider.service.web.Saml2AuthenticationRequestRepository
@@ -32,6 +34,8 @@ internal const val DEFAULT_ASSERTION_CONSUMER_SERVICE_LOCATION =
 
 private const val BASE_URL_PLACEHOLDER = "{baseUrl}"
 
+private const val REGISTRATION_ID_PLACEHOLDER = "{registrationId}"
+
 /** Which assertion consumer services the configuration puts a registration behind. */
 class Saml2AssertionConsumerServices(
     private val saml2Properties: ExtendedSaml2RelyingPartyProperties
@@ -39,8 +43,7 @@ class Saml2AssertionConsumerServices(
   /**
    * Where each registration which configures `acs.location` away from
    * [DEFAULT_ASSERTION_CONSUMER_SERVICE_LOCATION] expects its assertions, keyed by registration.
-   * The location has to be the registration's own because the response's `Destination` is validated
-   * against it, and the login DSL serves only the default one, so each of these needs a filter.
+   * The login DSL serves only the default one, so each of these needs a filter.
    */
   fun configuredPaths(): Map<UUID, String> {
     val paths =
@@ -56,13 +59,35 @@ class Saml2AssertionConsumerServices(
     }
     return paths
   }
+
+  /**
+   * The locations [registration] accepts, resolved against the same base URL Spring resolved the
+   * primary one with. Neither a response validator nor the metadata customizer sees the request, so
+   * the base URL is recovered from the primary location rather than built from scratch. A primary
+   * location which does not end in the path it was configured with was resolved by something this
+   * does not model, and then the primary one is all that can safely be accepted.
+   */
+  fun acceptedLocations(registration: RelyingPartyRegistration): List<String> {
+    val location = registration.assertionConsumerServiceLocation
+    val configured =
+        runCatching { UUID.fromString(registration.registrationId) }
+            .getOrNull()
+            ?.let { saml2Properties.registration[it] } ?: return listOf(location)
+    val locations = assertionConsumerServiceLocations(configured)
+    val primaryPath = servedPath(locations.first(), registration.registrationId)
+    if (!location.endsWith(primaryPath)) {
+      return listOf(location)
+    }
+    val baseUrl = location.removeSuffix(primaryPath)
+    return locations.map { baseUrl + servedPath(it, registration.registrationId) }
+  }
 }
 
 /**
- * Serves an assertion consumer service wherever a registration configures one away from Spring's
- * default, alongside the one the login DSL sets up.
+ * Serves every assertion consumer service a registration configures beyond Spring's default,
+ * alongside the one the login DSL sets up.
  *
- * A second [Saml2WebSsoAuthenticationFilter] is the only way to serve both at once:
+ * A filter of its own is the only way to serve one next to the DSL's:
  * `Saml2LoginConfigurer.loginProcessingUrl` replaces the default rather than adding to it. Nothing
  * wires a hand-added filter, so everything `AbstractAuthenticationFilterConfigurer` does for the
  * DSL's own filter is repeated below.
@@ -143,6 +168,15 @@ private class FailureTranslatingAuthenticationConverter(
 }
 
 /**
+ * Every assertion consumer service a registration accepts, primary first.
+ * [DEFAULT_ASSERTION_CONSUMER_SERVICE_LOCATION] is always among them, so a registration serving a
+ * location of its own stays reachable at the one every other deployment uses, and moving from one
+ * to the other needs no window in which only one of them works.
+ */
+private fun assertionConsumerServiceLocations(registration: ExtendedRegistration): List<String> =
+    listOf(registration.acs.location, DEFAULT_ASSERTION_CONSUMER_SERVICE_LOCATION).distinct()
+
+/**
  * The servlet context path is part of `{baseUrl}`, so it must not reach a filter's matcher. An
  * absolute location cannot say where the context path ends, which is why only the placeholder form
  * is accepted.
@@ -153,5 +187,9 @@ private fun assertionConsumerServicePath(registrationId: UUID, location: String)
         "security.saml2.relyingparty.registration.$registrationId.acs.location has to start " +
         "with $BASE_URL_PLACEHOLDER/ to be served."
   }
-  return location.removePrefix(BASE_URL_PLACEHOLDER)
+  return servedPath(location, registrationId.toString())
 }
+
+/** What [location] leaves once the base URL is stripped and the registration is filled in. */
+private fun servedPath(location: String, registrationId: String) =
+    location.removePrefix(BASE_URL_PLACEHOLDER).replace(REGISTRATION_ID_PLACEHOLDER, registrationId)

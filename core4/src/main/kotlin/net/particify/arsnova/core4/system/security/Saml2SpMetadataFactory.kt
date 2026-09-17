@@ -12,11 +12,13 @@ import org.opensaml.saml.ext.saml2mdattr.impl.EntityAttributesBuilder
 import org.opensaml.saml.saml2.core.Attribute
 import org.opensaml.saml.saml2.core.AttributeValue
 import org.opensaml.saml.saml2.core.impl.AttributeBuilder
+import org.opensaml.saml.saml2.metadata.AssertionConsumerService
 import org.opensaml.saml.saml2.metadata.AttributeConsumingService
 import org.opensaml.saml.saml2.metadata.EntityDescriptor
 import org.opensaml.saml.saml2.metadata.RequestedAttribute
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor
 import org.opensaml.saml.saml2.metadata.ServiceName
+import org.opensaml.saml.saml2.metadata.impl.AssertionConsumerServiceBuilder
 import org.opensaml.saml.saml2.metadata.impl.AttributeConsumingServiceBuilder
 import org.opensaml.saml.saml2.metadata.impl.ExtensionsBuilder
 import org.opensaml.saml.saml2.metadata.impl.RequestedAttributeBuilder
@@ -59,6 +61,8 @@ class Saml2SpMetadataFactory(
     private val productName: String,
     private val saml2Properties: ExtendedSaml2RelyingPartyProperties
 ) {
+  private val assertionConsumerServices = Saml2AssertionConsumerServices(saml2Properties)
+
   /** Resolves the document served at `/saml2/service-provider-metadata/{registrationId}`. */
   fun metadataResponseResolver(
       registrations: RelyingPartyRegistrationRepository
@@ -85,7 +89,31 @@ class Saml2SpMetadataFactory(
   private fun declareServiceProvider(parameters: EntityDescriptorParameters) {
     val descriptor = serviceProviderDescriptor(parameters)
     declareAuthnRequestsSigned(parameters.relyingPartyRegistration, descriptor)
+    advertiseAssertionConsumerServices(parameters.relyingPartyRegistration, descriptor)
     declareRequestedAttributes(parameters, descriptor)
+  }
+
+  /**
+   * Publishes every location the registration accepts, not only the one Spring derives from it.
+   *
+   * `isDefault` is stated on the primary rather than left to document order, which SAML 2.0
+   * Metadata 2.4.4.1 falls back to and which nothing here guarantees. The added services are
+   * indexed past the one Spring built, because an index identifies a service and two carrying the
+   * same one is invalid.
+   */
+  private fun advertiseAssertionConsumerServices(
+      registration: RelyingPartyRegistration,
+      descriptor: SPSSODescriptor
+  ) {
+    val primary = descriptor.assertionConsumerServices.singleOrNull() ?: return
+    primary.setIsDefault(true)
+    var index = primary.index ?: 0
+    val additional =
+        assertionConsumerServices.acceptedLocations(registration).filter { it != primary.location }
+    for (location in additional) {
+      index += 1
+      descriptor.assertionConsumerServices.add(assertionConsumerService(primary, location, index))
+    }
   }
 
   /**
@@ -173,6 +201,19 @@ private fun declareAuthnRequestsSigned(
   if (registration.isAuthnRequestsSigned) {
     descriptor.setAuthnRequestsSigned(true)
   }
+}
+
+/** Everything the schema requires of a service beyond its location, copied from the primary. */
+private fun assertionConsumerService(
+    primary: AssertionConsumerService,
+    location: String,
+    index: Int
+): AssertionConsumerService {
+  val service = AssertionConsumerServiceBuilder().buildObject()
+  service.location = location
+  service.binding = primary.binding
+  service.setIndex(index)
+  return service
 }
 
 /**

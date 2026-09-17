@@ -53,8 +53,8 @@ security:
 
 `entity-id`:: Entity ID of the service provider.
   `{registrationId}` is substituted with the registration's UUID.
-`acs.location`:: Where assertions are posted,
-  `{baseUrl}/login/saml2/sso/{registrationId}` by default.
+`acs.location`:: The primary assertion consumer service -- where an authentication request asks for
+  assertions to be posted, `{baseUrl}/login/saml2/sso/{registrationId}` by default.
   Pointing it elsewhere serves that path in addition to the default one, see below.
   `{baseUrl}` covers scheme, host, port and the `/api` context path,
   so the placeholder form is required: an absolute URL gives no way to tell where the context path
@@ -104,6 +104,35 @@ security:
   `SAML` by default, which leaves several registrations indistinguishable,
   so an installation offering more than one should set it.
 `order`:: Position among the login options, `0` by default.
+
+=== Assertion consumer services
+
+A registration accepts assertions at `acs.location` and always at
+`{baseUrl}/login/saml2/sso/{registrationId}` as well --
+the default needs no configuration and cannot be turned off,
+so a registration serving an endpoint of its own stays reachable at the one every other
+installation uses.
+Both are served, advertised in the published metadata and accepted as a response's `Destination`
+and as an assertion's `Recipient`.
+
+`acs.location` picks the *primary* of the two.
+That is the location an authentication request asks the identity provider to post to,
+and the one the metadata marks `isDefault="true"`;
+the default one is advertised with an index of its own and never becomes the default.
+So the two endpoints do not have to go live together:
+publish the pair, let the identity provider re-read the metadata whenever it does,
+and drop `acs.location` afterwards.
+Until it has re-read, it goes on posting where it always did.
+
+Two registrations cannot share an assertion consumer service path,
+and the application refuses to start when they do.
+The path carries no registration ID, so a response arriving there is matched to a registration by
+the authentication request the login stored, and by its `Issuer` when there is none -- an
+identity-provider-initiated login, or one whose session was lost.
+That fallback needs the asserting party's entity ID to identify exactly one registration,
+so such a registration should set `assertingparty.entity-id` --
+nothing else says which entity ID it has until the identity provider's metadata has been read --
+and no second registration may point at the same identity provider.
 
 == Metadata refresh
 

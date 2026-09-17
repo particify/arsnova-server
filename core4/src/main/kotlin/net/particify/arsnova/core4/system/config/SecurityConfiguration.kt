@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.system.security.Http401UnauthenticatedEntryPo
 import net.particify.arsnova.core4.system.security.RefreshAuthenticationFilter
 import net.particify.arsnova.core4.system.security.RefreshableRelyingPartyRegistrationRepository
 import net.particify.arsnova.core4.system.security.Saml2AssertionConsumerServiceConfigurer
+import net.particify.arsnova.core4.system.security.Saml2ResponseValidation
 import net.particify.arsnova.core4.system.security.Saml2SpMetadataFactory
 import net.particify.arsnova.core4.system.security.UserJwtAuthenticationFilter
 import net.particify.arsnova.core4.user.ADMIN_ROLE
@@ -124,6 +125,9 @@ class SecurityConfiguration(
         })
     if (saml2Properties.registration.isNotEmpty()) {
       val samlAuthenticationProvider = OpenSaml5AuthenticationProvider()
+      val responseValidation = Saml2ResponseValidation(saml2Properties)
+      samlAuthenticationProvider.setResponseValidator(responseValidation.responseValidator())
+      samlAuthenticationProvider.setAssertionValidator(responseValidation.assertionValidator())
       samlAuthenticationProvider.setResponseAuthenticationConverter(converter)
       val samlAuthenticationManager = ProviderManager(samlAuthenticationProvider)
       // One handler for both, so a change to how a failed login is answered lands once.
@@ -156,7 +160,7 @@ class SecurityConfiguration(
   }
 
   /**
-   * Shared, so the legacy assertion consumer service finds the authentication request the modern
+   * Shared, so a configured assertion consumer service finds the authentication request the default
    * one stored. Two instances would reject every response carrying an `InResponseTo`.
    */
   @Bean
