@@ -7,6 +7,7 @@ import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
 import net.particify.arsnova.core4.system.security.LdapAuthenticationProviderRegistry
 import net.particify.arsnova.core4.user.RecordingExternalLoginLinkingStrategy.Consultation
+import net.particify.arsnova.core4.user.event.UserCreatedEvent
 import net.particify.arsnova.core4.user.internal.UserRepository
 import net.particify.arsnova.core4.user.internal.UserServiceImpl
 import org.junit.jupiter.api.Assertions
@@ -18,6 +19,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.event.ApplicationEvents
+import org.springframework.test.context.event.RecordApplicationEvents
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -49,7 +52,9 @@ private const val SAML_ID_LINKING_PROPERTY =
     ExternalLoginLinkingTestConfiguration::class,
     LdapTestConfiguration::class,
     Saml2TestConfiguration::class)
+@RecordApplicationEvents
 class ExternalLoginLinkingTests {
+  @Autowired lateinit var events: ApplicationEvents
   @Autowired lateinit var mockMvc: MockMvc
   @Autowired lateinit var providerRegistry: LdapAuthenticationProviderRegistry
   @Autowired lateinit var identityProvider: Saml2TestIdentityProvider
@@ -92,6 +97,7 @@ class ExternalLoginLinkingTests {
     samlLogin(mailRegistrationId, asserted)
 
     Assertions.assertEquals(accountsBefore, userRepository.count())
+    Assertions.assertEquals(emptyList<UUID>(), createdAccountIds())
     transactional {
       val user = loadSamlUser(mailRegistrationId, asserted)
       Assertions.assertEquals(target.id, user.id)
@@ -127,6 +133,7 @@ class ExternalLoginLinkingTests {
     Assertions.assertEquals(1, strategy.consultations.size)
     transactional {
       val user = loadSamlUser(mailRegistrationId, asserted)
+      Assertions.assertEquals(listOf(user.id), createdAccountIds())
       Assertions.assertEquals(asserted.mailAddress, user.username)
       Assertions.assertEquals(asserted.mailAddress, user.mailAddress)
       Assertions.assertEquals(asserted.givenName, user.givenName)
@@ -197,6 +204,13 @@ class ExternalLoginLinkingTests {
     Assertions.assertTrue(user.roles.any { it.name == "USER" })
     Assertions.assertEquals(user.id, loadLdapUser(directoryUser).id)
   }
+
+  /**
+   * The accounts reported as created by the logins a test performs. A login attached to an account
+   * which already exists creates none.
+   */
+  private fun createdAccountIds(): List<UUID> =
+      events.stream(UserCreatedEvent::class.java).map { it.id }.toList()
 
   private fun samlLogin(registrationId: UUID, user: Saml2TestUser) {
     val encodedResponse = identityProvider.encodedResponse(registrationId, user)

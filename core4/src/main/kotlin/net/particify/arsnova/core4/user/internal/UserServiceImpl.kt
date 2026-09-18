@@ -59,11 +59,17 @@ class UserServiceImpl(
 
   @Transactional
   fun createForExternalLogin(user: User, externalLogin: ExternalLogin): User {
+    // An account which already exists is one the login is attached to, so no account is created.
+    val createsAccount = user.id == null
     externalLogin.user = user
     externalLogin.lastLoginAt = Instant.now()
     user.roles += userRole
     user.externalLogins += externalLogin
-    return userRepository.save(user)
+    val persistedUser = userRepository.save(user)
+    if (createsAccount) {
+      eventPublisher.publishEvent(UserCreatedEvent(persistedUser.id!!))
+    }
+    return persistedUser
   }
 
   @Transactional
