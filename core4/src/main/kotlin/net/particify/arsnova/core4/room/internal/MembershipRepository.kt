@@ -14,6 +14,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.querydsl.QuerydslPredicateExecutor
 
+@Suppress("TooManyFunctions")
 interface MembershipRepository :
     JpaRepository<Membership, Membership.RoomUserId>, QuerydslPredicateExecutor<Membership> {
   fun findOneByUserIdAndRoomShortId(userId: UUID, shortId: Int): Membership?
@@ -64,4 +65,11 @@ interface MembershipRepository :
           "AND m.lastActivityAt >= :from " +
           "AND m.lastActivityAt < :to")
   fun countAllParticipantUsersByLastActivityAtRange(from: Instant, to: Instant): Long
+
+  @Query(
+      "SELECT COUNT(DISTINCT m.user) FROM Membership m " +
+          "WHERE m.role != 'PARTICIPANT' " +
+          "AND m.lastActivityAt >= :from " +
+          "AND m.lastActivityAt < :to")
+  fun countAllManagingUsersByLastActivityAtRange(from: Instant, to: Instant): Long
 }
