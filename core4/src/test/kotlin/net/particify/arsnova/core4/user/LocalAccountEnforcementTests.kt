@@ -40,9 +40,11 @@ private const val INVITATION_TEMPLATE = "admin-invitation-verification"
 
 class RecordingMailService : MailService {
   val recipients = mutableListOf<String>()
+  val templates = mutableListOf<String>()
 
   override fun sendMail(address: String, template: String, data: Map<String, Any>, locale: Locale) {
     recipients.add(address)
+    templates.add(template)
   }
 }
 
@@ -81,6 +83,12 @@ abstract class LocalAccountEnforcementTestSupport {
 
   protected fun completePasswordReset(): User =
       localUserService.completePasswordReset(localAccountUser(), PASSWORD, 0)
+
+  protected fun requestPasswordSetup(mailAddress: String = address(ALLOWED_DOMAIN)): User =
+      localUserService.initiatePasswordSetup(User(mailAddress = mailAddress), Locale.ENGLISH)
+
+  protected fun changePassword(): User =
+      localUserService.updatePassword(localAccountUser(), PASSWORD, PASSWORD)
 
   protected fun verifyUser(): User =
       localUserService.verifyUser(User(unverifiedMailAddress = address(ALLOWED_DOMAIN)))
@@ -135,6 +143,16 @@ class LocalAccountsDisabledTests : LocalAccountEnforcementTestSupport() {
   }
 
   @Test
+  fun shouldRefusePasswordSetupRequest() {
+    assertThrows<AccessDeniedException> { requestPasswordSetup() }
+  }
+
+  @Test
+  fun shouldRefusePasswordChange() {
+    assertThrows<AccessDeniedException> { changePassword() }
+  }
+
+  @Test
   fun shouldStillAllowAdministrativeAccountCreation() {
     Assertions.assertNotNull(inviteUser(administrator))
   }
@@ -183,6 +201,12 @@ class SelfRegistrationDisabledTests : LocalAccountEnforcementTestSupport() {
   fun shouldAllowMailAddressChange() {
     Assertions.assertNotNull(changeMailAddress())
   }
+
+  /** The account already exists, so adding a password to it is not a registration. */
+  @Test
+  fun shouldAllowPasswordSetupRequest() {
+    Assertions.assertNotNull(requestPasswordSetup())
+  }
 }
 
 @SpringBootTest(properties = ["$ALLOWED_DOMAINS_PROPERTY[0]=$ALLOWED_DOMAIN"])
@@ -221,6 +245,11 @@ class AllowedMailAddressDomainsTests : LocalAccountEnforcementTestSupport() {
   @Test
   fun shouldRefuseInvitationToOtherDomain() {
     assertThrows<MailAddressNotAllowedException> { inviteUser(guest, address(OTHER_DOMAIN)) }
+  }
+
+  @Test
+  fun shouldRefusePasswordSetupForOtherDomain() {
+    assertThrows<MailAddressNotAllowedException> { requestPasswordSetup(address(OTHER_DOMAIN)) }
   }
 
   @Test

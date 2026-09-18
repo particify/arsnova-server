@@ -77,7 +77,7 @@ class LocalUserServiceImpl(
   ): User {
     checkLocalAccountsEnabled()
     checkMailAddressAllowed(mailAddress)
-    if (user.mailAddress == null) {
+    if (user.mailAddress == null || user.password == null) {
       throw InvalidUserStateException("No local login credentials", user.id!!)
     }
     if (!passwordEncoder.matches(password, user.password)) {
@@ -147,17 +147,36 @@ class LocalUserServiceImpl(
     if (user.password == null || user.mailAddress == null) {
       throw InvalidUserStateException("No local login credentials", user.id!!)
     }
+    return initiatePasswordVerification(user, "password-reset", locale)
+  }
+
+  /**
+   * Adds a local password to an account which has none, with the mailed code as the proof. The
+   * completion is shared with the reset, which does not require a previous password either.
+   */
+  fun initiatePasswordSetup(user: User, locale: Locale): User {
+    checkLocalAccountsEnabled()
+    if (user.password != null) {
+      throw InvalidUserStateException("Local password already set", user.id!!)
+    }
+    val mailAddress =
+        user.mailAddress ?: throw InvalidUserStateException("No mail address", user.id!!)
+    checkMailAddressAllowed(mailAddress)
+    return initiatePasswordVerification(user, "password-setup", locale)
+  }
+
+  private fun initiatePasswordVerification(user: User, template: String, locale: Locale): User {
     initiateVerification(user)
     val persistedUser = userRepository.save(user)
-    sendPasswordResetMail(persistedUser, locale)
+    sendPasswordMail(persistedUser, template, locale)
     return persistedUser
   }
 
-  private fun sendPasswordResetMail(user: User, locale: Locale) {
+  private fun sendPasswordMail(user: User, template: String, locale: Locale) {
     val code = toFixedLength(user.verificationCode!!)
     val passwordResetUri = MessageFormat.format(passwordResetUriPattern, user.mailAddress!!)
     val templateData = mapOf("code" to code, "passwordResetUri" to passwordResetUri)
-    mailService.sendMail(user.mailAddress!!, "password-reset", templateData, locale)
+    mailService.sendMail(user.mailAddress!!, template, templateData, locale)
   }
 
   fun completePasswordReset(user: User, password: String, verificationCode: Int): User {
@@ -219,6 +238,7 @@ class LocalUserServiceImpl(
   }
 
   fun updatePassword(user: User, oldPassword: String, newPassword: String): User {
+    checkLocalAccountsEnabled()
     if (user.password == null) {
       throw InvalidUserStateException("No local login credentials", user.id!!)
     }

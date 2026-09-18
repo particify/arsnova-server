@@ -7,7 +7,6 @@ import java.time.Instant
 import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
-import net.particify.arsnova.core4.system.MailService
 import net.particify.arsnova.core4.user.exception.InvalidUserStateException
 import net.particify.arsnova.core4.user.exception.InvalidVerificationCodeException
 import net.particify.arsnova.core4.user.internal.LocalUserServiceImpl
@@ -18,14 +17,13 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(TestcontainersConfiguration::class)
+@Import(TestcontainersConfiguration::class, RecordingMailServiceConfiguration::class)
 class LocalUserServiceTests {
   @Autowired lateinit var localUserService: LocalUserServiceImpl
-  @MockitoBean lateinit var mailService: MailService
+  @Autowired lateinit var mailService: RecordingMailService
   @Autowired lateinit var passwordEncoder: PasswordEncoder
 
   @Test
@@ -113,5 +111,67 @@ class LocalUserServiceTests {
     Assertions.assertThrows(InvalidUserStateException::class.java) {
       localUserService.restartVerification(user, Locale.ENGLISH)
     }
+  }
+
+  @Test
+  fun shouldNotInitiateMailVerificationWithoutPassword() {
+    val user =
+        User(
+            id = UUID.nameUUIDFromBytes("Directory User".toByteArray()),
+            mailAddress = "shouldNotInitiateMailVerificationWithoutPassword@example.com")
+    Assertions.assertThrows(InvalidUserStateException::class.java) {
+      localUserService.initiateMailVerification(
+          user, "new-address@example.com", "password", Locale.ENGLISH)
+    }
+  }
+
+  @Test
+  fun shouldInitiatePasswordSetup() {
+    val user = User(mailAddress = "shouldInitiatePasswordSetup@example.com")
+    localUserService.initiatePasswordSetup(user, Locale.ENGLISH)
+    Assertions.assertNotNull(user.verificationCode)
+    Assertions.assertNotNull(user.verificationExpiresAt)
+    Assertions.assertTrue(user.isPasswordResetVerificationActive())
+  }
+
+  @Test
+  fun shouldSendPasswordSetupMail() {
+    val mailAddress = "shouldsendpasswordsetupmail@example.com"
+    localUserService.initiatePasswordSetup(User(mailAddress = mailAddress), Locale.ENGLISH)
+    Assertions.assertTrue(mailService.recipients.contains(mailAddress))
+    Assertions.assertTrue(mailService.templates.contains("password-setup"))
+  }
+
+  @Test
+  fun shouldNotInitiatePasswordSetupWithPassword() {
+    val user =
+        User(
+            id = UUID.nameUUIDFromBytes("Local Account User".toByteArray()),
+            mailAddress = "shouldNotInitiatePasswordSetupWithPassword@example.com",
+            password = "{noop}password")
+    Assertions.assertThrows(InvalidUserStateException::class.java) {
+      localUserService.initiatePasswordSetup(user, Locale.ENGLISH)
+    }
+  }
+
+  /** Without an address there is nothing to send the code to. */
+  @Test
+  fun shouldNotInitiatePasswordSetupWithoutMailAddress() {
+    val user =
+        User(id = UUID.nameUUIDFromBytes("Mailless User".toByteArray()), username = "mailless-user")
+    Assertions.assertThrows(InvalidUserStateException::class.java) {
+      localUserService.initiatePasswordSetup(user, Locale.ENGLISH)
+    }
+  }
+
+  /** The setup shares its completion with the reset, which needs no previous password either. */
+  @Test
+  fun shouldCompletePasswordSetup() {
+    val user =
+        localUserService.initiatePasswordSetup(
+            User(mailAddress = "shouldcompletepasswordsetup@example.com"), Locale.ENGLISH)
+    localUserService.completePasswordReset(user, "password", user.verificationCode!!)
+    Assertions.assertNotNull(user.password)
+    Assertions.assertNotNull(user.passwordChangedAt)
   }
 }
