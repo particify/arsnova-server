@@ -45,7 +45,8 @@ class AdminRoomStatisticsQueryController(
       @Argument from: Instant,
       @Argument to: Instant
   ): AdminRoomActivityStats {
-    val managingUserCount = roomService.countAllCreatorsByCreatedAtRange(from, to)
+    val managingUserCount =
+        membershipServiceImpl.countAllManagingUsersByLastActivityAtRange(from, to)
     val participantCount =
         membershipServiceImpl.countAllParticipantUsersByLastActivityAtRange(from, to)
     val roomCount =
