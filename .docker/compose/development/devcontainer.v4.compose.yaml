@@ -1,6 +1,6 @@
 services:
   postgresql-core4:
-    image: pgautoupgrade/pgautoupgrade:18-alpine@sha256:47c36aa117109a7c413936f31fbf78633ba0b5b43be62ec86497b83e96c08bf5
+    image: pgautoupgrade/pgautoupgrade:18-alpine@sha256:eeea89559ea86833979c00171be6eb09a76e846ef4e75c988ca592c9467cfb83
   arsnova-server-core4:
     image: devcontainer-arsnova-server-core4:$CORE4_TAG
     init: true
