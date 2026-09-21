@@ -55,12 +55,14 @@ LEGACY_POSTGRESQL_TAG=13-alpine
 ----
 services:
   postgresql-authz:
-    volumes:
+    volumes: !override
       - postgresql_data_auth:/var/lib/postgresql/data
   postgresql-comments:
-    volumes:
+    volumes: !override
       - postgresql_data_comment:/var/lib/postgresql/data
 ----
+
+`!override` needs Docker Compose 2.24.4 or newer.
 
 Both belong together.
 Removing only one of them produces exactly the empty-cluster case above.
@@ -152,6 +154,7 @@ Do not carry them into the v3 core's file.
 |`arsnova.security.authentication-providers.registered.enabled` |`security.local-account.enabled`
 |`arsnova.security.authentication-providers.registered.allowed-email-domains` |`security.local-account.allowed-mail-address-domains`
 |`arsnova.system.auto-deletion-thresholds.user-inactivity-period` |`user.inactivity-thresholds.verified`
+|`arsnova.security.admin-accounts` |no setting; a role in the database, see <<Administrators>>
 |`arsnova.ui.*` |`ui.*`, unchanged
 |===
 
@@ -159,11 +162,62 @@ Note that the service names changed as well, so URLs carried over from v3 need r
 `arsnova-formatting-service` became `arsnova-server-formatting`, `postgresql_comment` became
 `postgresql-comments`, and `arsnova-auth-service` became `arsnova-server-authz`.
 
-Image tag variables were renamed too: `WSGW_TAG` to `WEBSOCKET_TAG`, `AUTH_TAG` to `AUTHZ_TAG`,
-`COMMENT_TAG` to `COMMENTS_TAG` and `WEB_TAG` to `WEBCLIENT_TAG`.
-`HTTPGW_TAG` has no counterpart, because the HTTP gateway was replaced by APISIX.
-`CORE_TAG` still tags the v3 core, and `core4` has its own `CORE4_TAG` -- the two version series are
-not interchangeable.
+Image tag variables were renamed too: `WSGW_TAG` to `WEBSOCKET_TAG`, `AUTH_TAG` to `AUTHZ_TAG`
+and `WEB_TAG` to `WEBCLIENT_TAG`.
+`HTTPGW_TAG` and `COMMENT_TAG` have no counterpart: the HTTP gateway was replaced by APISIX, and
+`core4` took over the Q&A, so nothing in a v4 installation starts the v3 service.
+
+Do not carry any of their values over.
+A release pins every service's tag in `provided/base.env`, including `CORE_TAG` for the version 3
+core it still ships, and `update-config` folds `local.env` in last -- so a tag set there overrides
+the release with a version 3 image.
+That is not only a version mismatch: the data migration reads CouchDB design documents which no
+released 3.x core creates.
+`LEGACY_POSTGRESQL_TAG` is the exception, because it describes your volumes rather than the release.
+
+[[Administrators]]
+=== Administrators
+
+v3 granted administrative rights through `arsnova.security.admin-accounts`, a list it checked at
+every login.
+v4 has no such setting: `ADMIN` is a role in its own database, and the data migration gives every
+account it imports `USER` and nothing else.
+So the accounts listed there keep their data and lose their rights, and nothing reports it.
+
+Grant the role again once the data migration has exited and before the installation is started,
+with `postgresql-core4` still running:
+
+[source,shell]
+----
+./particifyctl compose exec -T postgresql-core4 psql -U arsnova -d arsnova <<'SQL'
+INSERT INTO "user".user_role_mapping (user_id, role_id)
+SELECT u.id, r.id FROM "user"."user" u, "user".role r
+WHERE u.id = '<user id>' AND r.name = 'ADMIN'
+ON CONFLICT DO NOTHING;
+SQL
+----
+
+The quoting is not optional -- both the schema and the table are reserved words.
+The statement prints `INSERT 0 1` where it granted the role and `INSERT 0 0` where it did not,
+which is what tells you the account exists at all: a v3 admin account is configuration rather than a
+user, so one may name a login v3 never created.
+
+The user id is v3's own: the migration keeps the CouchDB document identifier and only inserts the
+UUID dashes.
+Read it off v3's database, which means doing so before that stack is gone:
+
+[source,shell]
+----
+curl -sg -u <user>:<password> \
+  '<couchdb>/<database>/_design/UserProfile/_view/by_authprovider_loginid?key=["<provider>","<login id>"]'
+----
+
+`<provider>` is the `authProvider` of the configured entry, spelled as v3 spelled it: `ARSNOVA`
+for a local account, or `LDAP` or `SAML`.
+A `CAS` or `OIDC` entry is not worth the lookup -- those accounts are imported but have no way to
+log in under v4, as below, so the role would be granted to an account nobody can reach.
+An installation whose administrators were all CAS or OIDC accounts needs a new one under a provider
+v4 still supports, and the version 3 stack has to be up to create it.
 
 `allowed-roles` did not survive as a per-provider list.
 v4 decides by the account's verified state rather than by the provider it was created through,
@@ -240,7 +294,12 @@ security:
 
 Three things to get right.
 `user-dn-pattern` and `user-search-filter` are mutually exclusive, and v3's shipped configuration
-set both, so drop whichever one the installation did not actually use.
+set both -- so which one was in use is not a matter of which looks more deliberate.
+v3 took the search filter whenever it was non-empty and only ever fell back to the DN pattern, so an
+installation with a filter set anywhere, its own configuration or the shipped defaults, was
+searching.
+Keep that one and drop the other; v4 refuses to start with both, and starts happily with the wrong
+one, binding against a different subtree.
 `imported-attributes` is empty by default, which silently stops importing the attributes v3 imported
 unconditionally.
 And the same UUID has to appear under
@@ -424,6 +483,13 @@ database directly over JDBC.
 CouchDB and the authorization service therefore have to be running; the Q&A service itself does not,
 only its database.
 
+The version 3 core has to be running as well, for a different reason: it is the only component which
+creates CouchDB's design documents, and the import reads the data through their views.
+The document the room settings are read through was added after the last 3.x release, so no
+installation has it until a version 4 image of that service has started once against the database.
+Without it the import fails part way through, after it has already written rows, and a retry then
+has to have those cleaned up first.
+
 Those services are not part of a version 4 installation, so they are not started unless you ask for
 them.
 Add the profile to `local.env` before the migration, and remove it again afterwards - nothing
@@ -456,13 +522,18 @@ Otherwise the first login after the migration does not find the imported account
 creates a second, empty one for every user.
 Nothing reports it.
 
-Start what the migration reads, then run it:
+Start what the migration reads, wait for the version 3 core to have brought the database up to
+date, then run it:
 
 [source,shell]
 ----
-./particifyctl run -d couchdb postgresql-core4 arsnova-server-authz postgresql-comments
+./particifyctl run -d couchdb postgresql-core4 arsnova-server-core arsnova-server-authz postgresql-comments
+./particifyctl compose logs -f arsnova-server-core
 ./particifyctl compose run --rm -e PERSISTENCE_V3MIGRATION_ENABLED=true arsnova-server-core4
 ----
+
+Wait for `Database initialization completed.` before starting the import; the design documents are
+written during that startup.
 
 `arsnova-server-authz` brings its own database and RabbitMQ with it.
 The switch rides on that one command rather than living in a file:
@@ -474,6 +545,9 @@ A step whose target table already has rows is skipped, so a single account regis
 gateway is enough to skip the entire user import.
 A second `core4` would also run the hourly account-deletion tasks against accounts which have just
 been imported carrying their version 3 timestamps.
+The version 3 core above is the exception, and a safe one: version 4 runs it with
+`SYSTEM_EXTERNAL_DATA_MANAGEMENT` set, which is what withdraws user management from it, so its own
+account-deletion tasks are not created at all.
 
 When it has exited, remove `COMPOSE_PROFILES=v3-migration` from `local.env` and start the
 installation:
