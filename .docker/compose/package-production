@@ -165,6 +165,19 @@ apply_image_location() {
   fi
 }
 
+# The packaged routes are the development ones, where the webclient is a development server on
+# 4200, while the released image serves the built application from nginx on 80. Rewritten here
+# rather than in the routes file because both development environments mount that file directly and
+# neither has a rendering step to undo it with.
+retarget_webclient_upstream() {
+  local target=$1 file="$target/provided/apisix-routes.yaml"
+  # A renamed upstream would otherwise ship pointing at a port nothing listens on, which nothing
+  # notices until the gateway serves the application to no one.
+  grep -q '"arsnova-webclient:4200"' "$file" \
+    || fail "the webclient upstream is not on the development port in ${file#"$target/"}"
+  sed -i 's|"arsnova-webclient:4200"|"arsnova-webclient:80"|' "$file"
+}
+
 pin_tags() {
   local target=$1 name override
   if [ -n "$VERSION" ]; then
@@ -291,6 +304,7 @@ main() {
   copy_config_dir "$SOURCE_DIR" "$target"
   [ -n "$ADDITIONAL_CONFIG_DIR" ] && copy_config_dir "$ADDITIONAL_CONFIG_DIR" "$target"
   pin_tags "$target"
+  retarget_webclient_upstream "$target"
   verify "$target"
 
   archive_path="$(readlink -f "$OUTPUT_DIR")/$ARCHIVE_NAME-$label.tar.gz"
