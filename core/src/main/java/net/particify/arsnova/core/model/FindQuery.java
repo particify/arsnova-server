@@ -19,6 +19,7 @@
 package net.particify.arsnova.core.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 import org.springframework.core.style.ToStringCreator;
 
@@ -31,8 +32,12 @@ public class FindQuery<E extends Entity> {
   }
 
   private LogicalOperator operator = LogicalOperator.AND;
+
+  @NotNull
   private E properties;
-  private Map<String, Object> externalFilters;
+
+  /* Never null so that query implementations can dereference it without a guard. */
+  private Map<String, Object> externalFilters = Map.of();
 
   public LogicalOperator getOperator() {
     return operator;
@@ -58,7 +63,7 @@ public class FindQuery<E extends Entity> {
 
   @JsonView(View.Public.class)
   public void setExternalFilters(final Map<String, Object> externalFilters) {
-    this.externalFilters = externalFilters;
+    this.externalFilters = externalFilters != null ? externalFilters : Map.of();
   }
 
   @Override
