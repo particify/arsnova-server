@@ -232,6 +232,22 @@ ${alias_hosts}    priority: 100
         http_to_https: true
 "
     fi
+    # APISIX forwards its own listener port rather than the one the client reached, and the
+    # services rebuild the request URL from the forwarded headers to decide whether a WebSocket
+    # handshake is same-origin. Without this every handshake looks cross-origin wherever the
+    # published port differs from the gateway container's own, and is rejected with 403.
+    if [ -n "$keys" ]; then
+      public_port=`read_env HTTPS_PORT`
+      public_port=${public_port:-443}
+    else
+      public_port=`read_env PORT`
+      public_port=${public_port:-80}
+    fi
+    global_plugins="$global_plugins      proxy-rewrite:
+        headers:
+          set:
+            X-Forwarded-Port: \"$public_port\"
+"
     if [ -n "$csp_frame_ancestors" ]; then
       # The header goes on every response rather than only on the documents which can be framed.
       # An installation embedding the application in an LMS has to list the LMS origins here, or
