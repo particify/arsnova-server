@@ -47,7 +47,7 @@ class Saml2ResponseAuthenticationConverter(
     val idMappingAttribute = registration.attributeMapping.id
     val externalId =
         attributes[idMappingAttribute]?.firstOrNull()?.toString()
-            ?: error("Required SAML attribute $idMappingAttribute is missing.")
+            ?: missingIdAttribute(providerId, idMappingAttribute, attributes.keys)
     logger.debug("Using SAML attribute {} as ID: {}", idMappingAttribute, externalId)
     val existingUser = this.userService.loadUserByProviderIdAndExternalId(providerId, externalId)
     val principal =
@@ -58,6 +58,25 @@ class Saml2ResponseAuthenticationConverter(
         authentication.saml2Response,
         principal.authorities,
         sessionEndsAt(responseToken))
+  }
+
+  /**
+   * Spring logs the authentication failure this becomes at DEBUG, which suits a wrong password and
+   * not a configuration fault failing every login. Attribute names only: the values are personal
+   * data and this line is on by default.
+   */
+  private fun missingIdAttribute(
+      providerId: UUID,
+      idMappingAttribute: String,
+      receivedAttributes: Set<String>
+  ): Nothing {
+    logger.warn(
+        "SAML registration {}: no login can succeed because the assertion carries no attribute " +
+            "{}, which attribute-mapping.id names. Attributes received: {}.",
+        providerId,
+        idMappingAttribute,
+        receivedAttributes)
+    error("Required SAML attribute $idMappingAttribute is missing.")
   }
 
   /**
