@@ -186,10 +186,37 @@ case $COMMAND in
       exit 1
     fi
     mkdir -p "$TLS_CERT_DIR"
-    keys=`ls "$TLS_CERT_DIR"/*_key.pem 2> /dev/null`
+    # A directory which cannot be searched looks exactly like one holding no certificates, and the
+    # gateway would come up on plaintext without anything having gone visibly wrong.
+    if [ ! -r "$TLS_CERT_DIR" ] || [ ! -x "$TLS_CERT_DIR" ]; then
+      echo "ERROR: $TLS_CERT_DIR is not readable."
+      exit 1
+    fi
+    # Enumerated with the shell's own glob rather than with ls, which stats every operand and drops
+    # the ones it cannot reach: a link into the root-only directory certbot keeps its certificates
+    # in then vanishes for anyone but root, leaving the directory looking empty and the gateway
+    # coming up on plaintext.
+    keys=""
+    for key in "$TLS_CERT_DIR"/*_key.pem; do
+      # A pattern which matches nothing is left literal.
+      { [ -e "$key" ] || [ -h "$key" ]; } || continue
+      keys="${keys:+$keys
+}$key"
+    done
     # Checked up front, so a missing certificate cannot leave a half-written file behind.
     for key in $keys; do
       hostname=`basename "$key" _key.pem`
+      # A file which exists but cannot be read is inlined as an empty block instead of refused --
+      # the certificate's own error is swallowed along with the optional chain's -- and APISIX then
+      # drops the entry as too short and serves that host plaintext. Symlinks are followed, so a
+      # link whose target is unreadable or gone has to be refused rather than skipped: -e is false
+      # for both, which is why -h is asked as well. Only the chain may legitimately be absent.
+      for file in "$key" "$TLS_CERT_DIR/${hostname}_cer.pem" "$TLS_CERT_DIR/${hostname}_ca.pem"; do
+        if { [ -e "$file" ] || [ -h "$file" ]; } && [ ! -r "$file" ]; then
+          echo "ERROR: $file cannot be read."
+          exit 1
+        fi
+      done
       if [ ! -f "$TLS_CERT_DIR/${hostname}_cer.pem" ]; then
         echo "ERROR: $key has no matching ${hostname}_cer.pem."
         exit 1
