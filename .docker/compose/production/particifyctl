@@ -189,9 +189,27 @@ case $COMMAND in
       echo "ERROR: ARSNOVA_HOSTNAME_ALIASES is set but ARSNOVA_HOSTNAME is not."
       exit 1
     fi
-    # The redirect follows the gateway's own scheme: targeting https unconditionally would strand
-    # a plaintext installation on a scheme it does not serve.
-    if [ -n "$keys" ]; then
+    # Anything but true leaves the flag empty, so everything below tests it the way it tests for
+    # certificates. A typo has to fail loudly rather than fall through: it would otherwise generate
+    # exactly the plaintext configuration the flag exists to prevent.
+    external_tls=`read_env EXTERNAL_TLS`
+    case "$external_tls" in
+      true) ;;
+      ''|false) external_tls="" ;;
+      *)
+        echo "ERROR: EXTERNAL_TLS is \"$external_tls\", which is neither true nor false."
+        exit 1
+        ;;
+    esac
+    if [ -n "$external_tls" ] && [ -n "$keys" ]; then
+      echo "ERROR: EXTERNAL_TLS is set but $TLS_CERT_DIR holds certificates."
+      echo "       Either the gateway terminates TLS itself or something in front of it does."
+      exit 1
+    fi
+    # The gateway serves HTTPS itself, or something in front of it does; either way the public
+    # scheme is https. Targeting it unconditionally would strand a plaintext installation on a
+    # scheme it does not serve.
+    if [ -n "$keys" ] || [ -n "$external_tls" ]; then
       alias_scheme=https
     else
       alias_scheme=http
@@ -232,11 +250,13 @@ ${alias_hosts}    priority: 100
         http_to_https: true
 "
     fi
-    # APISIX forwards its own listener port rather than the one the client reached, and the
-    # services rebuild the request URL from the forwarded headers to decide whether a WebSocket
-    # handshake is same-origin. Without this every handshake looks cross-origin wherever the
-    # published port differs from the gateway container's own, and is rejected with 403.
-    if [ -n "$keys" ]; then
+    # APISIX replaces the forwarded headers with its own view of the request: its listener port
+    # rather than the one the client reached, and its own scheme rather than the one TLS was
+    # terminated on. The services rebuild request URLs from those headers, so without this a
+    # WebSocket handshake looks cross-origin and is rejected with 403 wherever the published port
+    # differs from the gateway container's own, and behind a terminator everything a service
+    # generates -- SAML endpoints among them -- names http.
+    if [ -n "$keys" ] || [ -n "$external_tls" ]; then
       public_port=`read_env HTTPS_PORT`
       public_port=${public_port:-443}
     else
@@ -248,6 +268,11 @@ ${alias_hosts}    priority: 100
           set:
             X-Forwarded-Port: \"$public_port\"
 "
+    # Only where the gateway does not serve HTTPS itself; there $scheme already says https.
+    if [ -n "$external_tls" ]; then
+      global_plugins="$global_plugins            X-Forwarded-Proto: \"https\"
+"
+    fi
     if [ -n "$csp_frame_ancestors" ]; then
       # The header goes on every response rather than only on the documents which can be framed.
       # An installation embedding the application in an LMS has to list the LMS origins here, or
@@ -309,7 +334,10 @@ ${alias_hosts}    priority: 100
     # replacing the file would leave APISIX reading the old one and never reloading.
     cat apisix.yaml.new > apisix.yaml
     rm -f apisix.yaml.new
-    if [ -z "$keys" ]; then
+    if [ -n "$external_tls" ]; then
+      echo "Serving plain HTTP, reporting requests to the services as HTTPS on port $public_port."
+      echo "Whatever terminates TLS has to redirect plaintext requests itself."
+    elif [ -z "$keys" ]; then
       echo "No certificates in $TLS_CERT_DIR, so the gateway will serve plain HTTP only."
       echo "Add <hostname>_key.pem and <hostname>_cer.pem there and run this again."
     fi
