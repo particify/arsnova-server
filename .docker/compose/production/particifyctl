@@ -361,9 +361,25 @@ ${alias_hosts}    priority: 100
       ipv6_note="This host has no IPv6 support, so the gateway is configured for IPv4 only."
     fi
 
+    # A client which sends no SNI is served no certificate at all: APISIX selects one by SNI alone
+    # and aborts the handshake where it has nothing to match. The fallback names the certificate to
+    # use instead, so it has to be one of those just written into apisix.yaml -- a name with no ssls
+    # entry aborts the handshake just the same.
+    fallback_sni=""
+    if [ -n "$canonical_hostname" ] && [ -f "$TLS_CERT_DIR/${canonical_hostname}_key.pem" ]; then
+      fallback_sni="$canonical_hostname"
+    elif [ -n "$keys" ] && [ `echo "$keys" | wc -l` -eq 1 ]; then
+      fallback_sni=`basename "$keys" _key.pem`
+    fi
+
     apisix_settings=""
     if [ -n "$enable_ipv6" ]; then
       apisix_settings="  enable_ipv6: $enable_ipv6"
+    fi
+    if [ -n "$fallback_sni" ]; then
+      apisix_settings="${apisix_settings:+$apisix_settings
+}  ssl:
+    fallback_sni: \"$fallback_sni\""
     fi
 
     # No timestamp in this header, unlike apisix.yaml's. The restart hint below is printed only
@@ -407,6 +423,12 @@ ${alias_hosts}    priority: 100
     fi
     if [ -n "$ipv6_note" ]; then
       echo "$ipv6_note"
+    fi
+    if [ -n "$fallback_sni" ]; then
+      echo "Serving $fallback_sni's certificate to clients which send no SNI."
+    elif [ -n "$keys" ]; then
+      echo "Clients which send no SNI cannot be served: ARSNOVA_HOSTNAME names no certificate in"
+      echo "$TLS_CERT_DIR, so the gateway has none to fall back to."
     fi
     echo Wrote apisix.yaml and apisix-config.yaml. Run \"$0 update-config\" to apply them.
     if [ -n "$config_changed" ]; then

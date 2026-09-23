@@ -136,8 +136,8 @@ link:upgrading-to-v4.adoc[the upgrade guide] for the property structure.
 `provided/apisix-routes.yaml`, the certificates in `tls/`, and `ARSNOVA_HOSTNAME_ALIASES`,
 `CSP_FRAME_ANCESTORS` and `EXTERNAL_TLS`.
 It generates `apisix-config.yaml` from `provided/apisix-config.yaml` as well, adding the settings
-which depend on the host rather than on the release, such as whether the gateway listens on
-IPv6.
+which depend on the host and the certificates rather than on the release: whether the gateway
+listens on IPv6, and which certificate a client sending no SNI is served.
 Run it, followed by `./particifyctl update-config`, after changing any of those.
 The gateway picks `apisix.yaml` up without a restart, but reads `apisix-config.yaml` only at
 startup, so restart it whenever the command reports that file as changed.
@@ -155,6 +155,12 @@ With them, a plaintext request is redirected to HTTPS: `301` for `GET` and `HEAD
 so a request keeps its method and body.
 The redirect names no port, so an installation which publishes HTTPS somewhere other than 443 needs
 whatever terminates TLS in front of the gateway to handle it.
+
+A client which sends no SNI -- an old one, or anything addressing the installation by its IP address
+-- is served the certificate of `ARSNOVA_HOSTNAME`, or the only one in `tls/` where there is just
+one.
+The gateway selects a certificate by SNI alone and closes the connection where it has nothing to
+match, so with several certificates and no `ARSNOVA_HOSTNAME` those clients cannot be served at all.
 
 ==== TLS terminated in front of the gateway
 
