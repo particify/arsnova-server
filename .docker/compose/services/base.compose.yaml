@@ -16,7 +16,7 @@ services:
     # The upstream image enables rabbitmq_prometheus and nothing else, so the STOMP plugin the
     # websocket service relays through comes from an enabled_plugins file each environment's overlay
     # mounts.
-    image: rabbitmq:4.3-alpine@sha256:dac45ba393fcabed5bddaaa6698a8ace38678423eac4b77ba1c82abf853c9bbc
+    image: rabbitmq:4.3-alpine@sha256:2531fe16e1cb4ec4086d3eaa63118c8f074dd98620d55f022f453a397b18f037
     restart: $RESTART_MODE
     environment:
       RABBITMQ_NODENAME: rabbit@localhost
