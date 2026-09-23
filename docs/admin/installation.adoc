@@ -46,8 +46,8 @@ In the repository they live in `.docker/compose/production`.
 Everything but `provided/` is yours to edit.
 `provided/` is replaced wholesale by the next release, so a change made there is lost on the next
 update; override the setting in `local.env` or `local.compose.yaml` instead.
-`particifyctl` additionally writes `.env`, `.compose.yaml`, `.version` and `apisix.yaml`, which are
-generated and should not be edited either.
+`particifyctl` additionally writes `.env`, `.compose.yaml`, `.version`, `apisix.yaml` and
+`apisix-config.yaml`, which are generated and should not be edited either.
 
 === Running
 
@@ -135,8 +135,12 @@ link:upgrading-to-v4.adoc[the upgrade guide] for the property structure.
 `./particifyctl update-gateway` generates the gateway's `apisix.yaml` from
 `provided/apisix-routes.yaml`, the certificates in `tls/`, and `ARSNOVA_HOSTNAME_ALIASES`,
 `CSP_FRAME_ANCESTORS` and `EXTERNAL_TLS`.
+It generates `apisix-config.yaml` from `provided/apisix-config.yaml` as well, adding the settings
+which depend on the host rather than on the release, such as whether the gateway listens on
+IPv6.
 Run it, followed by `./particifyctl update-config`, after changing any of those.
-The gateway picks the generated file up without a restart.
+The gateway picks `apisix.yaml` up without a restart, but reads `apisix-config.yaml` only at
+startup, so restart it whenever the command reports that file as changed.
 
 ==== HTTPS
 
@@ -186,6 +190,14 @@ frame, sent as the `frame-ancestors` directive of a `Content-Security-Policy` he
 Left empty, no such header is sent at all and any origin may embed the application.
 An installation which embeds the application in a learning management system over LTI has to list
 that system's origins, or the launch is blocked.
+
+==== IPv6
+
+The gateway listens on IPv6 as well as IPv4 wherever the host supports it.
+Where the kernel has no IPv6 at all it does not start, reporting
+`socket() [::]:9080 failed (97: Address family not supported by protocol)`, so `update-gateway`
+detects that case and configures the gateway for IPv4 only.
+The container runs on the host's kernel, so `/proc/net/if_inet6` answers for it.
 
 === Docker Compose overrides
 

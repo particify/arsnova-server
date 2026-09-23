@@ -18,7 +18,7 @@ EXCLUDED_FILES=".gitignore"
 
 # Bind sources naming a file particifyctl generates rather than one the release ships, so they are
 # legitimately absent from the archive and the bind-source check has to know them.
-GENERATED_BIND_SOURCES="./apisix.yaml"
+GENERATED_BIND_SOURCES="./apisix.yaml ./apisix-config.yaml"
 
 # Where --dev-images points the services this repository builds. Development publishes them under a
 # path of their own rather than under a different tag alone, so a test archive has to move the

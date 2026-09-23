@@ -1,6 +1,7 @@
 /.compose.yaml
 /.env
 /.version
+/apisix-config.yaml
 /apisix.yaml
 /core-config/
 /core4-config/
