@@ -2,6 +2,10 @@ upstreams:
   - id: webclient
     nodes:
       "arsnova-webclient:4200": 1
+    # Only an HTTP/1.0 request can arrive without a Host header, nginx rejecting an HTTP/1.1 one
+    # outright. APISIX accepts it but proxies over HTTP/1.1, where the upstream's own nginx does
+    # reject it, with 400. Any Host will do here: the webclient has a single default server.
+    pass_host: node
   - id: core-v4
     nodes:
       "arsnova-server-core4:8080": 1
