@@ -62,7 +62,8 @@ To persist the configuration, add those variable assignments to `local.env` (one
 |=======
 |Variable |Default value |Description
 |PORT |80 |Port on which the gateway serves HTTP
-|HTTPS_PORT |443 |Port on which the gateway serves HTTPS, if certificates are configured
+|HTTPS_PORT |443 |Port on which the gateway serves HTTPS, or on which a front proxy does with `EXTERNAL_TLS`
+|EXTERNAL_TLS |false |Set to `true` where something in front of the gateway terminates TLS
 |JWT_SECRET |generated |Encryption token for authentication, shared by every service; generated into `local.env` when it is unset
 |CHALLENGE_SECRET |generated |Token for the registration challenge, generated into `local.env` when it is unset
 |JWT_DOMAIN |example.com |A domain usable as server ID (used for the JWT issuer/audience claim)
@@ -132,8 +133,8 @@ link:upgrading-to-v4.adoc[the upgrade guide] for the property structure.
 === Gateway
 
 `./particifyctl update-gateway` generates the gateway's `apisix.yaml` from
-`provided/apisix-routes.yaml`, the certificates in `tls/`, and `ARSNOVA_HOSTNAME_ALIASES` and
-`CSP_FRAME_ANCESTORS`.
+`provided/apisix-routes.yaml`, the certificates in `tls/`, and `ARSNOVA_HOSTNAME_ALIASES`,
+`CSP_FRAME_ANCESTORS` and `EXTERNAL_TLS`.
 Run it, followed by `./particifyctl update-config`, after changing any of those.
 The gateway picks the generated file up without a restart.
 
@@ -150,6 +151,21 @@ With them, a plaintext request is redirected to HTTPS: `301` for `GET` and `HEAD
 so a request keeps its method and body.
 The redirect names no port, so an installation which publishes HTTPS somewhere other than 443 needs
 whatever terminates TLS in front of the gateway to handle it.
+
+==== TLS terminated in front of the gateway
+
+Set `EXTERNAL_TLS=true` where something else terminates TLS and forwards plain HTTP to the gateway,
+then run `./particifyctl update-gateway` followed by `./particifyctl update-config`.
+The gateway otherwise reports the request to the services as plaintext,
+because it replaces `X-Forwarded-Proto` with its own scheme,
+and every URL they generate then names `http` -- SAML endpoints, published service metadata,
+and the origin a WebSocket handshake is checked against.
+`HTTPS_PORT` in this arrangement names the port the front proxy serves rather than one the gateway
+listens on.
+
+The setting is mutually exclusive with certificates in `tls/`:
+with those the gateway's own scheme is already the public one.
+Redirecting plaintext requests belongs to the front proxy here; the gateway sends no redirect.
 
 ==== Hostname aliases
 

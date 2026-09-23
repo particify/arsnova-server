@@ -467,7 +467,8 @@ With them, plaintext requests are redirected to HTTPS as they were in v3.
 
 `PORT` and `HTTPS_PORT` select the published ports and default to 80 and 443.
 If something else already terminates TLS in front of the gateway, set them to whatever that proxy
-expects.
+expects and set `EXTERNAL_TLS=true` as well, or the services generate `http` URLs for an
+installation reached over `https`.
 
 `ARSNOVA_HOSTNAME_ALIASES` and `CSP_FRAME_ANCESTORS` keep their v3 meaning and are read by
 `update-gateway` as well, so an installation which used either of them has to run that command even
