@@ -462,6 +462,8 @@ APISIX can terminate TLS instead, using the same certificate layout the v3 proxy
 Certificates have to be inlined rather than referenced, because APISIX rejects a path, so
 `apisix.yaml` is generated from the shipped template.
 Re-run `update-gateway` after renewing a certificate; APISIX picks the change up without a restart.
+The command generates `apisix-config.yaml` next to it, which APISIX reads only at startup, so
+restart the gateway whenever the command reports that file as changed.
 With no certificates present the gateway serves plain HTTP only.
 With them, plaintext requests are redirected to HTTPS as they were in v3.
 
