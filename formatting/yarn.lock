@@ -2111,9 +2111,9 @@ which-collection@^1.0.2:
     is-weakset "^2.0.3"
 
 which-typed-array@^1.1.16, which-typed-array@^1.1.19:
-  version "1.1.23"
-  resolved "https://registry.yarnpkg.com/which-typed-array/-/which-typed-array-1.1.23.tgz#9c586ad46795d0a31e14cef261d5d24bbfb4e2c7"
-  integrity sha512-JMh8aK+1B/0bk/YNupICmH5MgCq6yNLKYQUfsZtSDLLCCmxUkHjUY+oOlIa90lO7lHN1woAfpenLdlKpXy9o+A==
+  version "1.1.24"
+  resolved "https://registry.yarnpkg.com/which-typed-array/-/which-typed-array-1.1.24.tgz#211f5877c29e6213d50e8f2dce4ac9ca2d0008cf"
+  integrity sha512-wk4Mf4pR5mRP7eYuuTBCIQ9d0ud2Fv2jRLQpfgnRjbOxAFHmjKFValgTpitVKzJJS8ajnYQV2Du1SZ8j6b/EUQ==
   dependencies:
     available-typed-arrays "^1.0.7"
     call-bind "^1.0.9"
