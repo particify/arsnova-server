@@ -5,11 +5,13 @@ package net.particify.arsnova.core4.questionnaire.content.api
 
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
+import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.TextContentFormatData
 import org.springframework.data.web.ProjectedPayload
 
 data class ContentFormatDataInput(
     val choice: ChoiceContentFormatDataInput?,
+    val numeric: NumericContentFormatDataInput?,
     val text: TextContentFormatDataInput?
 ) {
 
@@ -17,6 +19,9 @@ data class ContentFormatDataInput(
     return when {
       choice != null ->
           ChoiceContentFormatData(choice.choices, choice.correctOptionIndexes, choice.multiple)
+      numeric != null ->
+          NumericContentFormatData(
+              numeric.minNumber, numeric.maxNumber, numeric.correctNumber, numeric.tolerance)
       text != null -> TextContentFormatData(text.answersPublished)
       else -> error("No FormatData available.")
     }
@@ -27,6 +32,14 @@ data class ContentFormatDataInput(
     val choices: List<String>
     val correctOptionIndexes: List<Int>
     val multiple: Boolean
+  }
+
+  @ProjectedPayload
+  interface NumericContentFormatDataInput {
+    val minNumber: Double
+    val maxNumber: Double
+    val correctNumber: Double?
+    val tolerance: Double
   }
 
   @ProjectedPayload

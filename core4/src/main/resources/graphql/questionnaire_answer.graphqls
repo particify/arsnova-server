@@ -11,6 +11,7 @@ extend type Query {
 
 extend type Mutation {
   createQuestionnaireChoiceAnswer(input: CreateChoiceAnswerInput!): Answer
+  createQuestionnaireNumericAnswer(input: CreateNumericAnswerInput): Answer
   createQuestionnaireTextAnswer(input: CreateTextAnswerInput!): Answer
   createQuestionnaireWordcloudAnswer(input: CreateWordcloudAnswerInput!): Answer
   createQuestionnaireAbstention(roundId: UUID!): Answer
@@ -33,12 +34,18 @@ type Answer {
 
 union AnswerFormatData =
   | ChoiceAnswerFormatData
+  | NumericAnswerFormatData
   | TextAnswerFormatData
   | WordcloudAnswerFormatData
 
 type ChoiceAnswerFormatData {
   format: ContentType!
   selectedChoiceIndexes: [Int!]!
+}
+
+type NumericAnswerFormatData {
+  format: ContentType!
+  selectedNumber: Float!
 }
 
 type WordcloudAnswerFormatData {
@@ -76,6 +83,11 @@ enum AnswerResultState {
 input CreateChoiceAnswerInput {
   roundId: UUID!
   selectedChoiceIndexes: [Int!]!
+}
+
+input CreateNumericAnswerInput {
+  roundId: UUID!
+  selectedNumber: Float!
 }
 
 input CreateTextAnswerInput {

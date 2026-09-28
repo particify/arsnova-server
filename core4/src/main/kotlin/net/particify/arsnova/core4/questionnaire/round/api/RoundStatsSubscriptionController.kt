@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentPermissionEvaluator
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
 import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
+import net.particify.arsnova.core4.questionnaire.round.NumericContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.WordcloudContentRoundStats
@@ -53,6 +54,13 @@ class RoundStatsSubscriptionController(
   @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
   fun questionnaireChoiceRoundStatsUpdated(@Argument roundId: UUID): Flux<ChoiceContentRoundStats> =
       statsFlux(roundId) { roundStatsServiceImpl.getChoiceRoundStatsByRoundId(roundId) }
+
+  @SubscriptionMapping
+  @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
+  fun questionnaireNumericRoundStatsUpdated(
+      @Argument roundId: UUID
+  ): Flux<NumericContentRoundStats> =
+      statsFlux(roundId) { roundStatsServiceImpl.getNumericRoundStatsByRoundId(roundId) }
 
   @SubscriptionMapping
   @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")

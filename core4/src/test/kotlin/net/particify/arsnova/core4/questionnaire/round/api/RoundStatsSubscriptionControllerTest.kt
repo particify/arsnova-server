@@ -11,6 +11,7 @@ import net.particify.arsnova.core4.questionnaire.content.ContentPermissionEvalua
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
+import net.particify.arsnova.core4.questionnaire.round.NumericContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
@@ -111,6 +112,35 @@ class RoundStatsSubscriptionControllerTest {
     StepVerifier.withVirtualTime { subscribeChoice() }
         .expectSubscription()
         .expectNext(choiceStats)
+        .then { publishAnswerChanged(OTHER_ROUND_ID) }
+        .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
+  @Test
+  fun shouldEmitNumericStatsForAnswerOfSubscribedRound() {
+    val stats = numericStats()
+    Mockito.`when`(roundStatsServiceImpl.getNumericRoundStatsByRoundId(SUBSCRIBED_ROUND_ID))
+        .thenReturn(stats)
+
+    StepVerifier.withVirtualTime {
+          controller.questionnaireNumericRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+        }
+        .expectSubscription()
+        .then { publishAnswerChanged(SUBSCRIBED_ROUND_ID) }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(stats)
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
+  @Test
+  fun shouldNotEmitNumericStatsForAnswerOfOtherRound() {
+    StepVerifier.withVirtualTime {
+          controller.questionnaireNumericRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+        }
+        .expectSubscription()
         .then { publishAnswerChanged(OTHER_ROUND_ID) }
         .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
         .thenCancel()
@@ -227,6 +257,18 @@ class RoundStatsSubscriptionControllerTest {
     Mockito.verify(roundStatsServiceImpl, Mockito.times(1))
         .getChoiceRoundStatsByRoundId(SUBSCRIBED_ROUND_ID)
   }
+
+  private fun numericStats() =
+      NumericContentRoundStats(
+          selectedNumbers = listOf(1.0, 2.0),
+          counts = listOf(1, 2),
+          mean = 1.5,
+          median = 1.5,
+          standardDeviation = 0.5,
+          variance = 0.25,
+          minimum = 1.0,
+          maximum = 2.0,
+          correctAnswerFraction = null)
 
   private fun publishAnswerChanged(roundId: UUID) {
     eventPublisher.publishAnswerChanged(

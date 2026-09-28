@@ -1,0 +1,21 @@
+/* Copyright 2026 Particify GmbH
+ * SPDX-License-Identifier: MIT
+ */
+package net.particify.arsnova.core4.questionnaire.round
+
+/**
+ * Raw per-value counts plus descriptive statistics of a numeric round. [selectedNumbers] and
+ * [counts] are parallel and ascending by value; grouping them into chart buckets is left to the
+ * client. [correctAnswerFraction] is null for a content without a correct number.
+ */
+data class NumericContentRoundStats(
+    val selectedNumbers: List<Double>,
+    val counts: List<Int>,
+    val mean: Double,
+    val median: Double,
+    val standardDeviation: Double,
+    val variance: Double,
+    val minimum: Double,
+    val maximum: Double,
+    val correctAnswerFraction: Double?,
+)

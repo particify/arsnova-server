@@ -13,6 +13,7 @@ import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInva
 @JsonSubTypes(
     JsonSubTypes.Type(ChoiceContentFormatData::class, name = "CHOICE"),
     JsonSubTypes.Type(FlashcardContentFormatData::class, name = "FLASHCARD"),
+    JsonSubTypes.Type(NumericContentFormatData::class, name = "NUMERIC"),
     JsonSubTypes.Type(SlideContentFormatData::class, name = "SLIDE"),
     JsonSubTypes.Type(TextContentFormatData::class, name = "TEXT"),
     JsonSubTypes.Type(WordcloudContentFormatData::class, name = "WORDCLOUD"),
