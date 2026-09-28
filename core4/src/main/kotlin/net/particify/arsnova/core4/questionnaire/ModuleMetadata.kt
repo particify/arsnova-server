@@ -7,5 +7,6 @@ import org.springframework.modulith.ApplicationModule
 import org.springframework.modulith.PackageInfo
 
 @PackageInfo
-@ApplicationModule(allowedDependencies = ["common", "room::events", "security::permission", "user"])
+@ApplicationModule(
+    allowedDependencies = ["common", "room", "room::events", "security::permission", "user"])
 class ModuleMetadata

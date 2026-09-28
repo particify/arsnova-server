@@ -31,6 +31,11 @@ class QuestionnairePermissionEvaluator(
           // Moderators may open what they can list, unpublished questionnaires included.
           "read" -> if (targetDomainObject.published) "read" else "moderate"
           "moderate" -> "moderate"
+          // Participants only see the leaderboard of a published questionnaire which enables it.
+          "readLeaderboard" ->
+              if (targetDomainObject.published && targetDomainObject.leaderboardEnabled == true)
+                  "read"
+              else "write"
           "delete" -> "write"
           else -> return DomainPermissionEvaluation(false)
         }

@@ -62,8 +62,8 @@ interface ContentFormatData {
       AnswerResultState.NEUTRAL
 
   /**
-   * The share of [basePoints] the answer is worth. Formats which cannot be answered partially score
-   * all or nothing.
+   * The share of [basePoints] the answer is worth, before it is weighted by answering speed.
+   * Formats which cannot be answered partially score all or nothing.
    */
   fun calculateAchievedPoints(answerFormatData: AnswerFormatData, basePoints: Int): Int =
       if (evaluateAnswer(answerFormatData) == AnswerResultState.CORRECT) basePoints else 0

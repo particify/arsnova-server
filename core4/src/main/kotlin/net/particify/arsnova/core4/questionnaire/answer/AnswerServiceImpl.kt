@@ -80,7 +80,7 @@ class AnswerServiceImpl(
         ))
   }
 
-  /** The worth of a fully correct answer to the content. */
+  /** The worth of a fully correct answer to the content before answering speed is accounted for. */
   private fun basePoints(content: Content): Int =
       content.points ?: Content.calculateBasePoints(content.weight)
 
@@ -108,15 +108,19 @@ class AnswerServiceImpl(
     val contentFormatData = content.formatData!!
     contentFormatData.validateAnswer(formatData)
     val result = contentFormatData.evaluateAnswer(formatData)
+    val elapsedMs = round.elapsedAnsweringTime(now)
     val achievedPoints = achievedPoints(round, content, formatData, now)
+    // An answer which achieved nothing is stored without points rather than with zero.
+    val competitivePoints =
+        if (achievedPoints > 0) content.calculateCompetitivePoints(achievedPoints, elapsedMs)
+        else null
     val answer =
         Answer(
             round = round,
             formatData = formatData,
             result = result,
-            // An answer which achieved nothing is stored without points rather than with zero.
-            points = achievedPoints.takeIf { it > 0 },
-            durationMs = round.elapsedAnsweringTime(now),
+            points = competitivePoints,
+            durationMs = elapsedMs,
         )
     val persisted = store(answer)
     publishAnswerChanged(round)
@@ -255,8 +259,10 @@ class AnswerServiceImpl(
     // The result decides whether an answer counts as correct, not the points: older stored answers
     // carry points of 0 rather than none at all even when they are wrong.
     if (answer.result == AnswerResultState.CORRECT) result.correctAnswerCount++
-    // The score cannot be derived from the result, since a partially correct answer is worth part
-    // of the content while its result is not CORRECT.
+    // The score is recomputed from the stored answer rather than taken from its points, which are
+    // weighted by answering speed for timed contents and could exceed the maximum score. It cannot
+    // be derived from the result either, since a partially correct answer is worth part of the
+    // content while its result is not CORRECT.
     val answerFormatData = answer.formatData ?: return
     result.achievedScore +=
         achievedPoints(round, content, answerFormatData, answer.auditMetadata.createdAt)

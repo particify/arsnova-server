@@ -10,6 +10,18 @@ interface RoomUserAliasService {
   fun findOneByRoomIdAndUserId(roomId: UUID, userId: UUID): RoomUserAlias?
 
   /**
+   * Returns the unlocalized aliases of all users of the room, keyed by user ID. Localization is
+   * left to the caller so that one lookup can serve readers of different locales.
+   */
+  fun findAliasMappingsByRoomId(roomId: UUID): Map<UUID, RoomUserAliasProjection>
+
+  /**
+   * Turns a projected alias into the alias to display. Aliases without an explicitly set name are
+   * generated from their seed for the given locale.
+   */
+  fun localize(alias: RoomUserAliasProjection, locale: Locale): RoomUserAlias
+
+  /**
    * Returns the user's alias for the room or an unpersisted proposal if the user has not set one
    * yet. Aliases without an explicitly set name are generated from their seed for the given locale.
    */

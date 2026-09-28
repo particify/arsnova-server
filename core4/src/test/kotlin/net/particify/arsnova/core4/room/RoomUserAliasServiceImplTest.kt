@@ -32,7 +32,9 @@ class RoomUserAliasServiceImplTest {
   private val repository = Mockito.mock(RoomUserAliasRepository::class.java)
   private val service =
       RoomUserAliasServiceImpl(
-          repository, RoomUserAliasGenerator(loadAliasWords(), messageSource()))
+          repository,
+          RoomUserAliasGenerator(loadAliasWords(), messageSource()),
+          RoomUserAliasEventPublisher())
 
   init {
     Mockito.`when`(repository.saveAndFlush(Mockito.any(RoomUserAlias::class.java))).thenAnswer {

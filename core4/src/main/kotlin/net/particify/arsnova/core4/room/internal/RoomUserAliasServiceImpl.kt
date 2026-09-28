@@ -10,6 +10,9 @@ import java.util.concurrent.ThreadLocalRandom
 import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomUserAlias
+import net.particify.arsnova.core4.room.RoomUserAliasChangedEvent
+import net.particify.arsnova.core4.room.RoomUserAliasEventPublisher
+import net.particify.arsnova.core4.room.RoomUserAliasProjection
 import net.particify.arsnova.core4.room.RoomUserAliasService
 import net.particify.arsnova.core4.user.User
 import org.springframework.dao.DataIntegrityViolationException
@@ -20,10 +23,24 @@ private const val ALREADY_CREATED_MESSAGE = "Alias has already been created."
 @Service
 class RoomUserAliasServiceImpl(
     private val roomUserAliasRepository: RoomUserAliasRepository,
-    private val roomUserAliasGenerator: RoomUserAliasGenerator
+    private val roomUserAliasGenerator: RoomUserAliasGenerator,
+    private val roomUserAliasEventPublisher: RoomUserAliasEventPublisher
 ) : RoomUserAliasService, RoomUserAliasRepository by roomUserAliasRepository {
   override fun findOneByRoomIdAndUserId(roomId: UUID, userId: UUID): RoomUserAlias? {
     return roomUserAliasRepository.findOneByRoomIdAndUserId(roomId, userId)
+  }
+
+  override fun findAliasMappingsByRoomId(roomId: UUID): Map<UUID, RoomUserAliasProjection> {
+    return roomUserAliasRepository.findProjectedByRoomId(roomId).associateBy { it.userId }
+  }
+
+  override fun localize(alias: RoomUserAliasProjection, locale: Locale): RoomUserAlias {
+    if (alias.alias != null) {
+      return RoomUserAlias(id = alias.id, alias = alias.alias, seed = alias.seed)
+    }
+    val generatedAlias = roomUserAliasGenerator.generate(alias.seed!!, locale)
+    generatedAlias.id = alias.id
+    return generatedAlias
   }
 
   override fun retrieveOrGenerate(roomId: UUID, userId: UUID, locale: Locale): RoomUserAlias {
@@ -50,6 +67,7 @@ class RoomUserAliasServiceImpl(
                 user = User(id = userId),
                 alias = alias?.let(::normalizeAlias),
                 seed = seed ?: ThreadLocalRandom.current().nextInt()))
+    roomUserAliasEventPublisher.publishAliasChanged(RoomUserAliasChangedEvent(roomId, userId))
     return localizeIfGenerated(persistedAlias, locale)
   }
 

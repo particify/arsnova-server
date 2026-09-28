@@ -15,6 +15,7 @@ import jakarta.persistence.Table
 import jakarta.persistence.Version
 import jakarta.validation.constraints.Max
 import java.util.UUID
+import kotlin.math.roundToInt
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.common.UuidGenerator
 import net.particify.arsnova.core4.common.exception.InvalidInputException
@@ -45,10 +46,15 @@ data class Content(
     const val MAX_DURATION = 3600L
     const val MAX_BODY_LENGTH = 2000
     const val BASE_POINTS = 500
+    private const val MILLIS_PER_SECOND = 1000L
+    // Multiplying by 2 is what makes taking less than half of the duration for answering result in
+    // additional points while taking more time results in subtracted points in comparison to the
+    // base points given for correct answers.
+    private const val COMPETITIVE_FACTOR = 2.0
     val DURATION_RANGE = 1..MAX_DURATION.toInt()
     val WEIGHT_RANGE = 1..5
 
-    /** The worth of a fully correct answer to a content of the given weight. */
+    /** The worth of a correct answer before it is weighted by answering speed. */
     fun calculateBasePoints(weight: Int?): Int = BASE_POINTS * (weight ?: 1)
 
     /** A null duration means no countdown and a null weight the default one. */
@@ -64,6 +70,21 @@ data class Content(
         throw InvalidInputException("The weight must be within $WEIGHT_RANGE")
       }
     }
+  }
+
+  /**
+   * Weights [achievedPoints] by the time left when the answer was given: answering instantly is
+   * worth twice the points, answering after half of the duration the plain value and answering at
+   * the buzzer nothing. Contents which are answered without a countdown keep their fixed value, so
+   * [elapsedMs] is null for those.
+   */
+  fun calculateCompetitivePoints(achievedPoints: Int, elapsedMs: Int?): Int {
+    val durationSeconds = duration?.takeIf { it > 0 } ?: return achievedPoints
+    if (elapsedMs == null) return achievedPoints
+    val timeLeftMs = durationSeconds * MILLIS_PER_SECOND - elapsedMs
+    val weightedPoints =
+        COMPETITIVE_FACTOR * timeLeftMs / MILLIS_PER_SECOND / durationSeconds * achievedPoints
+    return weightedPoints.roundToInt()
   }
 
   fun copy(): Content {

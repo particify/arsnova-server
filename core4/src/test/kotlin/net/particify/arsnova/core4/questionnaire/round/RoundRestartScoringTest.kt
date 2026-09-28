@@ -14,8 +14,9 @@ private const val BASE_POINTS = 500
 
 /**
  * Restarting a content whose countdown had run out used to leave the round without a deadline,
- * which made answering time unmeasurable and handed out the unweighted score to everyone. Answers
- * given after the restart are timed against the new countdown but earn no points.
+ * which made answering time unmeasurable and handed out the unweighted score to everyone. These
+ * cover the whole chain from the countdown to the points it produces. Answers given after the
+ * restart are timed against the new countdown but earn no points.
  */
 class RoundRestartScoringTest {
   private val content = Content(duration = DURATION_SECONDS, points = BASE_POINTS)
@@ -25,6 +26,9 @@ class RoundRestartScoringTest {
     round.startAnswering(DURATION_SECONDS, NOW)
     return round
   }
+
+  private fun pointsFor(round: Round, at: Instant) =
+      content.calculateCompetitivePoints(BASE_POINTS, round.elapsedAnsweringTime(at))
 
   @Test
   fun shouldMeasureNoElapsedTimeForAnInstantAnswer() {
@@ -69,5 +73,28 @@ class RoundRestartScoringTest {
     round.openAnswering(DURATION_SECONDS, reopenTime)
     Assertions.assertNull(round.answeringExpiredAt)
     Assertions.assertTrue(round.scoresAnswerAt(reopenTime.plusSeconds(10)))
+  }
+
+  @Test
+  fun shouldWeightPointsByAnsweringSpeedAfterARestart() {
+    val round = startedRound()
+    val restartTime = NOW.plusSeconds(DURATION_SECONDS.toLong() + 20)
+    round.openAnswering(DURATION_SECONDS, restartTime)
+    // An instant answer is worth double, one at half time the plain value, one at the buzzer none.
+    Assertions.assertEquals(2 * BASE_POINTS, pointsFor(round, restartTime))
+    Assertions.assertEquals(BASE_POINTS, pointsFor(round, restartTime.plusSeconds(15)))
+    Assertions.assertEquals(0, pointsFor(round, restartTime.plusSeconds(DURATION_SECONDS.toLong())))
+  }
+
+  @Test
+  fun shouldWeightPointsByTheRemainderAfterResumingAStoppedCountdown() {
+    val round = startedRound()
+    round.stopAnswering(NOW.plusSeconds(20)) // 10s left
+    val resumeTime = NOW.plusSeconds(25)
+    round.openAnswering(DURATION_SECONDS, resumeTime)
+    // 20s of the countdown were already used up, so answering now is worth two thirds of the base
+    // value rather than the double an answer to a freshly restarted round would earn.
+    Assertions.assertEquals(20_000, round.elapsedAnsweringTime(resumeTime))
+    Assertions.assertEquals(333, pointsFor(round, resumeTime))
   }
 }
