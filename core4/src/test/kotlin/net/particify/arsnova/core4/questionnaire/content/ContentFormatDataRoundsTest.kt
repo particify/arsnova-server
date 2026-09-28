@@ -30,4 +30,10 @@ class ContentFormatDataRoundsTest {
   fun shouldSupportRoundsForNumeric() {
     Assertions.assertTrue(NumericContentFormatData(0.0, 10.0).supportsRounds())
   }
+
+  @Test
+  fun shouldSupportRoundsForScale() {
+    Assertions.assertTrue(
+        ScaleContentFormatData(ScaleContentFormatData.Template.AGREEMENT, true).supportsRounds())
+  }
 }

@@ -15,6 +15,7 @@ import net.particify.arsnova.core4.questionnaire.round.NumericContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
+import net.particify.arsnova.core4.questionnaire.round.ScaleContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.WordcloudContentRoundStats
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -163,6 +164,35 @@ class RoundStatsSubscriptionControllerTest {
         }
         .thenAwait(SAMPLE_INTERVAL)
         .expectNext(stats)
+        .then { publishAnswerChanged(OTHER_ROUND_ID) }
+        .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
+  @Test
+  fun shouldEmitScaleStatsForAnswerOfSubscribedRound() {
+    val stats = ScaleContentRoundStats(listOf(1, 0, 2, 0, 1))
+    Mockito.`when`(roundStatsServiceImpl.getScaleRoundStatsByRoundId(SUBSCRIBED_ROUND_ID))
+        .thenReturn(stats)
+
+    StepVerifier.withVirtualTime {
+          controller.questionnaireScaleRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+        }
+        .expectSubscription()
+        .then { publishAnswerChanged(SUBSCRIBED_ROUND_ID) }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(stats)
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
+  @Test
+  fun shouldNotEmitScaleStatsForAnswerOfOtherRound() {
+    StepVerifier.withVirtualTime {
+          controller.questionnaireScaleRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+        }
+        .expectSubscription()
         .then { publishAnswerChanged(OTHER_ROUND_ID) }
         .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
         .thenCancel()

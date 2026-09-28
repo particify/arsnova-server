@@ -6,6 +6,7 @@ extend type Query {
   questionnaireNumericRoundStatsByRoundId(
     roundId: UUID!
   ): NumericContentRoundStats
+  questionnaireScaleRoundStatsByRoundId(roundId: UUID!): ScaleContentRoundStats
   questionnaireWordcloudRoundStatsByRoundId(
     roundId: UUID!
   ): WordcloudContentRoundStats
@@ -20,6 +21,7 @@ extend type Subscription {
   questionnaireNumericRoundStatsUpdated(
     roundId: UUID!
   ): NumericContentRoundStats
+  questionnaireScaleRoundStatsUpdated(roundId: UUID!): ScaleContentRoundStats
   questionnaireWordcloudRoundStatsUpdated(
     roundId: UUID!
   ): WordcloudContentRoundStats
@@ -49,6 +51,10 @@ type NumericContentRoundStats {
   minimum: Float!
   maximum: Float!
   correctAnswerFraction: Float
+}
+
+type ScaleContentRoundStats {
+  counts: [Int!]
 }
 
 type WordcloudContentRoundStats {

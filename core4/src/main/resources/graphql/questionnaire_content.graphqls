@@ -22,6 +22,7 @@ extend type Mutation {
     input: CreateFlashcardContentInput!
   ): Content
   createQuestionnaireNumericContent(input: CreateNumericContentInput!): Content
+  createQuestionnaireScaleContent(input: CreateScaleContentInput): Content
   createQuestionnaireSlideContent(input: CreateSlideContentInput!): Content
   createQuestionnaireTextContent(input: CreateTextContentInput!): Content
   createQuestionnaireWordcloudContent(
@@ -43,6 +44,7 @@ extend type Mutation {
     input: UpdateFlashcardContentInput!
   ): Content
   updateQuestionnaireNumericContent(input: UpdateNumericContentInput!): Content
+  updateQuestionnaireScaleContent(input: UpdateScaleContentInput): Content
   updateQuestionnaireSlideContent(input: UpdateSlideContentInput!): Content
   updateQuestionnaireTextContent(input: UpdateTextContentInput!): Content
   updateQuestionnaireWordcloudContent(
@@ -117,6 +119,23 @@ type NumericContentFormatData {
 
 type ScaleContentFormatData {
   format: ContentType!
+  template: ScaleContentTemplate
+  neutralOption: Boolean
+}
+
+enum ScaleContentTemplate {
+  AGREEMENT
+  INTENSITY
+  FREQUENCY
+  QUALITY
+  PROBABILITY
+  LEVEL
+  IMPORTANCE
+  DIFFICULTY
+  PACE
+  EMOJI
+  PLUS_MINUS
+  POINTS
 }
 
 type SlideContentFormatData {
@@ -202,6 +221,24 @@ input UpdateNumericContentInput {
   tolerance: Float
   duration: Int
   weight: Int
+  abstentionsAllowed: Boolean
+}
+
+input CreateScaleContentInput {
+  questionnaireId: UUID!
+  body: String!
+  template: ScaleContentTemplate!
+  neutralOption: Boolean!
+  duration: Int
+  abstentionsAllowed: Boolean
+}
+
+input UpdateScaleContentInput {
+  id: UUID!
+  body: String!
+  template: ScaleContentTemplate!
+  neutralOption: Boolean!
+  duration: Int
   abstentionsAllowed: Boolean
 }
 

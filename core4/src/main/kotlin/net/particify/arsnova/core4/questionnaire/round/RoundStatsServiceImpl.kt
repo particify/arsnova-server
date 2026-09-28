@@ -12,9 +12,11 @@ import kotlin.math.sqrt
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.answer.ScaleAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
+import net.particify.arsnova.core4.questionnaire.content.ScaleContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.normalizeAnswerText
@@ -118,6 +120,22 @@ class RoundStatsServiceImpl(
     if (!formatData.hasCorrectAnswer()) return null
     if (numbers.isEmpty()) return 0.0
     return numbers.count { formatData.isCorrect(it) }.toDouble() / numbers.size
+  }
+
+  @Transactional
+  fun getScaleRoundStatsByRoundId(roundId: UUID): ScaleContentRoundStats {
+    val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
+    val formatData =
+        round.content?.formatData as? ScaleContentFormatData
+            ?: throw ContentFormatDataInvalidException("Content is not a scale content")
+    val countsByRating =
+        answerServiceImpl
+            .findByRoundId(roundId)
+            .mapNotNull { (it.formatData as? ScaleAnswerFormatData)?.rating }
+            .groupingBy { it }
+            .eachCount()
+    return ScaleContentRoundStats(
+        (0 until formatData.optionCount()).map { countsByRating.getOrDefault(it, 0) })
   }
 
   @Transactional
