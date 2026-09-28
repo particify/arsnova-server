@@ -10,7 +10,6 @@ import kotlin.Int
 import kotlin.ReplaceWith
 import net.particify.arsnova.core4.questionnaire.answer.AnswerRepository
 import net.particify.arsnova.core4.questionnaire.content.Content
-import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.event.RoundDeletedEvent
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
@@ -82,7 +81,8 @@ class RoundServiceImpl(
     // Only LIVE presents one content at a time; elsewhere other contents' rounds stay open.
     if (live) questionnaire.activeRound?.let { stopAnswering(it) }
     val round = Round(content = content, roundNo = (currentRound?.roundNo ?: 0) + 1)
-    if (live) startLiveAnswering(round, format, content.duration) else round.openWithoutCountdown()
+    // Formats which support rounds are all answerable, so a new live round always opens.
+    if (live) round.startAnswering(content.duration) else round.openWithoutCountdown()
     val persistedRound = roundRepository.save(round)
     content.activeRound = persistedRound
     val persistedContent = contentRepository.save(content)
@@ -113,14 +113,6 @@ class RoundServiceImpl(
   private fun stopAnswering(round: Round) {
     round.stopAnswering()
     roundRepository.save(round)
-  }
-
-  private fun startLiveAnswering(round: Round, formatData: ContentFormatData, duration: Int?) {
-    if (formatData.answerable()) {
-      round.startAnswering(duration)
-    } else {
-      round.stopAnswering()
-    }
   }
 
   @Deprecated(
