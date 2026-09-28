@@ -7,6 +7,9 @@ extend type Query {
     roundId: UUID!
   ): NumericContentRoundStats
   questionnaireScaleRoundStatsByRoundId(roundId: UUID!): ScaleContentRoundStats
+  questionnaireShortAnswerRoundStatsByRoundId(
+    roundId: UUID!
+  ): ShortAnswerContentRoundStats
   questionnaireWordcloudRoundStatsByRoundId(
     roundId: UUID!
   ): WordcloudContentRoundStats
@@ -22,6 +25,9 @@ extend type Subscription {
     roundId: UUID!
   ): NumericContentRoundStats
   questionnaireScaleRoundStatsUpdated(roundId: UUID!): ScaleContentRoundStats
+  questionnaireShortAnswerRoundStatsUpdated(
+    roundId: UUID!
+  ): ShortAnswerContentRoundStats
   questionnaireWordcloudRoundStatsUpdated(
     roundId: UUID!
   ): WordcloudContentRoundStats
@@ -54,6 +60,11 @@ type NumericContentRoundStats {
 }
 
 type ScaleContentRoundStats {
+  counts: [Int!]
+}
+
+type ShortAnswerContentRoundStats {
+  texts: [String!]
   counts: [Int!]
 }
 

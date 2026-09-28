@@ -138,7 +138,9 @@ class AnswerServiceImpl(
 
   /** Answers chosen from given options carry nothing a participant wrote that could need hiding. */
   private fun isHideable(formatData: AnswerFormatData?) =
-      formatData is TextAnswerFormatData || formatData is WordcloudAnswerFormatData
+      formatData is TextAnswerFormatData ||
+          formatData is WordcloudAnswerFormatData ||
+          formatData is ShortAnswerAnswerFormatData
 
   /**
    * Returns the answers of a text round. Whoever may edit the content or moderate its room gets all

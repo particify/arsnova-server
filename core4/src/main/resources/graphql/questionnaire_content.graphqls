@@ -9,6 +9,10 @@ extend type Query {
 }
 
 extend type Mutation {
+  banQuestionnaireShortAnswerContentKeyword(
+    contentId: UUID!
+    keyword: String!
+  ): Content
   banQuestionnaireWordcloudContentKeyword(
     contentId: UUID!
     keyword: String!
@@ -23,6 +27,9 @@ extend type Mutation {
   ): Content
   createQuestionnaireNumericContent(input: CreateNumericContentInput!): Content
   createQuestionnaireScaleContent(input: CreateScaleContentInput!): Content
+  createQuestionnaireShortAnswerContent(
+    input: CreateShortAnswerContentInput
+  ): Content
   createQuestionnaireSlideContent(input: CreateSlideContentInput!): Content
   createQuestionnaireTextContent(input: CreateTextContentInput!): Content
   createQuestionnaireWordcloudContent(
@@ -34,6 +41,7 @@ extend type Mutation {
     contentId: UUID!
     questionnaireId: UUID!
   ): Content
+  resetBannedQuestionnaireShortAnswerContentKeywords(contentId: UUID!): Content
   resetBannedQuestionnaireWordcloudContentKeywords(contentId: UUID!): Content
   toggleQuestionnaireTextContentAnswersPublished(
     contentId: UUID!
@@ -45,6 +53,9 @@ extend type Mutation {
   ): Content
   updateQuestionnaireNumericContent(input: UpdateNumericContentInput!): Content
   updateQuestionnaireScaleContent(input: UpdateScaleContentInput!): Content
+  updateQuestionnaireShortAnswerContent(
+    input: UpdateShortAnswerContentInput
+  ): Content
   updateQuestionnaireSlideContent(input: UpdateSlideContentInput!): Content
   updateQuestionnaireTextContent(input: UpdateTextContentInput!): Content
   updateQuestionnaireWordcloudContent(
@@ -87,6 +98,7 @@ union ContentFormatData =
   | FlashcardContentFormatData
   | NumericContentFormatData
   | ScaleContentFormatData
+  | ShortAnswerContentFormatData
   | SlideContentFormatData
   | TextContentFormatData
   | WordcloudContentFormatData
@@ -136,6 +148,11 @@ enum ScaleContentTemplate {
   EMOJI
   PLUS_MINUS
   POINTS
+}
+
+type ShortAnswerContentFormatData {
+  format: ContentType!
+  correctTerms: [String!]!
 }
 
 type SlideContentFormatData {
@@ -239,6 +256,24 @@ input UpdateScaleContentInput {
   template: ScaleContentTemplate!
   neutralOption: Boolean!
   duration: Int
+  abstentionsAllowed: Boolean
+}
+
+input CreateShortAnswerContentInput {
+  questionnaireId: UUID!
+  body: String!
+  correctTerms: [String!]!
+  duration: Int
+  weight: Int
+  abstentionsAllowed: Boolean
+}
+
+input UpdateShortAnswerContentInput {
+  id: UUID!
+  body: String!
+  correctTerms: [String!]!
+  duration: Int
+  weight: Int
   abstentionsAllowed: Boolean
 }
 

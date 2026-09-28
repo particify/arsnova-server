@@ -13,10 +13,12 @@ import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ScaleAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.answer.ShortAnswerAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ScaleContentFormatData
+import net.particify.arsnova.core4.questionnaire.content.ShortAnswerContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.normalizeAnswerText
@@ -139,6 +141,20 @@ class RoundStatsServiceImpl(
   }
 
   @Transactional
+  fun getShortAnswerRoundStatsByRoundId(roundId: UUID): ShortAnswerContentRoundStats {
+    val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
+    val formatData =
+        round.content?.formatData as? ShortAnswerContentFormatData
+            ?: throw ContentFormatDataInvalidException("Content is not a short answer content")
+    val bodies =
+        answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId).mapNotNull {
+          (it.formatData as? ShortAnswerAnswerFormatData)?.body
+        }
+    val aggregated = aggregateTexts(bodies, formatData.bannedKeywords, formatData.correctTerms)
+    return ShortAnswerContentRoundStats(aggregated.map { it.text }, aggregated.map { it.count })
+  }
+
+  @Transactional
   fun getWordcloudRoundStatsByRoundId(roundId: UUID): WordcloudContentRoundStats {
     val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
     val formatData =
@@ -153,9 +169,20 @@ class RoundStatsServiceImpl(
     return WordcloudContentRoundStats(aggregated.map { it.text }, aggregated.map { it.count })
   }
 
-  /** Keywords are banned by their normalized form, the same form texts are grouped by. */
-  private fun aggregateTexts(texts: List<String>, bannedKeywords: List<String>): List<TextCount> {
+  /**
+   * Groups texts by their normalized form, which banned keywords are matched by too, and labels
+   * each group with its most common variant, or with the matching [preferredTerms] entry's own
+   * spelling where there is one. The client highlights correct answers by exact string match, so
+   * that relabelling is what makes a correct term recognizable even when nobody spelled it the way
+   * the creator did.
+   */
+  private fun aggregateTexts(
+      texts: List<String>,
+      bannedKeywords: List<String>,
+      preferredTerms: List<String> = emptyList()
+  ): List<TextCount> {
     val normalizedBannedKeywords = bannedKeywords.map { normalizeAnswerText(it) }.toSet()
+    val preferredTermsByNormalizedForm = preferredTerms.associateBy { normalizeAnswerText(it) }
     return texts
         .map { it.trim() }
         .filter { it.isNotBlank() && normalizeAnswerText(it) !in normalizedBannedKeywords }
@@ -163,8 +190,11 @@ class RoundStatsServiceImpl(
         .eachCount()
         .entries
         .groupBy { normalizeAnswerText(it.key) }
-        .map { (_, variants) ->
-          TextCount(text = variants.maxBy { it.value }.key, count = variants.sumOf { it.value })
+        .map { (normalizedForm, variants) ->
+          val mostCommonVariant = variants.maxBy { it.value }.key
+          TextCount(
+              text = preferredTermsByNormalizedForm[normalizedForm] ?: mostCommonVariant,
+              count = variants.sumOf { it.value })
         }
         .sortedByDescending { it.count }
   }
