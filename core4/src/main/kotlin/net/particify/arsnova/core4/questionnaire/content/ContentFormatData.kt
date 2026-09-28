@@ -17,6 +17,7 @@ import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInva
     JsonSubTypes.Type(ScaleContentFormatData::class, name = "SCALE"),
     JsonSubTypes.Type(ShortAnswerContentFormatData::class, name = "SHORT_ANSWER"),
     JsonSubTypes.Type(SlideContentFormatData::class, name = "SLIDE"),
+    JsonSubTypes.Type(SortContentFormatData::class, name = "SORT"),
     JsonSubTypes.Type(TextContentFormatData::class, name = "TEXT"),
     JsonSubTypes.Type(WordcloudContentFormatData::class, name = "WORDCLOUD"),
 )

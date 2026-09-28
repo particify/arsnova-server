@@ -13,6 +13,7 @@ import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
 import net.particify.arsnova.core4.questionnaire.content.FlashcardContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
+import net.particify.arsnova.core4.questionnaire.content.SortContentFormatData
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
@@ -69,6 +70,10 @@ class ContentQueryController(
 
   @SchemaMapping(typeName = "ChoiceContentFormatData")
   fun options(formatData: ChoiceContentFormatData): List<AnswerOption> =
+      answerOptions(formatData.options)
+
+  @SchemaMapping(typeName = "SortContentFormatData", field = "options")
+  fun sortOptions(formatData: SortContentFormatData): List<AnswerOption> =
       answerOptions(formatData.options)
 
   private fun answerOptions(labels: List<String>): List<AnswerOption> =

@@ -13,6 +13,7 @@ import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.ScaleContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.ShortAnswerContentRoundStats
+import net.particify.arsnova.core4.questionnaire.round.SortContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.WordcloudContentRoundStats
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
@@ -60,6 +61,12 @@ class RoundQueryController(
   ): ShortAnswerContentRoundStats {
     return roundStatsServiceImpl.getShortAnswerRoundStatsByRoundId(
         roundId, SecurityContextHolder.getContext().authentication)
+  }
+
+  @QueryMapping
+  @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
+  fun questionnaireSortRoundStatsByRoundId(@Argument roundId: UUID): SortContentRoundStats {
+    return roundStatsServiceImpl.getSortRoundStatsByRoundId(roundId)
   }
 
   @QueryMapping

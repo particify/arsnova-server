@@ -16,6 +16,7 @@ import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.ScaleContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.ShortAnswerContentRoundStats
+import net.particify.arsnova.core4.questionnaire.round.SortContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.WordcloudContentRoundStats
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.method.annotation.Argument
@@ -80,6 +81,11 @@ class RoundStatsSubscriptionController(
       statsFlux(roundId, ShortAnswerContentRoundStats::withoutSolution) {
         roundStatsServiceImpl.getShortAnswerRoundStatsWithSolutionByRoundId(roundId)
       }
+
+  @SubscriptionMapping
+  @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
+  fun questionnaireSortRoundStatsUpdated(@Argument roundId: UUID): Flux<SortContentRoundStats> =
+      statsFlux(roundId) { roundStatsServiceImpl.getSortRoundStatsByRoundId(roundId) }
 
   @SubscriptionMapping
   @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
