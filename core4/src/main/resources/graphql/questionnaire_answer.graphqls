@@ -10,6 +10,7 @@ extend type Query {
 }
 
 extend type Mutation {
+  createQuestionnaireBinaryAnswer(input: CreateBinaryAnswerInput): Answer
   createQuestionnaireChoiceAnswer(input: CreateChoiceAnswerInput!): Answer
   createQuestionnaireNumericAnswer(input: CreateNumericAnswerInput!): Answer
   createQuestionnairePrioritizationAnswer(
@@ -41,6 +42,7 @@ type Answer {
 }
 
 union AnswerFormatData =
+  | BinaryAnswerFormatData
   | ChoiceAnswerFormatData
   | NumericAnswerFormatData
   | PrioritizationAnswerFormatData
@@ -49,6 +51,11 @@ union AnswerFormatData =
   | SortAnswerFormatData
   | TextAnswerFormatData
   | WordcloudAnswerFormatData
+
+type BinaryAnswerFormatData {
+  format: ContentType!
+  answer: Boolean!
+}
 
 type ChoiceAnswerFormatData {
   format: ContentType!
@@ -110,6 +117,11 @@ enum AnswerResultState {
   NEUTRAL
   CORRECT
   WRONG
+}
+
+input CreateBinaryAnswerInput {
+  roundId: UUID!
+  answer: Boolean!
 }
 
 input CreateChoiceAnswerInput {
