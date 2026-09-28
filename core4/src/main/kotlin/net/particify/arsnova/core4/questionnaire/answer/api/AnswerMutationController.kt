@@ -7,6 +7,7 @@ import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.answer.Answer
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.answer.TextAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
@@ -33,6 +34,23 @@ class AnswerMutationController(private val answerService: AnswerServiceImpl) {
       @Argument input: CreateWordcloudAnswerInput,
   ): Answer {
     return answerService.createAnswer(input.roundId, WordcloudAnswerFormatData(input.words))
+  }
+
+  @MutationMapping
+  @PreAuthorize("hasPermission(#input.roundId, 'Round', 'read')")
+  fun createQuestionnaireTextAnswer(
+      @Argument input: CreateTextAnswerInput,
+  ): Answer {
+    return answerService.createAnswer(input.roundId, TextAnswerFormatData(input.body))
+  }
+
+  @MutationMapping
+  @PreAuthorize("hasPermission(#answerId, 'Answer', 'moderate')")
+  fun toggleQuestionnaireTextAnswerHidden(
+      @Argument answerId: UUID,
+      @Argument hidden: Boolean
+  ): Answer {
+    return answerService.updateHidden(answerId, hidden)
   }
 
   @MutationMapping

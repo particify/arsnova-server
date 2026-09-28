@@ -21,6 +21,7 @@ import org.mockito.Mockito
 import org.springframework.data.domain.AuditorAware
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Window
+import org.springframework.security.access.PermissionEvaluator
 
 private const val HALF_OF_DOUBLE_WEIGHT = 500
 private const val LEGACY_POINTS = 300
@@ -45,7 +46,8 @@ class AnswerServiceImplScoringTest {
           RoundStatsEventPublisher(),
           questionnaireRepository,
           AuditorAware { Optional.of(USER_ID) },
-          Mockito.mock(RoundServiceImpl::class.java))
+          Mockito.mock(RoundServiceImpl::class.java),
+          Mockito.mock(PermissionEvaluator::class.java))
   private val questionnaire = Questionnaire(id = UUID.randomUUID())
   private val ownAnswers = mutableListOf<Answer>()
 

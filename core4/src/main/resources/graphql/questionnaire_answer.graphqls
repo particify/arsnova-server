@@ -6,13 +6,20 @@ extend type Query {
   questionnaireAnswerResultsByQuestionnaireId(
     questionnaireId: UUID!
   ): QuestionnaireAnswerResult
+  questionnaireTextAnswersByRoundId(roundId: UUID!): [Answer!]
 }
 
 extend type Mutation {
   createQuestionnaireChoiceAnswer(input: CreateChoiceAnswerInput!): Answer
+  createQuestionnaireTextAnswer(input: CreateTextAnswerInput): Answer
   createQuestionnaireWordcloudAnswer(input: CreateWordcloudAnswerInput!): Answer
   createQuestionnaireAbstention(roundId: UUID!): Answer
   deleteQuestionnaireAnswersByContentId(contentId: UUID!): Boolean
+  toggleQuestionnaireTextAnswerHidden(answerId: UUID!, hidden: Boolean!): Answer
+}
+
+extend type Subscription {
+  questionnaireTextAnswersUpdated(roundId: UUID!): [Answer!]
 }
 
 type Answer {
@@ -24,7 +31,10 @@ type Answer {
   createdAt: DateTime
 }
 
-union AnswerFormatData = ChoiceAnswerFormatData | WordcloudAnswerFormatData
+union AnswerFormatData =
+  | ChoiceAnswerFormatData
+  | TextAnswerFormatData
+  | WordcloudAnswerFormatData
 
 type ChoiceAnswerFormatData {
   format: ContentType!
@@ -34,6 +44,11 @@ type ChoiceAnswerFormatData {
 type WordcloudAnswerFormatData {
   format: ContentType!
   words: [String!]!
+}
+
+type TextAnswerFormatData {
+  format: ContentType!
+  body: String!
 }
 
 type ContentAnswerResult {
@@ -61,6 +76,11 @@ enum AnswerResultState {
 input CreateChoiceAnswerInput {
   roundId: UUID!
   selectedChoiceIndexes: [Int!]!
+}
+
+input CreateTextAnswerInput {
+  roundId: UUID!
+  body: String!
 }
 
 input CreateWordcloudAnswerInput {

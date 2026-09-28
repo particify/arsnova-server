@@ -25,18 +25,28 @@ class AnswerPermissionEvaluator(
       permission: Any
   ): DomainPermissionEvaluation {
     logger.debug("hasPermission({}, {}, {})", user, targetDomainObject, permission)
-    val parentPermission =
+    val reference =
         when (permission) {
-          "write" -> "write"
-          "read" -> "read"
-          "delete" -> "write"
-          else -> return DomainPermissionEvaluation(false)
-        }
-    return DomainPermissionEvaluation(
-        null,
-        DomainPermissionEvaluation.PermissionReference(
-            "Round", targetDomainObject.round!!.id!!, parentPermission))
+          "write" -> roundReference(targetDomainObject, "write")
+          "read" -> roundReference(targetDomainObject, "read")
+          "delete" -> roundReference(targetDomainObject, "write")
+          "moderate" -> moderationReference(targetDomainObject)
+          else -> null
+        } ?: return DomainPermissionEvaluation(false)
+    return DomainPermissionEvaluation(null, reference)
   }
+
+  private fun roundReference(answer: Answer, permission: String) =
+      DomainPermissionEvaluation.PermissionReference("Round", answer.round!!.id!!, permission)
+
+  /**
+   * Moderating answers is a room-wide right which moderators hold without being able to edit the
+   * questionnaire, so it is checked against the room rather than through the content chain.
+   */
+  private fun moderationReference(answer: Answer) =
+      answer.round?.content?.questionnaire?.roomId?.let {
+        DomainPermissionEvaluation.PermissionReference("Room", it, "moderate")
+      }
 
   override fun findOneByKey(key: Any): Answer {
     check(key is UUID) { "Excepted key to be of type UUID." }

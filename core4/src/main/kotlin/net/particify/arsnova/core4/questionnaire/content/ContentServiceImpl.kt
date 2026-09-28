@@ -87,7 +87,7 @@ class ContentServiceImpl(
             abstentionsAllowed = abstentionsAllowed ?: true,
             points = if (formatData.hasCorrectAnswer()) Content.calculateBasePoints(weight) else 0)
     questionnaire.contents.add(content)
-    releaseFirstContent(questionnaire, content)
+    questionnaire.releaseFirstContent(content)
     questionnaireRepository.save(questionnaire)
     var persistedContent = questionnaire.contents.last()
     val round = Round.initial(persistedContent, questionnaire.isLive())
@@ -134,6 +134,18 @@ class ContentServiceImpl(
       contentId in answerRepository.findContentIdsWithAnswers(setOf(contentId))
 
   @Transactional
+  fun updateTextAnswersPublished(id: UUID, published: Boolean): Content {
+    val content = contentRepository.findByIdOrNull(id) ?: throw ContentNotFoundException(id)
+    asTextFormatData(content)
+    content.formatData = TextContentFormatData(published)
+    return contentRepository.save(content)
+  }
+
+  fun asTextFormatData(content: Content): TextContentFormatData =
+      content.formatData as? TextContentFormatData
+          ?: throw ContentFormatDataInvalidException("Content is not a text content")
+
+  @Transactional
   override fun deleteByQuestionnaireId(questionnaireId: UUID): Int {
     val contents =
         contentRepository
@@ -153,32 +165,11 @@ class ContentServiceImpl(
     val content = findByIdOrNull(id) ?: throw ContentNotFoundException(id)
     applicationEventPublisher.publishEvent(ContentDeletedEvent(id))
     val questionnaire = content.questionnaire!!
-    releaseReferencesTo(content, questionnaire)
+    questionnaire.releaseReferencesTo(content)
     questionnaire.contents.remove(content)
     contentRepository.deleteById(id)
     questionnaireEventPublisher.publishQuestionnairesChanged(questionnaire)
     return id
-  }
-
-  /** A questionnaire which releases contents one by one starts with its first one released. */
-  private fun releaseFirstContent(questionnaire: Questionnaire, content: Content) {
-    if (questionnaire.publishingMode != QuestionnairePublishingMode.ALL &&
-        questionnaire.publishedUpToContent == null) {
-      questionnaire.publishedUpToContent = content
-    }
-  }
-
-  /**
-   * Keeps [questionnaire] from referencing [content] once it is no longer part of it. A published
-   * range ending at the content shrinks to the preceding one instead of releasing the following
-   * one.
-   */
-  private fun releaseReferencesTo(content: Content, questionnaire: Questionnaire) {
-    if (questionnaire.activeRound?.content?.id == content.id) questionnaire.activeRound = null
-    if (questionnaire.publishedUpToContent?.id == content.id) {
-      val index = questionnaire.contents.indexOfFirst { it.id == content.id }
-      questionnaire.publishedUpToContent = questionnaire.contents.getOrNull(index - 1)
-    }
   }
 
   @Transactional
@@ -249,11 +240,11 @@ class ContentServiceImpl(
     if (sourceQuestionnaire.id == targetQuestionnaire.id) {
       return content
     }
-    releaseReferencesTo(content, sourceQuestionnaire)
+    sourceQuestionnaire.releaseReferencesTo(content)
     sourceQuestionnaire.contents.remove(content)
     targetQuestionnaire.contents.add(content)
     content.questionnaire = targetQuestionnaire
-    releaseFirstContent(targetQuestionnaire, content)
+    targetQuestionnaire.releaseFirstContent(content)
     alignRoundWith(content, targetQuestionnaire)
     questionnaireRepository.save(sourceQuestionnaire)
     questionnaireRepository.save(targetQuestionnaire)
