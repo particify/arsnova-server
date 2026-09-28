@@ -46,3 +46,18 @@ databaseChangeLog:
             tableName: tag
             primaryKey: id
             file: db/data-dev/qna/tag.csv
+        - loadUpdateData:
+            schemaName: questionnaire
+            tableName: questionnaire
+            primaryKey: id
+            file: db/data-dev/questionnaire/questionnaire.csv
+        - loadUpdateData:
+            schemaName: questionnaire
+            tableName: content
+            primaryKey: id
+            file: db/data-dev/questionnaire/content.csv
+        - loadUpdateData:
+            schemaName: questionnaire
+            tableName: round
+            primaryKey: id
+            file: db/data-dev/questionnaire/round.csv

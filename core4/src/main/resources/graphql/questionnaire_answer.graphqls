@@ -1,0 +1,69 @@
+extend type Query {
+  questionnaireAnswerByRoundId(roundId: UUID!): Answer
+  questionnaireContentAnswerResultsByQuestionnaireId(
+    questionnaireId: UUID!
+  ): [ContentAnswerResult!]
+  questionnaireAnswerResultsByQuestionnaireId(
+    questionnaireId: UUID!
+  ): QuestionnaireAnswerResult
+}
+
+extend type Mutation {
+  createQuestionnaireChoiceAnswer(input: CreateChoiceAnswerInput): Answer
+  createQuestionnaireWordcloudAnswer(input: CreateWordcloudAnswerInput): Answer
+  createQuestionnaireAbstention(roundId: UUID): Answer
+  deleteQuestionnaireAnswersByContentId(contentId: UUID): Boolean
+}
+
+type Answer {
+  id: ID!
+  result: AnswerResultState!
+  formatData: AnswerFormatData
+  durationMs: Int
+  hidden: Boolean!
+  createdAt: DateTime
+}
+
+union AnswerFormatData = ChoiceAnswerFormatData | WordcloudAnswerFormatData
+
+type ChoiceAnswerFormatData {
+  format: ContentType!
+  selectedChoiceIndexes: [Int!]!
+}
+
+type WordcloudAnswerFormatData {
+  format: ContentType!
+  words: [String!]!
+}
+
+type ContentAnswerResult {
+  contentId: UUID!
+  result: AnswerResultState!
+  durationMs: Int
+}
+
+type QuestionnaireAnswerResult {
+  questionnaireId: UUID!
+  correctAnswerCount: Int
+  scorableContentCount: Int
+  achievedScore: Int
+  maxScore: Int
+}
+
+enum AnswerResultState {
+  UNANSWERED
+  ABSTAINED
+  NEUTRAL
+  CORRECT
+  WRONG
+}
+
+input CreateChoiceAnswerInput {
+  roundId: UUID!
+  selectedChoiceIndexes: [Int!]!
+}
+
+input CreateWordcloudAnswerInput {
+  roundId: UUID!
+  words: [String!]!
+}

@@ -1,0 +1,13 @@
+extend type Questionnaire {
+  activeRound: Round
+  publishedUpToContent: Content
+}
+
+extend type Mutation {
+  startQuestionnaireContent(contentId: UUID!): Questionnaire!
+  stopQuestionnaireContent(questionnaireId: UUID!): Questionnaire!
+  publishQuestionnaireUpToContent(
+    questionnaireId: UUID!
+    contentId: UUID!
+  ): Questionnaire!
+}

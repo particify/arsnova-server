@@ -1,0 +1,38 @@
+extend type Query {
+  questionnaireRoundsByContentId(contentId: UUID!): [Round!]
+  questionnaireChoiceRoundStatsByRoundId(
+    roundId: UUID!
+  ): ChoiceContentRoundStats
+  questionnaireWordcloudRoundStatsByRoundId(
+    roundId: UUID!
+  ): WordcloudContentRoundStats
+}
+
+extend type Mutation {
+  startQuestionnaireContentRound(contentId: UUID!): Round!
+}
+
+extend type Subscription {
+  questionnaireChoiceRoundStatsUpdated(roundId: UUID!): ChoiceContentRoundStats
+  questionnaireWordcloudRoundStatsUpdated(
+    roundId: UUID!
+  ): WordcloudContentRoundStats
+}
+
+type Round {
+  id: ID!
+  contentId: ID
+  roundNo: Int!
+  closed: Boolean!
+  answeringEndTime: DateTime
+  answerable: Boolean!
+}
+
+type ChoiceContentRoundStats {
+  selectionCounts: [Int!]
+}
+
+type WordcloudContentRoundStats {
+  words: [String!]
+  counts: [Int!]
+}

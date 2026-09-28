@@ -1,0 +1,3 @@
+id,questionnaire_id,body,weight,duration,points,position,active_round_id,format_data,created_by
+c0c3580d-55ff-4a2f-bf46-168643ddc5a3,57a9ed4b-d0a8-4e19-bd06-b38ba465e371,"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.",1,60,0,0,6d0c4c1e-3f4a-4b8e-9a51-2f1f0b7c9a01,"{""format"": ""CHOICE"", ""options"": [""A"", ""B"", ""C""], ""correctOptionIndexes"": null, ""multiple"": false}",9c778494-9b52-424d-8c7f-f4936629facb
+899ec1de-702a-451d-a6a4-600829deae41,57a9ed4b-d0a8-4e19-bd06-b38ba465e371,"Hello world!",1,60,0,1,6d0c4c1e-3f4a-4b8e-9a51-2f1f0b7c9a02,"{""format"": ""WORDCLOUD"", ""maxAnswers"": 3, ""bannedKeywords"": []}",9c778494-9b52-424d-8c7f-f4936629facb

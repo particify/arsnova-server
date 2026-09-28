@@ -1,6 +1,9 @@
 complexity:
   TooManyFunctions:
     allowedFunctionsPerClass: 15
+    # Services delegating to a repository interface have to override its members; that is
+    # boilerplate, not surface the class itself adds.
+    ignoreOverridden: true
 style:
   ReturnCount:
     excludeGuardClauses: true

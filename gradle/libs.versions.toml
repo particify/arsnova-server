@@ -56,6 +56,7 @@ pac4j-saml = { module = "org.pac4j:pac4j-saml", version.ref = "pac4j" }
 postgresql = { module = "org.postgresql:postgresql" }
 querydsl-jpa = { module = "io.github.openfeign.querydsl:querydsl-jpa", version.ref = "querydsl" }
 querydsl-apt = { module = "io.github.openfeign.querydsl:querydsl-apt", version.ref = "querydsl" }
+reactor-test = { module = "io.projectreactor:reactor-test" }
 spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugs-annotations" }
 spring-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 spring-amqp = { module = "org.springframework.boot:spring-boot-starter-amqp" }
