@@ -12,6 +12,7 @@ import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
 import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.NumericContentRoundStats
+import net.particify.arsnova.core4.questionnaire.round.PrioritizationContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.ScaleContentRoundStats
@@ -67,6 +68,13 @@ class RoundStatsSubscriptionController(
       statsFlux(roundId, NumericContentRoundStats::withoutSolution) {
         roundStatsServiceImpl.getNumericRoundStatsWithSolutionByRoundId(roundId)
       }
+
+  @SubscriptionMapping
+  @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
+  fun questionnairePrioritizationRoundStatsUpdated(
+      @Argument roundId: UUID
+  ): Flux<PrioritizationContentRoundStats> =
+      statsFlux(roundId) { roundStatsServiceImpl.getPrioritizationRoundStatsByRoundId(roundId) }
 
   @SubscriptionMapping
   @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")

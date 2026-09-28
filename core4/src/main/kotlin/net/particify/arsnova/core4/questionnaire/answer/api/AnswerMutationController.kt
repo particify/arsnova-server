@@ -8,6 +8,7 @@ import net.particify.arsnova.core4.questionnaire.answer.Answer
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.answer.PrioritizationAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ScaleAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ShortAnswerAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.SortAnswerFormatData
@@ -38,6 +39,15 @@ class AnswerMutationController(private val answerService: AnswerServiceImpl) {
       @Argument input: CreateNumericAnswerInput,
   ): Answer {
     return answerService.createAnswer(input.roundId, NumericAnswerFormatData(input.selectedNumber))
+  }
+
+  @MutationMapping
+  @PreAuthorize("hasPermission(#input.roundId, 'Round', 'read')")
+  fun createQuestionnairePrioritizationAnswer(
+      @Argument input: CreatePrioritizationAnswerInput,
+  ): Answer {
+    return answerService.createAnswer(
+        input.roundId, PrioritizationAnswerFormatData(input.assignedPoints))
   }
 
   @MutationMapping
