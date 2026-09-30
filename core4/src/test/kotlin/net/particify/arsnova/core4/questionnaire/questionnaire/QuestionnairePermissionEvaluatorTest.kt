@@ -4,6 +4,8 @@
 package net.particify.arsnova.core4.questionnaire.questionnaire
 
 import java.util.UUID
+import net.particify.arsnova.core4.questionnaire.template.TemplatePermissionEvaluator
+import net.particify.arsnova.core4.questionnaire.template.TemplateRepository
 import net.particify.arsnova.core4.user.User
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -13,7 +15,9 @@ private val ROOM_ID = UUID.randomUUID()
 
 class QuestionnairePermissionEvaluatorTest {
   private val evaluator =
-      QuestionnairePermissionEvaluator(Mockito.mock(QuestionnaireRepository::class.java))
+      QuestionnairePermissionEvaluator(
+          Mockito.mock(QuestionnaireRepository::class.java),
+          TemplatePermissionEvaluator(Mockito.mock(TemplateRepository::class.java)))
 
   /** The room permission the check is delegated to, which decides participant versus moderator. */
   private fun delegatedRoomPermission(published: Boolean, leaderboardEnabled: Boolean?): Any? {

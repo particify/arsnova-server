@@ -45,8 +45,9 @@ class ContentPermissionEvaluator(
             "Questionnaire", questionnaire.id!!, parentPermission))
   }
 
+  /** A template's contents are all visible to whoever may read the template. */
   private fun isVisible(content: Content, questionnaire: Questionnaire): Boolean =
-      questionnaire.published && isReleased(content, questionnaire)
+      questionnaire.isRoomless() || (questionnaire.published && isReleased(content, questionnaire))
 
   private fun areStatisticsPublished(content: Content, questionnaire: Questionnaire): Boolean =
       questionnaire.statisticsPublished == true && isVisible(content, questionnaire)

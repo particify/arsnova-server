@@ -12,6 +12,7 @@ import net.particify.arsnova.core4.questionnaire.content.SlideContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
+import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireServiceImpl
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.method.annotation.Argument
@@ -142,6 +143,7 @@ class ContentMutationController(
     val questionnaire =
         questionnaireService.findByIdOrNull(questionnaireId)
             ?: throw QuestionnaireNotFoundException(questionnaireId)
+    requireRoomQuestionnaires(content, questionnaire)
     return contentService.duplicate(content, questionnaire)
   }
 
@@ -154,6 +156,15 @@ class ContentMutationController(
       @Argument questionnaireId: UUID
   ): Content {
     return contentService.moveContentToQuestionnaire(contentId, questionnaireId)
+  }
+
+  /**
+   * Templates are copied as a whole through the template operations, which also reset the state a
+   * presentation accumulates. Single contents neither enter nor leave a template.
+   */
+  private fun requireRoomQuestionnaires(content: Content, target: Questionnaire) {
+    content.questionnaire!!.requireRoomId()
+    target.requireRoomId()
   }
 
   @MutationMapping

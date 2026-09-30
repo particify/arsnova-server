@@ -45,6 +45,9 @@ constructor(@JsonProperty("correctTerms") val correctTerms: List<String>) : Keyw
    */
   override fun withoutSolution() = copy(correctTerms = listOf())
 
+  /** `copy()` drops [bannedKeywords], which belong to a presentation of the content. */
+  override fun withoutRuntimeState(): ContentFormatData = copy()
+
   /** Banned keywords are set through their own operations, never through an update. */
   override fun mergeWith(current: ContentFormatData): ContentFormatData {
     val merged = copy()

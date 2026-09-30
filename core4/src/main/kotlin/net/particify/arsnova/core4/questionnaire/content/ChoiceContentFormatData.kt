@@ -16,6 +16,8 @@ data class ChoiceContentFormatData(
 ) : ContentFormatData {
   override val format = "CHOICE"
 
+  override fun withoutRuntimeState() = this
+
   override fun supportsRounds() = true
 
   override fun withoutSolution() = copy(correctOptionIndexes = null)

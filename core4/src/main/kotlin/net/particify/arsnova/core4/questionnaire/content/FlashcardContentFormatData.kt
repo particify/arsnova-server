@@ -12,6 +12,8 @@ data class FlashcardContentFormatData
 constructor(@JsonProperty("answer") val answer: String) : ContentFormatData {
   override val format = "FLASHCARD"
 
+  override fun withoutRuntimeState() = this
+
   override fun answerable() = false
 
   /** An update of another format would reinterpret the content's rounds and answers. */

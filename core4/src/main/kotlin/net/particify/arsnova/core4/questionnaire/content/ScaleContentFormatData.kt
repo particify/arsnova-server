@@ -17,6 +17,8 @@ constructor(
 ) : ContentFormatData {
   override val format = "SCALE"
 
+  override fun withoutRuntimeState() = this
+
   override fun supportsRounds() = true
 
   fun optionCount(): Int =

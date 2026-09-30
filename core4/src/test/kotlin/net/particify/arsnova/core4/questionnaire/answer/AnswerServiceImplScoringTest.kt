@@ -48,10 +48,12 @@ class AnswerServiceImplScoringTest {
           AuditorAware { Optional.of(USER_ID) },
           Mockito.mock(RoundServiceImpl::class.java),
           Mockito.mock(PermissionEvaluator::class.java))
-  private val questionnaire = Questionnaire(id = UUID.randomUUID())
+  private val questionnaire = Questionnaire(id = UUID.randomUUID(), roomId = UUID.randomUUID())
   private val ownAnswers = mutableListOf<Answer>()
 
   init {
+    Mockito.`when`(questionnaireRepository.findById(questionnaire.id!!))
+        .thenReturn(Optional.of(questionnaire))
     Mockito.`when`(answerRepository.saveAndFlush(Mockito.any(Answer::class.java))).thenAnswer {
       it.arguments[0]
     }

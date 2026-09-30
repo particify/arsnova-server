@@ -17,6 +17,9 @@ so a module boundary is enforced by a test rather than by convention alone.
 |`mail`
 |Sending mail from templates, and the limit on how often a mail is sent to the same address.
 
+|`license`
+|The catalogue of licences that shared content is published under, such as templates of question series.
+
 |`user`
 |Accounts, roles, local accounts and their policy, and provisioning of accounts from SAML and LDAP logins.
 
@@ -33,7 +36,8 @@ so a module boundary is enforced by a test rather than by convention alone.
 |Announcements published in a room.
 
 |`questionnaire`
-|Question series: their contents, rounds and answers.
+|Question series: their contents, rounds and answers,
+and the templates of question series which users share and copy into their rooms, with their tags.
 
 |`system`
 |Platform configuration (GraphQL, JPA auditing, RabbitMQ), the compatibility endpoints for v3 clients and the v3 migration.
@@ -50,7 +54,7 @@ qna, announcement, questionnaire
 room
 security
 user
-mail
+mail, license
 common
 ----
 

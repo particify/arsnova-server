@@ -23,6 +23,8 @@ data class SortContentFormatData(
 ) : ContentFormatData {
   override val format = "SORT"
 
+  override fun withoutRuntimeState() = this
+
   override fun hasCorrectAnswer(): Boolean = true
 
   private fun optionIndexes(): List<Int> = options.indices.toList()

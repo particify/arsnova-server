@@ -96,6 +96,8 @@ class ContentPointsTest {
         object : ContentFormatData {
           override val format = "CHOICE"
 
+          override fun withoutRuntimeState() = this
+
           override fun evaluateAnswer(answerFormatData: AnswerFormatData) =
               if ((answerFormatData as ChoiceAnswerFormatData).selectedChoiceIndexes == listOf(0))
                   AnswerResultState.CORRECT

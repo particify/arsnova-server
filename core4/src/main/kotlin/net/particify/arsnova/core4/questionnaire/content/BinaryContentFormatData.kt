@@ -19,6 +19,8 @@ data class BinaryContentFormatData
 constructor(@JsonProperty("correctAnswer") val correctAnswer: Boolean? = null) : ContentFormatData {
   override val format = "BINARY"
 
+  override fun withoutRuntimeState() = this
+
   override fun supportsRounds() = true
 
   override fun hasCorrectAnswer(): Boolean = correctAnswer != null

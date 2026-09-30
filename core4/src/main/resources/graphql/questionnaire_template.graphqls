@@ -1,0 +1,105 @@
+extend type Query {
+  currentUserTemplates(
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): TemplateConnection
+  publishedTemplates(
+    query: TemplateQueryInput
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): TemplateConnection
+  templateById(id: UUID!): Template
+  templateLicenses: [TemplateLicense!]!
+  templateTagsByLanguage(
+    language: String!
+    verified: Boolean! = true
+  ): [TemplateTag!]!
+}
+
+extend type Mutation {
+  adminDeleteTemplate(id: UUID!): UUID!
+  adminDeleteTemplateTag(id: UUID!): UUID!
+  adminUpdateTemplateTagName(id: UUID!, name: String!): TemplateTag!
+  adminUpdateTemplateTagVerified(id: UUID!, verified: Boolean!): TemplateTag!
+  createQuestionnaireFromTemplate(
+    input: CreateQuestionnaireFromTemplateInput!
+  ): Questionnaire!
+  createTemplateFromQuestionnaire(
+    input: CreateTemplateFromQuestionnaireInput!
+  ): Template!
+  deleteTemplate(id: UUID!): UUID!
+  updateTemplate(input: UpdateTemplateInput!): Template!
+  updateTemplateFromSource(id: UUID!): Template!
+}
+
+type Template {
+  id: ID!
+  aiGenerated: Boolean!
+  attribution: String
+  contentCount: Int!
+  createdAt: DateTime!
+  createdByCurrentUser: Boolean!
+  description: String
+  language: String!
+  license: TemplateLicense
+  name: String!
+  published: Boolean!
+  questionnaireId: ID!
+  questionnaireType: QuestionnaireType!
+  sourceQuestionnaireId: ID
+  tags: [TemplateTag!]!
+  updatedAt: DateTime
+}
+
+type TemplateLicense {
+  id: ID!
+  name: String!
+  url: String
+}
+
+type TemplateTag {
+  id: ID!
+  language: String!
+  name: String!
+  verified: Boolean!
+}
+
+input TemplateQueryInput {
+  language: String
+  search: String
+  tagIds: [UUID!]
+}
+
+input CreateTemplateFromQuestionnaireInput {
+  aiGenerated: Boolean = false
+  attribution: String
+  description: String
+  language: String!
+  licenseId: String
+  name: String!
+  published: Boolean = false
+  questionnaireId: UUID!
+  tagNames: [String!]
+}
+
+input UpdateTemplateInput {
+  id: UUID!
+  aiGenerated: Boolean
+  attribution: String
+  description: String
+  language: String
+  licenseId: String
+  name: String
+  published: Boolean
+  tagNames: [String!]
+}
+
+input CreateQuestionnaireFromTemplateInput {
+  name: String
+  roomId: UUID!
+  templateId: UUID!
+}

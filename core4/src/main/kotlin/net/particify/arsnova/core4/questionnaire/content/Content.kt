@@ -41,6 +41,10 @@ data class Content(
     var points: Int? = null,
     @Column(name = "position", insertable = false, updatable = false) var position: Int? = null,
     @Embedded var auditMetadata: AuditMetadata = AuditMetadata(),
+    var sourceTemplateId: UUID? = null,
+    var sourceContentId: UUID? = null,
+    // Snapshot per content, so a content moved into another questionnaire keeps its licence.
+    var sourceTemplateLicenseId: String? = null,
 ) {
   companion object {
     const val MAX_DURATION = 3600L
@@ -96,6 +100,9 @@ data class Content(
         weight = this.weight,
         abstentionsAllowed = this.abstentionsAllowed,
         points = this.points,
+        sourceTemplateId = this.sourceTemplateId,
+        sourceContentId = this.sourceContentId,
+        sourceTemplateLicenseId = this.sourceTemplateLicenseId,
     )
   }
 }

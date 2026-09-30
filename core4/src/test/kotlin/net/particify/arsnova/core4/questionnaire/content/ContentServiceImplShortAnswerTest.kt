@@ -7,6 +7,7 @@ import java.util.Optional
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.answer.AnswerRepository
 import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
+import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireRepository
 import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
 import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
@@ -16,6 +17,9 @@ import org.mockito.Mockito
 import org.springframework.context.ApplicationEventPublisher
 
 private val CONTENT_ID = UUID.randomUUID()
+
+// Keyword and publishing operations only apply to questionnaires presented in a room.
+private val roomQuestionnaire = Questionnaire(id = UUID.randomUUID(), roomId = UUID.randomUUID())
 
 class ContentServiceImplShortAnswerTest {
   private val contentRepository = Mockito.mock(ContentRepository::class.java)
@@ -30,7 +34,8 @@ class ContentServiceImplShortAnswerTest {
           QuestionnaireEventPublisher())
 
   private fun givenContent(formatData: ContentFormatData): Content {
-    val content = Content(id = CONTENT_ID, formatData = formatData)
+    val content =
+        Content(id = CONTENT_ID, questionnaire = roomQuestionnaire, formatData = formatData)
     Mockito.`when`(contentRepository.findById(CONTENT_ID)).thenReturn(Optional.of(content))
     Mockito.`when`(contentRepository.save(content)).thenReturn(content)
     return content

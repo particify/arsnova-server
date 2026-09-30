@@ -20,6 +20,8 @@ constructor(
 ) : ContentFormatData {
   override val format = "NUMERIC"
 
+  override fun withoutRuntimeState() = this
+
   override fun supportsRounds() = true
 
   override fun hasCorrectAnswer(): Boolean = correctNumber != null

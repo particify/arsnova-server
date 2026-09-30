@@ -31,6 +31,7 @@ class QuestionnaireExceptionResolverAdapter : DataFetcherExceptionResolverAdapte
         is ContentFormatDataInvalidException,
         is QuestionnaireWithNameAlreadyExistsException,
         is RoundClosedException,
+        is RoomlessQuestionnaireException,
         is RoundExpiredException,
         is RoundsNotSupportedException -> true
         else -> false
@@ -45,6 +46,9 @@ internal fun notFoundMessage(ex: Throwable): String? {
         is ContentNotFoundException -> ex.id
         is QuestionnaireNotFoundException -> ex.id
         is RoundNotFoundException -> ex.id
+        is TemplateNotFoundException -> ex.id
+        is TemplateSourceNotFoundException -> ex.id
+        is TemplateTagNotFoundException -> ex.id
         else -> return null
       }
   return if (id != null) "${ex.message}: $id" else ex.message

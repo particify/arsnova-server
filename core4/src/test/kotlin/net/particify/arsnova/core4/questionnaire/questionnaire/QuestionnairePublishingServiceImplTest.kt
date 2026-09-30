@@ -156,7 +156,10 @@ class QuestionnairePublishingServiceImplTest {
   @Test
   fun shouldPresentSlideWithoutOpeningAnswering() {
     val questionnaire =
-        Questionnaire(id = UUID.randomUUID(), publishingMode = QuestionnairePublishingMode.LIVE)
+        Questionnaire(
+            id = UUID.randomUUID(),
+            roomId = UUID.randomUUID(),
+            publishingMode = QuestionnairePublishingMode.LIVE)
     val slide =
         Content(
             id = UUID.randomUUID(),
