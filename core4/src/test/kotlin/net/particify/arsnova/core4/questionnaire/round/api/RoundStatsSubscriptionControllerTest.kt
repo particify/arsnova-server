@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentPermissionEvaluator
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
+import net.particify.arsnova.core4.questionnaire.round.BinaryContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.NumericContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.PrioritizationContentRoundStats
@@ -93,6 +94,35 @@ class RoundStatsSubscriptionControllerTest {
     StepVerifier.withVirtualTime { subscribeChoice() }
         .expectSubscription()
         .expectNext(choiceStats)
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
+  @Test
+  fun shouldEmitBinaryStatsForAnswerOfSubscribedRound() {
+    val stats = BinaryContentRoundStats(listOf(3, 1))
+    Mockito.`when`(roundStatsServiceImpl.getBinaryRoundStatsByRoundId(SUBSCRIBED_ROUND_ID))
+        .thenReturn(stats)
+
+    StepVerifier.withVirtualTime {
+          controller.questionnaireBinaryRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+        }
+        .expectSubscription()
+        .then { publishAnswerChanged(SUBSCRIBED_ROUND_ID) }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(stats)
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
+  @Test
+  fun shouldNotEmitBinaryStatsForAnswerOfOtherRound() {
+    StepVerifier.withVirtualTime {
+          controller.questionnaireBinaryRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+        }
+        .expectSubscription()
+        .then { publishAnswerChanged(OTHER_ROUND_ID) }
+        .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
         .thenCancel()
         .verify(VERIFY_TIMEOUT)
   }
