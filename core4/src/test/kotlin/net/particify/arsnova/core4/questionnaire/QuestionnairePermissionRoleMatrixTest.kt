@@ -276,6 +276,20 @@ class QuestionnairePermissionRoleMatrixTest {
           READ_STATISTICS,
           setOf())
     }
+
+    @Test
+    fun shouldLetModeratorsModerateRegardlessOfVisibility() {
+      val moderators = EDITORS + RoomRole.MODERATOR
+      assertGrantedTo(answer(), MODERATE, moderators)
+      val unpublished = answer(round(content(questionnaire(published = false))))
+      assertGrantedTo(unpublished, MODERATE, moderators)
+    }
+
+    @Test
+    fun shouldDenyModerationOfAnswerOutsideARoom() {
+      val roomless = Questionnaire(id = UUID.randomUUID(), published = true)
+      assertGrantedTo(answer(round(content(roomless))), MODERATE, setOf())
+    }
   }
 
   @Test
