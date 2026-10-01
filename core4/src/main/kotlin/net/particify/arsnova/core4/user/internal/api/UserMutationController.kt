@@ -109,7 +109,8 @@ class UserMutationController(
   @MutationMapping
   @PreAuthorize("hasRole('CHALLENGE_SOLVED')")
   fun requestUserPasswordReset(@Argument mailAddress: String, locale: Locale): Boolean {
-    val user = userService.findByMailAddress(mailAddress) ?: throw UserNotFoundException()
+    val user =
+        userService.findByMailAddress(mailAddress.lowercase()) ?: throw UserNotFoundException()
     localUserService.initiatePasswordReset(user, locale)
     // Returning the user would leak information to a third party
     return true
@@ -126,7 +127,8 @@ class UserMutationController(
       )
       verificationCode: String
   ): User {
-    val user = userService.findByMailAddress(mailAddress) ?: throw UserNotFoundException()
+    val user =
+        userService.findByMailAddress(mailAddress.lowercase()) ?: throw UserNotFoundException()
     return localUserService.completePasswordReset(user, password, verificationCode.toInt())
   }
 
