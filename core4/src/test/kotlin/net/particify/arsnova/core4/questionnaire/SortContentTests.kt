@@ -36,7 +36,10 @@ private const val BODY = "Order these cities from north to south."
 private const val OTHER_BODY = "Order these cities from south to north."
 private val OPTIONS = listOf("Hamburg", "Frankfurt am Main", "Munich")
 private val OTHER_OPTIONS = listOf("Bonn", "Cologne", "Offenbach")
-private val CORRECT_ORDER = listOf(0, 1, 2)
+// OPTIONS as the mutation stores them: shuffled, with their correct sequence kept apart.
+private val STORED_OPTIONS = listOf("Munich", "Hamburg", "Frankfurt am Main")
+private val STORED_CORRECT_ORDER = listOf(1, 2, 0)
+private val STORAGE_ORDER = listOf(0, 1, 2)
 private val PERMUTED_ORDER = listOf(1, 0, 2)
 
 @SpringBootTest
@@ -72,7 +75,8 @@ class SortContentTests {
       contentService.create(
           createQuestionnaire(QuestionnaireType.SURVEY).id!!,
           BODY,
-          SortContentFormatData(options),
+          if (options == OPTIONS) SortContentFormatData(STORED_OPTIONS, STORED_CORRECT_ORDER)
+          else SortContentFormatData(options),
           null,
           true,
           null,
@@ -101,7 +105,9 @@ class SortContentTests {
     Assertions.assertEquals("SORT", formatData.format)
     Assertions.assertTrue(formatData.answerable())
     Assertions.assertTrue(formatData.hasCorrectAnswer())
-    Assertions.assertEquals(OPTIONS, formatData.options)
+    Assertions.assertEquals(STORED_OPTIONS, formatData.options)
+    Assertions.assertEquals(STORED_CORRECT_ORDER, formatData.correctOrder)
+    Assertions.assertEquals(OPTIONS, formatData.correctlyOrderedOptions())
     Assertions.assertEquals(Content.BASE_POINTS, reload(content).points)
   }
 
@@ -116,16 +122,18 @@ class SortContentTests {
 
   @Test
   fun shouldScoreDeclaredOptionOrderAsCorrect() {
-    val answer = answer(createSortContent(), CORRECT_ORDER)
+    val answer = answer(createSortContent(), STORED_CORRECT_ORDER)
     Assertions.assertEquals(AnswerResultState.CORRECT, answer.result)
     Assertions.assertEquals(Content.BASE_POINTS, answer.points)
   }
 
   @Test
   fun shouldScoreOtherOrderAsWrongWithoutPoints() {
-    val answer = answer(createSortContent(), PERMUTED_ORDER)
-    Assertions.assertEquals(AnswerResultState.WRONG, answer.result)
-    Assertions.assertNull(answer.points)
+    listOf(STORAGE_ORDER, PERMUTED_ORDER).forEach {
+      val answer = answer(createSortContent(), it)
+      Assertions.assertEquals(AnswerResultState.WRONG, answer.result, "$it")
+      Assertions.assertNull(answer.points, "$it")
+    }
   }
 
   @Test
@@ -192,36 +200,36 @@ class SortContentTests {
   @Test
   fun shouldRejectOptionChangeOnAnsweredContent() {
     val content = createSortContent()
-    answer(content, CORRECT_ORDER)
+    answer(content, STORAGE_ORDER)
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
       contentService.update(
           content.id!!, BODY, SortContentFormatData(OTHER_OPTIONS), null, true, null)
     }
-    Assertions.assertEquals(OPTIONS, formatDataOf(content).options)
+    Assertions.assertEquals(STORED_OPTIONS, formatDataOf(content).options)
   }
 
   @Test
   fun shouldRejectOptionReorderingOnAnsweredContent() {
     val content = createSortContent()
-    answer(content, CORRECT_ORDER)
+    answer(content, STORAGE_ORDER)
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
       contentService.update(
           content.id!!, BODY, SortContentFormatData(OPTIONS.reversed()), null, true, null)
     }
-    Assertions.assertEquals(OPTIONS, formatDataOf(content).options)
+    Assertions.assertEquals(STORED_OPTIONS, formatDataOf(content).options)
   }
 
   @Test
   fun shouldUpdateUnrelatedFieldsOnAnsweredContent() {
     val content = createSortContent()
-    answer(content, CORRECT_ORDER)
+    answer(content, STORAGE_ORDER)
     contentService.update(
         content.id!!, OTHER_BODY, SortContentFormatData(OPTIONS), DURATION, false, null)
     val reloaded = reload(content)
     Assertions.assertEquals(OTHER_BODY, reloaded.body)
     Assertions.assertEquals(DURATION, reloaded.duration)
     Assertions.assertFalse(reloaded.abstentionsAllowed)
-    Assertions.assertEquals(OPTIONS, formatDataOf(content).options)
+    Assertions.assertEquals(STORED_OPTIONS, formatDataOf(content).options)
   }
 
   @Test
@@ -236,7 +244,7 @@ class SortContentTests {
   fun shouldRejectSortAnswerForOtherFormat() {
     val content = createTextContent()
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
-      answer(content, CORRECT_ORDER)
+      answer(content, STORAGE_ORDER)
     }
   }
 
