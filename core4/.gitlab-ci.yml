@@ -29,11 +29,21 @@ detekt:
   script:
     - ../gradlew $GRADLE_CLI_OPTS detekt -x classes
 
-# Tests currently do not work on CI because of Testcontainers.
-# java.lang.IllegalStateException at DockerClientProviderStrategy.java
 unit_test:
-  rules:
-    - when: never
+  image: registry.gitlab.com/particify/dev/foss/arsnova-server/openjdk-podman:25
+  variables:
+    TESTCONTAINERS_RYUK_CONTAINER_PRIVILEGED: "false"
+  before_script:
+    - date
+    - echo "$PROJECT"
+    - cd "$PROJECT"
+    - export DOCKER_HOST=unix:///tmp/podman.sock
+    - mkdir -p build/reports
+    - podman system service --time=0 "$DOCKER_HOST" > build/reports/podman-service.log 2>&1 &
+    - sleep 1
+  script:
+    - ../gradlew $GRADLE_CLI_OPTS test jacocoTestReport -x classes -x processAot -x processTestAot
+    - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' build/reports/jacoco/test/jacocoTestReport.csv
 
 docker_image:
   variables:
