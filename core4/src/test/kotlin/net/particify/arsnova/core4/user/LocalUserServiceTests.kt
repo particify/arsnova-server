@@ -33,7 +33,7 @@ class LocalUserServiceTests {
     Assertions.assertDoesNotThrow {
       localUserService.claimUnverifiedUser(user, mailAddress, "password", Locale.ENGLISH)
     }
-    Assertions.assertEquals(mailAddress, user.unverifiedMailAddress)
+    Assertions.assertEquals(mailAddress.lowercase(), user.unverifiedMailAddress)
     Assertions.assertNull(user.mailAddress)
     Assertions.assertNotNull(user.password)
     Assertions.assertNotNull(user.verificationCode)
@@ -56,7 +56,7 @@ class LocalUserServiceTests {
     val user =
         User(mailAddress = "oldMailAdress@example.com", password = passwordEncoder.encode(password))
     localUserService.initiateMailVerification(user, mailAddress, password, Locale.ENGLISH)
-    Assertions.assertEquals(mailAddress, user.unverifiedMailAddress)
+    Assertions.assertEquals(mailAddress.lowercase(), user.unverifiedMailAddress)
     Assertions.assertNotNull(user.verificationCode)
     Assertions.assertNotNull(user.verificationExpiresAt)
   }
