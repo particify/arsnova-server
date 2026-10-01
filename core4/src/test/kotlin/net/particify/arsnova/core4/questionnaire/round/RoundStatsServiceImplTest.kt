@@ -9,10 +9,12 @@ import net.particify.arsnova.core4.questionnaire.answer.Answer
 import net.particify.arsnova.core4.questionnaire.answer.AnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
+import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
 import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
@@ -148,6 +150,77 @@ class RoundStatsServiceImplTest {
     }
     Assertions.assertThrows(RoundNotFoundException::class.java) {
       roundStatsService.getWordcloudRoundStatsByRoundId(ROUND_ID)
+    }
+  }
+
+  private fun numericStats(
+      formatData: NumericContentFormatData,
+      vararg numbers: Double?
+  ): NumericContentRoundStats {
+    val answers = numbers.map { it?.let { number -> NumericAnswerFormatData(number) } }
+    givenRound(formatData, *answers.toTypedArray())
+    return roundStatsService.getNumericRoundStatsByRoundId(ROUND_ID)
+  }
+
+  @Test
+  fun shouldDescribeNumericAnswersWithPopulationVariance() {
+    val stats = numericStats(NumericContentFormatData(0.0, 10.0, 2.0), 5.0, 2.0, 1.0, 2.0)
+    Assertions.assertEquals(listOf(1.0, 2.0, 5.0), stats.selectedNumbers)
+    Assertions.assertEquals(listOf(1, 2, 1), stats.counts)
+    Assertions.assertEquals(2.5, stats.mean)
+    Assertions.assertEquals(2.0, stats.median)
+    Assertions.assertEquals(2.25, stats.variance)
+    Assertions.assertEquals(1.5, stats.standardDeviation)
+    Assertions.assertEquals(1.0, stats.minimum)
+    Assertions.assertEquals(5.0, stats.maximum)
+    Assertions.assertEquals(0.5, stats.correctAnswerFraction)
+  }
+
+  @Test
+  fun shouldAverageTheMiddleNumbersForEvenCountMedian() {
+    Assertions.assertEquals(
+        2.5, numericStats(NumericContentFormatData(0.0, 10.0), 4.0, 1.0, 3.0, 2.0).median)
+    Assertions.assertEquals(
+        3.0, numericStats(NumericContentFormatData(0.0, 10.0), 4.0, 1.0, 3.0).median)
+  }
+
+  @Test
+  fun shouldDescribeSingleAnswerWithoutSpread() {
+    val stats = numericStats(NumericContentFormatData(0.0, 10.0, 6.0, 1.0), 7.0)
+    Assertions.assertEquals(7.0, stats.mean)
+    Assertions.assertEquals(7.0, stats.median)
+    Assertions.assertEquals(0.0, stats.variance)
+    Assertions.assertEquals(0.0, stats.standardDeviation)
+    Assertions.assertEquals(1.0, stats.correctAnswerFraction)
+  }
+
+  @Test
+  fun shouldZeroNumericStatsWithoutAnswersAndIgnoreAbstentions() {
+    val stats = numericStats(NumericContentFormatData(0.0, 10.0, 5.0), null)
+    Assertions.assertEquals(listOf<Double>(), stats.selectedNumbers)
+    Assertions.assertEquals(
+        listOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+        listOf(
+            stats.mean,
+            stats.median,
+            stats.variance,
+            stats.standardDeviation,
+            stats.minimum,
+            stats.maximum))
+    Assertions.assertEquals(0.0, stats.correctAnswerFraction)
+  }
+
+  @Test
+  fun shouldOmitCorrectAnswerFractionWithoutCorrectNumber() {
+    Assertions.assertNull(
+        numericStats(NumericContentFormatData(0.0, 10.0), 1.0).correctAnswerFraction)
+  }
+
+  @Test
+  fun shouldRejectNumericStatsOfOtherFormat() {
+    givenRound(WordcloudContentFormatData())
+    Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
+      roundStatsService.getNumericRoundStatsByRoundId(ROUND_ID)
     }
   }
 }
