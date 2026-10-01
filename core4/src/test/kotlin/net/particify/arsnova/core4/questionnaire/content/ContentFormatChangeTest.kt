@@ -67,4 +67,18 @@ class ContentFormatChangeTest {
     Assertions.assertEquals("old", content.body)
     Mockito.verify(contentRepository, Mockito.never()).save(Mockito.any())
   }
+
+  @Test
+  fun shouldNotTurnChoiceContentIntoNonAnswerableFormat() {
+    listOf(FlashcardContentFormatData("Back"), SlideContentFormatData()).forEach {
+      val current = choice()
+      val content = Content(id = CONTENT_ID, formatData = current)
+      Mockito.`when`(contentRepository.findById(CONTENT_ID)).thenReturn(Optional.of(content))
+      Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
+        contentService.update(CONTENT_ID, "body", it, null, false, null)
+      }
+      Assertions.assertSame(current, content.formatData)
+    }
+    Mockito.verify(contentRepository, Mockito.never()).save(Mockito.any())
+  }
 }
