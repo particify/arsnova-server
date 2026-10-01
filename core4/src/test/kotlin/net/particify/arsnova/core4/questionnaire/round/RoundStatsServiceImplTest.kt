@@ -10,11 +10,13 @@ import net.particify.arsnova.core4.questionnaire.answer.AnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.answer.ScaleAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
+import net.particify.arsnova.core4.questionnaire.content.ScaleContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
 import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
@@ -303,6 +305,33 @@ class RoundStatsServiceImplTest {
     givenRound(WordcloudContentFormatData())
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
       roundStatsService.getNumericRoundStatsByRoundId(ROUND_ID, reader)
+    }
+  }
+
+  private fun scaleCounts(neutralOption: Boolean, vararg ratings: Int?): List<Int> {
+    val formatData =
+        ScaleContentFormatData(ScaleContentFormatData.Template.AGREEMENT, neutralOption)
+    givenRound(
+        formatData, *ratings.map { it?.let { r -> ScaleAnswerFormatData(r) } }.toTypedArray())
+    return roundStatsService.getScaleRoundStatsByRoundId(ROUND_ID).counts
+  }
+
+  @Test
+  fun shouldCountRatingsPerDisplayedOptionZeroFilled() {
+    Assertions.assertEquals(listOf(0, 2, 0, 0, 1), scaleCounts(true, 1, 4, 1))
+    Assertions.assertEquals(listOf(0, 0, 0, 0), scaleCounts(false))
+  }
+
+  @Test
+  fun shouldIgnoreAbstentionsAndRatingsOutsideTheDisplayedOptions() {
+    Assertions.assertEquals(listOf(1, 0, 0, 1), scaleCounts(false, null, 0, 4, 3, -1))
+  }
+
+  @Test
+  fun shouldRejectScaleStatsOfOtherFormat() {
+    givenRound(WordcloudContentFormatData())
+    Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
+      roundStatsService.getScaleRoundStatsByRoundId(ROUND_ID)
     }
   }
 }
