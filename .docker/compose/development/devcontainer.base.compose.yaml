@@ -3,9 +3,9 @@ services:
     ports:
       - 127.0.0.1:5984:5984
   postgresql-authz:
-    image: pgautoupgrade/pgautoupgrade:17-alpine@sha256:5e72ae68c56bf14ca67c2f51917153ffd5b5c726bf490925dd26d2747a9cf238
+    image: pgautoupgrade/pgautoupgrade:17-alpine@sha256:37b78be34e30ac090046b0935085725852cfbe1bda6634d6e27e5949df2f50e9
   postgresql-comments:
-    image: pgautoupgrade/pgautoupgrade:17-alpine@sha256:5e72ae68c56bf14ca67c2f51917153ffd5b5c726bf490925dd26d2747a9cf238
+    image: pgautoupgrade/pgautoupgrade:17-alpine@sha256:37b78be34e30ac090046b0935085725852cfbe1bda6634d6e27e5949df2f50e9
   rabbitmq:
     ports:
       - 15672:15672
