@@ -34,6 +34,15 @@ data class ExtendedSaml2RelyingPartyProperties(
     val additionalRequestedAttributes: MutableList<RequestedAttribute> = mutableListOf()
 
     /**
+     * Publishes every attribute [attributeMapping] names as required; each of the
+     * [additionalRequestedAttributes] keeps its own [RequestedAttribute.required]. For an identity
+     * provider which releases only required attributes, where declaring them required here is
+     * preferable to changing its release policy. Needs a setter for the same reason as
+     * [usernameMapping].
+     */
+    var requireMappedAttributes = false
+
+    /**
      * A further path this registration's own metadata document is served at, besides
      * `/saml2/service-provider-metadata/{registrationId}`, which is always served and cannot be
      * turned off. A servlet path rather than a URL: nothing publishes it, so there is no
@@ -96,7 +105,10 @@ data class ExtendedSaml2RelyingPartyProperties(
               "must name the attribute to request, which cannot be derived from anything else")
       var name: String = ""
 
-      /** Whether a login is expected to fail without it, which is never the case here. */
+      /**
+       * Whether the service needs the attribute to function, which is what SAML means by
+       * `isRequired`.
+       */
       var required: Boolean = false
     }
 

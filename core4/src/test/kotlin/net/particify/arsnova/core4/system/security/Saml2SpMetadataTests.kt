@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.system.security
 import java.util.UUID
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.internal.UsernameMapping
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.security.saml2.provider.service.metadata.OpenSaml5MetadataResolver
@@ -107,7 +108,7 @@ class Saml2SpMetadataTests {
     Assertions.assertTrue(metadata.contains(">subject-id<"), metadata)
     Assertions.assertEquals(
         listOf(MAIL_ATTRIBUTE, GIVEN_NAME_ATTRIBUTE, SURNAME_ATTRIBUTE), requestedNames(metadata))
-    Assertions.assertTrue(requestedAttributes(metadata).none { it["isRequired"] == "true" })
+    Assertions.assertEquals(listOf(MAIL_ATTRIBUTE), requiredNames(metadata))
   }
 
   @Test
@@ -133,6 +134,34 @@ class Saml2SpMetadataTests {
     val metadata = resolve(id = "uid")
     val attribute = requestedAttributes(metadata).single { it["Name"] == "uid" }
     Assertions.assertNull(attribute["NameFormat"])
+  }
+
+  /** Without the attribute behind the username, the account stays unverified. */
+  @Test
+  fun shouldRequireMailAddressMappedToUsername() {
+    val metadata = resolve()
+    val attribute = requestedAttributes(metadata).single { it["Name"] == MAIL_ATTRIBUTE }
+    Assertions.assertEquals("true", attribute["isRequired"])
+  }
+
+  @Test
+  fun shouldNotRequireMailAddressForIdUsernameMapping() {
+    val metadata = resolve(usernameMapping = UsernameMapping.ID)
+    Assertions.assertEquals(
+        listOf(MAIL_ATTRIBUTE, GIVEN_NAME_ATTRIBUTE, SURNAME_ATTRIBUTE), requestedNames(metadata))
+    Assertions.assertTrue(requiredNames(metadata).isEmpty(), metadata)
+  }
+
+  @Test
+  fun shouldRequireOnlyMappedAttributesWhenRequiringMapped() {
+    val metadata =
+        resolve(
+            additional = listOf(ENTITLEMENT_ATTRIBUTE to false),
+            usernameMapping = UsernameMapping.ID,
+            requireMapped = true)
+    Assertions.assertEquals(
+        listOf(MAIL_ATTRIBUTE, GIVEN_NAME_ATTRIBUTE, SURNAME_ATTRIBUTE), requiredNames(metadata))
+    Assertions.assertTrue(requestedNames(metadata).contains(ENTITLEMENT_ATTRIBUTE), metadata)
   }
 
   /** Two mappings may point at one attribute, which must not be requested twice. */
@@ -185,11 +214,15 @@ class Saml2SpMetadataTests {
   private fun resolve(
       id: String? = null,
       additional: List<Pair<String, Boolean>> = listOf(),
-      signed: Boolean = false
+      signed: Boolean = false,
+      usernameMapping: UsernameMapping = UsernameMapping.MAIL_ADDRESS,
+      requireMapped: Boolean = false
   ): String {
     val properties = properties()
     val registration = properties.registration.getValue(REGISTRATION_ID)
     id?.let { registration.attributeMapping.id = it }
+    registration.usernameMapping = usernameMapping
+    registration.requireMappedAttributes = requireMapped
     additional.mapTo(registration.additionalRequestedAttributes) { (name, required) ->
       ExtendedRegistration.RequestedAttribute().apply {
         this.name = name
@@ -212,6 +245,9 @@ class Saml2SpMetadataTests {
 
   private fun requestedNames(metadata: String): List<String> =
       requestedAttributes(metadata).mapNotNull { it["Name"] }
+
+  private fun requiredNames(metadata: String): List<String> =
+      requestedAttributes(metadata).filter { it["isRequired"] == "true" }.mapNotNull { it["Name"] }
 
   private fun properties(): ExtendedSaml2RelyingPartyProperties {
     val registration =

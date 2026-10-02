@@ -107,6 +107,9 @@ security:
   Empty by default.
   Each entry takes a `name` and an optional `required`, which is `false` unless set.
   An entry without a name is rejected while the application starts.
+`require-mapped-attributes`:: Whether every attribute `attribute-mapping` names is published with
+  `isRequired="true"`, see below.
+  `false` by default.
 `username-mapping`:: Whether the username is the mapped ID or the mail address, see below.
   `MAIL_ADDRESS` by default.
 `title`:: Name shown to users selecting this registration on the login page.
@@ -268,8 +271,11 @@ so a federated deployment does not have to maintain a second list of them anywhe
 Nothing has to be enabled for it;
 every registration publishes an `AttributeConsumingService`.
 
-`mail-address`, `given-name` and `surname` are requested with `isRequired="false"`,
-because a login succeeds without any of them.
+`isRequired` means what SAML defines it as: the service needs the attribute to function.
+`given-name` and `surname` are requested with `isRequired="false"`.
+So is `mail-address`, unless `username-mapping` is `MAIL_ADDRESS` --
+the default -- in which case it is requested with `isRequired="true"`,
+because an account logging in without it stays unverified, see below.
 The `id` attribute depends on what it is mapped to:
 
 * A subject identifier -- `urn:oasis:names:tc:SAML:attribute:subject-id`,
@@ -290,6 +296,17 @@ because nothing else could say which attribute was meant.
 An attribute already derived from `attribute-mapping` is not published twice,
 and neither is one two mappings happen to share;
 the first entry wins, so a required attribute stays required.
+
+`require-mapped-attributes` publishes every attribute `attribute-mapping` names with
+`isRequired="true"`;
+an `additional-requested-attributes` entry is still controlled by its own `required`.
+It is for an identity provider which releases only required attributes,
+where declaring them required here is preferable to changing its release policy.
+It is also the only way to require a mapped attribute other than the ID and the one behind
+`username-mapping`,
+because an `additional-requested-attributes` entry cannot change a mapped attribute's flag.
+It does not affect the subject identifier, which is requested through the entity attribute either
+way.
 
 `NameFormat` is only stated for a name which is URI-shaped --
 one starting with `urn:` or containing `://` -- in which case it is

@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.system.security
 import java.util.UUID
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.internal.UsernameMapping
 import org.opensaml.core.xml.schema.XSAny
 import org.opensaml.core.xml.schema.impl.XSAnyBuilder
 import org.opensaml.saml.ext.saml2mdattr.impl.EntityAttributesBuilder
@@ -261,13 +262,14 @@ private fun assertionConsumerService(
 }
 
 /**
- * The attributes to ask for, mapped to whether the login fails without them, in the order they are
- * published.
+ * The attributes to ask for, mapped to whether the service needs them to function, in the order
+ * they are published. The ID is needed for the login and the attribute behind
+ * [ExtendedRegistration.usernameMapping] for the account to be verified.
  *
  * Keyed by attribute name across the whole set rather than only checking the extras against the
  * derived ones: two mappings may legitimately point at the same attribute, which would otherwise be
- * requested twice with conflicting `isRequired` values. The ID is inserted first so a required
- * entry survives the collision.
+ * requested twice with conflicting `isRequired` values. The required entries are inserted first so
+ * they survive the collision.
  */
 private fun requestedAttributes(registration: ExtendedRegistration): Map<String, Boolean> {
   val mapping = registration.attributeMapping
@@ -275,8 +277,11 @@ private fun requestedAttributes(registration: ExtendedRegistration): Map<String,
   if (mapping.id !in SUBJECT_ID_REQUIREMENTS) {
     attributes[mapping.id] = true
   }
-  for (name in listOf(mapping.mailAddress, mapping.givenName, mapping.surname)) {
-    attributes.putIfAbsent(name, false)
+  val required = registration.requireMappedAttributes
+  attributes.putIfAbsent(
+      mapping.mailAddress, required || registration.usernameMapping == UsernameMapping.MAIL_ADDRESS)
+  for (name in listOf(mapping.givenName, mapping.surname)) {
+    attributes.putIfAbsent(name, required)
   }
   for (attribute in registration.additionalRequestedAttributes) {
     attributes.putIfAbsent(attribute.name, attribute.required)
