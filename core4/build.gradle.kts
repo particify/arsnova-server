@@ -132,6 +132,9 @@ detekt {
 spotless {
   ratchetFrom("origin/master")
   kotlin {
+    // Without a target, Spotless formats every source set, generated ones included, which makes
+    // it compile the project and run AOT processing first.
+    target("src/**/*.kt")
     ktfmt(libs.versions.ktfmt.get())
     licenseHeader("/* Copyright \$YEAR Particify GmbH\n * SPDX-License-Identifier: MIT\n */")
   }
