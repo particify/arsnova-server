@@ -1,3 +1,4 @@
+import java.util.concurrent.Callable
 import org.gradle.kotlin.dsl.withType
 import org.springframework.boot.gradle.tasks.aot.AbstractAot
 
@@ -113,6 +114,43 @@ tasks.withType<Test> {
 // AOT processing decides at build time which beans exist, so the environment the build runs in
 // must not reach it: any environment variable can set a property.
 tasks.withType<AbstractAot>().configureEach { environment = emptyMap() }
+
+// The Spring Boot plugin puts the AOT output on these classpaths, so every run and test would build
+// it although only spring.aot.enabled uses it. -Paot keeps the plugin's classpaths.
+if (!providers.gradleProperty("aot").isPresent) {
+  tasks.bootRun {
+    classpath =
+        withoutAot(
+            classpath,
+            "aot",
+            "processAot",
+            sourceSets.main.get().output,
+            configurations.runtimeClasspath)
+  }
+  tasks.test {
+    classpath =
+        withoutAot(
+            classpath,
+            "aotTest",
+            "processTestAot",
+            sourceSets.test.get().output,
+            sourceSets.main.get().output,
+            configurations.testRuntimeClasspath)
+  }
+}
+
+/** A plain file list carries no task dependencies, so those of what remains are added back. */
+fun withoutAot(
+    classpath: FileCollection,
+    sourceSet: String,
+    task: String,
+    vararg producers: Any
+): FileCollection {
+  val aotOutput = sourceSets[sourceSet].output
+  val aotClasses = tasks.named<AbstractAot>(task).flatMap { it.classesOutput }
+  return files(Callable { classpath.files - aotOutput.files - aotClasses.get().asFile })
+      .builtBy(*producers)
+}
 
 tasks.jib { jib { from { image = "eclipse-temurin:25-alpine" } } }
 
