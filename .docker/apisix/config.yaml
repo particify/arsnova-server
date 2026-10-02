@@ -1,4 +1,7 @@
 apisix:
+  # The DNS client ignores Docker's ndots:0 and would try the host's search domains before a
+  # service name. Upstreams are only ever service names, so the search list is never needed.
+  enable_resolv_search_opt: false
   enable_server_tokens: false
 
 deployment:
