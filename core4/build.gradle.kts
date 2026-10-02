@@ -1,4 +1,5 @@
 import org.gradle.kotlin.dsl.withType
+import org.springframework.boot.gradle.tasks.aot.AbstractAot
 
 plugins {
   jacoco
@@ -108,6 +109,10 @@ tasks.withType<Test> {
   // Gradle's default of 512m does not hold the application contexts the test context cache keeps.
   maxHeapSize = "1g"
 }
+
+// AOT processing decides at build time which beans exist, so the environment the build runs in
+// must not reach it: any environment variable can set a property.
+tasks.withType<AbstractAot>().configureEach { environment = emptyMap() }
 
 tasks.jib { jib { from { image = "eclipse-temurin:25-alpine" } } }
 

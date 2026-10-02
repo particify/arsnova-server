@@ -27,7 +27,7 @@ repos:
         files: \.(java|kts?)$
         language: system
         entry: ./gradlew
-        args: [spotlessCheck, -x, processAot, -x, processTestAot]
+        args: [spotlessCheck]
         pass_filenames: false
       - id: detekt
         name: Detekt

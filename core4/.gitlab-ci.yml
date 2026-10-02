@@ -28,7 +28,7 @@ spotless:
   script:
     # git fetch is needed for Spotless' ratchetFrom
     - git fetch origin master
-    - ../gradlew $GRADLE_CLI_OPTS spotlessKotlinApply spotlessKotlinGradleApply -x classes -x processAot -x processTestAot
+    - ../gradlew $GRADLE_CLI_OPTS spotlessKotlinApply spotlessKotlinGradleApply -x classes
 
 detekt:
   extends: .gradle
@@ -51,10 +51,9 @@ unit_test:
     - podman system service --time=0 "$DOCKER_HOST" > build/reports/podman-service.log 2>&1 &
     - sleep 1
   script:
-    - ../gradlew $GRADLE_CLI_OPTS test jacocoTestReport -x classes -x processAot -x processTestAot
+    - ../gradlew $GRADLE_CLI_OPTS test jacocoTestReport -x classes
     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' build/reports/jacoco/test/jacocoTestReport.csv
 
 docker_image:
   variables:
     <<: *git_safe_directory
-    GRADLE_JIB_OPTS: -x processAot -x processTestAot
