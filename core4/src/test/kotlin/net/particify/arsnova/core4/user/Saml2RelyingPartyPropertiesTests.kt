@@ -86,6 +86,19 @@ class Saml2RelyingPartyPropertiesTests {
         listOf(true, false), registration.additionalRequestedAttributes.map { it.required })
   }
 
+  @Test
+  fun shouldDefaultRequireMappedAttributesToOff() {
+    val registration = bind(mapOf("entity-id" to "https://example.com"))
+    Assertions.assertFalse(registration.requireMappedAttributes)
+  }
+
+  /** Fails for a getter-only scalar, which binds to nothing but its default. */
+  @Test
+  fun shouldBindConfiguredRequireMappedAttributes() {
+    val registration = bind(mapOf("require-mapped-attributes" to "true"))
+    Assertions.assertTrue(registration.requireMappedAttributes)
+  }
+
   /**
    * Nothing can be requested without a name, and dropping the entry while the document is resolved
    * would hide the typo, so it has to stop the application from starting instead.
