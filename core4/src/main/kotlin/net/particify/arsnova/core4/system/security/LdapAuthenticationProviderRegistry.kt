@@ -4,7 +4,6 @@
 package net.particify.arsnova.core4.system.security
 
 import java.util.UUID
-import net.particify.arsnova.core4.system.migration.v3.MigrationProperties
 import net.particify.arsnova.core4.user.internal.LdapProperties
 import net.particify.arsnova.core4.user.internal.LdapProperties.Registration
 import net.particify.arsnova.core4.user.internal.LdapUserDetailsContextMapperFactory
@@ -35,7 +34,6 @@ private const val READ_TIMEOUT_PROPERTY = "com.sun.jndi.ldap.read.timeout"
 @Component
 class LdapAuthenticationProviderRegistry(
     ldapProperties: LdapProperties,
-    migrationProperties: MigrationProperties,
     private val mapperFactory: LdapUserDetailsContextMapperFactory,
     private val eventPublisher: ApplicationEventPublisher
 ) {
@@ -46,13 +44,6 @@ class LdapAuthenticationProviderRegistry(
   private val authenticationManagers: Map<UUID, AuthenticationManager>
 
   init {
-    require(!migrationProperties.enabled || ldapProperties.registration.size <= 1) {
-      "Only a single LDAP registration is supported while the v3 migration is enabled because " +
-          "persistence.v3-migration.authentication-provider-mapping maps the v3 provider name " +
-          "\"LDAP\" to exactly one provider ID. Migrated users would end up in whichever " +
-          "registration matches that mapping. Configured registrations: " +
-          "${ldapProperties.registration.keys}."
-    }
     authenticationManagers =
         ldapProperties.registration.mapValues { createAuthenticationManager(it.key, it.value) }
     if (authenticationManagers.isNotEmpty()) {
