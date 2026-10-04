@@ -1,17 +1,17 @@
 /* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.system.mail
+package net.particify.arsnova.core4.mail.internal
 
 import jakarta.mail.internet.MimeMessage
 import java.io.UnsupportedEncodingException
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import net.particify.arsnova.core4.system.MailService
-import net.particify.arsnova.core4.system.config.MailProperties
-import net.particify.arsnova.core4.system.config.ServiceProperties
-import net.particify.arsnova.core4.system.exception.MailAddressTemporarilyBlockedException
+import net.particify.arsnova.core4.common.ServiceProperties
+import net.particify.arsnova.core4.mail.MailService
+import net.particify.arsnova.core4.mail.config.MailProperties
+import net.particify.arsnova.core4.mail.exception.MailAddressTemporarilyBlockedException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.mail.MailException

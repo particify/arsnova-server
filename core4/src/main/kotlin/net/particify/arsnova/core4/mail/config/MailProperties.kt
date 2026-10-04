@@ -1,7 +1,7 @@
 /* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.system.config
+package net.particify.arsnova.core4.mail.config
 
 import jakarta.validation.Valid
 import java.net.URL
@@ -20,9 +20,6 @@ data class MailProperties(
     val username: String? = null,
     val password: String? = null,
     val localhost: String? = null,
-    val invitationUriPattern: String,
-    val verificationUriPattern: String,
-    val passwordResetUriPattern: String,
     @field:Valid val footer: List<Footer> = emptyList()
 ) {
   data class Footer(

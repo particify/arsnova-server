@@ -1,7 +1,7 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.system.config
+package net.particify.arsnova.core4.mail.config
 
 import net.particify.arsnova.common.util.YamlPropertiesLoader
 import org.springframework.context.ApplicationContext

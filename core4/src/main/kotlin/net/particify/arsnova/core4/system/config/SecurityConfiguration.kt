@@ -4,6 +4,7 @@
 package net.particify.arsnova.core4.system.config
 
 import jakarta.servlet.DispatcherType
+import net.particify.arsnova.core4.common.ServiceProperties
 import net.particify.arsnova.core4.system.security.AuthenticationSuccessHandler
 import net.particify.arsnova.core4.system.security.ChallengeJwtAuthenticationFilter
 import net.particify.arsnova.core4.system.security.Http401UnauthenticatedEntryPoint

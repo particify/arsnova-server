@@ -3,9 +3,9 @@
  */
 package net.particify.arsnova.core4.system.compat
 
+import net.particify.arsnova.core4.common.ServiceProperties
 import net.particify.arsnova.core4.system.config.LocalAccountPolicy
 import net.particify.arsnova.core4.system.config.SecurityProperties
-import net.particify.arsnova.core4.system.config.ServiceProperties
 import net.particify.arsnova.core4.system.config.UiProperties
 import net.particify.arsnova.core4.system.config.login
 import net.particify.arsnova.core4.system.config.securityProperties

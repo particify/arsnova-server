@@ -1,7 +1,7 @@
 /* Copyright 2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.system.exception
+package net.particify.arsnova.core4.mail.exception
 
 import graphql.GraphQLError
 import graphql.GraphqlErrorBuilder
@@ -11,7 +11,7 @@ import org.springframework.graphql.execution.ErrorType
 import org.springframework.stereotype.Component
 
 @Component
-class SystemExceptionResolverAdapter : DataFetcherExceptionResolverAdapter() {
+class MailExceptionResolverAdapter : DataFetcherExceptionResolverAdapter() {
   override fun resolveToSingleError(ex: Throwable, env: DataFetchingEnvironment): GraphQLError? {
     val builder = GraphqlErrorBuilder.newError(env)
     val error =
