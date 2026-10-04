@@ -33,6 +33,14 @@ Using the reactive Webflux stack for the gateway in version 3, we have made the 
 Furthermore, the excessive use of asynchronous callbacks makes the code harder to read.
 With the introduction of virtual threads to Java the performance advantage of Webflux diminishes and no longer justifies the increased complexity for us.
 
+== Architecture: Modular monolith
+
+The core service is a modular monolith built with Spring Modulith rather than a set of microservices.
+Its application modules have explicit dependencies and APIs,
+which a test verifies so that the boundaries hold without separate deployments.
+Why the microservice split of version 3 is not continued is described in link:road-to-v4.adoc[].
+The modules, their layering and the rules for working with them are described in link:modules.adoc[].
+
 == Database management system: Dropping CouchDB
 
 We will move away from CouchDB for version 4.
