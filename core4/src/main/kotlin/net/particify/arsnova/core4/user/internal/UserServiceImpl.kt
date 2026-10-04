@@ -36,6 +36,10 @@ class UserServiceImpl(
     return userRepository.findByIdOrNull(id)
   }
 
+  override fun getUserById(id: UUID): User {
+    return userRepository.findByIdOrNull(id) ?: throw UserNotFoundException(id)
+  }
+
   fun loadUserByProviderIdAndExternalId(providerId: UUID, externalId: String): User? {
     return userRepository.findOneByExternalLogin(providerId, externalId)
   }

@@ -1,7 +1,7 @@
 /* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.room.event
+package net.particify.arsnova.core4.room.event.internal
 
 import jakarta.persistence.PostUpdate
 import net.particify.arsnova.core4.common.event.EntityChangeEvent

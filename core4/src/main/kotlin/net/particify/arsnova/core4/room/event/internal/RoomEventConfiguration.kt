@@ -1,8 +1,11 @@
 /* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.room.event
+package net.particify.arsnova.core4.room.event.internal
 
+import net.particify.arsnova.core4.room.event.ROOM_CREATED_DESTINATION
+import net.particify.arsnova.core4.room.event.ROOM_DELETED_DESTINATION
+import net.particify.arsnova.core4.room.event.ROOM_DUPLICATED_DESTINATION
 import org.springframework.amqp.core.Exchange
 import org.springframework.amqp.core.ExchangeBuilder
 import org.springframework.context.annotation.Bean

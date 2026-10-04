@@ -15,7 +15,7 @@ import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.common.LanguageIso639
 import net.particify.arsnova.core4.common.UuidGenerator
-import net.particify.arsnova.core4.room.event.RoomEntityEventDispatcher
+import net.particify.arsnova.core4.room.event.internal.RoomEntityEventDispatcher
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 

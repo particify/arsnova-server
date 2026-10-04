@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.room.internal.api
@@ -11,7 +11,6 @@ import net.particify.arsnova.core4.room.exception.MembershipNotFoundException
 import net.particify.arsnova.core4.room.internal.MembershipServiceImpl
 import net.particify.arsnova.core4.room.internal.RoomServiceImpl
 import net.particify.arsnova.core4.user.UserService
-import net.particify.arsnova.core4.user.exception.UserNotFoundException
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
@@ -34,7 +33,7 @@ class AdminRoomMutationController(
 
   @MutationMapping
   fun adminTransferRoom(@Argument roomId: UUID, @Argument userId: UUID): Room? {
-    val user = userService.loadUserById(userId) ?: throw UserNotFoundException(userId)
+    val user = userService.getUserById(userId)
     val oldMembership =
         membershipService.findOwnerMembershipByRoomId(roomId) ?: throw MembershipNotFoundException()
     oldMembership.role = RoomRole.PARTICIPANT

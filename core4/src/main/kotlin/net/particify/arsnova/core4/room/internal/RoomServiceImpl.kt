@@ -12,6 +12,7 @@ import kotlin.math.pow
 import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomRole
+import net.particify.arsnova.core4.room.RoomService
 import net.particify.arsnova.core4.room.event.DemoRoomDuplicatedEvent
 import net.particify.arsnova.core4.room.event.RoomCreatedEvent
 import net.particify.arsnova.core4.room.event.RoomDeletedEvent
@@ -19,6 +20,7 @@ import net.particify.arsnova.core4.room.event.RoomDuplicatedEvent
 import net.particify.arsnova.core4.room.exception.RoomNotFoundException
 import net.particify.arsnova.core4.user.User
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
@@ -26,12 +28,16 @@ class RoomServiceImpl(
     private val roomRepository: RoomRepository,
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val roomProperties: RoomProperties
-) : RoomRepository by roomRepository {
+) : RoomService, RoomRepository by roomRepository {
   companion object {
     private val SHORT_ID_MAX: Int = (10.0.pow(Room.SHORT_ID_LENGTH) - 1).toInt()
   }
 
   private val secureRandom = SecureRandom()
+
+  override fun getRoomById(id: UUID): Room {
+    return roomRepository.findByIdOrNull(id) ?: throw RoomNotFoundException(id)
+  }
 
   @Transactional
   fun create(room: Room, user: User, isDuplication: Boolean = false): Room {

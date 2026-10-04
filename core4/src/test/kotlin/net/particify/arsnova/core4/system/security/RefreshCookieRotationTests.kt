@@ -263,6 +263,8 @@ class RefreshCookieRotationTests {
 private class SingleUserService(private val user: User) : UserService {
   override fun loadUserById(id: UUID) = user.takeIf { it.id == id }
 
+  override fun getUserById(id: UUID): User = error(UNSUPPORTED)
+
   override fun loadUserByUsername(username: String) = error(UNSUPPORTED)
 
   override fun markAnnouncementsReadForUserId(id: UUID) = error(UNSUPPORTED)
