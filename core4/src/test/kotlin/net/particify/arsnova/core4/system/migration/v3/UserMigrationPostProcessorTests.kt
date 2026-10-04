@@ -9,11 +9,11 @@ import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
 import net.particify.arsnova.core4.user.User
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
 import net.particify.arsnova.core4.user.internal.ExternalLogin
 import net.particify.arsnova.core4.user.internal.UserRepository
-import net.particify.arsnova.core4.user.internal.UsernameMapping
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.sso.UsernameMapping
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

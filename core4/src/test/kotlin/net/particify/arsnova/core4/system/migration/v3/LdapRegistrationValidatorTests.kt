@@ -5,7 +5,7 @@ package net.particify.arsnova.core4.system.migration.v3
 
 import java.net.URI
 import java.util.UUID
-import net.particify.arsnova.core4.user.internal.LdapProperties
+import net.particify.arsnova.core4.user.sso.LdapProperties
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow

@@ -3,7 +3,7 @@
  */
 package net.particify.arsnova.core4.system.security
 
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
 import org.opensaml.saml.saml2.assertion.SAML2AssertionValidationParameters
 import org.springframework.core.convert.converter.Converter
 import org.springframework.security.saml2.core.Saml2Error

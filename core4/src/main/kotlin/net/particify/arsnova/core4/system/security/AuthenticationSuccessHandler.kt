@@ -6,7 +6,7 @@ package net.particify.arsnova.core4.system.security
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import net.particify.arsnova.core4.user.User
-import net.particify.arsnova.core4.user.internal.Saml2SessionAuthentication
+import net.particify.arsnova.core4.user.sso.Saml2SessionAuthentication
 import org.springframework.http.MediaType
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler

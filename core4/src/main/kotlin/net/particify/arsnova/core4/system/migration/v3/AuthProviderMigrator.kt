@@ -6,8 +6,8 @@ package net.particify.arsnova.core4.system.migration.v3
 import java.time.Instant
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.user.User
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.internal.ExternalLogin
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 

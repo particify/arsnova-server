@@ -6,8 +6,9 @@ package net.particify.arsnova.core4.user.internal
 import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.user.User
-import net.particify.arsnova.core4.user.internal.LdapProperties.ImportedAttribute
-import net.particify.arsnova.core4.user.internal.LdapProperties.Registration
+import net.particify.arsnova.core4.user.sso.LdapProperties
+import net.particify.arsnova.core4.user.sso.LdapProperties.ImportedAttribute
+import net.particify.arsnova.core4.user.sso.LdapProperties.Registration
 import org.hibernate.Hibernate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

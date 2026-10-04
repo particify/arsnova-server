@@ -10,8 +10,8 @@ import net.particify.arsnova.core4.system.config.UiProperties
 import net.particify.arsnova.core4.system.config.localAccount
 import net.particify.arsnova.core4.system.config.securityProperties
 import net.particify.arsnova.core4.system.security.RoomCreationPolicy
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
-import net.particify.arsnova.core4.user.internal.LdapProperties
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.LdapProperties
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

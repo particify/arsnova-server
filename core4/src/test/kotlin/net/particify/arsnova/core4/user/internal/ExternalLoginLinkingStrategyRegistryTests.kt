@@ -6,7 +6,9 @@ package net.particify.arsnova.core4.user.internal
 import java.util.UUID
 import net.particify.arsnova.core4.user.ExternalLoginLinkingStrategy
 import net.particify.arsnova.core4.user.User
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.sso.LdapProperties
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow

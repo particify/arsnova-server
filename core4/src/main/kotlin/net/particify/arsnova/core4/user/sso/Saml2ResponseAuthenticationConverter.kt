@@ -1,12 +1,17 @@
 /* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.user.internal
+package net.particify.arsnova.core4.user.sso
 
 import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.user.User
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.internal.ExternalLogin
+import net.particify.arsnova.core4.user.internal.ExternalLoginLinkingStrategyRegistry
+import net.particify.arsnova.core4.user.internal.ExternalLoginRepository
+import net.particify.arsnova.core4.user.internal.UserRepository
+import net.particify.arsnova.core4.user.internal.UserServiceImpl
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.convert.converter.Converter

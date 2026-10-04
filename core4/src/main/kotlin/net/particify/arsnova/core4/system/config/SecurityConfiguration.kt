@@ -14,8 +14,8 @@ import net.particify.arsnova.core4.system.security.Saml2ResponseValidation
 import net.particify.arsnova.core4.system.security.Saml2SpMetadataFactory
 import net.particify.arsnova.core4.system.security.UserJwtAuthenticationFilter
 import net.particify.arsnova.core4.user.ADMIN_ROLE
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
-import net.particify.arsnova.core4.user.internal.Saml2ResponseAuthenticationConverter
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.Saml2ResponseAuthenticationConverter
 import org.slf4j.LoggerFactory
 import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest
 import org.springframework.context.annotation.Bean

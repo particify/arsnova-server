@@ -5,8 +5,8 @@ package net.particify.arsnova.core4.system.security
 
 import jakarta.servlet.http.HttpServletRequest
 import java.util.UUID
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer

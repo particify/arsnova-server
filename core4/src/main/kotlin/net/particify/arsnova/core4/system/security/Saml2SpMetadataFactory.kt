@@ -4,9 +4,9 @@
 package net.particify.arsnova.core4.system.security
 
 import java.util.UUID
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
-import net.particify.arsnova.core4.user.internal.UsernameMapping
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.sso.UsernameMapping
 import org.opensaml.core.xml.schema.XSAny
 import org.opensaml.core.xml.schema.impl.XSAnyBuilder
 import org.opensaml.saml.ext.saml2mdattr.impl.EntityAttributesBuilder

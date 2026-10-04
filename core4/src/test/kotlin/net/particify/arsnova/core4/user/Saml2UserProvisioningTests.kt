@@ -4,10 +4,10 @@
 package net.particify.arsnova.core4.user
 
 import net.particify.arsnova.core4.TestcontainersConfiguration
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
-import net.particify.arsnova.core4.user.internal.Saml2ResponseAuthenticationConverter
 import net.particify.arsnova.core4.user.internal.UserRepository
-import net.particify.arsnova.core4.user.internal.UsernameMapping
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.sso.Saml2ResponseAuthenticationConverter
+import net.particify.arsnova.core4.user.sso.UsernameMapping
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

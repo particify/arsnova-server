@@ -1,9 +1,10 @@
 /* Copyright 2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.user.internal
+package net.particify.arsnova.core4.user.sso
 
 import java.util.UUID
+import net.particify.arsnova.core4.user.internal.LdapUserProvisioningService
 import org.springframework.ldap.core.DirContextOperations
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails

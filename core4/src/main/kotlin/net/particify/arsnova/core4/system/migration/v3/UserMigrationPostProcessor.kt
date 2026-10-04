@@ -6,8 +6,8 @@ package net.particify.arsnova.core4.system.migration.v3
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import java.util.UUID
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
-import net.particify.arsnova.core4.user.internal.UsernameMapping
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.UsernameMapping
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional

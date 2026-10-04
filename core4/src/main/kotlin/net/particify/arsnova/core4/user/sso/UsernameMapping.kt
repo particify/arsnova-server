@@ -1,7 +1,7 @@
 /* Copyright 2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.user.internal
+package net.particify.arsnova.core4.user.sso
 
 /** Which asserted value becomes the username of an account authenticated through SAML. */
 enum class UsernameMapping {

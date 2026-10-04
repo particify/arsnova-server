@@ -7,8 +7,8 @@ import java.security.cert.X509Certificate
 import java.security.interfaces.RSAPrivateKey
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
 import org.opensaml.security.x509.X509Support
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.DisposableBean

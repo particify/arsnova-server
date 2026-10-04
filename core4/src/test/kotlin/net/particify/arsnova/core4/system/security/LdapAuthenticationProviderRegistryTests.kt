@@ -5,8 +5,8 @@ package net.particify.arsnova.core4.system.security
 
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
-import net.particify.arsnova.core4.user.internal.LdapProperties
-import net.particify.arsnova.core4.user.internal.LdapUserDetailsContextMapperFactory
+import net.particify.arsnova.core4.user.sso.LdapProperties
+import net.particify.arsnova.core4.user.sso.LdapUserDetailsContextMapperFactory
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

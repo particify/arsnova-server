@@ -1,7 +1,7 @@
 /* Copyright 2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.user.internal
+package net.particify.arsnova.core4.user.sso
 
 import java.time.Duration
 import java.util.UUID

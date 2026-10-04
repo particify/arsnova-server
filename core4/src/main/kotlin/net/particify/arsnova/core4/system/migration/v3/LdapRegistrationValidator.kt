@@ -3,7 +3,7 @@
  */
 package net.particify.arsnova.core4.system.migration.v3
 
-import net.particify.arsnova.core4.user.internal.LdapProperties
+import net.particify.arsnova.core4.user.sso.LdapProperties
 import org.springframework.stereotype.Component
 
 /** Fails startup if the LDAP registrations cannot be mapped unambiguously by the migration. */

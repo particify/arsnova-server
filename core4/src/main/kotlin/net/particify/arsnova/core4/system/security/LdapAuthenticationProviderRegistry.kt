@@ -4,9 +4,9 @@
 package net.particify.arsnova.core4.system.security
 
 import java.util.UUID
-import net.particify.arsnova.core4.user.internal.LdapProperties
-import net.particify.arsnova.core4.user.internal.LdapProperties.Registration
-import net.particify.arsnova.core4.user.internal.LdapUserDetailsContextMapperFactory
+import net.particify.arsnova.core4.user.sso.LdapProperties
+import net.particify.arsnova.core4.user.sso.LdapProperties.Registration
+import net.particify.arsnova.core4.user.sso.LdapUserDetailsContextMapperFactory
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher

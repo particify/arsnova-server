@@ -11,7 +11,7 @@ import java.security.cert.X509Certificate
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
 import net.shibboleth.shared.component.DestructableComponent
 import net.shibboleth.shared.resolver.ResolverException
 import net.shibboleth.shared.resource.Resource as MetadataResource

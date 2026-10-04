@@ -1,7 +1,7 @@
 /* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.user.internal
+package net.particify.arsnova.core4.user.sso
 
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
