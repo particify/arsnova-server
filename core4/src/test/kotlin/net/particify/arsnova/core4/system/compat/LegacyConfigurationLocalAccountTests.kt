@@ -4,9 +4,9 @@
 package net.particify.arsnova.core4.system.compat
 
 import net.particify.arsnova.core4.common.ServiceProperties
+import net.particify.arsnova.core4.security.RoomCreationPolicy
+import net.particify.arsnova.core4.security.securityProperties
 import net.particify.arsnova.core4.system.config.UiProperties
-import net.particify.arsnova.core4.system.config.securityProperties
-import net.particify.arsnova.core4.system.security.RoomCreationPolicy
 import net.particify.arsnova.core4.user.LocalAccountPolicy
 import net.particify.arsnova.core4.user.internal.LocalAccountProperties
 import net.particify.arsnova.core4.user.internal.localAccount

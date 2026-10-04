@@ -9,7 +9,7 @@ import com.unboundid.ldap.sdk.ModificationType
 import com.unboundid.ldap.sdk.ResultCode
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
-import net.particify.arsnova.core4.system.security.LdapAuthenticationProviderRegistry
+import net.particify.arsnova.core4.security.internal.LdapAuthenticationProviderRegistry
 import net.particify.arsnova.core4.user.internal.UserServiceImpl
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

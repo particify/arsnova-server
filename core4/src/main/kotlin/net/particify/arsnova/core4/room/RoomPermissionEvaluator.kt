@@ -8,8 +8,8 @@ import kotlin.reflect.KClass
 import net.particify.arsnova.core4.room.exception.RoomNotFoundException
 import net.particify.arsnova.core4.room.internal.MembershipRepository
 import net.particify.arsnova.core4.room.internal.RoomRepository
-import net.particify.arsnova.core4.system.DomainPermissionEvaluation
-import net.particify.arsnova.core4.system.DomainPermissionEvaluator
+import net.particify.arsnova.core4.security.DomainPermissionEvaluation
+import net.particify.arsnova.core4.security.DomainPermissionEvaluator
 import net.particify.arsnova.core4.user.User
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
