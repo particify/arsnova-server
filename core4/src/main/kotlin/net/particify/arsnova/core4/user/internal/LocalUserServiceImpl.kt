@@ -13,7 +13,7 @@ import kotlin.math.roundToLong
 import net.particify.arsnova.core4.common.exception.AccessDeniedException
 import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.mail.MailService
-import net.particify.arsnova.core4.system.config.LocalAccountPolicy
+import net.particify.arsnova.core4.user.LocalAccountPolicy
 import net.particify.arsnova.core4.user.LocalUserService
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService

@@ -16,7 +16,6 @@ private const val REMEMBER_ME_DAYS = 180L
 
 /** Everything a test does not pass carries the value shipped in `application.yaml`. */
 fun securityProperties(
-    localAccount: SecurityProperties.LocalAccount = localAccount(),
     login: SecurityProperties.Login = login(),
     roomCreatorRole: SecurityProperties.RoomCreatorRole =
         SecurityProperties.RoomCreatorRole(AutoAssignment.VERIFIED_ACCOUNTS)
@@ -32,7 +31,6 @@ fun securityProperties(
                 CHALLENGE_ITERATIONS,
                 CHALLENGE_ITERATIONS),
         login = login,
-        localAccount = localAccount,
         roomCreatorRole = roomCreatorRole,
         authorizeUriHeader = "X-Forwarded-Uri",
         authorizeUriPrefix = "/api")
@@ -46,9 +44,3 @@ fun login(
         attemptWindow = Duration.ofMinutes(2),
         externalSessionMaxAge = externalSessionMaxAge,
         rememberMeMaxAge = rememberMeMaxAge)
-
-fun localAccount(
-    enabled: Boolean = true,
-    selfRegistrationEnabled: Boolean = true,
-    allowedMailAddressDomains: List<String> = listOf()
-) = SecurityProperties.LocalAccount(enabled, selfRegistrationEnabled, allowedMailAddressDomains)

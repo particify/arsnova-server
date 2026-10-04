@@ -1,11 +1,10 @@
 /* Copyright 2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.system.config
+package net.particify.arsnova.core4.user
 
 import java.util.regex.Pattern
-import net.particify.arsnova.core4.user.ADMIN_ROLE
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.internal.LocalAccountProperties
 import org.springframework.stereotype.Component
 
 private const val WILDCARD_LABEL = "*"
@@ -20,8 +19,7 @@ private const val WILDCARD_EXPRESSION = "[^.]+"
  * the address rather than about the configuration.
  */
 @Component
-class LocalAccountPolicy(securityProperties: SecurityProperties) {
-  private val properties = securityProperties.localAccount
+class LocalAccountPolicy(properties: LocalAccountProperties) {
   private val domainPatterns = properties.allowedMailAddressDomains.map { compile(it) }
 
   val enabled = properties.enabled

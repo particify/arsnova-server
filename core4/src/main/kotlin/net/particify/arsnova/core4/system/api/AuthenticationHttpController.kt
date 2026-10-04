@@ -6,12 +6,12 @@ package net.particify.arsnova.core4.system.api
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import java.util.UUID
-import net.particify.arsnova.core4.system.config.LocalAccountPolicy
 import net.particify.arsnova.core4.system.security.JwtUtils
 import net.particify.arsnova.core4.system.security.LdapAuthenticationProviderRegistry
 import net.particify.arsnova.core4.system.security.LoginAttemptService
 import net.particify.arsnova.core4.system.security.RefreshCookieComponent
 import net.particify.arsnova.core4.system.security.RefreshJwtAuthentication
+import net.particify.arsnova.core4.user.LocalAccountPolicy
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
 import org.springframework.http.HttpStatus

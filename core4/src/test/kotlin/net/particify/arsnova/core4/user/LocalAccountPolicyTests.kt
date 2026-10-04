@@ -1,11 +1,10 @@
 /* Copyright 2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.system.config
+package net.particify.arsnova.core4.user
 
-import net.particify.arsnova.core4.user.ADMIN_ROLE
-import net.particify.arsnova.core4.user.Role
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.internal.LocalAccountProperties
+import net.particify.arsnova.core4.user.internal.localAccount
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -117,6 +116,5 @@ class LocalAccountPolicyTests {
     Assertions.assertFalse(policy.isMailAddressAllowed("someone@"))
   }
 
-  private fun policy(localAccount: SecurityProperties.LocalAccount) =
-      LocalAccountPolicy(securityProperties(localAccount = localAccount))
+  private fun policy(localAccount: LocalAccountProperties) = LocalAccountPolicy(localAccount)
 }

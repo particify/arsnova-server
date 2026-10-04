@@ -1,7 +1,7 @@
 /* Copyright 2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
-package net.particify.arsnova.core4.system.config
+package net.particify.arsnova.core4.user.internal
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -82,8 +82,8 @@ class LocalAccountPropertiesTests {
       mapOf("enabled" to "true", "self-registration-enabled" to "true")
           .plus(domains.mapIndexed { i, d -> "allowed-mail-address-domains[$i]" to d })
 
-  private fun bind(properties: Map<String, String>): SecurityProperties.LocalAccount {
+  private fun bind(properties: Map<String, String>): LocalAccountProperties {
     val source = MapConfigurationPropertySource(properties.mapKeys { "$PREFIX.${it.key}" })
-    return Binder(source).bind(PREFIX, SecurityProperties.LocalAccount::class.java).get()
+    return Binder(source).bind(PREFIX, LocalAccountProperties::class.java).get()
   }
 }
