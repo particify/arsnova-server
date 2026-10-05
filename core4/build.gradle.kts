@@ -157,6 +157,17 @@ tasks.jib { jib { from { image = "eclipse-temurin:25-alpine" } } }
 // Spring Boot adds developmentOnly to runtimeClasspath, which Jib packages by default.
 jib { configurationName = "productionRuntimeClasspath" }
 
+// Jib packages the jars of its configuration but not the AOT output, so that goes in as a jar.
+val aotJar =
+    tasks.register<Jar>("aotJar") {
+      archiveClassifier = "aot"
+      from(
+          sourceSets["aot"].output,
+          tasks.named<AbstractAot>("processAot").flatMap { it.classesOutput })
+    }
+
+dependencies { productionRuntimeClasspath(files(aotJar)) }
+
 tasks.jacocoTestReport { reports { csv.required.set(true) } }
 
 detekt {
