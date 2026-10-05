@@ -39,6 +39,19 @@ class UserBulkDeletionServiceTests {
   }
 
   @Test
+  fun shouldDeleteMarkedUsersAcrossMultipleBatches() {
+    val users =
+        List(21) {
+          val user = userService.createAccount()
+          user.username = "Delete Me In Batch $it"
+          user.deletedAt = Instant.now().minus(7, ChronoUnit.DAYS)
+          userRepository.save(user)
+        }
+    userBulkDeletionService.deleteMarkedUsers()
+    users.forEach { Assertions.assertNull(userService.loadUserById(it.id!!)) }
+  }
+
+  @Test
   fun shouldNotDeleteMarkedUserBefore7Days() {
     val user = userService.createAccount()
     user.username = "Do Not Delete Me"

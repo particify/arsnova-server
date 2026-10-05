@@ -37,9 +37,10 @@ class UserBulkDeletionService(
     val deletedAtBefore = Instant.now().minus(userProperties.deleteDelay)
     var totalCount = 0
     for (i in 0..<DELETE_BATCH_COUNT) {
-      val position = ScrollPosition.offset(i.toLong())
+      // The previous batch is soft-deleted and filtered out, so every batch starts at the top.
       val window =
-          userService.findByDeletedAtBefore(deletedAtBefore, position, Limit.of(DELETE_BATCH_SIZE))
+          userService.findByDeletedAtBefore(
+              deletedAtBefore, ScrollPosition.offset(), Limit.of(DELETE_BATCH_SIZE))
       totalCount += window.size()
       window.forEach {
         eventPublisher.publishEvent(UserDeletedEvent(it.id!!))
