@@ -1,0 +1,152 @@
+= Testcontainers in CI
+
+The core4 test suite starts its PostgreSQL database with Testcontainers,
+so its `unit_test` job needs a container engine.
+The job image, `openjdk-podman`, ships Podman alongside the JDK,
+and the job starts a Podman API service inside its own container for Testcontainers to talk to.
+
+The image is built from `.docker/images/openjdk-podman/Containerfile` by the `build_ci_image` job.
+A manual run from another branch replaces the image for all pipelines.
+
+== How the test job works
+
+The Podman service's output goes to `build/reports/podman-service.log`,
+which is collected with the test reports.
+It routinely contains `cancelled by user` and `hangup by client` errors:
+Podman logs one whenever Testcontainers closes a wait or log stream early,
+and neither indicates a problem.
+
+Two defaults of nested rootless Podman are changed for Testcontainers to work:
+
+Network mode::
+The `quay.io/podman/stable` base image runs every container in the host network namespace,
+which discards port mappings.
+Testcontainers waits for a published port that never appears, so the image switches the default
+back to `pasta` with a drop-in in `/etc/containers/containers.conf.d/`.
+
+Ryuk::
+Testcontainers starts its Ryuk cleanup container privileged by default.
+In a separate network namespace, a privileged container needs a fresh sysfs mount,
+which the kernel refuses inside the job container,
+so `TESTCONTAINERS_RYUK_CONTAINER_PRIVILEGED` is set to `false`.
+
+The test job runs as the image's `podman` user, the other Gradle jobs as root,
+and both share the checkout, the Gradle cache and the `compile` artifacts.
+`FF_DISABLE_UMASK_FOR_DOCKER_EXECUTOR` makes the runner change the ownership of all of them
+to the user of each job's image.
+The runner takes that user from the image's `USER`, not from `docker: user`,
+so a job's user can only be changed through its image.
+
+== Runner requirements
+
+The job runs on a Docker executor whose `host` is the API socket of a rootless Podman installation.
+The runner's user needs:
+
+* a subordinate UID and GID range of at least 65536 IDs,
+  because the Podman inside the job container maps its own range from that one,
+* lingering enabled (`loginctl enable-linger`),
+* `/dev/fuse` and `/dev/net/tun` passed through as devices.
+  The second is what `pasta` needs.
+
+[source,toml]
+----
+[[runners]]
+  [runners.docker]
+    host = "unix:///run/user/<uid>/podman/podman.sock"
+    devices = ["/dev/fuse", "/dev/net/tun"]
+    volumes = ["/cache", "ci-image-store:/var/lib/shared:ro"]
+----
+
+The `ci-image-store` volume is only needed for the shared image store.
+
+=== Shared image store
+
+The nested Podman starts with empty storage in every job.
+To spare each job pulling the images its tests need,
+a runner can provide them in a read-only store, mounted at `/var/lib/shared` as shown above.
+The job image configures that path as an additional image store for its `podman` user;
+rootless Podman ignores the system-wide setting for it.
+
+The store has to be filled as that same user,
+so that its files' owners match the user mapping in the job container.
+Otherwise Podman copies every layer with adjusted owners instead of using it in place.
+As the runner's user:
+
+[source,shell]
+----
+IMAGE=registry.gitlab.com/particify/dev/foss/arsnova-server/openjdk-podman:25
+podman volume create ci-image-store
+podman run --rm --user root -v ci-image-store:/var/lib/shared "$IMAGE" \
+  chown -R podman:podman /var/lib/shared
+podman run --rm --pull=newer --device /dev/fuse -v ci-image-store:/var/lib/shared "$IMAGE" \
+  podman --root /var/lib/shared pull \
+    docker.io/library/postgres:18-alpine \
+    docker.io/testcontainers/ryuk:0.14.0
+----
+
+The last command also refreshes the store,
+and has to be repeated whenever a moving tag or a Testcontainers upgrade brings a new image.
+Run it while no jobs are running.
+
+== Isolation
+
+Root inside a job container is mapped to the runner's user and every other user to one of its
+subordinate IDs,
+so a process escaping its container ends up as an unprivileged user on the host.
+A rootful engine maps container root to host root instead,
+and Docker-in-Docker additionally needs privileged job containers.
+
+Each job runs its own Podman rather than getting the runner's socket mounted.
+That socket would let a job control every container of the runner, including those of concurrent
+jobs;
+the nested engine only sees the containers its own job started, and disappears with it.
+The job container needs neither privileged mode nor relaxed security options for this.
+
+Passing `/dev/net/tun` through grants nothing by itself.
+Creating an interface requires `CAP_NET_ADMIN` in the user namespace owning the target network
+namespace,
+which the job container does not have for its own.
+The nested Podman can only create interfaces in network namespaces it created itself,
+and `pasta` forwards their traffic through ordinary sockets of the job,
+so nested containers reach no more than the job itself can.
+What the device does add is the TUN driver as kernel code reachable from jobs -
+the same driver the runner's Podman already uses on the host.
+
+The shared image store is mounted read-only,
+so jobs share its layers without being able to change them for later jobs.
+
+== Drawbacks
+
+* Images missing from the shared image store are pulled by every job,
+  which costs time and counts against the registry's pull rate limits.
+* Privileged containers cannot be started nested, so tests cannot rely on one.
+
+== Troubleshooting
+
+The test report only summarises the exception chain.
+The full Podman error is in the JUnit XML report of the failing test class,
+in the innermost `Caused by` line.
+
+[cols="1,1"]
+|===
+|Error |Cause
+
+|`Port mappings have been discarded because "host" network namespace mode does not support them`,
+followed by a `ConditionTimeoutException` for the Ryuk container
+|The inner Podman still runs containers in the host network namespace.
+
+|`+crun: mount `sysfs` to `sys`: Operation not permitted+`
+|A privileged container was started in a separate network namespace.
+
+|`+can't create .../CI_SERVER_TLS_CA_FILE: Permission denied+` before the job script starts
+|A job's user was changed with `docker: user`, which the runner ignores when assigning ownership.
+|===
+
+To reproduce a failure outside CI, start the job image interactively as the runner's user,
+with the same devices, and run `podman` inside it:
+
+[source,shell]
+----
+podman run --rm -it --device /dev/fuse --device /dev/net/tun \
+  registry.gitlab.com/particify/dev/foss/arsnova-server/openjdk-podman:25 bash
+----

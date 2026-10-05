@@ -1,0 +1,12 @@
+FROM quay.io/podman/stable
+
+RUN \
+  mkdir -p /etc/containers/containers.conf.d && \
+  printf '[containers]\nnetns="pasta"\n' > /etc/containers/containers.conf.d/50-netns-pasta.conf && \
+  mkdir -p /home/podman/.config/containers && \
+  printf '[storage]\ndriver = "overlay"\n\n[storage.options]\nadditionalimagestores = ["/var/lib/shared"]\n' \
+    > /home/podman/.config/containers/storage.conf && \
+  chown -R podman:podman /home/podman/.config
+RUN dnf -y install java-25-openjdk-devel && dnf -y clean all
+USER podman
+ENV JAVA_HOME=/usr/lib/jvm/java-25-openjdk
