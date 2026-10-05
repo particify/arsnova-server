@@ -9,6 +9,9 @@ import org.springframework.security.core.userdetails.UserDetailsService
 interface UserService : UserDetailsService {
   fun loadUserById(id: UUID): User?
 
+  /** @throws net.particify.arsnova.core4.user.exception.UserNotFoundException */
+  fun getUserById(id: UUID): User
+
   fun markAnnouncementsReadForUserId(id: UUID)
 
   fun findRoleByName(name: String): Role

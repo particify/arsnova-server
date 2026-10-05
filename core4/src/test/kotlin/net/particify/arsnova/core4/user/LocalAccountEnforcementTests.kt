@@ -7,7 +7,7 @@ import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
 import net.particify.arsnova.core4.common.exception.AccessDeniedException
-import net.particify.arsnova.core4.system.MailService
+import net.particify.arsnova.core4.mail.MailService
 import net.particify.arsnova.core4.user.exception.AccountCreationNotAllowedException
 import net.particify.arsnova.core4.user.exception.MailAddressNotAllowedException
 import net.particify.arsnova.core4.user.internal.LocalUserServiceImpl

@@ -1,0 +1,151 @@
+= Application modules
+
+The core service is a modular monolith built with https://docs.spring.io/spring-modulith/reference/[Spring Modulith].
+Each top-level package below `net.particify.arsnova.core4` is an application module.
+Spring Modulith verifies the dependencies between them,
+so a module boundary is enforced by a test rather than by convention alone.
+
+== Modules
+
+[cols="1,4"]
+|===
+|Module |Owns
+
+|`common`
+|Shared building blocks: auditing metadata, ID generators, base events and exceptions, text rendering, service properties and the public routes contract.
+
+|`mail`
+|Sending mail from templates, and the limit on how often a mail is sent to the same address.
+
+|`user`
+|Accounts, roles, local accounts and their policy, and provisioning of accounts from SAML and LDAP logins.
+
+|`security`
+|Authentication, the tokens issued to clients and other services, method security, and the permission contract the domain modules implement.
+
+|`room`
+|Rooms, memberships and room roles, and the permissions on rooms.
+
+|`qna`
+|The Q&A: posts, replies, votes and tags.
+
+|`announcement`
+|Announcements published in a room.
+
+|`system`
+|Platform configuration (GraphQL, JPA auditing, RabbitMQ), the compatibility endpoints for v3 clients and the v3 migration.
+|===
+
+== Layering
+
+Module A is _above_ module B if A may use B and B must not use A.
+The modules form this stack, from top to bottom:
+
+----
+system
+qna, announcement
+room
+security
+user
+mail
+common
+----
+
+Every dependency points down.
+Modules on the same level do not use each other.
+Nothing uses `system`.
+
+Each module except `system` declares what it may use
+with `@ApplicationModule(allowedDependencies = …)` on a `ModuleMetadata` class in its base package.
+Two details of that list are easy to miss:
+
+* `common` is an open module, but it still has to be listed explicitly.
+  An allow-list is checked without the shortcut that open modules get otherwise.
+* A module name grants only the module's base package.
+  Each named interface has to be listed separately, e.g. `room::events`.
+
+== Exposure
+
+* The base package of a module is its API.
+* Sub-packages are hidden by default.
+  An existing sub-package such as `config`, `api` or `exception` keeps its name
+  and is not moved under `internal`.
+* `internal` exists for one reason only: hiding a module's main classes,
+  e.g. service implementations and repositories,
+  which would otherwise sit in the base package.
+* A named interface publishes a sub-package or single types as a contract:
+** `events` in `user`, `room`, `qna` and `announcement` for the module's domain events,
+** `user::sso` for the SAML and LDAP configuration and provisioning types
+   that `security` builds on,
+** `security::permission` for the permission contract,
+   the only part of `security` the domain modules may use.
+
+Before exposing a type, check whether the reference to it should exist at all.
+Exposing something only because another module currently uses it declares the coupling;
+it does not justify it.
+
+== Collaboration between modules
+
+Events::
+A module which reacts to something happening in another module listens to that module's events.
+For example, `qna` creates and deletes a room's Q&A in response to `room` events.
+The publishing module knows nothing about its listeners.
+
+Exposed services::
+For synchronous calls, a module exposes a service interface in its base package
+and keeps the implementation in `internal`, e.g. `UserService` or `RoomService`.
+
+Contracts in a lower module::
+When a lower module needs something only a higher module knows,
+the lower module defines an interface and the higher module implements it.
+`security` defines `DomainPermissionEvaluator`,
+which `room`, `qna` and `announcement` implement for their types,
+and `RoomRoleLookup`, which `room` implements
+so that `security` can issue room tokens without depending on `room`.
+`common` defines `PublicRoutes` for modules which add routes that need no authentication.
+
+Errors belong to their module::
+A module raises its own exceptions and maps them to API errors itself.
+Other modules use a throwing lookup instead of throwing a foreign exception,
+e.g. `UserService.getUserById` throws the `user` module's not-found exception.
+
+== The v3 migration
+
+`system.migration.v3` is excluded from verification.
+It is a temporary importer which writes to the other modules' persistence directly
+and bypasses their services by design.
+Fitting it into the module structure would mean exposing internals
+for code that is removed once the migration is no longer needed.
+
+== Checking the structure
+
+`ModularityTests` verifies the module structure:
+
+----
+./gradlew :core4:test --tests net.particify.arsnova.core4.ModularityTests
+----
+
+It fails on cycles, on references to types a module does not expose,
+and on dependencies a module has not declared.
+The same test writes documentation with module and component diagrams (PlantUML)
+to `core4/build/spring-modulith-docs/`.
+
+== Checklist
+
+Adding a class::
+* Does it belong to the module whose data or behaviour it is about?
+* Is it used by other modules?
+  If not, put it in a sub-package or in `internal`, not in the base package.
+
+Adding a dependency on another module::
+* Does it point down the stack?
+  If not, invert it with an event or a contract in the lower module.
+* Does it use only the base package or a named interface of the other module?
+* Is it listed in the module's `allowedDependencies`,
+  including the named interface if one is used?
+
+Adding a module::
+* Decide where it sits in the stack and add it to this document.
+* Add a `ModuleMetadata` class with `allowedDependencies`, listing `common` explicitly.
+* Add `allowedDependencies` entries in the modules that will use it.
+* Run `ModularityTests`.

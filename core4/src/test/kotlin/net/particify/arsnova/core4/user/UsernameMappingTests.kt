@@ -3,8 +3,8 @@
  */
 package net.particify.arsnova.core4.user
 
-import net.particify.arsnova.core4.user.internal.UsernameMapping
-import net.particify.arsnova.core4.user.internal.resolveUsername
+import net.particify.arsnova.core4.user.sso.UsernameMapping
+import net.particify.arsnova.core4.user.sso.resolveUsername
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

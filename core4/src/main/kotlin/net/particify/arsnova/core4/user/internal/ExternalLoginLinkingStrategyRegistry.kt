@@ -5,6 +5,8 @@ package net.particify.arsnova.core4.user.internal
 
 import java.util.UUID
 import net.particify.arsnova.core4.user.ExternalLoginLinkingStrategy
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.LdapProperties
 import org.springframework.stereotype.Component
 
 /**

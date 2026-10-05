@@ -12,9 +12,8 @@ import kotlin.math.pow
 import kotlin.math.roundToLong
 import net.particify.arsnova.core4.common.exception.AccessDeniedException
 import net.particify.arsnova.core4.common.exception.InvalidInputException
-import net.particify.arsnova.core4.system.MailService
-import net.particify.arsnova.core4.system.config.LocalAccountPolicy
-import net.particify.arsnova.core4.system.config.MailProperties
+import net.particify.arsnova.core4.mail.MailService
+import net.particify.arsnova.core4.user.LocalAccountPolicy
 import net.particify.arsnova.core4.user.LocalUserService
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
@@ -43,7 +42,7 @@ class LocalUserServiceImpl(
     private val mailService: MailService,
     private val eventPublisher: ApplicationEventPublisher,
     private val localAccountPolicy: LocalAccountPolicy,
-    mailProperties: MailProperties
+    mailProperties: UserMailProperties
 ) : LocalUserService {
   companion object {
     private val logger = LoggerFactory.getLogger(this::class.java)

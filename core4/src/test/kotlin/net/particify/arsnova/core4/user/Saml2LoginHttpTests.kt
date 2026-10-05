@@ -8,7 +8,7 @@ import java.time.temporal.ChronoUnit
 import java.util.Base64
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
-import net.particify.arsnova.core4.system.security.REFRESH_TOKEN_COOKIE
+import net.particify.arsnova.core4.security.REFRESH_TOKEN_COOKIE
 import net.particify.arsnova.core4.user.internal.UserServiceImpl
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

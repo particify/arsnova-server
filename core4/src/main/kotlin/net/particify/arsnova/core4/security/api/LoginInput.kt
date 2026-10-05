@@ -1,0 +1,17 @@
+/* Copyright 2025-2026 Particify GmbH
+ * SPDX-License-Identifier: MIT
+ */
+package net.particify.arsnova.core4.security.api
+
+import java.util.UUID
+
+/**
+ * [providerId] is absent for the local provider. [rememberMe] is without effect unless the
+ * deployment offers a remembered session.
+ */
+data class LoginInput(
+    val username: String,
+    val password: String,
+    val providerId: UUID? = null,
+    val rememberMe: Boolean = false
+)

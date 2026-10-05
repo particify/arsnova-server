@@ -6,6 +6,7 @@ variables:
   GRADLE_USER_HOME: $CI_PROJECT_DIR/$GRADLE_USER_HOME_DIR
   GRADLE_RO_DEP_CACHE: /root/.gradle-ro-cache
   GRADLE_CLI_OPTS: --no-daemon --console=plain
+  FF_DISABLE_UMASK_FOR_DOCKER_EXECUTOR: "true"
 
 # Override rules from parent CI config
 workflow:

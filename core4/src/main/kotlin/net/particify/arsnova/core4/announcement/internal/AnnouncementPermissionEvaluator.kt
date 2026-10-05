@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.announcement.internal
@@ -7,8 +7,8 @@ import java.util.UUID
 import kotlin.reflect.KClass
 import net.particify.arsnova.core4.announcement.Announcement
 import net.particify.arsnova.core4.announcement.exception.AnnouncementNotFoundException
-import net.particify.arsnova.core4.system.DomainPermissionEvaluation
-import net.particify.arsnova.core4.system.DomainPermissionEvaluator
+import net.particify.arsnova.core4.security.DomainPermissionEvaluation
+import net.particify.arsnova.core4.security.DomainPermissionEvaluator
 import net.particify.arsnova.core4.user.User
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull

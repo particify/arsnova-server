@@ -12,7 +12,7 @@ import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomRole
 import net.particify.arsnova.core4.room.internal.MembershipServiceImpl
-import net.particify.arsnova.core4.system.security.DelegatingPermissionEvaluator
+import net.particify.arsnova.core4.security.internal.DelegatingPermissionEvaluator
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
 import org.junit.jupiter.api.AfterEach

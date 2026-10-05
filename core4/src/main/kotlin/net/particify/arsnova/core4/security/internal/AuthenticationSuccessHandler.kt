@@ -1,0 +1,52 @@
+/* Copyright 2019-2026 Particify GmbH
+ * SPDX-License-Identifier: MIT
+ */
+package net.particify.arsnova.core4.security.internal
+
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import net.particify.arsnova.core4.security.RefreshCookieComponent
+import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.sso.Saml2SessionAuthentication
+import org.springframework.http.MediaType
+import org.springframework.security.core.Authentication
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
+import org.springframework.stereotype.Component
+
+@Component
+class AuthenticationSuccessHandler(private val refreshCookieComponent: RefreshCookieComponent) :
+    SimpleUrlAuthenticationSuccessHandler() {
+  companion object {
+    const val URL_ATTRIBUTE: String = "ars-login-success-url"
+  }
+
+  override fun determineTargetUrl(
+      request: HttpServletRequest,
+      response: HttpServletResponse
+  ): String {
+    val session = request.getSession(false)
+    val url = session.getAttribute(URL_ATTRIBUTE) as String? ?: ""
+    session.removeAttribute(URL_ATTRIBUTE)
+    return url
+  }
+
+  override fun onAuthenticationSuccess(
+      request: HttpServletRequest,
+      response: HttpServletResponse,
+      authentication: Authentication
+  ) {
+    val session = request.getSession(false)
+    if (session == null || session.getAttribute(URL_ATTRIBUTE) == null) {
+      val user = authentication.principal as User
+      val subject = user.id.toString()
+      val endsAt = (authentication as? Saml2SessionAuthentication)?.endsAt
+      refreshCookieComponent.addForExternalLogin(
+          subject, user.tokenVersion!!, response, extendUntil = endsAt)
+      response.contentType = MediaType.TEXT_HTML_VALUE
+      response.writer.println(
+          "<!DOCTYPE html><script>if (window.opener) window.close(); else location.href='/login/complete'</script>")
+      return
+    }
+    super.onAuthenticationSuccess(request, response, authentication)
+  }
+}

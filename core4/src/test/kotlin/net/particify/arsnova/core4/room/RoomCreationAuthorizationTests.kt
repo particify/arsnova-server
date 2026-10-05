@@ -9,9 +9,9 @@ import net.particify.arsnova.core4.TestcontainersConfiguration
 import net.particify.arsnova.core4.room.internal.api.CreateRoomInput
 import net.particify.arsnova.core4.room.internal.api.DuplicateRoomInput
 import net.particify.arsnova.core4.room.internal.api.RoomMutationController
-import net.particify.arsnova.core4.system.security.JwtUtils
-import net.particify.arsnova.core4.system.security.UserJwtAuthentication
-import net.particify.arsnova.core4.system.security.UserJwtAuthenticationProvider
+import net.particify.arsnova.core4.security.internal.JwtUtils
+import net.particify.arsnova.core4.security.internal.UserJwtAuthentication
+import net.particify.arsnova.core4.security.internal.UserJwtAuthenticationProvider
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
 import org.junit.jupiter.api.AfterEach

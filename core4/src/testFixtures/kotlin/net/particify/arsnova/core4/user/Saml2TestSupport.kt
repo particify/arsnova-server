@@ -5,8 +5,8 @@ package net.particify.arsnova.core4.user
 
 import java.security.cert.X509Certificate
 import java.util.UUID
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties
-import net.particify.arsnova.core4.user.internal.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
 import org.springframework.boot.security.saml2.autoconfigure.Saml2RelyingPartyProperties
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.DefaultResourceLoader
