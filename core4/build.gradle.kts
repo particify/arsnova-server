@@ -112,6 +112,9 @@ tasks.withType<Test> {
 
 tasks.jib { jib { from { image = "eclipse-temurin:25-alpine" } } }
 
+// Spring Boot adds developmentOnly to runtimeClasspath, which Jib packages by default.
+jib { configurationName = "productionRuntimeClasspath" }
+
 tasks.jacocoTestReport { reports { csv.required.set(true) } }
 
 detekt {
