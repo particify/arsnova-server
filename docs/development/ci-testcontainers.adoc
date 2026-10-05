@@ -33,9 +33,11 @@ so `TESTCONTAINERS_RYUK_CONTAINER_PRIVILEGED` is set to `false`.
 The test job runs as the image's `podman` user, the other Gradle jobs as root,
 and both share the checkout, the Gradle cache and the `compile` artifacts.
 `FF_DISABLE_UMASK_FOR_DOCKER_EXECUTOR` makes the runner change the ownership of all of them
-to the user of each job's image.
+to the user of each job's image, unless that user is root.
 The runner takes that user from the image's `USER`, not from `docker: user`,
 so a job's user can only be changed through its image.
+A root job can find the checkout still owned by the test job's user,
+so jobs running git in their script declare the checkout a `safe.directory`.
 
 == Runner requirements
 

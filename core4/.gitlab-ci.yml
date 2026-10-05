@@ -11,11 +11,20 @@ ktlint:
   rules:
     - when: never
 
+# Root jobs get no ownership change from FF_DISABLE_UMASK_FOR_DOCKER_EXECUTOR,
+# so their git can find the checkout still owned by unit_test's non-root user.
+.git_safe_directory: &git_safe_directory
+  GIT_CONFIG_COUNT: "1"
+  GIT_CONFIG_KEY_0: safe.directory
+  GIT_CONFIG_VALUE_0: $CI_PROJECT_DIR
+
 spotless:
   extends: .gradle
   stage: test
   needs:
     - compile
+  variables:
+    <<: *git_safe_directory
   script:
     # git fetch is needed for Spotless' ratchetFrom
     - git fetch origin master
@@ -47,4 +56,5 @@ unit_test:
 
 docker_image:
   variables:
+    <<: *git_safe_directory
     GRADLE_JIB_OPTS: -x processAot -x processTestAot
