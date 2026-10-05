@@ -2,6 +2,9 @@ logging:
   exception-depth: full
 
 spring:
+  devtools:
+    restart:
+      enabled: false
   liquibase:
     contexts: default,dev
 
