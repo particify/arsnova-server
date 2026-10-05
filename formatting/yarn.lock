@@ -1333,10 +1333,10 @@ json5@^1.0.2:
   dependencies:
     minimist "^1.2.0"
 
-katex@0.18.9, katex@^0.12.0:
-  version "0.18.9"
-  resolved "https://registry.yarnpkg.com/katex/-/katex-0.18.9.tgz#60d720d8cc87a2267096785070e4210b39957bda"
-  integrity sha512-8ad9RyoKsb/g8/yLFE+KAlP+DhbCTRUNi/V9XGsxn0R+trJJltNwzcDNo0q/DEkOy5fQUQTAQyCXCYSE+OakTQ==
+katex@0.18.10, katex@^0.12.0:
+  version "0.18.10"
+  resolved "https://registry.yarnpkg.com/katex/-/katex-0.18.10.tgz#71373b79139d2dba768774145782de3405bfdff2"
+  integrity sha512-/B6p9eY9DX7aHBfpkHdpirDTZ5QH9xTwL9y837PWuzuv41O5jFdqNQwVQEQsimY0/iVNkwBY4+4hMfhQ7d4Dbw==
   dependencies:
     commander "^15.0.0"
 
