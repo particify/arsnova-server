@@ -63,7 +63,6 @@ spring-boot-security-test = { module = "org.springframework.boot:spring-boot-sec
 spring-cache = { module = "org.springframework.boot:spring-boot-starter-cache" }
 spring-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
 spring-docker = { module = "org.springframework.boot:spring-boot-docker-compose" }
-spring-hal-explorer = { module = "org.springframework.data:spring-data-rest-hal-explorer" }
 spring-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
 spring-graphql = { module = "org.springframework.boot:spring-boot-starter-graphql" }
 spring-graphql-test = { module = "org.springframework.graphql:spring-graphql-test" }
