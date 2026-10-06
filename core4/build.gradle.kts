@@ -104,7 +104,11 @@ tasks.bootRun {
   }
 }
 
-tasks.withType<Test> { useJUnitPlatform() }
+tasks.withType<Test> {
+  useJUnitPlatform()
+  // Gradle's default of 512m does not hold the application contexts the test context cache keeps.
+  maxHeapSize = "1g"
+}
 
 tasks.jib { jib { from { image = "eclipse-temurin:25-alpine" } } }
 
