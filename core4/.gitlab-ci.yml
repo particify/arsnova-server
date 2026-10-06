@@ -54,6 +54,11 @@ unit_test:
     - ../gradlew $GRADLE_CLI_OPTS test jacocoTestReport -x classes
     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' build/reports/jacoco/test/jacocoTestReport.csv
 
+unit_test_aot:
+  extends: unit_test
+  script:
+    - ../gradlew $GRADLE_CLI_OPTS -Paot test -x classes
+
 docker_image:
   variables:
     <<: *git_safe_directory

@@ -116,7 +116,8 @@ tasks.withType<Test> {
 tasks.withType<AbstractAot>().configureEach { environment = emptyMap() }
 
 // The Spring Boot plugin puts the AOT output on these classpaths, so every run and test would build
-// it although only spring.aot.enabled uses it. -Paot keeps the plugin's classpaths.
+// it although only spring.aot.enabled uses it. -Paot keeps the plugin's classpaths and runs the
+// tests in AOT mode.
 if (!providers.gradleProperty("aot").isPresent) {
   tasks.bootRun {
     classpath =
@@ -137,6 +138,8 @@ if (!providers.gradleProperty("aot").isPresent) {
             sourceSets.main.get().output,
             configurations.testRuntimeClasspath)
   }
+} else {
+  tasks.test { systemProperty("spring.aot.enabled", true) }
 }
 
 /** A plain file list carries no task dependencies, so those of what remains are added back. */
