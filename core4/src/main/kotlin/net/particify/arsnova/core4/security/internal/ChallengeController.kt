@@ -27,8 +27,8 @@ class ChallengeController(val challengeService: ChallengeService) {
           HttpStatus.BAD_REQUEST,
           when {
             result.expired -> "Challenge expired"
-            result.invalidSignature -> "Invalid signature"
-            result.invalidSolution -> "Invalid solution"
+            result.invalidSignature == true -> "Invalid signature"
+            result.invalidSolution == true -> "Invalid solution"
             else -> "Verification failed"
           })
     }

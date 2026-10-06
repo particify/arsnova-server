@@ -27,7 +27,7 @@ class ChallengeService(
   @Volatile var staleBlockedIds: MutableSet<UUID> = ConcurrentHashMap.newKeySet()
 
   fun generateChallenge(): Altcha.Challenge {
-    val counter = this.secureRandom.nextInt(this.challengeProperties.maxIterations)
+    val counter = this.secureRandom.nextLong(this.challengeProperties.maxIterations.toLong())
     val options =
         Altcha.CreateChallengeOptions()
             .algorithm(this.challengeProperties.algorithm)
@@ -51,7 +51,7 @@ class ChallengeService(
   fun createJwtForSolution(solution: String): String {
     val payload = parsePayload(solution)
     val id = payload.challenge.parameters.data["id"]
-    val expires = Instant.ofEpochSecond(payload.challenge.parameters.expiresAt)
+    val expires = Instant.ofEpochSecond(payload.challenge.parameters.expiresAt.toLong())
     return jwtUtils.encodeJwt(
         "challenge-$id", listOf(CHALLENGE_SOLVED_ROLE), expirationTime = expires)
   }

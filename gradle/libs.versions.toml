@@ -1,5 +1,5 @@
 [versions]
-altcha = "2.0.3"
+altcha = "2.1.1"
 aspectj-plugin = "9.8.0"
 aspectj-rt = "1.9.25.1"
 bouncycastle = "1.86"
