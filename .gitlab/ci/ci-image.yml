@@ -2,7 +2,7 @@ build_ci_image:
   stage: deploy
   needs: []
   image:
-    name: quay.io/podman/stable
+    name: quay.io/podman/stable:v5.8.7-immutable@sha256:f345d8d4fddea244d3a1ced27bcec82d14cc9e32cb5ead7f5882b0baf59dc8b0
   variables:
     CONTAINER_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH/openjdk-podman
     CONTAINER_TAG: 25
