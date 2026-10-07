@@ -40,6 +40,7 @@ services:
     volumes:
       - $ROOT_DIR/.git:/workspace/.git
       - $ROOT_DIR/webclient:/workspace/webclient
+      - playwright-browsers-webclient:/opt/playwright
       - vscode-extensions-webclient:/home/dev/.vscode-server/extensions
       - yarn-global-webclient:/home/dev/.yarn
   arsnova-server-core:
@@ -172,6 +173,7 @@ volumes:
   gradle-workspace-core:
   gradle-workspace-websocket:
   gradle-wrapper:
+  playwright-browsers-webclient:
   vscode-extensions-authz:
   vscode-extensions-comments:
   vscode-extensions-core:
