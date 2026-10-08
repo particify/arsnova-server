@@ -51,6 +51,24 @@ if [ -n "$ADDITIONAL_COMPOSE_DIR" ]; then
 fi
 export LOCAL_ROOT_DIR=$(readlink -f $LOCAL_COMPOSE_DIR/../../..)
 
+# Installs the hook only if it is missing or cannot run here, so that environments sharing the
+# repository do not keep overwriting each other's hook. One installed elsewhere still works through
+# its PATH fallback, unless its INSTALL_PYTHON also exists here without pre-commit.
+ensure_pre_commit_hook() {
+  [ -f "$1/.pre-commit-config.yaml" ] || return 0
+  local hook python
+  hook=$(git -C "$1" rev-parse --path-format=absolute --git-path hooks/pre-commit)
+  if [ -f "$hook" ]; then
+    python=$(sed -n 's/^INSTALL_PYTHON=//p' "$hook")
+    if [ -x "$python" ]; then
+      "$python" -c 'import pre_commit' 2>/dev/null && return 0
+    elif command -v pre-commit &> /dev/null; then
+      return 0
+    fi
+  fi
+  (cd "$1" && pre-commit install >/dev/null)
+}
+
 init_gitmodules() {
   REPLY=
   gitmodules=$(cat "$ROOT_DIR/.gitmodules" | grep -E '^\s+path' | sed -E 's/^\s+path\s+=\s+//')
@@ -65,7 +83,9 @@ init_gitmodules() {
       git submodule update --init --recursive "$ROOT_DIR/$gitmodule"
     fi
   done
-  git submodule foreach 'if [ -f .pre-commit-config.yaml ]; then pre-commit install; fi' >/dev/null
+  git -C "$ROOT_DIR" submodule foreach --quiet pwd | while read -r dir; do
+    ensure_pre_commit_hook "$dir"
+  done
 }
 
 # The service definitions both environments share: the pinned images, the dependency containers and
@@ -1062,9 +1082,7 @@ if ! command -v pre-commit &> /dev/null; then
   pip install pre-commit
 fi
 
-if [ -f .pre-commit-config.yaml ]; then
-  pre-commit install >/dev/null
-fi
+ensure_pre_commit_hook "$ROOT_DIR"
 
 init_gitmodules
 if [ -n "$2" ]; then
