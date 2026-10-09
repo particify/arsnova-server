@@ -1017,6 +1017,10 @@ resolve_engine
 # reset-podman shortcut below so that nothing escapes being recorded.
 log_invocation "$@"
 trap 'log_invocation_exit $?' EXIT
+# Without these, a killed invocation reaches the EXIT trap with the status of whatever ran last,
+# usually 0, and reads as a successful one.
+trap 'exit 129' HUP
+trap 'exit 143' TERM
 
 # Deliberately runs before the Docker/Podman preflight below - a broken Podman instance
 # (the exact case this command exists for) can fail that preflight outright, which would
