@@ -21,6 +21,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistrar
 import org.springframework.test.web.servlet.MockMvc
@@ -51,6 +53,9 @@ private const val PROTOCOL_NAMESPACE = "urn:oasis:names:tc:SAML:2.0:protocol"
 /** The response's own issuer, which precedes the assertion's in document order. */
 private val RESPONSE_ISSUER_PATTERN =
     Regex("<[\\w:]*Issuer[\\s>].*?</[\\w:]*Issuer>", RegexOption.DOT_MATCHES_ALL)
+
+/** A `Saml2Error` code, as opposed to its description, which is not shown. */
+private val ERROR_CODE_PARAGRAPH = Regex("<p>[a-z_]+</p>")
 
 private val USER =
     Saml2TestUser(
@@ -105,12 +110,13 @@ class Saml2ConfiguredEndpointsHttpTests {
 
   /**
    * Widened, not switched off: a location the registration does not carry is still refused, and the
-   * two endpoints refuse it the same way.
+   * two endpoints refuse it the same way, with a page naming the error code.
    *
    * The configured one carries no registration ID, so its converter always resolves through the
    * asserting party's entity ID. That branch reports what it cannot read by throwing something
    * which is not an `AuthenticationException`, which no failure handler would answer, so a payload
-   * failing there has to be checked against the endpoint which does not take that branch.
+   * failing there has to be checked against the endpoint which does not take that branch. The two
+   * branches can name different codes for one payload, so the code itself is not compared.
    */
   @ParameterizedTest
   @ValueSource(
@@ -118,10 +124,16 @@ class Saml2ConfiguredEndpointsHttpTests {
           [ADDRESSED_ELSEWHERE, WITHOUT_ISSUER, WITH_EMPTY_ISSUER, NOT_WELL_FORMED, NOT_A_RESPONSE])
   fun shouldRejectAtBothAssertionConsumerServicesAlike(case: String) {
     val payload = rejectedResponse(case)
-    val configured = submit(CONFIGURED_ACS_PATH, payload)
-    val default = submit(DEFAULT_ACS_PATH, payload)
-    Assertions.assertEquals(default, configured, case)
-    Assertions.assertEquals(HttpStatus.FOUND.value(), default, case)
+    for (path in listOf(CONFIGURED_ACS_PATH, DEFAULT_ACS_PATH)) {
+      val response = submit(path, payload)
+      Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.status, "$case at $path")
+      Assertions.assertTrue(
+          MediaType.TEXT_HTML.isCompatibleWith(
+              MediaType.parseMediaType(checkNotNull(response.contentType))),
+          "$case at $path")
+      Assertions.assertTrue(
+          ERROR_CODE_PARAGRAPH.containsMatchIn(response.contentAsString), "$case at $path")
+    }
   }
 
   @Test
@@ -162,10 +174,12 @@ class Saml2ConfiguredEndpointsHttpTests {
 
   private fun login(path: String, destination: String = acsLocation(registrationId, path)): Int =
       submit(
-          path, identityProvider.encodedResponse(registrationId, USER, acsLocation = destination))
+              path,
+              identityProvider.encodedResponse(registrationId, USER, acsLocation = destination))
+          .status
 
-  private fun submit(path: String, samlResponse: String): Int =
-      mockMvc.perform(post(path).param("SAMLResponse", samlResponse)).andReturn().response.status
+  private fun submit(path: String, samlResponse: String): MockHttpServletResponse =
+      mockMvc.perform(post(path).param("SAMLResponse", samlResponse)).andReturn().response
 
   private fun rejectedResponse(case: String): String =
       when (case) {
