@@ -85,6 +85,43 @@ class ContentDeletionTests {
   }
 
   @Test
+  fun shouldReleaseTheActiveRoundWhenDeletingThePresentedContent() {
+    val questionnaire =
+        questionnaireService.create(ROOM_ID, "Live ${UUID.randomUUID()}", QuestionnaireType.QUIZ)
+    val presented =
+        contentService.create(
+            questionnaire.id!!,
+            "Presented",
+            ChoiceContentFormatData(listOf("A", "B"), listOf(0), false),
+            null,
+            true,
+            null)
+    publishingService.startLiveContent(presented.id!!)
+    contentService.delete(presented.id!!)
+    val reloaded = questionnaireService.findByIdOrNull(questionnaire.id!!)!!
+    Assertions.assertNull(reloaded.activeRound)
+    Assertions.assertNull(reloaded.publishedUpToContent)
+  }
+
+  @Test
+  fun shouldDeleteQuestionnaireWhilePresentingAContent() {
+    val questionnaire =
+        questionnaireService.create(ROOM_ID, "Live ${UUID.randomUUID()}", QuestionnaireType.QUIZ)
+    val presented =
+        contentService.create(
+            questionnaire.id!!,
+            "Presented",
+            ChoiceContentFormatData(listOf("A", "B"), listOf(0), false),
+            null,
+            true,
+            null)
+    publishingService.startLiveContent(presented.id!!)
+    questionnaireService.delete(questionnaire.id!!)
+    Assertions.assertNull(questionnaireService.findByIdOrNull(questionnaire.id!!))
+    Assertions.assertNull(contentService.findByIdOrNull(presented.id!!))
+  }
+
+  @Test
   fun shouldKeepPublishedRangeWhenDeletingAContentOutsideIt() {
     val contents = createContents(publishedIndex = 0)
     contentService.delete(contents[2].id!!)

@@ -3,6 +3,7 @@ databaseChangeLog:
       id: 1
       author: arsnova
       labels: ddl,questionnaire
+      context: default
       comment: Create initial definitions for questionnaire module
       changes:
         - sql: CREATE SCHEMA "questionnaire"
@@ -338,3 +339,19 @@ databaseChangeLog:
             tableName: answer
             columnNames: round_id, created_by
             constraintName: answer_round_id_created_by_key
+        - addForeignKeyConstraint:
+            baseTableSchemaName: questionnaire
+            baseTableName: questionnaire
+            baseColumnNames: published_up_to_content_id
+            referencedTableSchemaName: questionnaire
+            referencedTableName: content
+            referencedColumnNames: id
+            constraintName: questionnaire_published_up_to_content_fkey
+        - addForeignKeyConstraint:
+            baseTableSchemaName: questionnaire
+            baseTableName: questionnaire
+            baseColumnNames: active_round_id
+            referencedTableSchemaName: questionnaire
+            referencedTableName: round
+            referencedColumnNames: id
+            constraintName: questionnaire_active_round_fkey
