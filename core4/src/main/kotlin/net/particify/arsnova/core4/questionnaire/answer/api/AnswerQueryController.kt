@@ -7,10 +7,12 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.answer.Answer
+import net.particify.arsnova.core4.questionnaire.answer.AnswerResultState
 import net.particify.arsnova.core4.questionnaire.answer.AnswerResultVisibility
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.ContentAnswerResult
 import net.particify.arsnova.core4.questionnaire.answer.QuestionnaireAnswerResult
+import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.user.User
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
@@ -25,7 +27,8 @@ import org.springframework.stereotype.Controller
 @SchemaMapping(typeName = "Query")
 class AnswerQueryController(
     private val answerServiceImpl: AnswerServiceImpl,
-    private val answerResultVisibility: AnswerResultVisibility
+    private val answerResultVisibility: AnswerResultVisibility,
+    private val solutionVisibility: SolutionVisibility
 ) {
 
   @QueryMapping
@@ -67,5 +70,16 @@ class AnswerQueryController(
   @SchemaMapping(typeName = "Answer")
   fun createdAt(answer: Answer): OffsetDateTime? {
     return answer.auditMetadata.createdAt?.atOffset(ZoneOffset.UTC)
+  }
+
+  /**
+   * Every path which serves an answer, the answer mutations included, resolves its result here, so
+   * whether it was correct stays hidden until the reader may see the solution.
+   */
+  @SchemaMapping(typeName = "Answer")
+  fun result(answer: Answer): AnswerResultState {
+    val result = checkNotNull(answer.result)
+    return if (solutionVisibility.maySeeSolution(answer.round!!.content!!)) result
+    else AnswerResultVisibility.withoutCorrectness(result)
   }
 }

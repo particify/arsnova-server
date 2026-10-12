@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.questionnaire
 
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
+import net.particify.arsnova.core4.questionnaire.answer.AnswerResultState
 import net.particify.arsnova.core4.questionnaire.answer.api.AnswerMutationController
 import net.particify.arsnova.core4.questionnaire.answer.api.AnswerQueryController
 import net.particify.arsnova.core4.questionnaire.answer.api.CreateChoiceAnswerInput
@@ -105,14 +106,22 @@ class QuestionnairePermissionTests {
     return questionnaireService.updatePublished(questionnaire.id!!, true)
   }
 
-  private fun createChoiceContent(questionnaire: Questionnaire): Content =
+  private fun createChoiceContent(
+      questionnaire: Questionnaire,
+      correctOptionIndexes: List<Int>? = null
+  ): Content =
       contentService.create(
           questionnaire.id!!,
           "Choice",
-          ChoiceContentFormatData(listOf("A", "B"), null, false),
+          ChoiceContentFormatData(listOf("A", "B"), correctOptionIndexes, false),
           null,
           true,
           null)
+
+  private fun publishSolution(questionnaire: Questionnaire, published: Boolean) {
+    authenticate(OWNER_ID)
+    questionnaireService.update(questionnaire.id!!, null, null, null, null, published, null)
+  }
 
   private fun roundIdOf(content: Content): UUID = content.activeRound!!.id!!
 
@@ -229,6 +238,27 @@ class QuestionnairePermissionTests {
     Assertions.assertNotNull(
         answerQueryController.questionnaireAnswerResultsByQuestionnaireId(
             questionnaire.id!!, user, subrange))
+  }
+
+  @Test
+  fun shouldWithholdAnswerResultFromParticipantUntilSolutionIsPublished() {
+    val questionnaire = createPublishedQuestionnaire(SHARED_ROOM_ID)
+    val content = createChoiceContent(questionnaire, listOf(0))
+    publishSolution(questionnaire, false)
+    val user = authenticate(OTHER_USER_ID)
+    val answer =
+        answerMutationController.createQuestionnaireChoiceAnswer(
+            CreateChoiceAnswerInput(roundIdOf(content), listOf(0)))
+    Assertions.assertEquals(AnswerResultState.CORRECT, answer.result)
+    Assertions.assertEquals(AnswerResultState.NEUTRAL, answerQueryController.result(answer))
+    val queried = answerQueryController.questionnaireAnswerByRoundId(roundIdOf(content), user)!!
+    Assertions.assertEquals(AnswerResultState.NEUTRAL, answerQueryController.result(queried))
+    authenticate(OWNER_ID)
+    Assertions.assertEquals(AnswerResultState.CORRECT, answerQueryController.result(answer))
+    publishSolution(questionnaire, true)
+    authenticate(OTHER_USER_ID)
+    val published = answerQueryController.questionnaireAnswerByRoundId(roundIdOf(content), user)!!
+    Assertions.assertEquals(AnswerResultState.CORRECT, answerQueryController.result(published))
   }
 
   @Test

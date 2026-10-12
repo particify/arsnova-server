@@ -35,8 +35,11 @@ class AnswerResultVisibility(private val questionnaireRepository: QuestionnaireR
     return result.copy(correctAnswerCount = 0, achievedScore = 0)
   }
 
-  private fun withoutCorrectness(state: AnswerResultState) =
-      if (state == AnswerResultState.CORRECT || state == AnswerResultState.WRONG)
-          AnswerResultState.NEUTRAL
-      else state
+  companion object {
+    /** The state as shown to a reader who may not learn whether the answer was correct. */
+    fun withoutCorrectness(state: AnswerResultState) =
+        if (state == AnswerResultState.CORRECT || state == AnswerResultState.WRONG)
+            AnswerResultState.NEUTRAL
+        else state
+  }
 }
