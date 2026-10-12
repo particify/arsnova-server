@@ -30,8 +30,6 @@ spring:
       enabled: false
 
   graphql:
-    graphiql:
-      enabled: true
     websocket:
       path: /graphql/ws
 

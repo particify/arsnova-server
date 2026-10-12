@@ -53,7 +53,6 @@ dependencies {
   compileOnly(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   compileOnly(libs.postgresql)
   developmentOnly(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
-  developmentOnly(libs.spring.hal.explorer)
   developmentOnly(libs.spring.devtools)
   runtimeOnly(libs.postgresql)
   runtimeOnly(libs.spring.modulith.actuator)
@@ -111,6 +110,9 @@ tasks.withType<Test> {
 }
 
 tasks.jib { jib { from { image = "eclipse-temurin:25-alpine" } } }
+
+// Spring Boot adds developmentOnly to runtimeClasspath, which Jib packages by default.
+jib { configurationName = "productionRuntimeClasspath" }
 
 tasks.jacocoTestReport { reports { csv.required.set(true) } }
 
