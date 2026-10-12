@@ -4,6 +4,7 @@
 package net.particify.arsnova.core4.questionnaire
 
 import graphql.schema.GraphQLFieldDefinition
+import graphql.schema.GraphQLNamedType
 import graphql.schema.GraphQLNonNull
 import net.particify.arsnova.core4.TestcontainersConfiguration
 import org.junit.jupiter.api.Assertions
@@ -41,12 +42,30 @@ class QuestionnaireSchemaTests {
     assertRequired(mutation("createQuestionnaireAbstention"), "roundId")
     assertRequired(mutation("deleteQuestionnaireAnswersByContentId"), "contentId")
     assertRequired(mutation("createQuestionnaireChoiceContent"), "input")
+    assertRequired(mutation("createQuestionnaireFlashcardContent"), "input")
+    assertRequired(mutation("createQuestionnaireSlideContent"), "input")
     assertRequired(mutation("createQuestionnaireWordcloudContent"), "input")
     assertRequired(mutation("updateQuestionnaireChoiceContent"), "input")
+    assertRequired(mutation("updateQuestionnaireFlashcardContent"), "input")
+    assertRequired(mutation("updateQuestionnaireSlideContent"), "input")
     assertRequired(mutation("updateQuestionnaireWordcloudContent"), "input")
     assertRequired(mutation("updateQuestionnaireContentOrder"), "questionnaireId", "contentIds")
     assertRequired(mutation("banQuestionnaireWordcloudContentKeyword"), "contentId", "keyword")
     assertRequired(mutation("resetBannedQuestionnaireWordcloudContentKeywords"), "contentId")
+  }
+
+  /** Every format's content mutations share one result type: a nullable Content. */
+  @Test
+  fun shouldReturnNullableContentFromEveryFormatMutation() {
+    graphQlSource
+        .schema()
+        .mutationType
+        .fieldDefinitions
+        .filter { it.name.matches(Regex("(create|update)Questionnaire\\w+Content")) }
+        .forEach {
+          Assertions.assertFalse(it.type is GraphQLNonNull, it.name)
+          Assertions.assertEquals("Content", (it.type as GraphQLNamedType).name, it.name)
+        }
   }
 
   @Test

@@ -19,9 +19,9 @@ extend type Mutation {
   ): Content
   createQuestionnaireChoiceContent(input: CreateChoiceContentInput!): Content
   createQuestionnaireFlashcardContent(
-    input: CreateFlashcardContentInput
-  ): Content!
-  createQuestionnaireSlideContent(input: CreateSlideContentInput): Content!
+    input: CreateFlashcardContentInput!
+  ): Content
+  createQuestionnaireSlideContent(input: CreateSlideContentInput!): Content
   createQuestionnaireWordcloudContent(
     input: CreateWordcloudContentInput!
   ): Content
@@ -34,9 +34,9 @@ extend type Mutation {
   resetBannedQuestionnaireWordcloudContentKeywords(contentId: UUID!): Content
   updateQuestionnaireChoiceContent(input: UpdateChoiceContentInput!): Content
   updateQuestionnaireFlashcardContent(
-    input: UpdateFlashcardContentInput
-  ): Content!
-  updateQuestionnaireSlideContent(input: UpdateSlideContentInput): Content!
+    input: UpdateFlashcardContentInput!
+  ): Content
+  updateQuestionnaireSlideContent(input: UpdateSlideContentInput!): Content
   updateQuestionnaireWordcloudContent(
     input: UpdateWordcloudContentInput!
   ): Content
