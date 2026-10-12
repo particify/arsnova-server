@@ -3,7 +3,7 @@ extend type Query {
     questionnaireId: UUID!
     contentId: UUID
     limit: Int
-  ): LeaderboardPage
+  ): LeaderboardPage!
 }
 
 extend type Subscription {
@@ -11,7 +11,7 @@ extend type Subscription {
     questionnaireId: UUID!
     contentId: UUID
     limit: Int
-  ): LeaderboardPage
+  ): LeaderboardPage!
 }
 
 type LeaderboardPage {

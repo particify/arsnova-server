@@ -105,6 +105,15 @@ class QuestionnaireSchemaTests {
   }
 
   @Test
+  fun shouldAlwaysReturnALeaderboardPage() {
+    val schema = graphQlSource.schema()
+    listOf(
+            query("questionnaireLeaderboardByQuestionnaireId"),
+            schema.subscriptionType.getFieldDefinition("questionnaireLeaderboardUpdated"))
+        .forEach { Assertions.assertInstanceOf(GraphQLNonNull::class.java, it.type, it.name) }
+  }
+
+  @Test
   fun shouldOfferNoPaginationForContentLists() {
     listOf(
             "questionnaireContentsByQuestionnaireId",
