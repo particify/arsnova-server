@@ -31,7 +31,7 @@ extend type Mutation {
     input: CreateShortAnswerContentInput!
   ): Content
   createQuestionnaireSlideContent(input: CreateSlideContentInput!): Content
-  createQuestionnaireSortContent(input: CreateSortContentInput): Content
+  createQuestionnaireSortContent(input: CreateSortContentInput!): Content
   createQuestionnaireTextContent(input: CreateTextContentInput!): Content
   createQuestionnaireWordcloudContent(
     input: CreateWordcloudContentInput!
@@ -58,7 +58,7 @@ extend type Mutation {
     input: UpdateShortAnswerContentInput!
   ): Content
   updateQuestionnaireSlideContent(input: UpdateSlideContentInput!): Content
-  updateQuestionnaireSortContent(input: UpdateSortContentInput): Content
+  updateQuestionnaireSortContent(input: UpdateSortContentInput!): Content
   updateQuestionnaireTextContent(input: UpdateTextContentInput!): Content
   updateQuestionnaireWordcloudContent(
     input: UpdateWordcloudContentInput!

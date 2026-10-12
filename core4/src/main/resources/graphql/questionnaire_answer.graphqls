@@ -16,7 +16,7 @@ extend type Mutation {
   createQuestionnaireShortAnswerAnswer(
     input: CreateShortAnswerAnswerInput!
   ): Answer
-  createQuestionnaireSortAnswer(input: CreateSortAnswerInput): Answer
+  createQuestionnaireSortAnswer(input: CreateSortAnswerInput!): Answer
   createQuestionnaireTextAnswer(input: CreateTextAnswerInput!): Answer
   createQuestionnaireWordcloudAnswer(input: CreateWordcloudAnswerInput!): Answer
   createQuestionnaireAbstention(roundId: UUID!): Answer
