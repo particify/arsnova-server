@@ -8,6 +8,7 @@ import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
+import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.exception.AbstentionsNotAllowedException
 import net.particify.arsnova.core4.questionnaire.exception.AnswerAlreadyExistsException
 import net.particify.arsnova.core4.questionnaire.exception.AnswerNotFoundException
@@ -28,7 +29,6 @@ import org.springframework.data.domain.AuditorAware
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.access.PermissionEvaluator
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 
 @Service
@@ -141,21 +141,23 @@ class AnswerServiceImpl(
       formatData is TextAnswerFormatData || formatData is WordcloudAnswerFormatData
 
   /**
-   * Returns the unhidden answers of a text round. Participants only see them once the answers have
-   * been published; for them an unpublished set is empty rather than an error.
+   * Returns the answers of a text round. Whoever may edit the content or moderate its room gets all
+   * of them, hidden ones included so that hiding can be undone. Participants get the unhidden ones
+   * once the answers have been published; for them an unpublished set is empty rather than an
+   * error.
    */
   @Transactional
   fun findTextAnswersByRoundId(roundId: UUID): List<Answer> {
     val round = roundRepository.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
     val content = round.content!!
     val formatData = contentServiceImpl.asTextFormatData(content)
-    if (!formatData.answersPublished && !mayEditContent(content.id!!)) return emptyList()
-    return answerRepository.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId)
-  }
-
-  private fun mayEditContent(contentId: UUID): Boolean {
-    val authentication = SecurityContextHolder.getContext().authentication ?: return false
-    return permissionEvaluator.hasPermission(authentication, contentId, "Content", "write")
+    return when {
+      SolutionVisibility.isPrivileged(permissionEvaluator, content) ->
+          answerRepository.findByRoundIdOrderByIdAsc(roundId)
+      formatData.answersPublished ->
+          answerRepository.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId)
+      else -> emptyList()
+    }
   }
 
   @Transactional

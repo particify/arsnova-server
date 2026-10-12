@@ -52,6 +52,8 @@ class AnswerServiceImplTextTest {
           Mockito.mock(RoundServiceImpl::class.java),
           permissionEvaluator)
   private val visibleAnswers = listOf(Answer(id = UUID.randomUUID()))
+  private val allAnswers = visibleAnswers + Answer(id = UUID.randomUUID(), hidden = true)
+  private val roomId = UUID.randomUUID()
   private val authentication = TestingAuthenticationToken("user", null, "ROLE_USER")
 
   @AfterEach
@@ -63,44 +65,61 @@ class AnswerServiceImplTextTest {
     val content =
         Content(
             id = CONTENT_ID,
-            questionnaire = Questionnaire(id = UUID.randomUUID()),
+            questionnaire = Questionnaire(id = UUID.randomUUID(), roomId = roomId),
             formatData = formatData)
     val round = Round(id = ROUND_ID, content = content)
     Mockito.`when`(roundRepository.findById(ROUND_ID)).thenReturn(Optional.of(round))
     Mockito.`when`(contentServiceImpl.asTextFormatData(content)).thenCallRealMethod()
     Mockito.`when`(answerRepository.findByRoundIdAndHiddenFalseOrderByIdAsc(ROUND_ID))
         .thenReturn(visibleAnswers)
+    Mockito.`when`(answerRepository.findByRoundIdOrderByIdAsc(ROUND_ID)).thenReturn(allAnswers)
     return round
   }
 
-  private fun givenMayEditContent(mayEdit: Boolean) {
+  private fun givenPermissions(mayEdit: Boolean, mayModerate: Boolean = false) {
     SecurityContextHolder.getContext().authentication = authentication
     Mockito.`when`(
             permissionEvaluator.hasPermission(authentication, CONTENT_ID, "Content", "write"))
         .thenReturn(mayEdit)
+    Mockito.`when`(permissionEvaluator.hasPermission(authentication, roomId, "Room", "moderate"))
+        .thenReturn(mayModerate)
   }
 
   @Test
-  fun shouldShowPublishedAnswersToEveryone() {
+  fun shouldShowPublishedUnhiddenAnswersToParticipants() {
+    givenRound(TextContentFormatData(true))
+    givenPermissions(mayEdit = false)
+    Assertions.assertEquals(visibleAnswers, answerService.findTextAnswersByRoundId(ROUND_ID))
+  }
+
+  @Test
+  fun shouldShowPublishedUnhiddenAnswersWithoutAuthentication() {
     givenRound(TextContentFormatData(true))
     Assertions.assertEquals(visibleAnswers, answerService.findTextAnswersByRoundId(ROUND_ID))
     Mockito.verifyNoInteractions(permissionEvaluator)
   }
 
   @Test
-  fun shouldShowUnpublishedAnswersToEditors() {
-    givenRound(TextContentFormatData(false))
-    givenMayEditContent(true)
-    Assertions.assertEquals(visibleAnswers, answerService.findTextAnswersByRoundId(ROUND_ID))
+  fun shouldShowEveryAnswerToEditorsAndModerators() {
+    listOf(true, false).forEach { published ->
+      givenRound(TextContentFormatData(published))
+      givenPermissions(mayEdit = true)
+      Assertions.assertEquals(
+          allAnswers, answerService.findTextAnswersByRoundId(ROUND_ID), "editor $published")
+      givenPermissions(mayEdit = false, mayModerate = true)
+      Assertions.assertEquals(
+          allAnswers, answerService.findTextAnswersByRoundId(ROUND_ID), "moderator $published")
+    }
   }
 
   @Test
   fun shouldWithholdUnpublishedAnswersFromParticipants() {
     givenRound(TextContentFormatData(false))
-    givenMayEditContent(false)
+    givenPermissions(mayEdit = false)
     Assertions.assertEquals(listOf<Answer>(), answerService.findTextAnswersByRoundId(ROUND_ID))
     Mockito.verify(answerRepository, Mockito.never())
         .findByRoundIdAndHiddenFalseOrderByIdAsc(ROUND_ID)
+    Mockito.verify(answerRepository, Mockito.never()).findByRoundIdOrderByIdAsc(ROUND_ID)
   }
 
   @Test

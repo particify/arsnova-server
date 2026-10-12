@@ -276,6 +276,26 @@ class TextContentTests {
   }
 
   @Test
+  fun shouldListHiddenAnswersOnlyToPrivilegedReaders() {
+    val questionnaire = createQuestionnaire(QuestionnaireType.SURVEY)
+    val content = createTextContent(questionnaire.id!!)
+    val roundId = content.activeRound!!.id!!
+    val visible = answerService.createAnswer(roundId, TextAnswerFormatData("Visible"))
+    authenticateAs(PARTICIPANT_ID)
+    val hidden = answerService.createAnswer(roundId, TextAnswerFormatData("Hidden"))
+    authenticateAs(OWNER_ID)
+    answerService.updateHidden(hidden.id!!, true)
+    contentService.updateTextAnswersPublished(content.id!!, true)
+
+    Assertions.assertEquals(
+        mapOf(visible.id to false, hidden.id to true),
+        answerService.findTextAnswersByRoundId(roundId).associate { it.id to it.hidden })
+    authenticateAs(PARTICIPANT_ID)
+    Assertions.assertEquals(
+        listOf(visible.id), answerService.findTextAnswersByRoundId(roundId).map { it.id })
+  }
+
+  @Test
   fun shouldAlwaysShowAnswersToEditor() {
     val questionnaire = createQuestionnaire(QuestionnaireType.SURVEY)
     val content = createTextContent(questionnaire.id!!)

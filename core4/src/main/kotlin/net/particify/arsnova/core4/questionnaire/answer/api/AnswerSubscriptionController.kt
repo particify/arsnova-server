@@ -41,8 +41,8 @@ class AnswerSubscriptionController(
    * security context, and reinstated for every fetch. Emissions run on another thread where the
    * thread-bound context is absent, and the visibility gating in
    * [AnswerServiceImpl.findTextAnswersByRoundId] reads it to decide whether the caller may see
-   * unpublished answers. Permissions are therefore evaluated as of subscription time; a role change
-   * only takes effect once the client resubscribes.
+   * unpublished and hidden answers. Permissions are therefore evaluated as of subscription time; a
+   * role change only takes effect once the client resubscribes.
    */
   @SubscriptionMapping
   @PreAuthorize("hasPermission(#roundId, 'Round', 'read')")
