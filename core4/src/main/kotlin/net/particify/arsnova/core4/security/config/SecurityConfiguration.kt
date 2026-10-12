@@ -12,6 +12,7 @@ import net.particify.arsnova.core4.security.internal.Http401UnauthenticatedEntry
 import net.particify.arsnova.core4.security.internal.RefreshAuthenticationFilter
 import net.particify.arsnova.core4.security.internal.RefreshableRelyingPartyRegistrationRepository
 import net.particify.arsnova.core4.security.internal.Saml2AssertionConsumerServiceConfigurer
+import net.particify.arsnova.core4.security.internal.Saml2AuthenticationFailureHandler
 import net.particify.arsnova.core4.security.internal.Saml2ResponseValidation
 import net.particify.arsnova.core4.security.internal.Saml2SpMetadataFactory
 import net.particify.arsnova.core4.security.internal.UserJwtAuthenticationFilter
@@ -40,15 +41,7 @@ import org.springframework.security.saml2.provider.service.web.HttpSessionSaml2A
 import org.springframework.security.saml2.provider.service.web.Saml2AuthenticationRequestRepository
 import org.springframework.security.web.DefaultSecurityFilterChain
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-
-/**
- * What the SAML login DSL redirects a failed authentication to. Stated rather than left to the DSL,
- * because the assertion consumer services served next to it have to answer the same way and take
- * the handler built from this.
- */
-private const val SAML_LOGIN_FAILURE_URL = "/login?error"
 
 private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
 
@@ -133,8 +126,7 @@ class SecurityConfiguration(
       samlAuthenticationProvider.setResponseAuthenticationConverter(converter)
       val samlAuthenticationManager = ProviderManager(samlAuthenticationProvider)
       // One handler for both, so a change to how a failed login is answered lands once.
-      val samlAuthenticationFailureHandler =
-          SimpleUrlAuthenticationFailureHandler(SAML_LOGIN_FAILURE_URL)
+      val samlAuthenticationFailureHandler = Saml2AuthenticationFailureHandler(saml2Properties)
       http
           .saml2Login {
             it.authenticationManager(samlAuthenticationManager)
