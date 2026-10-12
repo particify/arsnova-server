@@ -126,6 +126,17 @@ class Round(
     recordStart(now)
   }
 
+  /**
+   * Closes answering and clears any countdown state, as for the round of a content which has yet to
+   * be presented in LIVE publishing mode.
+   */
+  fun closeWithoutCountdown(now: Instant = Instant.now()) {
+    recordExpiry(now)
+    closed = true
+    answeringEndTime = null
+    answeringPausedAt = null
+  }
+
   fun acceptsAnswers(now: Instant = Instant.now()) =
       !closed && answeringEndTime?.isAfter(now) != false
 

@@ -86,10 +86,7 @@ class ContentServiceImpl(
             abstentionsAllowed = abstentionsAllowed ?: true,
             points = if (formatData.hasCorrectAnswer()) Content.calculateBasePoints(weight) else 0)
     questionnaire.contents.add(content)
-    if (questionnaire.publishingMode != QuestionnairePublishingMode.ALL &&
-        questionnaire.publishedUpToContent == null) {
-      questionnaire.publishedUpToContent = content
-    }
+    releaseFirstContent(questionnaire, content)
     questionnaireRepository.save(questionnaire)
     var persistedContent = questionnaire.contents.last()
     val round = Round.initial(persistedContent, questionnaire.isLive())
@@ -162,9 +159,18 @@ class ContentServiceImpl(
     return id
   }
 
+  /** A questionnaire which releases contents one by one starts with its first one released. */
+  private fun releaseFirstContent(questionnaire: Questionnaire, content: Content) {
+    if (questionnaire.publishingMode != QuestionnairePublishingMode.ALL &&
+        questionnaire.publishedUpToContent == null) {
+      questionnaire.publishedUpToContent = content
+    }
+  }
+
   /**
-   * Keeps [questionnaire] from referencing [content] once it is deleted. A published range ending
-   * at the content shrinks to the preceding one instead of releasing the following one.
+   * Keeps [questionnaire] from referencing [content] once it is no longer part of it. A published
+   * range ending at the content shrinks to the preceding one instead of releasing the following
+   * one.
    */
   private fun releaseReferencesTo(content: Content, questionnaire: Questionnaire) {
     if (questionnaire.activeRound?.content?.id == content.id) questionnaire.activeRound = null
@@ -226,20 +232,46 @@ class ContentServiceImpl(
     return persistedContent
   }
 
+  /**
+   * The content leaves the source like a deleted one and joins the target like a new one: the
+   * source lets go of its pointers to it, and its round takes the state a new content's round has
+   * in the target's publishing mode.
+   */
   @Transactional
-  fun moveContentToQuestionnaire(content: Content, targetQuestionnaire: Questionnaire): Content {
-    val sourceQuestionnaire = content.questionnaire
-
-    if (sourceQuestionnaire!!.id == targetQuestionnaire.id) {
+  fun moveContentToQuestionnaire(contentId: UUID, targetQuestionnaireId: UUID): Content {
+    val content =
+        contentRepository.findByIdOrNull(contentId) ?: throw ContentNotFoundException(contentId)
+    val targetQuestionnaire =
+        questionnaireRepository.findByIdOrNull(targetQuestionnaireId)
+            ?: throw QuestionnaireNotFoundException(targetQuestionnaireId)
+    val sourceQuestionnaire = content.questionnaire!!
+    if (sourceQuestionnaire.id == targetQuestionnaire.id) {
       return content
     }
+    releaseReferencesTo(content, sourceQuestionnaire)
     sourceQuestionnaire.contents.remove(content)
     targetQuestionnaire.contents.add(content)
     content.questionnaire = targetQuestionnaire
+    releaseFirstContent(targetQuestionnaire, content)
+    alignRoundWith(content, targetQuestionnaire)
+    questionnaireRepository.save(sourceQuestionnaire)
+    questionnaireRepository.save(targetQuestionnaire)
     val persisted = contentRepository.save(content)
-    questionnaireEventPublisher.publishQuestionnairesChanged(sourceQuestionnaire)
-    questionnaireEventPublisher.publishQuestionnairesChanged(targetQuestionnaire)
+    listOf(sourceQuestionnaire, targetQuestionnaire).forEach {
+      questionnaireEventPublisher.publishQuestionnaireUpdated(it.id!!)
+      questionnaireEventPublisher.publishQuestionnairesChanged(it)
+    }
     return persisted
+  }
+
+  private fun alignRoundWith(content: Content, questionnaire: Questionnaire) {
+    val round = roundService.findByContentIdOrderByRoundNo(content.id!!).lastOrNull() ?: return
+    if (questionnaire.isLive()) {
+      round.closeWithoutCountdown()
+    } else {
+      round.openWithoutCountdown()
+    }
+    roundService.save(round)
   }
 
   @Deprecated(

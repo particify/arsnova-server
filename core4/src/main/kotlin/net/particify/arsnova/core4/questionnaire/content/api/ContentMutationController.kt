@@ -119,12 +119,7 @@ class ContentMutationController(
       @Argument contentId: UUID,
       @Argument questionnaireId: UUID
   ): Content {
-    val content =
-        contentService.findByIdOrNull(contentId) ?: throw ContentNotFoundException(contentId)
-    val questionnaire =
-        questionnaireService.findByIdOrNull(questionnaireId)
-            ?: throw QuestionnaireNotFoundException(questionnaireId)
-    return contentService.moveContentToQuestionnaire(content, questionnaire)
+    return contentService.moveContentToQuestionnaire(contentId, questionnaireId)
   }
 
   @MutationMapping
