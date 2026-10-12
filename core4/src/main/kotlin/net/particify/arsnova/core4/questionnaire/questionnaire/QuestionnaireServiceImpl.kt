@@ -195,9 +195,7 @@ class QuestionnaireServiceImpl(
                 statisticsPublished = original.statisticsPublished,
                 correctOptionsPublished = original.correctOptionsPublished,
                 leaderboardEnabled = original.leaderboardEnabled,
-                sourceTemplateId = original.sourceTemplateId,
-                sourceTemplateLicenseId = original.sourceTemplateLicenseId,
-                sourceTemplateAttribution = original.sourceTemplateAttribution))
+                sourceTemplateId = original.sourceTemplateId))
     original.contents.toList().forEach { contentServiceImpl.duplicate(it, copy) }
     copy.publishedUpToContent = copiedPublishedUpToContent(original, copy)
     val persisted = questionnaireRepository.save(copy)

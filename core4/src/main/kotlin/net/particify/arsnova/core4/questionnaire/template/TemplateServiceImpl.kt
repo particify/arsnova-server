@@ -162,15 +162,19 @@ class TemplateServiceImpl(
   }
 
   /**
-   * The licence of the templates the questionnaire's contents were copied from. A copy of a
-   * licensed template may only be republished under exactly that licence, so contents copied under
-   * different licences cannot be combined into a template at all.
+   * The licence of the templates the questionnaire's contents were copied from, upstream ones
+   * included. A copy of a licensed template may only be republished under exactly that licence, so
+   * contents copied under different licences cannot be combined into a template at all.
    */
   private fun findInheritedLicenseId(questionnaireId: UUID): String? {
     val licenseIds =
         templateQuestionnaireService
             .findContentsCopiedFromTemplates(questionnaireId)
-            .mapNotNull { it.sourceTemplateLicenseId }
+            .flatMap { content ->
+              listOf(content.sourceTemplateLicenseId) +
+                  content.upstreamAttributions.map { it.licenseId }
+            }
+            .filterNotNull()
             .distinct()
     if (licenseIds.size > 1) {
       throw InvalidInputException(

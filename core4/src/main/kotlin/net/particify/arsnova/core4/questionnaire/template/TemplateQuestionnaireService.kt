@@ -8,6 +8,7 @@ import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
+import net.particify.arsnova.core4.questionnaire.content.TemplateCredit
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireWithNameAlreadyExistsException
 import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
@@ -124,13 +125,12 @@ class TemplateQuestionnaireService(
     }
     val copy = questionnaireServiceImpl.duplicate(roomless, roomId, name)
     copy.sourceTemplateId = template.id
-    copy.sourceTemplateLicenseId = template.license?.id
-    copy.sourceTemplateAttribution = template.attribution
     copy.contents.zip(roomless.contents).forEach { (copiedContent, templateContent) ->
       resetRuntimeState(copiedContent)
       copiedContent.sourceTemplateId = template.id
       copiedContent.sourceContentId = templateContent.id
       copiedContent.sourceTemplateLicenseId = template.license?.id
+      copiedContent.sourceTemplateAttribution = template.attribution
       contentRepository.save(copiedContent)
     }
     return questionnaireServiceImpl.save(copy)
@@ -154,19 +154,27 @@ class TemplateQuestionnaireService(
    * Template provenance counts as runtime state as well: it records which template a room's
    * questionnaire was copied from, so a room-less questionnaire, which holds a template's own
    * contents, never carries any, and a room copy only carries the provenance [createRoomCopy] sets.
+   * The credit it held moves to the upstream credits instead, which a template's contents keep and
+   * hand on to their copies.
    */
   private fun resetRuntimeState(content: Content) {
     content.formatData = content.formatData?.withoutRuntimeState()
+    content.sourceTemplateId?.let { templateId ->
+      val credit =
+          TemplateCredit(
+              templateId, content.sourceTemplateLicenseId, content.sourceTemplateAttribution)
+      content.upstreamAttributions =
+          (listOf(credit) + content.upstreamAttributions).distinctBy { it.templateId }
+    }
     content.sourceTemplateId = null
     content.sourceContentId = null
     content.sourceTemplateLicenseId = null
+    content.sourceTemplateAttribution = null
     contentRepository.save(content)
   }
 
   private fun clearProvenance(questionnaire: Questionnaire) {
     questionnaire.sourceTemplateId = null
-    questionnaire.sourceTemplateLicenseId = null
-    questionnaire.sourceTemplateAttribution = null
   }
 
   private fun findQuestionnaire(id: UUID): Questionnaire =

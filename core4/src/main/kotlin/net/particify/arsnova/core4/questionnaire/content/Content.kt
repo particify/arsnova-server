@@ -43,8 +43,12 @@ data class Content(
     @Embedded var auditMetadata: AuditMetadata = AuditMetadata(),
     var sourceTemplateId: UUID? = null,
     var sourceContentId: UUID? = null,
-    // Snapshot per content, so a content moved into another questionnaire keeps its licence.
+    // Snapshots per content, so a content moved into another questionnaire keeps its licence and
+    // its credit.
     var sourceTemplateLicenseId: String? = null,
+    var sourceTemplateAttribution: String? = null,
+    // The templates the template this content was copied from was made from, nearest first.
+    @JdbcTypeCode(SqlTypes.JSON) var upstreamAttributions: List<TemplateCredit> = listOf(),
 ) {
   companion object {
     const val MAX_DURATION = 3600L
@@ -103,6 +107,8 @@ data class Content(
         sourceTemplateId = this.sourceTemplateId,
         sourceContentId = this.sourceContentId,
         sourceTemplateLicenseId = this.sourceTemplateLicenseId,
+        sourceTemplateAttribution = this.sourceTemplateAttribution,
+        upstreamAttributions = this.upstreamAttributions,
     )
   }
 }

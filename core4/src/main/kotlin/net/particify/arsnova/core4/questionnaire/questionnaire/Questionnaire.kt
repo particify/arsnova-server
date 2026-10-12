@@ -42,8 +42,6 @@ class Questionnaire(
     @ManyToOne var activeRound: Round? = null,
     @Embedded var auditMetadata: AuditMetadata = AuditMetadata(),
     var sourceTemplateId: UUID? = null,
-    var sourceTemplateLicenseId: String? = null,
-    var sourceTemplateAttribution: String? = null,
 ) {
   companion object {
     const val MAX_NAME_LENGTH = 50

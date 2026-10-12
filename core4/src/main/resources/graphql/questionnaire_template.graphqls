@@ -13,6 +13,9 @@ extend type Query {
     before: String
   ): TemplateConnection
   templateById(id: UUID!): Template
+  templateContentAttributionsByQuestionnaireId(
+    questionnaireId: UUID!
+  ): [TemplateContentAttribution!]!
   templateLicenses: [TemplateLicense!]!
   templateTagsByLanguage(
     language: String!
@@ -55,6 +58,14 @@ type Template {
   updatedAt: DateTime
 }
 
+type TemplateContentAttribution {
+  attribution: String
+  contentId: ID!
+  license: TemplateLicense
+  templateId: ID!
+  upstreamAttributions: [TemplateUpstreamAttribution!]!
+}
+
 type TemplateLicense {
   id: ID!
   name: String!
@@ -66,6 +77,12 @@ type TemplateTag {
   language: String!
   name: String!
   verified: Boolean!
+}
+
+type TemplateUpstreamAttribution {
+  attribution: String
+  license: TemplateLicense
+  templateId: ID!
 }
 
 input TemplateQueryInput {

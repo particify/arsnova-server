@@ -8,6 +8,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager
 import java.util.UUID
 import net.particify.arsnova.core4.license.License
+import net.particify.arsnova.core4.license.LicenseService
 import net.particify.arsnova.core4.questionnaire.exception.TemplateNotFoundException
 import net.particify.arsnova.core4.questionnaire.template.QTemplate
 import net.particify.arsnova.core4.questionnaire.template.Template
@@ -36,6 +37,7 @@ class TemplateQueryController(
     private val templateService: TemplateServiceImpl,
     private val templateTagService: TemplateTagServiceImpl,
     private val templateQuestionnaireService: TemplateQuestionnaireService,
+    private val licenseService: LicenseService,
     private val entityManager: EntityManager,
 ) {
   companion object {
@@ -102,6 +104,37 @@ class TemplateQueryController(
   @PreAuthorize("hasPermission(#id, 'Template', 'read')")
   fun templateById(@Argument id: UUID): Template {
     return templateService.findByIdOrNull(id) ?: throw TemplateNotFoundException(id)
+  }
+
+  /**
+   * Reads the snapshot each content took when it was copied, so the credits survive the template
+   * being unpublished or deleted, and go along when the content moves to another questionnaire.
+   * Licences are never deleted. Each content reports the licence it was copied under, which is also
+   * the one a template made from it has to keep.
+   */
+  @QueryMapping
+  @PreAuthorize("hasPermission(#questionnaireId, 'Questionnaire', 'read')")
+  fun templateContentAttributionsByQuestionnaireId(
+      @Argument questionnaireId: UUID
+  ): List<TemplateContentAttribution> {
+    val contents = templateQuestionnaireService.findContentsCopiedFromTemplates(questionnaireId)
+    val licenseIds =
+        contents.flatMap { content ->
+          listOf(content.sourceTemplateLicenseId) +
+              content.upstreamAttributions.map { it.licenseId }
+        }
+    val licenses =
+        licenseService.findAllById(licenseIds.filterNotNull().toSet()).associateBy { it.id }
+    return contents.map { content ->
+      TemplateContentAttribution(
+          content.sourceTemplateAttribution,
+          content.id!!,
+          licenses[content.sourceTemplateLicenseId],
+          content.sourceTemplateId!!,
+          content.upstreamAttributions.map {
+            TemplateUpstreamAttribution(it.attribution, licenses[it.licenseId], it.templateId)
+          })
+    }
   }
 
   @QueryMapping
