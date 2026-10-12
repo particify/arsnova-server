@@ -80,6 +80,17 @@ class AnswerServiceImpl(
   private fun basePoints(content: Content): Int =
       content.points ?: Content.calculateBasePoints(content.weight)
 
+  /** The points an answer given at [at] earns; none once the round's countdown ran out. */
+  private fun achievedPoints(
+      round: Round,
+      content: Content,
+      formatData: AnswerFormatData,
+      at: Instant?
+  ): Int {
+    if (at != null && !round.scoresAnswerAt(at)) return 0
+    return content.formatData!!.calculateAchievedPoints(formatData, basePoints(content))
+  }
+
   /**
    * Both the correctness test and any format-specific answer validation belong to the content's
    * format data, so this path is the same for every format.
@@ -93,7 +104,7 @@ class AnswerServiceImpl(
     val contentFormatData = content.formatData!!
     contentFormatData.validateAnswer(formatData)
     val result = contentFormatData.evaluateAnswer(formatData)
-    val achievedPoints = contentFormatData.calculateAchievedPoints(formatData, basePoints(content))
+    val achievedPoints = achievedPoints(round, content, formatData, now)
     val answer =
         Answer(
             round = round,
@@ -190,14 +201,15 @@ class AnswerServiceImpl(
         scorableAnswerCount++
         if (it.points != null) maxScore += it.points!!
       }
-      val answer: Answer? = findByRoundIdAndAuditMetadataCreatedBy(it.activeRound!!.id!!, userId)
+      val round = it.activeRound!!
+      val answer: Answer? = findByRoundIdAndAuditMetadataCreatedBy(round.id!!, userId)
       // The result decides whether an answer counts as correct, not the points: older stored
       // answers carry points of 0 rather than none at all even when they are wrong.
       if (answer?.result == AnswerResultState.CORRECT) correctAnswerCount++
       // The score cannot be derived from the result, since a partially correct answer is worth part
       // of the content while its result is not CORRECT.
       val answerFormatData = answer?.formatData ?: return@forEach
-      achievedScore += contentFormatData.calculateAchievedPoints(answerFormatData, basePoints(it))
+      achievedScore += achievedPoints(round, it, answerFormatData, answer.auditMetadata.createdAt)
     }
     return QuestionnaireAnswerResult(
         questionnaireId, correctAnswerCount, scorableAnswerCount, achievedScore, maxScore)

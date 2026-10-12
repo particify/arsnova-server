@@ -3,6 +3,7 @@
  */
 package net.particify.arsnova.core4.questionnaire.answer
 
+import java.time.Instant
 import java.util.Optional
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
@@ -48,7 +49,11 @@ class AnswerServiceImplScoringTest {
     }
   }
 
-  private fun content(weight: Int, points: Int? = null): Content {
+  private fun content(
+      weight: Int,
+      points: Int? = null,
+      answeringExpiredAt: Instant? = null
+  ): Content {
     val content =
         Content(
             id = UUID.randomUUID(),
@@ -56,7 +61,8 @@ class AnswerServiceImplScoringTest {
             formatData = ChoiceContentFormatData(OPTIONS, listOf(0, 1), true),
             weight = weight,
             points = points)
-    val round = Round(id = UUID.randomUUID(), content = content)
+    val round =
+        Round(id = UUID.randomUUID(), content = content, answeringExpiredAt = answeringExpiredAt)
     content.activeRound = round
     Mockito.`when`(roundRepository.findById(round.id!!)).thenReturn(Optional.of(round))
     return content
@@ -104,6 +110,36 @@ class AnswerServiceImplScoringTest {
     Assertions.assertEquals(3, results.scorableAnswerCount)
     Assertions.assertEquals(Content.BASE_POINTS + HALF_OF_DOUBLE_WEIGHT, results.achievedScore)
     Assertions.assertEquals(4 * Content.BASE_POINTS, results.maxScore)
+  }
+
+  @Test
+  fun shouldStoreAnswerGivenAfterTheCountdownRanOutWithoutPoints() {
+    val expired = content(weight = 1, answeringExpiredAt = Instant.now().minusSeconds(60))
+    val stored = answer(expired, 0, 1)
+    Assertions.assertEquals(AnswerResultState.CORRECT, stored.result)
+    Assertions.assertNull(stored.points)
+  }
+
+  @Test
+  fun shouldCountButNotScoreAnswerGivenAfterTheCountdownRanOut() {
+    val expired =
+        content(
+            weight = 1,
+            points = Content.BASE_POINTS,
+            answeringExpiredAt = Instant.now().minusSeconds(60))
+    givenOwnAnswer(expired, Answer(result = AnswerResultState.CORRECT, formatData = choice(0, 1)))
+    Mockito.`when`(
+            contentServiceImpl.findByQuestionnaireIdOrderByPosition(
+                questionnaire.id!!, ScrollPosition.offset()))
+        .thenReturn(Window.from(listOf(expired)) { ScrollPosition.offset() })
+
+    val results =
+        answerService.findQuestionnaireAnswerResults(
+            questionnaire.id!!, USER_ID, ScrollSubrange.create(null, null, true))
+
+    Assertions.assertEquals(1, results.correctAnswerCount)
+    Assertions.assertEquals(0, results.achievedScore)
+    Assertions.assertEquals(Content.BASE_POINTS, results.maxScore)
   }
 
   private fun choice(vararg selectedChoiceIndexes: Int) =

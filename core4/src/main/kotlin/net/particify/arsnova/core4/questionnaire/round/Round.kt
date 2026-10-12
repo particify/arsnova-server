@@ -16,6 +16,15 @@ import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.common.UuidGenerator
 import net.particify.arsnova.core4.questionnaire.content.Content
 
+/**
+ * A round keeps two instants of its lifecycle besides its countdown. [answeringStartedAt] is set
+ * the first time answering opens and never changes, so a round which was never presented can be
+ * told from one which ran and was stopped. [answeringExpiredAt] is set once, when the countdown
+ * first ran out; a manual stop sets nothing. Answering can be restarted after the countdown ran
+ * out, so that a content can be presented again without losing its answers, but answers given after
+ * that instant earn no points: they are still evaluated, since the competition was over by then,
+ * not the question.
+ */
 @Entity
 @Table(schema = "questionnaire")
 class Round(
@@ -26,14 +35,42 @@ class Round(
     var closed: Boolean = false,
     var answeringEndTime: Instant? = null,
     var answeringPausedAt: Instant? = null,
+    var answeringStartedAt: Instant? = null,
+    var answeringExpiredAt: Instant? = null,
     @Embedded var auditMetadata: AuditMetadata = AuditMetadata(),
 ) {
+  /** Whether answering has ever been open. */
+  val started: Boolean
+    get() = answeringStartedAt != null
+
   /** Opens answering for a round that has never been opened before. */
   fun startAnswering(duration: Int?, now: Instant = Instant.now()) {
     closed = false
     answeringEndTime = duration?.takeIf { it > 0 }?.let { now.plusSeconds(it.toLong()) }
     answeringPausedAt = null
+    recordStart(now)
   }
+
+  private fun recordStart(now: Instant) {
+    if (answeringStartedAt == null) answeringStartedAt = now
+  }
+
+  /**
+   * Records the end of a countdown which ran out, once. A stopped round is judged by its pause
+   * instant, like [remainingAnsweringTime] does, so a stop with time left records nothing. Every
+   * state change calls this, and a state change is the only time a round is persisted, so a round
+   * which expired and was never touched again carries no record. It needs none: nobody could have
+   * answered it after it expired.
+   */
+  private fun recordExpiry(now: Instant) {
+    val endTime = answeringEndTime ?: return
+    if (answeringExpiredAt == null && !endTime.isAfter(answeringPausedAt ?: now)) {
+      answeringExpiredAt = endTime
+    }
+  }
+
+  /** Whether an answer given at [at] earns points, which it does not once the countdown ran out. */
+  fun scoresAnswerAt(at: Instant): Boolean = answeringExpiredAt?.isAfter(at) != false
 
   /**
    * The countdown left when answering was stopped, or null if this round has no countdown or its
@@ -63,12 +100,14 @@ class Round(
    * not reachable on its own: without a duration to fall back on it could only drop the countdown.
    */
   fun openAnswering(duration: Int?, now: Instant = Instant.now()) {
+    recordExpiry(now)
     val remaining = remainingAnsweringTime(now)
     if (remaining != null) resumeAnswering(remaining, now) else startAnswering(duration, now)
   }
 
   /** Stops answering. Idempotent: a repeated stop does not move the recorded pause instant. */
   fun stopAnswering(now: Instant = Instant.now()) {
+    recordExpiry(now)
     closed = true
     if (answeringPausedAt == null) {
       answeringPausedAt = now
@@ -79,10 +118,12 @@ class Round(
    * Opens answering with no countdown, clearing any countdown state. Used when leaving LIVE
    * publishing mode, where rounds are closed until presented.
    */
-  fun openWithoutCountdown() {
+  fun openWithoutCountdown(now: Instant = Instant.now()) {
+    recordExpiry(now)
     closed = false
     answeringEndTime = null
     answeringPausedAt = null
+    recordStart(now)
   }
 
   fun acceptsAnswers(now: Instant = Instant.now()) =
@@ -103,5 +144,15 @@ class Round(
 
   companion object {
     private const val MILLIS_PER_SECOND = 1000L
+
+    /**
+     * The first round of [content]: closed until the content is presented in LIVE publishing mode,
+     * open right away in the other modes.
+     */
+    fun initial(content: Content, live: Boolean, now: Instant = Instant.now()): Round {
+      val round = Round(content = content, roundNo = 1, closed = live)
+      if (!live) round.openWithoutCountdown(now)
+      return round
+    }
   }
 }

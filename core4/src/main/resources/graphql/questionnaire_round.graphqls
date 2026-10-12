@@ -24,6 +24,7 @@ type Round {
   contentId: ID
   roundNo: Int!
   closed: Boolean!
+  started: Boolean!
   answeringEndTime: DateTime
   answerable: Boolean!
 }

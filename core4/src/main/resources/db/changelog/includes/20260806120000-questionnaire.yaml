@@ -236,6 +236,12 @@ databaseChangeLog:
                   name: answering_paused_at
                   type: timestamp with time zone
               - column:
+                  name: answering_started_at
+                  type: timestamp with time zone
+              - column:
+                  name: answering_expired_at
+                  type: timestamp with time zone
+              - column:
                   name: created_by
                   type: uuid
                   constraints:

@@ -15,7 +15,6 @@ import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.event.RoundDeletedEvent
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.RoundsNotSupportedException
-import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnairePublishingMode
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireRepository
 import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
 import net.particify.arsnova.core4.questionnaire.round.api.AnswerChangedEvent
@@ -63,12 +62,7 @@ class RoundServiceImpl(
     }
     content.activeRound = null
     deleteByContentId(contentId)
-    val round =
-        Round(
-            content = content,
-            roundNo = 1,
-            closed = questionnaire.publishingMode == QuestionnairePublishingMode.LIVE)
-    val persistedRound = roundRepository.save(round)
+    val persistedRound = roundRepository.save(Round.initial(content, questionnaire.isLive()))
     content.activeRound = persistedRound
     contentRepository.save(content)
     publishRoundsChanged(content)
@@ -82,13 +76,13 @@ class RoundServiceImpl(
     val format = content.formatData!!
     if (!format.supportsRounds()) throw RoundsNotSupportedException(format.format)
     val questionnaire = content.questionnaire!!
-    val live = questionnaire.publishingMode == QuestionnairePublishingMode.LIVE
+    val live = questionnaire.isLive()
     val currentRound = content.activeRound
     currentRound?.let { stopAnswering(it) }
     // Only LIVE presents one content at a time; elsewhere other contents' rounds stay open.
     if (live) questionnaire.activeRound?.let { stopAnswering(it) }
-    val round = Round(content = content, roundNo = (currentRound?.roundNo ?: 0) + 1, closed = false)
-    if (live) startLiveAnswering(round, format, content.duration)
+    val round = Round(content = content, roundNo = (currentRound?.roundNo ?: 0) + 1)
+    if (live) startLiveAnswering(round, format, content.duration) else round.openWithoutCountdown()
     val persistedRound = roundRepository.save(round)
     content.activeRound = persistedRound
     val persistedContent = contentRepository.save(content)

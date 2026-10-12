@@ -92,10 +92,7 @@ class ContentServiceImpl(
     }
     questionnaireRepository.save(questionnaire)
     var persistedContent = questionnaire.contents.last()
-    val round =
-        Round(
-            content = persistedContent,
-            closed = questionnaire.publishingMode == QuestionnairePublishingMode.LIVE)
+    val round = Round.initial(persistedContent, questionnaire.isLive())
     val persistedRound = roundService.save(round)
     persistedContent.activeRound = persistedRound
     persistedContent = contentRepository.save(persistedContent)
@@ -219,10 +216,7 @@ class ContentServiceImpl(
     questionnaire!!.contents.add(newContent)
     val persistedQuestionnaire = questionnaireRepository.save(questionnaire)
     var persistedContent = persistedQuestionnaire.contents.last()
-    val round =
-        Round(
-            content = persistedContent,
-            closed = questionnaire.publishingMode == QuestionnairePublishingMode.LIVE)
+    val round = Round.initial(persistedContent, questionnaire.isLive())
     val persistedRound = roundService.save(round)
     persistedContent.activeRound = persistedRound
     persistedContent = contentRepository.save(persistedContent)

@@ -4,6 +4,7 @@
 package net.particify.arsnova.core4.questionnaire.round
 
 import java.time.Instant
+import net.particify.arsnova.core4.questionnaire.content.Content
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -166,6 +167,113 @@ class RoundTest {
     round.openAnswering(DURATION_SECONDS.toInt(), NOW)
     Assertions.assertEquals(NOW.plusSeconds(DURATION_SECONDS), round.answeringEndTime)
     Assertions.assertFalse(round.closed)
+  }
+
+  @Test
+  fun shouldRecordWhenTheCountdownRanOutWhenRestartedAfterExpiry() {
+    val round = Round()
+    round.startAnswering(DURATION_SECONDS.toInt(), NOW)
+    val expiredAt = NOW.plusSeconds(DURATION_SECONDS)
+    round.openAnswering(DURATION_SECONDS.toInt(), NOW.plusSeconds(DURATION_SECONDS + 20))
+    Assertions.assertEquals(expiredAt, round.answeringExpiredAt)
+    Assertions.assertTrue(round.scoresAnswerAt(expiredAt.minusSeconds(1)))
+    Assertions.assertFalse(round.scoresAnswerAt(expiredAt))
+    Assertions.assertFalse(round.scoresAnswerAt(NOW.plusSeconds(DURATION_SECONDS + 25)))
+  }
+
+  @Test
+  fun shouldKeepTheFirstExpiryWhenRestartedAgain() {
+    val round = Round()
+    round.startAnswering(DURATION_SECONDS.toInt(), NOW)
+    round.openAnswering(DURATION_SECONDS.toInt(), NOW.plusSeconds(DURATION_SECONDS + 20))
+    round.openAnswering(DURATION_SECONDS.toInt(), NOW.plusSeconds(3 * DURATION_SECONDS))
+    Assertions.assertEquals(NOW.plusSeconds(DURATION_SECONDS), round.answeringExpiredAt)
+  }
+
+  @Test
+  fun shouldRecordNoExpiryWhenStoppedWithTimeLeft() {
+    val round = Round()
+    round.startAnswering(DURATION_SECONDS.toInt(), NOW)
+    round.stopAnswering(NOW.plusSeconds(10))
+    round.openAnswering(DURATION_SECONDS.toInt(), NOW.plusSeconds(DURATION_SECONDS + 20))
+    Assertions.assertNull(round.answeringExpiredAt)
+    Assertions.assertTrue(round.scoresAnswerAt(NOW.plusSeconds(DURATION_SECONDS + 25)))
+  }
+
+  @Test
+  fun shouldRecordExpiryWhenStoppedAfterTheCountdownRanOut() {
+    val round = Round()
+    round.startAnswering(DURATION_SECONDS.toInt(), NOW)
+    round.stopAnswering(NOW.plusSeconds(DURATION_SECONDS + 10))
+    round.openAnswering(DURATION_SECONDS.toInt(), NOW.plusSeconds(DURATION_SECONDS + 20))
+    Assertions.assertEquals(NOW.plusSeconds(DURATION_SECONDS), round.answeringExpiredAt)
+  }
+
+  @Test
+  fun shouldRecordExpiryWhenOpenedWithoutCountdownAfterItRanOut() {
+    val expired = Round()
+    expired.startAnswering(DURATION_SECONDS.toInt(), NOW)
+    expired.openWithoutCountdown(NOW.plusSeconds(DURATION_SECONDS + 10))
+    Assertions.assertEquals(NOW.plusSeconds(DURATION_SECONDS), expired.answeringExpiredAt)
+    val stopped = Round()
+    stopped.startAnswering(DURATION_SECONDS.toInt(), NOW)
+    stopped.stopAnswering(NOW.plusSeconds(10))
+    stopped.openWithoutCountdown(NOW.plusSeconds(DURATION_SECONDS + 10))
+    Assertions.assertNull(stopped.answeringExpiredAt)
+  }
+
+  @Test
+  fun shouldScoreEveryAnswerWithoutExpiry() {
+    val round = Round()
+    round.startAnswering(null, NOW)
+    round.openAnswering(null, NOW.plusSeconds(DURATION_SECONDS * 100))
+    Assertions.assertNull(round.answeringExpiredAt)
+    Assertions.assertTrue(round.scoresAnswerAt(NOW.plusSeconds(DURATION_SECONDS * 200)))
+  }
+
+  @Test
+  fun shouldRecordTheStartOnceWhenAnsweringOpens() {
+    val round = Round()
+    Assertions.assertFalse(round.started)
+    Assertions.assertNull(round.answeringStartedAt)
+    round.startAnswering(DURATION_SECONDS.toInt(), NOW)
+    Assertions.assertTrue(round.started)
+    Assertions.assertEquals(NOW, round.answeringStartedAt)
+    round.stopAnswering(NOW.plusSeconds(10))
+    Assertions.assertTrue(round.started)
+    round.openAnswering(DURATION_SECONDS.toInt(), NOW.plusSeconds(15))
+    round.openAnswering(DURATION_SECONDS.toInt(), NOW.plusSeconds(3 * DURATION_SECONDS))
+    Assertions.assertEquals(NOW, round.answeringStartedAt)
+  }
+
+  @Test
+  fun shouldRecordTheStartWhenOpenedWithoutCountdown() {
+    val round = Round(closed = true)
+    round.openWithoutCountdown(NOW)
+    Assertions.assertEquals(NOW, round.answeringStartedAt)
+  }
+
+  @Test
+  fun shouldStartTheInitialRoundOutsideLiveModeOnly() {
+    val live = Round.initial(Content(), live = true, now = NOW)
+    Assertions.assertTrue(live.closed)
+    Assertions.assertFalse(live.started)
+    val open = Round.initial(Content(), live = false, now = NOW)
+    Assertions.assertFalse(open.closed)
+    Assertions.assertEquals(NOW, open.answeringStartedAt)
+    Assertions.assertTrue(open.acceptsAnswers(NOW.plusSeconds(DURATION_SECONDS * 100)))
+  }
+
+  @Test
+  fun shouldRecordExpiryWhenStoppedAfterTheCountdownRanOutWithoutReopening() {
+    val round = Round()
+    round.startAnswering(DURATION_SECONDS.toInt(), NOW)
+    round.stopAnswering(NOW.plusSeconds(DURATION_SECONDS + 10))
+    Assertions.assertEquals(NOW.plusSeconds(DURATION_SECONDS), round.answeringExpiredAt)
+    val stoppedInTime = Round()
+    stoppedInTime.startAnswering(DURATION_SECONDS.toInt(), NOW)
+    stoppedInTime.stopAnswering(NOW.plusSeconds(10))
+    Assertions.assertNull(stoppedInTime.answeringExpiredAt)
   }
 
   @Test

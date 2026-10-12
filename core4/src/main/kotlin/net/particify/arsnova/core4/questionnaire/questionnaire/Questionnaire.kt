@@ -40,4 +40,6 @@ class Questionnaire(
     @ManyToOne var publishedUpToContent: Content? = null,
     @ManyToOne var activeRound: Round? = null,
     @Embedded var auditMetadata: AuditMetadata = AuditMetadata(),
-)
+) {
+  fun isLive(): Boolean = publishingMode == QuestionnairePublishingMode.LIVE
+}
