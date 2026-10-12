@@ -10,6 +10,11 @@ class SlideContentFormatData : ContentFormatData {
 
   override fun answerable() = false
 
+  /** A slide carries no settings, so every instance equals every other. */
+  override fun equals(other: Any?): Boolean = other is SlideContentFormatData
+
+  override fun hashCode(): Int = format.hashCode()
+
   /** An update of another format would reinterpret the content's rounds and answers. */
   override fun validateChange(current: ContentFormatData, hasAnswers: () -> Boolean) {
     if (current !is SlideContentFormatData) {

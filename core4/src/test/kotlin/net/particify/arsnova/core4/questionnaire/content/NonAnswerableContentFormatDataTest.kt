@@ -41,6 +41,14 @@ class NonAnswerableContentFormatDataTest {
   }
 
   @Test
+  fun shouldTreatEverySlideAsEqual() {
+    Assertions.assertEquals(SlideContentFormatData(), SlideContentFormatData())
+    Assertions.assertEquals(
+        SlideContentFormatData().hashCode(), SlideContentFormatData().hashCode())
+    Assertions.assertNotEquals(SlideContentFormatData(), FlashcardContentFormatData("Back"))
+  }
+
+  @Test
   fun shouldAcceptSlideWithoutFurtherData() {
     SlideContentFormatData().validate()
   }
