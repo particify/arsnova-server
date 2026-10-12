@@ -38,20 +38,26 @@ class QuestionnaireSchemaTests {
   fun shouldRequireTheArgumentsTheResolversCannotDoWithout() {
     assertRequired(mutation("createQuestionnaire"), "input")
     assertRequired(mutation("createQuestionnaireChoiceAnswer"), "input")
+    assertRequired(mutation("createQuestionnaireTextAnswer"), "input")
     assertRequired(mutation("createQuestionnaireWordcloudAnswer"), "input")
     assertRequired(mutation("createQuestionnaireAbstention"), "roundId")
     assertRequired(mutation("deleteQuestionnaireAnswersByContentId"), "contentId")
     assertRequired(mutation("createQuestionnaireChoiceContent"), "input")
     assertRequired(mutation("createQuestionnaireFlashcardContent"), "input")
     assertRequired(mutation("createQuestionnaireSlideContent"), "input")
+    assertRequired(mutation("createQuestionnaireTextContent"), "input")
     assertRequired(mutation("createQuestionnaireWordcloudContent"), "input")
     assertRequired(mutation("updateQuestionnaireChoiceContent"), "input")
     assertRequired(mutation("updateQuestionnaireFlashcardContent"), "input")
     assertRequired(mutation("updateQuestionnaireSlideContent"), "input")
+    assertRequired(mutation("updateQuestionnaireTextContent"), "input")
     assertRequired(mutation("updateQuestionnaireWordcloudContent"), "input")
     assertRequired(mutation("updateQuestionnaireContentOrder"), "questionnaireId", "contentIds")
     assertRequired(mutation("banQuestionnaireWordcloudContentKeyword"), "contentId", "keyword")
     assertRequired(mutation("resetBannedQuestionnaireWordcloudContentKeywords"), "contentId")
+    assertRequired(mutation("toggleQuestionnaireTextAnswerHidden"), "answerId", "hidden")
+    assertRequired(
+        mutation("toggleQuestionnaireTextContentAnswersPublished"), "contentId", "published")
   }
 
   /** Every format's content mutations share one result type: a nullable Content. */

@@ -11,7 +11,7 @@ extend type Query {
 
 extend type Mutation {
   createQuestionnaireChoiceAnswer(input: CreateChoiceAnswerInput!): Answer
-  createQuestionnaireTextAnswer(input: CreateTextAnswerInput): Answer
+  createQuestionnaireTextAnswer(input: CreateTextAnswerInput!): Answer
   createQuestionnaireWordcloudAnswer(input: CreateWordcloudAnswerInput!): Answer
   createQuestionnaireAbstention(roundId: UUID!): Answer
   deleteQuestionnaireAnswersByContentId(contentId: UUID!): Boolean
