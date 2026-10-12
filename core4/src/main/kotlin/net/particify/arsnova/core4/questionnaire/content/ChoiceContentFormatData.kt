@@ -36,6 +36,10 @@ data class ChoiceContentFormatData(
     if (correctIndexes.distinct().size != correctIndexes.size) {
       throw ContentFormatDataInvalidException("An option must not be marked correct twice")
     }
+    if (multiple != true && correctIndexes.size > 1) {
+      throw ContentFormatDataInvalidException(
+          "Only one option may be correct unless the content allows multiple selections")
+    }
   }
 
   /** An update of another format would reinterpret the content's rounds and answers. */

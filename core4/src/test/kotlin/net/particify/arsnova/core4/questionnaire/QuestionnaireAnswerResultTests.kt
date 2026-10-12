@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.graphql.ExecutionGraphQlService
-import org.springframework.graphql.data.query.ScrollSubrange
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
@@ -77,8 +76,7 @@ class QuestionnaireAnswerResultTests {
       answerService.createAnswer(content.activeRound!!.id!!, ChoiceAnswerFormatData(listOf(index)))
 
   private fun resultsOf(content: Content) =
-      answerService.findQuestionnaireAnswerResults(
-          content.questionnaire!!.id!!, OWNER_ID, ScrollSubrange.create(null, null, true))
+      answerService.findQuestionnaireAnswerResults(content.questionnaire!!.id!!, OWNER_ID)
 
   @Test
   fun shouldCountCorrectAnswerOnceWithItsPoints() {

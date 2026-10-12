@@ -36,7 +36,15 @@ class QuestionnaireSchemaTests {
   @Test
   fun shouldRequireTheArgumentsTheResolversCannotDoWithout() {
     assertRequired(mutation("createQuestionnaire"), "input")
+    assertRequired(mutation("createQuestionnaireChoiceAnswer"), "input")
+    assertRequired(mutation("createQuestionnaireWordcloudAnswer"), "input")
     assertRequired(mutation("createQuestionnaireAbstention"), "roundId")
+    assertRequired(mutation("deleteQuestionnaireAnswersByContentId"), "contentId")
+    assertRequired(mutation("createQuestionnaireChoiceContent"), "input")
+    assertRequired(mutation("createQuestionnaireWordcloudContent"), "input")
+    assertRequired(mutation("updateQuestionnaireChoiceContent"), "input")
+    assertRequired(mutation("updateQuestionnaireWordcloudContent"), "input")
+    assertRequired(mutation("updateQuestionnaireContentOrder"), "questionnaireId", "contentIds")
     assertRequired(mutation("banQuestionnaireWordcloudContentKeyword"), "contentId", "keyword")
     assertRequired(mutation("resetBannedQuestionnaireWordcloudContentKeywords"), "contentId")
   }

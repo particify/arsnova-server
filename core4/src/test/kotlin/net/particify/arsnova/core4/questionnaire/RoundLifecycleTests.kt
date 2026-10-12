@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.graphql.ExecutionGraphQlService
-import org.springframework.graphql.data.query.ScrollSubrange
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
@@ -96,9 +95,7 @@ class RoundLifecycleTests {
     val answer = answerService.createAnswer(reopened.id!!, ChoiceAnswerFormatData(listOf(0)))
     Assertions.assertEquals(AnswerResultState.CORRECT, answer.result)
     Assertions.assertNull(answer.points)
-    val results =
-        answerService.findQuestionnaireAnswerResults(
-            questionnaire.id!!, USER_ID, ScrollSubrange.create(null, null, true))
+    val results = answerService.findQuestionnaireAnswerResults(questionnaire.id!!, USER_ID)
     Assertions.assertEquals(1, results.correctAnswerCount)
     Assertions.assertEquals(0, results.achievedScore)
     Assertions.assertEquals(Content.BASE_POINTS, results.maxScore)

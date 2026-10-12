@@ -17,7 +17,6 @@ import net.particify.arsnova.core4.user.User
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
-import org.springframework.graphql.data.query.ScrollSubrange
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Controller
@@ -48,12 +47,10 @@ class AnswerQueryController(
   fun questionnaireContentAnswerResultsByQuestionnaireId(
       @Argument questionnaireId: UUID,
       @AuthenticationPrincipal user: User,
-      subrange: ScrollSubrange,
   ): List<ContentAnswerResult> {
     return answerResultVisibility.contentResults(
         questionnaireId,
-        answerServiceImpl.findQuestionnaireContentAnswerResults(
-            questionnaireId, user.id!!, subrange))
+        answerServiceImpl.findQuestionnaireContentAnswerResults(questionnaireId, user.id!!))
   }
 
   @QueryMapping
@@ -61,10 +58,9 @@ class AnswerQueryController(
   fun questionnaireAnswerResultsByQuestionnaireId(
       @Argument questionnaireId: UUID,
       @AuthenticationPrincipal user: User,
-      subrange: ScrollSubrange,
   ): QuestionnaireAnswerResult {
     return answerResultVisibility.questionnaireResult(
-        answerServiceImpl.findQuestionnaireAnswerResults(questionnaireId, user.id!!, subrange))
+        answerServiceImpl.findQuestionnaireAnswerResults(questionnaireId, user.id!!))
   }
 
   @SchemaMapping(typeName = "Answer")

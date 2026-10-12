@@ -9,10 +9,10 @@ extend type Query {
 }
 
 extend type Mutation {
-  createQuestionnaireChoiceAnswer(input: CreateChoiceAnswerInput): Answer
-  createQuestionnaireWordcloudAnswer(input: CreateWordcloudAnswerInput): Answer
+  createQuestionnaireChoiceAnswer(input: CreateChoiceAnswerInput!): Answer
+  createQuestionnaireWordcloudAnswer(input: CreateWordcloudAnswerInput!): Answer
   createQuestionnaireAbstention(roundId: UUID!): Answer
-  deleteQuestionnaireAnswersByContentId(contentId: UUID): Boolean
+  deleteQuestionnaireAnswersByContentId(contentId: UUID!): Boolean
 }
 
 type Answer {

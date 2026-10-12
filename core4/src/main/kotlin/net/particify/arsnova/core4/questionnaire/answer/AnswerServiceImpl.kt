@@ -25,7 +25,6 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.AuditorAware
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.graphql.data.query.ScrollSubrange
 import org.springframework.stereotype.Service
 
 @Service
@@ -151,18 +150,14 @@ class AnswerServiceImpl(
   @Transactional
   fun findQuestionnaireContentAnswerResults(
       questionnaireId: UUID,
-      userId: UUID,
-      subrange: ScrollSubrange
+      userId: UUID
   ): List<ContentAnswerResult> {
     val questionnaire =
         questionnaireRepository.findByIdOrNull(questionnaireId)
             ?: throw QuestionnaireNotFoundException(questionnaireId)
     val contents =
         contentServiceImpl
-            .findByQuestionnaireIdOrderByPosition(
-                questionnaireId,
-                subrange.position().orElse(ScrollPosition.offset()),
-            )
+            .findByQuestionnaireIdOrderByPosition(questionnaireId, ScrollPosition.offset())
             .filter { contentServiceImpl.isPublished(it, questionnaire) }
             .toList()
     return contents.map {
@@ -181,15 +176,11 @@ class AnswerServiceImpl(
   @Transactional
   fun findQuestionnaireAnswerResults(
       questionnaireId: UUID,
-      userId: UUID,
-      subrange: ScrollSubrange
+      userId: UUID
   ): QuestionnaireAnswerResult {
     val contents =
         contentServiceImpl
-            .findByQuestionnaireIdOrderByPosition(
-                questionnaireId,
-                subrange.position().orElse(ScrollPosition.offset()),
-            )
+            .findByQuestionnaireIdOrderByPosition(questionnaireId, ScrollPosition.offset())
             .toList()
     var correctAnswerCount = 0
     var scorableContentCount = 0

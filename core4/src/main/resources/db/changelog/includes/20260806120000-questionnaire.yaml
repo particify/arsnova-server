@@ -355,3 +355,13 @@ databaseChangeLog:
             referencedTableName: round
             referencedColumnNames: id
             constraintName: questionnaire_active_round_fkey
+        - addForeignKeyConstraint:
+            baseTableSchemaName: questionnaire
+            baseTableName: content
+            baseColumnNames: active_round_id
+            referencedTableSchemaName: questionnaire
+            referencedTableName: round
+            referencedColumnNames: id
+            constraintName: content_active_round_fkey
+            deferrable: true
+            initiallyDeferred: true

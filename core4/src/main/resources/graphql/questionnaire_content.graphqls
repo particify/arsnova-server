@@ -17,9 +17,9 @@ extend type Mutation {
     contentId: UUID!
     questionnaireId: UUID!
   ): Content
-  createQuestionnaireChoiceContent(input: CreateChoiceContentInput): Content
+  createQuestionnaireChoiceContent(input: CreateChoiceContentInput!): Content
   createQuestionnaireWordcloudContent(
-    input: CreateWordcloudContentInput
+    input: CreateWordcloudContentInput!
   ): Content
   deleteQuestionnaireContent(id: ID!): ID
   duplicateQuestionnaireContent(id: ID!): Content
@@ -28,9 +28,9 @@ extend type Mutation {
     questionnaireId: UUID!
   ): Content
   resetBannedQuestionnaireWordcloudContentKeywords(contentId: UUID!): Content
-  updateQuestionnaireChoiceContent(input: UpdateChoiceContentInput): Content
+  updateQuestionnaireChoiceContent(input: UpdateChoiceContentInput!): Content
   updateQuestionnaireWordcloudContent(
-    input: UpdateWordcloudContentInput
+    input: UpdateWordcloudContentInput!
   ): Content
 }
 

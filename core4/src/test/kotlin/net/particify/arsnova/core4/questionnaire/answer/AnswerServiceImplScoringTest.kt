@@ -21,7 +21,6 @@ import org.mockito.Mockito
 import org.springframework.data.domain.AuditorAware
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Window
-import org.springframework.graphql.data.query.ScrollSubrange
 
 private const val HALF_OF_DOUBLE_WEIGHT = 500
 private const val LEGACY_POINTS = 300
@@ -102,9 +101,7 @@ class AnswerServiceImplScoringTest {
                 questionnaire.id!!, ScrollPosition.offset()))
         .thenReturn(Window.from(listOf(correct, partial, abstained)) { ScrollPosition.offset() })
 
-    val results =
-        answerService.findQuestionnaireAnswerResults(
-            questionnaire.id!!, USER_ID, ScrollSubrange.create(null, null, true))
+    val results = answerService.findQuestionnaireAnswerResults(questionnaire.id!!, USER_ID)
 
     Assertions.assertEquals(1, results.correctAnswerCount)
     Assertions.assertEquals(3, results.scorableContentCount)
@@ -133,9 +130,7 @@ class AnswerServiceImplScoringTest {
                 questionnaire.id!!, ScrollPosition.offset()))
         .thenReturn(Window.from(listOf(expired)) { ScrollPosition.offset() })
 
-    val results =
-        answerService.findQuestionnaireAnswerResults(
-            questionnaire.id!!, USER_ID, ScrollSubrange.create(null, null, true))
+    val results = answerService.findQuestionnaireAnswerResults(questionnaire.id!!, USER_ID)
 
     Assertions.assertEquals(1, results.correctAnswerCount)
     Assertions.assertEquals(0, results.achievedScore)

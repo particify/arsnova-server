@@ -35,8 +35,6 @@ import org.junit.jupiter.api.function.Executable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
-import org.springframework.data.domain.ScrollPosition
-import org.springframework.graphql.data.query.ScrollSubrange
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
@@ -74,8 +72,6 @@ class QuestionnairePermissionTests {
   private lateinit var foreignQuestionnaire: Questionnaire
   private lateinit var foreignContent: Content
   private lateinit var foreignWordcloud: Content
-
-  private val subrange = ScrollSubrange.create(ScrollPosition.offset(), null, true)
 
   @BeforeEach
   fun createForeignQuestionnaire() {
@@ -226,11 +222,10 @@ class QuestionnairePermissionTests {
         { answerQueryController.questionnaireAnswerByRoundId(roundId, user) },
         {
           answerQueryController.questionnaireContentAnswerResultsByQuestionnaireId(
-              questionnaireId, user, subrange)
+              questionnaireId, user)
         },
         {
-          answerQueryController.questionnaireAnswerResultsByQuestionnaireId(
-              questionnaireId, user, subrange)
+          answerQueryController.questionnaireAnswerResultsByQuestionnaireId(questionnaireId, user)
         },
     )
   }
@@ -260,8 +255,7 @@ class QuestionnairePermissionTests {
     Assertions.assertNotNull(
         answerQueryController.questionnaireAnswerByRoundId(roundIdOf(content), user))
     Assertions.assertNotNull(
-        answerQueryController.questionnaireAnswerResultsByQuestionnaireId(
-            questionnaire.id!!, user, subrange))
+        answerQueryController.questionnaireAnswerResultsByQuestionnaireId(questionnaire.id!!, user))
   }
 
   @Test

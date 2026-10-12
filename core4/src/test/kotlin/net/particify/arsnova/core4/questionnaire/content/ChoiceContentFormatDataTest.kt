@@ -152,6 +152,13 @@ class ChoiceContentFormatDataTest {
     assertInvalid(ChoiceContentFormatData(OPTIONS, listOf(1, 1), true))
   }
 
+  @Test
+  fun shouldRejectSeveralCorrectOptionsForSingleChoice() {
+    assertInvalid(ChoiceContentFormatData(OPTIONS, listOf(0, 2), false))
+    assertInvalid(ChoiceContentFormatData(OPTIONS, listOf(0, 2), null))
+    ChoiceContentFormatData(OPTIONS, listOf(0, 2), true).validate()
+  }
+
   private fun assertInvalid(content: ChoiceContentFormatData) {
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) { content.validate() }
   }

@@ -13,7 +13,7 @@ extend type Mutation {
   updateQuestionnaire(input: UpdateQuestionnaireInput!): Questionnaire!
   updateQuestionnaireContentOrder(
     questionnaireId: UUID!
-    contentIds: [UUID!]
+    contentIds: [UUID!]!
   ): Questionnaire
 }
 
