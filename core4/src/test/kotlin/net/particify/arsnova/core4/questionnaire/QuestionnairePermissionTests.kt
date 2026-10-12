@@ -184,6 +184,19 @@ class QuestionnairePermissionTests {
   }
 
   @Test
+  fun shouldRejectCopyingAContentTheParticipantMayOnlyRead() {
+    val questionnaire = createPublishedQuestionnaire(SHARED_ROOM_ID)
+    val content = createChoiceContent(questionnaire)
+    authenticate(OTHER_USER_ID)
+    val ownQuestionnaire = createPublishedQuestionnaire(OTHER_USERS_ROOM_ID)
+    Assertions.assertNotNull(contentQueryController.questionnaireContentById(content.id!!))
+    assertAllDenied({
+      contentMutationController.copyQuestionnaireContentToQuestionnaire(
+          content.id!!, ownQuestionnaire.id!!)
+    })
+  }
+
+  @Test
   fun shouldRejectPublishingAndRoundOperationsOfNonMember() {
     val contentId = foreignContent.id!!
     val questionnaireId = foreignQuestionnaire.id!!

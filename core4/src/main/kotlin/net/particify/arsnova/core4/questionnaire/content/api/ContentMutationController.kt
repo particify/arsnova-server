@@ -97,7 +97,7 @@ class ContentMutationController(
 
   @MutationMapping
   @PreAuthorize(
-      "hasPermission(#contentId, 'Content', 'read') and " +
+      "hasPermission(#contentId, 'Content', 'write') and " +
           "hasPermission(#questionnaireId, 'Questionnaire', 'write')")
   fun copyQuestionnaireContentToQuestionnaire(
       @Argument contentId: UUID,
