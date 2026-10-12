@@ -42,7 +42,11 @@ class ScaleRoundStatsTests {
 
   @BeforeEach
   fun authenticateUser() {
-    val user = userService.loadUserById(OWNER_ID)!!
+    authenticate(OWNER_ID)
+  }
+
+  private fun authenticate(userId: UUID) {
+    val user = userService.loadUserById(userId)!!
     SecurityContextHolder.getContext().authentication =
         UsernamePasswordAuthenticationToken(user, null, user.authorities)
   }
@@ -66,10 +70,13 @@ class ScaleRoundStatsTests {
     )
   }
 
+  /** Each answer comes from a fresh account, since a user may answer a round only once. */
   private fun answerAll(content: Content, ratings: List<Int>) {
     ratings.forEach {
+      authenticate(userService.createAccount().id!!)
       answerService.createAnswer(content.activeRound!!.id!!, ScaleAnswerFormatData(it))
     }
+    authenticate(OWNER_ID)
   }
 
   private fun statsOf(content: Content) =

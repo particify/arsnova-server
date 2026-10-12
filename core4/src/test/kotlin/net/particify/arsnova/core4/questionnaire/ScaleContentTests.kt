@@ -7,6 +7,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
+import net.particify.arsnova.core4.questionnaire.answer.Answer
 import net.particify.arsnova.core4.questionnaire.answer.AnswerRepository
 import net.particify.arsnova.core4.questionnaire.answer.AnswerResultState
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
@@ -57,7 +58,11 @@ class ScaleContentTests {
 
   @BeforeEach
   fun authenticateUser() {
-    val user = userService.loadUserById(OWNER_ID)!!
+    authenticate(OWNER_ID)
+  }
+
+  private fun authenticate(userId: UUID) {
+    val user = userService.loadUserById(userId)!!
     SecurityContextHolder.getContext().authentication =
         UsernamePasswordAuthenticationToken(user, null, user.authorities)
   }
@@ -88,8 +93,15 @@ class ScaleContentTests {
   private fun createAnswerableContent(neutralOption: Boolean = true): Content =
       createScaleContent(createQuestionnaire(QuestionnaireType.SURVEY).id!!, neutralOption)
 
-  private fun answer(content: Content, rating: Int) =
-      answerService.createAnswer(content.activeRound!!.id!!, ScaleAnswerFormatData(rating))
+  /** Each answer comes from a fresh account, since a user may answer a round only once. */
+  private fun answer(content: Content, rating: Int): Answer {
+    authenticate(userService.createAccount().id!!)
+    try {
+      return answerService.createAnswer(content.activeRound!!.id!!, ScaleAnswerFormatData(rating))
+    } finally {
+      authenticate(OWNER_ID)
+    }
+  }
 
   private fun reload(content: Content): Content =
       contentService.findById(content.id!!).orElseThrow()
