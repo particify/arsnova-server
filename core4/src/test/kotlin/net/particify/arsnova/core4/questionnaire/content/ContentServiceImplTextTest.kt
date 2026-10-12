@@ -19,12 +19,13 @@ private val CONTENT_ID = UUID.randomUUID()
 
 class ContentServiceImplTextTest {
   private val contentRepository = Mockito.mock(ContentRepository::class.java)
+  private val roundService = Mockito.mock(RoundServiceImpl::class.java)
   private val contentService =
       ContentServiceImpl(
           contentRepository,
           Mockito.mock(QuestionnaireRepository::class.java),
           Mockito.mock(ApplicationEventPublisher::class.java),
-          Mockito.mock(RoundServiceImpl::class.java),
+          roundService,
           Mockito.mock(AnswerRepository::class.java),
           QuestionnaireEventPublisher())
 
@@ -36,14 +37,15 @@ class ContentServiceImplTextTest {
   }
 
   @Test
-  fun shouldPublishAndWithdrawAnswers() {
-    givenContent(TextContentFormatData(false))
+  fun shouldPublishAndWithdrawAnswersAndNotifyTheRounds() {
+    val content = givenContent(TextContentFormatData(false))
     Assertions.assertEquals(
         TextContentFormatData(true),
         contentService.updateTextAnswersPublished(CONTENT_ID, true).formatData)
     Assertions.assertEquals(
         TextContentFormatData(false),
         contentService.updateTextAnswersPublished(CONTENT_ID, false).formatData)
+    Mockito.verify(roundService, Mockito.times(2)).publishRoundsChanged(content)
   }
 
   @Test
@@ -55,6 +57,7 @@ class ContentServiceImplTextTest {
     }
     Assertions.assertSame(current, content.formatData)
     Mockito.verify(contentRepository, Mockito.never()).save(Mockito.any())
+    Mockito.verifyNoInteractions(roundService)
   }
 
   @Test

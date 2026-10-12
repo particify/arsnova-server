@@ -133,12 +133,18 @@ class ContentServiceImpl(
   private fun hasAnswers(contentId: UUID): Boolean =
       contentId in answerRepository.findContentIdsWithAnswers(setOf(contentId))
 
+  /**
+   * Publishing changes which answers participants see, so the rounds' subscribers are told about it
+   * as if an answer had changed.
+   */
   @Transactional
   fun updateTextAnswersPublished(id: UUID, published: Boolean): Content {
     val content = contentRepository.findByIdOrNull(id) ?: throw ContentNotFoundException(id)
     asTextFormatData(content)
     content.formatData = TextContentFormatData(published)
-    return contentRepository.save(content)
+    val persistedContent = contentRepository.save(content)
+    roundService.publishRoundsChanged(persistedContent)
+    return persistedContent
   }
 
   fun asTextFormatData(content: Content): TextContentFormatData =

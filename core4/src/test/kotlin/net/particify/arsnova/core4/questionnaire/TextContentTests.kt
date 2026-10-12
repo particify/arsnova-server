@@ -24,6 +24,8 @@ import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireServ
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireType
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
+import net.particify.arsnova.core4.questionnaire.round.api.AnswerChangedEvent
+import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsEventPublisher
 import net.particify.arsnova.core4.user.UserService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -52,6 +54,7 @@ class TextContentTests {
   @Autowired lateinit var publishingService: QuestionnairePublishingServiceImpl
   @Autowired lateinit var questionnaireService: QuestionnaireServiceImpl
   @Autowired lateinit var roundService: RoundServiceImpl
+  @Autowired lateinit var roundStatsEventPublisher: RoundStatsEventPublisher
   @Autowired lateinit var userService: UserService
 
   @BeforeEach
@@ -97,6 +100,24 @@ class TextContentTests {
       contentService.findById(content.id!!).orElseThrow()
 
   private fun formatDataOf(content: Content) = reload(content).formatData as TextContentFormatData
+
+  /**
+   * The events for [roundId] published while [action] runs. The publisher emits on the calling
+   * thread, but replays events buffered while nobody was subscribed, hence the filter.
+   */
+  private fun answerChangedEventsDuring(
+      roundId: UUID,
+      action: () -> Unit
+  ): List<AnswerChangedEvent> {
+    val events = mutableListOf<AnswerChangedEvent>()
+    val subscription = roundStatsEventPublisher.answerChangedFlux().subscribe { events.add(it) }
+    try {
+      action()
+    } finally {
+      subscription.dispose()
+    }
+    return events.filter { it.roundId == roundId }
+  }
 
   private fun expire(round: Round): Round {
     round.answeringEndTime = Instant.now().minus(1, ChronoUnit.MINUTES)
@@ -148,6 +169,20 @@ class TextContentTests {
     Assertions.assertTrue(formatDataOf(content).answersPublished)
     contentService.updateTextAnswersPublished(content.id!!, false)
     Assertions.assertFalse(formatDataOf(content).answersPublished)
+  }
+
+  @Test
+  fun shouldNotifyTheRoundWhenPublishingAnswers() {
+    val questionnaire = createQuestionnaire(QuestionnaireType.SURVEY)
+    val content = createTextContent(questionnaire.id!!)
+    val roundId = content.activeRound!!.id!!
+    listOf(true, false).forEach { published ->
+      val events =
+          answerChangedEventsDuring(roundId) {
+            contentService.updateTextAnswersPublished(content.id!!, published)
+          }
+      Assertions.assertEquals(listOf(content.id), events.map { it.contentId }, "$published")
+    }
   }
 
   @Test
