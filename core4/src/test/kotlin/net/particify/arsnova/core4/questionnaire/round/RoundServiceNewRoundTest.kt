@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.questionnaire.round
 import java.util.Optional
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.answer.AnswerRepository
+import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
@@ -40,6 +41,50 @@ class RoundServiceNewRoundTest {
       object : ContentFormatData {
         override val format = "WITHOUT_ROUNDS"
       }
+
+  private fun liveQuestionnaire(): Questionnaire {
+    val questionnaire =
+        Questionnaire(id = UUID.randomUUID(), publishingMode = QuestionnairePublishingMode.LIVE)
+    listOf("First", "Second", "Third").forEach {
+      val content =
+          Content(
+              id = UUID.randomUUID(),
+              questionnaire = questionnaire,
+              body = it,
+              formatData = ChoiceContentFormatData(listOf("A", "B"), null, false),
+              activeRound = Round(id = UUID.randomUUID()))
+      questionnaire.contents.add(content)
+      Mockito.`when`(contentRepository.findById(content.id!!)).thenReturn(Optional.of(content))
+    }
+    Mockito.`when`(roundRepository.save(Mockito.any(Round::class.java))).thenAnswer {
+      it.arguments[0]
+    }
+    Mockito.`when`(contentRepository.save(Mockito.any(Content::class.java))).thenAnswer {
+      it.arguments[0]
+    }
+    return questionnaire
+  }
+
+  @Test
+  fun shouldKeepLaterContentsReleasedWhenStartingANewRoundOfAnEarlierOne() {
+    val questionnaire = liveQuestionnaire()
+    val (first, second, third) = questionnaire.contents
+    questionnaire.publishedUpToContent = third
+    roundService.startNewRound(first.id!!)
+    Assertions.assertSame(third, questionnaire.publishedUpToContent)
+    Assertions.assertSame(first.activeRound, questionnaire.activeRound)
+    roundService.startNewRound(second.id!!)
+    Assertions.assertSame(third, questionnaire.publishedUpToContent)
+  }
+
+  @Test
+  fun shouldReleaseUpToTheContentWhenStartingANewRoundBeyondTheRange() {
+    val questionnaire = liveQuestionnaire()
+    val (first, second) = questionnaire.contents
+    questionnaire.publishedUpToContent = first
+    roundService.startNewRound(second.id!!)
+    Assertions.assertSame(second, questionnaire.publishedUpToContent)
+  }
 
   @Test
   fun shouldRejectNewRoundForFormatWithoutRoundsBeforeChangingAnything() {

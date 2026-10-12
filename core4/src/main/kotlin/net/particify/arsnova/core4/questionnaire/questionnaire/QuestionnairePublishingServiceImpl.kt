@@ -41,7 +41,7 @@ class QuestionnairePublishingServiceImpl(
     content.activeRound = persistedRound
     val persistedContent = contentRepository.save(content)
     questionnaire.activeRound = persistedRound
-    questionnaire.publishedUpToContent = persistedContent
+    questionnaire.releaseUpTo(persistedContent)
     val persistedQuestionnaire = questionnaireRepository.save(questionnaire)
     questionnaireEventPublisher.publishQuestionnaireUpdated(questionnaire.id!!)
     return persistedQuestionnaire

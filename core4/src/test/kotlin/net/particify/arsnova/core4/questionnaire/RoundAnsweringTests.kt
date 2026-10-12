@@ -543,6 +543,22 @@ class RoundAnsweringTests {
   }
 
   @Test
+  fun shouldKeepLaterContentsReleasedWhenStartingAnEarlierOne() {
+    val questionnaire = createQuestionnaire(QuestionnaireType.QUIZ)
+    val first = createChoiceContent(questionnaire.id!!, null)
+    val second = createChoiceContent(questionnaire.id!!, null)
+    startLiveContent(second.id!!)
+    startLiveContent(first.id!!)
+    Assertions.assertEquals(
+        second.id,
+        questionnaireService.findById(questionnaire.id!!).orElseThrow().publishedUpToContent?.id)
+    roundService.startNewRound(first.id!!)
+    Assertions.assertEquals(
+        second.id,
+        questionnaireService.findById(questionnaire.id!!).orElseThrow().publishedUpToContent?.id)
+  }
+
+  @Test
   fun shouldStayUntimedWhenReopeningUntimedContent() {
     val questionnaire = createQuestionnaire(QuestionnaireType.QUIZ)
     val content = createChoiceContent(questionnaire.id!!, null)

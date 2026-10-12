@@ -42,4 +42,15 @@ class Questionnaire(
     @Embedded var auditMetadata: AuditMetadata = AuditMetadata(),
 ) {
   fun isLive(): Boolean = publishingMode == QuestionnairePublishingMode.LIVE
+
+  /**
+   * Extends the released range to [content] if it lies beyond the range's current end. The range
+   * never shrinks here, so presenting an earlier content again keeps the later ones released.
+   */
+  fun releaseUpTo(content: Content) {
+    val releasedIndex = contents.indexOfFirst { it.id == publishedUpToContent?.id }
+    if (contents.indexOfFirst { it.id == content.id } > releasedIndex) {
+      publishedUpToContent = content
+    }
+  }
 }

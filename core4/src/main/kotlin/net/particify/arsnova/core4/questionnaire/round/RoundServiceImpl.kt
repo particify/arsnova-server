@@ -88,7 +88,7 @@ class RoundServiceImpl(
     val persistedContent = contentRepository.save(content)
     if (live) {
       questionnaire.activeRound = persistedRound
-      questionnaire.publishedUpToContent = persistedContent
+      questionnaire.releaseUpTo(persistedContent)
       questionnaireRepository.save(questionnaire)
     }
     questionnaireEventPublisher.publishQuestionnaireUpdated(questionnaire.id!!)
