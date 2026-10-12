@@ -49,3 +49,8 @@ databaseChangeLog:
             tableName: user_alias
             constraintName: user_alias_room_id_user_id_key
             columnNames: room_id,user_id
+        - createIndex:
+            schemaName: room
+            tableName: user_alias
+            column:
+              - name: user_id
