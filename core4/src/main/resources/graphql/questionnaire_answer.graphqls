@@ -12,7 +12,7 @@ extend type Query {
 extend type Mutation {
   createQuestionnaireChoiceAnswer(input: CreateChoiceAnswerInput!): Answer
   createQuestionnaireNumericAnswer(input: CreateNumericAnswerInput!): Answer
-  createQuestionnaireScaleAnswer(input: CreateScaleAnswerInput): Answer
+  createQuestionnaireScaleAnswer(input: CreateScaleAnswerInput!): Answer
   createQuestionnaireTextAnswer(input: CreateTextAnswerInput!): Answer
   createQuestionnaireWordcloudAnswer(input: CreateWordcloudAnswerInput!): Answer
   createQuestionnaireAbstention(roundId: UUID!): Answer

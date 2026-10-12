@@ -22,7 +22,7 @@ extend type Mutation {
     input: CreateFlashcardContentInput!
   ): Content
   createQuestionnaireNumericContent(input: CreateNumericContentInput!): Content
-  createQuestionnaireScaleContent(input: CreateScaleContentInput): Content
+  createQuestionnaireScaleContent(input: CreateScaleContentInput!): Content
   createQuestionnaireSlideContent(input: CreateSlideContentInput!): Content
   createQuestionnaireTextContent(input: CreateTextContentInput!): Content
   createQuestionnaireWordcloudContent(
@@ -44,7 +44,7 @@ extend type Mutation {
     input: UpdateFlashcardContentInput!
   ): Content
   updateQuestionnaireNumericContent(input: UpdateNumericContentInput!): Content
-  updateQuestionnaireScaleContent(input: UpdateScaleContentInput): Content
+  updateQuestionnaireScaleContent(input: UpdateScaleContentInput!): Content
   updateQuestionnaireSlideContent(input: UpdateSlideContentInput!): Content
   updateQuestionnaireTextContent(input: UpdateTextContentInput!): Content
   updateQuestionnaireWordcloudContent(
