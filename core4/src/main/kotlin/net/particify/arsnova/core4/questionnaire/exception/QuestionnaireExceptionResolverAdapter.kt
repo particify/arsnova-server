@@ -32,6 +32,7 @@ class QuestionnaireExceptionResolverAdapter : DataFetcherExceptionResolverAdapte
               builder
                   .errorType(ErrorType.NOT_FOUND)
                   .message(if (ex.id != null) "${ex.message}: ${ex.id}" else ex.message)
+          is AbstentionsNotAllowedException,
           is AnswerAlreadyExistsException,
           is ContentFormatDataInvalidException,
           is QuestionnaireWithNameAlreadyExistsException,

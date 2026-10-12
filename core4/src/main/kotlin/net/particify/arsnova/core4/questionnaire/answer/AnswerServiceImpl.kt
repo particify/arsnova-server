@@ -8,6 +8,7 @@ import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
+import net.particify.arsnova.core4.questionnaire.exception.AbstentionsNotAllowedException
 import net.particify.arsnova.core4.questionnaire.exception.AnswerAlreadyExistsException
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.RoundClosedException
@@ -110,6 +111,8 @@ class AnswerServiceImpl(
   ): Answer {
     val now = Instant.now()
     val round = findAnswerableRound(roundId)
+    val content = round.content!!
+    if (!content.abstentionsAllowed) throw AbstentionsNotAllowedException(content.id)
     requireNoAnswer(roundId)
     val answer =
         Answer(
@@ -117,7 +120,9 @@ class AnswerServiceImpl(
             result = AnswerResultState.ABSTAINED,
             durationMs = round.elapsedAnsweringTime(now),
         )
-    return store(answer)
+    val persisted = store(answer)
+    publishAnswerChanged(round)
+    return persisted
   }
 
   @Transactional

@@ -19,6 +19,7 @@ import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
+import net.particify.arsnova.core4.questionnaire.exception.AbstentionsNotAllowedException
 import net.particify.arsnova.core4.questionnaire.exception.AnswerAlreadyExistsException
 import net.particify.arsnova.core4.questionnaire.exception.RoundClosedException
 import net.particify.arsnova.core4.questionnaire.exception.RoundExpiredException
@@ -28,7 +29,9 @@ import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireServ
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireType
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
+import net.particify.arsnova.core4.questionnaire.round.api.AnswerChangedEvent
 import net.particify.arsnova.core4.questionnaire.round.api.RoundQueryController
+import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsEventPublisher
 import net.particify.arsnova.core4.user.UserService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -61,6 +64,7 @@ class RoundAnsweringTests {
   @Autowired lateinit var questionnaireService: QuestionnaireServiceImpl
   @Autowired lateinit var roundQueryController: RoundQueryController
   @Autowired lateinit var roundService: RoundServiceImpl
+  @Autowired lateinit var roundStatsEventPublisher: RoundStatsEventPublisher
   @Autowired lateinit var userService: UserService
 
   @BeforeEach
@@ -82,14 +86,36 @@ class RoundAnsweringTests {
   private fun createQuestionnaire(type: QuestionnaireType) =
       questionnaireService.create(ROOM_ID, "Countdown ${UUID.randomUUID()}", type)
 
-  private fun createChoiceContent(questionnaireId: UUID, duration: Int?): Content =
+  private fun createChoiceContent(
+      questionnaireId: UUID,
+      duration: Int?,
+      abstentionsAllowed: Boolean = true
+  ): Content =
       contentService.create(
           questionnaireId,
           "Choice content",
           ChoiceContentFormatData(listOf("A", "B"), listOf(0), false),
           duration,
-          true,
+          abstentionsAllowed,
           null)
+
+  /**
+   * The events for [roundId] published while [action] runs. The publisher emits on the calling
+   * thread, but replays events buffered while nobody was subscribed, hence the filter.
+   */
+  private fun answerChangedEventsDuring(
+      roundId: UUID,
+      action: () -> Unit
+  ): List<AnswerChangedEvent> {
+    val events = mutableListOf<AnswerChangedEvent>()
+    val subscription = roundStatsEventPublisher.answerChangedFlux().subscribe { events.add(it) }
+    try {
+      action()
+    } finally {
+      subscription.dispose()
+    }
+    return events.filter { it.roundId == roundId }
+  }
 
   private fun createWordcloudContent(questionnaireId: UUID, duration: Int?): Content =
       contentService.create(
@@ -283,6 +309,27 @@ class RoundAnsweringTests {
     Assertions.assertThrows(RoundClosedException::class.java) {
       answerService.createAnswer(round.id!!, ChoiceAnswerFormatData(listOf(0)))
     }
+  }
+
+  @Test
+  fun shouldRejectAbstentionWhenContentDoesNotAllowIt() {
+    val questionnaire = createQuestionnaire(QuestionnaireType.SURVEY)
+    val round =
+        createChoiceContent(questionnaire.id!!, null, abstentionsAllowed = false).activeRound!!
+    Assertions.assertThrows(AbstentionsNotAllowedException::class.java) {
+      answerService.createAbstention(round.id!!)
+    }
+    Assertions.assertTrue(answerRepository.findByRoundId(round.id!!).isEmpty())
+  }
+
+  @Test
+  fun shouldPublishAbstentionLikeAnAnswer() {
+    val questionnaire = createQuestionnaire(QuestionnaireType.SURVEY)
+    val content = createChoiceContent(questionnaire.id!!, null)
+    val roundId = content.activeRound!!.id!!
+    val events = answerChangedEventsDuring(roundId) { answerService.createAbstention(roundId) }
+    Assertions.assertEquals(
+        listOf(AnswerChangedEvent(roundId, content.id!!, questionnaire.id!!)), events)
   }
 
   @Test
