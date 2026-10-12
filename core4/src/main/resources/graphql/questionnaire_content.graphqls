@@ -119,8 +119,8 @@ type NumericContentFormatData {
 
 type ScaleContentFormatData {
   format: ContentType!
-  template: ScaleContentTemplate
-  neutralOption: Boolean
+  template: ScaleContentTemplate!
+  neutralOption: Boolean!
 }
 
 enum ScaleContentTemplate {

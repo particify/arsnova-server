@@ -82,6 +82,11 @@ class QuestionnaireSchemaTests {
     val textFormatData = graphQlSource.schema().getObjectType("TextContentFormatData")
     Assertions.assertInstanceOf(
         GraphQLNonNull::class.java, textFormatData.getFieldDefinition("answersPublished").type)
+    val scaleFormatData = graphQlSource.schema().getObjectType("ScaleContentFormatData")
+    listOf("template", "neutralOption").forEach {
+      Assertions.assertInstanceOf(
+          GraphQLNonNull::class.java, scaleFormatData.getFieldDefinition(it).type, it)
+    }
   }
 
   @Test
