@@ -26,14 +26,19 @@ class SolutionVisibilityTest {
     SecurityContextHolder.clearContext()
   }
 
-  private fun content(correctOptionsPublished: Boolean?, roomId: UUID? = ROOM_ID) =
+  private fun content(
+      correctOptionsPublished: Boolean?,
+      roomId: UUID? = ROOM_ID,
+      statisticsPublished: Boolean? = null
+  ) =
       Content(
           id = CONTENT_ID,
           questionnaire =
               Questionnaire(
                   id = UUID.randomUUID(),
                   roomId = roomId,
-                  correctOptionsPublished = correctOptionsPublished))
+                  correctOptionsPublished = correctOptionsPublished,
+                  statisticsPublished = statisticsPublished))
 
   private fun givenPermissions(mayWriteContent: Boolean, mayModerateRoom: Boolean) {
     SecurityContextHolder.getContext().authentication = authentication
@@ -73,6 +78,35 @@ class SolutionVisibilityTest {
   fun shouldWithholdUnpublishedSolutionWithoutAuthentication() {
     Assertions.assertFalse(solutionVisibility.maySeeSolution(content(false)))
     Mockito.verifyNoInteractions(permissionEvaluator)
+  }
+
+  @Test
+  fun shouldShowPublishedStatisticsToEveryone() {
+    Assertions.assertTrue(
+        solutionVisibility.maySeeStatistics(content(null, statisticsPublished = true)))
+    Mockito.verifyNoInteractions(permissionEvaluator)
+  }
+
+  @Test
+  fun shouldShowUnpublishedStatisticsToEditorsAndModeratorsOnly() {
+    givenPermissions(mayWriteContent = false, mayModerateRoom = true)
+    Assertions.assertTrue(
+        solutionVisibility.maySeeStatistics(content(null, statisticsPublished = false)))
+    givenPermissions(mayWriteContent = false, mayModerateRoom = false)
+    Assertions.assertFalse(
+        solutionVisibility.maySeeStatistics(content(null, statisticsPublished = false)))
+    Assertions.assertFalse(solutionVisibility.maySeeStatistics(content(null)))
+  }
+
+  @Test
+  fun shouldDecideStatisticsAndSolutionIndependently() {
+    givenPermissions(mayWriteContent = false, mayModerateRoom = false)
+    val statisticsOnly = content(false, statisticsPublished = true)
+    Assertions.assertTrue(solutionVisibility.maySeeStatistics(statisticsOnly))
+    Assertions.assertFalse(solutionVisibility.maySeeSolution(statisticsOnly))
+    val solutionOnly = content(true, statisticsPublished = false)
+    Assertions.assertFalse(solutionVisibility.maySeeStatistics(solutionOnly))
+    Assertions.assertTrue(solutionVisibility.maySeeSolution(solutionOnly))
   }
 
   @Test

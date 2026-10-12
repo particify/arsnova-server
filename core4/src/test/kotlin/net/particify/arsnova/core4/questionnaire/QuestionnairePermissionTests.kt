@@ -123,6 +123,17 @@ class QuestionnairePermissionTests {
     questionnaireService.update(questionnaire.id!!, null, null, null, null, published, null)
   }
 
+  private fun publishStatistics(questionnaire: Questionnaire, published: Boolean) {
+    authenticate(OWNER_ID)
+    questionnaireService.update(questionnaire.id!!, null, null, null, published, null, null)
+  }
+
+  private fun counts(content: Content): List<Int?> =
+      listOf(
+          contentQueryController.answerCount(content),
+          contentQueryController.abstentionCount(content),
+          contentQueryController.correctAnswerCount(content))
+
   private fun roundIdOf(content: Content): UUID = content.activeRound!!.id!!
 
   private fun assertAllDenied(vararg calls: Executable) {
@@ -259,6 +270,29 @@ class QuestionnairePermissionTests {
     authenticate(OTHER_USER_ID)
     val published = answerQueryController.questionnaireAnswerByRoundId(roundIdOf(content), user)!!
     Assertions.assertEquals(AnswerResultState.CORRECT, answerQueryController.result(published))
+  }
+
+  @Test
+  fun shouldWithholdAnswerCountsFromParticipantUntilPublished() {
+    val questionnaire = createPublishedQuestionnaire(SHARED_ROOM_ID)
+    val content = createChoiceContent(questionnaire, listOf(0))
+    publishSolution(questionnaire, false)
+    publishStatistics(questionnaire, false)
+    authenticate(OTHER_USER_ID)
+    answerMutationController.createQuestionnaireChoiceAnswer(
+        CreateChoiceAnswerInput(roundIdOf(content), listOf(0)))
+    val unpublished = contentQueryController.questionnaireContentById(content.id!!)
+    Assertions.assertEquals(listOf(null, null, null), counts(unpublished))
+    authenticate(OWNER_ID)
+    Assertions.assertEquals(listOf(1, 0, 1), counts(unpublished))
+    publishStatistics(questionnaire, true)
+    authenticate(OTHER_USER_ID)
+    val statisticsPublished = contentQueryController.questionnaireContentById(content.id!!)
+    Assertions.assertEquals(listOf(1, 0, null), counts(statisticsPublished))
+    publishSolution(questionnaire, true)
+    authenticate(OTHER_USER_ID)
+    val solutionPublished = contentQueryController.questionnaireContentById(content.id!!)
+    Assertions.assertEquals(listOf(1, 0, 1), counts(solutionPublished))
   }
 
   @Test

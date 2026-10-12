@@ -11,6 +11,7 @@ import net.particify.arsnova.core4.questionnaire.content.AnswerOption
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
+import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
@@ -30,7 +31,8 @@ class ContentQueryController(
     private val contentServiceImpl: ContentServiceImpl,
     private val textRenderingService: TextRenderingService,
     private val roundService: RoundServiceImpl,
-    private val answerRepository: AnswerRepository
+    private val answerRepository: AnswerRepository,
+    private val solutionVisibility: SolutionVisibility
 ) {
 
   @QueryMapping
@@ -66,35 +68,27 @@ class ContentQueryController(
   private fun answerOptions(labels: List<String>): List<AnswerOption> =
       labels.map { AnswerOption(label = it, labelRendered = textRenderingService.renderText(it)) }
 
+  /** The counts are null for a reader who may not see them yet, not zero. */
   @SchemaMapping(typeName = "Content")
-  fun answerCount(content: Content): Int {
-    val roundId = activeRound(content)?.id
-    return if (roundId != null) {
-      answerRepository.countByRoundIdAndHiddenFalse(roundId)
-    } else {
-      0
-    }
+  fun answerCount(content: Content): Int? {
+    if (!solutionVisibility.maySeeStatistics(content)) return null
+    return activeRound(content)?.id?.let { answerRepository.countByRoundIdAndHiddenFalse(it) } ?: 0
   }
 
   @SchemaMapping(typeName = "Content")
-  fun abstentionCount(content: Content): Int {
-    val roundId = activeRound(content)?.id
-    return if (roundId != null) {
-      answerRepository.countByRoundIdAndResult(roundId, AnswerResultState.ABSTAINED)
-    } else {
-      0
-    }
+  fun abstentionCount(content: Content): Int? {
+    if (!solutionVisibility.maySeeStatistics(content)) return null
+    return countByResult(content, AnswerResultState.ABSTAINED)
   }
 
   @SchemaMapping(typeName = "Content")
-  fun correctAnswerCount(content: Content): Int {
-    val roundId = activeRound(content)?.id
-    return if (roundId != null) {
-      answerRepository.countByRoundIdAndResult(roundId, AnswerResultState.CORRECT)
-    } else {
-      0
-    }
+  fun correctAnswerCount(content: Content): Int? {
+    if (!solutionVisibility.maySeeSolution(content)) return null
+    return countByResult(content, AnswerResultState.CORRECT)
   }
+
+  private fun countByResult(content: Content, result: AnswerResultState): Int =
+      activeRound(content)?.id?.let { answerRepository.countByRoundIdAndResult(it, result) } ?: 0
 
   @SchemaMapping(typeName = "Content")
   fun hasCorrectAnswer(content: Content): Boolean {
