@@ -3,12 +3,12 @@
  */
 package net.particify.arsnova.core4.questionnaire
 
-import jakarta.validation.ConstraintViolationException
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
+import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.questionnaire.answer.Answer
 import net.particify.arsnova.core4.questionnaire.answer.AnswerRepository
 import net.particify.arsnova.core4.questionnaire.answer.AnswerResultState
@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.data.domain.ScrollPosition
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
@@ -131,22 +132,18 @@ class RoundAnsweringTests {
 
   private fun reload(round: Round): Round = roundService.findById(round.id!!).orElseThrow()
 
-  private fun constraintViolationOf(throwable: Throwable) =
-      generateSequence(throwable) { it.cause }
-          .filterIsInstance<ConstraintViolationException>()
-          .firstOrNull()
-
   @Test
-  fun shouldRejectDurationAboveMaximum() {
+  fun shouldRejectDurationOutsideTheRange() {
     val questionnaire = createQuestionnaire(QuestionnaireType.QUIZ)
-    val thrown =
-        Assertions.assertThrows(RuntimeException::class.java) {
-          createChoiceContent(questionnaire.id!!, (Content.MAX_DURATION + 1).toInt())
-        }
-    val violation = constraintViolationOf(thrown)
-    Assertions.assertNotNull(violation)
-    Assertions.assertEquals(
-        "duration", violation!!.constraintViolations.first().propertyPath.toString())
+    listOf(0, -1, (Content.MAX_DURATION + 1).toInt()).forEach { duration ->
+      Assertions.assertThrows(InvalidInputException::class.java) {
+        createChoiceContent(questionnaire.id!!, duration)
+      }
+    }
+    Assertions.assertTrue(
+        contentService
+            .findByQuestionnaireIdOrderByPosition(questionnaire.id!!, ScrollPosition.offset())
+            .isEmpty)
   }
 
   @Test
@@ -190,15 +187,6 @@ class RoundAnsweringTests {
   fun shouldNotStampDeadlineWhenStartingLiveContentWithoutDuration() {
     val questionnaire = createQuestionnaire(QuestionnaireType.QUIZ)
     val content = createChoiceContent(questionnaire.id!!, null)
-    val round = startLiveContent(content.id!!)
-    Assertions.assertNull(round.answeringEndTime)
-    Assertions.assertTrue(round.acceptsAnswers())
-  }
-
-  @Test
-  fun shouldNotStampDeadlineWhenStartingLiveContentWithZeroDuration() {
-    val questionnaire = createQuestionnaire(QuestionnaireType.QUIZ)
-    val content = createChoiceContent(questionnaire.id!!, 0)
     val round = startLiveContent(content.id!!)
     Assertions.assertNull(round.answeringEndTime)
     Assertions.assertTrue(round.acceptsAnswers())

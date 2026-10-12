@@ -17,6 +17,7 @@ import jakarta.validation.constraints.Max
 import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.common.UuidGenerator
+import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import net.particify.arsnova.core4.questionnaire.round.Round
 import org.hibernate.annotations.JdbcTypeCode
@@ -42,10 +43,27 @@ data class Content(
 ) {
   companion object {
     const val MAX_DURATION = 3600L
+    const val MAX_BODY_LENGTH = 2000
     const val BASE_POINTS = 500
+    val DURATION_RANGE = 1..MAX_DURATION.toInt()
+    val WEIGHT_RANGE = 1..5
 
     /** The worth of a fully correct answer to a content of the given weight. */
     fun calculateBasePoints(weight: Int?): Int = BASE_POINTS * (weight ?: 1)
+
+    /** A null duration means no countdown and a null weight the default one. */
+    fun validateSettings(body: String, duration: Int?, weight: Int?) {
+      if (body.isBlank() || body.length > MAX_BODY_LENGTH) {
+        throw InvalidInputException(
+            "The body must not be blank or longer than $MAX_BODY_LENGTH characters")
+      }
+      if (duration != null && duration !in DURATION_RANGE) {
+        throw InvalidInputException("The duration must be within $DURATION_RANGE seconds")
+      }
+      if (weight != null && weight !in WEIGHT_RANGE) {
+        throw InvalidInputException("The weight must be within $WEIGHT_RANGE")
+      }
+    }
   }
 
   fun copy(): Content {

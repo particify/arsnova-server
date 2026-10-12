@@ -41,6 +41,10 @@ class Questionnaire(
     @ManyToOne var activeRound: Round? = null,
     @Embedded var auditMetadata: AuditMetadata = AuditMetadata(),
 ) {
+  companion object {
+    const val MAX_NAME_LENGTH = 50
+  }
+
   fun isLive(): Boolean = publishingMode == QuestionnairePublishingMode.LIVE
 
   /**

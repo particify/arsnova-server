@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.questionnaire.questionnaire
 import jakarta.transaction.Transactional
 import java.util.UUID
 import kotlin.collections.indexOf
+import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
@@ -30,8 +31,16 @@ class QuestionnaireServiceImpl(
     private val questionnaireEventPublisher: QuestionnaireEventPublisher,
     private val contentServiceImpl: ContentServiceImpl
 ) : QuestionnaireRepository by questionnaireRepository {
+  private fun validateName(name: String) {
+    if (name.isBlank() || name.length > Questionnaire.MAX_NAME_LENGTH) {
+      throw InvalidInputException(
+          "The name must not be blank or longer than ${Questionnaire.MAX_NAME_LENGTH} characters")
+    }
+  }
+
   @Transactional
   fun create(roomId: UUID, name: String, type: QuestionnaireType): Questionnaire {
+    validateName(name)
     if (questionnaireRepository.findByRoomIdAndName(roomId, name) != null) {
       throw QuestionnaireWithNameAlreadyExistsException()
     }
@@ -77,6 +86,7 @@ class QuestionnaireServiceImpl(
   ): Questionnaire {
     val questionnaire = findByIdOrNull(id) ?: throw QuestionnaireNotFoundException(id)
     if (name != null && name != questionnaire.name) {
+      validateName(name)
       if (questionnaireRepository.findByRoomIdAndName(questionnaire.roomId!!, name) != null) {
         throw QuestionnaireWithNameAlreadyExistsException()
       }
@@ -150,6 +160,7 @@ class QuestionnaireServiceImpl(
   /** Copies a questionnaire within its room under [newName]. */
   @Transactional
   fun duplicate(id: UUID, newName: String): Questionnaire {
+    validateName(newName)
     val original = findByIdOrNull(id) ?: throw QuestionnaireNotFoundException(id)
     val roomId = checkNotNull(original.roomId)
     if (questionnaireRepository.findByRoomIdAndName(roomId, newName) != null) {

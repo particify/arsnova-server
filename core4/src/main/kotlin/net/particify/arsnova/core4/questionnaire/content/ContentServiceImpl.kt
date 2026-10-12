@@ -72,6 +72,7 @@ class ContentServiceImpl(
       abstentionsAllowed: Boolean?,
       weight: Int?,
   ): Content {
+    Content.validateSettings(body, duration, weight)
     formatData.validate()
     val questionnaire =
         questionnaireRepository.findByIdOrNull(questionnaireId)
@@ -107,6 +108,7 @@ class ContentServiceImpl(
       abstentionsAllowed: Boolean?,
       weight: Int?
   ): Content {
+    Content.validateSettings(body, duration, weight)
     val content = contentRepository.findByIdOrNull(id) ?: throw ContentNotFoundException(id)
     val current = content.formatData!!
     val merged = formatData.mergeWith(current)

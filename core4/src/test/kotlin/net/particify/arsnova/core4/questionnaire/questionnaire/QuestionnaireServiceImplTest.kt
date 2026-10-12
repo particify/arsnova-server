@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.questionnaire.questionnaire
 import java.time.Instant
 import java.util.Optional
 import java.util.UUID
+import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
@@ -90,6 +91,23 @@ class QuestionnaireServiceImplTest {
     givenQuestionnaire(QuestionnairePublishingMode.UP_TO)
     changeMode(QuestionnairePublishingMode.LIVE)
     Assertions.assertTrue(round.closed)
+  }
+
+  @Test
+  fun shouldRejectBlankOrOverlongName() {
+    givenQuestionnaire(QuestionnairePublishingMode.ALL)
+    listOf("", " ", "x".repeat(Questionnaire.MAX_NAME_LENGTH + 1)).forEach { name ->
+      Assertions.assertThrows(InvalidInputException::class.java) {
+        questionnaireService.create(UUID.randomUUID(), name, QuestionnaireType.SURVEY)
+      }
+      Assertions.assertThrows(InvalidInputException::class.java) {
+        questionnaireService.update(QUESTIONNAIRE_ID, name, null, null, null, null, null)
+      }
+      Assertions.assertThrows(InvalidInputException::class.java) {
+        questionnaireService.duplicate(QUESTIONNAIRE_ID, name)
+      }
+    }
+    Mockito.verify(questionnaireRepository, Mockito.never()).save(Mockito.any())
   }
 
   @Test
