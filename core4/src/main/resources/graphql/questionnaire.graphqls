@@ -5,7 +5,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  createQuestionnaire(input: CreateQuestionnaireInput): Questionnaire!
+  createQuestionnaire(input: CreateQuestionnaireInput!): Questionnaire!
   toggleQuestionnairePublished(id: UUID!, published: Boolean!): Questionnaire!
   deleteQuestionnaire(id: ID!): ID
   duplicateQuestionnaire(id: UUID!, newName: String!): Questionnaire!

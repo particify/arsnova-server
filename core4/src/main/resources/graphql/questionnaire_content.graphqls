@@ -1,25 +1,17 @@
 extend type Query {
   questionnaireContentsByQuestionnaireId(
     questionnaireId: UUID!
-    first: Int
-    after: String
-    last: Int
-    before: String
   ): ContentConnection
   questionnairePublishedContentsByQuestionnaireId(
     questionnaireId: UUID!
-    first: Int
-    after: String
-    last: Int
-    before: String
   ): ContentConnection
   questionnaireContentById(id: UUID!): Content
 }
 
 extend type Mutation {
   banQuestionnaireWordcloudContentKeyword(
-    contentId: UUID
-    keyword: String
+    contentId: UUID!
+    keyword: String!
   ): Content
   copyQuestionnaireContentToQuestionnaire(
     contentId: UUID!
@@ -35,7 +27,7 @@ extend type Mutation {
     contentId: UUID!
     questionnaireId: UUID!
   ): Content
-  resetBannedQuestionnaireWordcloudContentKeywords(contentId: UUID): Content
+  resetBannedQuestionnaireWordcloudContentKeywords(contentId: UUID!): Content
   updateQuestionnaireChoiceContent(input: UpdateChoiceContentInput): Content
   updateQuestionnaireWordcloudContent(
     input: UpdateWordcloudContentInput
