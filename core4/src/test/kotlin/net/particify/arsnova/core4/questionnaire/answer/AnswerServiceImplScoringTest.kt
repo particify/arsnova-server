@@ -12,6 +12,7 @@ import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireRepository
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
+import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsEventPublisher
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -37,7 +38,8 @@ class AnswerServiceImplScoringTest {
           contentServiceImpl,
           RoundStatsEventPublisher(),
           Mockito.mock(QuestionnaireRepository::class.java),
-          AuditorAware { Optional.of(USER_ID) })
+          AuditorAware { Optional.of(USER_ID) },
+          Mockito.mock(RoundServiceImpl::class.java))
   private val questionnaire = Questionnaire(id = UUID.randomUUID())
 
   init {

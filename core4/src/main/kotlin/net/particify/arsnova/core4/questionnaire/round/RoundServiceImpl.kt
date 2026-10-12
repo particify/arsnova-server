@@ -46,6 +46,35 @@ class RoundServiceImpl(
     return rounds.count()
   }
 
+  /**
+   * Replaces every round of [content] by a fresh first one, dropping their answers. The new round
+   * starts closed in LIVE mode, where it opens when the content is presented, like the round of a
+   * new content. The questionnaire lets go of the active round first, since it is about to be
+   * deleted.
+   */
+  @Transactional
+  fun resetRounds(content: Content): Round {
+    val questionnaire = content.questionnaire!!
+    val contentId = content.id!!
+    if (questionnaire.activeRound?.content?.id == contentId) {
+      questionnaire.activeRound = null
+      questionnaireRepository.save(questionnaire)
+      questionnaireEventPublisher.publishQuestionnaireUpdated(questionnaire.id!!)
+    }
+    content.activeRound = null
+    deleteByContentId(contentId)
+    val round =
+        Round(
+            content = content,
+            roundNo = 1,
+            closed = questionnaire.publishingMode == QuestionnairePublishingMode.LIVE)
+    val persistedRound = roundRepository.save(round)
+    content.activeRound = persistedRound
+    contentRepository.save(content)
+    publishRoundsChanged(content)
+    return persistedRound
+  }
+
   @Transactional
   fun startNewRound(contentId: UUID): Round {
     val content =

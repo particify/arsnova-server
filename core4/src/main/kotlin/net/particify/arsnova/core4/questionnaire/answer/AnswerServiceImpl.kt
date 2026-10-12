@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
 import net.particify.arsnova.core4.questionnaire.exception.AbstentionsNotAllowedException
 import net.particify.arsnova.core4.questionnaire.exception.AnswerAlreadyExistsException
+import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.RoundClosedException
 import net.particify.arsnova.core4.questionnaire.exception.RoundExpiredException
@@ -17,6 +18,7 @@ import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundExceptio
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireRepository
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
+import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.api.AnswerChangedEvent
 import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsEventPublisher
 import org.springframework.dao.DataIntegrityViolationException
@@ -34,6 +36,7 @@ class AnswerServiceImpl(
     private val roundStatsEventPublisher: RoundStatsEventPublisher,
     private val questionnaireRepository: QuestionnaireRepository,
     private val auditorAware: AuditorAware<UUID>,
+    private val roundService: RoundServiceImpl,
 ) : AnswerRepository by answerRepository {
 
   private fun findAnswerableRound(roundId: UUID): Round {
@@ -125,10 +128,12 @@ class AnswerServiceImpl(
     return persisted
   }
 
+  /** Deleting the answers starts the content over, so its rounds go with them. */
   @Transactional
   fun deleteByContentId(contentId: UUID): Boolean {
-    val rounds = roundRepository.findByContentIdOrderByRoundNo(contentId)
-    rounds.forEach { answerRepository.deleteByRoundId(it.id!!) }
+    val content =
+        contentServiceImpl.findByIdOrNull(contentId) ?: throw ContentNotFoundException(contentId)
+    roundService.resetRounds(content)
     return true
   }
 

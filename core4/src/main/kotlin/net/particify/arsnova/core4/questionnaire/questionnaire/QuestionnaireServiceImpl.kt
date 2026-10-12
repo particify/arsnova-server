@@ -15,7 +15,6 @@ import net.particify.arsnova.core4.questionnaire.event.QuestionnaireDuplicatedEv
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireWithNameAlreadyExistsException
 import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
-import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.ScrollPosition
@@ -214,17 +213,7 @@ class QuestionnaireServiceImpl(
         contentRepository.findByQuestionnaireIdOrderByPosition(id, ScrollPosition.offset())
     questionnaire.publishedUpToContent = contents.firstOrNull()
     questionnaireRepository.save(questionnaire)
-    contents.forEach { content ->
-      roundServiceImpl.deleteByContentId(content.id!!)
-      val newRound =
-          roundServiceImpl.save(
-              Round(
-                  content = content,
-                  roundNo = 1,
-                  closed = questionnaire.publishingMode == QuestionnairePublishingMode.LIVE))
-      content.activeRound = newRound
-      contentRepository.save(content)
-    }
+    contents.forEach { roundServiceImpl.resetRounds(it) }
     questionnaireEventPublisher.publishQuestionnaireUpdated(id)
     return true
   }

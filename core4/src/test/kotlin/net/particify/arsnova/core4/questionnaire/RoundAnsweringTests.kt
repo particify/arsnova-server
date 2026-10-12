@@ -333,6 +333,63 @@ class RoundAnsweringTests {
   }
 
   @Test
+  fun shouldStartOverWithClosedFirstRoundWhenDeletingAnswersInLiveMode() {
+    val questionnaire = createQuestionnaire(QuestionnaireType.QUIZ)
+    val content = createChoiceContent(questionnaire.id!!, DURATION)
+    val firstRound = startLiveContent(content.id!!)
+    answerService.createAnswer(firstRound.id!!, ChoiceAnswerFormatData(listOf(0)))
+    val secondRound = roundService.startNewRound(content.id!!)
+    answerService.createAnswer(secondRound.id!!, ChoiceAnswerFormatData(listOf(1)))
+
+    answerService.deleteByContentId(content.id!!)
+
+    val rounds = roundService.findByContentIdOrderByRoundNo(content.id!!)
+    val newRound = rounds.single()
+    Assertions.assertEquals(1, newRound.roundNo)
+    Assertions.assertTrue(newRound.closed)
+    Assertions.assertNull(newRound.answeringEndTime)
+    val oldRoundIds = listOf(firstRound.id!!, secondRound.id!!)
+    Assertions.assertFalse(newRound.id in oldRoundIds)
+    Assertions.assertEquals(
+        newRound.id, contentService.findById(content.id!!).orElseThrow().activeRound?.id)
+    Assertions.assertTrue(roundService.findAllById(oldRoundIds).isEmpty())
+    Assertions.assertTrue(answerRepository.findByRoundId(newRound.id!!).isEmpty())
+    Assertions.assertNull(
+        questionnaireService.findById(questionnaire.id!!).orElseThrow().activeRound)
+  }
+
+  @Test
+  fun shouldStartOverWithOpenFirstRoundWhenDeletingAnswersOutsideLiveMode() {
+    val questionnaire = createQuestionnaire(QuestionnaireType.SURVEY)
+    val content = createChoiceContent(questionnaire.id!!, null)
+    answerService.createAnswer(content.activeRound!!.id!!, ChoiceAnswerFormatData(listOf(0)))
+    answerService.deleteByContentId(content.id!!)
+    val newRound = roundService.findByContentIdOrderByRoundNo(content.id!!).single()
+    Assertions.assertFalse(newRound.closed)
+    val answer = answerService.createAnswer(newRound.id!!, ChoiceAnswerFormatData(listOf(0)))
+    Assertions.assertNotNull(answer.id)
+  }
+
+  @Test
+  fun shouldSignalTheFreshRoundWhenDeletingAnswers() {
+    val questionnaire = createQuestionnaire(QuestionnaireType.SURVEY)
+    val content = createChoiceContent(questionnaire.id!!, null)
+    val events = mutableListOf<AnswerChangedEvent>()
+    val subscription = roundStatsEventPublisher.answerChangedFlux().subscribe { events.add(it) }
+    try {
+      answerService.deleteByContentId(content.id!!)
+      questionnaireService.resetAnswerResultsByQuestionnaireId(questionnaire.id!!)
+    } finally {
+      subscription.dispose()
+    }
+    val roundIdsSignalled = events.filter { it.contentId == content.id }.map { it.roundId }
+    Assertions.assertEquals(2, roundIdsSignalled.size)
+    Assertions.assertEquals(
+        roundService.findByContentIdOrderByRoundNo(content.id!!).single().id,
+        roundIdsSignalled.last())
+  }
+
+  @Test
   fun shouldRejectSecondAnswerOfSameUserInRound() {
     val questionnaire = createQuestionnaire(QuestionnaireType.SURVEY)
     val round = createChoiceContent(questionnaire.id!!, null).activeRound!!
