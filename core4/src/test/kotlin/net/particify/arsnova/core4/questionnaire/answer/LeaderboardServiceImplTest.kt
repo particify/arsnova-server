@@ -52,9 +52,11 @@ class LeaderboardServiceImplTest {
     return tuple
   }
 
+  private val questionnaire = Questionnaire(id = QUESTIONNAIRE_ID, roomId = ROOM_ID)
+
   private fun givenQuestionnaire(scores: List<Tuple>) {
     Mockito.`when`(questionnaireRepository.findById(QUESTIONNAIRE_ID))
-        .thenReturn(Optional.of(Questionnaire(id = QUESTIONNAIRE_ID, roomId = ROOM_ID)))
+        .thenReturn(Optional.of(questionnaire))
     Mockito.`when`(answerRepository.sumPointsByQuestionnaireIdGroupByCreatedBy(QUESTIONNAIRE_ID))
         .thenReturn(scores)
   }
@@ -125,7 +127,8 @@ class LeaderboardServiceImplTest {
   fun shouldAddEachUsersResultForTheActiveRoundOfTheContent() {
     val (first, second) = userIds.take(2)
     givenQuestionnaire(listOf(score(first, 500), score(second, 0)))
-    val content = Content(id = CONTENT_ID, activeRound = Round(id = ROUND_ID))
+    val content =
+        Content(id = CONTENT_ID, questionnaire = questionnaire, activeRound = Round(id = ROUND_ID))
     Mockito.`when`(contentRepository.findById(CONTENT_ID)).thenReturn(Optional.of(content))
     Mockito.`when`(answerRepository.findByRoundId(ROUND_ID))
         .thenReturn(
@@ -145,7 +148,7 @@ class LeaderboardServiceImplTest {
   fun shouldOmitResultsForAContentWithoutActiveRound() {
     givenQuestionnaire(listOf(score(userIds[0], 500)))
     Mockito.`when`(contentRepository.findById(CONTENT_ID))
-        .thenReturn(Optional.of(Content(id = CONTENT_ID)))
+        .thenReturn(Optional.of(Content(id = CONTENT_ID, questionnaire = questionnaire)))
     val ranking = service.findLeaderboardByQuestionnaireId(QUESTIONNAIRE_ID, CONTENT_ID)
     Assertions.assertNull(ranking.single().currentResult)
   }
@@ -159,5 +162,18 @@ class LeaderboardServiceImplTest {
     Assertions.assertThrows(ContentNotFoundException::class.java) {
       service.findLeaderboardByQuestionnaireId(QUESTIONNAIRE_ID, CONTENT_ID)
     }
+  }
+
+  @Test
+  fun shouldRejectAContentOfAnotherQuestionnaireLikeAnUnknownOne() {
+    givenQuestionnaire(listOf(score(userIds[0], 500)))
+    val foreign = Questionnaire(id = UUID.randomUUID(), roomId = UUID.randomUUID())
+    val content =
+        Content(id = CONTENT_ID, questionnaire = foreign, activeRound = Round(id = ROUND_ID))
+    Mockito.`when`(contentRepository.findById(CONTENT_ID)).thenReturn(Optional.of(content))
+    Assertions.assertThrows(ContentNotFoundException::class.java) {
+      service.findLeaderboardByQuestionnaireId(QUESTIONNAIRE_ID, CONTENT_ID)
+    }
+    Mockito.verify(answerRepository, Mockito.never()).findByRoundId(ROUND_ID)
   }
 }

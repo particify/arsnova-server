@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.questionnaire.answer
 import jakarta.transaction.Transactional
 import java.util.Locale
 import java.util.UUID
+import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
@@ -56,6 +57,7 @@ class LeaderboardServiceImpl(
       questionnaireId: UUID,
       contentId: UUID?
   ): List<RawLeaderboardEntry> {
+    contentId?.let { requireContentOfQuestionnaire(questionnaireId, it) }
     val questionnaire =
         questionnaireRepository.findByIdOrNull(questionnaireId)
             ?: throw QuestionnaireNotFoundException(questionnaireId)
@@ -103,6 +105,16 @@ class LeaderboardServiceImpl(
       Pair(it.get(0, UUID::class.java), (it.get(1, Long::class.java) ?: 0L).toInt())
     }
   }
+
+  /**
+   * Fails like an unknown content for a content of another questionnaire. The permission is checked
+   * on the questionnaire only, so the content must not be able to reach beyond it, and the error
+   * must not reveal that the content exists.
+   */
+  fun requireContentOfQuestionnaire(questionnaireId: UUID, contentId: UUID): Content =
+      contentRepository.findByIdOrNull(contentId)?.takeIf {
+        it.questionnaire?.id == questionnaireId
+      } ?: throw ContentNotFoundException(contentId)
 
   private fun findCurrentResults(contentId: UUID): Map<UUID, LeaderboardCurrentResult> {
     val content =

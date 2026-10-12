@@ -28,6 +28,9 @@ class LeaderboardSubscriptionController(
    * Emits the leaderboard whenever one of the questionnaire's answers changed, at most once per
    * sample interval. All subscribers of a questionnaire share one computation; only cutting it to
    * size and localizing the aliases happens per subscriber, and neither touches the database.
+   *
+   * A content of another questionnaire is rejected before subscribing, rather than failing the
+   * shared computation once the first answer arrives.
    */
   @SubscriptionMapping
   @PreAuthorize("hasPermission(#questionnaireId, 'Questionnaire', 'readLeaderboard')")
@@ -38,6 +41,7 @@ class LeaderboardSubscriptionController(
       @AuthenticationPrincipal user: User,
       locale: Locale
   ): Flux<LeaderboardPage> {
+    contentId?.let { leaderboardServiceImpl.requireContentOfQuestionnaire(questionnaireId, it) }
     val userId = user.id
     return leaderboardFluxRegistry.leaderboardFlux(questionnaireId, contentId).map {
       leaderboardServiceImpl.toPage(it, userId, limit, locale)

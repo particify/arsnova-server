@@ -8,7 +8,9 @@ import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.answer.LeaderboardPage
 import net.particify.arsnova.core4.questionnaire.answer.LeaderboardServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.RawLeaderboardEntry
+import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.user.User
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import reactor.core.publisher.Flux
@@ -41,5 +43,16 @@ class LeaderboardSubscriptionControllerTest {
                 QUESTIONNAIRE_ID, CONTENT_ID, LIMIT, user, LOCALE))
         .expectNext(firstPage, secondPage)
         .verifyComplete()
+  }
+
+  @Test
+  fun shouldRejectAContentOfAnotherQuestionnaireBeforeSubscribing() {
+    Mockito.`when`(leaderboardService.requireContentOfQuestionnaire(QUESTIONNAIRE_ID, CONTENT_ID))
+        .thenThrow(ContentNotFoundException(CONTENT_ID))
+    Assertions.assertThrows(ContentNotFoundException::class.java) {
+      controller.questionnaireLeaderboardUpdated(
+          QUESTIONNAIRE_ID, CONTENT_ID, LIMIT, User(id = UUID.randomUUID()), LOCALE)
+    }
+    Mockito.verifyNoInteractions(registry)
   }
 }
