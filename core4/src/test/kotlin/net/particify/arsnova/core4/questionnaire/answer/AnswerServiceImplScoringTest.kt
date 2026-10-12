@@ -16,6 +16,7 @@ import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsEventPublis
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.springframework.data.domain.AuditorAware
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Window
 import org.springframework.graphql.data.query.ScrollSubrange
@@ -35,11 +36,12 @@ class AnswerServiceImplScoringTest {
           roundRepository,
           contentServiceImpl,
           RoundStatsEventPublisher(),
-          Mockito.mock(QuestionnaireRepository::class.java))
+          Mockito.mock(QuestionnaireRepository::class.java),
+          AuditorAware { Optional.of(USER_ID) })
   private val questionnaire = Questionnaire(id = UUID.randomUUID())
 
   init {
-    Mockito.`when`(answerRepository.save(Mockito.any(Answer::class.java))).thenAnswer {
+    Mockito.`when`(answerRepository.saveAndFlush(Mockito.any(Answer::class.java))).thenAnswer {
       it.arguments[0]
     }
   }

@@ -8,6 +8,7 @@ import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
+import net.particify.arsnova.core4.questionnaire.exception.AnswerAlreadyExistsException
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.RoundClosedException
 import net.particify.arsnova.core4.questionnaire.exception.RoundExpiredException
@@ -17,6 +18,8 @@ import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.round.api.AnswerChangedEvent
 import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsEventPublisher
+import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.data.domain.AuditorAware
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.query.ScrollSubrange
@@ -29,6 +32,7 @@ class AnswerServiceImpl(
     private val contentServiceImpl: ContentServiceImpl,
     private val roundStatsEventPublisher: RoundStatsEventPublisher,
     private val questionnaireRepository: QuestionnaireRepository,
+    private val auditorAware: AuditorAware<UUID>,
 ) : AnswerRepository by answerRepository {
 
   private fun findAnswerableRound(roundId: UUID): Round {
@@ -38,6 +42,25 @@ class AnswerServiceImpl(
     if (!round.acceptsAnswers()) throw RoundExpiredException(roundId)
     return round
   }
+
+  /** An abstention is an answer row too, so a user who answered cannot abstain and vice versa. */
+  private fun requireNoAnswer(roundId: UUID) {
+    val userId = auditorAware.currentAuditor.orElseThrow()
+    if (answerRepository.findByRoundIdAndAuditMetadataCreatedBy(roundId, userId) != null) {
+      throw AnswerAlreadyExistsException(roundId)
+    }
+  }
+
+  /**
+   * Concurrent submissions can both pass [requireNoAnswer], so the unique index on the round and
+   * the user has the last word and its violation is reported like the check's.
+   */
+  private fun store(answer: Answer): Answer =
+      try {
+        answerRepository.saveAndFlush(answer)
+      } catch (e: DataIntegrityViolationException) {
+        throw AnswerAlreadyExistsException(answer.round?.id, e)
+      }
 
   private fun publishAnswerChanged(round: Round) {
     val content = round.content!!
@@ -61,6 +84,7 @@ class AnswerServiceImpl(
   fun createAnswer(roundId: UUID, formatData: AnswerFormatData): Answer {
     val now = Instant.now()
     val round = findAnswerableRound(roundId)
+    requireNoAnswer(roundId)
     val content = round.content!!
     val contentFormatData = content.formatData!!
     contentFormatData.validateAnswer(formatData)
@@ -75,7 +99,7 @@ class AnswerServiceImpl(
             points = achievedPoints.takeIf { it > 0 },
             durationMs = round.elapsedAnsweringTime(now),
         )
-    val persisted = answerRepository.save(answer)
+    val persisted = store(answer)
     publishAnswerChanged(round)
     return persisted
   }
@@ -86,13 +110,14 @@ class AnswerServiceImpl(
   ): Answer {
     val now = Instant.now()
     val round = findAnswerableRound(roundId)
+    requireNoAnswer(roundId)
     val answer =
         Answer(
             round = round,
             result = AnswerResultState.ABSTAINED,
             durationMs = round.elapsedAnsweringTime(now),
         )
-    return answerRepository.save(answer)
+    return store(answer)
   }
 
   @Transactional

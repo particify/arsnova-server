@@ -9,6 +9,9 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
+import net.particify.arsnova.core4.questionnaire.answer.Answer
+import net.particify.arsnova.core4.questionnaire.answer.AnswerRepository
+import net.particify.arsnova.core4.questionnaire.answer.AnswerResultState
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
@@ -16,6 +19,7 @@ import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
+import net.particify.arsnova.core4.questionnaire.exception.AnswerAlreadyExistsException
 import net.particify.arsnova.core4.questionnaire.exception.RoundClosedException
 import net.particify.arsnova.core4.questionnaire.exception.RoundExpiredException
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnairePublishingMode
@@ -33,18 +37,24 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
 
-private val ROOM_ID = UUID.fromString("3f9cecb5-6dbf-45cc-b630-4af700d474b6")
+/** Accounts and rooms from the `dev` Liquibase fixtures. */
 private val USER_ID = UUID.fromString("9c778494-9b52-424d-8c7f-f4936629facb")
+private val PARTICIPANT_ID = UUID.fromString("43389844-708b-469d-8d22-abdd2eb88777")
+
+/** Owned by [USER_ID]; [PARTICIPANT_ID] is a participant. */
+private val ROOM_ID = UUID.fromString("3f9cecb5-6dbf-45cc-b630-4af700d474b6")
 private const val DURATION = 30
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Import(TestcontainersConfiguration::class)
 class RoundAnsweringTests {
+  @Autowired lateinit var answerRepository: AnswerRepository
   @Autowired lateinit var answerService: AnswerServiceImpl
   @Autowired lateinit var contentService: ContentServiceImpl
   @Autowired lateinit var publishingService: QuestionnairePublishingServiceImpl
@@ -55,7 +65,11 @@ class RoundAnsweringTests {
 
   @BeforeEach
   fun authenticateUser() {
-    val user = userService.loadUserById(USER_ID)!!
+    authenticate(USER_ID)
+  }
+
+  private fun authenticate(userId: UUID) {
+    val user = userService.loadUserById(userId)!!
     SecurityContextHolder.getContext().authentication =
         UsernamePasswordAuthenticationToken(user, null, user.authorities)
   }
@@ -268,6 +282,57 @@ class RoundAnsweringTests {
     Assertions.assertFalse(stoppedRound.acceptsAnswers())
     Assertions.assertThrows(RoundClosedException::class.java) {
       answerService.createAnswer(round.id!!, ChoiceAnswerFormatData(listOf(0)))
+    }
+  }
+
+  @Test
+  fun shouldRejectSecondAnswerOfSameUserInRound() {
+    val questionnaire = createQuestionnaire(QuestionnaireType.SURVEY)
+    val round = createChoiceContent(questionnaire.id!!, null).activeRound!!
+    answerService.createAnswer(round.id!!, ChoiceAnswerFormatData(listOf(0)))
+    Assertions.assertThrows(AnswerAlreadyExistsException::class.java) {
+      answerService.createAnswer(round.id!!, ChoiceAnswerFormatData(listOf(1)))
+    }
+    Assertions.assertThrows(AnswerAlreadyExistsException::class.java) {
+      answerService.createAbstention(round.id!!)
+    }
+    Assertions.assertEquals(1, answerRepository.findByRoundId(round.id!!).size)
+  }
+
+  @Test
+  fun shouldRejectAnswerAfterAbstentionInRound() {
+    val questionnaire = createQuestionnaire(QuestionnaireType.SURVEY)
+    val round = createChoiceContent(questionnaire.id!!, null).activeRound!!
+    answerService.createAbstention(round.id!!)
+    Assertions.assertThrows(AnswerAlreadyExistsException::class.java) {
+      answerService.createAnswer(round.id!!, ChoiceAnswerFormatData(listOf(0)))
+    }
+    Assertions.assertThrows(AnswerAlreadyExistsException::class.java) {
+      answerService.createAbstention(round.id!!)
+    }
+  }
+
+  @Test
+  fun shouldAcceptOneAnswerPerUserInRound() {
+    val questionnaire = createQuestionnaire(QuestionnaireType.SURVEY)
+    val content = createChoiceContent(questionnaire.id!!, null)
+    val round = content.activeRound!!
+    answerService.createAnswer(round.id!!, ChoiceAnswerFormatData(listOf(0)))
+    authenticate(PARTICIPANT_ID)
+    answerService.createAnswer(round.id!!, ChoiceAnswerFormatData(listOf(1)))
+    val secondRound = roundService.startNewRound(content.id!!)
+    answerService.createAnswer(secondRound.id!!, ChoiceAnswerFormatData(listOf(0)))
+    Assertions.assertEquals(2, answerRepository.findByRoundId(round.id!!).size)
+    Assertions.assertEquals(1, answerRepository.findByRoundId(secondRound.id!!).size)
+  }
+
+  @Test
+  fun shouldEnforceOneAnswerPerUserAndRoundInTheDatabase() {
+    val questionnaire = createQuestionnaire(QuestionnaireType.SURVEY)
+    val round = createChoiceContent(questionnaire.id!!, null).activeRound!!
+    answerRepository.saveAndFlush(Answer(round = round, result = AnswerResultState.NEUTRAL))
+    Assertions.assertThrows(DataIntegrityViolationException::class.java) {
+      answerRepository.saveAndFlush(Answer(round = round, result = AnswerResultState.ABSTAINED))
     }
   }
 

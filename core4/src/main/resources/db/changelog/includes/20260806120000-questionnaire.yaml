@@ -327,8 +327,8 @@ databaseChangeLog:
               - column:
                   name: updated_at
                   type: timestamp with time zone
-        - createIndex:
+        - addUniqueConstraint:
             schemaName: questionnaire
             tableName: answer
-            column:
-              - name: round_id
+            columnNames: round_id, created_by
+            constraintName: answer_round_id_created_by_key

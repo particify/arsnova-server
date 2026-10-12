@@ -3,7 +3,6 @@
  */
 package net.particify.arsnova.core4.questionnaire.answer
 
-import jakarta.persistence.Embeddable
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -31,6 +30,4 @@ data class Answer(
     var durationMs: Int? = null,
     var hidden: Boolean = false,
     @Embedded val auditMetadata: AuditMetadataUuidV7 = AuditMetadataUuidV7()
-) {
-  @Embeddable data class RoundUserId(var roundId: UUID? = null, var userId: UUID? = null)
-}
+)
