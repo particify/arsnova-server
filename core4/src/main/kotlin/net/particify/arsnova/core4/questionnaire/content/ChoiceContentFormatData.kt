@@ -20,6 +20,24 @@ data class ChoiceContentFormatData(
 
   override fun withoutSolution() = copy(correctOptionIndexes = null)
 
+  override fun validate() {
+    if (options.size < MIN_OPTION_COUNT) {
+      throw ContentFormatDataInvalidException(
+          "A choice content needs at least $MIN_OPTION_COUNT options")
+    }
+    if (options.any { it.isBlank() }) {
+      throw ContentFormatDataInvalidException("Options must not be blank")
+    }
+    val correctIndexes = correctOptionIndexes.orEmpty()
+    if (correctIndexes.any { it !in options.indices }) {
+      throw ContentFormatDataInvalidException(
+          "Correct options must be between 0 and ${options.size - 1} for this choice content")
+    }
+    if (correctIndexes.distinct().size != correctIndexes.size) {
+      throw ContentFormatDataInvalidException("An option must not be marked correct twice")
+    }
+  }
+
   /** An update of another format would reinterpret the content's rounds and answers. */
   override fun validateChange(current: ContentFormatData, hasAnswers: () -> Boolean) {
     if (current !is ChoiceContentFormatData) {
@@ -84,6 +102,8 @@ data class ChoiceContentFormatData(
   constructor() : this(listOf(), null, false)
 
   companion object {
+    const val MIN_OPTION_COUNT = 2
+
     /**
      * Summing the share of each option leaves a fully correct answer just short of the whole for
      * option counts which cannot be represented exactly, so correctness is decided against a

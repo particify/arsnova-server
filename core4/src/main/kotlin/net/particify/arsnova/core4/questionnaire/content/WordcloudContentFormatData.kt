@@ -13,6 +13,12 @@ class WordcloudContentFormatData(val maxAnswers: Int) : KeywordBanning {
 
   override fun supportsRounds() = true
 
+  override fun validate() {
+    if (maxAnswers < 1) {
+      throw ContentFormatDataInvalidException("A wordcloud content must allow at least one word")
+    }
+  }
+
   /** An update of another format would reinterpret the content's rounds and answers. */
   override fun validateChange(current: ContentFormatData, hasAnswers: () -> Boolean) {
     if (current !is WordcloudContentFormatData) {

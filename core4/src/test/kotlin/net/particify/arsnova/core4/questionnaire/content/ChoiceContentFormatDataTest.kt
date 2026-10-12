@@ -121,6 +121,42 @@ class ChoiceContentFormatDataTest {
   }
 
   @Test
+  fun shouldAcceptDistinctCorrectOptionsWithinTheOptions() {
+    ChoiceContentFormatData(OPTIONS, null, false).validate()
+    ChoiceContentFormatData(OPTIONS, listOf(), false).validate()
+    ChoiceContentFormatData(OPTIONS, listOf(2, 0), true).validate()
+    ChoiceContentFormatData(listOf("A", "B"), listOf(1), false).validate()
+  }
+
+  @Test
+  fun shouldRejectFewerThanTwoOptions() {
+    assertInvalid(ChoiceContentFormatData(listOf(), null, false))
+    assertInvalid(ChoiceContentFormatData(listOf("A"), null, false))
+  }
+
+  @Test
+  fun shouldRejectBlankOption() {
+    listOf("", " ", "\t").forEach {
+      assertInvalid(ChoiceContentFormatData(listOf("A", it), null, false))
+    }
+  }
+
+  @Test
+  fun shouldRejectCorrectOptionOutsideTheOptions() {
+    assertInvalid(ChoiceContentFormatData(OPTIONS, listOf(OPTIONS.size), false))
+    assertInvalid(ChoiceContentFormatData(OPTIONS, listOf(-1), false))
+  }
+
+  @Test
+  fun shouldRejectRepeatedCorrectOption() {
+    assertInvalid(ChoiceContentFormatData(OPTIONS, listOf(1, 1), true))
+  }
+
+  private fun assertInvalid(content: ChoiceContentFormatData) {
+    Assertions.assertThrows(ContentFormatDataInvalidException::class.java) { content.validate() }
+  }
+
+  @Test
   fun shouldDropOnlyTheCorrectOptionsWhenWithholdingTheSolution() {
     val stored = ChoiceContentFormatData(OPTIONS, listOf(0, 2), true)
     Assertions.assertEquals(ChoiceContentFormatData(OPTIONS, null, true), stored.withoutSolution())

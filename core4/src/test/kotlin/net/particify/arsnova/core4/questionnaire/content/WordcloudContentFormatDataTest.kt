@@ -92,6 +92,16 @@ class WordcloudContentFormatDataTest {
   }
 
   @Test
+  fun shouldRequireAtLeastOneWord() {
+    WordcloudContentFormatData(1).validate()
+    listOf(0, -1).forEach {
+      Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
+        WordcloudContentFormatData(it).validate()
+      }
+    }
+  }
+
+  @Test
   fun shouldBeEqualByMaxAnswersAndBannedKeywords() {
     val banned = WordcloudContentFormatData(2)
     banned.addBannedKeyword("spam")
