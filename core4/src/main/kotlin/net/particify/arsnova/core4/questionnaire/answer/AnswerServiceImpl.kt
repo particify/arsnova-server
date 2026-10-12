@@ -192,13 +192,13 @@ class AnswerServiceImpl(
             )
             .toList()
     var correctAnswerCount = 0
-    var scorableAnswerCount = 0
+    var scorableContentCount = 0
     var achievedScore = 0
     var maxScore = 0
     contents.forEach {
       val contentFormatData = it.formatData!!
       if (contentFormatData.hasCorrectAnswer()) {
-        scorableAnswerCount++
+        scorableContentCount++
         if (it.points != null) maxScore += it.points!!
       }
       val round = it.activeRound!!
@@ -212,7 +212,7 @@ class AnswerServiceImpl(
       achievedScore += achievedPoints(round, it, answerFormatData, answer.auditMetadata.createdAt)
     }
     return QuestionnaireAnswerResult(
-        questionnaireId, correctAnswerCount, scorableAnswerCount, achievedScore, maxScore)
+        questionnaireId, correctAnswerCount, scorableContentCount, achievedScore, maxScore)
   }
 
   @Deprecated(

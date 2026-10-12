@@ -8,7 +8,7 @@ import java.util.UUID
 data class QuestionnaireAnswerResult(
     val questionnaireId: UUID,
     var correctAnswerCount: Int,
-    var scorableAnswerCount: Int,
+    var scorableContentCount: Int,
     var achievedScore: Int,
     var maxScore: Int
 )

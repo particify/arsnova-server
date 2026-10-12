@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.graphql.ExecutionGraphQlService
 import org.springframework.graphql.data.query.ScrollSubrange
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
@@ -41,6 +42,7 @@ class QuestionnaireAnswerResultTests {
   @Autowired lateinit var answerRepository: AnswerRepository
   @Autowired lateinit var answerService: AnswerServiceImpl
   @Autowired lateinit var contentService: ContentServiceImpl
+  @Autowired lateinit var graphQlService: ExecutionGraphQlService
   @Autowired lateinit var questionnaireService: QuestionnaireServiceImpl
   @Autowired lateinit var userService: UserService
 
@@ -85,7 +87,7 @@ class QuestionnaireAnswerResultTests {
     Assertions.assertEquals(AnswerResultState.CORRECT, answer.result)
     Assertions.assertEquals(Content.BASE_POINTS, answer.points)
     val results = resultsOf(content)
-    Assertions.assertEquals(1, results.scorableAnswerCount)
+    Assertions.assertEquals(1, results.scorableContentCount)
     Assertions.assertEquals(1, results.correctAnswerCount)
     Assertions.assertEquals(Content.BASE_POINTS, results.achievedScore)
     Assertions.assertEquals(Content.BASE_POINTS, results.maxScore)
@@ -98,7 +100,7 @@ class QuestionnaireAnswerResultTests {
     Assertions.assertEquals(AnswerResultState.WRONG, answer.result)
     Assertions.assertNull(answer.points)
     val results = resultsOf(content)
-    Assertions.assertEquals(1, results.scorableAnswerCount)
+    Assertions.assertEquals(1, results.scorableContentCount)
     Assertions.assertEquals(0, results.correctAnswerCount)
     Assertions.assertEquals(0, results.achievedScore)
   }
@@ -110,10 +112,36 @@ class QuestionnaireAnswerResultTests {
     Assertions.assertEquals(AnswerResultState.NEUTRAL, answer.result)
     Assertions.assertNull(answer.points)
     val results = resultsOf(content)
-    Assertions.assertEquals(0, results.scorableAnswerCount)
+    Assertions.assertEquals(0, results.scorableContentCount)
     Assertions.assertEquals(0, results.correctAnswerCount)
     Assertions.assertEquals(0, results.achievedScore)
     Assertions.assertEquals(0, results.maxScore)
+  }
+
+  @Test
+  fun shouldServeTheScorableContentCountThroughTheSchema() {
+    val content = createChoiceContent(listOf(CORRECT_INDEX))
+    answer(content, CORRECT_INDEX)
+    val response =
+        graphQlService.executeAsCurrentUser(
+            """
+            {
+              questionnaireAnswerResultsByQuestionnaireId(
+                questionnaireId: "${content.questionnaire!!.id}"
+              ) {
+                scorableContentCount
+                maxScore
+              }
+            }
+            """
+                .trimIndent())
+    Assertions.assertTrue(response.errors.isEmpty(), response.errors.toString())
+    val result =
+        response
+            .getData<Map<String, Map<String, Int?>>>()!!
+            .getValue("questionnaireAnswerResultsByQuestionnaireId")
+    Assertions.assertEquals(1, result["scorableContentCount"])
+    Assertions.assertEquals(Content.BASE_POINTS, result["maxScore"])
   }
 
   @Test

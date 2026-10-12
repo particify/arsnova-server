@@ -107,7 +107,7 @@ class AnswerServiceImplScoringTest {
             questionnaire.id!!, USER_ID, ScrollSubrange.create(null, null, true))
 
     Assertions.assertEquals(1, results.correctAnswerCount)
-    Assertions.assertEquals(3, results.scorableAnswerCount)
+    Assertions.assertEquals(3, results.scorableContentCount)
     Assertions.assertEquals(Content.BASE_POINTS + HALF_OF_DOUBLE_WEIGHT, results.achievedScore)
     Assertions.assertEquals(4 * Content.BASE_POINTS, results.maxScore)
   }
