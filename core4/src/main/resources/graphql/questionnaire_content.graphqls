@@ -21,7 +21,7 @@ extend type Mutation {
     contentId: UUID!
     questionnaireId: UUID!
   ): Content
-  createQuestionnaireBinaryContent(input: CreateBinaryContentInput): Content
+  createQuestionnaireBinaryContent(input: CreateBinaryContentInput!): Content
   createQuestionnaireChoiceContent(input: CreateChoiceContentInput!): Content
   createQuestionnaireFlashcardContent(
     input: CreateFlashcardContentInput!
@@ -52,7 +52,7 @@ extend type Mutation {
     contentId: UUID!
     published: Boolean!
   ): Content
-  updateQuestionnaireBinaryContent(input: UpdateBinaryContentInput): Content
+  updateQuestionnaireBinaryContent(input: UpdateBinaryContentInput!): Content
   updateQuestionnaireChoiceContent(input: UpdateChoiceContentInput!): Content
   updateQuestionnaireFlashcardContent(
     input: UpdateFlashcardContentInput!

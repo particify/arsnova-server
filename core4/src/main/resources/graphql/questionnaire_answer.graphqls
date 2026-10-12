@@ -10,7 +10,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  createQuestionnaireBinaryAnswer(input: CreateBinaryAnswerInput): Answer
+  createQuestionnaireBinaryAnswer(input: CreateBinaryAnswerInput!): Answer
   createQuestionnaireChoiceAnswer(input: CreateChoiceAnswerInput!): Answer
   createQuestionnaireNumericAnswer(input: CreateNumericAnswerInput!): Answer
   createQuestionnairePrioritizationAnswer(
