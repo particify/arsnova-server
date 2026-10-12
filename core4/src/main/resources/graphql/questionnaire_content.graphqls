@@ -114,7 +114,7 @@ type SlideContentFormatData {
 
 type TextContentFormatData {
   format: ContentType!
-  answersPublished: Boolean
+  answersPublished: Boolean!
 }
 
 type WordcloudContentFormatData {

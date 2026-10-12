@@ -69,6 +69,13 @@ class QuestionnaireSchemaTests {
   }
 
   @Test
+  fun shouldDeclareFormatDataFieldsTheModelAlwaysHas() {
+    val textFormatData = graphQlSource.schema().getObjectType("TextContentFormatData")
+    Assertions.assertInstanceOf(
+        GraphQLNonNull::class.java, textFormatData.getFieldDefinition("answersPublished").type)
+  }
+
+  @Test
   fun shouldOfferNoPaginationForContentLists() {
     listOf(
             "questionnaireContentsByQuestionnaireId",
