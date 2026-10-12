@@ -1,3 +1,8 @@
+# Each list is addressed by index: an alias is stored as its seed only, and the seed picks a word
+# by its position, with the length of the noun list also weighting the special nouns. The order and
+# the length of every list therefore decide which alias each stored seed stands for. Any change,
+# appending included, renames existing users; translations in messages/alias*.yaml are free to
+# change.
 alias-words:
   nouns:
     - alpaca

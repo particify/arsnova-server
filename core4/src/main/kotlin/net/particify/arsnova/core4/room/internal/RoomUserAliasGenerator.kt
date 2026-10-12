@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component
 /**
  * Generates localized aliases which are composed of an adjective and an animal name. The generated
  * name is fully determined by the alias' seed so it stays stable while its localization can change.
+ *
+ * The seed selects words by their index in the lists of `config/alias-words.yaml`, so the order and
+ * the length of those lists are part of every stored alias: changing either renames existing users.
  */
 @Component
 class RoomUserAliasGenerator(

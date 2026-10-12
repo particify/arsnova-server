@@ -32,6 +32,10 @@ class RoomUserAliasGeneratorTest {
     Assertions.assertEquals(alias.alias, generator.generate(seed, ENGLISH).alias)
   }
 
+  /**
+   * Pins seeds to their aliases. Stored aliases are only seeds, so this fails whenever a change to
+   * the word lists or the selection would rename existing users.
+   */
   @Test
   fun shouldGenerateLocalizedAliases() {
     Assertions.assertEquals("Enthusiastic Owl", generator.generate(0, ENGLISH).alias)
