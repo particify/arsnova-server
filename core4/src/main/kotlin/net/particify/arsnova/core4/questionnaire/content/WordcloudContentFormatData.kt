@@ -44,6 +44,14 @@ class WordcloudContentFormatData(val maxAnswers: Int) : KeywordBanning {
     }
   }
 
+  /** Equality covers the banned keywords, which are state rather than settings. */
+  override fun equals(other: Any?): Boolean =
+      other is WordcloudContentFormatData &&
+          maxAnswers == other.maxAnswers &&
+          bannedKeywords == other.bannedKeywords
+
+  override fun hashCode(): Int = 31 * maxAnswers + bannedKeywords.hashCode()
+
   companion object {
     const val MAX_ANSWERS_DEFAULT = 3
 

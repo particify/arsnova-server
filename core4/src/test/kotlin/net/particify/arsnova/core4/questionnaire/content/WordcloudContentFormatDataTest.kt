@@ -91,6 +91,18 @@ class WordcloudContentFormatDataTest {
     }
   }
 
+  @Test
+  fun shouldBeEqualByMaxAnswersAndBannedKeywords() {
+    val banned = WordcloudContentFormatData(2)
+    banned.addBannedKeyword("spam")
+    val same = WordcloudContentFormatData(2)
+    same.addBannedKeyword("spam")
+    Assertions.assertEquals(banned, same)
+    Assertions.assertEquals(banned.hashCode(), same.hashCode())
+    Assertions.assertNotEquals(banned, WordcloudContentFormatData(2))
+    Assertions.assertNotEquals(WordcloudContentFormatData(2), WordcloudContentFormatData(3))
+  }
+
   private fun assertRejected(formatData: WordcloudContentFormatData, words: List<String>) {
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
       formatData.validateAnswer(WordcloudAnswerFormatData(words))
