@@ -27,7 +27,7 @@ extend type Mutation {
   ): Content
   createQuestionnaireNumericContent(input: CreateNumericContentInput!): Content
   createQuestionnairePrioritizationContent(
-    input: CreatePrioritizationContentInput
+    input: CreatePrioritizationContentInput!
   ): Content
   createQuestionnaireScaleContent(input: CreateScaleContentInput!): Content
   createQuestionnaireShortAnswerContent(
@@ -57,7 +57,7 @@ extend type Mutation {
   ): Content
   updateQuestionnaireNumericContent(input: UpdateNumericContentInput!): Content
   updateQuestionnairePrioritizationContent(
-    input: UpdatePrioritizationContentInput
+    input: UpdatePrioritizationContentInput!
   ): Content
   updateQuestionnaireScaleContent(input: UpdateScaleContentInput!): Content
   updateQuestionnaireShortAnswerContent(

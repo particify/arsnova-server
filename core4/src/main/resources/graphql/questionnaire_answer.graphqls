@@ -13,7 +13,7 @@ extend type Mutation {
   createQuestionnaireChoiceAnswer(input: CreateChoiceAnswerInput!): Answer
   createQuestionnaireNumericAnswer(input: CreateNumericAnswerInput!): Answer
   createQuestionnairePrioritizationAnswer(
-    input: CreatePrioritizationAnswerInput
+    input: CreatePrioritizationAnswerInput!
   ): Answer
   createQuestionnaireScaleAnswer(input: CreateScaleAnswerInput!): Answer
   createQuestionnaireShortAnswerAnswer(
