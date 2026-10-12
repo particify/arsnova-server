@@ -28,7 +28,7 @@ extend type Mutation {
   createQuestionnaireNumericContent(input: CreateNumericContentInput!): Content
   createQuestionnaireScaleContent(input: CreateScaleContentInput!): Content
   createQuestionnaireShortAnswerContent(
-    input: CreateShortAnswerContentInput
+    input: CreateShortAnswerContentInput!
   ): Content
   createQuestionnaireSlideContent(input: CreateSlideContentInput!): Content
   createQuestionnaireTextContent(input: CreateTextContentInput!): Content
@@ -54,7 +54,7 @@ extend type Mutation {
   updateQuestionnaireNumericContent(input: UpdateNumericContentInput!): Content
   updateQuestionnaireScaleContent(input: UpdateScaleContentInput!): Content
   updateQuestionnaireShortAnswerContent(
-    input: UpdateShortAnswerContentInput
+    input: UpdateShortAnswerContentInput!
   ): Content
   updateQuestionnaireSlideContent(input: UpdateSlideContentInput!): Content
   updateQuestionnaireTextContent(input: UpdateTextContentInput!): Content

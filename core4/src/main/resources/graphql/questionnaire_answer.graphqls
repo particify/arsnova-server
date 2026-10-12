@@ -14,7 +14,7 @@ extend type Mutation {
   createQuestionnaireNumericAnswer(input: CreateNumericAnswerInput!): Answer
   createQuestionnaireScaleAnswer(input: CreateScaleAnswerInput!): Answer
   createQuestionnaireShortAnswerAnswer(
-    input: CreateShortAnswerAnswerInput
+    input: CreateShortAnswerAnswerInput!
   ): Answer
   createQuestionnaireTextAnswer(input: CreateTextAnswerInput!): Answer
   createQuestionnaireWordcloudAnswer(input: CreateWordcloudAnswerInput!): Answer
