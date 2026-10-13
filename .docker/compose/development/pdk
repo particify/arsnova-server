@@ -770,8 +770,7 @@ start_dev_server() {
     # a progress bar redrawn every second, which is four fifths of a captured log and unreadable in
     # anything but a terminal. A --console argument still wins, so `--console=rich` restores it.
     # Appended to GRADLE_OPTS inside the container rather than assigned, hence the escaped $.
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u 1000:1000 "$SERVICE" sh -c "/post-attach.sh && trap '{ echo; echo \"Starting production server...\"; }' INT && cd /workspace/$PROJECT && GRADLE_OPTS=\"\$GRADLE_OPTS -Dorg.gradle.console=plain\" ../gradlew bootRun $*; exit" 2>&1 | tee -a "$log"
-    announce_dev_server_end | tee -a "$log"
+    run_dev_server_session "$log" $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u 1000:1000 "$SERVICE" sh -c "/post-attach.sh && trap '{ echo; echo \"Starting production server...\"; }' INT && cd /workspace/$PROJECT && GRADLE_OPTS=\"\$GRADLE_OPTS -Dorg.gradle.console=plain\" ../gradlew bootRun $*; exit"
   # No production server takes over on exit here (unlike the Gradle services, this
   # devcontainer overrides the image's command with a plain sleep loop), so there is
   # nothing for an INT trap to announce. The argument selects the yarn script rather than
@@ -787,11 +786,51 @@ start_dev_server() {
   elif [ -f "$LOCAL_ROOT_DIR/$PROJECT/package.json" ]; then
     prepare_dev_server_slot "$force" || return 1
     open_dev_server_log "$log" || return 1
-    $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u 1000:1000 "$SERVICE" sh -c "/post-attach.sh && cd /workspace/$PROJECT && yarn install && yarn ${*:-start:all} --host 0.0.0.0 --allowed-hosts; exit" 2>&1 | tee -a "$log"
-    announce_dev_server_end | tee -a "$log"
+    run_dev_server_session "$log" $DOCKER_BIN compose -f "$PDK_COMPOSE_FILE" exec $EXEC_TTY_ARG -u 1000:1000 "$SERVICE" sh -c "/post-attach.sh && cd /workspace/$PROJECT && yarn install && yarn ${*:-start:all} --host 0.0.0.0 --allowed-hosts; exit"
   else
     echo "Service $SERVICE is not supported."
   fi
+}
+
+# Runs a session with its log capture detached from whoever invoked pdk, which only follows the log.
+# As a child of the caller, the capture died with it - a closed terminal, or an agent harness reaping
+# its background tasks - while the server in the container carried on with its output going nowhere.
+# setsid takes the capture out of the caller's session, and the command substitution it is started
+# from exits at once, so it is not the caller's descendant either. -w keeps $! naming a process that
+# lives exactly as long as the capture, whether or not setsid had to fork.
+run_dev_server_session() {
+  local log=$1 offset capture_pid
+  shift 1
+  # Created here rather than left to the capture's first write, which tail would otherwise race.
+  : >> "$log"
+  offset=$(stat -c%s "$log")
+  capture_pid=$(
+    setsid -w bash -c "$(declare -f announce_dev_server_end)"'
+      log=$1
+      shift 1
+      "$@" >> "$log" 2>&1
+      announce_dev_server_end >> "$log"' capture "$log" "$@" < /dev/null > /dev/null 2>&1 &
+    echo $!
+  )
+  follow_dev_server_log "$log" "$offset" "$capture_pid"
+}
+
+# Shows the session's output until its capture ends, so the invocation still lasts as long as the
+# session does. The capture never sees the terminal, so Ctrl+C is turned into the same stop
+# stop-dev-server performs - and since the session itself ends the capture, this keeps following
+# until the end marker is out. tail runs in the background because a foreground one would take the
+# SIGINT itself and lose the place in the log; --pid ends it after a final read once the capture
+# exits.
+follow_dev_server_log() {
+  local log=$1 offset=$2 capture_pid=$3 tail_pid
+  tail -c "+$((offset + 1))" -f --pid="$capture_pid" "$log" &
+  tail_pid=$!
+  trap 'stop_dev_server' INT
+  # wait returns early whenever the trap runs, hence the loop.
+  while kill -0 "$tail_pid" 2>/dev/null; do
+    wait "$tail_pid"
+  done
+  trap - INT
 }
 
 # Bytes at which a dev-server log is rotated, and how many compressed generations survive. A session
@@ -824,9 +863,9 @@ open_dev_server_log() {
 }
 
 # Marks the end of a session for whoever is tailing the log, who would otherwise see it freeze with
-# no indication why. Printed rather than written to the file directly, so it also reaches the
-# terminal, and reaches the log through the same pipe as everything else the session produced.
-# "Ended" rather than "stopped" because this is also the path a failed start and a crash take.
+# no indication why. Written by the capture itself, so it is there however the session ended and
+# whoever started it. "Ended" rather than "stopped" because this is also the path a failed start and
+# a crash take.
 announce_dev_server_end() {
   local message rule
   message="  DEV SERVER SESSION ENDED ($(date -u +%Y-%m-%dT%H:%M:%SZ))  "
@@ -998,6 +1037,10 @@ resolve_engine
 # reset-podman shortcut below so that nothing escapes being recorded.
 log_invocation "$@"
 trap 'log_invocation_exit $?' EXIT
+# Without these, a killed invocation reaches the EXIT trap with the status of whatever ran last,
+# usually 0, and reads as a successful one.
+trap 'exit 129' HUP
+trap 'exit 143' TERM
 
 # Deliberately runs before the Docker/Podman preflight below - a broken Podman instance
 # (the exact case this command exists for) can fail that preflight outright, which would
