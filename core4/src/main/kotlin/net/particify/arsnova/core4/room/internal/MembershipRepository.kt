@@ -21,8 +21,11 @@ interface MembershipRepository :
 
   fun findByUserId(userId: UUID, scrollPosition: ScrollPosition): Window<Membership>
 
+  // Selecting m.id directly is rewritten by Spring Data's AOT repositories into a constructor
+  // expression taking the whole embeddable, which Hibernate rejects.
   @Query(
-      "SELECT m.id " +
+      "SELECT new net.particify.arsnova.core4.room.Membership\$RoomUserId(" +
+          "m.id.roomId, m.id.userId) " +
           "FROM Membership m " +
           "WHERE m.id.userId = :userId " +
           "AND m.role = 'OWNER'")

@@ -13,6 +13,10 @@ when it is done.
 So a migration is performed by starting core4 with that property set, waiting for it to terminate,
 and starting it normally afterwards.
 
+The migration only runs on the JVM without AOT-generated artifacts.
+Spring AOT decides at build time which beans exist, and the migration's beans are left out there,
+so starting an AOT build with `spring.aot.enabled=true` and the migration enabled fails instead.
+
 Each step is skipped with a warning if the table it writes already contains rows, so a second run
 cannot half-overwrite an installation which is already in use.
 That also means a partially failed migration has to be cleaned up before it is retried:

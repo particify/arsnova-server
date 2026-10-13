@@ -4,7 +4,6 @@
 package net.particify.arsnova.core4.system.migration.v3
 
 import jakarta.persistence.EntityManager
-import jakarta.persistence.PersistenceContext
 import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
@@ -37,7 +36,7 @@ class UserMigrationPostProcessorTests {
   @Autowired lateinit var userRepository: UserRepository
   @Autowired lateinit var migrationProperties: MigrationProperties
   @Autowired lateinit var transactionManager: PlatformTransactionManager
-  @PersistenceContext lateinit var entityManager: EntityManager
+  @Autowired lateinit var entityManager: EntityManager
 
   @Test
   fun shouldLetLocalAccountKeepSharedMailAddress() {

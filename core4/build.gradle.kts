@@ -1,4 +1,6 @@
+import java.util.concurrent.Callable
 import org.gradle.kotlin.dsl.withType
+import org.springframework.boot.gradle.tasks.aot.AbstractAot
 
 plugins {
   jacoco
@@ -109,10 +111,65 @@ tasks.withType<Test> {
   maxHeapSize = "1g"
 }
 
+// AOT processing decides at build time which beans exist, so the environment the build runs in
+// must not reach it: any environment variable can set a property.
+tasks.withType<AbstractAot>().configureEach { environment = emptyMap() }
+
+// The Spring Boot plugin puts the AOT output on these classpaths, so every run and test would build
+// it although only spring.aot.enabled uses it. -Paot keeps the plugin's classpaths and runs the
+// tests in AOT mode.
+if (!providers.gradleProperty("aot").isPresent) {
+  tasks.bootRun {
+    classpath =
+        withoutAot(
+            classpath,
+            "aot",
+            "processAot",
+            sourceSets.main.get().output,
+            configurations.runtimeClasspath)
+  }
+  tasks.test {
+    classpath =
+        withoutAot(
+            classpath,
+            "aotTest",
+            "processTestAot",
+            sourceSets.test.get().output,
+            sourceSets.main.get().output,
+            configurations.testRuntimeClasspath)
+  }
+} else {
+  tasks.test { systemProperty("spring.aot.enabled", true) }
+}
+
+/** A plain file list carries no task dependencies, so those of what remains are added back. */
+fun withoutAot(
+    classpath: FileCollection,
+    sourceSet: String,
+    task: String,
+    vararg producers: Any
+): FileCollection {
+  val aotOutput = sourceSets[sourceSet].output
+  val aotClasses = tasks.named<AbstractAot>(task).flatMap { it.classesOutput }
+  return files(Callable { classpath.files - aotOutput.files - aotClasses.get().asFile })
+      .builtBy(*producers)
+}
+
 tasks.jib { jib { from { image = "eclipse-temurin:25-alpine" } } }
 
 // Spring Boot adds developmentOnly to runtimeClasspath, which Jib packages by default.
 jib { configurationName = "productionRuntimeClasspath" }
+
+// Jib packages the jars of its configuration but not the AOT output, so that goes in as a jar.
+val aotJar =
+    tasks.register<Jar>("aotJar") {
+      archiveClassifier = "aot"
+      from(
+          sourceSets["aot"].output,
+          tasks.named<AbstractAot>("processAot").flatMap { it.classesOutput })
+    }
+
+dependencies { productionRuntimeClasspath(files(aotJar)) }
 
 tasks.jacocoTestReport { reports { csv.required.set(true) } }
 
@@ -127,6 +184,9 @@ detekt {
 spotless {
   ratchetFrom("origin/master")
   kotlin {
+    // Without a target, Spotless formats every source set, generated ones included, which makes
+    // it compile the project and run AOT processing first.
+    target("src/**/*.kt")
     ktfmt(libs.versions.ktfmt.get())
     licenseHeader("/* Copyright \$YEAR Particify GmbH\n * SPDX-License-Identifier: MIT\n */")
   }
