@@ -76,7 +76,7 @@ abstract class RoomCreationAuthorizationTestSupport {
    * The provider reads the account's roles, which are only reachable while a transaction is open:
    * outside a request there is no session to load them lazily from.
    */
-  private fun authenticate(userId: UUID): User {
+  protected fun authenticate(userId: UUID): User {
     val token = jwtUtils.encodeJwt(userId.toString(), listOf())
     val authentication =
         checkNotNull(
@@ -174,5 +174,15 @@ class RoomCreationForNoAccountsTests : RoomCreationAuthorizationTestSupport() {
   fun shouldDenyDuplicateRoomForVerifiedOwner() {
     val user = authenticateVerifiedUser()
     assertThrows<AccessDeniedException> { duplicateOwnedRoom(user) }
+  }
+
+  /** The setting governs only the automatic assignment, not a role the account holds itself. */
+  @Test
+  fun shouldAllowCreateRoomForAccountHoldingRole() {
+    val userId = checkNotNull(userService.createAccount().id)
+    TransactionTemplate(transactionManager).executeWithoutResult {
+      userService.getUserById(userId).roles += userService.findRoleByName("ROOM_CREATOR")
+    }
+    Assertions.assertNotNull(createRoom(authenticate(userId)))
   }
 }
