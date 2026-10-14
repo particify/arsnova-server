@@ -61,6 +61,18 @@ The runner's user needs:
 
 The `ci-image-store` volume is only needed for the shared image store.
 
+The runner's Podman sends all job traffic through its own `pasta`, which is part of passt.
+Older passt releases can stall long uploads until the connection is reset,
+which makes artifact uploads fail.
+Release `2026_01_20`, as packaged by Ubuntu 26.04, is affected, `2026_10_02` is not.
+A build placed in `/usr/local/libexec/podman/` takes precedence over the packaged one.
+To see which one is in use:
+
+[source,shell]
+----
+podman info --format '{{.Host.Pasta.Executable}} {{.Host.Pasta.Version}}'
+----
+
 === Shared image store
 
 The nested Podman starts with empty storage in every job.
@@ -142,6 +154,9 @@ followed by a `ConditionTimeoutException` for the Ryuk container
 
 |`+can't create .../CI_SERVER_TLS_CA_FILE: Permission denied+` before the job script starts
 |A job's user was changed with `docker: user`, which the runner ignores when assigning ownership.
+
+|`use of closed network connection` while uploading artifacts
+|An outdated passt release on the runner, such as `2026_01_20`.
 |===
 
 To reproduce a failure outside CI, start the job image interactively as the runner's user,
