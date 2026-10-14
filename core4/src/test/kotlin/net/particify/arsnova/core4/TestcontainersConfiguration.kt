@@ -3,15 +3,16 @@
  */
 package net.particify.arsnova.core4
 
+import org.springframework.boot.jdbc.autoconfigure.JdbcConnectionDetails
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.test.context.DynamicPropertyRegistrar
 import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 
 /**
- * Properties rather than @ServiceConnection: the connection details beans the latter registers do
- * not survive AOT processing, so test contexts would not load in AOT mode.
+ * A plain connection details bean rather than @ServiceConnection, whose bean registration does not
+ * survive AOT processing, or dynamic properties, which are applied only after an embedded web
+ * server has already created the DataSource for its filters.
  */
 @TestConfiguration(proxyBeanMethods = false)
 class TestcontainersConfiguration {
@@ -21,9 +22,12 @@ class TestcontainersConfiguration {
   }
 
   @Bean
-  fun postgresqlProperties(container: PostgreSQLContainer) = DynamicPropertyRegistrar {
-    it.add("spring.datasource.url", container::getJdbcUrl)
-    it.add("spring.datasource.username", container::getUsername)
-    it.add("spring.datasource.password", container::getPassword)
-  }
+  fun postgresqlConnectionDetails(container: PostgreSQLContainer): JdbcConnectionDetails =
+      object : JdbcConnectionDetails {
+        override fun getJdbcUrl(): String = container.jdbcUrl
+
+        override fun getUsername(): String = container.username
+
+        override fun getPassword(): String = container.password
+      }
 }
