@@ -15,22 +15,39 @@ import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
+import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
 import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
+import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.springframework.security.access.PermissionEvaluator
+import org.springframework.security.authentication.TestingAuthenticationToken
 
 private val ROUND_ID = UUID.randomUUID()
+private val CONTENT_ID = UUID.randomUUID()
+private val ROOM_ID = UUID.randomUUID()
 
 class RoundStatsServiceImplTest {
   private val roundServiceImpl = Mockito.mock(RoundServiceImpl::class.java)
   private val answerServiceImpl = Mockito.mock(AnswerServiceImpl::class.java)
-  private val roundStatsService = RoundStatsServiceImpl(roundServiceImpl, answerServiceImpl)
+  private val permissionEvaluator = Mockito.mock(PermissionEvaluator::class.java)
+  private val roundStatsService =
+      RoundStatsServiceImpl(
+          roundServiceImpl, answerServiceImpl, SolutionVisibility(permissionEvaluator))
+  private val reader = TestingAuthenticationToken("user", null, "ROLE_USER")
 
-  private fun givenRound(formatData: ContentFormatData, vararg answers: AnswerFormatData?) {
-    val round = Round(id = ROUND_ID, content = Content(formatData = formatData))
+  private fun givenRound(
+      formatData: ContentFormatData,
+      vararg answers: AnswerFormatData?,
+      correctOptionsPublished: Boolean? = true
+  ) {
+    val questionnaire =
+        Questionnaire(roomId = ROOM_ID, correctOptionsPublished = correctOptionsPublished)
+    val content = Content(id = CONTENT_ID, questionnaire = questionnaire, formatData = formatData)
+    val round = Round(id = ROUND_ID, content = content)
     Mockito.`when`(roundServiceImpl.findById(ROUND_ID)).thenReturn(Optional.of(round))
     val stored = answers.map { Answer(formatData = it) }
     Mockito.`when`(answerServiceImpl.findByRoundId(ROUND_ID)).thenReturn(stored)
@@ -155,11 +172,46 @@ class RoundStatsServiceImplTest {
 
   private fun numericStats(
       formatData: NumericContentFormatData,
-      vararg numbers: Double?
+      vararg numbers: Double?,
+      correctOptionsPublished: Boolean? = true
   ): NumericContentRoundStats {
     val answers = numbers.map { it?.let { number -> NumericAnswerFormatData(number) } }
-    givenRound(formatData, *answers.toTypedArray())
-    return roundStatsService.getNumericRoundStatsByRoundId(ROUND_ID)
+    givenRound(
+        formatData, *answers.toTypedArray(), correctOptionsPublished = correctOptionsPublished)
+    return roundStatsService.getNumericRoundStatsByRoundId(ROUND_ID, reader)
+  }
+
+  private fun givenReaderMayEditContent(mayEdit: Boolean) {
+    Mockito.`when`(permissionEvaluator.hasPermission(reader, CONTENT_ID, "Content", "write"))
+        .thenReturn(mayEdit)
+  }
+
+  private fun correctAnswerFraction(correctOptionsPublished: Boolean) =
+      numericStats(
+              NumericContentFormatData(0.0, 10.0, 2.0),
+              2.0,
+              5.0,
+              correctOptionsPublished = correctOptionsPublished)
+          .correctAnswerFraction
+
+  @Test
+  fun shouldWithholdCorrectAnswerFractionFromParticipantBeforeTheSolutionIsPublished() {
+    givenReaderMayEditContent(false)
+    Assertions.assertNull(correctAnswerFraction(correctOptionsPublished = false))
+  }
+
+  @Test
+  fun shouldShowCorrectAnswerFractionToEditorBeforeTheSolutionIsPublished() {
+    givenReaderMayEditContent(true)
+    Assertions.assertEquals(0.5, correctAnswerFraction(correctOptionsPublished = false))
+  }
+
+  @Test
+  fun shouldShowCorrectAnswerFractionToEveryoneOnceTheSolutionIsPublished() {
+    givenReaderMayEditContent(false)
+    Assertions.assertEquals(0.5, correctAnswerFraction(correctOptionsPublished = true))
+    givenReaderMayEditContent(true)
+    Assertions.assertEquals(0.5, correctAnswerFraction(correctOptionsPublished = true))
   }
 
   @Test
@@ -220,7 +272,7 @@ class RoundStatsServiceImplTest {
   fun shouldRejectNumericStatsOfOtherFormat() {
     givenRound(WordcloudContentFormatData())
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
-      roundStatsService.getNumericRoundStatsByRoundId(ROUND_ID)
+      roundStatsService.getNumericRoundStatsByRoundId(ROUND_ID, reader)
     }
   }
 }

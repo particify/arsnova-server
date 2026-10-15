@@ -14,6 +14,11 @@ import net.particify.arsnova.core4.questionnaire.content.TextContentFormatData
 import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireServiceImpl
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireType
+import net.particify.arsnova.core4.room.Membership
+import net.particify.arsnova.core4.room.Room
+import net.particify.arsnova.core4.room.RoomRole
+import net.particify.arsnova.core4.room.internal.MembershipServiceImpl
+import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -28,6 +33,9 @@ import org.springframework.test.context.ActiveProfiles
 
 private val ROOM_ID = UUID.fromString("3f9cecb5-6dbf-45cc-b630-4af700d474b6")
 private val OWNER_ID = UUID.fromString("9c778494-9b52-424d-8c7f-f4936629facb")
+
+/** A participant of [ROOM_ID] in the `dev` Liquibase fixtures. */
+private val PARTICIPANT_ID = UUID.fromString("43389844-708b-469d-8d22-abdd2eb88777")
 private const val MIN_NUMBER = 0.0
 private const val MAX_NUMBER = 100.0
 private const val DELTA = 1e-9
@@ -38,6 +46,7 @@ private const val DELTA = 1e-9
 class NumericRoundStatsTests {
   @Autowired lateinit var answerService: AnswerServiceImpl
   @Autowired lateinit var contentService: ContentServiceImpl
+  @Autowired lateinit var membershipService: MembershipServiceImpl
   @Autowired lateinit var questionnaireService: QuestionnaireServiceImpl
   @Autowired lateinit var roundStatsService: RoundStatsServiceImpl
   @Autowired lateinit var userService: UserService
@@ -82,7 +91,33 @@ class NumericRoundStatsTests {
   }
 
   private fun statsOf(content: Content) =
-      roundStatsService.getNumericRoundStatsByRoundId(content.activeRound!!.id!!)
+      roundStatsService.getNumericRoundStatsByRoundId(
+          content.activeRound!!.id!!, SecurityContextHolder.getContext().authentication)
+
+  private fun createEditor(): UUID {
+    val user = userService.createAccount()
+    membershipService.save(
+        Membership(room = Room(id = ROOM_ID), user = User(id = user.id), role = RoomRole.EDITOR))
+    return user.id!!
+  }
+
+  private fun correctAnswerFractionAs(userId: UUID, content: Content): Double? {
+    authenticate(userId)
+    return statsOf(content).correctAnswerFraction
+  }
+
+  @Test
+  fun shouldShowCorrectAnswerFractionToParticipantOnlyOnceTheSolutionIsPublished() {
+    val content = createContent(correctNumber = 42.0)
+    answerAll(content, listOf(42.0, 7.0))
+    val editorId = createEditor()
+    Assertions.assertNull(correctAnswerFractionAs(PARTICIPANT_ID, content))
+    Assertions.assertEquals(0.5, correctAnswerFractionAs(editorId, content))
+    authenticate(OWNER_ID)
+    questionnaireService.update(content.questionnaire!!.id!!, null, null, null, null, true, null)
+    Assertions.assertEquals(0.5, correctAnswerFractionAs(PARTICIPANT_ID, content))
+    Assertions.assertEquals(0.5, correctAnswerFractionAs(editorId, content))
+  }
 
   @Test
   fun shouldAggregateSelectedNumbersAscendingWithCounts() {

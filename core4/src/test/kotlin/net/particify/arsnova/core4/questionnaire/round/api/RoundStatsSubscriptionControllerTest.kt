@@ -118,17 +118,27 @@ class RoundStatsSubscriptionControllerTest {
         .verify(VERIFY_TIMEOUT)
   }
 
+  /**
+   * Whether the correct answer fraction is included depends on the reader, whom the emissions
+   * cannot take from the security context, so it has to be the subscriber captured when
+   * subscribing.
+   */
   @Test
-  fun shouldEmitNumericStatsForAnswerOfSubscribedRound() {
+  fun shouldEmitNumericStatsForAnswerOfSubscribedRoundAsTheSubscriber() {
     val stats = numericStats()
-    Mockito.`when`(roundStatsServiceImpl.getNumericRoundStatsByRoundId(SUBSCRIBED_ROUND_ID))
+    Mockito.`when`(
+            roundStatsServiceImpl.getNumericRoundStatsByRoundId(
+                SUBSCRIBED_ROUND_ID, authentication))
         .thenReturn(stats)
 
     StepVerifier.withVirtualTime {
           controller.questionnaireNumericRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
         }
         .expectSubscription()
-        .then { publishAnswerChanged(SUBSCRIBED_ROUND_ID) }
+        .then {
+          SecurityContextHolder.clearContext()
+          publishAnswerChanged(SUBSCRIBED_ROUND_ID)
+        }
         .thenAwait(SAMPLE_INTERVAL)
         .expectNext(stats)
         .thenCancel()

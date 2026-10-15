@@ -15,17 +15,20 @@ import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
+import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.normalizeAnswerText
 import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 
 @Service
 class RoundStatsServiceImpl(
     private val roundServiceImpl: RoundServiceImpl,
-    private val answerServiceImpl: AnswerServiceImpl
+    private val answerServiceImpl: AnswerServiceImpl,
+    private val solutionVisibility: SolutionVisibility
 ) {
   @Transactional
   fun getChoiceRoundStatsByRoundId(roundId: UUID): ChoiceContentRoundStats {
@@ -46,11 +49,20 @@ class RoundStatsServiceImpl(
     return ChoiceContentRoundStats(optionCounts)
   }
 
+  /**
+   * Leaves out the correct answer fraction for a [reader] who may not see the solution, since it
+   * tells whether the correct number is among the selected ones. The reader is passed in rather
+   * than taken from the security context because subscription emissions run without one.
+   */
   @Transactional
-  fun getNumericRoundStatsByRoundId(roundId: UUID): NumericContentRoundStats {
+  fun getNumericRoundStatsByRoundId(
+      roundId: UUID,
+      reader: Authentication?
+  ): NumericContentRoundStats {
     val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
+    val content = round.content!!
     val formatData =
-        round.content?.formatData as? NumericContentFormatData
+        content.formatData as? NumericContentFormatData
             ?: throw ContentFormatDataInvalidException("Content is not a numeric content")
     val numbers =
         answerServiceImpl.findByRoundId(roundId).mapNotNull {
@@ -68,7 +80,10 @@ class RoundStatsServiceImpl(
         variance = variance,
         minimum = numbers.minOrNull() ?: 0.0,
         maximum = numbers.maxOrNull() ?: 0.0,
-        correctAnswerFraction = correctAnswerFraction(numbers, formatData),
+        correctAnswerFraction =
+            if (solutionVisibility.maySeeSolution(content, reader))
+                correctAnswerFraction(numbers, formatData)
+            else null,
     )
   }
 
