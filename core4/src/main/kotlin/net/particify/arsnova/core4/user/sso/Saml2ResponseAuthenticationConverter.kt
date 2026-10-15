@@ -28,7 +28,8 @@ class Saml2ResponseAuthenticationConverter(
     private val userRepository: UserRepository,
     private val externalLoginRepository: ExternalLoginRepository,
     private val saml2Properties: ExtendedSaml2RelyingPartyProperties,
-    private val linkingStrategyRegistry: ExternalLoginLinkingStrategyRegistry
+    private val linkingStrategyRegistry: ExternalLoginLinkingStrategyRegistry,
+    private val loginHooks: List<Saml2LoginHook>
 ) : Converter<ResponseToken, Saml2Authentication> {
   companion object {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -54,10 +55,12 @@ class Saml2ResponseAuthenticationConverter(
         attributes[idMappingAttribute]?.firstOrNull()?.toString()
             ?: missingIdAttribute(providerId, idMappingAttribute, attributes.keys)
     logger.debug("Using SAML attribute {} as ID: {}", idMappingAttribute, externalId)
+    loginHooks.forEach { it.beforeProvisioning(providerId, attributes) }
     val existingUser = this.userService.loadUserByProviderIdAndExternalId(providerId, externalId)
     val principal =
         if (existingUser == null) createUser(providerId, registration, externalId, attributes)
         else updateUser(providerId, registration, existingUser, externalId, attributes)
+    loginHooks.forEach { it.afterProvisioning(principal, providerId, attributes) }
     return Saml2SessionAuthentication(
         principal,
         authentication.saml2Response,
