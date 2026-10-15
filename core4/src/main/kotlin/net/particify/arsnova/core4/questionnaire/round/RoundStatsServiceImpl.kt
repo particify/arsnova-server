@@ -140,17 +140,29 @@ class RoundStatsServiceImpl(
         (0 until formatData.optionCount()).map { countsByRating.getOrDefault(it, 0) })
   }
 
+  /**
+   * Labels a group with the matching correct term only for a [reader] who may see the solution,
+   * since the creator's spelling of a term would give it away. The reader is passed in rather than
+   * taken from the security context because subscription emissions run without one.
+   */
   @Transactional
-  fun getShortAnswerRoundStatsByRoundId(roundId: UUID): ShortAnswerContentRoundStats {
+  fun getShortAnswerRoundStatsByRoundId(
+      roundId: UUID,
+      reader: Authentication?
+  ): ShortAnswerContentRoundStats {
     val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
+    val content = round.content!!
     val formatData =
-        round.content?.formatData as? ShortAnswerContentFormatData
+        content.formatData as? ShortAnswerContentFormatData
             ?: throw ContentFormatDataInvalidException("Content is not a short answer content")
     val bodies =
         answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId).mapNotNull {
           (it.formatData as? ShortAnswerAnswerFormatData)?.body
         }
-    val aggregated = aggregateTexts(bodies, formatData.bannedKeywords, formatData.correctTerms)
+    val preferredTerms =
+        if (solutionVisibility.maySeeSolution(content, reader)) formatData.correctTerms
+        else emptyList()
+    val aggregated = aggregateTexts(bodies, formatData.bannedKeywords, preferredTerms)
     return ShortAnswerContentRoundStats(aggregated.map { it.text }, aggregated.map { it.count })
   }
 

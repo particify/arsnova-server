@@ -76,8 +76,13 @@ class RoundStatsSubscriptionController(
   @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
   fun questionnaireShortAnswerRoundStatsUpdated(
       @Argument roundId: UUID
-  ): Flux<ShortAnswerContentRoundStats> =
-      statsFlux(roundId) { roundStatsServiceImpl.getShortAnswerRoundStatsByRoundId(roundId) }
+  ): Flux<ShortAnswerContentRoundStats> {
+    // Captured here since the emissions run without a security context.
+    val reader = SecurityContextHolder.getContext().authentication
+    return statsFlux(roundId) {
+      roundStatsServiceImpl.getShortAnswerRoundStatsByRoundId(roundId, reader)
+    }
+  }
 
   @SubscriptionMapping
   @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")

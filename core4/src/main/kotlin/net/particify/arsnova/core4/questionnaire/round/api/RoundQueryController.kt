@@ -58,7 +58,8 @@ class RoundQueryController(
   fun questionnaireShortAnswerRoundStatsByRoundId(
       @Argument roundId: UUID
   ): ShortAnswerContentRoundStats {
-    return roundStatsServiceImpl.getShortAnswerRoundStatsByRoundId(roundId)
+    return roundStatsServiceImpl.getShortAnswerRoundStatsByRoundId(
+        roundId, SecurityContextHolder.getContext().authentication)
   }
 
   @QueryMapping

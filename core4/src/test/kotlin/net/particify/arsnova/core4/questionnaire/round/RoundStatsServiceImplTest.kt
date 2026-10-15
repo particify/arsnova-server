@@ -352,12 +352,52 @@ class RoundStatsServiceImplTest {
 
   private fun shortAnswerStats(
       correctTerms: List<String>,
-      vararg bodies: String?
+      vararg bodies: String?,
+      correctOptionsPublished: Boolean? = true
   ): List<Pair<String, Int>> {
     val answers = bodies.map { it?.let { body -> ShortAnswerAnswerFormatData(body) } }
-    givenRound(ShortAnswerContentFormatData(correctTerms), *answers.toTypedArray())
-    val stats = roundStatsService.getShortAnswerRoundStatsByRoundId(ROUND_ID)
+    givenRound(
+        ShortAnswerContentFormatData(correctTerms),
+        *answers.toTypedArray(),
+        correctOptionsPublished = correctOptionsPublished)
+    val stats = roundStatsService.getShortAnswerRoundStatsByRoundId(ROUND_ID, reader)
     return stats.texts.zip(stats.counts)
+  }
+
+  @Test
+  fun shouldNotLabelGroupWithCorrectTermForParticipantBeforeTheSolutionIsPublished() {
+    givenReaderMayEditContent(false)
+    Assertions.assertEquals(
+        listOf("frankfurt am main" to 2),
+        shortAnswerStats(
+            listOf("Frankfurt am Main"),
+            "frankfurt am main",
+            "frankfurt am main",
+            correctOptionsPublished = false))
+  }
+
+  @Test
+  fun shouldLabelGroupWithCorrectTermForEditorBeforeTheSolutionIsPublished() {
+    givenReaderMayEditContent(true)
+    Assertions.assertEquals(
+        listOf("Frankfurt am Main" to 2),
+        shortAnswerStats(
+            listOf("Frankfurt am Main"),
+            "frankfurt am main",
+            "frankfurt am main",
+            correctOptionsPublished = false))
+  }
+
+  @Test
+  fun shouldLabelGroupWithCorrectTermForEveryoneOnceTheSolutionIsPublished() {
+    givenReaderMayEditContent(false)
+    Assertions.assertEquals(
+        listOf("Frankfurt am Main" to 2),
+        shortAnswerStats(listOf("Frankfurt am Main"), "frankfurt am main", "frankfurt am main"))
+    givenReaderMayEditContent(true)
+    Assertions.assertEquals(
+        listOf("Frankfurt am Main" to 2),
+        shortAnswerStats(listOf("Frankfurt am Main"), "frankfurt am main", "frankfurt am main"))
   }
 
   @Test
@@ -396,7 +436,7 @@ class RoundStatsServiceImplTest {
         ShortAnswerAnswerFormatData("Frankfurt am Main"),
         ShortAnswerAnswerFormatData("Hanau"),
         ShortAnswerAnswerFormatData("Spam and eggs"))
-    val stats = roundStatsService.getShortAnswerRoundStatsByRoundId(ROUND_ID)
+    val stats = roundStatsService.getShortAnswerRoundStatsByRoundId(ROUND_ID, reader)
     // A keyword matches the whole answer, so an answer merely containing it stays.
     Assertions.assertEquals(listOf("Hanau", "Spam and eggs"), stats.texts)
     Assertions.assertEquals(listOf(1, 1), stats.counts)
@@ -411,7 +451,7 @@ class RoundStatsServiceImplTest {
     Mockito.`when`(answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(ROUND_ID))
         .thenReturn(listOf(visible))
 
-    val stats = roundStatsService.getShortAnswerRoundStatsByRoundId(ROUND_ID)
+    val stats = roundStatsService.getShortAnswerRoundStatsByRoundId(ROUND_ID, reader)
 
     Assertions.assertEquals(listOf("Offenbach"), stats.texts)
   }
@@ -420,7 +460,7 @@ class RoundStatsServiceImplTest {
   fun shouldRejectShortAnswerStatsOfOtherFormat() {
     givenRound(WordcloudContentFormatData())
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
-      roundStatsService.getShortAnswerRoundStatsByRoundId(ROUND_ID)
+      roundStatsService.getShortAnswerRoundStatsByRoundId(ROUND_ID, reader)
     }
   }
 }

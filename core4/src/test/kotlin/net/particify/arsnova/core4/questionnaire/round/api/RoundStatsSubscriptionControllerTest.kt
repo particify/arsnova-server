@@ -191,17 +191,26 @@ class RoundStatsSubscriptionControllerTest {
         .verify(VERIFY_TIMEOUT)
   }
 
+  /**
+   * Whether a correct term labels its group depends on the reader, whom the emissions cannot take
+   * from the security context, so it has to be the subscriber captured when subscribing.
+   */
   @Test
-  fun shouldEmitShortAnswerStatsForAnswerOfSubscribedRound() {
+  fun shouldEmitShortAnswerStatsForAnswerOfSubscribedRoundAsTheSubscriber() {
     val stats = ShortAnswerContentRoundStats(listOf("Offenbach"), listOf(2))
-    Mockito.`when`(roundStatsServiceImpl.getShortAnswerRoundStatsByRoundId(SUBSCRIBED_ROUND_ID))
+    Mockito.`when`(
+            roundStatsServiceImpl.getShortAnswerRoundStatsByRoundId(
+                SUBSCRIBED_ROUND_ID, authentication))
         .thenReturn(stats)
 
     StepVerifier.withVirtualTime {
           controller.questionnaireShortAnswerRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
         }
         .expectSubscription()
-        .then { publishAnswerChanged(SUBSCRIBED_ROUND_ID) }
+        .then {
+          SecurityContextHolder.clearContext()
+          publishAnswerChanged(SUBSCRIBED_ROUND_ID)
+        }
         .thenAwait(SAMPLE_INTERVAL)
         .expectNext(stats)
         .thenCancel()

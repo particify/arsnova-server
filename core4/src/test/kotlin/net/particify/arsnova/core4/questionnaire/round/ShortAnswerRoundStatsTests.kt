@@ -16,6 +16,11 @@ import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInva
 import net.particify.arsnova.core4.questionnaire.executeAsCurrentUser
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireServiceImpl
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireType
+import net.particify.arsnova.core4.room.Membership
+import net.particify.arsnova.core4.room.Room
+import net.particify.arsnova.core4.room.RoomRole
+import net.particify.arsnova.core4.room.internal.MembershipServiceImpl
+import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -31,6 +36,9 @@ import org.springframework.test.context.ActiveProfiles
 
 private val ROOM_ID = UUID.fromString("3f9cecb5-6dbf-45cc-b630-4af700d474b6")
 private val OWNER_ID = UUID.fromString("9c778494-9b52-424d-8c7f-f4936629facb")
+
+/** A participant of [ROOM_ID] in the `dev` Liquibase fixtures. */
+private val PARTICIPANT_ID = UUID.fromString("43389844-708b-469d-8d22-abdd2eb88777")
 private val TERMS = listOf("Frankfurt am Main")
 
 @SpringBootTest
@@ -40,6 +48,7 @@ class ShortAnswerRoundStatsTests {
   @Autowired lateinit var answerService: AnswerServiceImpl
   @Autowired lateinit var contentService: ContentServiceImpl
   @Autowired lateinit var graphQlService: ExecutionGraphQlService
+  @Autowired lateinit var membershipService: MembershipServiceImpl
   @Autowired lateinit var questionnaireService: QuestionnaireServiceImpl
   @Autowired lateinit var roundStatsService: RoundStatsServiceImpl
   @Autowired lateinit var userService: UserService
@@ -86,7 +95,36 @@ class ShortAnswerRoundStatsTests {
   }
 
   private fun statsOf(content: Content) =
-      roundStatsService.getShortAnswerRoundStatsByRoundId(content.activeRound!!.id!!)
+      roundStatsService.getShortAnswerRoundStatsByRoundId(
+          content.activeRound!!.id!!, SecurityContextHolder.getContext().authentication)
+
+  private fun createEditor(): UUID {
+    val user = userService.createAccount()
+    membershipService.save(
+        Membership(room = Room(id = ROOM_ID), user = User(id = user.id), role = RoomRole.EDITOR))
+    return user.id!!
+  }
+
+  private fun publishSolution(content: Content) {
+    authenticate(OWNER_ID)
+    questionnaireService.update(content.questionnaire!!.id!!, null, null, null, null, true, null)
+  }
+
+  private fun textsAs(userId: UUID, content: Content): Any? {
+    authenticate(userId)
+    val response =
+        graphQlService.executeAsCurrentUser(
+            """
+            {
+              questionnaireShortAnswerRoundStatsByRoundId(roundId: "${content.activeRound!!.id}") {
+                texts
+              }
+            }
+            """)
+    Assertions.assertTrue(response.errors.isEmpty()) { response.errors.toString() }
+    val data = response.getData<Map<String, Map<String, Any?>>>()!!
+    return data.getValue("questionnaireShortAnswerRoundStatsByRoundId")["texts"]
+  }
 
   @Test
   fun shouldReturnEmptyStatsWithoutAnswers() {
@@ -118,6 +156,19 @@ class ShortAnswerRoundStatsTests {
     val content = createContent()
     answerAll(content, listOf("frankfurt am main", "FRANKFURT AM MAIN", "frankfurt-am-main"))
     Assertions.assertEquals(listOf("Frankfurt am Main"), statsOf(content).texts)
+  }
+
+  @Test
+  fun shouldLabelCorrectTermGroupForParticipantOnlyOnceTheSolutionIsPublished() {
+    val content = createContent()
+    questionnaireService.updatePublished(content.questionnaire!!.id!!, true)
+    answerAll(content, listOf("frankfurt am main", "FRANKFURT AM MAIN", "frankfurt am main"))
+    val editorId = createEditor()
+    Assertions.assertEquals(listOf("frankfurt am main"), textsAs(PARTICIPANT_ID, content))
+    Assertions.assertEquals(listOf("Frankfurt am Main"), textsAs(editorId, content))
+    publishSolution(content)
+    Assertions.assertEquals(listOf("Frankfurt am Main"), textsAs(PARTICIPANT_ID, content))
+    Assertions.assertEquals(listOf("Frankfurt am Main"), textsAs(editorId, content))
   }
 
   @Test
