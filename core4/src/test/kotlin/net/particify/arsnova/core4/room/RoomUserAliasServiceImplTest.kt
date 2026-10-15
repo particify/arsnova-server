@@ -102,6 +102,17 @@ class RoomUserAliasServiceImplTest {
   }
 
   @Test
+  fun shouldTrimAnAliasBeforeCheckingItsLength() {
+    givenStored(null)
+    val longest = "x".repeat(RoomUserAlias.MAX_ALIAS_LENGTH)
+    Assertions.assertEquals(
+        longest, service.set(ROOM_ID, USER_ID, " \t$longest\n ", null, ENGLISH).alias)
+    val captor = ArgumentCaptor.forClass(RoomUserAlias::class.java)
+    Mockito.verify(repository).save(captor.capture())
+    Assertions.assertEquals(longest, captor.value.alias)
+  }
+
+  @Test
   fun shouldPersistAnExplicitAliasForTheRoomAndUser() {
     givenStored(null)
     val set = service.set(ROOM_ID, USER_ID, "Captain", null, ENGLISH)

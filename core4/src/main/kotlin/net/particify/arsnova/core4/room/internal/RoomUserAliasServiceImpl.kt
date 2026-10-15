@@ -40,18 +40,23 @@ class RoomUserAliasServiceImpl(
     if (findOneByRoomIdAndUserId(roomId, userId) != null) {
       throw InvalidInputException("Alias has already been created.")
     }
-    if (alias != null && (alias.isBlank() || alias.length > RoomUserAlias.MAX_ALIAS_LENGTH)) {
-      throw InvalidInputException(
-          "Alias must not be blank or exceed ${RoomUserAlias.MAX_ALIAS_LENGTH} characters.")
-    }
     val persistedAlias =
         roomUserAliasRepository.save(
             RoomUserAlias(
                 room = Room(id = roomId),
                 user = User(id = userId),
-                alias = alias,
+                alias = alias?.let(::normalizeAlias),
                 seed = seed ?: ThreadLocalRandom.current().nextInt()))
     return localizeIfGenerated(persistedAlias, locale)
+  }
+
+  private fun normalizeAlias(alias: String): String {
+    val trimmed = alias.trim()
+    if (trimmed.isEmpty() || trimmed.length > RoomUserAlias.MAX_ALIAS_LENGTH) {
+      throw InvalidInputException(
+          "Alias must not be blank or exceed ${RoomUserAlias.MAX_ALIAS_LENGTH} characters.")
+    }
+    return trimmed
   }
 
   /** Aliases without an explicitly set name are generated from their seed on retrieval. */
