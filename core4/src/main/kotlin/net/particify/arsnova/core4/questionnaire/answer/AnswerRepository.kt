@@ -15,7 +15,7 @@ interface AnswerRepository : JpaRepository<Answer, UUID> {
 
   fun countByRoundIdAndHiddenFalse(roundId: UUID): Int
 
-  fun countByRoundIdAndResult(roundId: UUID, result: AnswerResultState): Int
+  fun countByRoundIdAndHiddenFalseAndResult(roundId: UUID, result: AnswerResultState): Int
 
   fun existsByRoundId(roundId: UUID): Boolean
 

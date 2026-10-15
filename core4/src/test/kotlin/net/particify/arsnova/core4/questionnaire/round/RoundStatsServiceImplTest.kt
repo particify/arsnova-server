@@ -29,8 +29,10 @@ class RoundStatsServiceImplTest {
   private fun givenRound(formatData: ContentFormatData, vararg answers: AnswerFormatData?) {
     val round = Round(id = ROUND_ID, content = Content(formatData = formatData))
     Mockito.`when`(roundServiceImpl.findById(ROUND_ID)).thenReturn(Optional.of(round))
-    Mockito.`when`(answerServiceImpl.findByRoundId(ROUND_ID))
-        .thenReturn(answers.map { Answer(formatData = it) })
+    val stored = answers.map { Answer(formatData = it) }
+    Mockito.`when`(answerServiceImpl.findByRoundId(ROUND_ID)).thenReturn(stored)
+    Mockito.`when`(answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(ROUND_ID))
+        .thenReturn(stored.filter { !it.hidden })
   }
 
   private fun choiceStats(vararg answers: AnswerFormatData?): List<Int> {
@@ -66,6 +68,19 @@ class RoundStatsServiceImplTest {
   @Test
   fun shouldCountEveryOptionAsZeroWithoutAnswers() {
     Assertions.assertEquals(listOf(0, 0, 0), choiceStats())
+  }
+
+  @Test
+  fun shouldLeaveHiddenAnswersOutOfChoiceCounts() {
+    givenRound(ChoiceContentFormatData(listOf("A", "B", "C"), null, true))
+    val visible = Answer(formatData = ChoiceAnswerFormatData(listOf(0)))
+    val hidden = Answer(formatData = ChoiceAnswerFormatData(listOf(0, 1)), hidden = true)
+    Mockito.`when`(answerServiceImpl.findByRoundId(ROUND_ID)).thenReturn(listOf(visible, hidden))
+    Mockito.`when`(answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(ROUND_ID))
+        .thenReturn(listOf(visible))
+
+    Assertions.assertEquals(
+        listOf(1, 0, 0), roundStatsService.getChoiceRoundStatsByRoundId(ROUND_ID).selectionCounts)
   }
 
   @Test
@@ -106,6 +121,21 @@ class RoundStatsServiceImplTest {
     givenRound(WordcloudContentFormatData(), WordcloudAnswerFormatData(listOf("A")))
     Assertions.assertEquals(
         listOf<Int>(), roundStatsService.getChoiceRoundStatsByRoundId(ROUND_ID).selectionCounts)
+  }
+
+  @Test
+  fun shouldLeaveHiddenWordsOutOfWordcloud() {
+    givenRound(WordcloudContentFormatData())
+    val visible = Answer(formatData = WordcloudAnswerFormatData(listOf("ham")))
+    val hidden = Answer(formatData = WordcloudAnswerFormatData(listOf("spam")), hidden = true)
+    Mockito.`when`(answerServiceImpl.findByRoundId(ROUND_ID)).thenReturn(listOf(visible, hidden))
+    Mockito.`when`(answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(ROUND_ID))
+        .thenReturn(listOf(visible))
+
+    val stats = roundStatsService.getWordcloudRoundStatsByRoundId(ROUND_ID)
+
+    Assertions.assertEquals(listOf("ham"), stats.words)
+    Assertions.assertEquals(listOf(1), stats.counts)
   }
 
   @Test

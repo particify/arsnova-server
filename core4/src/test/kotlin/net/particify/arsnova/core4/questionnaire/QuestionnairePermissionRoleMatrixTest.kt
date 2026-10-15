@@ -39,6 +39,7 @@ import org.springframework.security.authentication.TestingAuthenticationToken
 private val ROOM_ID = UUID.randomUUID()
 
 private const val DELETE = "delete"
+private const val MODERATE = "moderate"
 private const val READ = "read"
 private const val READ_STATISTICS = "readStatistics"
 private const val WRITE = "write"
@@ -49,6 +50,7 @@ private val ROLES =
 private val EVERY_MEMBER =
     setOf(RoomRole.OWNER, RoomRole.EDITOR, RoomRole.MODERATOR, RoomRole.PARTICIPANT)
 private val EDITORS = setOf(RoomRole.OWNER, RoomRole.EDITOR)
+private val MODERATORS = setOf(RoomRole.OWNER, RoomRole.EDITOR, RoomRole.MODERATOR)
 
 /**
  * Resolves each questionnaire evaluator's delegation chain up to the room, where the role decides.
@@ -144,8 +146,14 @@ class QuestionnairePermissionRoleMatrixTest {
     }
 
     @Test
-    fun shouldRestrictReadOfUnpublishedQuestionnaireToEditors() {
-      assertGrantedTo(questionnaire(published = false), READ, EDITORS)
+    fun shouldRestrictReadOfUnpublishedQuestionnaireToModerators() {
+      assertGrantedTo(questionnaire(published = false), READ, MODERATORS)
+    }
+
+    @Test
+    fun shouldLetModeratorsModerateEvenUnpublishedQuestionnaire() {
+      assertGrantedTo(questionnaire(published = true), MODERATE, MODERATORS)
+      assertGrantedTo(questionnaire(published = false), MODERATE, MODERATORS)
     }
 
     @Test
@@ -169,8 +177,8 @@ class QuestionnairePermissionRoleMatrixTest {
     }
 
     @Test
-    fun shouldRestrictReadOfContentOfUnpublishedQuestionnaireToEditors() {
-      assertGrantedTo(content(questionnaire(published = false)), READ, EDITORS)
+    fun shouldRestrictReadOfContentOfUnpublishedQuestionnaireToModerators() {
+      assertGrantedTo(content(questionnaire(published = false)), READ, MODERATORS)
     }
 
     @Test
@@ -180,20 +188,20 @@ class QuestionnairePermissionRoleMatrixTest {
         questionnaire.publishedUpToContent = content(questionnaire, position = 1)
         assertGrantedTo(content(questionnaire, position = 0), READ, EVERY_MEMBER)
         assertGrantedTo(content(questionnaire, position = 1), READ, EVERY_MEMBER)
-        assertGrantedTo(content(questionnaire, position = 2), READ, EDITORS)
+        assertGrantedTo(content(questionnaire, position = 2), READ, MODERATORS)
       }
     }
 
     @Test
-    fun shouldRestrictReadToEditorsWhileNothingIsReleased() {
+    fun shouldRestrictReadToModeratorsWhileNothingIsReleased() {
       listOf(QuestionnairePublishingMode.UP_TO, QuestionnairePublishingMode.LIVE, null).forEach {
-        assertGrantedTo(content(questionnaire(publishingMode = it)), READ, EDITORS)
+        assertGrantedTo(content(questionnaire(publishingMode = it)), READ, MODERATORS)
       }
     }
 
     @Test
     fun shouldDenyUnknownPermissionEvenToOwner() {
-      assertGrantedTo(content(), READ_STATISTICS, setOf())
+      assertGrantedTo(content(), MODERATE, setOf())
     }
   }
 
@@ -209,7 +217,7 @@ class QuestionnairePermissionRoleMatrixTest {
     @Test
     fun shouldFollowContentVisibilityForRead() {
       assertGrantedTo(round(), READ, EVERY_MEMBER)
-      assertGrantedTo(round(content(questionnaire(published = false))), READ, EDITORS)
+      assertGrantedTo(round(content(questionnaire(published = false))), READ, MODERATORS)
     }
 
     @Test
@@ -219,24 +227,30 @@ class QuestionnairePermissionRoleMatrixTest {
     }
 
     @Test
-    fun shouldRestrictUnpublishedStatisticsToEditors() {
+    fun shouldRestrictUnpublishedStatisticsToModerators() {
       listOf(false, null).forEach {
         assertGrantedTo(
-            round(content(questionnaire(statisticsPublished = it))), READ_STATISTICS, EDITORS)
+            round(content(questionnaire(statisticsPublished = it))), READ_STATISTICS, MODERATORS)
       }
     }
 
     @Test
-    fun shouldRestrictPublishedStatisticsOfUnreleasedContentToEditors() {
+    fun shouldRestrictPublishedStatisticsOfUnreleasedContentToModerators() {
       val questionnaire =
           questionnaire(
               publishingMode = QuestionnairePublishingMode.UP_TO, statisticsPublished = true)
-      assertGrantedTo(round(content(questionnaire)), READ_STATISTICS, EDITORS)
+      assertGrantedTo(round(content(questionnaire)), READ_STATISTICS, MODERATORS)
+    }
+
+    @Test
+    fun shouldRestrictPublishedStatisticsOfUnpublishedQuestionnaireToModerators() {
+      val questionnaire = questionnaire(published = false, statisticsPublished = true)
+      assertGrantedTo(round(content(questionnaire)), READ_STATISTICS, MODERATORS)
     }
 
     @Test
     fun shouldDenyUnknownPermissionEvenToOwner() {
-      assertGrantedTo(round(), "moderate", setOf())
+      assertGrantedTo(round(), MODERATE, setOf())
     }
   }
 
@@ -252,7 +266,7 @@ class QuestionnairePermissionRoleMatrixTest {
     @Test
     fun shouldFollowContentVisibilityForRead() {
       assertGrantedTo(answer(), READ, EVERY_MEMBER)
-      assertGrantedTo(answer(round(content(questionnaire(published = false)))), READ, EDITORS)
+      assertGrantedTo(answer(round(content(questionnaire(published = false)))), READ, MODERATORS)
     }
 
     @Test

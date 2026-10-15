@@ -29,10 +29,7 @@ class RoundPermissionEvaluator(
         when (permission) {
           "write" -> "write"
           "read" -> "read"
-          // Participants only see a round's statistics once the questionnaire publishes them.
-          "readStatistics" ->
-              if (targetDomainObject.content?.questionnaire?.statisticsPublished == true) "read"
-              else "write"
+          "readStatistics" -> "readStatistics"
           "delete" -> "write"
           else -> return DomainPermissionEvaluation(false)
         }

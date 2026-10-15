@@ -28,7 +28,9 @@ class QuestionnairePermissionEvaluator(
     val parentPermission =
         when (permission) {
           "write" -> "write"
-          "read" -> if (targetDomainObject.published) "read" else "write"
+          // Moderators may open what they can list, unpublished questionnaires included.
+          "read" -> if (targetDomainObject.published) "read" else "moderate"
+          "moderate" -> "moderate"
           "delete" -> "write"
           else -> return DomainPermissionEvaluation(false)
         }

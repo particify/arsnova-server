@@ -36,7 +36,7 @@ class ContentQueryController(
 ) {
 
   @QueryMapping
-  @PreAuthorize("hasPermission(#questionnaireId, 'Questionnaire', 'write')")
+  @PreAuthorize("hasPermission(#questionnaireId, 'Questionnaire', 'moderate')")
   fun questionnaireContentsByQuestionnaireId(@Argument questionnaireId: UUID): Window<Content> {
     return contentServiceImpl.findByQuestionnaireIdOrderByPosition(
         questionnaireId, ScrollPosition.offset())
@@ -88,7 +88,9 @@ class ContentQueryController(
   }
 
   private fun countByResult(content: Content, result: AnswerResultState): Int =
-      activeRound(content)?.id?.let { answerRepository.countByRoundIdAndResult(it, result) } ?: 0
+      activeRound(content)?.id?.let {
+        answerRepository.countByRoundIdAndHiddenFalseAndResult(it, result)
+      } ?: 0
 
   @SchemaMapping(typeName = "Content")
   fun hasCorrectAnswer(content: Content): Boolean {

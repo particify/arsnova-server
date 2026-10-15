@@ -23,7 +23,7 @@ class QuestionnaireQueryController(
     private val contentServiceImpl: ContentServiceImpl
 ) {
   @QueryMapping
-  @PreAuthorize("hasPermission(#roomId, 'Room', 'write')")
+  @PreAuthorize("hasPermission(#roomId, 'Room', 'moderate')")
   fun questionnairesByRoomId(@Argument roomId: UUID): List<Questionnaire> {
     return questionnaireServiceImpl.findByRoomIdOrderByName(roomId)
   }

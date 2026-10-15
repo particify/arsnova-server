@@ -31,9 +31,11 @@ class ContentPermissionEvaluator(
     val parentPermission =
         when (permission) {
           "write" -> "write"
-          "read" ->
-              if (questionnaire.published && isReleased(targetDomainObject, questionnaire)) "read"
-              else "write"
+          "read" -> if (isVisible(targetDomainObject, questionnaire)) "read" else "moderate"
+          // Participants only see the statistics once the questionnaire publishes them, while
+          // moderators see them throughout, as they do the answer counts.
+          "readStatistics" ->
+              if (areStatisticsPublished(targetDomainObject, questionnaire)) "read" else "moderate"
           "delete" -> "write"
           else -> return DomainPermissionEvaluation(false)
         }
@@ -42,6 +44,12 @@ class ContentPermissionEvaluator(
         DomainPermissionEvaluation.PermissionReference(
             "Questionnaire", questionnaire.id!!, parentPermission))
   }
+
+  private fun isVisible(content: Content, questionnaire: Questionnaire): Boolean =
+      questionnaire.published && isReleased(content, questionnaire)
+
+  private fun areStatisticsPublished(content: Content, questionnaire: Questionnaire): Boolean =
+      questionnaire.statisticsPublished == true && isVisible(content, questionnaire)
 
   private fun isReleased(content: Content, questionnaire: Questionnaire): Boolean {
     return when (questionnaire.publishingMode) {

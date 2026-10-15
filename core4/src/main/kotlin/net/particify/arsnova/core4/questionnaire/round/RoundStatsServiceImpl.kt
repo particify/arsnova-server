@@ -25,7 +25,7 @@ class RoundStatsServiceImpl(
   @Transactional
   fun getChoiceRoundStatsByRoundId(roundId: UUID): ChoiceContentRoundStats {
     val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
-    val answers = answerServiceImpl.findByRoundId(roundId)
+    val answers = answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId)
     val optionCount = (round.content!!.formatData as? ChoiceContentFormatData)?.options?.size ?: 0
 
     val countMap =
@@ -41,7 +41,7 @@ class RoundStatsServiceImpl(
   @Transactional
   fun getWordcloudRoundStatsByRoundId(roundId: UUID): WordcloudContentRoundStats {
     val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
-    val answers = answerServiceImpl.findByRoundId(roundId)
+    val answers = answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId)
     val formatData =
         round.content?.formatData as? WordcloudContentFormatData
             ?: return WordcloudContentRoundStats(listOf(), listOf())
