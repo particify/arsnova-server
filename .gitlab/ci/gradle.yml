@@ -7,6 +7,11 @@ variables:
   GRADLE_RO_DEP_CACHE: /root/.gradle-ro-cache
   GRADLE_CLI_OPTS: --no-daemon --console=plain
   FF_DISABLE_UMASK_FOR_DOCKER_EXECUTOR: "true"
+  # Root jobs get no ownership change from FF_DISABLE_UMASK_FOR_DOCKER_EXECUTOR,
+  # so their git can find the checkout still owned by a non-root job's user.
+  GIT_CONFIG_COUNT: "1"
+  GIT_CONFIG_KEY_0: safe.directory
+  GIT_CONFIG_VALUE_0: $CI_PROJECT_DIR
 
 # Override rules from parent CI config
 workflow:
