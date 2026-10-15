@@ -139,7 +139,7 @@ class RoundStatsServiceImpl(
         round.content?.formatData as? PrioritizationContentFormatData
             ?: throw ContentFormatDataInvalidException("Content is not a prioritization content")
     val assignedPoints =
-        answerServiceImpl.findByRoundId(roundId).mapNotNull {
+        answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId).mapNotNull {
           (it.formatData as? PrioritizationAnswerFormatData)?.assignedPoints
         }
     return PrioritizationContentRoundStats(

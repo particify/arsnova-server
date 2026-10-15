@@ -540,6 +540,21 @@ class RoundStatsServiceImplTest {
   }
 
   @Test
+  fun shouldLeaveHiddenAnswersOutOfPrioritizationSums() {
+    givenRound(PrioritizationContentFormatData(listOf("A", "B", "C")))
+    val visible = Answer(formatData = PrioritizationAnswerFormatData(listOf(60, 40, 0)))
+    val hidden =
+        Answer(formatData = PrioritizationAnswerFormatData(listOf(0, 0, 100)), hidden = true)
+    Mockito.`when`(answerServiceImpl.findByRoundId(ROUND_ID)).thenReturn(listOf(visible, hidden))
+    Mockito.`when`(answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(ROUND_ID))
+        .thenReturn(listOf(visible))
+
+    Assertions.assertEquals(
+        listOf(60, 40, 0),
+        roundStatsService.getPrioritizationRoundStatsByRoundId(ROUND_ID).assignedPoints)
+  }
+
+  @Test
   fun shouldRejectPrioritizationStatsOfOtherFormat() {
     givenRound(WordcloudContentFormatData())
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
