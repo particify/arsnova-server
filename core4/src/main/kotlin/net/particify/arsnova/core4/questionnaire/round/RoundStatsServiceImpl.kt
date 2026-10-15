@@ -65,7 +65,7 @@ class RoundStatsServiceImpl(
         content.formatData as? NumericContentFormatData
             ?: throw ContentFormatDataInvalidException("Content is not a numeric content")
     val numbers =
-        answerServiceImpl.findByRoundId(roundId).mapNotNull {
+        answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId).mapNotNull {
           (it.formatData as? NumericAnswerFormatData)?.selectedNumber
         }
     val countsByNumber = numbers.groupingBy { it }.eachCount().toSortedMap()

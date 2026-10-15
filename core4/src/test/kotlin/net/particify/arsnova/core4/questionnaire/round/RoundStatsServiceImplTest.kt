@@ -269,6 +269,22 @@ class RoundStatsServiceImplTest {
   }
 
   @Test
+  fun shouldLeaveHiddenAnswersOutOfNumericStats() {
+    givenRound(NumericContentFormatData(0.0, 10.0))
+    val visible = Answer(formatData = NumericAnswerFormatData(2.0))
+    val hidden = Answer(formatData = NumericAnswerFormatData(8.0), hidden = true)
+    Mockito.`when`(answerServiceImpl.findByRoundId(ROUND_ID)).thenReturn(listOf(visible, hidden))
+    Mockito.`when`(answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(ROUND_ID))
+        .thenReturn(listOf(visible))
+
+    val stats = roundStatsService.getNumericRoundStatsByRoundId(ROUND_ID, reader)
+
+    Assertions.assertEquals(listOf(2.0), stats.selectedNumbers)
+    Assertions.assertEquals(listOf(1), stats.counts)
+    Assertions.assertEquals(2.0, stats.mean)
+  }
+
+  @Test
   fun shouldRejectNumericStatsOfOtherFormat() {
     givenRound(WordcloudContentFormatData())
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
