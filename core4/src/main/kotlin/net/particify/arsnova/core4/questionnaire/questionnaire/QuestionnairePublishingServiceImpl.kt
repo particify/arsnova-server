@@ -41,9 +41,11 @@ class QuestionnairePublishingServiceImpl(
     content.activeRound = persistedRound
     val persistedContent = contentRepository.save(content)
     questionnaire.activeRound = persistedRound
+    val releasedBefore = questionnaire.publishedUpToContent?.id
     questionnaire.releaseUpTo(persistedContent)
     val persistedQuestionnaire = questionnaireRepository.save(questionnaire)
     questionnaireEventPublisher.publishQuestionnaireUpdated(questionnaire.id!!)
+    publishIfReleasedRangeChanged(persistedQuestionnaire, releasedBefore)
     return persistedQuestionnaire
   }
 
@@ -72,9 +74,18 @@ class QuestionnairePublishingServiceImpl(
         contentRepository.findByIdOrNull(contentId)?.takeIf {
           it.questionnaire?.id == questionnaireId
         } ?: throw ContentNotFoundException(contentId)
+    val releasedBefore = questionnaire.publishedUpToContent?.id
     questionnaire.publishedUpToContent = content
     val persistedQuestionnaire = questionnaireRepository.save(questionnaire)
     questionnaireEventPublisher.publishQuestionnaireUpdated(questionnaireId)
+    publishIfReleasedRangeChanged(persistedQuestionnaire, releasedBefore)
     return persistedQuestionnaire
+  }
+
+  /** The room's questionnaire list carries the released content count, which participants see. */
+  private fun publishIfReleasedRangeChanged(questionnaire: Questionnaire, releasedBefore: UUID?) {
+    if (questionnaire.publishedUpToContent?.id != releasedBefore) {
+      questionnaireEventPublisher.publishQuestionnairesChanged(questionnaire)
+    }
   }
 }

@@ -9,6 +9,7 @@ import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
+import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnairesChangedEvent
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import org.junit.jupiter.api.Assertions
@@ -19,14 +20,16 @@ class QuestionnairePublishingServiceImplTest {
   private val contentRepository = Mockito.mock(ContentRepository::class.java)
   private val questionnaireRepository = Mockito.mock(QuestionnaireRepository::class.java)
   private val roundRepository = Mockito.mock(RoundRepository::class.java)
+  private val questionnaireEventPublisher = QuestionnaireEventPublisher()
   private val publishingService =
       QuestionnairePublishingServiceImpl(
-          contentRepository,
-          questionnaireRepository,
-          roundRepository,
-          QuestionnaireEventPublisher())
+          contentRepository, questionnaireRepository, roundRepository, questionnaireEventPublisher)
   private val questionnaire =
-      Questionnaire(id = UUID.randomUUID(), publishingMode = QuestionnairePublishingMode.LIVE)
+      Questionnaire(
+          id = UUID.randomUUID(),
+          roomId = UUID.randomUUID(),
+          publishingMode = QuestionnairePublishingMode.LIVE)
+  private val listChanges = mutableListOf<QuestionnairesChangedEvent>()
 
   init {
     listOf("First", "Second", "Third").forEach {
@@ -46,6 +49,9 @@ class QuestionnairePublishingServiceImplTest {
       it.arguments[0]
     }
     Mockito.`when`(questionnaireRepository.save(questionnaire)).thenReturn(questionnaire)
+    Mockito.`when`(questionnaireRepository.findById(questionnaire.id!!))
+        .thenReturn(Optional.of(questionnaire))
+    questionnaireEventPublisher.questionnairesChangedFlux().subscribe { listChanges.add(it) }
   }
 
   @Test
@@ -67,5 +73,31 @@ class QuestionnairePublishingServiceImplTest {
     Assertions.assertSame(first.activeRound, questionnaire.activeRound)
     publishingService.startLiveContent(second.id!!)
     Assertions.assertSame(third, questionnaire.publishedUpToContent)
+  }
+
+  @Test
+  fun shouldSignalListChangeOnlyWhenStartingContentExtendsReleasedRange() {
+    val (first, second) = questionnaire.contents
+    val expected = QuestionnairesChangedEvent(questionnaire.roomId!!, questionnaire.id!!)
+    publishingService.startLiveContent(first.id!!)
+    publishingService.startLiveContent(second.id!!)
+    Assertions.assertEquals(listOf(expected, expected), listChanges)
+    publishingService.startLiveContent(first.id!!)
+    publishingService.startLiveContent(second.id!!)
+    Assertions.assertEquals(2, listChanges.size)
+  }
+
+  @Test
+  fun shouldSignalListChangeOnlyWhenPublishingUpToMovesReleasedRange() {
+    val (first, second) = questionnaire.contents
+    questionnaire.publishingMode = QuestionnairePublishingMode.UP_TO
+    questionnaire.publishedUpToContent = first
+    publishingService.publishUpToContent(questionnaire.id!!, first.id!!)
+    Assertions.assertTrue(listChanges.isEmpty())
+    publishingService.publishUpToContent(questionnaire.id!!, second.id!!)
+    Assertions.assertEquals(
+        listOf(QuestionnairesChangedEvent(questionnaire.roomId!!, questionnaire.id!!)), listChanges)
+    publishingService.publishUpToContent(questionnaire.id!!, first.id!!)
+    Assertions.assertEquals(2, listChanges.size)
   }
 }
