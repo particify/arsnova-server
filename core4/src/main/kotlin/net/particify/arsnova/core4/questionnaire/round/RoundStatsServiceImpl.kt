@@ -130,7 +130,7 @@ class RoundStatsServiceImpl(
             ?: throw ContentFormatDataInvalidException("Content is not a scale content")
     val countsByRating =
         answerServiceImpl
-            .findByRoundId(roundId)
+            .findByRoundIdAndHiddenFalseOrderByIdAsc(roundId)
             .mapNotNull { (it.formatData as? ScaleAnswerFormatData)?.rating }
             .groupingBy { it }
             .eachCount()

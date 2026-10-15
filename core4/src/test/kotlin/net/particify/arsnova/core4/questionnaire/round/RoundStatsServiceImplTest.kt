@@ -328,6 +328,19 @@ class RoundStatsServiceImplTest {
   }
 
   @Test
+  fun shouldLeaveHiddenAnswersOutOfScaleCounts() {
+    givenRound(ScaleContentFormatData(ScaleContentFormatData.Template.AGREEMENT, false))
+    val visible = Answer(formatData = ScaleAnswerFormatData(0))
+    val hidden = Answer(formatData = ScaleAnswerFormatData(3), hidden = true)
+    Mockito.`when`(answerServiceImpl.findByRoundId(ROUND_ID)).thenReturn(listOf(visible, hidden))
+    Mockito.`when`(answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(ROUND_ID))
+        .thenReturn(listOf(visible))
+
+    Assertions.assertEquals(
+        listOf(1, 0, 0, 0), roundStatsService.getScaleRoundStatsByRoundId(ROUND_ID).counts)
+  }
+
+  @Test
   fun shouldRejectScaleStatsOfOtherFormat() {
     givenRound(WordcloudContentFormatData())
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
