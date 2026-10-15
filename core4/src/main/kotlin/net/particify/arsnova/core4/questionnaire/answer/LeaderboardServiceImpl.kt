@@ -8,11 +8,13 @@ import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
+import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireRepository
 import net.particify.arsnova.core4.room.RoomUserAliasService
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.access.PermissionEvaluator
 import org.springframework.stereotype.Service
 
 @Service
@@ -20,7 +22,8 @@ class LeaderboardServiceImpl(
     private val answerRepository: AnswerRepository,
     private val contentRepository: ContentRepository,
     private val questionnaireRepository: QuestionnaireRepository,
-    private val roomUserAliasService: RoomUserAliasService
+    private val roomUserAliasService: RoomUserAliasService,
+    private val permissionEvaluator: PermissionEvaluator
 ) {
   companion object {
     const val DEFAULT_ENTRY_LIMIT = 100
@@ -69,36 +72,59 @@ class LeaderboardServiceImpl(
           alias = aliases[it.userId],
           score = it.score,
           position = it.position,
-          currentResult = currentResults[it.userId])
+          currentResult = currentResults[it.userId],
+          solutionPublished = questionnaire.correctOptionsPublished == true)
     }
+  }
+
+  /**
+   * Whether the current user may see how the current results were scored before the solution is
+   * published, which is decided by [SolutionVisibility] as for a single answer. The shared
+   * computation and the emissions of a subscription have no reader, so this is asked once up front.
+   */
+  @Transactional
+  fun maySeeUnpublishedResults(questionnaireId: UUID, contentId: UUID?): Boolean {
+    if (contentId == null) return false
+    val content = requireContentOfQuestionnaire(questionnaireId, contentId)
+    return SolutionVisibility.isPrivileged(permissionEvaluator, content)
   }
 
   /**
    * Cuts the ranking down to [limit] entries and localizes their aliases for a single reader. A
    * room can hold a four-digit number of participants, so the full ranking is not something each
-   * one of them should be sent.
+   * one of them should be sent. The current results are withheld as long as the solution is
+   * unpublished, unless [maySeeUnpublishedResults] holds for the reader.
    */
   fun toPage(
       entries: List<RawLeaderboardEntry>,
       userId: UUID?,
       limit: Int?,
-      locale: Locale
+      locale: Locale,
+      maySeeUnpublishedResults: Boolean
   ): LeaderboardPage {
     val entryLimit = (limit ?: DEFAULT_ENTRY_LIMIT).coerceIn(0, MAX_ENTRY_LIMIT)
     val ownEntry =
         userId?.let { id -> entries.asSequence().drop(entryLimit).firstOrNull { it.userId == id } }
+    val pageEntry = { entry: RawLeaderboardEntry ->
+      toEntry(entry, locale, maySeeUnpublishedResults || entry.solutionPublished)
+    }
     return LeaderboardPage(
-        entries = entries.take(entryLimit).map { localize(it, locale) },
-        ownEntry = ownEntry?.let { localize(it, locale) },
+        entries = entries.take(entryLimit).map(pageEntry),
+        ownEntry = ownEntry?.let(pageEntry),
         totalCount = entries.size)
   }
 
-  private fun localize(entry: RawLeaderboardEntry, locale: Locale): LeaderboardEntry =
+  private fun toEntry(
+      entry: RawLeaderboardEntry,
+      locale: Locale,
+      maySeeResults: Boolean
+  ): LeaderboardEntry =
       LeaderboardEntry(
           userAlias = entry.alias?.let { roomUserAliasService.localize(it, locale) },
           score = entry.score,
           position = entry.position,
-          currentResult = entry.currentResult)
+          currentResult =
+              if (maySeeResults) entry.currentResult else entry.currentResult?.withoutCorrectness())
 
   private fun findScores(questionnaireId: UUID): Map<UUID, Int> {
     return answerRepository.sumPointsByQuestionnaireIdGroupByCreatedBy(questionnaireId).associate {

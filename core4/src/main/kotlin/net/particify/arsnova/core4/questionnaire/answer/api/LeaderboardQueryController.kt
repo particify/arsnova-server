@@ -31,6 +31,8 @@ class LeaderboardQueryController(private val leaderboardServiceImpl: Leaderboard
   ): LeaderboardPage {
     val entries =
         leaderboardServiceImpl.findLeaderboardByQuestionnaireId(questionnaireId, contentId)
-    return leaderboardServiceImpl.toPage(entries, user.id, limit, locale)
+    val maySeeUnpublishedResults =
+        leaderboardServiceImpl.maySeeUnpublishedResults(questionnaireId, contentId)
+    return leaderboardServiceImpl.toPage(entries, user.id, limit, locale, maySeeUnpublishedResults)
   }
 }

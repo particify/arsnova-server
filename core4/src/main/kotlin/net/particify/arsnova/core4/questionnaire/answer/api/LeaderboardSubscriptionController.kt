@@ -43,8 +43,11 @@ class LeaderboardSubscriptionController(
   ): Flux<LeaderboardPage> {
     contentId?.let { leaderboardServiceImpl.requireContentOfQuestionnaire(questionnaireId, it) }
     val userId = user.id
+    // Decided here since the emissions run without a security context.
+    val maySeeUnpublishedResults =
+        leaderboardServiceImpl.maySeeUnpublishedResults(questionnaireId, contentId)
     return leaderboardFluxRegistry.leaderboardFlux(questionnaireId, contentId).map {
-      leaderboardServiceImpl.toPage(it, userId, limit, locale)
+      leaderboardServiceImpl.toPage(it, userId, limit, locale, maySeeUnpublishedResults)
     }
   }
 }

@@ -35,14 +35,40 @@ class LeaderboardSubscriptionControllerTest {
     val secondPage = LeaderboardPage(listOf(), null, 0)
     Mockito.`when`(registry.leaderboardFlux(QUESTIONNAIRE_ID, CONTENT_ID))
         .thenReturn(Flux.just(first, second))
-    Mockito.`when`(leaderboardService.toPage(first, user.id, LIMIT, LOCALE)).thenReturn(firstPage)
-    Mockito.`when`(leaderboardService.toPage(second, user.id, LIMIT, LOCALE)).thenReturn(secondPage)
+    Mockito.`when`(leaderboardService.toPage(first, user.id, LIMIT, LOCALE, false))
+        .thenReturn(firstPage)
+    Mockito.`when`(leaderboardService.toPage(second, user.id, LIMIT, LOCALE, false))
+        .thenReturn(secondPage)
 
     StepVerifier.create(
             controller.questionnaireLeaderboardUpdated(
                 QUESTIONNAIRE_ID, CONTENT_ID, LIMIT, user, LOCALE))
         .expectNext(firstPage, secondPage)
         .verifyComplete()
+  }
+
+  /**
+   * The emissions run without a security context, so whether the subscriber may see unpublished
+   * results has to be decided when subscribing and applied to every page.
+   */
+  @Test
+  fun shouldApplyTheResultVisibilityOfTheSubscriberToEveryPage() {
+    val user = User(id = UUID.randomUUID())
+    val ranking = listOf(RawLeaderboardEntry(user.id!!, null, 500, 1, null))
+    val page = LeaderboardPage(listOf(), null, 1)
+    Mockito.`when`(leaderboardService.maySeeUnpublishedResults(QUESTIONNAIRE_ID, CONTENT_ID))
+        .thenReturn(true)
+    Mockito.`when`(registry.leaderboardFlux(QUESTIONNAIRE_ID, CONTENT_ID))
+        .thenReturn(Flux.just(ranking, ranking))
+    Mockito.`when`(leaderboardService.toPage(ranking, user.id, LIMIT, LOCALE, true))
+        .thenReturn(page)
+
+    StepVerifier.create(
+            controller.questionnaireLeaderboardUpdated(
+                QUESTIONNAIRE_ID, CONTENT_ID, LIMIT, user, LOCALE))
+        .expectNext(page, page)
+        .verifyComplete()
+    Mockito.verify(leaderboardService).maySeeUnpublishedResults(QUESTIONNAIRE_ID, CONTENT_ID)
   }
 
   @Test

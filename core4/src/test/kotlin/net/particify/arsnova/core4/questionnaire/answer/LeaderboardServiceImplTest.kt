@@ -18,9 +18,13 @@ import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.room.RoomUserAlias
 import net.particify.arsnova.core4.room.RoomUserAliasProjection
 import net.particify.arsnova.core4.room.RoomUserAliasService
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.springframework.security.access.PermissionEvaluator
+import org.springframework.security.authentication.TestingAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 private val QUESTIONNAIRE_ID = UUID.randomUUID()
 private val ROOM_ID = UUID.randomUUID()
@@ -34,9 +38,19 @@ class LeaderboardServiceImplTest {
   private val contentRepository = Mockito.mock(ContentRepository::class.java)
   private val questionnaireRepository = Mockito.mock(QuestionnaireRepository::class.java)
   private val roomUserAliasService = Mockito.mock(RoomUserAliasService::class.java)
+  private val permissionEvaluator = Mockito.mock(PermissionEvaluator::class.java)
   private val service =
       LeaderboardServiceImpl(
-          answerRepository, contentRepository, questionnaireRepository, roomUserAliasService)
+          answerRepository,
+          contentRepository,
+          questionnaireRepository,
+          roomUserAliasService,
+          permissionEvaluator)
+
+  @AfterEach
+  fun clearAuthentication() {
+    SecurityContextHolder.clearContext()
+  }
 
   // Sorted so that position, user ID order and list order agree.
   private val userIds = (1..ENTRY_COUNT).map { UUID.randomUUID() }.sorted()
@@ -70,29 +84,29 @@ class LeaderboardServiceImplTest {
 
   @Test
   fun shouldClampTheLimitToZeroUpToTheMaximum() {
-    Assertions.assertEquals(0, service.toPage(entries, null, -5, LOCALE).entries.size)
+    Assertions.assertEquals(0, service.toPage(entries, null, -5, LOCALE, false).entries.size)
     Assertions.assertEquals(
         LeaderboardServiceImpl.MAX_ENTRY_LIMIT,
-        service.toPage(entries, null, ENTRY_COUNT, LOCALE).entries.size)
+        service.toPage(entries, null, ENTRY_COUNT, LOCALE, false).entries.size)
     Assertions.assertEquals(
         LeaderboardServiceImpl.DEFAULT_ENTRY_LIMIT,
-        service.toPage(entries, null, null, LOCALE).entries.size)
+        service.toPage(entries, null, null, LOCALE, false).entries.size)
   }
 
   @Test
   fun shouldCountEveryEntryAndKeepTheRankingOrder() {
-    val page = service.toPage(entries, null, 3, LOCALE)
+    val page = service.toPage(entries, null, 3, LOCALE, false)
     Assertions.assertEquals(ENTRY_COUNT, page.totalCount)
     Assertions.assertEquals(listOf(1, 2, 3), page.entries.map { it.position })
   }
 
   @Test
   fun shouldAddTheOwnEntryOnlyWhenItIsCutFromThePage() {
-    val beyond = service.toPage(entries, userIds[5], 3, LOCALE)
+    val beyond = service.toPage(entries, userIds[5], 3, LOCALE, false)
     Assertions.assertEquals(6, beyond.ownEntry?.position)
-    Assertions.assertNull(service.toPage(entries, userIds[2], 3, LOCALE).ownEntry)
-    Assertions.assertNull(service.toPage(entries, UUID.randomUUID(), 3, LOCALE).ownEntry)
-    Assertions.assertNull(service.toPage(entries, null, 3, LOCALE).ownEntry)
+    Assertions.assertNull(service.toPage(entries, userIds[2], 3, LOCALE, false).ownEntry)
+    Assertions.assertNull(service.toPage(entries, UUID.randomUUID(), 3, LOCALE, false).ownEntry)
+    Assertions.assertNull(service.toPage(entries, null, 3, LOCALE, false).ownEntry)
   }
 
   @Test
@@ -101,7 +115,7 @@ class LeaderboardServiceImplTest {
     val localized = RoomUserAlias(id = projection.id, alias = "Diligent Donkey", seed = 2)
     Mockito.`when`(roomUserAliasService.localize(projection, LOCALE)).thenReturn(localized)
     val withAlias = listOf(entries[0].copy(alias = projection), entries[1])
-    val page = service.toPage(withAlias, null, 2, LOCALE)
+    val page = service.toPage(withAlias, null, 2, LOCALE, false)
     Assertions.assertSame(localized, page.entries[0].userAlias)
     Assertions.assertNull(page.entries[1].userAlias)
   }
@@ -151,6 +165,79 @@ class LeaderboardServiceImplTest {
         .thenReturn(Optional.of(Content(id = CONTENT_ID, questionnaire = questionnaire)))
     val ranking = service.findLeaderboardByQuestionnaireId(QUESTIONNAIRE_ID, CONTENT_ID)
     Assertions.assertNull(ranking.single().currentResult)
+  }
+
+  private fun scoredEntries(solutionPublished: Boolean) =
+      listOf(
+          entries[0].copy(
+              currentResult = LeaderboardCurrentResult(500, 1200, true),
+              solutionPublished = solutionPublished),
+          entries[1].copy(
+              currentResult = LeaderboardCurrentResult(0, 900, false),
+              solutionPublished = solutionPublished))
+
+  /** The reader's own entry is cut from a page of one, so it is withheld along with the others. */
+  private fun currentResultsOnPage(
+      solutionPublished: Boolean,
+      maySeeUnpublishedResults: Boolean
+  ): List<LeaderboardCurrentResult?> {
+    val page =
+        service.toPage(
+            scoredEntries(solutionPublished), userIds[1], 1, LOCALE, maySeeUnpublishedResults)
+    return (page.entries + page.ownEntry!!).map { it.currentResult }
+  }
+
+  @Test
+  fun shouldWithholdCurrentResultsFromParticipantBeforeTheSolutionIsPublished() {
+    Assertions.assertEquals(
+        listOf(LeaderboardCurrentResult(0, 1200, false), LeaderboardCurrentResult(0, 900, false)),
+        currentResultsOnPage(solutionPublished = false, maySeeUnpublishedResults = false))
+  }
+
+  @Test
+  fun shouldShowCurrentResultsToEditorBeforeTheSolutionIsPublished() {
+    Assertions.assertEquals(
+        listOf(LeaderboardCurrentResult(500, 1200, true), LeaderboardCurrentResult(0, 900, false)),
+        currentResultsOnPage(solutionPublished = false, maySeeUnpublishedResults = true))
+  }
+
+  @Test
+  fun shouldShowCurrentResultsToEveryoneOnceTheSolutionIsPublished() {
+    val results =
+        listOf(LeaderboardCurrentResult(500, 1200, true), LeaderboardCurrentResult(0, 900, false))
+    Assertions.assertEquals(
+        results, currentResultsOnPage(solutionPublished = true, maySeeUnpublishedResults = false))
+    Assertions.assertEquals(
+        results, currentResultsOnPage(solutionPublished = true, maySeeUnpublishedResults = true))
+  }
+
+  @Test
+  fun shouldTellWhetherTheSolutionOfTheRankedQuestionnaireIsPublished() {
+    givenQuestionnaire(listOf(score(userIds[0], 500)))
+    questionnaire.correctOptionsPublished = false
+    Assertions.assertFalse(
+        service.findLeaderboardByQuestionnaireId(QUESTIONNAIRE_ID, null).single().solutionPublished)
+    questionnaire.correctOptionsPublished = true
+    Assertions.assertTrue(
+        service.findLeaderboardByQuestionnaireId(QUESTIONNAIRE_ID, null).single().solutionPublished)
+  }
+
+  private fun givenReaderMayEditContent(mayEdit: Boolean) {
+    val reader = TestingAuthenticationToken("user", null, "ROLE_USER")
+    SecurityContextHolder.getContext().authentication = reader
+    Mockito.`when`(permissionEvaluator.hasPermission(reader, CONTENT_ID, "Content", "write"))
+        .thenReturn(mayEdit)
+    Mockito.`when`(contentRepository.findById(CONTENT_ID))
+        .thenReturn(Optional.of(Content(id = CONTENT_ID, questionnaire = questionnaire)))
+  }
+
+  @Test
+  fun shouldLetOnlyPrivilegedReadersSeeUnpublishedResults() {
+    givenReaderMayEditContent(true)
+    Assertions.assertTrue(service.maySeeUnpublishedResults(QUESTIONNAIRE_ID, CONTENT_ID))
+    givenReaderMayEditContent(false)
+    Assertions.assertFalse(service.maySeeUnpublishedResults(QUESTIONNAIRE_ID, CONTENT_ID))
+    Assertions.assertFalse(service.maySeeUnpublishedResults(QUESTIONNAIRE_ID, null))
   }
 
   @Test
