@@ -13,7 +13,10 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.graphql.data.method.annotation.SubscriptionMapping
+import org.springframework.security.access.PermissionEvaluator
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -24,7 +27,8 @@ import reactor.core.scheduler.Schedulers
 @SchemaMapping(typeName = "Subscription")
 class ContentSubscriptionController(
     private val roundStatsEventPublisher: RoundStatsEventPublisher,
-    private val contentRepository: ContentRepository
+    private val contentRepository: ContentRepository,
+    private val permissionEvaluator: PermissionEvaluator
 ) {
 
   companion object {
@@ -34,17 +38,27 @@ class ContentSubscriptionController(
   @SubscriptionMapping
   @PreAuthorize("hasPermission(#questionnaireId, 'Questionnaire', 'read')")
   fun questionnaireContentUpdated(@Argument questionnaireId: UUID): Flux<Content> {
+    val authentication = SecurityContextHolder.getContext().authentication ?: return Flux.empty()
     return roundStatsEventPublisher
         .answerChangedFlux()
         .filter { event: AnswerChangedEvent -> event.questionnaireId == questionnaireId }
         .groupBy { it.contentId }
         .flatMap { group -> group.sample(STATS_UPDATE_SAMPLE_INTERVAL) }
-        .concatMap { fetchContent(it.contentId) }
+        .concatMap { fetchReadableContent(it.contentId, authentication) }
   }
 
-  private fun fetchContent(contentId: UUID): Mono<Content> {
-    return Mono.fromCallable { contentRepository.findByIdOrNull(contentId) }
-        .mapNotNull { it }
+  /**
+   * Any content of the questionnaire can be answered, but the subscriber may only see the released
+   * ones, and release as well as permissions can change while subscribed, so this is checked on
+   * every emission. The emission thread has no security context, hence the captured
+   * [authentication].
+   */
+  private fun fetchReadableContent(contentId: UUID, authentication: Authentication): Mono<Content> {
+    return Mono.fromCallable {
+          contentRepository.findByIdOrNull(contentId)?.takeIf {
+            permissionEvaluator.hasPermission(authentication, it, "read")
+          }
+        }
         .subscribeOn(Schedulers.boundedElastic())
   }
 }

@@ -8,8 +8,13 @@ import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.WordcloudContentRoundStats
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.springframework.security.access.PermissionEvaluator
+import org.springframework.security.authentication.TestingAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 import reactor.test.StepVerifier
 
 private val SUBSCRIBED_ROUND_ID = UUID.randomUUID()
@@ -24,7 +29,52 @@ private val VERIFY_TIMEOUT = Duration.ofSeconds(10)
 class RoundStatsSubscriptionControllerTest {
   private val eventPublisher = RoundStatsEventPublisher()
   private val roundStatsServiceImpl = Mockito.mock(RoundStatsServiceImpl::class.java)
-  private val controller = RoundStatsSubscriptionController(eventPublisher, roundStatsServiceImpl)
+  private val permissionEvaluator = Mockito.mock(PermissionEvaluator::class.java)
+  private val authentication = TestingAuthenticationToken("participant", null, "ROLE_USER")
+  private val controller =
+      RoundStatsSubscriptionController(eventPublisher, roundStatsServiceImpl, permissionEvaluator)
+
+  @BeforeEach
+  fun authenticate() {
+    SecurityContextHolder.getContext().authentication = authentication
+    Mockito.`when`(statisticsPermission()).thenReturn(true)
+  }
+
+  @AfterEach
+  fun clearAuthentication() {
+    SecurityContextHolder.clearContext()
+  }
+
+  private fun statisticsPermission() =
+      permissionEvaluator.hasPermission(
+          authentication, SUBSCRIBED_ROUND_ID, "Round", "readStatistics")
+
+  /**
+   * The statistics can be unpublished, or the content withdrawn, while subscribed. Emissions also
+   * run without the subscriber's security context, so the context is cleared before the answers.
+   */
+  @Test
+  fun shouldStopEmittingStatsOnceNoLongerPermitted() {
+    val stats = ChoiceContentRoundStats(listOf(2, 1))
+    Mockito.`when`(roundStatsServiceImpl.getChoiceRoundStatsByRoundId(SUBSCRIBED_ROUND_ID))
+        .thenReturn(stats)
+    Mockito.`when`(statisticsPermission()).thenReturn(true, false)
+
+    StepVerifier.withVirtualTime {
+          controller.questionnaireChoiceRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+        }
+        .expectSubscription()
+        .then {
+          SecurityContextHolder.clearContext()
+          publishAnswerChanged(SUBSCRIBED_ROUND_ID)
+        }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(stats)
+        .then { publishAnswerChanged(SUBSCRIBED_ROUND_ID) }
+        .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
 
   @Test
   fun shouldEmitChoiceStatsForAnswerOfSubscribedRound() {
