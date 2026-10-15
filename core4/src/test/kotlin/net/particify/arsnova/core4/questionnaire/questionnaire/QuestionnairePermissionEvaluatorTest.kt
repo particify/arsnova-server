@@ -15,7 +15,7 @@ class QuestionnairePermissionEvaluatorTest {
   private val evaluator =
       QuestionnairePermissionEvaluator(Mockito.mock(QuestionnaireRepository::class.java))
 
-  /** The room permission the check is delegated to, which decides participant versus editor. */
+  /** The room permission the check is delegated to, which decides participant versus moderator. */
   private fun delegatedRoomPermission(published: Boolean, leaderboardEnabled: Boolean?): Any? {
     val questionnaire =
         Questionnaire(
@@ -36,13 +36,13 @@ class QuestionnairePermissionEvaluatorTest {
   }
 
   @Test
-  fun shouldRequireEditorForDisabledLeaderboard() {
-    Assertions.assertEquals("write", delegatedRoomPermission(true, false))
-    Assertions.assertEquals("write", delegatedRoomPermission(true, null))
+  fun shouldRequireModeratorForDisabledLeaderboard() {
+    Assertions.assertEquals("moderate", delegatedRoomPermission(true, false))
+    Assertions.assertEquals("moderate", delegatedRoomPermission(true, null))
   }
 
   @Test
-  fun shouldRequireEditorForLeaderboardOfUnpublishedQuestionnaire() {
-    Assertions.assertEquals("write", delegatedRoomPermission(false, true))
+  fun shouldRequireModeratorForLeaderboardOfUnpublishedQuestionnaire() {
+    Assertions.assertEquals("moderate", delegatedRoomPermission(false, true))
   }
 }
