@@ -48,7 +48,7 @@ class RoundStatsServiceImpl(
       throw ContentFormatDataInvalidException("Content is not a binary content")
     }
     val answers =
-        answerServiceImpl.findByRoundId(roundId).mapNotNull {
+        answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId).mapNotNull {
           (it.formatData as? BinaryAnswerFormatData)?.answer
         }
     return BinaryContentRoundStats(listOf(answers.count { it }, answers.count { !it }))

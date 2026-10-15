@@ -582,6 +582,19 @@ class RoundStatsServiceImplTest {
   }
 
   @Test
+  fun shouldLeaveHiddenAnswersOutOfBinaryCounts() {
+    givenRound(BinaryContentFormatData(true))
+    val visible = Answer(formatData = BinaryAnswerFormatData(true))
+    val hidden = Answer(formatData = BinaryAnswerFormatData(false), hidden = true)
+    Mockito.`when`(answerServiceImpl.findByRoundId(ROUND_ID)).thenReturn(listOf(visible, hidden))
+    Mockito.`when`(answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(ROUND_ID))
+        .thenReturn(listOf(visible))
+
+    Assertions.assertEquals(
+        listOf(1, 0), roundStatsService.getBinaryRoundStatsByRoundId(ROUND_ID).selectionCounts)
+  }
+
+  @Test
   fun shouldRejectBinaryStatsOfOtherFormat() {
     givenRound(WordcloudContentFormatData())
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
