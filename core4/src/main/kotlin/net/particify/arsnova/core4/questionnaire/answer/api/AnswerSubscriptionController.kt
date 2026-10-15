@@ -12,6 +12,7 @@ import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsEventPublis
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.graphql.data.method.annotation.SubscriptionMapping
+import org.springframework.security.access.PermissionEvaluator
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.concurrent.DelegatingSecurityContextCallable
 import org.springframework.security.core.context.SecurityContext
@@ -26,7 +27,8 @@ import reactor.core.scheduler.Schedulers
 @SchemaMapping(typeName = "Subscription")
 class AnswerSubscriptionController(
     private val roundStatsEventPublisher: RoundStatsEventPublisher,
-    private val answerServiceImpl: AnswerServiceImpl
+    private val answerServiceImpl: AnswerServiceImpl,
+    private val permissionEvaluator: PermissionEvaluator
 ) {
 
   companion object {
@@ -41,8 +43,11 @@ class AnswerSubscriptionController(
    * security context, and reinstated for every fetch. Emissions run on another thread where the
    * thread-bound context is absent, and the visibility gating in
    * [AnswerServiceImpl.findTextAnswersByRoundId] reads it to decide whether the caller may see
-   * unpublished and hidden answers. Permissions are therefore evaluated as of subscription time; a
-   * role change only takes effect once the client resubscribes.
+   * unpublished and hidden answers.
+   *
+   * The content can be withdrawn from the released range or the questionnaire unpublished while
+   * subscribed, so the read permission checked at subscription is checked again for every fetch,
+   * and an emission the subscriber may no longer read is dropped.
    */
   @SubscriptionMapping
   @PreAuthorize("hasPermission(#roundId, 'Round', 'read')")
@@ -66,7 +71,14 @@ class AnswerSubscriptionController(
       securityContext: SecurityContext
   ): Mono<List<Answer>> {
     val callable = { answerServiceImpl.findTextAnswersByRoundId(roundId) }
-    return Mono.fromCallable(DelegatingSecurityContextCallable(callable, securityContext))
+    return Mono.fromCallable { mayReadRound(roundId, securityContext) }
+        .filter { it }
+        .flatMap { Mono.fromCallable(DelegatingSecurityContextCallable(callable, securityContext)) }
         .subscribeOn(Schedulers.boundedElastic())
+  }
+
+  private fun mayReadRound(roundId: UUID, securityContext: SecurityContext): Boolean {
+    val authentication = securityContext.authentication ?: return false
+    return permissionEvaluator.hasPermission(authentication, roundId, "Round", "read")
   }
 }

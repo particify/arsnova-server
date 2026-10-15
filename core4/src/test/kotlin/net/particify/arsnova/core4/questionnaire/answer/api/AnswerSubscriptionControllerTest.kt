@@ -12,8 +12,10 @@ import net.particify.arsnova.core4.questionnaire.round.api.AnswerChangedEvent
 import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsEventPublisher
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.springframework.security.access.PermissionEvaluator
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -31,9 +33,21 @@ private val VERIFY_TIMEOUT = Duration.ofSeconds(10)
 class AnswerSubscriptionControllerTest {
   private val eventPublisher = RoundStatsEventPublisher()
   private val answerServiceImpl = Mockito.mock(AnswerServiceImpl::class.java)
-  private val controller = AnswerSubscriptionController(eventPublisher, answerServiceImpl)
+  private val permissionEvaluator = Mockito.mock(PermissionEvaluator::class.java)
+  private val controller =
+      AnswerSubscriptionController(eventPublisher, answerServiceImpl, permissionEvaluator)
   private val answers = listOf(Answer(id = UUID.randomUUID()))
   private val subscriberAuthentication = TestingAuthenticationToken("editor", null, "ROLE_USER")
+
+  @BeforeEach
+  fun authenticate() {
+    SecurityContextHolder.getContext().authentication = subscriberAuthentication
+    Mockito.`when`(roundReadPermission()).thenReturn(true)
+  }
+
+  private fun roundReadPermission() =
+      permissionEvaluator.hasPermission(
+          subscriberAuthentication, SUBSCRIBED_ROUND_ID, "Round", "read")
 
   @AfterEach
   fun clearAuthentication() {
@@ -94,6 +108,27 @@ class AnswerSubscriptionControllerTest {
 
     Assertions.assertEquals(subscriberAuthentication, fetchAuthentication.get())
     Assertions.assertNull(SecurityContextHolder.getContext().authentication)
+  }
+
+  /** The content can be withdrawn, or the questionnaire unpublished, while subscribed. */
+  @Test
+  fun shouldStopEmittingAnswersOnceRoundIsNoLongerReadable() {
+    Mockito.`when`(answerServiceImpl.findTextAnswersByRoundId(SUBSCRIBED_ROUND_ID))
+        .thenReturn(answers)
+    Mockito.`when`(roundReadPermission()).thenReturn(true, false)
+
+    StepVerifier.withVirtualTime { controller.questionnaireTextAnswersUpdated(SUBSCRIBED_ROUND_ID) }
+        .expectSubscription()
+        .then {
+          SecurityContextHolder.clearContext()
+          publishAnswerChanged(SUBSCRIBED_ROUND_ID)
+        }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(answers)
+        .then { publishAnswerChanged(SUBSCRIBED_ROUND_ID) }
+        .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
   }
 
   private fun publishAnswerChanged(roundId: UUID) {
