@@ -117,7 +117,7 @@ tasks.withType<AbstractAot>().configureEach { environment = emptyMap() }
 
 // The Spring Boot plugin puts the AOT output on these classpaths, so every run and test would build
 // it although only spring.aot.enabled uses it. -Paot keeps the plugin's classpaths and runs the
-// tests in AOT mode.
+// application and the tests in AOT mode.
 if (!providers.gradleProperty("aot").isPresent) {
   tasks.bootRun {
     classpath =
@@ -139,6 +139,12 @@ if (!providers.gradleProperty("aot").isPresent) {
             configurations.testRuntimeClasspath)
   }
 } else {
+  tasks.bootRun {
+    systemProperty("spring.aot.enabled", true)
+    // Only this system property keeps devtools' restart class loader out, which would load the
+    // generated classes apart from the library classes in the same packages they access.
+    systemProperty("spring.devtools.restart.enabled", false)
+  }
   tasks.test { systemProperty("spring.aot.enabled", true) }
 }
 
