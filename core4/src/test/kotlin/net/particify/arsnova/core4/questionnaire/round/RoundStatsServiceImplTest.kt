@@ -400,6 +400,21 @@ class RoundStatsServiceImplTest {
         shortAnswerStats(listOf("Frankfurt am Main"), "frankfurt am main", "frankfurt am main"))
   }
 
+  /** Subscriptions share these stats among all subscribers and relabel them per one. */
+  @Test
+  fun shouldLabelGroupWithCorrectTermInStatsWithSolutionWhoeverReads() {
+    givenReaderMayEditContent(false)
+    givenRound(
+        ShortAnswerContentFormatData(listOf("Frankfurt am Main")),
+        ShortAnswerAnswerFormatData("frankfurt am main"),
+        ShortAnswerAnswerFormatData("Hanau"),
+        correctOptionsPublished = false)
+    val stats = roundStatsService.getShortAnswerRoundStatsWithSolutionByRoundId(ROUND_ID)
+    Assertions.assertEquals(listOf("Frankfurt am Main", "Hanau"), stats.texts)
+    Assertions.assertEquals(listOf("frankfurt am main", "Hanau"), stats.withoutSolution().texts)
+    Assertions.assertEquals(stats.counts, stats.withoutSolution().counts)
+  }
+
   @Test
   fun shouldLabelGroupOfCorrectTermWithItsOwnSpelling() {
     Assertions.assertEquals(

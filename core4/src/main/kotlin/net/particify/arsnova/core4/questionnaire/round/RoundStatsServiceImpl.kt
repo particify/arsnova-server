@@ -151,19 +151,33 @@ class RoundStatsServiceImpl(
       reader: Authentication?
   ): ShortAnswerContentRoundStats {
     val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
-    val content = round.content!!
+    val stats = shortAnswerStats(round)
+    val maySeeSolution = solutionVisibility.maySeeSolution(round.content!!, reader)
+    return if (maySeeSolution) stats else stats.withoutSolution()
+  }
+
+  /**
+   * Labels groups with the matching correct term whoever reads them, for subscriptions which share
+   * one computation among all of their subscribers and relabel them per subscriber.
+   */
+  @Transactional
+  fun getShortAnswerRoundStatsWithSolutionByRoundId(roundId: UUID): ShortAnswerContentRoundStats =
+      shortAnswerStats(
+          roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId))
+
+  private fun shortAnswerStats(round: Round): ShortAnswerContentRoundStats {
     val formatData =
-        content.formatData as? ShortAnswerContentFormatData
+        round.content?.formatData as? ShortAnswerContentFormatData
             ?: throw ContentFormatDataInvalidException("Content is not a short answer content")
     val bodies =
-        answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId).mapNotNull {
+        answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(round.id!!).mapNotNull {
           (it.formatData as? ShortAnswerAnswerFormatData)?.body
         }
-    val preferredTerms =
-        if (solutionVisibility.maySeeSolution(content, reader)) formatData.correctTerms
-        else emptyList()
-    val aggregated = aggregateTexts(bodies, formatData.bannedKeywords, preferredTerms)
-    return ShortAnswerContentRoundStats(aggregated.map { it.text }, aggregated.map { it.count })
+    val aggregated = aggregateTexts(bodies, formatData.bannedKeywords, formatData.correctTerms)
+    return ShortAnswerContentRoundStats(
+        aggregated.map { it.text },
+        aggregated.map { it.count },
+        aggregated.map { it.mostCommonVariant })
   }
 
   @Transactional
@@ -206,7 +220,8 @@ class RoundStatsServiceImpl(
           val mostCommonVariant = variants.maxBy { it.value }.key
           TextCount(
               text = preferredTermsByNormalizedForm[normalizedForm] ?: mostCommonVariant,
-              count = variants.sumOf { it.value })
+              count = variants.sumOf { it.value },
+              mostCommonVariant = mostCommonVariant)
         }
         .sortedByDescending { it.count }
   }
@@ -214,5 +229,6 @@ class RoundStatsServiceImpl(
   private data class TextCount(
       val text: String,
       val count: Int,
+      val mostCommonVariant: String,
   )
 }

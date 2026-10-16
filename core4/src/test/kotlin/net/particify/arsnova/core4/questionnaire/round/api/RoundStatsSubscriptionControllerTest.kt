@@ -192,37 +192,51 @@ class RoundStatsSubscriptionControllerTest {
   }
 
   /**
-   * Whether a correct term labels its group depends on the reader, whom the emissions cannot take
-   * from the security context, so it has to be the subscriber captured when subscribing.
+   * The groups are labelled with the correct terms once for all subscribers and relabelled for each
+   * who may not see the solution, including the stats replayed to one joining later.
    */
   @Test
-  fun shouldEmitShortAnswerStatsForAnswerOfSubscribedRoundAsTheSubscriber() {
-    val stats = ShortAnswerContentRoundStats(listOf("Offenbach"), listOf(2))
-    Mockito.`when`(
-            roundStatsServiceImpl.getShortAnswerRoundStatsByRoundId(
-                SUBSCRIBED_ROUND_ID, authentication))
-        .thenReturn(stats)
-
+  fun shouldLabelShortAnswerStatsWithCorrectTermsForModeratorOnly() {
+    val stats = givenShortAnswerStats()
+    authenticate(moderator)
+    val participantEmissions = mutableListOf<ShortAnswerContentRoundStats>()
     StepVerifier.withVirtualTime {
           controller.questionnaireShortAnswerRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
         }
         .expectSubscription()
+        .assertNext { Assertions.assertEquals(listOf("Frankfurt am Main"), it.texts) }
         .then {
-          SecurityContextHolder.clearContext()
-          publishAnswerChanged(SUBSCRIBED_ROUND_ID)
+          authenticate(participant)
+          controller
+              .questionnaireShortAnswerRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+              .subscribe { participantEmissions.add(it) }
+              .dispose()
         }
-        .thenAwait(SAMPLE_INTERVAL)
-        .expectNext(stats)
         .thenCancel()
         .verify(VERIFY_TIMEOUT)
+
+    Assertions.assertEquals(
+        listOf(listOf("frankfurt am main")), participantEmissions.map { it.texts })
+    Mockito.verify(roundStatsServiceImpl, Mockito.times(1))
+        .getShortAnswerRoundStatsWithSolutionByRoundId(SUBSCRIBED_ROUND_ID)
   }
 
   @Test
-  fun shouldNotEmitShortAnswerStatsForAnswerOfOtherRound() {
+  fun shouldLabelShortAnswerStatsWithCorrectTermsOncePublished() {
+    givenShortAnswerStats()
+
     StepVerifier.withVirtualTime {
           controller.questionnaireShortAnswerRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
         }
         .expectSubscription()
+        .assertNext { Assertions.assertEquals(listOf("frankfurt am main"), it.texts) }
+        .then {
+          SecurityContextHolder.clearContext()
+          questionnaire.correctOptionsPublished = true
+          publishAnswerChanged(SUBSCRIBED_ROUND_ID)
+        }
+        .thenAwait(SAMPLE_INTERVAL)
+        .assertNext { Assertions.assertEquals(listOf("Frankfurt am Main"), it.texts) }
         .then { publishAnswerChanged(OTHER_ROUND_ID) }
         .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
         .thenCancel()
@@ -355,6 +369,18 @@ class RoundStatsSubscriptionControllerTest {
             correctAnswerFraction = 0.5)
     Mockito.`when`(
             roundStatsServiceImpl.getNumericRoundStatsWithSolutionByRoundId(SUBSCRIBED_ROUND_ID))
+        .thenReturn(stats)
+    return stats
+  }
+
+  private fun givenShortAnswerStats(): ShortAnswerContentRoundStats {
+    questionnaire.correctOptionsPublished = false
+    val stats =
+        ShortAnswerContentRoundStats(
+            listOf("Frankfurt am Main"), listOf(2), listOf("frankfurt am main"))
+    Mockito.`when`(
+            roundStatsServiceImpl.getShortAnswerRoundStatsWithSolutionByRoundId(
+                SUBSCRIBED_ROUND_ID))
         .thenReturn(stats)
     return stats
   }
