@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.questionnaire.questionnaire
 
 import jakarta.transaction.Transactional
 import java.util.UUID
+import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
@@ -27,6 +28,7 @@ class QuestionnairePublishingServiceImpl(
     val content =
         contentRepository.findByIdOrNull(contentId) ?: throw ContentNotFoundException(contentId)
     val questionnaire = content.questionnaire!!
+    requireMode(questionnaire, QuestionnairePublishingMode.LIVE)
     questionnaire.activeRound?.let {
       it.stopAnswering()
       roundRepository.save(it)
@@ -54,9 +56,10 @@ class QuestionnairePublishingServiceImpl(
     val questionnaire =
         questionnaireRepository.findByIdOrNull(questionnaireId)
             ?: throw QuestionnaireNotFoundException(questionnaireId)
+    requireMode(questionnaire, QuestionnairePublishingMode.LIVE)
     val round =
         questionnaire.activeRound
-            ?: throw IllegalStateException("No active round found for $questionnaireId")
+            ?: throw InvalidInputException("The questionnaire has no active content to stop")
     round.stopAnswering()
     val persistedRound = roundRepository.save(round)
     questionnaire.activeRound = persistedRound
@@ -74,12 +77,20 @@ class QuestionnairePublishingServiceImpl(
         contentRepository.findByIdOrNull(contentId)?.takeIf {
           it.questionnaire?.id == questionnaireId
         } ?: throw ContentNotFoundException(contentId)
+    requireMode(questionnaire, QuestionnairePublishingMode.UP_TO, QuestionnairePublishingMode.LIVE)
     val releasedBefore = questionnaire.publishedUpToContent?.id
     questionnaire.publishedUpToContent = content
     val persistedQuestionnaire = questionnaireRepository.save(questionnaire)
     questionnaireEventPublisher.publishQuestionnaireUpdated(questionnaireId)
     publishIfReleasedRangeChanged(persistedQuestionnaire, releasedBefore)
     return persistedQuestionnaire
+  }
+
+  private fun requireMode(questionnaire: Questionnaire, vararg modes: QuestionnairePublishingMode) {
+    if (questionnaire.publishingMode !in modes) {
+      throw InvalidInputException(
+          "Not supported in publishing mode ${questionnaire.publishingMode}")
+    }
   }
 
   /** The room's questionnaire list carries the released content count, which participants see. */

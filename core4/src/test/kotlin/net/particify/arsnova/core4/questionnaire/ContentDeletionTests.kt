@@ -8,6 +8,7 @@ import net.particify.arsnova.core4.TestcontainersConfiguration
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
+import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnairePublishingMode
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnairePublishingServiceImpl
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireServiceImpl
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireType
@@ -53,6 +54,8 @@ class ContentDeletionTests {
     val questionnaire =
         questionnaireService.create(
             ROOM_ID, "Deletion ${UUID.randomUUID()}", QuestionnaireType.SURVEY)
+    questionnaireService.update(
+        questionnaire.id!!, null, null, QuestionnairePublishingMode.UP_TO, null, null, null)
     val contents =
         listOf("First", "Second", "Third").map {
           contentService.create(

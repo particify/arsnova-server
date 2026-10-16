@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.questionnaire.questionnaire
 
 import java.util.Optional
 import java.util.UUID
+import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
@@ -99,5 +100,52 @@ class QuestionnairePublishingServiceImplTest {
         listOf(QuestionnairesChangedEvent(questionnaire.roomId!!, questionnaire.id!!)), listChanges)
     publishingService.publishUpToContent(questionnaire.id!!, first.id!!)
     Assertions.assertEquals(2, listChanges.size)
+  }
+
+  @Test
+  fun shouldRejectStoppingWithoutActiveRound() {
+    Assertions.assertThrows(InvalidInputException::class.java) {
+      publishingService.stopLiveContent(questionnaire.id!!)
+    }
+  }
+
+  @Test
+  fun shouldStopActiveRound() {
+    val first = questionnaire.contents.first()
+    publishingService.startLiveContent(first.id!!)
+    publishingService.stopLiveContent(questionnaire.id!!)
+    Assertions.assertSame(first.activeRound, questionnaire.activeRound)
+  }
+
+  @Test
+  fun shouldRejectLiveCallsOutsideLiveMode() {
+    val first = questionnaire.contents.first()
+    QuestionnairePublishingMode.entries
+        .filter { it != QuestionnairePublishingMode.LIVE }
+        .forEach {
+          questionnaire.publishingMode = it
+          Assertions.assertThrows(InvalidInputException::class.java) {
+            publishingService.startLiveContent(first.id!!)
+          }
+          Assertions.assertThrows(InvalidInputException::class.java) {
+            publishingService.stopLiveContent(questionnaire.id!!)
+          }
+        }
+  }
+
+  @Test
+  fun shouldRejectPublishingUpToInAllMode() {
+    val first = questionnaire.contents.first()
+    questionnaire.publishingMode = QuestionnairePublishingMode.ALL
+    Assertions.assertThrows(InvalidInputException::class.java) {
+      publishingService.publishUpToContent(questionnaire.id!!, first.id!!)
+    }
+  }
+
+  @Test
+  fun shouldPublishUpToInLiveMode() {
+    val second = questionnaire.contents[1]
+    publishingService.publishUpToContent(questionnaire.id!!, second.id!!)
+    Assertions.assertSame(second, questionnaire.publishedUpToContent)
   }
 }

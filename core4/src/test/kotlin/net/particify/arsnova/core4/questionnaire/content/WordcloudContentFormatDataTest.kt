@@ -3,6 +3,7 @@
  */
 package net.particify.arsnova.core4.questionnaire.content
 
+import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
@@ -41,6 +42,37 @@ class WordcloudContentFormatDataTest {
     formatData.addBannedKeyword("spam")
     formatData.addBannedKeyword(" Spam! ")
     Assertions.assertEquals(listOf("spam"), formatData.bannedKeywords)
+  }
+
+  @Test
+  fun shouldRejectKeywordWithoutLetterOrDigit() {
+    val formatData = WordcloudContentFormatData()
+    listOf("", " ", "!?").forEach {
+      Assertions.assertThrows(InvalidInputException::class.java) { formatData.addBannedKeyword(it) }
+    }
+    Assertions.assertEquals(listOf<String>(), formatData.bannedKeywords)
+  }
+
+  @Test
+  fun shouldRejectKeywordExceedingTheLengthLimit() {
+    val formatData = WordcloudContentFormatData()
+    val longest = "a".repeat(KeywordBanning.MAX_KEYWORD_LENGTH)
+    formatData.addBannedKeyword(longest)
+    Assertions.assertThrows(InvalidInputException::class.java) {
+      formatData.addBannedKeyword(longest + "a")
+    }
+    Assertions.assertEquals(listOf(longest), formatData.bannedKeywords)
+  }
+
+  @Test
+  fun shouldRejectKeywordsBeyondTheCountLimit() {
+    val formatData = WordcloudContentFormatData()
+    (1..KeywordBanning.MAX_KEYWORD_COUNT).forEach { formatData.addBannedKeyword("word$it") }
+    Assertions.assertThrows(InvalidInputException::class.java) {
+      formatData.addBannedKeyword("another")
+    }
+    formatData.addBannedKeyword("WORD1")
+    Assertions.assertEquals(KeywordBanning.MAX_KEYWORD_COUNT, formatData.bannedKeywords.size)
   }
 
   @Test
