@@ -18,6 +18,7 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.config.YamlMapFactoryBean
 import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.core.io.ClassPathResource
+import org.springframework.dao.DataIntegrityViolationException
 
 private val ROOM_ID = UUID.randomUUID()
 private val USER_ID = UUID.randomUUID()
@@ -34,7 +35,7 @@ class RoomUserAliasServiceImplTest {
           repository, RoomUserAliasGenerator(loadAliasWords(), messageSource()))
 
   init {
-    Mockito.`when`(repository.save(Mockito.any(RoomUserAlias::class.java))).thenAnswer {
+    Mockito.`when`(repository.saveAndFlush(Mockito.any(RoomUserAlias::class.java))).thenAnswer {
       (it.arguments[0] as RoomUserAlias).also { alias -> alias.id = UUID.randomUUID() }
     }
   }
@@ -50,7 +51,7 @@ class RoomUserAliasServiceImplTest {
     Assertions.assertNull(proposal.id)
     Assertions.assertNotNull(proposal.seed)
     Assertions.assertFalse(proposal.alias.isNullOrBlank())
-    Mockito.verify(repository, Mockito.never()).save(Mockito.any())
+    Mockito.verify(repository, Mockito.never()).saveAndFlush(Mockito.any())
   }
 
   @Test
@@ -79,7 +80,18 @@ class RoomUserAliasServiceImplTest {
     Assertions.assertThrows(InvalidInputException::class.java) {
       service.set(ROOM_ID, USER_ID, "Captain", null, ENGLISH)
     }
-    Mockito.verify(repository, Mockito.never()).save(Mockito.any())
+    Mockito.verify(repository, Mockito.never()).saveAndFlush(Mockito.any())
+  }
+
+  @Test
+  fun shouldRejectAnAliasCreatedConcurrently() {
+    givenStored(null)
+    Mockito.doThrow(DataIntegrityViolationException("user_alias_room_id_user_id_key"))
+        .`when`(repository)
+        .saveAndFlush(Mockito.any(RoomUserAlias::class.java))
+    Assertions.assertThrows(InvalidInputException::class.java) {
+      service.set(ROOM_ID, USER_ID, "Captain", null, ENGLISH)
+    }
   }
 
   @Test
@@ -91,7 +103,7 @@ class RoomUserAliasServiceImplTest {
           { service.set(ROOM_ID, USER_ID, it, null, ENGLISH) },
           it)
     }
-    Mockito.verify(repository, Mockito.never()).save(Mockito.any())
+    Mockito.verify(repository, Mockito.never()).saveAndFlush(Mockito.any())
   }
 
   @Test
@@ -108,7 +120,7 @@ class RoomUserAliasServiceImplTest {
     Assertions.assertEquals(
         longest, service.set(ROOM_ID, USER_ID, " \t$longest\n ", null, ENGLISH).alias)
     val captor = ArgumentCaptor.forClass(RoomUserAlias::class.java)
-    Mockito.verify(repository).save(captor.capture())
+    Mockito.verify(repository).saveAndFlush(captor.capture())
     Assertions.assertEquals(longest, captor.value.alias)
   }
 
@@ -129,7 +141,7 @@ class RoomUserAliasServiceImplTest {
     Assertions.assertEquals("Fleißiger Esel", set.alias)
     Assertions.assertNotNull(set.id)
     val captor = ArgumentCaptor.forClass(RoomUserAlias::class.java)
-    Mockito.verify(repository).save(captor.capture())
+    Mockito.verify(repository).saveAndFlush(captor.capture())
     Assertions.assertNull(captor.value.alias)
     Assertions.assertEquals(DONKEY_SEED, captor.value.seed)
     Assertions.assertEquals(captor.value.id, set.id)

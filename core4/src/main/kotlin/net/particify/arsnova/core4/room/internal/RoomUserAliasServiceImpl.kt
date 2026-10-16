@@ -12,7 +12,10 @@ import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomUserAlias
 import net.particify.arsnova.core4.room.RoomUserAliasService
 import net.particify.arsnova.core4.user.User
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
+
+private const val ALREADY_CREATED_MESSAGE = "Alias has already been created."
 
 @Service
 class RoomUserAliasServiceImpl(
@@ -38,10 +41,10 @@ class RoomUserAliasServiceImpl(
       locale: Locale
   ): RoomUserAlias {
     if (findOneByRoomIdAndUserId(roomId, userId) != null) {
-      throw InvalidInputException("Alias has already been created.")
+      throw InvalidInputException(ALREADY_CREATED_MESSAGE)
     }
     val persistedAlias =
-        roomUserAliasRepository.save(
+        store(
             RoomUserAlias(
                 room = Room(id = roomId),
                 user = User(id = userId),
@@ -49,6 +52,17 @@ class RoomUserAliasServiceImpl(
                 seed = seed ?: ThreadLocalRandom.current().nextInt()))
     return localizeIfGenerated(persistedAlias, locale)
   }
+
+  /**
+   * Concurrent calls can both pass the check in [set], so the unique constraint on the room and the
+   * user has the last word and its violation is reported like the check's.
+   */
+  private fun store(alias: RoomUserAlias): RoomUserAlias =
+      try {
+        roomUserAliasRepository.saveAndFlush(alias)
+      } catch (e: DataIntegrityViolationException) {
+        throw InvalidInputException(ALREADY_CREATED_MESSAGE, e)
+      }
 
   private fun normalizeAlias(alias: String): String {
     val trimmed = alias.trim()
