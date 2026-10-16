@@ -49,6 +49,24 @@ class SortContentFormatDataTest {
   }
 
   @Test
+  fun shouldAcceptOptionsAtTheUpperLimits() {
+    val options =
+        (1..SortContentFormatData.MAX_OPTION_COUNT).map {
+          "$it".padEnd(SortContentFormatData.MAX_OPTION_LENGTH, 'x')
+        }
+    SortContentFormatData(options).validate()
+  }
+
+  @Test
+  fun shouldRejectTooManyOrTooLongOptions() {
+    val tooMany = (0..SortContentFormatData.MAX_OPTION_COUNT).map { "Option $it" }
+    val tooLong = listOf("A", "B".repeat(SortContentFormatData.MAX_OPTION_LENGTH + 1))
+    listOf(tooMany, tooLong).forEach {
+      assertRejected({ SortContentFormatData(it).validate() }, "${it.size}")
+    }
+  }
+
+  @Test
   fun shouldAcceptEveryPermutationOfTheOptions() {
     listOf(sort(0, 1, 2), sort(2, 0, 1), sort(1, 2, 0)).forEach { formatData.validateAnswer(it) }
   }

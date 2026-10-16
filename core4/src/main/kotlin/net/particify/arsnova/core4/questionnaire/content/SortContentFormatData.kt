@@ -33,12 +33,13 @@ data class SortContentFormatData(
   fun correctlyOrderedOptions(): List<String> = solution().map { options[it] }
 
   override fun validate() {
-    if (options.size < MIN_OPTION_COUNT) {
+    if (options.size !in MIN_OPTION_COUNT..MAX_OPTION_COUNT) {
       throw ContentFormatDataInvalidException(
-          "A sort content must have at least $MIN_OPTION_COUNT options")
+          "A sort content must have between $MIN_OPTION_COUNT and $MAX_OPTION_COUNT options")
     }
-    if (options.any { it.isBlank() }) {
-      throw ContentFormatDataInvalidException("Options must not be blank")
+    if (options.any { it.isBlank() || it.length > MAX_OPTION_LENGTH }) {
+      throw ContentFormatDataInvalidException(
+          "Options must not be blank or exceed $MAX_OPTION_LENGTH characters")
     }
     // Options differing only in spacing or case would look the same to participants.
     if (options.distinctBy { it.trim().lowercase() }.size != options.size) {
@@ -89,6 +90,10 @@ data class SortContentFormatData(
 
   companion object {
     const val MIN_OPTION_COUNT = 2
+
+    /** Match the limits of the option list in the web client's content form. */
+    const val MAX_OPTION_COUNT = 12
+    const val MAX_OPTION_LENGTH = 500
 
     /** Stored before the correct order was kept apart from the options, which held it instead. */
     @JvmStatic
