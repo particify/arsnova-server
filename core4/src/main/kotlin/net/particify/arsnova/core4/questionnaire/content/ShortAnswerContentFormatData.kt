@@ -108,9 +108,12 @@ constructor(@JsonProperty("correctTerms") val correctTerms: List<String>) : Keyw
   }
 
   override fun evaluateAnswer(answerFormatData: AnswerFormatData): AnswerResultState {
-    if (!hasCorrectAnswer()) return AnswerResultState.NEUTRAL
-    val body = (answerFormatData as ShortAnswerAnswerFormatData).body
-    return if (isCorrect(body)) AnswerResultState.CORRECT else AnswerResultState.WRONG
+    val body = (answerFormatData as? ShortAnswerAnswerFormatData)?.body
+    return when {
+      body == null || !hasCorrectAnswer() -> AnswerResultState.NEUTRAL
+      isCorrect(body) -> AnswerResultState.CORRECT
+      else -> AnswerResultState.WRONG
+    }
   }
 
   companion object {

@@ -101,6 +101,12 @@ class ShortAnswerContentFormatDataTest {
   }
 
   @Test
+  fun shouldEvaluateStoredAnswerOfOtherFormatAsNeutral() {
+    Assertions.assertEquals(
+        AnswerResultState.NEUTRAL, formatData.evaluateAnswer(TextAnswerFormatData("FFM")))
+  }
+
+  @Test
   fun shouldAllowReorderingAndRespellingTermsOnceAnswered() {
     ShortAnswerContentFormatData(listOf("ffm", "Frankfurt-am-Main")).validateChange(formatData) {
       Assertions.fail("Answers must not be looked up for an unchanged set of terms")
