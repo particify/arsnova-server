@@ -49,6 +49,24 @@ class PrioritizationContentFormatDataTest {
   }
 
   @Test
+  fun shouldAcceptOptionsAtTheUpperLimits() {
+    val options =
+        (1..PrioritizationContentFormatData.MAX_OPTION_COUNT).map {
+          "$it".padEnd(PrioritizationContentFormatData.MAX_OPTION_LENGTH, 'x')
+        }
+    PrioritizationContentFormatData(options).validate()
+  }
+
+  @Test
+  fun shouldRejectTooManyOrTooLongOptions() {
+    val tooMany = (0..PrioritizationContentFormatData.MAX_OPTION_COUNT).map { "Option $it" }
+    val tooLong = listOf("A", "B".repeat(PrioritizationContentFormatData.MAX_OPTION_LENGTH + 1))
+    listOf(tooMany, tooLong).forEach {
+      assertRejected({ PrioritizationContentFormatData(it).validate() }, "${it.size}")
+    }
+  }
+
+  @Test
   fun shouldAcceptAnswersSpendingExactlyTheBudget() {
     listOf(points(100, 0, 0), points(50, 30, 20), points(0, 0, 100)).forEach {
       formatData.validateAnswer(it)
