@@ -119,38 +119,50 @@ class RoundStatsSubscriptionControllerTest {
   }
 
   /**
-   * Whether the correct answer fraction is included depends on the reader, whom the emissions
-   * cannot take from the security context, so it has to be the subscriber captured when
-   * subscribing.
+   * The solution is computed once for all subscribers and left out for each who may not see it,
+   * including the stats replayed to one joining later.
    */
   @Test
-  fun shouldEmitNumericStatsForAnswerOfSubscribedRoundAsTheSubscriber() {
-    val stats = numericStats()
-    Mockito.`when`(
-            roundStatsServiceImpl.getNumericRoundStatsByRoundId(
-                SUBSCRIBED_ROUND_ID, authentication))
-        .thenReturn(stats)
+  fun shouldLeaveTheSolutionOutOfNumericStatsForParticipantOnly() {
+    val stats = givenNumericStats()
+    authenticate(moderator)
+    val participantEmissions = mutableListOf<NumericContentRoundStats>()
+    StepVerifier.withVirtualTime {
+          controller.questionnaireNumericRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+        }
+        .expectSubscription()
+        .expectNext(stats)
+        .then {
+          authenticate(participant)
+          controller
+              .questionnaireNumericRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+              .subscribe { participantEmissions.add(it) }
+              .dispose()
+        }
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+
+    Assertions.assertEquals(listOf(stats.withoutSolution()), participantEmissions)
+    Mockito.verify(roundStatsServiceImpl, Mockito.times(1))
+        .getNumericRoundStatsWithSolutionByRoundId(SUBSCRIBED_ROUND_ID)
+  }
+
+  @Test
+  fun shouldIncludeTheSolutionInNumericStatsOncePublished() {
+    val stats = givenNumericStats()
 
     StepVerifier.withVirtualTime {
           controller.questionnaireNumericRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
         }
         .expectSubscription()
+        .expectNext(stats.withoutSolution())
         .then {
           SecurityContextHolder.clearContext()
+          questionnaire.correctOptionsPublished = true
           publishAnswerChanged(SUBSCRIBED_ROUND_ID)
         }
         .thenAwait(SAMPLE_INTERVAL)
         .expectNext(stats)
-        .thenCancel()
-        .verify(VERIFY_TIMEOUT)
-  }
-
-  @Test
-  fun shouldNotEmitNumericStatsForAnswerOfOtherRound() {
-    StepVerifier.withVirtualTime {
-          controller.questionnaireNumericRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
-        }
-        .expectSubscription()
         .then { publishAnswerChanged(OTHER_ROUND_ID) }
         .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
         .thenCancel()
@@ -268,17 +280,24 @@ class RoundStatsSubscriptionControllerTest {
         .getChoiceRoundStatsByRoundId(SUBSCRIBED_ROUND_ID)
   }
 
-  private fun numericStats() =
-      NumericContentRoundStats(
-          selectedNumbers = listOf(1.0, 2.0),
-          counts = listOf(1, 2),
-          mean = 1.5,
-          median = 1.5,
-          standardDeviation = 0.5,
-          variance = 0.25,
-          minimum = 1.0,
-          maximum = 2.0,
-          correctAnswerFraction = null)
+  private fun givenNumericStats(): NumericContentRoundStats {
+    questionnaire.correctOptionsPublished = false
+    val stats =
+        NumericContentRoundStats(
+            selectedNumbers = listOf(1.0, 2.0),
+            counts = listOf(1, 2),
+            mean = 1.5,
+            median = 1.5,
+            standardDeviation = 0.5,
+            variance = 0.25,
+            minimum = 1.0,
+            maximum = 2.0,
+            correctAnswerFraction = 0.5)
+    Mockito.`when`(
+            roundStatsServiceImpl.getNumericRoundStatsWithSolutionByRoundId(SUBSCRIBED_ROUND_ID))
+        .thenReturn(stats)
+    return stats
+  }
 
   private fun publishAnswerChanged(roundId: UUID) {
     eventPublisher.publishAnswerChanged(

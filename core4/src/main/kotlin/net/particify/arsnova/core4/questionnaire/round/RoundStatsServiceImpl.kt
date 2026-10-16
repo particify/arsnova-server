@@ -60,12 +60,26 @@ class RoundStatsServiceImpl(
       reader: Authentication?
   ): NumericContentRoundStats {
     val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
-    val content = round.content!!
+    val stats = numericStats(round)
+    val maySeeSolution = solutionVisibility.maySeeSolution(round.content!!, reader)
+    return if (maySeeSolution) stats else stats.withoutSolution()
+  }
+
+  /**
+   * Includes the correct answer fraction whoever reads it, for subscriptions which share one
+   * computation among all of their subscribers and leave it out per subscriber.
+   */
+  @Transactional
+  fun getNumericRoundStatsWithSolutionByRoundId(roundId: UUID): NumericContentRoundStats =
+      numericStats(
+          roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId))
+
+  private fun numericStats(round: Round): NumericContentRoundStats {
     val formatData =
-        content.formatData as? NumericContentFormatData
+        round.content?.formatData as? NumericContentFormatData
             ?: throw ContentFormatDataInvalidException("Content is not a numeric content")
     val numbers =
-        answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId).mapNotNull {
+        answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(round.id!!).mapNotNull {
           (it.formatData as? NumericAnswerFormatData)?.selectedNumber
         }
     val countsByNumber = numbers.groupingBy { it }.eachCount().toSortedMap()
@@ -80,10 +94,7 @@ class RoundStatsServiceImpl(
         variance = variance,
         minimum = numbers.minOrNull() ?: 0.0,
         maximum = numbers.maxOrNull() ?: 0.0,
-        correctAnswerFraction =
-            if (solutionVisibility.maySeeSolution(content, reader))
-                correctAnswerFraction(numbers, formatData)
-            else null,
+        correctAnswerFraction = correctAnswerFraction(numbers, formatData),
     )
   }
 

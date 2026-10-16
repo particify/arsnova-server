@@ -20,4 +20,7 @@ data class NumericContentRoundStats(
     val minimum: Double,
     val maximum: Double,
     val correctAnswerFraction: Double?,
-)
+) {
+  /** The correct answer fraction tells whether the correct number is among the selected ones. */
+  fun withoutSolution(): NumericContentRoundStats = copy(correctAnswerFraction = null)
+}

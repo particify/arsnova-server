@@ -214,6 +214,20 @@ class RoundStatsServiceImplTest {
     Assertions.assertEquals(0.5, correctAnswerFraction(correctOptionsPublished = true))
   }
 
+  /** Subscriptions share these stats among all subscribers and leave the solution out per one. */
+  @Test
+  fun shouldIncludeCorrectAnswerFractionInStatsWithSolutionWhoeverReads() {
+    givenReaderMayEditContent(false)
+    givenRound(
+        NumericContentFormatData(0.0, 10.0, 2.0),
+        NumericAnswerFormatData(2.0),
+        NumericAnswerFormatData(5.0),
+        correctOptionsPublished = false)
+    val stats = roundStatsService.getNumericRoundStatsWithSolutionByRoundId(ROUND_ID)
+    Assertions.assertEquals(0.5, stats.correctAnswerFraction)
+    Assertions.assertNull(stats.withoutSolution().correctAnswerFraction)
+  }
+
   @Test
   fun shouldDescribeNumericAnswersWithPopulationVariance() {
     val stats = numericStats(NumericContentFormatData(0.0, 10.0, 2.0), 5.0, 2.0, 1.0, 2.0)
