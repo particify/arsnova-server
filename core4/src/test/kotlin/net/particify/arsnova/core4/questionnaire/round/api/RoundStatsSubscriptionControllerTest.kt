@@ -4,17 +4,27 @@
 package net.particify.arsnova.core4.questionnaire.round.api
 
 import java.time.Duration
+import java.util.Optional
 import java.util.UUID
+import net.particify.arsnova.core4.questionnaire.content.Content
+import net.particify.arsnova.core4.questionnaire.content.ContentPermissionEvaluator
+import net.particify.arsnova.core4.questionnaire.content.ContentRepository
+import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
+import net.particify.arsnova.core4.questionnaire.round.Round
+import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.WordcloudContentRoundStats
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.security.access.PermissionEvaluator
 import org.springframework.security.authentication.TestingAuthenticationToken
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import reactor.core.Disposable
 import reactor.test.StepVerifier
 
 private val SUBSCRIBED_ROUND_ID = UUID.randomUUID()
@@ -26,18 +36,38 @@ private val QUESTIONNAIRE_ID = UUID.randomUUID()
 private val SAMPLE_INTERVAL = Duration.ofSeconds(3)
 private val VERIFY_TIMEOUT = Duration.ofSeconds(10)
 
+/**
+ * Emissions run without the subscriber's security context, so tests clear it once subscribed: the
+ * controller has to decide everything subscriber-specific at subscription.
+ */
 class RoundStatsSubscriptionControllerTest {
   private val eventPublisher = RoundStatsEventPublisher()
   private val roundStatsServiceImpl = Mockito.mock(RoundStatsServiceImpl::class.java)
+  private val roundRepository = Mockito.mock(RoundRepository::class.java)
   private val permissionEvaluator = Mockito.mock(PermissionEvaluator::class.java)
-  private val authentication = TestingAuthenticationToken("participant", null, "ROLE_USER")
+  private val participant = TestingAuthenticationToken("participant", null, "ROLE_USER")
+  private val moderator = TestingAuthenticationToken("moderator", null, "ROLE_USER")
   private val controller =
-      RoundStatsSubscriptionController(eventPublisher, roundStatsServiceImpl, permissionEvaluator)
+      RoundStatsSubscriptionController(
+          eventPublisher,
+          roundStatsServiceImpl,
+          roundRepository,
+          ContentPermissionEvaluator(Mockito.mock(ContentRepository::class.java)),
+          permissionEvaluator)
+  private val questionnaire =
+      Questionnaire(id = QUESTIONNAIRE_ID, published = true, statisticsPublished = true)
+  private val content = Content(id = CONTENT_ID, questionnaire = questionnaire, position = 0)
+  private val choiceStats = ChoiceContentRoundStats(listOf(2, 1))
 
   @BeforeEach
-  fun authenticate() {
-    SecurityContextHolder.getContext().authentication = authentication
-    Mockito.`when`(statisticsPermission()).thenReturn(true)
+  fun setUp() {
+    Mockito.`when`(roundRepository.findById(SUBSCRIBED_ROUND_ID))
+        .thenReturn(Optional.of(Round(id = SUBSCRIBED_ROUND_ID, content = content)))
+    Mockito.`when`(roundStatsServiceImpl.getChoiceRoundStatsByRoundId(SUBSCRIBED_ROUND_ID))
+        .thenReturn(choiceStats)
+    Mockito.`when`(permissionEvaluator.hasPermission(moderator, questionnaire, "moderate"))
+        .thenReturn(true)
+    authenticate(participant)
   }
 
   @AfterEach
@@ -45,60 +75,42 @@ class RoundStatsSubscriptionControllerTest {
     SecurityContextHolder.clearContext()
   }
 
-  private fun statisticsPermission() =
-      permissionEvaluator.hasPermission(
-          authentication, SUBSCRIBED_ROUND_ID, "Round", "readStatistics")
+  private fun authenticate(authentication: Authentication) {
+    SecurityContextHolder.getContext().authentication = authentication
+  }
 
-  /**
-   * The statistics can be unpublished, or the content withdrawn, while subscribed. Emissions also
-   * run without the subscriber's security context, so the context is cleared before the answers.
-   */
+  private fun subscribeChoice() =
+      controller.questionnaireChoiceRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+
   @Test
-  fun shouldStopEmittingStatsOnceNoLongerPermitted() {
-    val stats = ChoiceContentRoundStats(listOf(2, 1))
-    Mockito.`when`(roundStatsServiceImpl.getChoiceRoundStatsByRoundId(SUBSCRIBED_ROUND_ID))
-        .thenReturn(stats)
-    Mockito.`when`(statisticsPermission()).thenReturn(true, false)
-
-    StepVerifier.withVirtualTime {
-          controller.questionnaireChoiceRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
-        }
+  fun shouldStartWithTheCurrentStats() {
+    StepVerifier.withVirtualTime { subscribeChoice() }
         .expectSubscription()
-        .then {
-          SecurityContextHolder.clearContext()
-          publishAnswerChanged(SUBSCRIBED_ROUND_ID)
-        }
-        .thenAwait(SAMPLE_INTERVAL)
-        .expectNext(stats)
-        .then { publishAnswerChanged(SUBSCRIBED_ROUND_ID) }
-        .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
+        .expectNext(choiceStats)
         .thenCancel()
         .verify(VERIFY_TIMEOUT)
   }
 
   @Test
   fun shouldEmitChoiceStatsForAnswerOfSubscribedRound() {
-    val stats = ChoiceContentRoundStats(listOf(2, 1))
-    Mockito.`when`(roundStatsServiceImpl.getChoiceRoundStatsByRoundId(SUBSCRIBED_ROUND_ID))
-        .thenReturn(stats)
-
-    StepVerifier.withVirtualTime {
-          controller.questionnaireChoiceRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
-        }
+    StepVerifier.withVirtualTime { subscribeChoice() }
         .expectSubscription()
-        .then { publishAnswerChanged(SUBSCRIBED_ROUND_ID) }
+        .expectNext(choiceStats)
+        .then {
+          SecurityContextHolder.clearContext()
+          publishAnswerChanged(SUBSCRIBED_ROUND_ID)
+        }
         .thenAwait(SAMPLE_INTERVAL)
-        .expectNext(stats)
+        .expectNext(choiceStats)
         .thenCancel()
         .verify(VERIFY_TIMEOUT)
   }
 
   @Test
   fun shouldNotEmitChoiceStatsForAnswerOfOtherRound() {
-    StepVerifier.withVirtualTime {
-          controller.questionnaireChoiceRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
-        }
+    StepVerifier.withVirtualTime { subscribeChoice() }
         .expectSubscription()
+        .expectNext(choiceStats)
         .then { publishAnswerChanged(OTHER_ROUND_ID) }
         .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
         .thenCancel()
@@ -115,23 +127,105 @@ class RoundStatsSubscriptionControllerTest {
           controller.questionnaireWordcloudRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
         }
         .expectSubscription()
+        .expectNext(stats)
         .then { publishAnswerChanged(SUBSCRIBED_ROUND_ID) }
         .thenAwait(SAMPLE_INTERVAL)
         .expectNext(stats)
+        .then { publishAnswerChanged(OTHER_ROUND_ID) }
+        .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
         .thenCancel()
         .verify(VERIFY_TIMEOUT)
   }
 
   @Test
-  fun shouldNotEmitWordcloudStatsForAnswerOfOtherRound() {
-    StepVerifier.withVirtualTime {
-          controller.questionnaireWordcloudRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
-        }
+  fun shouldShareOneComputationAmongSubscribers() {
+    val second = mutableListOf<ChoiceContentRoundStats>()
+    var secondSubscription: Disposable? = null
+    StepVerifier.withVirtualTime { subscribeChoice() }
         .expectSubscription()
-        .then { publishAnswerChanged(OTHER_ROUND_ID) }
+        .expectNext(choiceStats)
+        .then {
+          secondSubscription = subscribeChoice().subscribe { second.add(it) }
+          publishAnswerChanged(SUBSCRIBED_ROUND_ID)
+        }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(choiceStats)
+        .then { secondSubscription?.dispose() }
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+
+    Assertions.assertEquals(listOf(choiceStats, choiceStats), second)
+    Mockito.verify(roundStatsServiceImpl, Mockito.times(2))
+        .getChoiceRoundStatsByRoundId(SUBSCRIBED_ROUND_ID)
+  }
+
+  /** The permission is decided at subscription only, never for an emission. */
+  @Test
+  fun shouldStopEmittingStatsOnceUnpublished() {
+    StepVerifier.withVirtualTime { subscribeChoice() }
+        .expectSubscription()
+        .expectNext(choiceStats)
+        .then {
+          SecurityContextHolder.clearContext()
+          questionnaire.statisticsPublished = false
+          publishAnswerChanged(SUBSCRIBED_ROUND_ID)
+        }
         .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
         .thenCancel()
         .verify(VERIFY_TIMEOUT)
+
+    Mockito.verify(permissionEvaluator).hasPermission(participant, questionnaire, "moderate")
+    Mockito.verifyNoMoreInteractions(permissionEvaluator)
+  }
+
+  @Test
+  fun shouldStopEmittingStatsOnceContentIsNoLongerReleased() {
+    StepVerifier.withVirtualTime { subscribeChoice() }
+        .expectSubscription()
+        .expectNext(choiceStats)
+        .then {
+          questionnaire.published = false
+          publishAnswerChanged(SUBSCRIBED_ROUND_ID)
+        }
+        .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
+  @Test
+  fun shouldEmitUnpublishedStatsToModerator() {
+    questionnaire.statisticsPublished = false
+    authenticate(moderator)
+
+    StepVerifier.withVirtualTime { subscribeChoice() }
+        .expectSubscription()
+        .expectNext(choiceStats)
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
+  /** The stats replayed to a late joiner are shared, so they have to pass the joiner's gate. */
+  @Test
+  fun shouldHandALateSubscriberTheLastStatsOnlyIfPermitted() {
+    questionnaire.statisticsPublished = false
+    authenticate(moderator)
+    val late = mutableListOf<ChoiceContentRoundStats>()
+    StepVerifier.withVirtualTime { subscribeChoice() }
+        .expectSubscription()
+        .expectNext(choiceStats)
+        .then {
+          authenticate(participant)
+          subscribeChoice().subscribe { late.add(it) }.dispose()
+          Assertions.assertEquals(emptyList<ChoiceContentRoundStats>(), late)
+          questionnaire.statisticsPublished = true
+          subscribeChoice().subscribe { late.add(it) }.dispose()
+        }
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+
+    Assertions.assertEquals(listOf(choiceStats), late)
+    Mockito.verify(roundStatsServiceImpl, Mockito.times(1))
+        .getChoiceRoundStatsByRoundId(SUBSCRIBED_ROUND_ID)
   }
 
   private fun publishAnswerChanged(roundId: UUID) {

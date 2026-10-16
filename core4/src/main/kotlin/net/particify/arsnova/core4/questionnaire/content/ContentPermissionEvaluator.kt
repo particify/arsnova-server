@@ -63,6 +63,17 @@ class ContentPermissionEvaluator(
     }
   }
 
+  /**
+   * Whether participants may read [content], decided from the entity alone, for subscribers who
+   * re-check a content they have been handed rather than reading it again.
+   */
+  fun isVisibleToParticipants(content: Content): Boolean =
+      isVisible(content, content.questionnaire!!)
+
+  /** Whether participants may read the statistics of [content], decided from the entity alone. */
+  fun areStatisticsPublishedToParticipants(content: Content): Boolean =
+      areStatisticsPublished(content, content.questionnaire!!)
+
   override fun findOneByKey(key: Any): Content {
     check(key is UUID) { "Excepted key to be of type UUID." }
     return contentRepository.findByIdOrNull(key) ?: throw ContentNotFoundException(key)
