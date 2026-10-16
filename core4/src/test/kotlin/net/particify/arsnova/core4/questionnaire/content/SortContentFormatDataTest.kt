@@ -84,6 +84,12 @@ class SortContentFormatDataTest {
   }
 
   @Test
+  fun shouldEvaluateStoredAnswerOfOtherFormatAsNeutral() {
+    Assertions.assertEquals(
+        AnswerResultState.NEUTRAL, formatData.evaluateAnswer(ChoiceAnswerFormatData(listOf(0))))
+  }
+
+  @Test
   fun shouldScoreOnlyTheDeclaredOrderAsCorrect() {
     Assertions.assertEquals(AnswerResultState.CORRECT, formatData.evaluateAnswer(sort(0, 1, 2)))
     Assertions.assertEquals(AnswerResultState.WRONG, formatData.evaluateAnswer(sort(0, 2, 1)))

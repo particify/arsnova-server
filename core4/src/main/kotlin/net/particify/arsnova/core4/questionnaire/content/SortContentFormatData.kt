@@ -83,7 +83,9 @@ data class SortContentFormatData(
   }
 
   override fun evaluateAnswer(answerFormatData: AnswerFormatData): AnswerResultState {
-    val selectedChoiceIndexes = (answerFormatData as SortAnswerFormatData).selectedChoiceIndexes
+    val selectedChoiceIndexes =
+        (answerFormatData as? SortAnswerFormatData)?.selectedChoiceIndexes
+            ?: return AnswerResultState.NEUTRAL
     return if (selectedChoiceIndexes == solution()) AnswerResultState.CORRECT
     else AnswerResultState.WRONG
   }
@@ -95,7 +97,7 @@ data class SortContentFormatData(
     const val MAX_OPTION_COUNT = 12
     const val MAX_OPTION_LENGTH = 500
 
-    /** Stored before the correct order was kept apart from the options, which held it instead. */
+    /** Without a stored `correctOrder`, the options themselves are in the correct sequence. */
     @JvmStatic
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     fun fromJson(
