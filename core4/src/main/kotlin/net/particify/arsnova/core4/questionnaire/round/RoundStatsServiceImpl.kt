@@ -32,6 +32,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 
+@Suppress("TooManyFunctions")
 @Service
 class RoundStatsServiceImpl(
     private val roundServiceImpl: RoundServiceImpl,
