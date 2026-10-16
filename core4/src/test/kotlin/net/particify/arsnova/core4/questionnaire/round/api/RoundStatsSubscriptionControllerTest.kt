@@ -108,19 +108,10 @@ class RoundStatsSubscriptionControllerTest {
           controller.questionnaireBinaryRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
         }
         .expectSubscription()
+        .expectNext(stats)
         .then { publishAnswerChanged(SUBSCRIBED_ROUND_ID) }
         .thenAwait(SAMPLE_INTERVAL)
         .expectNext(stats)
-        .thenCancel()
-        .verify(VERIFY_TIMEOUT)
-  }
-
-  @Test
-  fun shouldNotEmitBinaryStatsForAnswerOfOtherRound() {
-    StepVerifier.withVirtualTime {
-          controller.questionnaireBinaryRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
-        }
-        .expectSubscription()
         .then { publishAnswerChanged(OTHER_ROUND_ID) }
         .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
         .thenCancel()
