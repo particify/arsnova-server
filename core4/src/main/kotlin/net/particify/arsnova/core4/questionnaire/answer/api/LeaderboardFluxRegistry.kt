@@ -11,7 +11,7 @@ import net.particify.arsnova.core4.questionnaire.answer.LeaderboardServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.RawLeaderboardEntry
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireRepository
-import net.particify.arsnova.core4.questionnaire.round.api.AnswerChangedEvent
+import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
 import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsEventPublisher
 import net.particify.arsnova.core4.room.RoomUserAliasChangedEvent
 import net.particify.arsnova.core4.room.RoomUserAliasEventPublisher
@@ -31,6 +31,7 @@ import reactor.core.scheduler.Schedulers
 class LeaderboardFluxRegistry(
     private val roundStatsEventPublisher: RoundStatsEventPublisher,
     private val roomUserAliasEventPublisher: RoomUserAliasEventPublisher,
+    private val questionnaireEventPublisher: QuestionnaireEventPublisher,
     private val leaderboardServiceImpl: LeaderboardServiceImpl,
     private val questionnaireRepository: QuestionnaireRepository
 ) {
@@ -71,7 +72,10 @@ class LeaderboardFluxRegistry(
   }
 
   /**
-   * Besides answers, an alias set in the questionnaire's room by a ranked user triggers a
+   * Answers and updates of the questionnaire trigger a sampled recomputation. The latter covers
+   * publishing the solution, which reveals correctness and points of answers given before.
+   *
+   * Besides those, an alias set in the questionnaire's room by a ranked user triggers a
    * recomputation, right away rather than sampled: otherwise the ranking replayed to every
    * subscriber joining later would keep showing the user anonymously until the next answer. Users
    * who are not ranked yet appear with their alias once they answer.
@@ -82,10 +86,11 @@ class LeaderboardFluxRegistry(
    */
   private fun rankings(key: LeaderboardKey, roomId: UUID): Flux<List<RawLeaderboardEntry>> {
     val lastRanking = AtomicReference<List<RawLeaderboardEntry>>(emptyList())
-    val answerChanges: Flux<() -> Boolean> =
-        roundStatsEventPublisher
-            .answerChangedFlux()
-            .filter { event: AnswerChangedEvent -> event.questionnaireId == key.questionnaireId }
+    val answerChanges: Flux<UUID> =
+        roundStatsEventPublisher.answerChangedFlux().map { it.questionnaireId }
+    val sampledChanges: Flux<() -> Boolean> =
+        Flux.merge(answerChanges, questionnaireEventPublisher.questionnaireUpdatedFlux())
+            .filter { it == key.questionnaireId }
             .sample(LEADERBOARD_UPDATE_SAMPLE_INTERVAL)
             .map { { true } }
     val aliasChanges: Flux<() -> Boolean> =
@@ -94,7 +99,7 @@ class LeaderboardFluxRegistry(
             .filter { event: RoomUserAliasChangedEvent -> event.roomId == roomId }
             .map { event -> { lastRanking.get().any { it.userId == event.userId } } }
     val initial: Mono<() -> Boolean> = Mono.just { true }
-    return Flux.merge(answerChanges, aliasChanges, initial)
+    return Flux.merge(sampledChanges, aliasChanges, initial)
         .concatMap { recompute -> if (recompute()) findLeaderboard(key) else Mono.empty() }
         .doOnNext { lastRanking.set(it) }
   }

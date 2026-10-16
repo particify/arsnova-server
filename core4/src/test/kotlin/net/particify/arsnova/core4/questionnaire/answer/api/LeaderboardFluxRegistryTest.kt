@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.questionnaire.answer.LeaderboardServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.RawLeaderboardEntry
 import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireRepository
+import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
 import net.particify.arsnova.core4.questionnaire.round.api.AnswerChangedEvent
 import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsEventPublisher
 import net.particify.arsnova.core4.room.RoomUserAliasChangedEvent
@@ -34,11 +35,16 @@ private val VERIFY_TIMEOUT = Duration.ofSeconds(10)
 class LeaderboardFluxRegistryTest {
   private val eventPublisher = RoundStatsEventPublisher()
   private val aliasEventPublisher = RoomUserAliasEventPublisher()
+  private val questionnaireEventPublisher = QuestionnaireEventPublisher()
   private val leaderboardService = Mockito.mock(LeaderboardServiceImpl::class.java)
   private val questionnaireRepository = Mockito.mock(QuestionnaireRepository::class.java)
   private val registry =
       LeaderboardFluxRegistry(
-          eventPublisher, aliasEventPublisher, leaderboardService, questionnaireRepository)
+          eventPublisher,
+          aliasEventPublisher,
+          questionnaireEventPublisher,
+          leaderboardService,
+          questionnaireRepository)
   private val ranking = listOf(RawLeaderboardEntry(USER_ID, null, 500, 1, null))
   private val renamed =
       listOf(ranking.single().copy(alias = RoomUserAliasProjection(USER_ID, null, "Beta", null)))
@@ -130,6 +136,42 @@ class LeaderboardFluxRegistryTest {
         .expectNext(renamed)
         .thenCancel()
         .verify(VERIFY_TIMEOUT)
+  }
+
+  /**
+   * Correctness and points are withheld until the solution is published, and the next answer that
+   * would otherwise recompute the ranking may never come.
+   */
+  @Test
+  fun shouldRecomputeWhenTheSolutionIsPublished() {
+    val published = listOf(ranking.single().copy(solutionPublished = true))
+    StepVerifier.withVirtualTime { registry.leaderboardFlux(QUESTIONNAIRE_ID, null) }
+        .expectSubscription()
+        .expectNext(ranking)
+        .then {
+          Mockito.`when`(
+                  leaderboardService.findLeaderboardByQuestionnaireId(QUESTIONNAIRE_ID, null))
+              .thenReturn(published)
+          questionnaireEventPublisher.publishQuestionnaireUpdated(QUESTIONNAIRE_ID)
+        }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(published)
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
+  @Test
+  fun shouldIgnoreUpdatesOfOtherQuestionnaires() {
+    StepVerifier.withVirtualTime { registry.leaderboardFlux(QUESTIONNAIRE_ID, null) }
+        .expectSubscription()
+        .expectNext(ranking)
+        .then { questionnaireEventPublisher.publishQuestionnaireUpdated(OTHER_QUESTIONNAIRE_ID) }
+        .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+
+    Mockito.verify(leaderboardService, Mockito.times(1))
+        .findLeaderboardByQuestionnaireId(QUESTIONNAIRE_ID, null)
   }
 
   @Test
