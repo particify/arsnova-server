@@ -14,6 +14,7 @@ import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
+import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -112,15 +113,16 @@ class RoundStatsServiceImplTest {
   }
 
   @Test
-  fun shouldReturnEmptyStatsForRoundOfOtherFormat() {
+  fun shouldRejectStatsForRoundOfOtherFormat() {
     givenRound(ChoiceContentFormatData(listOf("A"), null, false), ChoiceAnswerFormatData(listOf(0)))
-    val choiceStats = roundStatsService.getWordcloudRoundStatsByRoundId(ROUND_ID)
-    Assertions.assertEquals(listOf<String>(), choiceStats.words)
-    Assertions.assertEquals(listOf<Int>(), choiceStats.counts)
+    Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
+      roundStatsService.getWordcloudRoundStatsByRoundId(ROUND_ID)
+    }
 
     givenRound(WordcloudContentFormatData(), WordcloudAnswerFormatData(listOf("A")))
-    Assertions.assertEquals(
-        listOf<Int>(), roundStatsService.getChoiceRoundStatsByRoundId(ROUND_ID).selectionCounts)
+    Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
+      roundStatsService.getChoiceRoundStatsByRoundId(ROUND_ID)
+    }
   }
 
   @Test

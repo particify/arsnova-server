@@ -12,13 +12,16 @@ interface AnswerRepository : JpaRepository<Answer, UUID> {
 
   fun findByRoundId(roundId: UUID): List<Answer>
 
+  fun findByRoundIdInAndAuditMetadataCreatedBy(
+      roundIds: Collection<UUID>,
+      createdBy: UUID
+  ): List<Answer>
+
   fun findByRoundIdAndHiddenFalseOrderByIdAsc(roundId: UUID): List<Answer>
 
   fun countByRoundIdAndHiddenFalse(roundId: UUID): Int
 
   fun countByRoundIdAndHiddenFalseAndResult(roundId: UUID, result: AnswerResultState): Int
-
-  fun existsByRoundId(roundId: UUID): Boolean
 
   /** Hidden answers count too: they are still answers an edit would reinterpret. */
   @Query("SELECT DISTINCT a.round.content.id FROM Answer a WHERE a.round.content.id IN :contentIds")

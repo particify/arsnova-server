@@ -27,31 +27,49 @@ private const val LEGACY_POINTS = 300
 private val OPTIONS = listOf("A", "B", "C")
 private val USER_ID = UUID.randomUUID()
 
+// Mockito's matchers return null, which the non-null parameters of a Kotlin interface reject.
+private fun eqUserId(): UUID = Mockito.eq(USER_ID) ?: USER_ID
+
+private fun anyUuid(): UUID = Mockito.any(UUID::class.java) ?: USER_ID
+
 class AnswerServiceImplScoringTest {
   private val answerRepository = Mockito.mock(AnswerRepository::class.java)
   private val roundRepository = Mockito.mock(RoundRepository::class.java)
   private val contentServiceImpl = Mockito.mock(ContentServiceImpl::class.java)
+  private val questionnaireRepository = Mockito.mock(QuestionnaireRepository::class.java)
   private val answerService =
       AnswerServiceImpl(
           answerRepository,
           roundRepository,
           contentServiceImpl,
           RoundStatsEventPublisher(),
-          Mockito.mock(QuestionnaireRepository::class.java),
+          questionnaireRepository,
           AuditorAware { Optional.of(USER_ID) },
           Mockito.mock(RoundServiceImpl::class.java))
   private val questionnaire = Questionnaire(id = UUID.randomUUID())
+  private val ownAnswers = mutableListOf<Answer>()
 
   init {
     Mockito.`when`(answerRepository.saveAndFlush(Mockito.any(Answer::class.java))).thenAnswer {
       it.arguments[0]
     }
+    Mockito.`when`(questionnaireRepository.findById(questionnaire.id!!))
+        .thenReturn(Optional.of(questionnaire))
+    Mockito.`when`(
+            answerRepository.findByRoundIdInAndAuditMetadataCreatedBy(
+                Mockito.anyCollection(), eqUserId()))
+        .thenAnswer { invocation ->
+          val roundIds = invocation.getArgument<Collection<UUID>>(0)
+          ownAnswers.filter { it.round?.id in roundIds }
+        }
   }
 
   private fun content(
       weight: Int,
       points: Int? = null,
-      answeringExpiredAt: Instant? = null
+      answeringExpiredAt: Instant? = null,
+      released: Boolean = true,
+      withRound: Boolean = true
   ): Content {
     val content =
         Content(
@@ -60,10 +78,13 @@ class AnswerServiceImplScoringTest {
             formatData = ChoiceContentFormatData(OPTIONS, listOf(0, 1), true),
             weight = weight,
             points = points)
-    val round =
-        Round(id = UUID.randomUUID(), content = content, answeringExpiredAt = answeringExpiredAt)
-    content.activeRound = round
-    Mockito.`when`(roundRepository.findById(round.id!!)).thenReturn(Optional.of(round))
+    if (withRound) {
+      val round =
+          Round(id = UUID.randomUUID(), content = content, answeringExpiredAt = answeringExpiredAt)
+      content.activeRound = round
+      Mockito.`when`(roundRepository.findById(round.id!!)).thenReturn(Optional.of(round))
+    }
+    Mockito.`when`(contentServiceImpl.isPublished(content, questionnaire)).thenReturn(released)
     return content
   }
 
@@ -96,10 +117,7 @@ class AnswerServiceImplScoringTest {
     givenOwnAnswer(correct, Answer(result = AnswerResultState.CORRECT, formatData = choice(0, 1)))
     givenOwnAnswer(partial, Answer(result = AnswerResultState.WRONG, formatData = choice(1)))
     givenOwnAnswer(abstained, Answer(result = AnswerResultState.ABSTAINED))
-    Mockito.`when`(
-            contentServiceImpl.findByQuestionnaireIdOrderByPosition(
-                questionnaire.id!!, ScrollPosition.offset()))
-        .thenReturn(Window.from(listOf(correct, partial, abstained)) { ScrollPosition.offset() })
+    givenContents(correct, partial, abstained)
 
     val results = answerService.findQuestionnaireAnswerResults(questionnaire.id!!, USER_ID)
 
@@ -125,10 +143,7 @@ class AnswerServiceImplScoringTest {
             points = Content.BASE_POINTS,
             answeringExpiredAt = Instant.now().minusSeconds(60))
     givenOwnAnswer(expired, Answer(result = AnswerResultState.CORRECT, formatData = choice(0, 1)))
-    Mockito.`when`(
-            contentServiceImpl.findByQuestionnaireIdOrderByPosition(
-                questionnaire.id!!, ScrollPosition.offset()))
-        .thenReturn(Window.from(listOf(expired)) { ScrollPosition.offset() })
+    givenContents(expired)
 
     val results = answerService.findQuestionnaireAnswerResults(questionnaire.id!!, USER_ID)
 
@@ -137,13 +152,66 @@ class AnswerServiceImplScoringTest {
     Assertions.assertEquals(Content.BASE_POINTS, results.maxScore)
   }
 
+  @Test
+  fun shouldCountContentWithoutActiveRoundAsUnanswered() {
+    val answered = content(weight = 1, points = Content.BASE_POINTS)
+    val withoutRound = content(weight = 1, points = Content.BASE_POINTS, withRound = false)
+    givenOwnAnswer(answered, Answer(result = AnswerResultState.CORRECT, formatData = choice(0, 1)))
+    givenContents(answered, withoutRound)
+
+    val results = answerService.findQuestionnaireAnswerResults(questionnaire.id!!, USER_ID)
+
+    Assertions.assertEquals(1, results.correctAnswerCount)
+    Assertions.assertEquals(2, results.scorableContentCount)
+    Assertions.assertEquals(Content.BASE_POINTS, results.achievedScore)
+    Assertions.assertEquals(2 * Content.BASE_POINTS, results.maxScore)
+  }
+
+  @Test
+  fun shouldLeaveUnreleasedContentsOutOfTheResults() {
+    val released = content(weight = 1, points = Content.BASE_POINTS)
+    val unreleased = content(weight = 2, points = 2 * Content.BASE_POINTS, released = false)
+    givenOwnAnswer(released, Answer(result = AnswerResultState.WRONG, formatData = choice(0)))
+    givenOwnAnswer(
+        unreleased, Answer(result = AnswerResultState.CORRECT, formatData = choice(0, 1)))
+    givenContents(released, unreleased)
+
+    val results = answerService.findQuestionnaireAnswerResults(questionnaire.id!!, USER_ID)
+
+    Assertions.assertEquals(0, results.correctAnswerCount)
+    Assertions.assertEquals(1, results.scorableContentCount)
+    Assertions.assertEquals(Content.BASE_POINTS, results.maxScore)
+  }
+
+  @Test
+  fun shouldLoadTheOwnAnswersOfAllContentsInOneQuery() {
+    val first = content(weight = 1, points = Content.BASE_POINTS)
+    val second = content(weight = 1, points = Content.BASE_POINTS)
+    givenOwnAnswer(first, Answer(result = AnswerResultState.CORRECT, formatData = choice(0, 1)))
+    givenOwnAnswer(second, Answer(result = AnswerResultState.CORRECT, formatData = choice(0, 1)))
+    givenContents(first, second)
+
+    val results = answerService.findQuestionnaireAnswerResults(questionnaire.id!!, USER_ID)
+
+    Assertions.assertEquals(2, results.correctAnswerCount)
+    Mockito.verify(answerRepository, Mockito.times(1))
+        .findByRoundIdInAndAuditMetadataCreatedBy(Mockito.anyCollection(), eqUserId())
+    Mockito.verify(answerRepository, Mockito.never())
+        .findByRoundIdAndAuditMetadataCreatedBy(anyUuid(), anyUuid())
+  }
+
   private fun choice(vararg selectedChoiceIndexes: Int) =
       ChoiceAnswerFormatData(selectedChoiceIndexes.toList())
 
   private fun givenOwnAnswer(content: Content, answer: Answer) {
+    answer.round = content.activeRound
+    ownAnswers.add(answer)
+  }
+
+  private fun givenContents(vararg contents: Content) {
     Mockito.`when`(
-            answerRepository.findByRoundIdAndAuditMetadataCreatedBy(
-                content.activeRound!!.id!!, USER_ID))
-        .thenReturn(answer)
+            contentServiceImpl.findByQuestionnaireIdOrderByPosition(
+                questionnaire.id!!, ScrollPosition.offset()))
+        .thenReturn(Window.from(contents.toList()) { ScrollPosition.offset() })
   }
 }

@@ -173,37 +173,49 @@ class AnswerServiceImpl(
     }
   }
 
+  /** Only released contents count, as the caller can neither see nor answer the others. */
   @Transactional
   fun findQuestionnaireAnswerResults(
       questionnaireId: UUID,
       userId: UUID
   ): QuestionnaireAnswerResult {
+    val questionnaire =
+        questionnaireRepository.findByIdOrNull(questionnaireId)
+            ?: throw QuestionnaireNotFoundException(questionnaireId)
     val contents =
         contentServiceImpl
             .findByQuestionnaireIdOrderByPosition(questionnaireId, ScrollPosition.offset())
+            .filter { contentServiceImpl.isPublished(it, questionnaire) }
             .toList()
-    var correctAnswerCount = 0
-    var scorableContentCount = 0
-    var achievedScore = 0
-    var maxScore = 0
-    contents.forEach {
-      val contentFormatData = it.formatData!!
-      if (contentFormatData.hasCorrectAnswer()) {
-        scorableContentCount++
-        if (it.points != null) maxScore += it.points!!
-      }
-      val round = it.activeRound!!
-      val answer: Answer? = findByRoundIdAndAuditMetadataCreatedBy(round.id!!, userId)
-      // The result decides whether an answer counts as correct, not the points: older stored
-      // answers carry points of 0 rather than none at all even when they are wrong.
-      if (answer?.result == AnswerResultState.CORRECT) correctAnswerCount++
-      // The score cannot be derived from the result, since a partially correct answer is worth part
-      // of the content while its result is not CORRECT.
-      val answerFormatData = answer?.formatData ?: return@forEach
-      achievedScore += achievedPoints(round, it, answerFormatData, answer.auditMetadata.createdAt)
+    val roundIds = contents.mapNotNull { it.activeRound?.id }
+    val answersByRoundId =
+        answerRepository
+            .findByRoundIdInAndAuditMetadataCreatedBy(roundIds, userId)
+            .mapNotNull { answer -> answer.round?.id?.let { it to answer } }
+            .toMap()
+    val result = QuestionnaireAnswerResult(questionnaireId, 0, 0, 0, 0)
+    contents.forEach { content ->
+      addToResult(result, content, content.activeRound?.id?.let { answersByRoundId[it] })
     }
-    return QuestionnaireAnswerResult(
-        questionnaireId, correctAnswerCount, scorableContentCount, achievedScore, maxScore)
+    return result
+  }
+
+  private fun addToResult(result: QuestionnaireAnswerResult, content: Content, answer: Answer?) {
+    if (content.formatData!!.hasCorrectAnswer()) {
+      result.scorableContentCount++
+      content.points?.let { result.maxScore += it }
+    }
+    // A content without an active round has never been answered.
+    val round = content.activeRound
+    if (answer == null || round == null) return
+    // The result decides whether an answer counts as correct, not the points: older stored answers
+    // carry points of 0 rather than none at all even when they are wrong.
+    if (answer.result == AnswerResultState.CORRECT) result.correctAnswerCount++
+    // The score cannot be derived from the result, since a partially correct answer is worth part
+    // of the content while its result is not CORRECT.
+    val answerFormatData = answer.formatData ?: return
+    result.achievedScore +=
+        achievedPoints(round, content, answerFormatData, answer.auditMetadata.createdAt)
   }
 
   @Deprecated(

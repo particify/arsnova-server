@@ -13,6 +13,7 @@ import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatDat
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.normalizeAnswerText
+import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -25,8 +26,11 @@ class RoundStatsServiceImpl(
   @Transactional
   fun getChoiceRoundStatsByRoundId(roundId: UUID): ChoiceContentRoundStats {
     val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
+    val formatData =
+        round.content?.formatData as? ChoiceContentFormatData
+            ?: throw ContentFormatDataInvalidException("Content is not a choice content")
     val answers = answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId)
-    val optionCount = (round.content!!.formatData as? ChoiceContentFormatData)?.options?.size ?: 0
+    val optionCount = formatData.options.size
 
     val countMap =
         answers
@@ -41,10 +45,10 @@ class RoundStatsServiceImpl(
   @Transactional
   fun getWordcloudRoundStatsByRoundId(roundId: UUID): WordcloudContentRoundStats {
     val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
-    val answers = answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId)
     val formatData =
         round.content?.formatData as? WordcloudContentFormatData
-            ?: return WordcloudContentRoundStats(listOf(), listOf())
+            ?: throw ContentFormatDataInvalidException("Content is not a wordcloud content")
+    val answers = answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId)
 
     val aggregated =
         aggregateTexts(
