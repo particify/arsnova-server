@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.questionnaire.answer.AnswerRepository
 import net.particify.arsnova.core4.questionnaire.answer.AnswerResultState
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.answer.LeaderboardAnswerProjection
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
@@ -155,5 +156,23 @@ class QuestionnaireAnswerResultTests {
     val results = resultsOf(content)
     Assertions.assertEquals(0, results.correctAnswerCount)
     Assertions.assertEquals(0, results.achievedScore)
+  }
+
+  /** The leaderboard reads a projection instead of the answers, which must not change its data. */
+  @Test
+  fun shouldProjectTheAnswersAsTheLeaderboardReadsThem() {
+    val content = createChoiceContent(listOf(CORRECT_INDEX))
+    answer(content, CORRECT_INDEX)
+    val roundId = content.activeRound!!.id!!
+    val fromEntities =
+        answerRepository.findByRoundId(roundId).map {
+          LeaderboardAnswerProjection(
+              it.auditMetadata.createdBy!!, it.points, it.durationMs, it.result)
+        }
+    val projected = answerRepository.findLeaderboardProjectionsByRoundId(roundId)
+    Assertions.assertEquals(
+        listOf(Triple(OWNER_ID, Content.BASE_POINTS, AnswerResultState.CORRECT)),
+        projected.map { Triple(it.userId, it.points, it.result) })
+    Assertions.assertEquals(fromEntities, projected)
   }
 }

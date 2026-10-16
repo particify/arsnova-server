@@ -13,13 +13,16 @@ import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFound
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireRepository
 import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
 import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsEventPublisher
-import net.particify.arsnova.core4.room.RoomUserAliasChangedEvent
-import net.particify.arsnova.core4.room.RoomUserAliasEventPublisher
+import net.particify.arsnova.core4.room.event.RoomUserAliasChangedEvent
+import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
+import org.springframework.transaction.event.TransactionalEventListener
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.publisher.Sinks
 import reactor.core.scheduler.Schedulers
+import reactor.util.concurrent.Queues
 
 /**
  * Holds one leaderboard computation per questionnaire and content, shared by all of its
@@ -30,7 +33,6 @@ import reactor.core.scheduler.Schedulers
 @Component
 class LeaderboardFluxRegistry(
     private val roundStatsEventPublisher: RoundStatsEventPublisher,
-    private val roomUserAliasEventPublisher: RoomUserAliasEventPublisher,
     private val questionnaireEventPublisher: QuestionnaireEventPublisher,
     private val leaderboardServiceImpl: LeaderboardServiceImpl,
     private val questionnaireRepository: QuestionnaireRepository
@@ -39,7 +41,14 @@ class LeaderboardFluxRegistry(
     private val LEADERBOARD_UPDATE_SAMPLE_INTERVAL: Duration = Duration.ofSeconds(3)
   }
 
+  private val logger = LoggerFactory.getLogger(javaClass)
+
   private data class LeaderboardKey(val questionnaireId: UUID, val contentId: UUID?)
+
+  private val aliasChangedSink =
+      Sinks.many()
+          .multicast()
+          .onBackpressureBuffer<RoomUserAliasChangedEvent>(Queues.SMALL_BUFFER_SIZE, false)
 
   private val sharedFluxes = ConcurrentHashMap<LeaderboardKey, Flux<List<RawLeaderboardEntry>>>()
 
@@ -55,16 +64,30 @@ class LeaderboardFluxRegistry(
       }
 
   /**
+   * Fed after the commit, so that the recomputation it triggers reads the new alias. Without a
+   * transaction, as for an alias set outside of one, it is fed right away.
+   */
+  @TransactionalEventListener(fallbackExecution = true)
+  fun onRoomUserAliasChanged(event: RoomUserAliasChangedEvent) {
+    val result = aliasChangedSink.tryEmitNext(event)
+    if (result.isFailure) logger.warn("Dropped alias changed event {}: {}", event, result)
+  }
+
+  /**
    * The pipeline unregisters itself once its last subscriber has left, so that questionnaires
    * nobody watches anymore do not accumulate. It removes itself by identity: a replacement created
-   * for the same key in the meantime has to survive.
+   * for the same key in the meantime has to survive. A failure to set the pipeline up still reaches
+   * its subscribers, but the pipeline is unregistered before, so the next subscriber starts over
+   * instead of being handed the failed one.
    */
   private fun createSharedFlux(key: LeaderboardKey): Flux<List<RawLeaderboardEntry>> {
     val registered = AtomicReference<Flux<List<RawLeaderboardEntry>>>()
+    val unregister = { sharedFluxes.remove(key, registered.get()) }
     val shared =
         findRoomId(key.questionnaireId)
+            .doOnError { unregister() }
             .flatMapMany { roomId -> rankings(key, roomId) }
-            .doFinally { sharedFluxes.remove(key, registered.get()) }
+            .doFinally { unregister() }
             .replay(1)
             .refCount()
     registered.set(shared)
@@ -83,6 +106,9 @@ class LeaderboardFluxRegistry(
    * Each trigger decides whether to recompute only once the computations before it are done, so an
    * alias set while the initial ranking is read is checked against that ranking. The events are
    * subscribed to before the initial trigger is emitted, so no change falls between the two.
+   *
+   * A failed computation, e.g. a transient database error or a content deleted meanwhile, is
+   * skipped: ending the stream would end it for every subscriber.
    */
   private fun rankings(key: LeaderboardKey, roomId: UUID): Flux<List<RawLeaderboardEntry>> {
     val lastRanking = AtomicReference<List<RawLeaderboardEntry>>(emptyList())
@@ -94,14 +120,22 @@ class LeaderboardFluxRegistry(
             .sample(LEADERBOARD_UPDATE_SAMPLE_INTERVAL)
             .map { { true } }
     val aliasChanges: Flux<() -> Boolean> =
-        roomUserAliasEventPublisher
-            .aliasChangedFlux()
+        aliasChangedSink
+            .asFlux()
             .filter { event: RoomUserAliasChangedEvent -> event.roomId == roomId }
             .map { event -> { lastRanking.get().any { it.userId == event.userId } } }
     val initial: Mono<() -> Boolean> = Mono.just { true }
     return Flux.merge(sampledChanges, aliasChanges, initial)
-        .concatMap { recompute -> if (recompute()) findLeaderboard(key) else Mono.empty() }
+        .concatMap { recompute ->
+          if (recompute()) findLeaderboard(key).onErrorResume { skipFailed(key, it) }
+          else Mono.empty()
+        }
         .doOnNext { lastRanking.set(it) }
+  }
+
+  private fun skipFailed(key: LeaderboardKey, error: Throwable): Mono<List<RawLeaderboardEntry>> {
+    logger.warn("Skipped a failed leaderboard computation for {}.", key, error)
+    return Mono.empty()
   }
 
   private fun findRoomId(questionnaireId: UUID): Mono<UUID> =

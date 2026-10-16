@@ -15,10 +15,7 @@ interface RoomUserAliasRepository : JpaRepository<RoomUserAlias, UUID> {
 
   fun findByRoomId(roomId: UUID): List<RoomUserAlias>
 
-  /**
-   * Reads the room's aliases without their associated entities. Both of those are eagerly mapped,
-   * so loading the aliases themselves would cost an additional query per participant.
-   */
+  /** Reads the room's aliases as plain values, without managing an entity per participant. */
   @Query(
       "SELECT new net.particify.arsnova.core4.room.RoomUserAliasProjection(" +
           "a.user.id, a.id, a.alias, a.seed) " +

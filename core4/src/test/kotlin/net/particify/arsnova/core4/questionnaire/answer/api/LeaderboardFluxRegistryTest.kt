@@ -6,20 +6,25 @@ package net.particify.arsnova.core4.questionnaire.answer.api
 import java.time.Duration
 import java.util.Optional
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicReference
 import net.particify.arsnova.core4.questionnaire.answer.LeaderboardServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.RawLeaderboardEntry
+import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireRepository
 import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
 import net.particify.arsnova.core4.questionnaire.round.api.AnswerChangedEvent
 import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsEventPublisher
-import net.particify.arsnova.core4.room.RoomUserAliasChangedEvent
-import net.particify.arsnova.core4.room.RoomUserAliasEventPublisher
 import net.particify.arsnova.core4.room.RoomUserAliasProjection
+import net.particify.arsnova.core4.room.event.RoomUserAliasChangedEvent
+import org.jmolecules.event.annotation.DomainEvent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.springframework.dao.TransientDataAccessResourceException
+import org.springframework.transaction.event.TransactionalEventListener
 import reactor.core.Disposable
+import reactor.core.publisher.Flux
 import reactor.test.StepVerifier
 
 private val QUESTIONNAIRE_ID = UUID.randomUUID()
@@ -34,17 +39,12 @@ private val VERIFY_TIMEOUT = Duration.ofSeconds(10)
 
 class LeaderboardFluxRegistryTest {
   private val eventPublisher = RoundStatsEventPublisher()
-  private val aliasEventPublisher = RoomUserAliasEventPublisher()
   private val questionnaireEventPublisher = QuestionnaireEventPublisher()
   private val leaderboardService = Mockito.mock(LeaderboardServiceImpl::class.java)
   private val questionnaireRepository = Mockito.mock(QuestionnaireRepository::class.java)
   private val registry =
       LeaderboardFluxRegistry(
-          eventPublisher,
-          aliasEventPublisher,
-          questionnaireEventPublisher,
-          leaderboardService,
-          questionnaireRepository)
+          eventPublisher, questionnaireEventPublisher, leaderboardService, questionnaireRepository)
   private val ranking = listOf(RawLeaderboardEntry(USER_ID, null, 500, 1, null))
   private val renamed =
       listOf(ranking.single().copy(alias = RoomUserAliasProjection(USER_ID, null, "Beta", null)))
@@ -65,7 +65,7 @@ class LeaderboardFluxRegistryTest {
   }
 
   private fun publishAliasChanged(roomId: UUID, userId: UUID) {
-    aliasEventPublisher.publishAliasChanged(RoomUserAliasChangedEvent(roomId, userId))
+    registry.onRoomUserAliasChanged(RoomUserAliasChangedEvent(roomId, userId))
   }
 
   @Test
@@ -215,6 +215,85 @@ class LeaderboardFluxRegistryTest {
 
     Mockito.verify(leaderboardService, Mockito.times(1))
         .findLeaderboardByQuestionnaireId(QUESTIONNAIRE_ID, null)
+  }
+
+  /** The registry must only see the alias after its commit, and as a declared domain event. */
+  @Test
+  fun shouldReceiveAliasChangesAsDomainEventsAfterTheCommit() {
+    Assertions.assertTrue(
+        RoomUserAliasChangedEvent::class.java.isAnnotationPresent(DomainEvent::class.java))
+    val listener =
+        LeaderboardFluxRegistry::class
+            .java
+            .getMethod("onRoomUserAliasChanged", RoomUserAliasChangedEvent::class.java)
+    Assertions.assertNotNull(listener.getAnnotation(TransactionalEventListener::class.java))
+  }
+
+  /** A failure ending the shared stream would end it for every subscriber of the leaderboard. */
+  @Test
+  fun shouldSkipAFailedComputationAndKeepServingEverySubscriber() {
+    val second = mutableListOf<List<RawLeaderboardEntry>>()
+    var secondSubscription: Disposable? = null
+    StepVerifier.withVirtualTime { registry.leaderboardFlux(QUESTIONNAIRE_ID, null) }
+        .expectSubscription()
+        .expectNext(ranking)
+        .then {
+          secondSubscription =
+              registry.leaderboardFlux(QUESTIONNAIRE_ID, null).subscribe { second.add(it) }
+          Mockito.`when`(
+                  leaderboardService.findLeaderboardByQuestionnaireId(QUESTIONNAIRE_ID, null))
+              .thenThrow(TransientDataAccessResourceException("Connection lost"))
+              .thenReturn(renamed)
+          publishAnswerChanged(QUESTIONNAIRE_ID)
+        }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNoEvent(SAMPLE_INTERVAL)
+        .then { publishAnswerChanged(QUESTIONNAIRE_ID) }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(renamed)
+        .then { secondSubscription?.dispose() }
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+
+    Assertions.assertEquals(listOf(ranking, renamed), second)
+  }
+
+  @Test
+  fun shouldKeepTheStreamAliveWhenTheContentIsDeletedMeanwhile() {
+    val contentId = UUID.randomUUID()
+    Mockito.`when`(leaderboardService.findLeaderboardByQuestionnaireId(QUESTIONNAIRE_ID, contentId))
+        .thenReturn(ranking)
+        .thenThrow(ContentNotFoundException(contentId))
+    StepVerifier.withVirtualTime { registry.leaderboardFlux(QUESTIONNAIRE_ID, contentId) }
+        .expectSubscription()
+        .expectNext(ranking)
+        .then { publishAnswerChanged(QUESTIONNAIRE_ID) }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNoEvent(SAMPLE_INTERVAL)
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
+  /** A failure to set the stream up is passed on, but the next subscriber starts over. */
+  @Test
+  fun shouldNotHandOnAStreamThatFailedToStart() {
+    Mockito.`when`(questionnaireRepository.findById(QUESTIONNAIRE_ID))
+        .thenThrow(TransientDataAccessResourceException("Connection lost"))
+        .thenReturn(Optional.of(Questionnaire(id = QUESTIONNAIRE_ID, roomId = ROOM_ID)))
+    val failed = registry.leaderboardFlux(QUESTIONNAIRE_ID, null)
+    // A subscriber reacting to the error right away must not be handed the failed stream either.
+    val handedOnError = AtomicReference<Flux<List<RawLeaderboardEntry>>>()
+    StepVerifier.create(
+            failed.doOnError {
+              handedOnError.set(registry.leaderboardFlux(QUESTIONNAIRE_ID, null))
+            })
+        .expectError(TransientDataAccessResourceException::class.java)
+        .verify(VERIFY_TIMEOUT)
+    Assertions.assertNotSame(failed, handedOnError.get())
+
+    val retried = registry.leaderboardFlux(QUESTIONNAIRE_ID, null)
+    Assertions.assertNotSame(failed, retried)
+    StepVerifier.create(retried).expectNext(ranking).thenCancel().verify(VERIFY_TIMEOUT)
   }
 
   @Test

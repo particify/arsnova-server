@@ -146,15 +146,12 @@ class LeaderboardServiceImpl(
     val content =
         contentRepository.findByIdOrNull(contentId) ?: throw ContentNotFoundException(contentId)
     val roundId = content.activeRound?.id ?: return emptyMap()
-    return answerRepository
-        .findByRoundId(roundId)
-        .filter { it.auditMetadata.createdBy != null }
-        .associate {
-          it.auditMetadata.createdBy!! to
-              LeaderboardCurrentResult(
-                  points = it.points ?: 0,
-                  durationMs = it.durationMs ?: 0,
-                  correct = it.result == AnswerResultState.CORRECT)
-        }
+    return answerRepository.findLeaderboardProjectionsByRoundId(roundId).associate {
+      it.userId to
+          LeaderboardCurrentResult(
+              points = it.points ?: 0,
+              durationMs = it.durationMs ?: 0,
+              correct = it.result == AnswerResultState.CORRECT)
+    }
   }
 }

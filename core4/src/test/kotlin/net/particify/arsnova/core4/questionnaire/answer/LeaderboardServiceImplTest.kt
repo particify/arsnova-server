@@ -7,7 +7,6 @@ import jakarta.persistence.Tuple
 import java.util.Locale
 import java.util.Optional
 import java.util.UUID
-import net.particify.arsnova.core4.common.AuditMetadataUuidV7
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
@@ -75,12 +74,8 @@ class LeaderboardServiceImplTest {
         .thenReturn(scores)
   }
 
-  private fun answerBy(userId: UUID?, result: AnswerResultState, points: Int?, durationMs: Int?) =
-      Answer(
-          result = result,
-          points = points,
-          durationMs = durationMs,
-          auditMetadata = AuditMetadataUuidV7(createdBy = userId))
+  private fun answerBy(userId: UUID, result: AnswerResultState, points: Int?, durationMs: Int?) =
+      LeaderboardAnswerProjection(userId, points, durationMs, result)
 
   @Test
   fun shouldClampTheLimitToZeroUpToTheMaximum() {
@@ -144,12 +139,11 @@ class LeaderboardServiceImplTest {
     val content =
         Content(id = CONTENT_ID, questionnaire = questionnaire, activeRound = Round(id = ROUND_ID))
     Mockito.`when`(contentRepository.findById(CONTENT_ID)).thenReturn(Optional.of(content))
-    Mockito.`when`(answerRepository.findByRoundId(ROUND_ID))
+    Mockito.`when`(answerRepository.findLeaderboardProjectionsByRoundId(ROUND_ID))
         .thenReturn(
             listOf(
                 answerBy(first, AnswerResultState.CORRECT, 500, 1200),
-                answerBy(second, AnswerResultState.WRONG, null, null),
-                answerBy(null, AnswerResultState.CORRECT, 500, 1)))
+                answerBy(second, AnswerResultState.WRONG, null, null)))
 
     val ranking = service.findLeaderboardByQuestionnaireId(QUESTIONNAIRE_ID, CONTENT_ID)
 
@@ -261,6 +255,6 @@ class LeaderboardServiceImplTest {
     Assertions.assertThrows(ContentNotFoundException::class.java) {
       service.findLeaderboardByQuestionnaireId(QUESTIONNAIRE_ID, CONTENT_ID)
     }
-    Mockito.verify(answerRepository, Mockito.never()).findByRoundId(ROUND_ID)
+    Mockito.verify(answerRepository, Mockito.never()).findLeaderboardProjectionsByRoundId(ROUND_ID)
   }
 }
