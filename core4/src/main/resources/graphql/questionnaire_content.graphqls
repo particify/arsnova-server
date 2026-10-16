@@ -48,6 +48,7 @@ type Content {
   weight: Int
   abstentionsAllowed: Boolean
   hasCorrectAnswer: Boolean
+  hasAnswers: Boolean!
   answerCount: Int
   correctAnswerCount: Int
   abstentionCount: Int

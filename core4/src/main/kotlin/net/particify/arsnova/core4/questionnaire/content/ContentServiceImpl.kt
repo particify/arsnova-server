@@ -126,13 +126,12 @@ class ContentServiceImpl(
   }
 
   /**
-   * Covers every round and hidden answers alike. ContentQueryController.answerCount is not a
-   * substitute: it counts the active round only and excludes hidden answers.
+   * Covers every round and hidden answers alike, as does ContentAnswersFieldController.hasAnswers,
+   * which shares the query. answerCount is not a substitute: it counts the active round only and
+   * excludes hidden answers.
    */
   private fun hasAnswers(contentId: UUID): Boolean =
-      roundService.findByContentIdOrderByRoundNo(contentId).any {
-        answerRepository.existsByRoundId(it.id!!)
-      }
+      contentId in answerRepository.findContentIdsWithAnswers(setOf(contentId))
 
   @Transactional
   override fun deleteByQuestionnaireId(questionnaireId: UUID): Int {
