@@ -40,8 +40,11 @@ constructor(@JsonProperty("correctAnswer") val correctAnswer: Boolean? = null) :
   }
 
   override fun evaluateAnswer(answerFormatData: AnswerFormatData): AnswerResultState {
-    val correct = correctAnswer ?: return AnswerResultState.NEUTRAL
-    val answer = (answerFormatData as BinaryAnswerFormatData).answer
-    return if (answer == correct) AnswerResultState.CORRECT else AnswerResultState.WRONG
+    val answer = (answerFormatData as? BinaryAnswerFormatData)?.answer
+    return when {
+      answer == null || correctAnswer == null -> AnswerResultState.NEUTRAL
+      answer == correctAnswer -> AnswerResultState.CORRECT
+      else -> AnswerResultState.WRONG
+    }
   }
 }

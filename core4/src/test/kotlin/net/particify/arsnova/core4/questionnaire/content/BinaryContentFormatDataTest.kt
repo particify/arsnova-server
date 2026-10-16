@@ -50,6 +50,13 @@ class BinaryContentFormatDataTest {
   }
 
   @Test
+  fun shouldEvaluateStoredAnswerOfOtherFormatAsNeutral() {
+    Assertions.assertEquals(
+        AnswerResultState.NEUTRAL,
+        BinaryContentFormatData(true).evaluateAnswer(ChoiceAnswerFormatData(listOf(0))))
+  }
+
+  @Test
   fun shouldAllowAnyChangeWithoutAnswers() {
     BinaryContentFormatData(false).validateChange(BinaryContentFormatData(true)) { false }
     BinaryContentFormatData(null).validateChange(BinaryContentFormatData(true)) { false }
