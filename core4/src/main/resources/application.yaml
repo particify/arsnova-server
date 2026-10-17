@@ -24,11 +24,6 @@ spring:
   liquibase:
     contexts: default
 
-  threads:
-    virtual:
-      # Virtual threads currently cause issue with security context propagation for GraphQL requests.
-      enabled: false
-
   graphql:
     websocket:
       path: /graphql/ws
