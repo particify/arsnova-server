@@ -172,7 +172,7 @@ ajv@^6.14.0:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-argparse@^3.0.0, argparse@^3.0.3:
+argparse@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/argparse/-/argparse-3.0.3.tgz#2527ed88cbaac60f7d7af28a5cf620a80f07d90b"
   integrity sha512-Sn98ftV3KfsO8xfLPHG6oT8y+b0yvbrLgZjgPDXsharNY15tTAjqIsIju4S32nl6/iEUNNE4v+yL2Zhm8ooP3w==
@@ -481,7 +481,7 @@ enhanced-resolve@^5.17.1:
     graceful-fs "^4.2.4"
     tapable "^2.3.3"
 
-entities@^8.0.0:
+entities@^8.1.0:
   version "8.1.0"
   resolved "https://registry.yarnpkg.com/entities/-/entities-8.1.0.tgz#9632d69619ebdbe0cf0ef22f53088fe5a2163d86"
   integrity sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA==
@@ -1345,7 +1345,7 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-linkify-it@^6.0.0:
+linkify-it@^6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/linkify-it/-/linkify-it-6.1.0.tgz#cd750d70fe9295eb7169e632ee67a4ff43e7f62d"
   integrity sha512-wJ/TwpSDTLepCrQoYWYIExIKg5Zchex2Nn5yk2mFnB+6PtdkHtyLx742md9csRjjOnGkKIS/RrbY7l8D6gT9Vw==
@@ -1371,14 +1371,14 @@ markdown-it-prism@4.0.0:
   dependencies:
     prismjs "1.30.0"
 
-markdown-it@15.0.2:
-  version "15.0.2"
-  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-15.0.2.tgz#5bc092394e9693519f6d5f499d3575469fec62f3"
-  integrity sha512-q4IGxMv56jCqT4OCRCADBoDP3LO4MhmTXjFbphHPXs4g3j9Xg5RDnxqN8IF/3vIWEU+VCnUq+7JUg/cfy2E6Qw==
+markdown-it@15.0.3:
+  version "15.0.3"
+  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-15.0.3.tgz#2a69a26db9abb63340512bfde0c4f4ae6db671eb"
+  integrity sha512-+Az7Ojz3iRGu8KYMvJ6xVhvrxP3eE+vEtJX75Ow88XBpcQNV/0lGX5ZynIIBftREo4DC2jsveAMDaeltmm8QvQ==
   dependencies:
-    argparse "^3.0.0"
-    entities "^8.0.0"
-    linkify-it "^6.0.0"
+    argparse "^3.0.3"
+    entities "^8.1.0"
+    linkify-it "^6.1.0"
     mdurl "^2.1.0"
     punycode.js "^2.3.1"
     uc.micro "^3.0.0"
