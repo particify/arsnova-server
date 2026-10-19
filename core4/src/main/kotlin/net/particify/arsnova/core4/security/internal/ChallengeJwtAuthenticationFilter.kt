@@ -11,16 +11,14 @@ import java.util.regex.Pattern
 import org.springframework.http.HttpHeaders
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
-import org.springframework.web.filter.OncePerRequestFilter
 
 private val BEARER_TOKEN_PATTERN = Pattern.compile("Bearer (.*)", Pattern.CASE_INSENSITIVE)
 
 @Component
 class ChallengeJwtAuthenticationFilter(
     private val challengeAuthenticationProvider: ChallengeAuthenticationProvider
-) : OncePerRequestFilter() {
+) : SecurityContextSavingFilter() {
   override fun doFilterInternal(
       request: HttpServletRequest,
       response: HttpServletResponse,
@@ -41,7 +39,7 @@ class ChallengeJwtAuthenticationFilter(
           challengeAuthenticationProvider.authenticate(authentication)
       if (authenticatedToken != null) {
         logger.debug("Storing JWT to SecurityContext: $authenticatedToken")
-        SecurityContextHolder.getContext().authentication = authenticatedToken
+        saveAuthentication(authenticatedToken, request, response)
       }
     } catch (e: AuthenticationException) {
       logger.debug("Challenge authentication failed", e)
@@ -51,6 +49,6 @@ class ChallengeJwtAuthenticationFilter(
   }
 
   override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-    return SecurityContextHolder.getContext().authentication != null
+    return isAuthenticated()
   }
 }

@@ -11,14 +11,12 @@ import java.util.regex.Pattern
 import org.springframework.http.HttpHeaders
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
-import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 class UserJwtAuthenticationFilter(
     private val userJwtAuthenticationProvider: UserJwtAuthenticationProvider
-) : OncePerRequestFilter() {
+) : SecurityContextSavingFilter() {
   companion object {
     private val BEARER_TOKEN_PATTERN = Pattern.compile("Bearer (.*)", Pattern.CASE_INSENSITIVE)
   }
@@ -42,7 +40,7 @@ class UserJwtAuthenticationFilter(
       val authenticatedToken: Authentication =
           userJwtAuthenticationProvider.authenticate(authentication)
       logger.debug("Storing UserJwtAuthentication to SecurityContext: $authenticatedToken")
-      SecurityContextHolder.getContext().authentication = authenticatedToken
+      saveAuthentication(authenticatedToken, request, response)
     } catch (e: AuthenticationException) {
       logger.debug("User JWT authentication failed", e)
     }
@@ -51,6 +49,6 @@ class UserJwtAuthenticationFilter(
   }
 
   override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-    return SecurityContextHolder.getContext().authentication != null
+    return isAuthenticated()
   }
 }

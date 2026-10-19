@@ -11,9 +11,7 @@ import net.particify.arsnova.core4.security.REFRESH_TOKEN_COOKIE
 import org.springframework.http.HttpHeaders
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
-import org.springframework.web.filter.OncePerRequestFilter
 
 private const val REFRESH_URI = "/auth/refresh"
 
@@ -22,7 +20,7 @@ class RefreshAuthenticationFilter(
     private val authenticationProvider: RefreshJwtAuthenticationProvider,
     private val jwtUtils: JwtUtils,
     servletContext: ServletContext
-) : OncePerRequestFilter() {
+) : SecurityContextSavingFilter() {
   private val contextPath = servletContext.contextPath
 
   override fun doFilterInternal(
@@ -43,7 +41,7 @@ class RefreshAuthenticationFilter(
     try {
       val authenticatedToken: Authentication = authenticationProvider.authenticate(authentication)
       logger.debug("Storing RefreshJwtAuthentication to SecurityContext: $authenticatedToken")
-      SecurityContextHolder.getContext().authentication = authenticatedToken
+      saveAuthentication(authenticatedToken, request, response)
     } catch (e: AuthenticationException) {
       logger.debug("Refresh JWT authentication failed", e)
     }
@@ -52,7 +50,6 @@ class RefreshAuthenticationFilter(
   }
 
   override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-    return request.requestURI != contextPath + REFRESH_URI ||
-        SecurityContextHolder.getContext().authentication != null
+    return request.requestURI != contextPath + REFRESH_URI || isAuthenticated()
   }
 }
