@@ -8,9 +8,9 @@ services:
       # one has to be the entrypoint's writable docker.ini rather than this read-only mount.
       - $ROOT_DIR/.docker/couchdb/custom.ini:/opt/couchdb/etc/local.d/10-custom.ini:ro
   postgresql-authz:
-    image: pgautoupgrade/pgautoupgrade:18-alpine@sha256:0980f46bd1ee8a09166786339b375508ff98ae3d2a00a20fc344c36f6fa75cdc
+    image: pgautoupgrade/pgautoupgrade:18-alpine@sha256:063f895a8ade15b441692d9636effa3dbd544ac0cf61cfb2895c692a5dc2aad9
   postgresql-comments:
-    image: pgautoupgrade/pgautoupgrade:18-alpine@sha256:0980f46bd1ee8a09166786339b375508ff98ae3d2a00a20fc344c36f6fa75cdc
+    image: pgautoupgrade/pgautoupgrade:18-alpine@sha256:063f895a8ade15b441692d9636effa3dbd544ac0cf61cfb2895c692a5dc2aad9
   rabbitmq:
     ports:
       - 15672:15672
