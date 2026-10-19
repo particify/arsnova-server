@@ -8,6 +8,7 @@ import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.MACSigner
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import java.time.Duration
 import java.time.Instant
 import java.time.temporal.TemporalAmount
 import java.util.Date
@@ -16,6 +17,9 @@ import net.particify.arsnova.core4.security.SecurityProperties
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.stereotype.Component
+
+/** How long after its expiry a token is still accepted. */
+val JWT_CLOCK_SKEW: Duration = Duration.ofSeconds(60)
 
 @Component
 class JwtUtils(securityProperties: SecurityProperties, private val jwtDecoder: JwtDecoder?) {

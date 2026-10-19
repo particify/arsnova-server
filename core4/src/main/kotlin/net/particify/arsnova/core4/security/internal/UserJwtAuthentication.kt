@@ -3,6 +3,7 @@
  */
 package net.particify.arsnova.core4.security.internal
 
+import java.time.Instant
 import net.particify.arsnova.core4.user.User
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
@@ -10,7 +11,8 @@ import org.springframework.security.core.GrantedAuthority
 class UserJwtAuthentication(
     private val token: String,
     private var principal: User? = null,
-    grantedAuthorities: Set<GrantedAuthority> = emptySet()
+    grantedAuthorities: Set<GrantedAuthority> = emptySet(),
+    val expiresAt: Instant? = null
 ) : AbstractAuthenticationToken(grantedAuthorities) {
   init {
     isAuthenticated = grantedAuthorities.isNotEmpty()

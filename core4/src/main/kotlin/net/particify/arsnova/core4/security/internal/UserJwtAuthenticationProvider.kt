@@ -36,7 +36,7 @@ class UserJwtAuthenticationProvider(
       if (roomCreationPolicy.mayCreateRooms(user)) {
         authorities = authorities.plus(ROLE_ROOM_CREATOR)
       }
-      return UserJwtAuthentication(token, user, authorities)
+      return UserJwtAuthentication(token, user, authorities, jwt.expiresAt)
     } catch (e: JwtException) {
       throw BadCredentialsException("Invalid JWT", e)
     } catch (e: IllegalArgumentException) {
