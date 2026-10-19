@@ -7,7 +7,11 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.graphql.server.WebGraphQlInterceptor
+import org.springframework.graphql.server.WebGraphQlRequest
+import org.springframework.graphql.server.WebGraphQlResponse
 import org.springframework.graphql.server.WebSocketGraphQlInterceptor
+import org.springframework.graphql.server.WebSocketGraphQlRequest
 import org.springframework.graphql.server.WebSocketSessionInfo
 import org.springframework.http.HttpHeaders
 import org.springframework.security.access.AccessDeniedException
@@ -19,7 +23,8 @@ import reactor.core.publisher.Mono
 
 @Component
 class AuthenticationWebSocketInterceptor(
-    private val userJwtAuthenticationProvider: UserJwtAuthenticationProvider
+    private val userJwtAuthenticationProvider: UserJwtAuthenticationProvider,
+    private val sessionExpiry: WebSocketSessionExpiry
 ) : WebSocketGraphQlInterceptor {
   companion object {
     private val BEARER_TOKEN_PATTERN = Pattern.compile("Bearer (.*)", Pattern.CASE_INSENSITIVE)
@@ -44,10 +49,24 @@ class AuthenticationWebSocketInterceptor(
           userJwtAuthenticationProvider.authenticate(authentication)
       logger.debug("Storing UserJwtAuthentication to session: {}", authenticatedToken)
       SecurityContextHolder.getContext().authentication = authenticatedToken
+      (authenticatedToken as? UserJwtAuthentication)?.expiresAt?.let {
+        sessionExpiry.closeAt(sessionInfo.id, it)
+      }
       Mono.empty()
     } catch (e: AuthenticationException) {
       logger.debug("User JWT authentication failed", e)
       Mono.error(e)
     }
+  }
+
+  override fun intercept(
+      request: WebGraphQlRequest,
+      chain: WebGraphQlInterceptor.Chain
+  ): Mono<WebGraphQlResponse> {
+    if (request is WebSocketGraphQlRequest &&
+        sessionExpiry.closeIfExpired(request.sessionInfo.id)) {
+      return Mono.empty()
+    }
+    return chain.next(request)
   }
 }
