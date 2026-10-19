@@ -26,6 +26,7 @@ spring:
 
   graphql:
     websocket:
+      keep-alive: 30s
       path: /graphql/ws
 
   rabbitmq:
