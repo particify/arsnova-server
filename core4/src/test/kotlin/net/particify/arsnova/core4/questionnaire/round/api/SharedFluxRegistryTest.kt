@@ -95,4 +95,31 @@ class SharedFluxRegistryTest {
         .thenCancel()
         .verify(VERIFY_TIMEOUT)
   }
+
+  /**
+   * Without replay, a joiner is handed nothing computed before it joined. Its joining calls for a
+   * recomputation, which every subscriber shares.
+   */
+  @Test
+  fun shouldHandAJoinerOnlyWhatIsComputedAfterItJoinedUnlessReplaying() {
+    val unreplayed =
+        SharedFluxRegistry<String, Int>(SAMPLE_INTERVAL, replayToJoiners = false) {
+          changes.asFlux()
+        }
+    val compute = computation(1, 2)
+    val joiner = mutableListOf<Int>()
+    StepVerifier.withVirtualTime { unreplayed.flux(KEY, compute) }
+        .expectSubscription()
+        .expectNext(1)
+        .then {
+          unreplayed.flux(KEY, compute).subscribe { joiner.add(it) }
+          Assertions.assertEquals(emptyList<Int>(), joiner)
+        }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(2)
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+
+    Assertions.assertEquals(listOf(2), joiner)
+  }
 }
