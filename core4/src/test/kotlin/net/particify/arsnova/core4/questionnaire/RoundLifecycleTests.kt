@@ -143,6 +143,7 @@ class RoundLifecycleTests {
     val reopened = startLiveContent(content.id!!)
     Assertions.assertNull(reopened.answeringExpiredAt)
     val answer = answerService.createAnswer(reopened.id!!, ChoiceAnswerFormatData(listOf(0)))
-    Assertions.assertEquals(Content.BASE_POINTS, answer.points)
+    // Weighted by answering speed, so anything above the base value proves the answer scored.
+    Assertions.assertTrue(answer.points!! >= Content.BASE_POINTS)
   }
 }

@@ -94,6 +94,9 @@ Events::
 A module which reacts to something happening in another module listens to that module's events.
 For example, `qna` creates and deletes a room's Q&A in response to `room` events.
 The publishing module knows nothing about its listeners.
+This holds for live updates as well:
+`questionnaire` refreshes its leaderboard subscriptions on `room`'s `RoomUserAliasChangedEvent`,
+received with `@TransactionalEventListener` so that it reads the committed alias.
 
 Exposed services::
 For synchronous calls, a module exposes a service interface in its base package

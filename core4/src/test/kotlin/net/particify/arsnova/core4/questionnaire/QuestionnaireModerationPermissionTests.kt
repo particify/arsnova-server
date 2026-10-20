@@ -3,8 +3,10 @@
  */
 package net.particify.arsnova.core4.questionnaire
 
+import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
+import net.particify.arsnova.core4.questionnaire.answer.api.LeaderboardQueryController
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
@@ -49,6 +51,7 @@ private const val EXTERNALIZATION_PROPERTY = "spring.modulith.events.externaliza
 class QuestionnaireModerationPermissionTests {
   @Autowired lateinit var contentQueryController: ContentQueryController
   @Autowired lateinit var contentService: ContentServiceImpl
+  @Autowired lateinit var leaderboardQueryController: LeaderboardQueryController
   @Autowired lateinit var membershipService: MembershipServiceImpl
   @Autowired lateinit var questionnaireQueryController: QuestionnaireQueryController
   @Autowired lateinit var questionnaireService: QuestionnaireServiceImpl
@@ -88,11 +91,12 @@ class QuestionnaireModerationPermissionTests {
   }
 
   /** Created after the questionnaire, so that auditing saw the owner as its creator. */
-  private fun authenticateMember(role: RoomRole) {
+  private fun authenticateMember(role: RoomRole): User {
     val user = userService.createAccount()
     membershipService.save(
         Membership(room = Room(id = ROOM_ID), user = User(id = user.id), role = role))
     authenticate(user)
+    return user
   }
 
   private fun roundId(): UUID = content.activeRound!!.id!!
@@ -155,6 +159,24 @@ class QuestionnaireModerationPermissionTests {
     }
     Assertions.assertThrows(AccessDeniedException::class.java) {
       contentQueryController.questionnaireContentById(content.id!!)
+    }
+  }
+
+  /** The fixture's questionnaire does not enable the leaderboard for participants. */
+  @Test
+  fun shouldLetModeratorSeeTheLeaderboardParticipantsCannot() {
+    val moderator = authenticateMember(RoomRole.MODERATOR)
+    Assertions.assertNotNull(
+        leaderboardQueryController.questionnaireLeaderboardByQuestionnaireId(
+            questionnaire.id!!, null, null, moderator, Locale.ENGLISH))
+  }
+
+  @Test
+  fun shouldNotLetParticipantSeeADisabledLeaderboard() {
+    val participant = authenticateMember(RoomRole.PARTICIPANT)
+    Assertions.assertThrows(AccessDeniedException::class.java) {
+      leaderboardQueryController.questionnaireLeaderboardByQuestionnaireId(
+          questionnaire.id!!, null, null, participant, Locale.ENGLISH)
     }
   }
 }

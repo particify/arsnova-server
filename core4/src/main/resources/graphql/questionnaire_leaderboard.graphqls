@@ -1,0 +1,36 @@
+extend type Query {
+  questionnaireLeaderboardByQuestionnaireId(
+    questionnaireId: UUID!
+    contentId: UUID
+    limit: Int
+  ): LeaderboardPage!
+}
+
+extend type Subscription {
+  questionnaireLeaderboardUpdated(
+    questionnaireId: UUID!
+    contentId: UUID
+    limit: Int
+  ): LeaderboardPage!
+}
+
+type LeaderboardPage {
+  entries: [LeaderboardEntry!]!
+  "The requesting user's own entry, set only if it is not part of the entries above."
+  ownEntry: LeaderboardEntry
+  totalCount: Int!
+}
+
+type LeaderboardEntry {
+  userAlias: RoomUserAlias
+  score: Int!
+  "Equal scores share a position; the next distinct score continues after all of them."
+  position: Int!
+  currentResult: LeaderboardCurrentResult
+}
+
+type LeaderboardCurrentResult {
+  points: Int!
+  durationMs: Int!
+  correct: Boolean!
+}

@@ -1,0 +1,131 @@
+/* Copyright 2026 Particify GmbH
+ * SPDX-License-Identifier: MIT
+ */
+package net.particify.arsnova.core4.questionnaire.answer.api
+
+import java.util.Locale
+import java.util.UUID
+import net.particify.arsnova.core4.questionnaire.answer.LeaderboardPage
+import net.particify.arsnova.core4.questionnaire.answer.LeaderboardServiceImpl
+import net.particify.arsnova.core4.questionnaire.answer.RawLeaderboardEntry
+import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
+import net.particify.arsnova.core4.user.User
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.mockito.Mockito
+import org.springframework.security.access.PermissionEvaluator
+import org.springframework.security.authentication.TestingAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
+import reactor.core.publisher.Flux
+import reactor.test.StepVerifier
+
+private val QUESTIONNAIRE_ID = UUID.randomUUID()
+private val CONTENT_ID = UUID.randomUUID()
+private val LOCALE = Locale.of("de")
+private const val LIMIT = 5
+
+class LeaderboardSubscriptionControllerTest {
+  private val registry = Mockito.mock(LeaderboardFluxRegistry::class.java)
+  private val leaderboardService = Mockito.mock(LeaderboardServiceImpl::class.java)
+  private val permissionEvaluator = Mockito.mock(PermissionEvaluator::class.java)
+  private val controller =
+      LeaderboardSubscriptionController(registry, leaderboardService, permissionEvaluator)
+  private val authentication = TestingAuthenticationToken("participant", null, "ROLE_USER")
+
+  @BeforeEach
+  fun authenticate() {
+    SecurityContextHolder.getContext().authentication = authentication
+    Mockito.`when`(leaderboardPermission()).thenReturn(true)
+  }
+
+  @AfterEach
+  fun clearAuthentication() {
+    SecurityContextHolder.clearContext()
+  }
+
+  private fun leaderboardPermission() =
+      permissionEvaluator.hasPermission(
+          authentication, QUESTIONNAIRE_ID, "Questionnaire", "readLeaderboard")
+
+  /**
+   * The questionnaire can be unpublished, or its leaderboard disabled, while subscribed. The
+   * context is cleared before subscribing, as emissions run without it.
+   */
+  @Test
+  fun shouldStopEmittingOnceLeaderboardIsNoLongerReadable() {
+    val user = User(id = UUID.randomUUID())
+    val first = listOf(RawLeaderboardEntry(user.id!!, null, 500, 1, null))
+    val second = listOf<RawLeaderboardEntry>()
+    val firstPage = LeaderboardPage(listOf(), null, 1)
+    Mockito.`when`(registry.leaderboardFlux(QUESTIONNAIRE_ID, null))
+        .thenReturn(Flux.just(first, second))
+    Mockito.`when`(leaderboardService.toPage(first, user.id, LIMIT, LOCALE, false))
+        .thenReturn(firstPage)
+    Mockito.`when`(leaderboardPermission()).thenReturn(true, false)
+    val updates =
+        controller.questionnaireLeaderboardUpdated(QUESTIONNAIRE_ID, null, LIMIT, user, LOCALE)
+    SecurityContextHolder.clearContext()
+
+    StepVerifier.create(updates).expectNext(firstPage).verifyComplete()
+    Mockito.verify(leaderboardService, Mockito.never())
+        .toPage(second, user.id, LIMIT, LOCALE, false)
+  }
+
+  @Test
+  fun shouldCutEachSharedRankingToThePageOfTheSubscriber() {
+    val user = User(id = UUID.randomUUID())
+    val first = listOf(RawLeaderboardEntry(user.id!!, null, 500, 1, null))
+    val second = listOf<RawLeaderboardEntry>()
+    val firstPage = LeaderboardPage(listOf(), null, 1)
+    val secondPage = LeaderboardPage(listOf(), null, 0)
+    Mockito.`when`(registry.leaderboardFlux(QUESTIONNAIRE_ID, CONTENT_ID))
+        .thenReturn(Flux.just(first, second))
+    Mockito.`when`(leaderboardService.toPage(first, user.id, LIMIT, LOCALE, false))
+        .thenReturn(firstPage)
+    Mockito.`when`(leaderboardService.toPage(second, user.id, LIMIT, LOCALE, false))
+        .thenReturn(secondPage)
+
+    StepVerifier.create(
+            controller.questionnaireLeaderboardUpdated(
+                QUESTIONNAIRE_ID, CONTENT_ID, LIMIT, user, LOCALE))
+        .expectNext(firstPage, secondPage)
+        .verifyComplete()
+  }
+
+  /**
+   * The emissions run without a security context, so whether the subscriber may see unpublished
+   * results has to be decided when subscribing and applied to every page.
+   */
+  @Test
+  fun shouldApplyTheResultVisibilityOfTheSubscriberToEveryPage() {
+    val user = User(id = UUID.randomUUID())
+    val ranking = listOf(RawLeaderboardEntry(user.id!!, null, 500, 1, null))
+    val page = LeaderboardPage(listOf(), null, 1)
+    Mockito.`when`(leaderboardService.maySeeUnpublishedResults(QUESTIONNAIRE_ID, CONTENT_ID))
+        .thenReturn(true)
+    Mockito.`when`(registry.leaderboardFlux(QUESTIONNAIRE_ID, CONTENT_ID))
+        .thenReturn(Flux.just(ranking, ranking))
+    Mockito.`when`(leaderboardService.toPage(ranking, user.id, LIMIT, LOCALE, true))
+        .thenReturn(page)
+
+    StepVerifier.create(
+            controller.questionnaireLeaderboardUpdated(
+                QUESTIONNAIRE_ID, CONTENT_ID, LIMIT, user, LOCALE))
+        .expectNext(page, page)
+        .verifyComplete()
+    Mockito.verify(leaderboardService).maySeeUnpublishedResults(QUESTIONNAIRE_ID, CONTENT_ID)
+  }
+
+  @Test
+  fun shouldRejectAContentOfAnotherQuestionnaireBeforeSubscribing() {
+    Mockito.`when`(leaderboardService.requireContentOfQuestionnaire(QUESTIONNAIRE_ID, CONTENT_ID))
+        .thenThrow(ContentNotFoundException(CONTENT_ID))
+    Assertions.assertThrows(ContentNotFoundException::class.java) {
+      controller.questionnaireLeaderboardUpdated(
+          QUESTIONNAIRE_ID, CONTENT_ID, LIMIT, User(id = UUID.randomUUID()), LOCALE)
+    }
+    Mockito.verifyNoInteractions(registry)
+  }
+}

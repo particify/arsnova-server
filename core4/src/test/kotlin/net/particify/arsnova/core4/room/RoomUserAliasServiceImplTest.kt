@@ -7,6 +7,7 @@ import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.common.util.YamlPropertiesLoader
 import net.particify.arsnova.core4.common.exception.InvalidInputException
+import net.particify.arsnova.core4.room.event.RoomUserAliasChangedEvent
 import net.particify.arsnova.core4.room.internal.AliasWordsProperties
 import net.particify.arsnova.core4.room.internal.RoomUserAliasGenerator
 import net.particify.arsnova.core4.room.internal.RoomUserAliasRepository
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 import org.springframework.beans.factory.config.YamlMapFactoryBean
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.core.io.ClassPathResource
 import org.springframework.dao.DataIntegrityViolationException
@@ -30,9 +32,10 @@ private const val DONKEY_SEED = 2
 
 class RoomUserAliasServiceImplTest {
   private val repository = Mockito.mock(RoomUserAliasRepository::class.java)
+  private val eventPublisher = Mockito.mock(ApplicationEventPublisher::class.java)
   private val service =
       RoomUserAliasServiceImpl(
-          repository, RoomUserAliasGenerator(loadAliasWords(), messageSource()))
+          repository, RoomUserAliasGenerator(loadAliasWords(), messageSource()), eventPublisher)
 
   init {
     Mockito.`when`(repository.saveAndFlush(Mockito.any(RoomUserAlias::class.java))).thenAnswer {
@@ -81,6 +84,7 @@ class RoomUserAliasServiceImplTest {
       service.set(ROOM_ID, USER_ID, "Captain", null, ENGLISH)
     }
     Mockito.verify(repository, Mockito.never()).saveAndFlush(Mockito.any())
+    Mockito.verifyNoInteractions(eventPublisher)
   }
 
   @Test
@@ -92,6 +96,13 @@ class RoomUserAliasServiceImplTest {
     Assertions.assertThrows(InvalidInputException::class.java) {
       service.set(ROOM_ID, USER_ID, "Captain", null, ENGLISH)
     }
+  }
+
+  @Test
+  fun shouldAnnounceASetAliasForTheRoomAndUser() {
+    givenStored(null)
+    service.set(ROOM_ID, USER_ID, "Captain", null, ENGLISH)
+    Mockito.verify(eventPublisher).publishEvent(RoomUserAliasChangedEvent(ROOM_ID, USER_ID))
   }
 
   @Test
@@ -153,6 +164,30 @@ class RoomUserAliasServiceImplTest {
     val set = service.set(ROOM_ID, USER_ID, null, null, ENGLISH)
     Assertions.assertNotNull(set.seed)
     Assertions.assertFalse(set.alias.isNullOrBlank())
+  }
+
+  @Test
+  fun shouldMapTheRoomsAliasesByUser() {
+    val first = RoomUserAliasProjection(USER_ID, UUID.randomUUID(), "Captain", 1)
+    val second = RoomUserAliasProjection(UUID.randomUUID(), UUID.randomUUID(), null, DONKEY_SEED)
+    Mockito.`when`(repository.findProjectedByRoomId(ROOM_ID)).thenReturn(listOf(first, second))
+    Assertions.assertEquals(
+        mapOf(first.userId to first, second.userId to second),
+        service.findAliasMappingsByRoomId(ROOM_ID))
+  }
+
+  @Test
+  fun shouldLocalizeOnlyGeneratedProjections() {
+    val explicit = RoomUserAliasProjection(USER_ID, UUID.randomUUID(), "Captain", 1)
+    val generated = RoomUserAliasProjection(USER_ID, UUID.randomUUID(), null, DONKEY_SEED)
+    val explicitAlias = service.localize(explicit, GERMAN)
+    val generatedAlias = service.localize(generated, GERMAN)
+    Assertions.assertEquals(
+        listOf(explicit.id, "Captain", 1),
+        listOf(explicitAlias.id, explicitAlias.alias, explicitAlias.seed))
+    Assertions.assertEquals(
+        listOf(generated.id, "Fleißiger Esel", DONKEY_SEED),
+        listOf(generatedAlias.id, generatedAlias.alias, generatedAlias.seed))
   }
 
   private fun messageSource(): ReloadableResourceBundleMessageSource {
