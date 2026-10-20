@@ -9,6 +9,7 @@ import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
+import net.particify.arsnova.core4.questionnaire.content.SlideContentFormatData
 import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
 import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnairesChangedEvent
 import net.particify.arsnova.core4.questionnaire.round.Round
@@ -16,6 +17,8 @@ import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+
+private const val DURATION = 60
 
 class QuestionnairePublishingServiceImplTest {
   private val contentRepository = Mockito.mock(ContentRepository::class.java)
@@ -49,7 +52,8 @@ class QuestionnairePublishingServiceImplTest {
     Mockito.`when`(contentRepository.save(Mockito.any(Content::class.java))).thenAnswer {
       it.arguments[0]
     }
-    Mockito.`when`(questionnaireRepository.save(questionnaire)).thenReturn(questionnaire)
+    Mockito.`when`(questionnaireRepository.save(Mockito.any(Questionnaire::class.java)))
+        .thenAnswer { it.arguments[0] }
     Mockito.`when`(questionnaireRepository.findById(questionnaire.id!!))
         .thenReturn(Optional.of(questionnaire))
     questionnaireEventPublisher.questionnairesChangedFlux().subscribe { listChanges.add(it) }
@@ -147,5 +151,29 @@ class QuestionnairePublishingServiceImplTest {
     val second = questionnaire.contents[1]
     publishingService.publishUpToContent(questionnaire.id!!, second.id!!)
     Assertions.assertSame(second, questionnaire.publishedUpToContent)
+  }
+
+  @Test
+  fun shouldPresentSlideWithoutOpeningAnswering() {
+    val questionnaire =
+        Questionnaire(id = UUID.randomUUID(), publishingMode = QuestionnairePublishingMode.LIVE)
+    val slide =
+        Content(
+            id = UUID.randomUUID(),
+            questionnaire = questionnaire,
+            formatData = SlideContentFormatData(),
+            duration = DURATION,
+            activeRound = Round(closed = true))
+    questionnaire.contents.add(slide)
+    Mockito.`when`(contentRepository.findById(slide.id!!)).thenReturn(Optional.of(slide))
+
+    val updated = publishingService.startLiveContent(slide.id!!)
+
+    val round = updated.activeRound!!
+    Assertions.assertSame(slide, updated.publishedUpToContent)
+    Assertions.assertSame(slide.activeRound, round)
+    Assertions.assertTrue(round.closed)
+    Assertions.assertNull(round.answeringEndTime)
+    Assertions.assertFalse(round.acceptsAnswers())
   }
 }

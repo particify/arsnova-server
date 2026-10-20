@@ -7,6 +7,8 @@ import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
+import net.particify.arsnova.core4.questionnaire.content.FlashcardContentFormatData
+import net.particify.arsnova.core4.questionnaire.content.SlideContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
@@ -47,6 +49,38 @@ class ContentMutationController(
         input.duration,
         input.abstentionsAllowed,
         input.weight)
+  }
+
+  @MutationMapping
+  @PreAuthorize("hasPermission(#input.questionnaireId, 'Questionnaire', 'write')")
+  fun createQuestionnaireFlashcardContent(@Argument input: CreateFlashcardContentInput): Content {
+    return contentService.create(
+        input.questionnaireId,
+        input.body,
+        FlashcardContentFormatData(input.answer),
+        null,
+        false,
+        null)
+  }
+
+  @MutationMapping
+  @PreAuthorize("hasPermission(#input.id, 'Content', 'write')")
+  fun updateQuestionnaireFlashcardContent(@Argument input: UpdateFlashcardContentInput): Content {
+    return contentService.update(
+        input.id, input.body, FlashcardContentFormatData(input.answer), null, false, null)
+  }
+
+  @MutationMapping
+  @PreAuthorize("hasPermission(#input.questionnaireId, 'Questionnaire', 'write')")
+  fun createQuestionnaireSlideContent(@Argument input: CreateSlideContentInput): Content {
+    return contentService.create(
+        input.questionnaireId, input.body, SlideContentFormatData(), null, false, null)
+  }
+
+  @MutationMapping
+  @PreAuthorize("hasPermission(#input.id, 'Content', 'write')")
+  fun updateQuestionnaireSlideContent(@Argument input: UpdateSlideContentInput): Content {
+    return contentService.update(input.id, input.body, SlideContentFormatData(), null, false, null)
   }
 
   @MutationMapping

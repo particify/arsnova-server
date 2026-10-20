@@ -11,6 +11,7 @@ import net.particify.arsnova.core4.questionnaire.content.AnswerOption
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
+import net.particify.arsnova.core4.questionnaire.content.FlashcardContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.questionnaire.round.Round
@@ -59,6 +60,11 @@ class ContentQueryController(
   @SchemaMapping(typeName = "Content")
   fun activeRound(content: Content): Round? {
     return roundService.findByContentIdOrderByRoundNo(content.id!!).lastOrNull()
+  }
+
+  @SchemaMapping(typeName = "FlashcardContentFormatData")
+  fun answerRendered(formatData: FlashcardContentFormatData): String? {
+    return textRenderingService.renderText(formatData.answer)
   }
 
   @SchemaMapping(typeName = "ChoiceContentFormatData")

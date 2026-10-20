@@ -17,7 +17,11 @@ class ContentFormatDataEqualityTest {
   private fun formatDataOfEveryFormat(): List<ContentFormatData> {
     val wordcloud = WordcloudContentFormatData(4)
     wordcloud.addBannedKeyword("spam")
-    return listOf(ChoiceContentFormatData(listOf("A", "B"), listOf(1), true), wordcloud)
+    return listOf(
+        ChoiceContentFormatData(listOf("A", "B"), listOf(1), true),
+        FlashcardContentFormatData("Back"),
+        SlideContentFormatData(),
+        wordcloud)
   }
 
   @Test

@@ -18,6 +18,10 @@ extend type Mutation {
     questionnaireId: UUID!
   ): Content
   createQuestionnaireChoiceContent(input: CreateChoiceContentInput!): Content
+  createQuestionnaireFlashcardContent(
+    input: CreateFlashcardContentInput!
+  ): Content
+  createQuestionnaireSlideContent(input: CreateSlideContentInput!): Content
   createQuestionnaireWordcloudContent(
     input: CreateWordcloudContentInput!
   ): Content
@@ -29,6 +33,10 @@ extend type Mutation {
   ): Content
   resetBannedQuestionnaireWordcloudContentKeywords(contentId: UUID!): Content
   updateQuestionnaireChoiceContent(input: UpdateChoiceContentInput!): Content
+  updateQuestionnaireFlashcardContent(
+    input: UpdateFlashcardContentInput!
+  ): Content
+  updateQuestionnaireSlideContent(input: UpdateSlideContentInput!): Content
   updateQuestionnaireWordcloudContent(
     input: UpdateWordcloudContentInput!
   ): Content
@@ -66,7 +74,9 @@ type ContentWithAnswer {
 
 union ContentFormatData =
   | ChoiceContentFormatData
+  | FlashcardContentFormatData
   | ScaleContentFormatData
+  | SlideContentFormatData
   | TextContentFormatData
   | WordcloudContentFormatData
 
@@ -82,7 +92,17 @@ type AnswerOption {
   labelRendered: String
 }
 
+type FlashcardContentFormatData {
+  format: ContentType!
+  answer: String!
+  answerRendered: String
+}
+
 type ScaleContentFormatData {
+  format: ContentType!
+}
+
+type SlideContentFormatData {
   format: ContentType!
 }
 
@@ -129,6 +149,28 @@ input UpdateChoiceContentInput {
   duration: Int
   weight: Int
   abstentionsAllowed: Boolean
+}
+
+input CreateFlashcardContentInput {
+  questionnaireId: UUID!
+  body: String!
+  answer: String!
+}
+
+input UpdateFlashcardContentInput {
+  id: UUID!
+  body: String!
+  answer: String!
+}
+
+input CreateSlideContentInput {
+  questionnaireId: UUID!
+  body: String!
+}
+
+input UpdateSlideContentInput {
+  id: UUID!
+  body: String!
 }
 
 input UpdateWordcloudContentInput {
