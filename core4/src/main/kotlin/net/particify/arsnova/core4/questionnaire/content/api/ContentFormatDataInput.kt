@@ -3,6 +3,7 @@
  */
 package net.particify.arsnova.core4.questionnaire.content.api
 
+import net.particify.arsnova.core4.questionnaire.content.BinaryContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
@@ -14,6 +15,7 @@ import net.particify.arsnova.core4.questionnaire.content.TextContentFormatData
 import org.springframework.data.web.ProjectedPayload
 
 data class ContentFormatDataInput(
+    val binary: BinaryContentFormatDataInput?,
     val choice: ChoiceContentFormatDataInput?,
     val numeric: NumericContentFormatDataInput?,
     val prioritization: PrioritizationContentFormatDataInput?,
@@ -25,6 +27,7 @@ data class ContentFormatDataInput(
 
   fun toFormatData(): ContentFormatData {
     return when {
+      binary != null -> BinaryContentFormatData(binary.correctAnswer)
       choice != null ->
           ChoiceContentFormatData(choice.choices, choice.correctOptionIndexes, choice.multiple)
       numeric != null ->
@@ -37,6 +40,11 @@ data class ContentFormatDataInput(
       text != null -> TextContentFormatData(text.answersPublished)
       else -> error("No FormatData available.")
     }
+  }
+
+  @ProjectedPayload
+  interface BinaryContentFormatDataInput {
+    val correctAnswer: Boolean?
   }
 
   @ProjectedPayload

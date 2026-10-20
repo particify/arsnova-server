@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentPermissionEvaluator
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
+import net.particify.arsnova.core4.questionnaire.round.BinaryContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.NumericContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.PrioritizationContentRoundStats
@@ -54,6 +55,11 @@ class RoundStatsSubscriptionController(
       SharedFluxRegistry<StatsKey, StatsEmission>(STATS_UPDATE_SAMPLE_INTERVAL) { key ->
         roundStatsEventPublisher.answerChangedFlux().filter { it.roundId == key.roundId }
       }
+
+  @SubscriptionMapping
+  @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
+  fun questionnaireBinaryRoundStatsUpdated(@Argument roundId: UUID): Flux<BinaryContentRoundStats> =
+      statsFlux(roundId) { roundStatsServiceImpl.getBinaryRoundStatsByRoundId(roundId) }
 
   @SubscriptionMapping
   @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")

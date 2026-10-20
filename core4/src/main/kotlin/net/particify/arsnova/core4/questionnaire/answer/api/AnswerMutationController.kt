@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.questionnaire.answer.api
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.answer.Answer
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
+import net.particify.arsnova.core4.questionnaire.answer.BinaryAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.PrioritizationAnswerFormatData
@@ -24,6 +25,14 @@ import org.springframework.stereotype.Controller
 @PreAuthorize("hasRole('USER')")
 @SchemaMapping(typeName = "Mutation")
 class AnswerMutationController(private val answerService: AnswerServiceImpl) {
+  @MutationMapping
+  @PreAuthorize("hasPermission(#input.roundId, 'Round', 'read')")
+  fun createQuestionnaireBinaryAnswer(
+      @Argument input: CreateBinaryAnswerInput,
+  ): Answer {
+    return answerService.createAnswer(input.roundId, BinaryAnswerFormatData(input.answer))
+  }
+
   @MutationMapping
   @PreAuthorize("hasPermission(#input.roundId, 'Round', 'read')")
   fun createQuestionnaireChoiceAnswer(

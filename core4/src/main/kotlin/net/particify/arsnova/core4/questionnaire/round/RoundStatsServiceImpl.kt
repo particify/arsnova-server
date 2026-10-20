@@ -10,6 +10,7 @@ import kotlin.String
 import kotlin.math.pow
 import kotlin.math.sqrt
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
+import net.particify.arsnova.core4.questionnaire.answer.BinaryAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.PrioritizationAnswerFormatData
@@ -17,6 +18,7 @@ import net.particify.arsnova.core4.questionnaire.answer.ScaleAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ShortAnswerAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.SortAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.content.BinaryContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.PrioritizationContentFormatData
@@ -39,6 +41,19 @@ class RoundStatsServiceImpl(
     private val answerServiceImpl: AnswerServiceImpl,
     private val solutionVisibility: SolutionVisibility
 ) {
+  @Transactional
+  fun getBinaryRoundStatsByRoundId(roundId: UUID): BinaryContentRoundStats {
+    val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
+    if (round.content?.formatData !is BinaryContentFormatData) {
+      throw ContentFormatDataInvalidException("Content is not a binary content")
+    }
+    val answers =
+        answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId).mapNotNull {
+          (it.formatData as? BinaryAnswerFormatData)?.answer
+        }
+    return BinaryContentRoundStats(listOf(answers.count { it }, answers.count { !it }))
+  }
+
   @Transactional
   fun getChoiceRoundStatsByRoundId(roundId: UUID): ChoiceContentRoundStats {
     val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)

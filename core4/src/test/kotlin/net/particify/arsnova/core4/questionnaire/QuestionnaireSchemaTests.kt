@@ -37,6 +37,7 @@ class QuestionnaireSchemaTests {
   @Test
   fun shouldRequireTheArgumentsTheResolversCannotDoWithout() {
     assertRequired(mutation("createQuestionnaire"), "input")
+    assertRequired(mutation("createQuestionnaireBinaryAnswer"), "input")
     assertRequired(mutation("createQuestionnaireChoiceAnswer"), "input")
     assertRequired(mutation("createQuestionnaireNumericAnswer"), "input")
     assertRequired(mutation("createQuestionnairePrioritizationAnswer"), "input")
@@ -47,6 +48,7 @@ class QuestionnaireSchemaTests {
     assertRequired(mutation("createQuestionnaireWordcloudAnswer"), "input")
     assertRequired(mutation("createQuestionnaireAbstention"), "roundId")
     assertRequired(mutation("deleteQuestionnaireAnswersByContentId"), "contentId")
+    assertRequired(mutation("createQuestionnaireBinaryContent"), "input")
     assertRequired(mutation("createQuestionnaireChoiceContent"), "input")
     assertRequired(mutation("createQuestionnaireFlashcardContent"), "input")
     assertRequired(mutation("createQuestionnaireNumericContent"), "input")
@@ -57,6 +59,7 @@ class QuestionnaireSchemaTests {
     assertRequired(mutation("createQuestionnaireSortContent"), "input")
     assertRequired(mutation("createQuestionnaireTextContent"), "input")
     assertRequired(mutation("createQuestionnaireWordcloudContent"), "input")
+    assertRequired(mutation("updateQuestionnaireBinaryContent"), "input")
     assertRequired(mutation("updateQuestionnaireChoiceContent"), "input")
     assertRequired(mutation("updateQuestionnaireFlashcardContent"), "input")
     assertRequired(mutation("updateQuestionnaireNumericContent"), "input")

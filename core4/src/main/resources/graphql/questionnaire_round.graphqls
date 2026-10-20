@@ -1,5 +1,8 @@
 extend type Query {
   questionnaireRoundsByContentId(contentId: UUID!): [Round!]
+  questionnaireBinaryRoundStatsByRoundId(
+    roundId: UUID!
+  ): BinaryContentRoundStats
   questionnaireChoiceRoundStatsByRoundId(
     roundId: UUID!
   ): ChoiceContentRoundStats
@@ -24,6 +27,7 @@ extend type Mutation {
 }
 
 extend type Subscription {
+  questionnaireBinaryRoundStatsUpdated(roundId: UUID!): BinaryContentRoundStats
   questionnaireChoiceRoundStatsUpdated(roundId: UUID!): ChoiceContentRoundStats
   questionnaireNumericRoundStatsUpdated(
     roundId: UUID!
@@ -49,6 +53,10 @@ type Round {
   started: Boolean!
   answeringEndTime: DateTime
   answerable: Boolean!
+}
+
+type BinaryContentRoundStats {
+  selectionCounts: [Int!]
 }
 
 type ChoiceContentRoundStats {

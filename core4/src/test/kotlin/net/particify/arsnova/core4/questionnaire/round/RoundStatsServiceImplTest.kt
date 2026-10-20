@@ -8,6 +8,7 @@ import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.answer.Answer
 import net.particify.arsnova.core4.questionnaire.answer.AnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
+import net.particify.arsnova.core4.questionnaire.answer.BinaryAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.PrioritizationAnswerFormatData
@@ -15,6 +16,7 @@ import net.particify.arsnova.core4.questionnaire.answer.ScaleAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ShortAnswerAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.SortAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.content.BinaryContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
@@ -559,6 +561,44 @@ class RoundStatsServiceImplTest {
     givenRound(WordcloudContentFormatData())
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
       roundStatsService.getPrioritizationRoundStatsByRoundId(ROUND_ID)
+    }
+  }
+
+  private fun binaryCounts(vararg answers: Boolean?): List<Int> {
+    val formatData = answers.map { it?.let { answer -> BinaryAnswerFormatData(answer) } }
+    givenRound(BinaryContentFormatData(true), *formatData.toTypedArray())
+    return roundStatsService.getBinaryRoundStatsByRoundId(ROUND_ID).selectionCounts
+  }
+
+  @Test
+  fun shouldCountYesBeforeNo() {
+    Assertions.assertEquals(listOf(2, 1), binaryCounts(true, false, true))
+  }
+
+  @Test
+  fun shouldIgnoreAbstentionsInBinaryCounts() {
+    Assertions.assertEquals(listOf(0, 1), binaryCounts(null, false))
+    Assertions.assertEquals(listOf(0, 0), binaryCounts())
+  }
+
+  @Test
+  fun shouldLeaveHiddenAnswersOutOfBinaryCounts() {
+    givenRound(BinaryContentFormatData(true))
+    val visible = Answer(formatData = BinaryAnswerFormatData(true))
+    val hidden = Answer(formatData = BinaryAnswerFormatData(false), hidden = true)
+    Mockito.`when`(answerServiceImpl.findByRoundId(ROUND_ID)).thenReturn(listOf(visible, hidden))
+    Mockito.`when`(answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(ROUND_ID))
+        .thenReturn(listOf(visible))
+
+    Assertions.assertEquals(
+        listOf(1, 0), roundStatsService.getBinaryRoundStatsByRoundId(ROUND_ID).selectionCounts)
+  }
+
+  @Test
+  fun shouldRejectBinaryStatsOfOtherFormat() {
+    givenRound(WordcloudContentFormatData())
+    Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
+      roundStatsService.getBinaryRoundStatsByRoundId(ROUND_ID)
     }
   }
 }

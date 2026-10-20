@@ -13,6 +13,7 @@ class ContentFormatDataInputTest {
   fun shouldMapChoiceInputToChoiceFormatData() {
     val input =
         ContentFormatDataInput(
+            binary = null,
             choice =
                 object : ContentFormatDataInput.ChoiceContentFormatDataInput {
                   override val choices = listOf("A", "B", "C")
@@ -34,6 +35,7 @@ class ContentFormatDataInputTest {
   fun shouldMapTextInputToTextFormatData() {
     val input =
         ContentFormatDataInput(
+            binary = null,
             choice = null,
             numeric = null,
             prioritization = null,
@@ -52,6 +54,7 @@ class ContentFormatDataInputTest {
   fun shouldRejectInputWithoutFormat() {
     Assertions.assertThrows(IllegalStateException::class.java) {
       ContentFormatDataInput(
+              binary = null,
               choice = null,
               numeric = null,
               prioritization = null,

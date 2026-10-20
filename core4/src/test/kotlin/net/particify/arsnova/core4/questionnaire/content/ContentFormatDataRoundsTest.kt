@@ -36,4 +36,9 @@ class ContentFormatDataRoundsTest {
     Assertions.assertTrue(
         ScaleContentFormatData(ScaleContentFormatData.Template.AGREEMENT, true).supportsRounds())
   }
+
+  @Test
+  fun shouldSupportRoundsForBinary() {
+    Assertions.assertTrue(BinaryContentFormatData().supportsRounds())
+  }
 }
