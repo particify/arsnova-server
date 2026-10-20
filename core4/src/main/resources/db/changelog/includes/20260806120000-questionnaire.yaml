@@ -1,0 +1,367 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: arsnova
+      labels: ddl,questionnaire
+      context: default
+      comment: Create initial definitions for questionnaire module
+      changes:
+        - sql: CREATE SCHEMA "questionnaire"
+      rollback:
+        - sql: DROP SCHEMA "questionnaire"
+  - changeSet:
+      id: 2
+      author: arsnova
+      labels: ddl,questionnaire
+      context: default
+      comment: Create enum definitions for questionnaire module
+      changes:
+        - sql: CREATE TYPE "questionnaire_type" AS ENUM ('MIXED', 'SURVEY', 'QUIZ', 'FLASHCARDS')
+        - sql: CREATE TYPE "questionnaire_publishing_mode" AS ENUM ('ALL', 'UP_TO', 'LIVE')
+        - sql: CREATE TYPE "questionnaire_answer_result_type" AS ENUM ('UNANSWERED', 'ABSTAINED', 'NEUTRAL', 'CORRECT', 'WRONG')
+  - changeSet:
+      id: 3
+      author: arsnova
+      labels: ddl,questionnaire
+      context: default
+      comment: Create database tables
+      changes:
+        - createTable:
+            schemaName: questionnaire
+            tableName: questionnaire
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: room_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: room_id_fkey
+                    references: '"room"."room"(id)'
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: questionnaire_type
+                  constraints:
+                    nullable: false
+              - column:
+                  name: published
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: publishing_mode
+                  type: questionnaire_publishing_mode
+                  defaultValue: "ALL"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: published_up_to_content_id
+                  type: uuid
+              - column:
+                  name: active_round_id
+                  type: uuid
+              - column:
+                  name: statistics_published
+                  type: boolean
+              - column:
+                  name: correct_options_published
+                  type: boolean
+              - column:
+                  name: leaderboard_enabled
+                  type: boolean
+              - column:
+                  name: created_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: created_by_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: updated_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+        - createIndex:
+            schemaName: questionnaire
+            tableName: questionnaire
+            column:
+              - name: room_id
+        - createTable:
+            schemaName: questionnaire
+            tableName: content
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: questionnaire_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: questionnaire_id_fkey
+                    references: '"questionnaire"."questionnaire"(id)'
+                    nullable: false
+              - column:
+                  name: body
+                  type: varchar(2000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: duration
+                  type: smallint
+              - column:
+                  name: weight
+                  type: smallint
+                  defaultValueNumeric: 1
+              - column:
+                  name: points
+                  type: smallint
+              - column:
+                  name: abstentions_allowed
+                  type: boolean
+                  defaultValueBoolean: true
+              - column:
+                  name: active_round_id
+                  type: uuid
+              - column:
+                  name: position
+                  type: smallint
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: format_data
+                  type: jsonb
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: created_by_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: updated_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+        - createIndex:
+            schemaName: questionnaire
+            tableName: content
+            column:
+              - name: questionnaire_id
+        - createTable:
+            schemaName: questionnaire
+            tableName: round
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: content_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: content_id_fkey
+                    references: '"questionnaire"."content"(id)'
+                    nullable: false
+              - column:
+                  name: round_no
+                  type: smallint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: closed
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: answering_end_time
+                  type: timestamp with time zone
+              - column:
+                  name: answering_paused_at
+                  type: timestamp with time zone
+              - column:
+                  name: answering_started_at
+                  type: timestamp with time zone
+              - column:
+                  name: answering_expired_at
+                  type: timestamp with time zone
+              - column:
+                  name: created_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: created_by_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: updated_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+        - createIndex:
+            schemaName: questionnaire
+            tableName: round
+            column:
+              - name: content_id
+        - createTable:
+            schemaName: questionnaire
+            tableName: answer
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: round_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: round_id_fkey
+                    references: '"questionnaire"."round"(id)'
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: result
+                  type: questionnaire_answer_result_type
+                  constraints:
+                    nullable: false
+              - column:
+                  name: points
+                  type: smallint
+              - column:
+                  name: duration_ms
+                  type: int
+              - column:
+                  name: hidden
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: format_data
+                  type: jsonb
+              - column:
+                  name: created_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: created_by_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: updated_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+        - addUniqueConstraint:
+            schemaName: questionnaire
+            tableName: answer
+            columnNames: round_id, created_by
+            constraintName: answer_round_id_created_by_key
+        - addForeignKeyConstraint:
+            baseTableSchemaName: questionnaire
+            baseTableName: questionnaire
+            baseColumnNames: published_up_to_content_id
+            referencedTableSchemaName: questionnaire
+            referencedTableName: content
+            referencedColumnNames: id
+            constraintName: questionnaire_published_up_to_content_fkey
+        - addForeignKeyConstraint:
+            baseTableSchemaName: questionnaire
+            baseTableName: questionnaire
+            baseColumnNames: active_round_id
+            referencedTableSchemaName: questionnaire
+            referencedTableName: round
+            referencedColumnNames: id
+            constraintName: questionnaire_active_round_fkey
+        - addForeignKeyConstraint:
+            baseTableSchemaName: questionnaire
+            baseTableName: content
+            baseColumnNames: active_round_id
+            referencedTableSchemaName: questionnaire
+            referencedTableName: round
+            referencedColumnNames: id
+            constraintName: content_active_round_fkey
+            deferrable: true
+            initiallyDeferred: true

@@ -32,6 +32,9 @@ so a module boundary is enforced by a test rather than by convention alone.
 |`announcement`
 |Announcements published in a room.
 
+|`questionnaire`
+|Question series: their contents, rounds and answers.
+
 |`system`
 |Platform configuration (GraphQL, JPA auditing, RabbitMQ), the compatibility endpoints for v3 clients and the v3 migration.
 |===
@@ -43,7 +46,7 @@ The modules form this stack, from top to bottom:
 
 ----
 system
-qna, announcement
+qna, announcement, questionnaire
 room
 security
 user
@@ -74,7 +77,8 @@ Two details of that list are easy to miss:
   e.g. service implementations and repositories,
   which would otherwise sit in the base package.
 * A named interface publishes a sub-package or single types as a contract:
-** `events` in `user`, `room`, `qna` and `announcement` for the module's domain events,
+** `events` in `user`, `room`, `qna`, `announcement` and `questionnaire`
+   for the module's domain events,
 ** `user::sso` for the SAML and LDAP configuration and provisioning types
    that `security` builds on,
 ** `security::permission` for the permission contract,
@@ -99,7 +103,7 @@ Contracts in a lower module::
 When a lower module needs something only a higher module knows,
 the lower module defines an interface and the higher module implements it.
 `security` defines `DomainPermissionEvaluator`,
-which `room`, `qna` and `announcement` implement for their types,
+which `room`, `qna`, `announcement` and `questionnaire` implement for their types,
 and `RoomRoleLookup`, which `room` implements
 so that `security` can issue room tokens without depending on `room`.
 `common` defines `PublicRoutes` for modules which add routes that need no authentication.

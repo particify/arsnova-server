@@ -1,0 +1,148 @@
+extend type Query {
+  questionnaireContentsByQuestionnaireId(
+    questionnaireId: UUID!
+  ): ContentConnection
+  questionnairePublishedContentsByQuestionnaireId(
+    questionnaireId: UUID!
+  ): ContentConnection
+  questionnaireContentById(id: UUID!): Content
+}
+
+extend type Mutation {
+  banQuestionnaireWordcloudContentKeyword(
+    contentId: UUID!
+    keyword: String!
+  ): Content
+  copyQuestionnaireContentToQuestionnaire(
+    contentId: UUID!
+    questionnaireId: UUID!
+  ): Content
+  createQuestionnaireChoiceContent(input: CreateChoiceContentInput!): Content
+  createQuestionnaireWordcloudContent(
+    input: CreateWordcloudContentInput!
+  ): Content
+  deleteQuestionnaireContent(id: ID!): ID
+  duplicateQuestionnaireContent(id: ID!): Content
+  moveQuestionnaireContentToQuestionnaire(
+    contentId: UUID!
+    questionnaireId: UUID!
+  ): Content
+  resetBannedQuestionnaireWordcloudContentKeywords(contentId: UUID!): Content
+  updateQuestionnaireChoiceContent(input: UpdateChoiceContentInput!): Content
+  updateQuestionnaireWordcloudContent(
+    input: UpdateWordcloudContentInput!
+  ): Content
+}
+
+extend type Subscription {
+  questionnaireContentUpdated(questionnaireId: UUID!): Content
+}
+
+type Content {
+  id: ID!
+  body: String!
+  bodyRendered: String
+  formatData: ContentFormatData!
+  activeRound: Round
+  duration: Int
+  weight: Int
+  abstentionsAllowed: Boolean
+  hasCorrectAnswer: Boolean
+  hasAnswers: Boolean!
+  answerCount: Int
+  correctAnswerCount: Int
+  abstentionCount: Int
+  position: Int
+}
+
+type ContentWithAnswer {
+  id: ID!
+  bodyRendered: String
+  formatData: ContentFormatData!
+  duration: Int
+  abstentionsAllowed: Boolean
+  answerResult: AnswerResultState
+}
+
+union ContentFormatData =
+  | ChoiceContentFormatData
+  | ScaleContentFormatData
+  | TextContentFormatData
+  | WordcloudContentFormatData
+
+type ChoiceContentFormatData {
+  format: ContentType!
+  options: [AnswerOption!]!
+  correctOptionIndexes: [Int!]
+  multiple: Boolean
+}
+
+type AnswerOption {
+  label: String!
+  labelRendered: String
+}
+
+type ScaleContentFormatData {
+  format: ContentType!
+}
+
+type TextContentFormatData {
+  format: ContentType!
+}
+
+type WordcloudContentFormatData {
+  format: ContentType!
+  maxAnswers: Int!
+}
+
+enum ContentType {
+  CHOICE
+  SCALE
+  TEXT
+  BINARY
+  NUMERIC
+  WORDCLOUD
+  SORT
+  SHORT_ANSWER
+  PRIORITIZATION
+  FLASHCARD
+  SLIDE
+}
+
+input CreateChoiceContentInput {
+  questionnaireId: UUID!
+  body: String!
+  options: [String!]!
+  correctOptionIndexes: [Int!]
+  multiple: Boolean
+  duration: Int
+  weight: Int
+  abstentionsAllowed: Boolean
+}
+
+input UpdateChoiceContentInput {
+  id: UUID!
+  body: String!
+  options: [String!]!
+  correctOptionIndexes: [Int!]
+  multiple: Boolean
+  duration: Int
+  weight: Int
+  abstentionsAllowed: Boolean
+}
+
+input UpdateWordcloudContentInput {
+  id: UUID!
+  body: String!
+  duration: Int
+  abstentionsAllowed: Boolean
+  maxAnswers: Int!
+}
+
+input CreateWordcloudContentInput {
+  questionnaireId: UUID!
+  body: String!
+  duration: Int
+  abstentionsAllowed: Boolean
+  maxAnswers: Int!
+}

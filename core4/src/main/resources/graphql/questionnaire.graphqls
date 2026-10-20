@@ -1,0 +1,64 @@
+extend type Query {
+  questionnairesByRoomId(roomId: UUID!): [Questionnaire!]
+  publishedQuestionnairesByRoomId(roomId: UUID!): [Questionnaire!]
+  questionnaireById(id: UUID!): Questionnaire
+}
+
+extend type Mutation {
+  createQuestionnaire(input: CreateQuestionnaireInput!): Questionnaire!
+  toggleQuestionnairePublished(id: UUID!, published: Boolean!): Questionnaire!
+  deleteQuestionnaire(id: ID!): ID
+  duplicateQuestionnaire(id: UUID!, newName: String!): Questionnaire!
+  resetQuestionnaireResults(id: UUID!): Boolean
+  updateQuestionnaire(input: UpdateQuestionnaireInput!): Questionnaire!
+  updateQuestionnaireContentOrder(
+    questionnaireId: UUID!
+    contentIds: [UUID!]!
+  ): Questionnaire
+}
+
+extend type Subscription {
+  questionnaireUpdated(questionnaireId: UUID!): Questionnaire
+  questionnairesChanged(roomId: UUID!): ID!
+}
+
+type Questionnaire {
+  id: ID!
+  name: String!
+  type: QuestionnaireType!
+  published: Boolean!
+  publishingMode: QuestionnairePublishingMode!
+  statisticsPublished: Boolean
+  correctOptionsPublished: Boolean
+  leaderboardEnabled: Boolean
+  contentCount: Int
+}
+
+enum QuestionnaireType {
+  MIXED
+  SURVEY
+  QUIZ
+  FLASHCARDS
+}
+
+enum QuestionnairePublishingMode {
+  ALL
+  UP_TO
+  LIVE
+}
+
+input CreateQuestionnaireInput {
+  roomId: UUID!
+  name: String!
+  type: QuestionnaireType!
+}
+
+input UpdateQuestionnaireInput {
+  id: UUID!
+  name: String
+  published: Boolean
+  publishingMode: QuestionnairePublishingMode
+  statisticsPublished: Boolean
+  correctOptionsPublished: Boolean
+  leaderboardEnabled: Boolean
+}

@@ -66,6 +66,7 @@ dependencies {
   testFixturesImplementation(libs.bouncycastle.pkix)
   testFixturesImplementation(libs.spring.security.saml)
   testImplementation(libs.kotlin.junit)
+  testImplementation(libs.reactor.test)
   testImplementation(libs.spring.test) { exclude(module = "mockito-core") }
   testImplementation(libs.spring.graphql.test)
   testImplementation(libs.spring.liquibase.test)
