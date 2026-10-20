@@ -20,6 +20,7 @@ class ContentFormatDataInputTest {
                   override val multiple = true
                 },
             numeric = null,
+            prioritization = null,
             scale = null,
             shortAnswer = null,
             sort = null,
@@ -35,6 +36,7 @@ class ContentFormatDataInputTest {
         ContentFormatDataInput(
             choice = null,
             numeric = null,
+            prioritization = null,
             scale = null,
             shortAnswer = null,
             sort = null,
@@ -52,6 +54,7 @@ class ContentFormatDataInputTest {
       ContentFormatDataInput(
               choice = null,
               numeric = null,
+              prioritization = null,
               scale = null,
               shortAnswer = null,
               sort = null,

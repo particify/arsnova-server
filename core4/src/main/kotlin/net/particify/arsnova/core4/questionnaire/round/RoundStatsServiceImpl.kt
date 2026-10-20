@@ -12,12 +12,14 @@ import kotlin.math.sqrt
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.answer.PrioritizationAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ScaleAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ShortAnswerAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.SortAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
+import net.particify.arsnova.core4.questionnaire.content.PrioritizationContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ScaleContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ShortAnswerContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
@@ -30,6 +32,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 
+@Suppress("TooManyFunctions")
 @Service
 class RoundStatsServiceImpl(
     private val roundServiceImpl: RoundServiceImpl,
@@ -124,6 +127,26 @@ class RoundStatsServiceImpl(
     if (!formatData.hasCorrectAnswer()) return null
     if (numbers.isEmpty()) return 0.0
     return numbers.count { formatData.isCorrect(it) }.toDouble() / numbers.size
+  }
+
+  /**
+   * Sums the points each option was assigned. A missing entry counts as zero, so an answer with an
+   * empty list contributes nothing and the result is as long as the option list either way.
+   */
+  @Transactional
+  fun getPrioritizationRoundStatsByRoundId(roundId: UUID): PrioritizationContentRoundStats {
+    val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
+    val formatData =
+        round.content?.formatData as? PrioritizationContentFormatData
+            ?: throw ContentFormatDataInvalidException("Content is not a prioritization content")
+    val assignedPoints =
+        answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId).mapNotNull {
+          (it.formatData as? PrioritizationAnswerFormatData)?.assignedPoints
+        }
+    return PrioritizationContentRoundStats(
+        formatData.options.indices.map { index ->
+          assignedPoints.sumOf { points -> points.getOrElse(index) { 0 } }
+        })
   }
 
   @Transactional

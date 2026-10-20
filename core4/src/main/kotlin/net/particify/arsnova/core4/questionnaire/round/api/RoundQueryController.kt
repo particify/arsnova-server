@@ -8,6 +8,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.NumericContentRoundStats
+import net.particify.arsnova.core4.questionnaire.round.PrioritizationContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
@@ -46,6 +47,14 @@ class RoundQueryController(
   fun questionnaireNumericRoundStatsByRoundId(@Argument roundId: UUID): NumericContentRoundStats {
     return roundStatsServiceImpl.getNumericRoundStatsByRoundId(
         roundId, SecurityContextHolder.getContext().authentication)
+  }
+
+  @QueryMapping
+  @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
+  fun questionnairePrioritizationRoundStatsByRoundId(
+      @Argument roundId: UUID
+  ): PrioritizationContentRoundStats {
+    return roundStatsServiceImpl.getPrioritizationRoundStatsByRoundId(roundId)
   }
 
   @QueryMapping

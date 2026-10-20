@@ -12,6 +12,9 @@ extend type Query {
 extend type Mutation {
   createQuestionnaireChoiceAnswer(input: CreateChoiceAnswerInput!): Answer
   createQuestionnaireNumericAnswer(input: CreateNumericAnswerInput!): Answer
+  createQuestionnairePrioritizationAnswer(
+    input: CreatePrioritizationAnswerInput!
+  ): Answer
   createQuestionnaireScaleAnswer(input: CreateScaleAnswerInput!): Answer
   createQuestionnaireShortAnswerAnswer(
     input: CreateShortAnswerAnswerInput!
@@ -40,6 +43,7 @@ type Answer {
 union AnswerFormatData =
   | ChoiceAnswerFormatData
   | NumericAnswerFormatData
+  | PrioritizationAnswerFormatData
   | ScaleAnswerFormatData
   | ShortAnswerAnswerFormatData
   | SortAnswerFormatData
@@ -54,6 +58,11 @@ type ChoiceAnswerFormatData {
 type NumericAnswerFormatData {
   format: ContentType!
   selectedNumber: Float!
+}
+
+type PrioritizationAnswerFormatData {
+  format: ContentType!
+  assignedPoints: [Int!]!
 }
 
 type WordcloudAnswerFormatData {
@@ -111,6 +120,11 @@ input CreateChoiceAnswerInput {
 input CreateNumericAnswerInput {
   roundId: UUID!
   selectedNumber: Float!
+}
+
+input CreatePrioritizationAnswerInput {
+  roundId: UUID!
+  assignedPoints: [Int!]!
 }
 
 input CreateScaleAnswerInput {

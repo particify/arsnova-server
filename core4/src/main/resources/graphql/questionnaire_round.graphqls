@@ -6,6 +6,9 @@ extend type Query {
   questionnaireNumericRoundStatsByRoundId(
     roundId: UUID!
   ): NumericContentRoundStats
+  questionnairePrioritizationRoundStatsByRoundId(
+    roundId: UUID!
+  ): PrioritizationContentRoundStats
   questionnaireScaleRoundStatsByRoundId(roundId: UUID!): ScaleContentRoundStats
   questionnaireShortAnswerRoundStatsByRoundId(
     roundId: UUID!
@@ -25,6 +28,9 @@ extend type Subscription {
   questionnaireNumericRoundStatsUpdated(
     roundId: UUID!
   ): NumericContentRoundStats
+  questionnairePrioritizationRoundStatsUpdated(
+    roundId: UUID!
+  ): PrioritizationContentRoundStats
   questionnaireScaleRoundStatsUpdated(roundId: UUID!): ScaleContentRoundStats
   questionnaireShortAnswerRoundStatsUpdated(
     roundId: UUID!
@@ -59,6 +65,10 @@ type NumericContentRoundStats {
   minimum: Float!
   maximum: Float!
   correctAnswerFraction: Float
+}
+
+type PrioritizationContentRoundStats {
+  assignedPoints: [Int!]
 }
 
 type ScaleContentRoundStats {

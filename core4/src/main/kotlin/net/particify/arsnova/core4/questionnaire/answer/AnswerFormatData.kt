@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 @JsonSubTypes(
     JsonSubTypes.Type(ChoiceAnswerFormatData::class, name = "CHOICE"),
     JsonSubTypes.Type(NumericAnswerFormatData::class, name = "NUMERIC"),
+    JsonSubTypes.Type(PrioritizationAnswerFormatData::class, name = "PRIORITIZATION"),
     JsonSubTypes.Type(ScaleAnswerFormatData::class, name = "SCALE"),
     JsonSubTypes.Type(ShortAnswerAnswerFormatData::class, name = "SHORT_ANSWER"),
     JsonSubTypes.Type(SortAnswerFormatData::class, name = "SORT"),

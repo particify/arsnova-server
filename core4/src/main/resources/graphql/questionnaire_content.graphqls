@@ -26,6 +26,9 @@ extend type Mutation {
     input: CreateFlashcardContentInput!
   ): Content
   createQuestionnaireNumericContent(input: CreateNumericContentInput!): Content
+  createQuestionnairePrioritizationContent(
+    input: CreatePrioritizationContentInput!
+  ): Content
   createQuestionnaireScaleContent(input: CreateScaleContentInput!): Content
   createQuestionnaireShortAnswerContent(
     input: CreateShortAnswerContentInput!
@@ -53,6 +56,9 @@ extend type Mutation {
     input: UpdateFlashcardContentInput!
   ): Content
   updateQuestionnaireNumericContent(input: UpdateNumericContentInput!): Content
+  updateQuestionnairePrioritizationContent(
+    input: UpdatePrioritizationContentInput!
+  ): Content
   updateQuestionnaireScaleContent(input: UpdateScaleContentInput!): Content
   updateQuestionnaireShortAnswerContent(
     input: UpdateShortAnswerContentInput!
@@ -99,6 +105,7 @@ union ContentFormatData =
   | ChoiceContentFormatData
   | FlashcardContentFormatData
   | NumericContentFormatData
+  | PrioritizationContentFormatData
   | ScaleContentFormatData
   | ShortAnswerContentFormatData
   | SlideContentFormatData
@@ -130,6 +137,12 @@ type NumericContentFormatData {
   maxNumber: Float!
   correctNumber: Float
   tolerance: Float!
+}
+
+type PrioritizationContentFormatData {
+  format: ContentType!
+  options: [AnswerOption!]!
+  assignablePoints: Int!
 }
 
 type ScaleContentFormatData {
@@ -247,6 +260,22 @@ input UpdateNumericContentInput {
   tolerance: Float
   duration: Int
   weight: Int
+  abstentionsAllowed: Boolean
+}
+
+input CreatePrioritizationContentInput {
+  questionnaireId: UUID!
+  body: String!
+  options: [String!]!
+  duration: Int
+  abstentionsAllowed: Boolean
+}
+
+input UpdatePrioritizationContentInput {
+  id: UUID!
+  body: String!
+  options: [String!]!
+  duration: Int
   abstentionsAllowed: Boolean
 }
 

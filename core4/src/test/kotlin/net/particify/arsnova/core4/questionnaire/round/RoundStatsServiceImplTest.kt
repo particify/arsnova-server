@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.questionnaire.answer.AnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.answer.PrioritizationAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ScaleAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ShortAnswerAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.SortAnswerFormatData
@@ -18,6 +19,7 @@ import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
+import net.particify.arsnova.core4.questionnaire.content.PrioritizationContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ScaleContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ShortAnswerContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
@@ -511,6 +513,52 @@ class RoundStatsServiceImplTest {
     givenRound(WordcloudContentFormatData())
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
       roundStatsService.getSortRoundStatsByRoundId(ROUND_ID)
+    }
+  }
+
+  private fun prioritizationSums(vararg assignedPoints: List<Int>?): List<Int> {
+    val answers =
+        assignedPoints.map { it?.let { points -> PrioritizationAnswerFormatData(points) } }
+    givenRound(PrioritizationContentFormatData(listOf("A", "B", "C")), *answers.toTypedArray())
+    return roundStatsService.getPrioritizationRoundStatsByRoundId(ROUND_ID).assignedPoints
+  }
+
+  @Test
+  fun shouldSumAssignedPointsPerOption() {
+    Assertions.assertEquals(
+        listOf(150, 30, 20), prioritizationSums(listOf(100, 0, 0), listOf(50, 30, 20)))
+  }
+
+  @Test
+  fun shouldIgnoreAbstentionsAndCountMissingPointsAsZero() {
+    Assertions.assertEquals(listOf(60, 40, 0), prioritizationSums(null, listOf(60, 40), listOf()))
+  }
+
+  @Test
+  fun shouldReportZeroPointsPerOptionWithoutAnswers() {
+    Assertions.assertEquals(listOf(0, 0, 0), prioritizationSums())
+  }
+
+  @Test
+  fun shouldLeaveHiddenAnswersOutOfPrioritizationSums() {
+    givenRound(PrioritizationContentFormatData(listOf("A", "B", "C")))
+    val visible = Answer(formatData = PrioritizationAnswerFormatData(listOf(60, 40, 0)))
+    val hidden =
+        Answer(formatData = PrioritizationAnswerFormatData(listOf(0, 0, 100)), hidden = true)
+    Mockito.`when`(answerServiceImpl.findByRoundId(ROUND_ID)).thenReturn(listOf(visible, hidden))
+    Mockito.`when`(answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(ROUND_ID))
+        .thenReturn(listOf(visible))
+
+    Assertions.assertEquals(
+        listOf(60, 40, 0),
+        roundStatsService.getPrioritizationRoundStatsByRoundId(ROUND_ID).assignedPoints)
+  }
+
+  @Test
+  fun shouldRejectPrioritizationStatsOfOtherFormat() {
+    givenRound(WordcloudContentFormatData())
+    Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
+      roundStatsService.getPrioritizationRoundStatsByRoundId(ROUND_ID)
     }
   }
 }

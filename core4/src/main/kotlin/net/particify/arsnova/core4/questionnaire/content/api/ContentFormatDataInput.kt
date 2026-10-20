@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.questionnaire.content.api
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
+import net.particify.arsnova.core4.questionnaire.content.PrioritizationContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ScaleContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ShortAnswerContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.SortContentFormatData
@@ -15,6 +16,7 @@ import org.springframework.data.web.ProjectedPayload
 data class ContentFormatDataInput(
     val choice: ChoiceContentFormatDataInput?,
     val numeric: NumericContentFormatDataInput?,
+    val prioritization: PrioritizationContentFormatDataInput?,
     val scale: ScaleContentFormatDataInput?,
     val shortAnswer: ShortAnswerContentFormatDataInput?,
     val sort: SortContentFormatDataInput?,
@@ -28,6 +30,7 @@ data class ContentFormatDataInput(
       numeric != null ->
           NumericContentFormatData(
               numeric.minNumber, numeric.maxNumber, numeric.correctNumber, numeric.tolerance)
+      prioritization != null -> PrioritizationContentFormatData(prioritization.options)
       scale != null -> ScaleContentFormatData(scale.template, scale.neutralOption)
       shortAnswer != null -> ShortAnswerContentFormatData(shortAnswer.correctTerms)
       sort != null -> SortContentFormatData.shuffled(sort.options)
@@ -49,6 +52,11 @@ data class ContentFormatDataInput(
     val maxNumber: Double
     val correctNumber: Double?
     val tolerance: Double
+  }
+
+  @ProjectedPayload
+  interface PrioritizationContentFormatDataInput {
+    val options: List<String>
   }
 
   @ProjectedPayload
