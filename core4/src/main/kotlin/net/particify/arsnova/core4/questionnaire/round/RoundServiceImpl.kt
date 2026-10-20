@@ -39,6 +39,7 @@ class RoundServiceImpl(
     rounds.forEach {
       answerRepository.deleteByRoundId(it.id!!)
       roundRepository.deleteById(it.id!!)
+      roundStatsEventPublisher.publishRoundDeleted(it.id!!)
     }
     applicationEventPublisher.publishEvent(RoundDeletedEvent(contentId))
     return rounds.count()

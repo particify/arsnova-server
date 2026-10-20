@@ -145,6 +145,7 @@ class ContentSubscriptionControllerTest {
     Mockito.verifyNoMoreInteractions(permissionEvaluator)
   }
 
+  /** A subscriber joining on the same answer waits for the recomputation, see the next test. */
   @Test
   fun shouldShareOneComputationAmongSubscribers() {
     val second = mutableListOf<Content>()
@@ -164,38 +165,89 @@ class ContentSubscriptionControllerTest {
         .thenCancel()
         .verify(VERIFY_TIMEOUT)
 
-    Assertions.assertEquals(listOf(releasedContent, releasedContent), second)
+    Assertions.assertEquals(listOf(releasedContent), second)
     Mockito.verify(contentRepository, Mockito.times(2)).findById(releasedContent.id!!)
   }
 
-  /** The content replayed to a late joiner is shared, so it has to pass the joiner's gate. */
+  /**
+   * A late joiner is handed no content computed before it joined, but its joining calls for a
+   * recomputation. The content is shared, so it has to pass the joiner's gate.
+   */
   @Test
-  fun shouldHandALateSubscriberTheLastContentOnlyIfPermitted() {
+  fun shouldHandALateSubscriberTheRecomputedContentOnlyIfPermitted() {
     SecurityContextHolder.getContext().authentication = moderator
     val late = mutableListOf<Content>()
+    var lateSubscription: Disposable? = null
     StepVerifier.withVirtualTime { controller.questionnaireContentUpdated(QUESTIONNAIRE_ID) }
         .expectSubscription()
         .then { publishAnswerChanged(unreleasedContent) }
         .expectNext(unreleasedContent)
         .then {
           SecurityContextHolder.getContext().authentication = participant
-          val unpermitted =
+          lateSubscription =
               controller.questionnaireContentUpdated(QUESTIONNAIRE_ID).subscribe { late.add(it) }
           publishAnswerChanged(unreleasedContent)
           Assertions.assertEquals(emptyList<Content>(), late)
-          unpermitted.dispose()
+        }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(unreleasedContent)
+        .then {
+          Assertions.assertEquals(emptyList<Content>(), late)
           questionnaire.publishedUpToContent = unreleasedContent
+          publishAnswerChanged(unreleasedContent)
+        }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(unreleasedContent)
+        .then { lateSubscription?.dispose() }
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+
+    Assertions.assertEquals(listOf(unreleasedContent), late)
+    Mockito.verify(contentRepository, Mockito.times(3)).findById(unreleasedContent.id!!)
+  }
+
+  /**
+   * The content replayed to a late joiner was read at the last computation, so it carries the
+   * release state of that moment. Withdrawing the release signals nothing, so the snapshot stays
+   * until the next answer, and that answer is what joins a participant subscribed in the meantime.
+   */
+  @Test
+  fun shouldNotHandALateSubscriberAContentWhoseReleaseWasWithdrawnSince() {
+    val released = snapshot(releasedContent, released = true)
+    val withdrawn = snapshot(releasedContent, released = false)
+    Mockito.`when`(contentRepository.findById(releasedContent.id!!))
+        .thenReturn(Optional.of(released), Optional.of(withdrawn))
+    SecurityContextHolder.getContext().authentication = moderator
+    val late = mutableListOf<Content>()
+    StepVerifier.withVirtualTime { controller.questionnaireContentUpdated(QUESTIONNAIRE_ID) }
+        .expectSubscription()
+        .then { publishAnswerChanged(releasedContent) }
+        .expectNext(released)
+        .then {
+          SecurityContextHolder.getContext().authentication = participant
           controller
               .questionnaireContentUpdated(QUESTIONNAIRE_ID)
               .subscribe { late.add(it) }
-              .also { publishAnswerChanged(unreleasedContent) }
+              .also { publishAnswerChanged(releasedContent) }
               .dispose()
         }
         .thenCancel()
         .verify(VERIFY_TIMEOUT)
 
-    Assertions.assertEquals(listOf(unreleasedContent), late)
-    Mockito.verify(contentRepository, Mockito.times(1)).findById(unreleasedContent.id!!)
+    Assertions.assertEquals(emptyList<Content>(), late)
+  }
+
+  /** [content] as read from the database while it was released, or after that was withdrawn. */
+  private fun snapshot(content: Content, released: Boolean): Content {
+    val questionnaire =
+        Questionnaire(
+            id = QUESTIONNAIRE_ID,
+            published = true,
+            publishingMode = QuestionnairePublishingMode.UP_TO)
+    val snapshot =
+        Content(id = content.id, questionnaire = questionnaire, position = content.position)
+    questionnaire.publishedUpToContent = if (released) snapshot else null
+    return snapshot
   }
 
   @Test

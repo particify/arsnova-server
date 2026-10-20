@@ -18,7 +18,11 @@ private val VERIFY_TIMEOUT = Duration.ofSeconds(10)
 
 class SharedFluxRegistryTest {
   private val changes = Sinks.many().multicast().directBestEffort<Unit>()
-  private val registry = SharedFluxRegistry<String, Int>(SAMPLE_INTERVAL) { changes.asFlux() }
+  private val ends = Sinks.many().multicast().directBestEffort<Throwable>()
+  private val registry =
+      SharedFluxRegistry<String, Int>(SAMPLE_INTERVAL, ends = { ends.asFlux() }) {
+        changes.asFlux()
+      }
 
   /** A computation which returns the given results in turn, throwing those which are errors. */
   private fun computation(vararg results: Any): () -> Int? {
@@ -68,5 +72,54 @@ class SharedFluxRegistryTest {
         .expectNext(2)
         .thenCancel()
         .verify(VERIFY_TIMEOUT)
+  }
+
+  @Test
+  fun shouldEndEverySubscriberAndStartOverOnceTheKeyEnds() {
+    val compute = computation(1, 2)
+    val second = mutableListOf<Int>()
+    var secondError: Throwable? = null
+    StepVerifier.create(registry.flux(KEY, compute))
+        .expectNext(1)
+        .then {
+          registry.flux(KEY, compute).subscribe({ second.add(it) }, { secondError = it })
+          ends.tryEmitNext(IllegalStateException("Deleted"))
+        }
+        .expectErrorMessage("Deleted")
+        .verify(VERIFY_TIMEOUT)
+
+    Assertions.assertEquals(listOf(1), second)
+    Assertions.assertEquals("Deleted", secondError?.message)
+    StepVerifier.create(registry.flux(KEY, compute))
+        .expectNext(2)
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
+  /**
+   * Without replay, a joiner is handed nothing computed before it joined. Its joining calls for a
+   * recomputation, which every subscriber shares.
+   */
+  @Test
+  fun shouldHandAJoinerOnlyWhatIsComputedAfterItJoinedUnlessReplaying() {
+    val unreplayed =
+        SharedFluxRegistry<String, Int>(SAMPLE_INTERVAL, replayToJoiners = false) {
+          changes.asFlux()
+        }
+    val compute = computation(1, 2)
+    val joiner = mutableListOf<Int>()
+    StepVerifier.withVirtualTime { unreplayed.flux(KEY, compute) }
+        .expectSubscription()
+        .expectNext(1)
+        .then {
+          unreplayed.flux(KEY, compute).subscribe { joiner.add(it) }
+          Assertions.assertEquals(emptyList<Int>(), joiner)
+        }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(2)
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+
+    Assertions.assertEquals(listOf(2), joiner)
   }
 }

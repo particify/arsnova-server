@@ -42,14 +42,17 @@ class ContentSubscriptionController(
   private data class ContentKey(val questionnaireId: UUID, val contentId: UUID)
 
   private val sharedContents =
-      SharedFluxRegistry<ContentKey, Content>(STATS_UPDATE_SAMPLE_INTERVAL) { key ->
-        roundStatsEventPublisher.answerChangedFlux().filter { it.contentId == key.contentId }
-      }
+      SharedFluxRegistry<ContentKey, Content>(
+          STATS_UPDATE_SAMPLE_INTERVAL, replayToJoiners = false) { key ->
+            roundStatsEventPublisher.answerChangedFlux().filter { it.contentId == key.contentId }
+          }
 
   /**
    * Emits a content of the questionnaire whenever one of its answers changed, at most once per
    * sample interval per content. The first answer to a content joins the subscriber to the
-   * content's computation, which all subscribers of the content share, see [SharedFluxRegistry].
+   * content's computation, which all subscribers of the content share, see [SharedFluxRegistry]. A
+   * subscriber joining it is not handed the content computed last: that predates the answer which
+   * joined it, and might show a release withdrawn since, so it waits for the recomputation.
    *
    * Any content of the questionnaire can be answered, but participants may only see the released
    * ones, and release can change while subscribed, so every emission is checked against the content
