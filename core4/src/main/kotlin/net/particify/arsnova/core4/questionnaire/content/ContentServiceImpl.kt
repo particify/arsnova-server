@@ -25,6 +25,7 @@ import org.springframework.data.domain.Window
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
+@Suppress("TooManyFunctions")
 @Service
 class ContentServiceImpl(
     private val contentRepository: ContentRepository,
@@ -187,6 +188,18 @@ class ContentServiceImpl(
   @Transactional
   fun resetBannedWordcloudKeywords(id: UUID): Content =
       updateBannedKeywords<WordcloudContentFormatData>(id, "wordcloud") { it.resetBannedKeywords() }
+
+  @Transactional
+  fun banShortAnswerKeyword(id: UUID, keyword: String): Content =
+      updateBannedKeywords<ShortAnswerContentFormatData>(id, "short answer") {
+        it.addBannedKeyword(keyword)
+      }
+
+  @Transactional
+  fun resetBannedShortAnswerKeywords(id: UUID): Content =
+      updateBannedKeywords<ShortAnswerContentFormatData>(id, "short answer") {
+        it.resetBannedKeywords()
+      }
 
   /**
    * Banned keywords are excluded from the stats of every round of the content, so the rounds'

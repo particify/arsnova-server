@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
+import net.particify.arsnova.core4.questionnaire.content.ShortAnswerContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.TextContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
 import net.particify.arsnova.core4.questionnaire.exception.AnswerNotFoundException
@@ -167,6 +168,18 @@ class AnswerServiceImplTextTest {
             id = UUID.randomUUID(),
             round = givenRound(WordcloudContentFormatData()),
             formatData = WordcloudAnswerFormatData(listOf("spam")))
+    Mockito.`when`(answerRepository.findById(answer.id!!)).thenReturn(Optional.of(answer))
+    Mockito.`when`(answerRepository.save(answer)).thenReturn(answer)
+    Assertions.assertTrue(answerService.updateHidden(answer.id!!, true).hidden)
+  }
+
+  @Test
+  fun shouldHideShortAnswer() {
+    val answer =
+        Answer(
+            id = UUID.randomUUID(),
+            round = givenRound(ShortAnswerContentFormatData(listOf("Offenbach"))),
+            formatData = ShortAnswerAnswerFormatData("Hanau"))
     Mockito.`when`(answerRepository.findById(answer.id!!)).thenReturn(Optional.of(answer))
     Mockito.`when`(answerRepository.save(answer)).thenReturn(answer)
     Assertions.assertTrue(answerService.updateHidden(answer.id!!, true).hidden)

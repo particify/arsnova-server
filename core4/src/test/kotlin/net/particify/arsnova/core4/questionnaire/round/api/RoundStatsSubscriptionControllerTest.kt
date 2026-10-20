@@ -16,6 +16,7 @@ import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.ScaleContentRoundStats
+import net.particify.arsnova.core4.questionnaire.round.ShortAnswerContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.WordcloudContentRoundStats
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -190,6 +191,58 @@ class RoundStatsSubscriptionControllerTest {
         .verify(VERIFY_TIMEOUT)
   }
 
+  /**
+   * The groups are labelled with the correct terms once for all subscribers and relabelled for each
+   * who may not see the solution, including the stats replayed to one joining later.
+   */
+  @Test
+  fun shouldLabelShortAnswerStatsWithCorrectTermsForModeratorOnly() {
+    val stats = givenShortAnswerStats()
+    authenticate(moderator)
+    val participantEmissions = mutableListOf<ShortAnswerContentRoundStats>()
+    StepVerifier.withVirtualTime {
+          controller.questionnaireShortAnswerRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+        }
+        .expectSubscription()
+        .assertNext { Assertions.assertEquals(listOf("Frankfurt am Main"), it.texts) }
+        .then {
+          authenticate(participant)
+          controller
+              .questionnaireShortAnswerRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+              .subscribe { participantEmissions.add(it) }
+              .dispose()
+        }
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+
+    Assertions.assertEquals(
+        listOf(listOf("frankfurt am main")), participantEmissions.map { it.texts })
+    Mockito.verify(roundStatsServiceImpl, Mockito.times(1))
+        .getShortAnswerRoundStatsWithSolutionByRoundId(SUBSCRIBED_ROUND_ID)
+  }
+
+  @Test
+  fun shouldLabelShortAnswerStatsWithCorrectTermsOncePublished() {
+    givenShortAnswerStats()
+
+    StepVerifier.withVirtualTime {
+          controller.questionnaireShortAnswerRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+        }
+        .expectSubscription()
+        .assertNext { Assertions.assertEquals(listOf("frankfurt am main"), it.texts) }
+        .then {
+          SecurityContextHolder.clearContext()
+          questionnaire.correctOptionsPublished = true
+          publishAnswerChanged(SUBSCRIBED_ROUND_ID)
+        }
+        .thenAwait(SAMPLE_INTERVAL)
+        .assertNext { Assertions.assertEquals(listOf("Frankfurt am Main"), it.texts) }
+        .then { publishAnswerChanged(OTHER_ROUND_ID) }
+        .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
   @Test
   fun shouldEmitWordcloudStatsForAnswerOfSubscribedRound() {
     val stats = WordcloudContentRoundStats(listOf("word"), listOf(1))
@@ -316,6 +369,18 @@ class RoundStatsSubscriptionControllerTest {
             correctAnswerFraction = 0.5)
     Mockito.`when`(
             roundStatsServiceImpl.getNumericRoundStatsWithSolutionByRoundId(SUBSCRIBED_ROUND_ID))
+        .thenReturn(stats)
+    return stats
+  }
+
+  private fun givenShortAnswerStats(): ShortAnswerContentRoundStats {
+    questionnaire.correctOptionsPublished = false
+    val stats =
+        ShortAnswerContentRoundStats(
+            listOf("Frankfurt am Main"), listOf(2), listOf("frankfurt am main"))
+    Mockito.`when`(
+            roundStatsServiceImpl.getShortAnswerRoundStatsWithSolutionByRoundId(
+                SUBSCRIBED_ROUND_ID))
         .thenReturn(stats)
     return stats
   }

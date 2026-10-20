@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(ChoiceAnswerFormatData::class, name = "CHOICE"),
     JsonSubTypes.Type(NumericAnswerFormatData::class, name = "NUMERIC"),
     JsonSubTypes.Type(ScaleAnswerFormatData::class, name = "SCALE"),
+    JsonSubTypes.Type(ShortAnswerAnswerFormatData::class, name = "SHORT_ANSWER"),
     JsonSubTypes.Type(TextAnswerFormatData::class, name = "TEXT"),
     JsonSubTypes.Type(WordcloudAnswerFormatData::class, name = "WORDCLOUD"),
 )

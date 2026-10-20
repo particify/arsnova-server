@@ -11,12 +11,14 @@ import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ScaleAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.answer.ShortAnswerAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ScaleContentFormatData
+import net.particify.arsnova.core4.questionnaire.content.ShortAnswerContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
 import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
@@ -345,6 +347,135 @@ class RoundStatsServiceImplTest {
     givenRound(WordcloudContentFormatData())
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
       roundStatsService.getScaleRoundStatsByRoundId(ROUND_ID)
+    }
+  }
+
+  private fun shortAnswerStats(
+      correctTerms: List<String>,
+      vararg bodies: String?,
+      correctOptionsPublished: Boolean? = true
+  ): List<Pair<String, Int>> {
+    val answers = bodies.map { it?.let { body -> ShortAnswerAnswerFormatData(body) } }
+    givenRound(
+        ShortAnswerContentFormatData(correctTerms),
+        *answers.toTypedArray(),
+        correctOptionsPublished = correctOptionsPublished)
+    val stats = roundStatsService.getShortAnswerRoundStatsByRoundId(ROUND_ID, reader)
+    return stats.texts.zip(stats.counts)
+  }
+
+  @Test
+  fun shouldNotLabelGroupWithCorrectTermForParticipantBeforeTheSolutionIsPublished() {
+    givenReaderMayEditContent(false)
+    Assertions.assertEquals(
+        listOf("frankfurt am main" to 2),
+        shortAnswerStats(
+            listOf("Frankfurt am Main"),
+            "frankfurt am main",
+            "frankfurt am main",
+            correctOptionsPublished = false))
+  }
+
+  @Test
+  fun shouldLabelGroupWithCorrectTermForEditorBeforeTheSolutionIsPublished() {
+    givenReaderMayEditContent(true)
+    Assertions.assertEquals(
+        listOf("Frankfurt am Main" to 2),
+        shortAnswerStats(
+            listOf("Frankfurt am Main"),
+            "frankfurt am main",
+            "frankfurt am main",
+            correctOptionsPublished = false))
+  }
+
+  @Test
+  fun shouldLabelGroupWithCorrectTermForEveryoneOnceTheSolutionIsPublished() {
+    givenReaderMayEditContent(false)
+    Assertions.assertEquals(
+        listOf("Frankfurt am Main" to 2),
+        shortAnswerStats(listOf("Frankfurt am Main"), "frankfurt am main", "frankfurt am main"))
+    givenReaderMayEditContent(true)
+    Assertions.assertEquals(
+        listOf("Frankfurt am Main" to 2),
+        shortAnswerStats(listOf("Frankfurt am Main"), "frankfurt am main", "frankfurt am main"))
+  }
+
+  /** Subscriptions share these stats among all subscribers and relabel them per one. */
+  @Test
+  fun shouldLabelGroupWithCorrectTermInStatsWithSolutionWhoeverReads() {
+    givenReaderMayEditContent(false)
+    givenRound(
+        ShortAnswerContentFormatData(listOf("Frankfurt am Main")),
+        ShortAnswerAnswerFormatData("frankfurt am main"),
+        ShortAnswerAnswerFormatData("Hanau"),
+        correctOptionsPublished = false)
+    val stats = roundStatsService.getShortAnswerRoundStatsWithSolutionByRoundId(ROUND_ID)
+    Assertions.assertEquals(listOf("Frankfurt am Main", "Hanau"), stats.texts)
+    Assertions.assertEquals(listOf("frankfurt am main", "Hanau"), stats.withoutSolution().texts)
+    Assertions.assertEquals(stats.counts, stats.withoutSolution().counts)
+  }
+
+  @Test
+  fun shouldLabelGroupOfCorrectTermWithItsOwnSpelling() {
+    Assertions.assertEquals(
+        listOf("Frankfurt am Main" to 3, "Hanau" to 1),
+        shortAnswerStats(
+            listOf("Frankfurt am Main"),
+            "frankfurt am main",
+            "Hanau",
+            "FRANKFURT AM MAIN!",
+            "frankfurt am main"))
+  }
+
+  @Test
+  fun shouldLabelOtherGroupsWithTheirMostCommonVariant() {
+    Assertions.assertEquals(
+        listOf("hanau" to 3, "Offenbach" to 1),
+        shortAnswerStats(listOf("Offenbach"), "Hanau", "hanau", " hanau ", "offenbach"))
+  }
+
+  @Test
+  fun shouldIgnoreBlankAnswersAndAbstentions() {
+    Assertions.assertEquals(
+        listOf("Offenbach" to 1), shortAnswerStats(listOf("Offenbach"), " ", null, "Offenbach"))
+  }
+
+  @Test
+  fun shouldLeaveShortAnswersMatchingABannedKeywordOutIncludingACorrectTerm() {
+    val formatData = ShortAnswerContentFormatData(listOf("Frankfurt am Main"))
+    formatData.addBannedKeyword("SPAM")
+    formatData.addBannedKeyword("frankfurt am main")
+    givenRound(
+        formatData,
+        ShortAnswerAnswerFormatData("Spam!"),
+        ShortAnswerAnswerFormatData("Frankfurt am Main"),
+        ShortAnswerAnswerFormatData("Hanau"),
+        ShortAnswerAnswerFormatData("Spam and eggs"))
+    val stats = roundStatsService.getShortAnswerRoundStatsByRoundId(ROUND_ID, reader)
+    // A keyword matches the whole answer, so an answer merely containing it stays.
+    Assertions.assertEquals(listOf("Hanau", "Spam and eggs"), stats.texts)
+    Assertions.assertEquals(listOf(1, 1), stats.counts)
+  }
+
+  @Test
+  fun shouldLeaveHiddenShortAnswersOut() {
+    givenRound(ShortAnswerContentFormatData(listOf("Offenbach")))
+    val visible = Answer(formatData = ShortAnswerAnswerFormatData("Offenbach"))
+    val hidden = Answer(formatData = ShortAnswerAnswerFormatData("Hanau"), hidden = true)
+    Mockito.`when`(answerServiceImpl.findByRoundId(ROUND_ID)).thenReturn(listOf(visible, hidden))
+    Mockito.`when`(answerServiceImpl.findByRoundIdAndHiddenFalseOrderByIdAsc(ROUND_ID))
+        .thenReturn(listOf(visible))
+
+    val stats = roundStatsService.getShortAnswerRoundStatsByRoundId(ROUND_ID, reader)
+
+    Assertions.assertEquals(listOf("Offenbach"), stats.texts)
+  }
+
+  @Test
+  fun shouldRejectShortAnswerStatsOfOtherFormat() {
+    givenRound(WordcloudContentFormatData())
+    Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
+      roundStatsService.getShortAnswerRoundStatsByRoundId(ROUND_ID, reader)
     }
   }
 }
