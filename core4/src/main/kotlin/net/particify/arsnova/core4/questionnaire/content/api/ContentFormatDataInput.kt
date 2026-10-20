@@ -8,6 +8,7 @@ import net.particify.arsnova.core4.questionnaire.content.ContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ScaleContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ShortAnswerContentFormatData
+import net.particify.arsnova.core4.questionnaire.content.SortContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.TextContentFormatData
 import org.springframework.data.web.ProjectedPayload
 
@@ -16,6 +17,7 @@ data class ContentFormatDataInput(
     val numeric: NumericContentFormatDataInput?,
     val scale: ScaleContentFormatDataInput?,
     val shortAnswer: ShortAnswerContentFormatDataInput?,
+    val sort: SortContentFormatDataInput?,
     val text: TextContentFormatDataInput?
 ) {
 
@@ -28,6 +30,7 @@ data class ContentFormatDataInput(
               numeric.minNumber, numeric.maxNumber, numeric.correctNumber, numeric.tolerance)
       scale != null -> ScaleContentFormatData(scale.template, scale.neutralOption)
       shortAnswer != null -> ShortAnswerContentFormatData(shortAnswer.correctTerms)
+      sort != null -> SortContentFormatData.shuffled(sort.options)
       text != null -> TextContentFormatData(text.answersPublished)
       else -> error("No FormatData available.")
     }
@@ -57,6 +60,11 @@ data class ContentFormatDataInput(
   @ProjectedPayload
   interface ShortAnswerContentFormatDataInput {
     val correctTerms: List<String>
+  }
+
+  @ProjectedPayload
+  interface SortContentFormatDataInput {
+    val options: List<String>
   }
 
   @ProjectedPayload

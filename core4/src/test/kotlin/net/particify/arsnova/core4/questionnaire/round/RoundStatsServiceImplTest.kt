@@ -12,6 +12,7 @@ import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ScaleAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ShortAnswerAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.answer.SortAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
@@ -20,6 +21,7 @@ import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatDat
 import net.particify.arsnova.core4.questionnaire.content.ScaleContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ShortAnswerContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
+import net.particify.arsnova.core4.questionnaire.content.SortContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
 import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
@@ -476,6 +478,39 @@ class RoundStatsServiceImplTest {
     givenRound(WordcloudContentFormatData())
     Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
       roundStatsService.getShortAnswerRoundStatsByRoundId(ROUND_ID, reader)
+    }
+  }
+
+  @Test
+  fun shouldCountSortCombinationsMostFrequentFirstAndTiesInAnswerOrder() {
+    val orders = listOf(listOf(1, 0, 2), listOf(0, 1, 2), listOf(2, 1, 0), listOf(0, 1, 2), null)
+    givenRound(
+        SortContentFormatData(listOf("A", "B", "C")),
+        *orders.map { it?.let { order -> SortAnswerFormatData(order) } }.toTypedArray())
+
+    val combinations = roundStatsService.getSortRoundStatsByRoundId(ROUND_ID).combinations
+
+    Assertions.assertEquals(
+        listOf(
+            SortCombination(listOf(0, 1, 2), 2),
+            SortCombination(listOf(1, 0, 2), 1),
+            SortCombination(listOf(2, 1, 0), 1)),
+        combinations)
+  }
+
+  @Test
+  fun shouldReturnNoSortCombinationsWithoutAnswers() {
+    givenRound(SortContentFormatData(listOf("A", "B")))
+    Assertions.assertEquals(
+        listOf<SortCombination>(),
+        roundStatsService.getSortRoundStatsByRoundId(ROUND_ID).combinations)
+  }
+
+  @Test
+  fun shouldRejectSortStatsOfOtherFormat() {
+    givenRound(WordcloudContentFormatData())
+    Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
+      roundStatsService.getSortRoundStatsByRoundId(ROUND_ID)
     }
   }
 }

@@ -31,6 +31,7 @@ extend type Mutation {
     input: CreateShortAnswerContentInput!
   ): Content
   createQuestionnaireSlideContent(input: CreateSlideContentInput!): Content
+  createQuestionnaireSortContent(input: CreateSortContentInput!): Content
   createQuestionnaireTextContent(input: CreateTextContentInput!): Content
   createQuestionnaireWordcloudContent(
     input: CreateWordcloudContentInput!
@@ -57,6 +58,7 @@ extend type Mutation {
     input: UpdateShortAnswerContentInput!
   ): Content
   updateQuestionnaireSlideContent(input: UpdateSlideContentInput!): Content
+  updateQuestionnaireSortContent(input: UpdateSortContentInput!): Content
   updateQuestionnaireTextContent(input: UpdateTextContentInput!): Content
   updateQuestionnaireWordcloudContent(
     input: UpdateWordcloudContentInput!
@@ -100,6 +102,7 @@ union ContentFormatData =
   | ScaleContentFormatData
   | ShortAnswerContentFormatData
   | SlideContentFormatData
+  | SortContentFormatData
   | TextContentFormatData
   | WordcloudContentFormatData
 
@@ -157,6 +160,12 @@ type ShortAnswerContentFormatData {
 
 type SlideContentFormatData {
   format: ContentType!
+}
+
+type SortContentFormatData {
+  format: ContentType!
+  options: [AnswerOption!]!
+  correctOrder: [Int!]
 }
 
 type TextContentFormatData {
@@ -285,6 +294,24 @@ input CreateSlideContentInput {
 input UpdateSlideContentInput {
   id: UUID!
   body: String!
+}
+
+input CreateSortContentInput {
+  questionnaireId: UUID!
+  body: String!
+  options: [String!]!
+  duration: Int
+  weight: Int
+  abstentionsAllowed: Boolean
+}
+
+input UpdateSortContentInput {
+  id: UUID!
+  body: String!
+  options: [String!]!
+  duration: Int
+  weight: Int
+  abstentionsAllowed: Boolean
 }
 
 input UpdateWordcloudContentInput {

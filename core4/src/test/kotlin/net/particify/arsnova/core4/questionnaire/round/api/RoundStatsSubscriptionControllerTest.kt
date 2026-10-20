@@ -17,6 +17,8 @@ import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.ScaleContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.ShortAnswerContentRoundStats
+import net.particify.arsnova.core4.questionnaire.round.SortCombination
+import net.particify.arsnova.core4.questionnaire.round.SortContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.WordcloudContentRoundStats
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -237,6 +239,26 @@ class RoundStatsSubscriptionControllerTest {
         }
         .thenAwait(SAMPLE_INTERVAL)
         .assertNext { Assertions.assertEquals(listOf("Frankfurt am Main"), it.texts) }
+        .then { publishAnswerChanged(OTHER_ROUND_ID) }
+        .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
+  @Test
+  fun shouldEmitSortStatsForAnswerOfSubscribedRound() {
+    val stats = SortContentRoundStats(listOf(SortCombination(listOf(1, 0), 2)))
+    Mockito.`when`(roundStatsServiceImpl.getSortRoundStatsByRoundId(SUBSCRIBED_ROUND_ID))
+        .thenReturn(stats)
+
+    StepVerifier.withVirtualTime {
+          controller.questionnaireSortRoundStatsUpdated(SUBSCRIBED_ROUND_ID)
+        }
+        .expectSubscription()
+        .expectNext(stats)
+        .then { publishAnswerChanged(SUBSCRIBED_ROUND_ID) }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(stats)
         .then { publishAnswerChanged(OTHER_ROUND_ID) }
         .expectNoEvent(SAMPLE_INTERVAL.multipliedBy(2))
         .thenCancel()

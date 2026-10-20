@@ -14,12 +14,14 @@ import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ScaleAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ShortAnswerAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.answer.SortAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ScaleContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.ShortAnswerContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
+import net.particify.arsnova.core4.questionnaire.content.SortContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.normalizeAnswerText
 import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
@@ -178,6 +180,23 @@ class RoundStatsServiceImpl(
         aggregated.map { it.text },
         aggregated.map { it.count },
         aggregated.map { it.mostCommonVariant })
+  }
+
+  @Transactional
+  fun getSortRoundStatsByRoundId(roundId: UUID): SortContentRoundStats {
+    val round = roundServiceImpl.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
+    if (round.content?.formatData !is SortContentFormatData) {
+      throw ContentFormatDataInvalidException("Content is not a sort content")
+    }
+    val combinations =
+        answerServiceImpl
+            .findByRoundIdAndHiddenFalseOrderByIdAsc(roundId)
+            .mapNotNull { (it.formatData as? SortAnswerFormatData)?.selectedChoiceIndexes }
+            .groupingBy { it }
+            .eachCount()
+            .map { (selectedChoiceIndexes, count) -> SortCombination(selectedChoiceIndexes, count) }
+            .sortedByDescending { it.count }
+    return SortContentRoundStats(combinations)
   }
 
   @Transactional

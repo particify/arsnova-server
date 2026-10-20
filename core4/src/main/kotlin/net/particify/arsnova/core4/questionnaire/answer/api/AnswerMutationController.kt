@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.questionnaire.answer.ChoiceAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.NumericAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ScaleAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.ShortAnswerAnswerFormatData
+import net.particify.arsnova.core4.questionnaire.answer.SortAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.TextAnswerFormatData
 import net.particify.arsnova.core4.questionnaire.answer.WordcloudAnswerFormatData
 import org.springframework.graphql.data.method.annotation.Argument
@@ -53,6 +54,15 @@ class AnswerMutationController(private val answerService: AnswerServiceImpl) {
       @Argument input: CreateShortAnswerAnswerInput,
   ): Answer {
     return answerService.createAnswer(input.roundId, ShortAnswerAnswerFormatData(input.body))
+  }
+
+  @MutationMapping
+  @PreAuthorize("hasPermission(#input.roundId, 'Round', 'read')")
+  fun createQuestionnaireSortAnswer(
+      @Argument input: CreateSortAnswerInput,
+  ): Answer {
+    return answerService.createAnswer(
+        input.roundId, SortAnswerFormatData(input.selectedChoiceIndexes))
   }
 
   @MutationMapping
