@@ -39,6 +39,7 @@ class QuestionnaireSchemaTests {
     assertRequired(mutation("createQuestionnaire"), "input")
     assertRequired(mutation("createQuestionnaireChoiceAnswer"), "input")
     assertRequired(mutation("createQuestionnaireNumericAnswer"), "input")
+    assertRequired(mutation("createQuestionnaireScaleAnswer"), "input")
     assertRequired(mutation("createQuestionnaireTextAnswer"), "input")
     assertRequired(mutation("createQuestionnaireWordcloudAnswer"), "input")
     assertRequired(mutation("createQuestionnaireAbstention"), "roundId")
@@ -46,12 +47,14 @@ class QuestionnaireSchemaTests {
     assertRequired(mutation("createQuestionnaireChoiceContent"), "input")
     assertRequired(mutation("createQuestionnaireFlashcardContent"), "input")
     assertRequired(mutation("createQuestionnaireNumericContent"), "input")
+    assertRequired(mutation("createQuestionnaireScaleContent"), "input")
     assertRequired(mutation("createQuestionnaireSlideContent"), "input")
     assertRequired(mutation("createQuestionnaireTextContent"), "input")
     assertRequired(mutation("createQuestionnaireWordcloudContent"), "input")
     assertRequired(mutation("updateQuestionnaireChoiceContent"), "input")
     assertRequired(mutation("updateQuestionnaireFlashcardContent"), "input")
     assertRequired(mutation("updateQuestionnaireNumericContent"), "input")
+    assertRequired(mutation("updateQuestionnaireScaleContent"), "input")
     assertRequired(mutation("updateQuestionnaireSlideContent"), "input")
     assertRequired(mutation("updateQuestionnaireTextContent"), "input")
     assertRequired(mutation("updateQuestionnaireWordcloudContent"), "input")
@@ -82,6 +85,11 @@ class QuestionnaireSchemaTests {
     val textFormatData = graphQlSource.schema().getObjectType("TextContentFormatData")
     Assertions.assertInstanceOf(
         GraphQLNonNull::class.java, textFormatData.getFieldDefinition("answersPublished").type)
+    val scaleFormatData = graphQlSource.schema().getObjectType("ScaleContentFormatData")
+    listOf("template", "neutralOption").forEach {
+      Assertions.assertInstanceOf(
+          GraphQLNonNull::class.java, scaleFormatData.getFieldDefinition(it).type, it)
+    }
   }
 
   @Test

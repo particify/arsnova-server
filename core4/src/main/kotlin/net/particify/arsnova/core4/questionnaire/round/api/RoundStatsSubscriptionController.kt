@@ -14,6 +14,7 @@ import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.NumericContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
+import net.particify.arsnova.core4.questionnaire.round.ScaleContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.WordcloudContentRoundStats
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.method.annotation.Argument
@@ -64,6 +65,11 @@ class RoundStatsSubscriptionController(
       statsFlux(roundId, NumericContentRoundStats::withoutSolution) {
         roundStatsServiceImpl.getNumericRoundStatsWithSolutionByRoundId(roundId)
       }
+
+  @SubscriptionMapping
+  @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
+  fun questionnaireScaleRoundStatsUpdated(@Argument roundId: UUID): Flux<ScaleContentRoundStats> =
+      statsFlux(roundId) { roundStatsServiceImpl.getScaleRoundStatsByRoundId(roundId) }
 
   @SubscriptionMapping
   @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")

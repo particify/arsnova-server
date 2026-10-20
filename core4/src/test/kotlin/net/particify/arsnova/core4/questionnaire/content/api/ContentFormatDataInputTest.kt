@@ -20,6 +20,7 @@ class ContentFormatDataInputTest {
                   override val multiple = true
                 },
             numeric = null,
+            scale = null,
             text = null)
 
     Assertions.assertEquals(
@@ -32,6 +33,7 @@ class ContentFormatDataInputTest {
         ContentFormatDataInput(
             choice = null,
             numeric = null,
+            scale = null,
             text =
                 object : ContentFormatDataInput.TextContentFormatDataInput {
                   override val answersPublished = true
@@ -43,7 +45,8 @@ class ContentFormatDataInputTest {
   @Test
   fun shouldRejectInputWithoutFormat() {
     Assertions.assertThrows(IllegalStateException::class.java) {
-      ContentFormatDataInput(choice = null, numeric = null, text = null).toFormatData()
+      ContentFormatDataInput(choice = null, numeric = null, scale = null, text = null)
+          .toFormatData()
     }
   }
 }
