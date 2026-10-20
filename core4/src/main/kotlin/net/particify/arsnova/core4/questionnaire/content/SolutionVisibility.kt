@@ -4,6 +4,7 @@
 package net.particify.arsnova.core4.questionnaire.content
 
 import org.springframework.security.access.PermissionEvaluator
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
@@ -14,10 +15,17 @@ import org.springframework.stereotype.Component
  */
 @Component
 class SolutionVisibility(private val permissionEvaluator: PermissionEvaluator) {
-  fun maySeeSolution(content: Content): Boolean {
+  fun maySeeSolution(content: Content): Boolean =
+      maySeeSolution(content, SecurityContextHolder.getContext().authentication)
+
+  /**
+   * Decides for [authentication] rather than the current user, for code running without a security
+   * context, like the emissions of a subscription.
+   */
+  fun maySeeSolution(content: Content, authentication: Authentication?): Boolean {
     val questionnaire = content.questionnaire ?: return false
     return questionnaire.correctOptionsPublished == true ||
-        isPrivileged(permissionEvaluator, content)
+        isPrivileged(permissionEvaluator, content, authentication)
   }
 
   /** Statistics are the answer counts and the round stats derived from the answers. */
@@ -28,8 +36,17 @@ class SolutionVisibility(private val permissionEvaluator: PermissionEvaluator) {
 
   companion object {
     /** Whether the current user may edit [content] or moderate its room. */
-    fun isPrivileged(permissionEvaluator: PermissionEvaluator, content: Content): Boolean {
-      val authentication = SecurityContextHolder.getContext().authentication ?: return false
+    fun isPrivileged(permissionEvaluator: PermissionEvaluator, content: Content): Boolean =
+        isPrivileged(
+            permissionEvaluator, content, SecurityContextHolder.getContext().authentication)
+
+    /** Whether [authentication] may edit [content] or moderate its room. */
+    fun isPrivileged(
+        permissionEvaluator: PermissionEvaluator,
+        content: Content,
+        authentication: Authentication?
+    ): Boolean {
+      if (authentication == null) return false
       val contentId = content.id ?: return false
       if (permissionEvaluator.hasPermission(authentication, contentId, "Content", "write")) {
         return true

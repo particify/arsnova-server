@@ -8,8 +8,10 @@ import java.util.UUID
 import kotlin.reflect.KClass
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentPermissionEvaluator
+import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
 import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
+import net.particify.arsnova.core4.questionnaire.round.NumericContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.WordcloudContentRoundStats
@@ -56,6 +58,15 @@ class RoundStatsSubscriptionController(
 
   @SubscriptionMapping
   @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
+  fun questionnaireNumericRoundStatsUpdated(
+      @Argument roundId: UUID
+  ): Flux<NumericContentRoundStats> =
+      statsFlux(roundId, NumericContentRoundStats::withoutSolution) {
+        roundStatsServiceImpl.getNumericRoundStatsWithSolutionByRoundId(roundId)
+      }
+
+  @SubscriptionMapping
+  @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
   fun questionnaireWordcloudRoundStatsUpdated(
       @Argument roundId: UUID
   ): Flux<WordcloudContentRoundStats> =
@@ -66,25 +77,34 @@ class RoundStatsSubscriptionController(
    * changed, at most once per sample interval. All subscribers of a round share one computation,
    * see [SharedFluxRegistry].
    *
-   * Publishing of the statistics and release of the content can change while subscribed, so every
-   * emission is checked against the content it carries, which takes no database read. Whether the
-   * subscriber moderates the questionnaire, and so sees the statistics regardless, is decided once
-   * here, since the emissions run without the security context: a membership revoked while
-   * subscribed only takes effect on the next subscription.
+   * Publishing of the statistics and of the solution, as well as release of the content, can change
+   * while subscribed, so every emission is checked against the content it carries, which takes no
+   * database read. The shared stats include the solution, which [withoutSolution] leaves out for a
+   * subscriber who may not see it yet. Whether the subscriber moderates the questionnaire, and so
+   * sees both regardless, is decided once here, since the emissions run without the security
+   * context: a membership revoked while subscribed only takes effect on the next subscription.
    */
   private inline fun <reified T : Any> statsFlux(
       roundId: UUID,
+      noinline withoutSolution: (T) -> T = { it },
       noinline supplier: () -> T
   ): Flux<T> {
     val moderator = isModerator(roundId)
     return sharedStats
         .flux(StatsKey(roundId, T::class)) { StatsEmission(findContent(roundId), supplier()) }
         .filter { moderator || maySeeStatistics(it.content) }
-        .map { it.stats as T }
+        .map { emission ->
+          val stats = emission.stats as T
+          if (moderator || isSolutionPublished(emission.content)) stats else withoutSolution(stats)
+        }
   }
 
   private fun maySeeStatistics(content: Content): Boolean =
       contentPermissionEvaluator.areStatisticsPublishedToParticipants(content)
+
+  /** For everyone but moderators, as in [SolutionVisibility.maySeeSolution]. */
+  private fun isSolutionPublished(content: Content): Boolean =
+      content.questionnaire?.correctOptionsPublished == true
 
   /** Owners and editors moderate as well. */
   private fun isModerator(roundId: UUID): Boolean {

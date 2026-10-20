@@ -21,6 +21,7 @@ extend type Mutation {
   createQuestionnaireFlashcardContent(
     input: CreateFlashcardContentInput!
   ): Content
+  createQuestionnaireNumericContent(input: CreateNumericContentInput!): Content
   createQuestionnaireSlideContent(input: CreateSlideContentInput!): Content
   createQuestionnaireTextContent(input: CreateTextContentInput!): Content
   createQuestionnaireWordcloudContent(
@@ -41,6 +42,7 @@ extend type Mutation {
   updateQuestionnaireFlashcardContent(
     input: UpdateFlashcardContentInput!
   ): Content
+  updateQuestionnaireNumericContent(input: UpdateNumericContentInput!): Content
   updateQuestionnaireSlideContent(input: UpdateSlideContentInput!): Content
   updateQuestionnaireTextContent(input: UpdateTextContentInput!): Content
   updateQuestionnaireWordcloudContent(
@@ -81,6 +83,7 @@ type ContentWithAnswer {
 union ContentFormatData =
   | ChoiceContentFormatData
   | FlashcardContentFormatData
+  | NumericContentFormatData
   | ScaleContentFormatData
   | SlideContentFormatData
   | TextContentFormatData
@@ -102,6 +105,14 @@ type FlashcardContentFormatData {
   format: ContentType!
   answer: String!
   answerRendered: String
+}
+
+type NumericContentFormatData {
+  format: ContentType!
+  minNumber: Float!
+  maxNumber: Float!
+  correctNumber: Float
+  tolerance: Float!
 }
 
 type ScaleContentFormatData {
@@ -168,6 +179,30 @@ input UpdateFlashcardContentInput {
   id: UUID!
   body: String!
   answer: String!
+}
+
+input CreateNumericContentInput {
+  questionnaireId: UUID!
+  body: String!
+  minNumber: Float!
+  maxNumber: Float!
+  correctNumber: Float
+  tolerance: Float
+  duration: Int
+  weight: Int
+  abstentionsAllowed: Boolean
+}
+
+input UpdateNumericContentInput {
+  id: UUID!
+  body: String!
+  minNumber: Float!
+  maxNumber: Float!
+  correctNumber: Float
+  tolerance: Float
+  duration: Int
+  weight: Int
+  abstentionsAllowed: Boolean
 }
 
 input CreateSlideContentInput {

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "format")
 @JsonSubTypes(
     JsonSubTypes.Type(ChoiceAnswerFormatData::class, name = "CHOICE"),
+    JsonSubTypes.Type(NumericAnswerFormatData::class, name = "NUMERIC"),
     JsonSubTypes.Type(TextAnswerFormatData::class, name = "TEXT"),
     JsonSubTypes.Type(WordcloudAnswerFormatData::class, name = "WORDCLOUD"),
 )

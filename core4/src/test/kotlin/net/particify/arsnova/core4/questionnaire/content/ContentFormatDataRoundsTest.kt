@@ -25,4 +25,9 @@ class ContentFormatDataRoundsTest {
   fun shouldSupportRoundsForWordcloud() {
     Assertions.assertTrue(WordcloudContentFormatData().supportsRounds())
   }
+
+  @Test
+  fun shouldSupportRoundsForNumeric() {
+    Assertions.assertTrue(NumericContentFormatData(0.0, 10.0).supportsRounds())
+  }
 }

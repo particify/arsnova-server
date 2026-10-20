@@ -3,6 +3,9 @@ extend type Query {
   questionnaireChoiceRoundStatsByRoundId(
     roundId: UUID!
   ): ChoiceContentRoundStats
+  questionnaireNumericRoundStatsByRoundId(
+    roundId: UUID!
+  ): NumericContentRoundStats
   questionnaireWordcloudRoundStatsByRoundId(
     roundId: UUID!
   ): WordcloudContentRoundStats
@@ -14,6 +17,9 @@ extend type Mutation {
 
 extend type Subscription {
   questionnaireChoiceRoundStatsUpdated(roundId: UUID!): ChoiceContentRoundStats
+  questionnaireNumericRoundStatsUpdated(
+    roundId: UUID!
+  ): NumericContentRoundStats
   questionnaireWordcloudRoundStatsUpdated(
     roundId: UUID!
   ): WordcloudContentRoundStats
@@ -31,6 +37,18 @@ type Round {
 
 type ChoiceContentRoundStats {
   selectionCounts: [Int!]
+}
+
+type NumericContentRoundStats {
+  selectedNumbers: [Float!]
+  counts: [Int!]
+  mean: Float!
+  median: Float!
+  standardDeviation: Float!
+  variance: Float!
+  minimum: Float!
+  maximum: Float!
+  correctAnswerFraction: Float
 }
 
 type WordcloudContentRoundStats {

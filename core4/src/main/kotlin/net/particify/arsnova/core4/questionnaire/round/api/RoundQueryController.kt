@@ -7,6 +7,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
+import net.particify.arsnova.core4.questionnaire.round.NumericContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
 import net.particify.arsnova.core4.questionnaire.round.RoundStatsServiceImpl
@@ -15,6 +16,7 @@ import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
 
 @Controller
@@ -34,6 +36,13 @@ class RoundQueryController(
   @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
   fun questionnaireChoiceRoundStatsByRoundId(@Argument roundId: UUID): ChoiceContentRoundStats {
     return roundStatsServiceImpl.getChoiceRoundStatsByRoundId(roundId)
+  }
+
+  @QueryMapping
+  @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
+  fun questionnaireNumericRoundStatsByRoundId(@Argument roundId: UUID): NumericContentRoundStats {
+    return roundStatsServiceImpl.getNumericRoundStatsByRoundId(
+        roundId, SecurityContextHolder.getContext().authentication)
   }
 
   @QueryMapping
