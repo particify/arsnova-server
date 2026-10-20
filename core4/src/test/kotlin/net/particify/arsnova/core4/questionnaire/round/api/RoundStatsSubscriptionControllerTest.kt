@@ -11,6 +11,7 @@ import net.particify.arsnova.core4.questionnaire.content.ContentPermissionEvalua
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
 import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
+import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
 import net.particify.arsnova.core4.questionnaire.round.BinaryContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.NumericContentRoundStats
@@ -50,6 +51,7 @@ private val VERIFY_TIMEOUT = Duration.ofSeconds(10)
  */
 class RoundStatsSubscriptionControllerTest {
   private val eventPublisher = RoundStatsEventPublisher()
+  private val questionnaireEventPublisher = QuestionnaireEventPublisher()
   private val roundStatsServiceImpl = Mockito.mock(RoundStatsServiceImpl::class.java)
   private val roundRepository = Mockito.mock(RoundRepository::class.java)
   private val permissionEvaluator = Mockito.mock(PermissionEvaluator::class.java)
@@ -58,6 +60,7 @@ class RoundStatsSubscriptionControllerTest {
   private val controller =
       RoundStatsSubscriptionController(
           eventPublisher,
+          questionnaireEventPublisher,
           roundStatsServiceImpl,
           roundRepository,
           ContentPermissionEvaluator(Mockito.mock(ContentRepository::class.java)),
@@ -429,6 +432,50 @@ class RoundStatsSubscriptionControllerTest {
         .then { eventPublisher.publishRoundDeleted(SUBSCRIBED_ROUND_ID) }
         .expectErrorMatches { it is RoundNotFoundException && it.id == SUBSCRIBED_ROUND_ID }
         .verify(VERIFY_TIMEOUT)
+  }
+
+  /**
+   * The stats replayed to a late joiner carry the content as read at their computation, so a
+   * withdrawal of the statistics has to recompute them, or the joiner is handed what it may no
+   * longer see.
+   */
+  @Test
+  fun shouldNotHandALateSubscriberStatsWhosePublishingWasWithdrawnSince() {
+    val published = snapshot(statisticsPublished = true)
+    val withdrawn = snapshot(statisticsPublished = false)
+    var current = published
+    Mockito.`when`(roundRepository.findById(SUBSCRIBED_ROUND_ID)).thenAnswer {
+      Optional.of(Round(id = SUBSCRIBED_ROUND_ID, content = current))
+    }
+    authenticate(moderator)
+    val late = mutableListOf<ChoiceContentRoundStats>()
+    StepVerifier.withVirtualTime { subscribeChoice() }
+        .expectSubscription()
+        .expectNext(choiceStats)
+        .then {
+          current = withdrawn
+          questionnaireEventPublisher.publishQuestionnaireUpdated(QUESTIONNAIRE_ID)
+        }
+        .thenAwait(SAMPLE_INTERVAL)
+        .expectNext(choiceStats)
+        .then {
+          authenticate(participant)
+          subscribeChoice().subscribe { late.add(it) }.dispose()
+        }
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+
+    Assertions.assertEquals(emptyList<ChoiceContentRoundStats>(), late)
+  }
+
+  /** [content] as read from the database at a time its statistics were published or not. */
+  private fun snapshot(statisticsPublished: Boolean): Content {
+    val snapshotQuestionnaire =
+        Questionnaire(
+            id = QUESTIONNAIRE_ID, published = true, statisticsPublished = statisticsPublished)
+    Mockito.`when`(permissionEvaluator.hasPermission(moderator, snapshotQuestionnaire, "moderate"))
+        .thenReturn(true)
+    return Content(id = CONTENT_ID, questionnaire = snapshotQuestionnaire, position = 0)
   }
 
   private fun givenNumericStats(): NumericContentRoundStats {

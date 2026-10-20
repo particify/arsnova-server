@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentPermissionEvaluator
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
+import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
 import net.particify.arsnova.core4.questionnaire.round.BinaryContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.NumericContentRoundStats
@@ -35,6 +36,7 @@ import reactor.core.publisher.Flux
 @SchemaMapping(typeName = "Subscription")
 class RoundStatsSubscriptionController(
     roundStatsEventPublisher: RoundStatsEventPublisher,
+    questionnaireEventPublisher: QuestionnaireEventPublisher,
     private val roundStatsServiceImpl: RoundStatsServiceImpl,
     private val roundRepository: RoundRepository,
     private val contentPermissionEvaluator: ContentPermissionEvaluator,
@@ -45,12 +47,19 @@ class RoundStatsSubscriptionController(
     private val STATS_UPDATE_SAMPLE_INTERVAL: Duration = Duration.ofSeconds(3)
   }
 
-  /** Each subscription computes the stats of its own format, so the format is part of the key. */
-  private data class StatsKey(val roundId: UUID, val format: KClass<*>)
+  /**
+   * Each subscription computes the stats of its own format, so the format is part of the key. The
+   * questionnaire is only carried along, for the changes of its release.
+   */
+  private data class StatsKey(val roundId: UUID, val format: KClass<*>, val questionnaireId: UUID?)
 
   /** The stats along with their content, whose state decides who may see them. */
   private class StatsEmission(val content: Content, val stats: Any)
 
+  /**
+   * A change of the release or of the publishing settings recomputes the stats as well, so that the
+   * content they carry, which gates them, is no older than a sample interval.
+   */
   private val sharedStats =
       SharedFluxRegistry<StatsKey, StatsEmission>(
           STATS_UPDATE_SAMPLE_INTERVAL,
@@ -60,7 +69,11 @@ class RoundStatsSubscriptionController(
                 .filter { it == key.roundId }
                 .map { RoundNotFoundException(it) }
           }) { key ->
-            roundStatsEventPublisher.answerChangedFlux().filter { it.roundId == key.roundId }
+            Flux.merge(
+                roundStatsEventPublisher.answerChangedFlux().filter { it.roundId == key.roundId },
+                questionnaireEventPublisher.questionnaireUpdatedFlux().filter {
+                  it == key.questionnaireId
+                })
           }
 
   @SubscriptionMapping
@@ -132,9 +145,11 @@ class RoundStatsSubscriptionController(
       noinline withoutSolution: (T) -> T = { it },
       noinline supplier: () -> T
   ): Flux<T> {
-    val moderator = isModerator(roundId)
+    val content = findContent(roundId)
+    val moderator = isModerator(content)
+    val key = StatsKey(roundId, T::class, content.questionnaire?.id)
     return sharedStats
-        .flux(StatsKey(roundId, T::class)) { StatsEmission(findContent(roundId), supplier()) }
+        .flux(key) { StatsEmission(findContent(roundId), supplier()) }
         .filter { moderator || maySeeStatistics(it.content) }
         .map { emission ->
           val stats = emission.stats as T
@@ -150,9 +165,9 @@ class RoundStatsSubscriptionController(
       content.questionnaire?.correctOptionsPublished == true
 
   /** Owners and editors moderate as well. */
-  private fun isModerator(roundId: UUID): Boolean {
+  private fun isModerator(content: Content): Boolean {
     val authentication = SecurityContextHolder.getContext().authentication ?: return false
-    val questionnaire = findContent(roundId).questionnaire ?: return false
+    val questionnaire = content.questionnaire ?: return false
     return permissionEvaluator.hasPermission(authentication, questionnaire, "moderate")
   }
 

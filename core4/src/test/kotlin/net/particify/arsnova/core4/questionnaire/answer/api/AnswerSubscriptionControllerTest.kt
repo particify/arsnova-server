@@ -14,6 +14,7 @@ import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.content.TextContentFormatData
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
 import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
+import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.round.api.AnswerChangedEvent
@@ -46,12 +47,14 @@ private val VERIFY_TIMEOUT = Duration.ofSeconds(10)
  */
 class AnswerSubscriptionControllerTest {
   private val eventPublisher = RoundStatsEventPublisher()
+  private val questionnaireEventPublisher = QuestionnaireEventPublisher()
   private val answerServiceImpl = Mockito.mock(AnswerServiceImpl::class.java)
   private val roundRepository = Mockito.mock(RoundRepository::class.java)
   private val permissionEvaluator = Mockito.mock(PermissionEvaluator::class.java)
   private val controller =
       AnswerSubscriptionController(
           eventPublisher,
+          questionnaireEventPublisher,
           answerServiceImpl,
           roundRepository,
           ContentPermissionEvaluator(Mockito.mock(ContentRepository::class.java)),

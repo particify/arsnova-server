@@ -13,6 +13,7 @@ import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.content.TextContentFormatData
 import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
+import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsEventPublisher
 import net.particify.arsnova.core4.questionnaire.round.api.SharedFluxRegistry
@@ -30,6 +31,7 @@ import reactor.core.publisher.Flux
 @SchemaMapping(typeName = "Subscription")
 class AnswerSubscriptionController(
     roundStatsEventPublisher: RoundStatsEventPublisher,
+    questionnaireEventPublisher: QuestionnaireEventPublisher,
     private val answerServiceImpl: AnswerServiceImpl,
     private val roundRepository: RoundRepository,
     private val contentPermissionEvaluator: ContentPermissionEvaluator,
@@ -43,16 +45,27 @@ class AnswerSubscriptionController(
   /** All answers of a round, hidden ones included, along with their content. */
   private class TextAnswersEmission(val content: Content, val answers: List<Answer>)
 
+  /** The questionnaire is only carried along, for the changes of its release. */
+  private data class AnswersKey(val roundId: UUID, val questionnaireId: UUID?)
+
+  /**
+   * A change of the release recomputes the answers as well, so that the content they carry, which
+   * gates them, is no older than a sample interval.
+   */
   private val sharedAnswers =
-      SharedFluxRegistry<UUID, TextAnswersEmission>(
+      SharedFluxRegistry<AnswersKey, TextAnswersEmission>(
           ANSWERS_UPDATE_SAMPLE_INTERVAL,
           ends = { key ->
             roundStatsEventPublisher
                 .roundDeletedFlux()
-                .filter { it == key }
+                .filter { it == key.roundId }
                 .map { RoundNotFoundException(it) }
-          }) { roundId ->
-            roundStatsEventPublisher.answerChangedFlux().filter { it.roundId == roundId }
+          }) { key ->
+            Flux.merge(
+                roundStatsEventPublisher.answerChangedFlux().filter { it.roundId == key.roundId },
+                questionnaireEventPublisher.questionnaireUpdatedFlux().filter {
+                  it == key.questionnaireId
+                })
           }
 
   /**
@@ -73,9 +86,10 @@ class AnswerSubscriptionController(
   @SubscriptionMapping
   @PreAuthorize("hasPermission(#roundId, 'Round', 'read')")
   fun questionnaireTextAnswersUpdated(@Argument roundId: UUID): Flux<List<Answer>> {
-    val privileged = SolutionVisibility.isPrivileged(permissionEvaluator, findContent(roundId))
+    val content = findContent(roundId)
+    val privileged = SolutionVisibility.isPrivileged(permissionEvaluator, content)
     return sharedAnswers
-        .flux(roundId) { findAllTextAnswers(roundId) }
+        .flux(AnswersKey(roundId, content.questionnaire?.id)) { findAllTextAnswers(roundId) }
         .filter { privileged || contentPermissionEvaluator.isVisibleToParticipants(it.content) }
         .map { visibleAnswers(it, privileged) }
   }
