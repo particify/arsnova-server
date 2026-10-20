@@ -11,6 +11,7 @@ import net.particify.arsnova.core4.questionnaire.answer.AnswerRepository
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentPermissionEvaluator
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
+import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.exception.AnswerNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.security.authentication.TestingAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 private val ROOM_ID = UUID.randomUUID()
 
@@ -275,6 +277,38 @@ class QuestionnairePermissionRoleMatrixTest {
           answer(round(content(questionnaire(statisticsPublished = true)))),
           READ_STATISTICS,
           setOf())
+    }
+
+    @Test
+    fun shouldLetModeratorsModerateRegardlessOfVisibility() {
+      val moderators = EDITORS + RoomRole.MODERATOR
+      assertGrantedTo(answer(), MODERATE, moderators)
+      val unpublished = answer(round(content(questionnaire(published = false))))
+      assertGrantedTo(unpublished, MODERATE, moderators)
+    }
+
+    @Test
+    fun shouldDenyModerationOfAnswerOutsideARoom() {
+      val roomless = Questionnaire(id = UUID.randomUUID(), published = true)
+      assertGrantedTo(answer(round(content(roomless))), MODERATE, setOf())
+    }
+  }
+
+  /** Privileged readers see unpublished and hidden text answers, so moderators can unhide them. */
+  @Test
+  fun shouldTreatEditorsAndModeratorsAsPrivilegedForAContent() {
+    val content = content(questionnaire(published = false))
+    ROLES.forEach { role ->
+      SecurityContextHolder.getContext().authentication =
+          TestingAuthenticationToken(userWithRole(role), null)
+      try {
+        Assertions.assertEquals(
+            role in EDITORS + RoomRole.MODERATOR,
+            SolutionVisibility.isPrivileged(permissionEvaluator, content),
+            "$role")
+      } finally {
+        SecurityContextHolder.clearContext()
+      }
     }
   }
 

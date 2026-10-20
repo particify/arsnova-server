@@ -47,6 +47,25 @@ class Questionnaire(
 
   fun isLive(): Boolean = publishingMode == QuestionnairePublishingMode.LIVE
 
+  /** A questionnaire which releases contents one by one starts with its first one released. */
+  fun releaseFirstContent(content: Content) {
+    if (publishingMode != QuestionnairePublishingMode.ALL && publishedUpToContent == null) {
+      publishedUpToContent = content
+    }
+  }
+
+  /**
+   * Stops referencing [content] once it is no longer part of this questionnaire. A published range
+   * ending at the content shrinks to the preceding one instead of releasing the following one.
+   */
+  fun releaseReferencesTo(content: Content) {
+    if (activeRound?.content?.id == content.id) activeRound = null
+    if (publishedUpToContent?.id == content.id) {
+      val index = contents.indexOfFirst { it.id == content.id }
+      publishedUpToContent = contents.getOrNull(index - 1)
+    }
+  }
+
   /**
    * Extends the released range to [content] if it lies beyond the range's current end. The range
    * never shrinks here, so presenting an earlier content again keeps the later ones released.

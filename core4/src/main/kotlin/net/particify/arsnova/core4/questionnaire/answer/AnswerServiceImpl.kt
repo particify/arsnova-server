@@ -8,8 +8,11 @@ import java.time.Instant
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
+import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.exception.AbstentionsNotAllowedException
 import net.particify.arsnova.core4.questionnaire.exception.AnswerAlreadyExistsException
+import net.particify.arsnova.core4.questionnaire.exception.AnswerNotFoundException
+import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
 import net.particify.arsnova.core4.questionnaire.exception.RoundClosedException
@@ -25,6 +28,7 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.AuditorAware
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.access.PermissionEvaluator
 import org.springframework.stereotype.Service
 
 @Service
@@ -36,6 +40,7 @@ class AnswerServiceImpl(
     private val questionnaireRepository: QuestionnaireRepository,
     private val auditorAware: AuditorAware<UUID>,
     private val roundService: RoundServiceImpl,
+    private val permissionEvaluator: PermissionEvaluator,
 ) : AnswerRepository by answerRepository {
 
   private fun findAnswerableRound(roundId: UUID): Round {
@@ -116,6 +121,43 @@ class AnswerServiceImpl(
     val persisted = store(answer)
     publishAnswerChanged(round)
     return persisted
+  }
+
+  @Transactional
+  fun updateHidden(answerId: UUID, hidden: Boolean): Answer {
+    val answer =
+        answerRepository.findByIdOrNull(answerId) ?: throw AnswerNotFoundException(answerId)
+    if (!isHideable(answer.formatData)) {
+      throw ContentFormatDataInvalidException("Only answers typed in by participants can be hidden")
+    }
+    answer.hidden = hidden
+    val persisted = answerRepository.save(answer)
+    publishAnswerChanged(answer.round!!)
+    return persisted
+  }
+
+  /** Answers chosen from given options carry nothing a participant wrote that could need hiding. */
+  private fun isHideable(formatData: AnswerFormatData?) =
+      formatData is TextAnswerFormatData || formatData is WordcloudAnswerFormatData
+
+  /**
+   * Returns the answers of a text round. Whoever may edit the content or moderate its room gets all
+   * of them, hidden ones included so that hiding can be undone. Participants get the unhidden ones
+   * once the answers have been published; for them an unpublished set is empty rather than an
+   * error.
+   */
+  @Transactional
+  fun findTextAnswersByRoundId(roundId: UUID): List<Answer> {
+    val round = roundRepository.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
+    val content = round.content!!
+    val formatData = contentServiceImpl.asTextFormatData(content)
+    return when {
+      SolutionVisibility.isPrivileged(permissionEvaluator, content) ->
+          answerRepository.findByRoundIdOrderByIdAsc(roundId)
+      formatData.answersPublished ->
+          answerRepository.findByRoundIdAndHiddenFalseOrderByIdAsc(roundId)
+      else -> emptyList()
+    }
   }
 
   @Transactional

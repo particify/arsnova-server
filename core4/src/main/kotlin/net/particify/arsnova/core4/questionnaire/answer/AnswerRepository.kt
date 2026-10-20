@@ -17,6 +17,8 @@ interface AnswerRepository : JpaRepository<Answer, UUID> {
       createdBy: UUID
   ): List<Answer>
 
+  fun findByRoundIdOrderByIdAsc(roundId: UUID): List<Answer>
+
   fun findByRoundIdAndHiddenFalseOrderByIdAsc(roundId: UUID): List<Answer>
 
   fun countByRoundIdAndHiddenFalse(roundId: UUID): Int

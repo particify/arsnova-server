@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.data.domain.AuditorAware
+import org.springframework.security.access.PermissionEvaluator
 
 private val ROUND_ID = UUID.randomUUID()
 
@@ -34,7 +35,8 @@ class AnswerServiceImplNonAnswerableTest {
           RoundStatsEventPublisher(),
           Mockito.mock(QuestionnaireRepository::class.java),
           AuditorAware { Optional.of(UUID.randomUUID()) },
-          Mockito.mock(RoundServiceImpl::class.java))
+          Mockito.mock(RoundServiceImpl::class.java),
+          Mockito.mock(PermissionEvaluator::class.java))
 
   /** The round is open, so only the format can be what refuses the answer. */
   private fun givenOpenRound(formatData: ContentFormatData) {

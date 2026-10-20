@@ -22,6 +22,7 @@ extend type Mutation {
     input: CreateFlashcardContentInput!
   ): Content
   createQuestionnaireSlideContent(input: CreateSlideContentInput!): Content
+  createQuestionnaireTextContent(input: CreateTextContentInput!): Content
   createQuestionnaireWordcloudContent(
     input: CreateWordcloudContentInput!
   ): Content
@@ -32,11 +33,16 @@ extend type Mutation {
     questionnaireId: UUID!
   ): Content
   resetBannedQuestionnaireWordcloudContentKeywords(contentId: UUID!): Content
+  toggleQuestionnaireTextContentAnswersPublished(
+    contentId: UUID!
+    published: Boolean!
+  ): Content
   updateQuestionnaireChoiceContent(input: UpdateChoiceContentInput!): Content
   updateQuestionnaireFlashcardContent(
     input: UpdateFlashcardContentInput!
   ): Content
   updateQuestionnaireSlideContent(input: UpdateSlideContentInput!): Content
+  updateQuestionnaireTextContent(input: UpdateTextContentInput!): Content
   updateQuestionnaireWordcloudContent(
     input: UpdateWordcloudContentInput!
   ): Content
@@ -108,6 +114,7 @@ type SlideContentFormatData {
 
 type TextContentFormatData {
   format: ContentType!
+  answersPublished: Boolean!
 }
 
 type WordcloudContentFormatData {
@@ -179,6 +186,20 @@ input UpdateWordcloudContentInput {
   duration: Int
   abstentionsAllowed: Boolean
   maxAnswers: Int!
+}
+
+input CreateTextContentInput {
+  questionnaireId: UUID!
+  body: String!
+  duration: Int
+  abstentionsAllowed: Boolean
+}
+
+input UpdateTextContentInput {
+  id: UUID!
+  body: String!
+  duration: Int
+  abstentionsAllowed: Boolean
 }
 
 input CreateWordcloudContentInput {

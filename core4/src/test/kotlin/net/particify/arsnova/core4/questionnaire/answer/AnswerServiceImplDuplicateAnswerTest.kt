@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.AuditorAware
+import org.springframework.security.access.PermissionEvaluator
 
 private val ROUND_ID = UUID.randomUUID()
 private val USER_ID = UUID.randomUUID()
@@ -36,7 +37,8 @@ class AnswerServiceImplDuplicateAnswerTest {
           RoundStatsEventPublisher(),
           Mockito.mock(QuestionnaireRepository::class.java),
           AuditorAware { Optional.of(USER_ID) },
-          Mockito.mock(RoundServiceImpl::class.java))
+          Mockito.mock(RoundServiceImpl::class.java),
+          Mockito.mock(PermissionEvaluator::class.java))
 
   init {
     val content =

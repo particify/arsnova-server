@@ -43,6 +43,12 @@ class AnswerQueryController(
   }
 
   @QueryMapping
+  @PreAuthorize("hasPermission(#roundId, 'Round', 'read')")
+  fun questionnaireTextAnswersByRoundId(@Argument roundId: UUID): List<Answer> {
+    return answerServiceImpl.findTextAnswersByRoundId(roundId)
+  }
+
+  @QueryMapping
   @PreAuthorize("hasPermission(#questionnaireId, 'Questionnaire', 'read')")
   fun questionnaireContentAnswerResultsByQuestionnaireId(
       @Argument questionnaireId: UUID,

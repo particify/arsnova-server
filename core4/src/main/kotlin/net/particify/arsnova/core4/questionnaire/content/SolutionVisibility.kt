@@ -3,7 +3,6 @@
  */
 package net.particify.arsnova.core4.questionnaire.content
 
-import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import org.springframework.security.access.PermissionEvaluator
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
@@ -17,22 +16,26 @@ import org.springframework.stereotype.Component
 class SolutionVisibility(private val permissionEvaluator: PermissionEvaluator) {
   fun maySeeSolution(content: Content): Boolean {
     val questionnaire = content.questionnaire ?: return false
-    return questionnaire.correctOptionsPublished == true || isPrivileged(content, questionnaire)
+    return questionnaire.correctOptionsPublished == true ||
+        isPrivileged(permissionEvaluator, content)
   }
 
   /** Statistics are the answer counts and the round stats derived from the answers. */
   fun maySeeStatistics(content: Content): Boolean {
     val questionnaire = content.questionnaire ?: return false
-    return questionnaire.statisticsPublished == true || isPrivileged(content, questionnaire)
+    return questionnaire.statisticsPublished == true || isPrivileged(permissionEvaluator, content)
   }
 
-  private fun isPrivileged(content: Content, questionnaire: Questionnaire): Boolean {
-    val authentication = SecurityContextHolder.getContext().authentication ?: return false
-    val contentId = content.id ?: return false
-    if (permissionEvaluator.hasPermission(authentication, contentId, "Content", "write")) {
-      return true
+  companion object {
+    /** Whether the current user may edit [content] or moderate its room. */
+    fun isPrivileged(permissionEvaluator: PermissionEvaluator, content: Content): Boolean {
+      val authentication = SecurityContextHolder.getContext().authentication ?: return false
+      val contentId = content.id ?: return false
+      if (permissionEvaluator.hasPermission(authentication, contentId, "Content", "write")) {
+        return true
+      }
+      val roomId = content.questionnaire?.roomId ?: return false
+      return permissionEvaluator.hasPermission(authentication, roomId, "Room", "moderate")
     }
-    val roomId = questionnaire.roomId ?: return false
-    return permissionEvaluator.hasPermission(authentication, roomId, "Room", "moderate")
   }
 }
