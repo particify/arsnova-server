@@ -11,13 +11,15 @@ import org.springframework.stereotype.Service
 @Service
 class RoomBulkDeletionService(
     val roomService: RoomServiceImpl,
-    val membershipService: MembershipServiceImpl
+    val membershipService: MembershipServiceImpl,
+    val roomUserAliasService: RoomUserAliasServiceImpl
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   @Transactional
   fun deleteRoomsAndMembershipsByUserId(userId: UUID) {
     logger.debug("Deleting all rooms and memberships for user {}.", userId)
+    roomUserAliasService.deleteAllByUserId(userId)
     val ownedIds = membershipService.findIdsByIdUserIdAndIsOwner(userId)
     ownedIds.forEach { roomService.deleteById(it.roomId!!) }
     membershipService.deleteAllByIdUserId(userId)
