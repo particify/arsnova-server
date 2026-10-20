@@ -44,16 +44,24 @@ class AnswerSubscriptionController(
   private class TextAnswersEmission(val content: Content, val answers: List<Answer>)
 
   private val sharedAnswers =
-      SharedFluxRegistry<UUID, TextAnswersEmission>(ANSWERS_UPDATE_SAMPLE_INTERVAL) { roundId ->
-        roundStatsEventPublisher.answerChangedFlux().filter { it.roundId == roundId }
-      }
+      SharedFluxRegistry<UUID, TextAnswersEmission>(
+          ANSWERS_UPDATE_SAMPLE_INTERVAL,
+          ends = { key ->
+            roundStatsEventPublisher
+                .roundDeletedFlux()
+                .filter { it == key }
+                .map { RoundNotFoundException(it) }
+          }) { roundId ->
+            roundStatsEventPublisher.answerChangedFlux().filter { it.roundId == roundId }
+          }
 
   /**
    * Emits the answers visible to the subscriber, starting with the current ones and then whenever
    * the round's answer set changes, at most once per sample interval, so that both newly submitted
    * and newly hidden answers reach every viewer. All subscribers of a round share one computation
    * of all of its answers, see [SharedFluxRegistry], and each gets those
-   * [AnswerServiceImpl.findTextAnswersByRoundId] would return to them.
+   * [AnswerServiceImpl.findTextAnswersByRoundId] would return to them. Deleting the round ends the
+   * stream with [RoundNotFoundException].
    *
    * Whether the subscriber may edit the content or moderate its room, and so sees hidden and
    * unpublished answers of an unreleased content too, is decided once here, since the emissions run

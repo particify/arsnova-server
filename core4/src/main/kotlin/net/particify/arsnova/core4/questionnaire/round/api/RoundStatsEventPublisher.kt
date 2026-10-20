@@ -33,6 +33,9 @@ class RoundStatsEventPublisher {
           .multicast()
           .onBackpressureBuffer<AnswerChangedEvent>(Queues.SMALL_BUFFER_SIZE, false)
 
+  /** A deletion nobody follows concerns nobody, so it is neither buffered nor reported. */
+  private val roundDeletedSink = Sinks.many().multicast().directBestEffort<UUID>()
+
   /**
    * Emits once the current transaction has committed, as subscribers react by reading the changed
    * data right away: emitted before, they could read the state without the change and, with nothing
@@ -43,24 +46,40 @@ class RoundStatsEventPublisher {
    * worth knowing about since it means the emission rate outgrew the buffer.
    */
   fun publishAnswerChanged(event: AnswerChangedEvent) {
+    afterCommit { emit(answerChangedSink, event, "answer changed", event.roundId) }
+  }
+
+  /**
+   * Signals that a round was deleted, so that whoever follows it can let go of it. Emitted once the
+   * current transaction has committed, like [publishAnswerChanged].
+   */
+  fun publishRoundDeleted(roundId: UUID) {
+    afterCommit { emit(roundDeletedSink, roundId, "round deleted", roundId) }
+  }
+
+  private fun afterCommit(action: () -> Unit) {
     if (TransactionSynchronizationManager.isSynchronizationActive()) {
       TransactionSynchronizationManager.registerSynchronization(
           object : TransactionSynchronization {
-            override fun afterCommit() = emit(event)
+            override fun afterCommit() = action()
           })
     } else {
-      emit(event)
+      action()
     }
   }
 
-  private fun emit(event: AnswerChangedEvent) {
-    val result = answerChangedSink.tryEmitNext(event)
-    if (result.isFailure) {
-      logger.warn("Dropped answer changed event for round {}: {}", event.roundId, result)
+  private fun <T : Any> emit(sink: Sinks.Many<T>, event: T, name: String, roundId: UUID) {
+    val result = sink.tryEmitNext(event)
+    if (result.isFailure && result != Sinks.EmitResult.FAIL_ZERO_SUBSCRIBER) {
+      logger.warn("Dropped {} event for round {}: {}", name, roundId, result)
     }
   }
 
   fun answerChangedFlux(): Flux<AnswerChangedEvent> {
     return answerChangedSink.asFlux().doOnError { logger.error(it.message) }
+  }
+
+  fun roundDeletedFlux(): Flux<UUID> {
+    return roundDeletedSink.asFlux().doOnError { logger.error(it.message) }
   }
 }

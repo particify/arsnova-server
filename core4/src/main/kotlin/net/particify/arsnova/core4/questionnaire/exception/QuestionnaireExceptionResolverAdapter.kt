@@ -14,34 +14,38 @@ import org.springframework.stereotype.Component
 class QuestionnaireExceptionResolverAdapter : DataFetcherExceptionResolverAdapter() {
   override fun resolveToSingleError(ex: Throwable, env: DataFetchingEnvironment): GraphQLError? {
     val builder = GraphqlErrorBuilder.newError(env)
+    val notFound = notFoundMessage(ex)
     val error =
-        when (ex) {
-          is QuestionnaireNotFoundException ->
-              builder
-                  .errorType(ErrorType.NOT_FOUND)
-                  .message(if (ex.id != null) "${ex.message}: ${ex.id}" else ex.message)
-          is ContentNotFoundException ->
-              builder
-                  .errorType(ErrorType.NOT_FOUND)
-                  .message(if (ex.id != null) "${ex.message}: ${ex.id}" else ex.message)
-          is RoundNotFoundException ->
-              builder
-                  .errorType(ErrorType.NOT_FOUND)
-                  .message(if (ex.id != null) "${ex.message}: ${ex.id}" else ex.message)
-          is AnswerNotFoundException ->
-              builder
-                  .errorType(ErrorType.NOT_FOUND)
-                  .message(if (ex.id != null) "${ex.message}: ${ex.id}" else ex.message)
-          is AbstentionsNotAllowedException,
-          is AnswerAlreadyExistsException,
-          is ContentFormatDataInvalidException,
-          is QuestionnaireWithNameAlreadyExistsException,
-          is RoundClosedException,
-          is RoundExpiredException,
-          is RoundsNotSupportedException ->
-              builder.errorType(ErrorType.BAD_REQUEST).message(ex.message)
+        when {
+          notFound != null -> builder.errorType(ErrorType.NOT_FOUND).message(notFound)
+          isBadRequest(ex) -> builder.errorType(ErrorType.BAD_REQUEST).message(ex.message)
           else -> return super.resolveToSingleError(ex, env)
         }
     return error.build()
   }
+
+  private fun isBadRequest(ex: Throwable): Boolean =
+      when (ex) {
+        is AbstentionsNotAllowedException,
+        is AnswerAlreadyExistsException,
+        is ContentFormatDataInvalidException,
+        is QuestionnaireWithNameAlreadyExistsException,
+        is RoundClosedException,
+        is RoundExpiredException,
+        is RoundsNotSupportedException -> true
+        else -> false
+      }
+}
+
+/** The message reporting a missing entity of the questionnaire module, with its id if known. */
+internal fun notFoundMessage(ex: Throwable): String? {
+  val id =
+      when (ex) {
+        is AnswerNotFoundException -> ex.id
+        is ContentNotFoundException -> ex.id
+        is QuestionnaireNotFoundException -> ex.id
+        is RoundNotFoundException -> ex.id
+        else -> return null
+      }
+  return if (id != null) "${ex.message}: $id" else ex.message
 }

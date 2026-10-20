@@ -18,7 +18,11 @@ private val VERIFY_TIMEOUT = Duration.ofSeconds(10)
 
 class SharedFluxRegistryTest {
   private val changes = Sinks.many().multicast().directBestEffort<Unit>()
-  private val registry = SharedFluxRegistry<String, Int>(SAMPLE_INTERVAL) { changes.asFlux() }
+  private val ends = Sinks.many().multicast().directBestEffort<Throwable>()
+  private val registry =
+      SharedFluxRegistry<String, Int>(SAMPLE_INTERVAL, ends = { ends.asFlux() }) {
+        changes.asFlux()
+      }
 
   /** A computation which returns the given results in turn, throwing those which are errors. */
   private fun computation(vararg results: Any): () -> Int? {
@@ -64,6 +68,28 @@ class SharedFluxRegistryTest {
         .verify(VERIFY_TIMEOUT)
 
     Assertions.assertNotSame(failed, handedOnError.get())
+    StepVerifier.create(registry.flux(KEY, compute))
+        .expectNext(2)
+        .thenCancel()
+        .verify(VERIFY_TIMEOUT)
+  }
+
+  @Test
+  fun shouldEndEverySubscriberAndStartOverOnceTheKeyEnds() {
+    val compute = computation(1, 2)
+    val second = mutableListOf<Int>()
+    var secondError: Throwable? = null
+    StepVerifier.create(registry.flux(KEY, compute))
+        .expectNext(1)
+        .then {
+          registry.flux(KEY, compute).subscribe({ second.add(it) }, { secondError = it })
+          ends.tryEmitNext(IllegalStateException("Deleted"))
+        }
+        .expectErrorMessage("Deleted")
+        .verify(VERIFY_TIMEOUT)
+
+    Assertions.assertEquals(listOf(1), second)
+    Assertions.assertEquals("Deleted", secondError?.message)
     StepVerifier.create(registry.flux(KEY, compute))
         .expectNext(2)
         .thenCancel()

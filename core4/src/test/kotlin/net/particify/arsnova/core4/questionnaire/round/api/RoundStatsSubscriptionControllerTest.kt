@@ -9,6 +9,7 @@ import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentPermissionEvaluator
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
+import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
 import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import net.particify.arsnova.core4.questionnaire.round.BinaryContentRoundStats
 import net.particify.arsnova.core4.questionnaire.round.ChoiceContentRoundStats
@@ -416,6 +417,18 @@ class RoundStatsSubscriptionControllerTest {
     Assertions.assertEquals(listOf(choiceStats), late)
     Mockito.verify(roundStatsServiceImpl, Mockito.times(1))
         .getChoiceRoundStatsByRoundId(SUBSCRIBED_ROUND_ID)
+  }
+
+  @Test
+  fun shouldEndTheStatsWithRoundNotFoundOnceTheRoundIsDeleted() {
+    StepVerifier.withVirtualTime { subscribeChoice() }
+        .expectSubscription()
+        .expectNext(choiceStats)
+        .then { eventPublisher.publishRoundDeleted(OTHER_ROUND_ID) }
+        .expectNoEvent(SAMPLE_INTERVAL)
+        .then { eventPublisher.publishRoundDeleted(SUBSCRIBED_ROUND_ID) }
+        .expectErrorMatches { it is RoundNotFoundException && it.id == SUBSCRIBED_ROUND_ID }
+        .verify(VERIFY_TIMEOUT)
   }
 
   private fun givenNumericStats(): NumericContentRoundStats {

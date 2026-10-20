@@ -12,6 +12,7 @@ import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentPermissionEvaluator
 import net.particify.arsnova.core4.questionnaire.content.ContentRepository
 import net.particify.arsnova.core4.questionnaire.content.TextContentFormatData
+import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
 import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
@@ -166,6 +167,18 @@ class AnswerSubscriptionControllerTest {
 
     Mockito.verify(permissionEvaluator).hasPermission(participant, CONTENT_ID, "Content", "write")
     Mockito.verifyNoMoreInteractions(permissionEvaluator)
+  }
+
+  @Test
+  fun shouldEndTheAnswersWithRoundNotFoundOnceTheRoundIsDeleted() {
+    StepVerifier.withVirtualTime { subscribe() }
+        .expectSubscription()
+        .expectNext(participantAnswers)
+        .then { eventPublisher.publishRoundDeleted(OTHER_ROUND_ID) }
+        .expectNoEvent(SAMPLE_INTERVAL)
+        .then { eventPublisher.publishRoundDeleted(SUBSCRIBED_ROUND_ID) }
+        .expectErrorMatches { it is RoundNotFoundException && it.id == SUBSCRIBED_ROUND_ID }
+        .verify(VERIFY_TIMEOUT)
   }
 
   @Test

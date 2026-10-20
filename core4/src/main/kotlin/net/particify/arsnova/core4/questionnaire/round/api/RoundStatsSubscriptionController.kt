@@ -52,9 +52,16 @@ class RoundStatsSubscriptionController(
   private class StatsEmission(val content: Content, val stats: Any)
 
   private val sharedStats =
-      SharedFluxRegistry<StatsKey, StatsEmission>(STATS_UPDATE_SAMPLE_INTERVAL) { key ->
-        roundStatsEventPublisher.answerChangedFlux().filter { it.roundId == key.roundId }
-      }
+      SharedFluxRegistry<StatsKey, StatsEmission>(
+          STATS_UPDATE_SAMPLE_INTERVAL,
+          ends = { key ->
+            roundStatsEventPublisher
+                .roundDeletedFlux()
+                .filter { it == key.roundId }
+                .map { RoundNotFoundException(it) }
+          }) { key ->
+            roundStatsEventPublisher.answerChangedFlux().filter { it.roundId == key.roundId }
+          }
 
   @SubscriptionMapping
   @PreAuthorize("hasPermission(#roundId, 'Round', 'readStatistics')")
@@ -111,7 +118,7 @@ class RoundStatsSubscriptionController(
   /**
    * Emits the round's stats, starting with the current ones and then whenever one of its answers
    * changed, at most once per sample interval. All subscribers of a round share one computation,
-   * see [SharedFluxRegistry].
+   * see [SharedFluxRegistry]. Deleting the round ends the stream with [RoundNotFoundException].
    *
    * Publishing of the statistics and of the solution, as well as release of the content, can change
    * while subscribed, so every emission is checked against the content it carries, which takes no

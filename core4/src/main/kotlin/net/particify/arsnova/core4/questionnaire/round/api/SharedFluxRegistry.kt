@@ -20,10 +20,13 @@ import reactor.core.scheduler.Schedulers
  * whatever depends on the subscriber is applied downstream, per subscriber, and has to gate the
  * value handed to a late joiner just like any other.
  *
+ * @param ends the end of a key, e.g. the deletion of what it computes from, as the error every
+ *   subscriber of the key receives
  * @param triggers the changes of a key which call for a recomputation, sampled by [sampleInterval]
  */
 class SharedFluxRegistry<K : Any, V : Any>(
     private val sampleInterval: Duration,
+    private val ends: (K) -> Flux<out Throwable> = { Flux.empty() },
     private val triggers: (K) -> Flux<out Any>,
 ) {
   private val logger = LoggerFactory.getLogger(javaClass)
@@ -54,6 +57,7 @@ class SharedFluxRegistry<K : Any, V : Any>(
     val unregister = { sharedFluxes.remove(key, registered.get()) }
     val sampledChanges: Flux<Boolean> =
         triggers(key).cast(Any::class.java).sample(sampleInterval).map { false }
+    val ended: Flux<V> = ends(key).take(1).flatMap { Mono.error<V>(it) }
     val shared =
         Flux.merge(sampledChanges, Mono.just(true))
             .concatMap { initial ->
@@ -62,6 +66,7 @@ class SharedFluxRegistry<K : Any, V : Any>(
                       .subscribeOn(Schedulers.boundedElastic())
               if (initial) computation else computation.onErrorResume { skipFailed(key, it) }
             }
+            .mergeWith(ended)
             .doOnError { unregister() }
             .doFinally { unregister() }
             .replay(1)
