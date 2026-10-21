@@ -3,10 +3,13 @@
  */
 package net.particify.arsnova.core4.user.internal.api
 
+import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
 import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.common.LanguageIso639
+import net.particify.arsnova.core4.user.MAIL_ADDRESS_MAX_LENGTH
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.exception.UserNotFoundException
 import net.particify.arsnova.core4.user.internal.LocalUserServiceImpl
@@ -27,7 +30,7 @@ class UserMutationController(
 ) {
   @MutationMapping
   fun claimUnverifiedUser(
-      @Argument mailAddress: String,
+      @Argument @Email @Size(max = MAIL_ADDRESS_MAX_LENGTH) mailAddress: String,
       @Argument password: String,
       @AuthenticationPrincipal user: User,
       locale: Locale
@@ -37,7 +40,7 @@ class UserMutationController(
 
   @MutationMapping
   fun updateUserMailAddress(
-      @Argument mailAddress: String,
+      @Argument @Email @Size(max = MAIL_ADDRESS_MAX_LENGTH) mailAddress: String,
       @Argument password: String,
       @AuthenticationPrincipal user: User,
       locale: Locale

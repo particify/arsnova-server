@@ -144,6 +144,18 @@ givenName: Nikko
 mail: admin@example.com
 userPassword: throwaway-credential
 
+# Its mail attribute is not a bare address, so it is not imported.
+dn: uid=fbergmann,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: fbergmann
+cn: Fenja Bergmann
+sn: Bergmann
+mail: 'Fenja Bergmann' <fenja.bergmann@example.com>
+userPassword: invalid-mail-secret
+
 # Loses its mail attribute between two logins.
 dn: uid=pmarchetti,ou=people,dc=example,dc=com
 objectClass: top

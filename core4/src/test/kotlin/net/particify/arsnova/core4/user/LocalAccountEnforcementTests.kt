@@ -3,6 +3,7 @@
  */
 package net.particify.arsnova.core4.user
 
+import jakarta.validation.ConstraintViolationException
 import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
@@ -223,6 +224,16 @@ class AllowedMailAddressDomainsTests : LocalAccountEnforcementTestSupport() {
     val exception =
         assertThrows<MailAddressNotAllowedException> { claimAccount(address(OTHER_DOMAIN)) }
     Assertions.assertTrue(exception.message!!.contains(ALLOWED_DOMAIN))
+  }
+
+  /**
+   * JavaMail delivers this to the first address, while the domain check reads the last one, so the
+   * syntax has to be rejected before the domain is checked.
+   */
+  @Test
+  fun shouldRefuseRegistrationSmugglingOtherDomain() {
+    val mailAddress = "<x@$OTHER_DOMAIN> ${address(ALLOWED_DOMAIN)}"
+    assertThrows<ConstraintViolationException> { claimAccount(mailAddress) }
   }
 
   @Test

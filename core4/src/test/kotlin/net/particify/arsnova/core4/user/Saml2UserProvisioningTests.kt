@@ -51,6 +51,14 @@ class Saml2UserProvisioningTests {
     Assertions.assertNull(user.username)
   }
 
+  /** An address stored before addresses were validated must not become the username either. */
+  @Test
+  fun shouldLeaveUserUnverifiedWithInvalidMailAddress() {
+    val user = User(mailAddress = "saml.invalid.username@example.com>")
+    converter.assignUsername(user, registration(UsernameMapping.MAIL_ADDRESS), "Subject-4")
+    Assertions.assertNull(user.username)
+  }
+
   @Test
   fun shouldLeaveUserUnverifiedOnUsernameCollision() {
     val taken = "saml-username-collision"
@@ -65,6 +73,15 @@ class Saml2UserProvisioningTests {
     val user = User()
     converter.updateMailAddress(user, "Saml.Import@example.com")
     Assertions.assertEquals("saml.import@example.com", user.mailAddress)
+  }
+
+  /** The address is dropped rather than failing the login, the same as one which is taken. */
+  @Test
+  fun shouldNotImportInvalidMailAddress() {
+    val stored = "saml-invalid-import@example.com"
+    val user = User(mailAddress = stored)
+    converter.updateMailAddress(user, "'Saml Import' <saml-invalid-import@example.net>")
+    Assertions.assertEquals(stored, user.mailAddress)
   }
 
   /**

@@ -3,9 +3,11 @@
  */
 package net.particify.arsnova.core4.system.migration.v3
 
+import jakarta.validation.Validation
 import java.net.URI
 import java.time.Instant
 import java.util.UUID
+import net.particify.arsnova.core4.user.MailAddressValidation
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
@@ -57,6 +59,17 @@ class AuthProviderMigratorTests {
     Assertions.assertNull(user.mailAddress)
     Assertions.assertNull(user.username)
     Assertions.assertEquals(PROVIDER_IDS[authProvider], user.externalLogins.single().providerId)
+  }
+
+  /** Settling a parked address makes it the account's address, so an invalid one is dropped. */
+  @ParameterizedTest
+  @EnumSource(UserProfile.AuthProvider::class, names = ["CAS", "LDAP", "OIDC", "SAML"])
+  fun shouldNotParkInvalidMailAddress(authProvider: UserProfile.AuthProvider) {
+    val user = newUser(MIXED_CASE_LOGIN_ID, "'Migrated Person' <$MAIL_ADDRESS>")
+    val migrated = migrator().migrateIdentity(user, userProfile(authProvider, MIXED_CASE_LOGIN_ID))
+    Assertions.assertTrue(migrated)
+    Assertions.assertNull(user.unverifiedMailAddress)
+    Assertions.assertNull(user.mailAddress)
   }
 
   /** Expected values are spelled out rather than derived, so the rule itself is asserted. */
@@ -149,12 +162,12 @@ class AuthProviderMigratorTests {
                       URI.create("http://couchdb.invalid"), "migration", "migration"),
               roomAccessUrl = URI.create("http://authz.invalid"),
               authenticationProviderMapping = providerMapping),
-          ExtendedSaml2RelyingPartyProperties(registrations))
+          ExtendedSaml2RelyingPartyProperties(registrations),
+          MailAddressValidation(Validation.buildDefaultValidatorFactory().validator))
 
   /** Mirrors how [Migrator] populates an account before the provider rules are applied. */
-  private fun newUser(loginId: String) =
-      User(
-          username = loginId, mailAddress = MAIL_ADDRESS, givenName = GIVEN_NAME, surname = SURNAME)
+  private fun newUser(loginId: String, mailAddress: String = MAIL_ADDRESS) =
+      User(username = loginId, mailAddress = mailAddress, givenName = GIVEN_NAME, surname = SURNAME)
 
   private fun userProfile(authProvider: UserProfile.AuthProvider, loginId: String) =
       UserProfile(

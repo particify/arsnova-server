@@ -3,6 +3,8 @@
  */
 package net.particify.arsnova.core4.room.internal.api
 
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.Size
 import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.common.LanguageIso639
@@ -15,6 +17,7 @@ import net.particify.arsnova.core4.room.exception.RoomNotFoundException
 import net.particify.arsnova.core4.room.internal.MembershipServiceImpl
 import net.particify.arsnova.core4.room.internal.RoomServiceImpl
 import net.particify.arsnova.core4.user.LocalUserService
+import net.particify.arsnova.core4.user.MAIL_ADDRESS_MAX_LENGTH
 import net.particify.arsnova.core4.user.User
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.method.annotation.Argument
@@ -117,7 +120,7 @@ class RoomMutationController(
   @PreAuthorize("hasRole('VERIFIED') and hasPermission(#roomId, 'Room', 'administer')")
   fun grantRoomRoleByInvitation(
       @Argument roomId: UUID,
-      @Argument mailAddress: String,
+      @Argument @Email @Size(max = MAIL_ADDRESS_MAX_LENGTH) mailAddress: String,
       @Argument role: RoomRole,
       @AuthenticationPrincipal user: User,
       locale: Locale

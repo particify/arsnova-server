@@ -1,11 +1,14 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.user.internal.api
 
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.Size
 import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.user.LocalUserService
+import net.particify.arsnova.core4.user.MAIL_ADDRESS_MAX_LENGTH
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.exception.UserNotFoundException
 import net.particify.arsnova.core4.user.internal.UserServiceImpl
@@ -31,7 +34,7 @@ class AdminUserMutationController(
 
   @MutationMapping
   fun adminCreateUser(
-      @Argument mailAddress: String,
+      @Argument @Email @Size(max = MAIL_ADDRESS_MAX_LENGTH) mailAddress: String,
       @AuthenticationPrincipal user: User,
       locale: Locale
   ): User {

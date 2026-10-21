@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.system.migration.v3
 
 import java.time.Instant
 import net.particify.arsnova.core4.common.AuditMetadata
+import net.particify.arsnova.core4.user.MailAddressValidation
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.internal.ExternalLogin
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
@@ -22,7 +23,8 @@ import org.springframework.stereotype.Component
 @Component
 class AuthProviderMigrator(
     private val properties: MigrationProperties,
-    private val saml2Properties: ExtendedSaml2RelyingPartyProperties
+    private val saml2Properties: ExtendedSaml2RelyingPartyProperties,
+    private val mailAddressValidation: MailAddressValidation
 ) {
   companion object {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -61,7 +63,9 @@ class AuthProviderMigrator(
   /**
    * Leaves the unique columns empty and parks the mail address instead of writing it: the account
    * which keeps an address shared by several users cannot be determined while documents are
-   * streamed in, so [UserMigrationPostProcessor] settles both columns once all users exist.
+   * streamed in, so [UserMigrationPostProcessor] settles both columns once all users exist. An
+   * address which is not valid is dropped: settling it would make it the account's address, and for
+   * a SAML registration mapping usernames to addresses its username as well.
    */
   private fun migrateExternalLogin(newUser: User, userProfile: UserProfile): Boolean {
     val authProvider = userProfile.authProvider
@@ -78,7 +82,7 @@ class AuthProviderMigrator(
           providerId)
       return false
     }
-    newUser.unverifiedMailAddress = newUser.mailAddress
+    newUser.unverifiedMailAddress = newUser.mailAddress?.let { validMailAddressOrNull(it) }
     newUser.mailAddress = null
     newUser.username = null
     newUser.externalLogins +=
@@ -88,6 +92,14 @@ class AuthProviderMigrator(
             externalId = externalId(authProvider, userProfile.loginId),
             auditMetadata = AuditMetadata(createdAt = Instant.now()))
     return true
+  }
+
+  private fun validMailAddressOrNull(mailAddress: String): String? {
+    if (mailAddressValidation.isValid(mailAddress)) {
+      return mailAddress
+    }
+    logger.warn("Not migrating the mail address {}: it is not valid.", mailAddress)
+    return null
   }
 
   /**

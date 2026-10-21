@@ -82,6 +82,13 @@ val UNLINKED_USER =
         surname = "Nakagawa",
         mailAddress = "wakana.nakagawa@example.com")
 
+/** Its mail attribute carries a display name, so it cannot be imported. */
+val INVALID_MAIL_USER =
+    LdapTestUser(
+        userId = "fbergmann",
+        password = "invalid-mail-secret",
+        mailAddress = "'Fenja Bergmann' <fenja.bergmann@example.com>")
+
 /** Its mail attribute is removed between two logins, so the stored address has to survive. */
 val RETAINED_MAIL_USER =
     LdapTestUser(
@@ -114,6 +121,7 @@ val LDAP_TEST_USERS =
         LINK_TARGET_USER,
         LINK_USERNAME_USER,
         UNLINKED_USER,
+        INVALID_MAIL_USER,
         RETAINED_MAIL_USER,
         RETAINED_NAME_USER)
 

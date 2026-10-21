@@ -99,6 +99,14 @@ class LdapAuthenticationTests {
     Assertions.assertNull(user.mailAddress)
   }
 
+  /** The address is dropped rather than failing the login, the same as one which is taken. */
+  @Test
+  fun shouldNotImportInvalidMailAddress() {
+    val user = authenticate(INVALID_MAIL_USER).principal as User
+    Assertions.assertEquals(INVALID_MAIL_USER.userId, user.username)
+    Assertions.assertNull(user.mailAddress)
+  }
+
   @Test
   fun shouldNotSetUsernameAlreadyInUse() {
     val user = authenticate(USERNAME_COLLISION_USER).principal as User
