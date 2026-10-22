@@ -175,4 +175,48 @@ class ChoiceContentFormatDataTest {
     val wordcloud = WordcloudContentFormatData()
     Assertions.assertSame(wordcloud, wordcloud.withoutSolution())
   }
+
+  @Test
+  fun shouldAllowAnyChangeWithoutAnswers() {
+    val current = ChoiceContentFormatData(OPTIONS, listOf(0), false)
+    listOf(
+            ChoiceContentFormatData(listOf("C", "B", "A"), listOf(0), false),
+            ChoiceContentFormatData(OPTIONS + "D", listOf(1), true))
+        .forEach { it.validateChange(current) { false } }
+  }
+
+  @Test
+  fun shouldNotConsultAnswersForEditedLabelsOnly() {
+    ChoiceContentFormatData(listOf("A", "Bee", "C"), listOf(2, 0), null).validateChange(
+        ChoiceContentFormatData(OPTIONS, listOf(0, 2), false)) {
+          Assertions.fail("Answers must not be looked up for an edit of the labels only")
+        }
+  }
+
+  @Test
+  fun shouldLockTheOptionsTheirOrderTheSolutionAndMultipleSelectionOnceAnswered() {
+    val current = ChoiceContentFormatData(OPTIONS, listOf(0), false)
+    listOf(
+            ChoiceContentFormatData(OPTIONS + "D", listOf(0), false),
+            ChoiceContentFormatData(listOf("A", "B"), listOf(0), false),
+            ChoiceContentFormatData(listOf("A", "C", "B"), listOf(0), false),
+            ChoiceContentFormatData(OPTIONS, listOf(1), false),
+            ChoiceContentFormatData(OPTIONS, null, false),
+            ChoiceContentFormatData(OPTIONS, listOf(0), true))
+        .forEach {
+          Assertions.assertThrows(
+              ContentFormatDataInvalidException::class.java,
+              { it.validateChange(current) { true } },
+              "$it")
+        }
+  }
+
+  @Test
+  fun shouldRejectUpdateOfOtherFormat() {
+    Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
+      ChoiceContentFormatData(OPTIONS, null, false).validateChange(TextContentFormatData(false)) {
+        false
+      }
+    }
+  }
 }

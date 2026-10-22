@@ -37,9 +37,10 @@ class ContentFormatChangeTest {
     }
   }
 
+  /** Answered contents lock some of their settings, see the format's own tests. */
   @Test
   fun shouldAllowChangesWithinTheSameFormat() {
-    choice().validateChange(ChoiceContentFormatData(listOf("A"), null, true)) { true }
+    choice().validateChange(ChoiceContentFormatData(listOf("A"), null, true)) { false }
     WordcloudContentFormatData(5).validateChange(WordcloudContentFormatData()) { true }
   }
 

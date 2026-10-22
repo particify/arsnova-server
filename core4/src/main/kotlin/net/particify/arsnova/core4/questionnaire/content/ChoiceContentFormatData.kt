@@ -42,12 +42,30 @@ data class ChoiceContentFormatData(
     }
   }
 
-  /** An update of another format would reinterpret the content's rounds and answers. */
+  /**
+   * An answer refers to the options by index. Its result and points are stored when it is given,
+   * while a participant's score is recomputed from it. So once the content has answers, the number
+   * and order of the options, the correct ones and whether several may be selected are fixed. The
+   * labels stay editable, so a typo can be fixed; a reordering is recognized as the same labels in
+   * another order.
+   */
   override fun validateChange(current: ContentFormatData, hasAnswers: () -> Boolean) {
-    if (current !is ChoiceContentFormatData) {
-      throw ContentFormatDataInvalidException("Content is not a choice content")
+    val currentFormatData =
+        current as? ChoiceContentFormatData
+            ?: throw ContentFormatDataInvalidException("Content is not a choice content")
+    if (changesWhatAnswersReferTo(currentFormatData) && hasAnswers()) {
+      throw ContentFormatDataInvalidException(
+          "Options, correct options and multiple selection must not be changed once the " +
+              "content has answers")
     }
   }
+
+  private fun changesWhatAnswersReferTo(current: ChoiceContentFormatData): Boolean =
+      current.options.size != options.size ||
+          (current.options != options && current.options.sorted() == options.sorted()) ||
+          current.correctOptionIndexes.orEmpty().sorted() !=
+              correctOptionIndexes.orEmpty().sorted() ||
+          (current.multiple == true) != (multiple == true)
 
   /** An empty index list marks no option as correct, just like a missing one. */
   override fun hasCorrectAnswer(): Boolean {

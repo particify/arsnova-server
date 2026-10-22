@@ -78,9 +78,9 @@ constructor(@JsonProperty("correctTerms") val correctTerms: List<String>) : Keyw
   }
 
   /**
-   * The result and the points of an answer are decided when it is given and never recomputed, so a
-   * later change of the terms would leave stored results disagreeing with the content. Only the set
-   * of normalized forms is guarded: reordering or respelling the terms cannot change how any answer
+   * The result and the points of an answer are stored when it is given, while a participant's score
+   * is recomputed from it, so a later change of the terms would set the two apart. Only the set of
+   * normalized forms is guarded: reordering or respelling the terms cannot change how any answer
    * was scored, and the order is the creator's own, carrying no meaning of its own.
    */
   override fun validateChange(current: ContentFormatData, hasAnswers: () -> Boolean) {
