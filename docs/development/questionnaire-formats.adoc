@@ -1,0 +1,51 @@
+= Question series: publishing and scoring
+
+A question series (`Questionnaire` in code) releases its contents to participants according to its
+publishing mode.
+Each content is answered in rounds, and a participant's own results are built from the answers given
+to each content's active round.
+
+== Publishing modes
+
+[cols="1,2,2"]
+|===
+|Mode |Released to participants |Answering
+
+|`ALL`
+|Every content
+|Open, without a countdown
+
+|`UP_TO`
+|Every content up to the one released last
+|Open, without a countdown
+
+|`LIVE`
+|Every content up to the one presented last
+|Only the presented content, with the content's countdown if it has a duration
+|===
+
+Leaving `LIVE` opens the round of every content without a countdown.
+Starting a new round always opens it in the way the current mode prescribes.
+
+== Scoring
+
+A content scores only if its format has a correct answer.
+A fully correct answer earns the content's points,
+which default to 500 per unit of weight;
+formats which can be answered partially earn the corresponding share.
+The maximum score of a question series sums the same points over its released, scorable contents,
+so achieved and maximum score always use one scale.
+
+=== Restarting after the countdown ran out
+
+A round records the instant its countdown first ran out, and keeps it for good.
+Presenting the content again opens answering once more with the full duration,
+so that it can be shown again without losing the answers it already has.
+**Answers given after that first expiry score 0 points.**
+They are still evaluated and keep their correctness,
+since what was over by then was the competition, not the question.
+
+The rule holds for the round, not for the content:
+a new round starts without a recorded expiry, so its answers score again.
+It also survives leaving `LIVE`, because the recorded instant is not cleared.
+A round stopped by hand while time was left records nothing and resumes with the time it had left.

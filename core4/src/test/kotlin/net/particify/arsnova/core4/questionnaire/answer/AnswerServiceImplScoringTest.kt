@@ -130,6 +130,19 @@ class AnswerServiceImplScoringTest {
   }
 
   @Test
+  fun shouldScoreContentWithoutStoredPointsOnTheScaleOfItsMaximum() {
+    val withoutPoints = content(weight = 2)
+    givenOwnAnswer(
+        withoutPoints, Answer(result = AnswerResultState.CORRECT, formatData = choice(0, 1)))
+    givenContents(withoutPoints)
+
+    val results = answerService.findQuestionnaireAnswerResults(questionnaire.id!!, USER_ID)
+
+    Assertions.assertEquals(2 * Content.BASE_POINTS, results.achievedScore)
+    Assertions.assertEquals(2 * Content.BASE_POINTS, results.maxScore)
+  }
+
+  @Test
   fun shouldStoreAnswerGivenAfterTheCountdownRanOutWithoutPoints() {
     val expired = content(weight = 1, answeringExpiredAt = Instant.now().minusSeconds(60))
     val stored = answer(expired, 0, 1)
