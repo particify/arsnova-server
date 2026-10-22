@@ -4,10 +4,12 @@
 package net.particify.arsnova.core4.user.internal
 
 import com.nulabinc.zxcvbn.Strength
+import com.nulabinc.zxcvbn.Zxcvbn
 import java.net.URI
 import java.util.Locale
 import net.particify.arsnova.core4.common.ServiceProperties
 import net.particify.arsnova.core4.user.exception.WeakPasswordException
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 /**
@@ -51,8 +53,19 @@ data class PasswordStrength(
  * reading its dictionaries takes a noticeable moment.
  */
 @Component
-class PasswordPolicy(properties: PasswordProperties, serviceProperties: ServiceProperties) {
-  private val zxcvbn = passwordEstimator
+class PasswordPolicy
+internal constructor(
+    properties: PasswordProperties,
+    serviceProperties: ServiceProperties,
+    estimator: (Collection<String>) -> Zxcvbn
+) {
+  @Autowired
+  constructor(
+      properties: PasswordProperties,
+      serviceProperties: ServiceProperties
+  ) : this(properties, serviceProperties, ::passwordEstimator)
+
+  private val zxcvbn = estimator(properties.dictionaryLanguages)
 
   private val minGuessesLog10 = properties.minGuessesLog10
 

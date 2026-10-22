@@ -8,6 +8,11 @@
     {
       "matchPackageNames": ["com.graphql-java:graphql-java-extended-scalars"],
       "allowedVersions": "/^[0-9]+\\.[0-9]+(\\.[0-9]+)?$/"
+    },
+    {
+      "description": "Word-list data only, no code: update by hand",
+      "matchFileNames": ["gradle/password-dictionaries.versions.toml"],
+      "enabled": false
     }
   ]
 }

@@ -20,7 +20,7 @@ private const val KEYBOARD_WALK_MIN_GUESSES_LOG10 = 9
 private const val LONG_PASSWORD_LENGTH = 10_000
 private const val RELATIVE_STRENGTH_TOLERANCE = 0.01
 
-/** Every case the issue names as weak, plus common words combined with digits or a name. */
+/** Every case the issue names as weak plus those only a dictionary of another language catches. */
 private val REJECTED_PASSWORDS =
     listOf(
         "abcXYZ123!",
@@ -29,9 +29,13 @@ private val REJECTED_PASSWORDS =
         "P@ssw0rd",
         "Aaaaaaaa",
         "Sommer2024!",
-        "Coffeecup99",
-        "Michaelsmith",
-        "Sunflower12")
+        "Blumenstrauß12",
+        "Blumenstrauss12",
+        "Sonnenblume12",
+        "Kaffeetasse99",
+        "Fussballverein1",
+        "Schmetterling7",
+        "Hausaufgaben2024")
 private const val CAPITALIZATION_HINT = "Capitalization doesn't help very much."
 private const val SIMILAR_PASSWORD_HINT = "This is similar to a commonly used password."
 
@@ -41,13 +45,13 @@ private const val SIMILAR_PASSWORD_HINT = "This is similar to a commonly used pa
  */
 private val HINTED_PASSWORDS =
     mapOf(
+        "Blumenstrauß12" to CAPITALIZATION_HINT,
+        "Kaffeetasse99" to CAPITALIZATION_HINT,
+        "Sommer2024!" to CAPITALIZATION_HINT,
         "abcXYZ123!" to SIMILAR_PASSWORD_HINT,
-        "arsnovaparticify" to "Add another word or two. Uncommon words are better.",
-        "Dragonfly1!" to CAPITALIZATION_HINT,
-        "Michaelsmith" to "Common names and surnames are easy to guess.",
+        "blumenstrauß12" to "Add another word or two. Uncommon words are better.",
         "Passwort123" to SIMILAR_PASSWORD_HINT,
-        "qwertzuiop1" to "Straight rows of keys are easy to guess.",
-        "Television" to "A word by itself is easy to guess.")
+        "qwertzuiop1" to "Straight rows of keys are easy to guess.")
 
 /** Shorter than the minimum, which the client explains itself. */
 private val SHORT_PASSWORDS = listOf("AaBbCc123", "1qay2wsx", "P@ssw0rd", "Aaaaaaaa")
@@ -64,6 +68,39 @@ class PasswordPolicyTests {
     listOf("abcXYZ123!", "AaBbCc123", "1qay2wsx", "P@ssw0rd", "Aaaaaaaa", "Sommer2024!").forEach {
       assertThrows<WeakPasswordException>(it) { policy.checkStrength(it) }
     }
+  }
+
+  /** zxcvbn's own dictionaries are English, which leaves these to zxcvbn-ts' German lists. */
+  @Test
+  fun shouldRejectGermanDictionaryWords() {
+    listOf(
+            "Blumenstrauß12",
+            "Blumenstrauss12",
+            "Sonnenblume12",
+            "Kaffeetasse99",
+            "Fussballverein1",
+            "Schmetterling7",
+            "Hausaufgaben2024")
+        .forEach { assertThrows<WeakPasswordException>(it) { policy.checkStrength(it) } }
+  }
+
+  /** Neither word is in zxcvbn's own dictionaries or in those of English and German. */
+  @Test
+  fun shouldRejectSpanishDictionaryWordsOnlyWithSpanishDictionaries() {
+    val spanishPolicy = passwordPolicy(dictionaryLanguages = listOf("en", "es"))
+    listOf("Calcetines2024", "Ayuntamiento7").forEach {
+      assertDoesNotThrow(it) { policy.checkStrength(it) }
+      assertThrows<WeakPasswordException>(it) { spanishPolicy.checkStrength(it) }
+    }
+  }
+
+  @Test
+  fun shouldRefuseUnknownDictionaryLanguage() {
+    val exception =
+        assertThrows<IllegalArgumentException> {
+          passwordPolicy(dictionaryLanguages = listOf("en", "xx"))
+        }
+    Assertions.assertTrue(exception.message!!.contains("xx"), exception.message)
   }
 
   @Test
@@ -156,8 +193,11 @@ class PasswordPolicyTests {
   /** Some cases lie above the guesses up to which zxcvbn itself gives any feedback. */
   @Test
   fun shouldExplainEveryRejectedPassword() {
+    val spanishPolicy = passwordPolicy(dictionaryLanguages = listOf("en", "es"))
     val estimates =
-        REJECTED_PASSWORDS.associateWith { policy.estimateStrength(it, listOf(), Locale.ENGLISH) }
+        REJECTED_PASSWORDS.associateWith { policy.estimateStrength(it, listOf(), Locale.ENGLISH) } +
+            ("Calcetines2024" to
+                spanishPolicy.estimateStrength("Calcetines2024", listOf(), Locale.ENGLISH))
     estimates.forEach { (password, strength) ->
       Assertions.assertFalse(strength.acceptable, password)
       Assertions.assertTrue(strength.relativeStrength < 1.0, password)
@@ -184,11 +224,14 @@ class PasswordPolicyTests {
 
   @Test
   fun shouldGiveSpecificHints() {
+    val spanishPolicy = passwordPolicy(dictionaryLanguages = listOf("en", "es"))
     val hints =
         HINTED_PASSWORDS.keys.associateWith {
           policy.estimateStrength(it, listOf(), Locale.ENGLISH).hint
-        }
-    Assertions.assertEquals(HINTED_PASSWORDS, hints)
+        } +
+            ("Calcetines2024" to
+                spanishPolicy.estimateStrength("Calcetines2024", listOf(), Locale.ENGLISH).hint)
+    Assertions.assertEquals(HINTED_PASSWORDS + ("Calcetines2024" to CAPITALIZATION_HINT), hints)
   }
 
   /**
@@ -199,6 +242,17 @@ class PasswordPolicyTests {
     val strength = policy.estimateStrength("gdaiuzxbts", listOf(), Locale.ENGLISH)
     Assertions.assertFalse(strength.acceptable)
     Assertions.assertNull(strength.hint)
+  }
+
+  /** zxcvbn words its warnings by the names of its own dictionaries only. */
+  @Test
+  fun shouldWarnAboutWordsOfZxcvbnTsDictionaries() {
+    Assertions.assertEquals(
+        "A word by itself is easy to guess.",
+        policy.estimateStrength("Hausaufgaben", listOf(), Locale.ENGLISH).hint)
+    Assertions.assertEquals(
+        "Common names and surnames are easy to guess.",
+        policy.estimateStrength("Schäfermüller", listOf(), Locale.ENGLISH).hint)
   }
 
   @Test

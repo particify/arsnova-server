@@ -52,6 +52,9 @@ security:
     context-words:
       - arsnova
       - particify
+    dictionary-languages:
+      - en
+      - de
     min-guesses-log10: 10
   jwt:
     validity-period: 100m

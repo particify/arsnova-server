@@ -275,6 +275,20 @@ so a shorter password can never reach it.
 The account's own mail address and names and the words in `security.password.context-words`
 count as known words.
 
+The estimate uses zxcvbn4j's own dictionaries
+plus the word lists of the zxcvbn-ts language packages.
+The build ships every one of them,
+generating resources from the npm packages pinned in `gradle/password-dictionaries.versions.toml`
+with the plugin in `build-logic`.
+A shipped language costs only image size, a loaded one memory.
+The languages to load depend on an installation's users (`security.password.dictionary-languages`);
+the default, English and German, matches those of a typical installation.
+The Arabic, Chinese, Japanese, Persian and Russian lists are mostly romanized,
+so they cover passwords typed in those scripts only partially.
+SecLists was considered as a source,
+but its common password lists derive from the same dataset as zxcvbn-ts's,
+without the filtering zxcvbn-ts applies.
+
 The check runs only on the server.
 Clients get the result through the `userPasswordStrength` query,
 to show the strength while a password is typed.

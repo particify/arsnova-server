@@ -23,5 +23,10 @@ data class PasswordProperties(
      * Words specific to the service which do not make a password any harder to guess. The host name
      * of `service.root-url` is added to them.
      */
-    val contextWords: List<String> = listOf()
+    val contextWords: List<String> = listOf(),
+    /**
+     * Languages, as ISO 639-1 codes, whose word lists the estimate checks a password against
+     * besides the ones belonging to no language.
+     */
+    val dictionaryLanguages: List<String> = listOf()
 )
