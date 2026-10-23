@@ -22,6 +22,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
 
 private const val PASSWORD = "not-a-real-password"
+private const val STRONG_PASSWORD = "sXQodP0UYeGQXuXE"
 private const val VERIFICATION_CODE = 123456
 
 @SpringBootTest
@@ -63,7 +64,28 @@ class UserMutationControllerTests {
   /** Clients tell a rejected password apart from other bad requests by the code alone. */
   @Test
   fun shouldReportWeakPasswordWithErrorCode() {
-    val mailAddress = "weak-password-${UUID.randomUUID()}@example.com"
+    Assertions.assertEquals(
+        mapOf("classification" to "BAD_REQUEST", "code" to "WEAK_PASSWORD"),
+        resetPasswordErrorExtensions("P@ssw0rd"))
+  }
+
+  @Test
+  fun shouldReportInvalidPasswordWithErrorCode() {
+    Assertions.assertEquals(
+        mapOf("classification" to "BAD_REQUEST", "code" to "INVALID_PASSWORD"),
+        resetPasswordErrorExtensions("$STRONG_PASSWORD "))
+  }
+
+  /** A password the encoder cannot store is a client error, not a server error. */
+  @Test
+  fun shouldReportTooLongPasswordAsInvalid() {
+    Assertions.assertEquals(
+        mapOf("classification" to "BAD_REQUEST", "code" to "INVALID_PASSWORD"),
+        resetPasswordErrorExtensions("ä".repeat(30) + STRONG_PASSWORD))
+  }
+
+  private fun resetPasswordErrorExtensions(password: String): Any? {
+    val mailAddress = "rejected-password-${UUID.randomUUID()}@example.com"
     userService.save(
         User(
             mailAddress = mailAddress,
@@ -75,13 +97,12 @@ class UserMutationControllerTests {
             """
             mutation {
               resetUserPassword(
-                mailAddress: "$mailAddress", password: "P@ssw0rd", verificationCode: "$VERIFICATION_CODE"
+                mailAddress: "$mailAddress", password: "$password", verificationCode: "$VERIFICATION_CODE"
               ) { id }
             }
             """)
     @Suppress("UNCHECKED_CAST")
     val error = (response.toMap()["errors"] as List<Map<String, Any>>).single()
-    Assertions.assertEquals(
-        mapOf("classification" to "BAD_REQUEST", "code" to "WEAK_PASSWORD"), error["extensions"])
+    return error["extensions"]
   }
 }

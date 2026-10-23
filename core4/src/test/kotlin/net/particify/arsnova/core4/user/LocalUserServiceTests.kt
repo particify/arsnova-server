@@ -8,6 +8,7 @@ import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
 import net.particify.arsnova.core4.common.exception.InvalidInputException
+import net.particify.arsnova.core4.user.exception.InvalidPasswordException
 import net.particify.arsnova.core4.user.exception.InvalidUserStateException
 import net.particify.arsnova.core4.user.exception.InvalidVerificationCodeException
 import net.particify.arsnova.core4.user.exception.WeakPasswordException
@@ -25,6 +26,14 @@ import org.springframework.test.context.ActiveProfiles
 private const val STRONG_PASSWORD = "sXQodP0UYeGQXuXE"
 
 private val WEAK_PASSWORDS = listOf("abcXYZ123!", "AaBbCc123", "1qay2wsx", "P@ssw0rd", "Aaaaaaaa")
+
+/** Strong passwords which cannot be set: two that a login form cannot reproduce, one too long. */
+private val INVALID_PASSWORDS =
+    listOf(
+        "$STRONG_PASSWORD ",
+        "\u00A0$STRONG_PASSWORD",
+        "sXQodP0U\nYeGQXuXE",
+        "ä".repeat(30) + STRONG_PASSWORD)
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -196,6 +205,43 @@ class LocalUserServiceTests {
   }
 
   @Test
+  fun shouldNotClaimUnverifiedUserWithInvalidPassword() {
+    INVALID_PASSWORDS.forEach {
+      val user = User()
+      assertThrows<InvalidPasswordException>(it) {
+        localUserService.claimUnverifiedUser(
+            user, "shouldNotClaimWithInvalidPassword@example.com", it, Locale.ENGLISH)
+      }
+      Assertions.assertNull(user.password)
+      Assertions.assertNull(user.unverifiedMailAddress)
+    }
+  }
+
+  @Test
+  fun shouldClaimUnverifiedUserWithPassphrase() {
+    val user = User()
+    val passphrase = "quorvex blandimor tessaly"
+    localUserService.claimUnverifiedUser(
+        user, "shouldClaimWithPassphrase@example.com", passphrase, Locale.ENGLISH)
+    Assertions.assertTrue(passwordEncoder.matches(passphrase, user.password))
+  }
+
+  @Test
+  fun shouldNotVerifyMailWithInvalidPassword() {
+    INVALID_PASSWORDS.forEach {
+      val user =
+          User(
+              unverifiedMailAddress = "shouldNotVerifyMailWithInvalidPassword@example.com",
+              verificationCode = 12345678,
+              verificationExpiresAt = Instant.now().plusSeconds(10))
+      assertThrows<InvalidPasswordException>(it) {
+        localUserService.completeMailVerification(user, user.verificationCode!!, it)
+      }
+      Assertions.assertNull(user.password)
+    }
+  }
+
+  @Test
   fun shouldNotVerifyMailWithWeakPassword() {
     WEAK_PASSWORDS.forEach {
       val user =
@@ -232,6 +278,42 @@ class LocalUserServiceTests {
       }
       Assertions.assertNull(user.password)
     }
+  }
+
+  @Test
+  fun shouldNotResetToInvalidPassword() {
+    val user =
+        localUserService.initiatePasswordSetup(
+            User(mailAddress = "shouldnotresettoinvalidpassword@example.com"), Locale.ENGLISH)
+    INVALID_PASSWORDS.forEach {
+      assertThrows<InvalidPasswordException>(it) {
+        localUserService.completePasswordReset(user, it, user.verificationCode!!)
+      }
+      Assertions.assertNull(user.password)
+    }
+  }
+
+  @Test
+  fun shouldNotUpdateToInvalidPassword() {
+    val user = localAccountUser("shouldNotUpdateToInvalidPassword@example.com")
+    INVALID_PASSWORDS.forEach {
+      assertThrows<InvalidPasswordException>(it) {
+        localUserService.updatePassword(user, STRONG_PASSWORD, it)
+      }
+      Assertions.assertTrue(passwordEncoder.matches(STRONG_PASSWORD, user.password))
+    }
+  }
+
+  /** Passwords set before the rule existed keep working, so the old one is checked unchanged. */
+  @Test
+  fun shouldUpdateFromPasswordWithOuterWhitespace() {
+    val oldPassword = " $STRONG_PASSWORD\t"
+    val user =
+        User(
+            mailAddress = "shouldUpdateFromPasswordWithOuterWhitespace@example.com",
+            password = passwordEncoder.encode(oldPassword))
+    localUserService.updatePassword(user, oldPassword, STRONG_PASSWORD)
+    Assertions.assertTrue(passwordEncoder.matches(STRONG_PASSWORD, user.password))
   }
 
   @Test

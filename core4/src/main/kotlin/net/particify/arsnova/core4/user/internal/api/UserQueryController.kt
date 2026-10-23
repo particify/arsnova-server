@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.exception.UserNotFoundException
 import net.particify.arsnova.core4.user.internal.PasswordPolicy
 import net.particify.arsnova.core4.user.internal.PasswordStrength
+import net.particify.arsnova.core4.user.internal.PasswordValidator
 import net.particify.arsnova.core4.user.internal.UserServiceImpl
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
@@ -51,6 +52,7 @@ class UserQueryController(
       @AuthenticationPrincipal user: User?,
       locale: Locale
   ): PasswordStrength {
+    PasswordValidator.check(query.password)
     val inputs =
         listOf(
             user?.mailAddress,

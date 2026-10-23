@@ -89,6 +89,16 @@ class UserPasswordStrengthQueryTests {
         false, strength(password, "quorvex.blandimor@example.org")["acceptable"])
   }
 
+  /** Rejected as when it is set, so the client does not rate a password it cannot submit. */
+  @Test
+  fun shouldReportInvalidPasswordWithErrorCode() {
+    authenticate(User(id = UUID.randomUUID()))
+    @Suppress("UNCHECKED_CAST")
+    val error = (query("$NAME_PASSWORD ").toMap()["errors"] as List<Map<String, Any>>).single()
+    Assertions.assertEquals(
+        mapOf("classification" to "BAD_REQUEST", "code" to "INVALID_PASSWORD"), error["extensions"])
+  }
+
   @Test
   fun shouldLocalizeHintByRequestLocale() {
     authenticate(User(id = UUID.randomUUID()))
