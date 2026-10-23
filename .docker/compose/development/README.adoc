@@ -114,6 +114,12 @@ compatibility with this script's volume-naming assumptions), and a Linux host wi
 You can override the stored choice per-invocation with `PDK_ENGINE=docker ./pdk ...` or
 `PDK_ENGINE=podman ./pdk ...` without editing `local.env`.
 
+Another checkout can share this instance instead of setting up its own:
+set `PDK_PODMAN_DIR` in its `local.env` to the absolute path of this checkout's `.podman/`.
+It then uses the same images and engine, while a different `COMPOSE_PROJECT_NAME` keeps its
+containers, networks and volumes apart.
+`./pdk reset-podman` refuses to run in such a checkout; reset the engine from the one owning it.
+
 === Known issues
 
 * No prebuilt version of the webclient is launched when running `./pdk run`.
