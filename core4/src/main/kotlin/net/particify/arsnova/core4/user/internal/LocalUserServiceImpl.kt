@@ -44,6 +44,7 @@ class LocalUserServiceImpl(
     private val eventPublisher: ApplicationEventPublisher,
     private val localAccountPolicy: LocalAccountPolicy,
     private val mailAddressValidation: MailAddressValidation,
+    private val passwordPolicy: PasswordPolicy,
     mailProperties: UserMailProperties
 ) : LocalUserService {
   companion object {
@@ -62,6 +63,7 @@ class LocalUserServiceImpl(
     if (user.mailAddress != null) {
       throw InvalidUserStateException("Account not claimable", user.id!!)
     }
+    checkPasswordStrength(user, password, mailAddress)
     initiateVerification(user)
     user.unverifiedMailAddress = mailAddress
     user.password = passwordEncoder.encode(password)
@@ -141,6 +143,7 @@ class LocalUserServiceImpl(
       if (!user.password.isNullOrEmpty()) {
         throw InvalidInputException("Password is already set")
       }
+      checkPasswordStrength(user, password, user.unverifiedMailAddress)
       user.password = passwordEncoder.encode(password)
     }
     return updateMailAddressFromUnverified(user)
@@ -189,6 +192,7 @@ class LocalUserServiceImpl(
       throw InvalidUserStateException("Password reset not initiated", user.id!!)
     }
     checkVerificationCode(user, verificationCode)
+    checkPasswordStrength(user, password, user.mailAddress)
     user.password = passwordEncoder.encode(password)
     user.passwordChangedAt = Instant.now()
     user.resetVerification()
@@ -221,6 +225,10 @@ class LocalUserServiceImpl(
     }
   }
 
+  private fun checkPasswordStrength(user: User, password: String, mailAddress: String?) {
+    passwordPolicy.checkStrength(password, mailAddress, user.givenName, user.surname)
+  }
+
   private fun initiateVerification(user: User) {
     user.resetVerification()
     user.verificationCode = generateNumericCode()
@@ -249,6 +257,7 @@ class LocalUserServiceImpl(
     if (!passwordEncoder.matches(oldPassword, user.password)) {
       throw InvalidInputException("Incorrect old password")
     }
+    checkPasswordStrength(user, newPassword, user.mailAddress)
     user.password = passwordEncoder.encode(newPassword)
     user.passwordChangedAt = Instant.now()
     val persistedUser = userRepository.save(user)

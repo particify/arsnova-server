@@ -1,6 +1,9 @@
 extend type Query {
   currentUser: User
   userByDisplayId(displayId: ID!): User
+  userPasswordStrength(
+    query: UserPasswordStrengthQueryInput!
+  ): UserPasswordStrength
 }
 
 extend type Mutation {
@@ -56,4 +59,15 @@ input UpdateUserUiSettingsInput {
   contentVisualizationUnitPercent: Boolean
   showContentResultsDirectly: Boolean
   rotateWordcloudItems: Boolean
+}
+
+input UserPasswordStrengthQueryInput {
+  password: String!
+  mailAddress: String
+}
+
+type UserPasswordStrength {
+  acceptable: Boolean!
+  relativeStrength: Float!
+  hint: String
 }

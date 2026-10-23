@@ -36,6 +36,13 @@ It is signed with a key derived from the JWT secret for reusable tokens,
 so no other service accepts it as a session,
 and issuing it consumes the challenge, so one solution yields exactly one token.
 
+The password strength check is the one use so far:
+the `userPasswordStrength` query allows the reusable token's role,
+and its default validity of 5 minutes covers typing a password (see <<password-strength>>).
+Creating a guest session for such clients was rejected:
+every visit to a password reset or invitation page would create a guest account
+and switch the client into a guest login in the middle of the flow.
+
 == Login throttling
 
 `POST /api/auth/login` is rate limited per submitted username.
@@ -246,6 +253,66 @@ right after registering is no restriction.
 So is an invitation, which would otherwise let a room's owner create the account the restriction
 denies its holder -- unless an administrator sends it, administrative account creation being
 ungated here as everywhere else.
+
+[[password-strength]]
+=== Password strength
+
+New passwords are checked against an estimate of how many guesses an attacker needs
+(zxcvbn, via zxcvbn4j),
+not against composition rules.
+Composition rules accept predictable patterns like `P@ssw0rd`
+while rejecting strong passwords without special characters,
+and NIST SP 800-63B and OWASP ASVS advise against them.
+Every operation that sets a password checks it:
+`claimUnverifiedUser`, `verifyUserMailAddressUnauthenticated`, `resetUserPassword` and
+`updateUserPassword` reject a weak one with `extensions.code` `WEAK_PASSWORD`.
+
+A password needs at least 10^10 estimated guesses (`security.password.min-guesses-log10`),
+zxcvbn's level for strong protection against offline attacks on slowly hashed passwords.
+The minimum length of 10 follows from that threshold:
+zxcvbn estimates a password without any recognised pattern at 10 guesses per character,
+so a shorter password can never reach it.
+The account's own mail address and names and the words in `security.password.context-words`
+count as known words.
+
+The check runs only on the server.
+Clients get the result through the `userPasswordStrength` query,
+to show the strength while a password is typed.
+Running zxcvbn-ts in the web client instead was considered and rejected:
+its estimate differs from zxcvbn4j's and it can only ship a fraction of the dictionaries,
+so the client would accept passwords the server rejects,
+and even reduced dictionaries cost about half a megabyte of download.
+
+The query's hint is zxcvbn's own feedback.
+zxcvbn only gives feedback about a single match and has no messages for some common cases,
+such as several common words combined,
+so the hints are not always specific.
+Deriving our own diagnosis from the matches with our own messages would close that gap,
+but was not considered worth the effort for now.
+
+Passing the check means that a password resists guessing as zxcvbn models it,
+not that it is safe in every respect.
+The estimate counts the guesses of an attacker who tries common passwords,
+dictionary words and patterns in order of likelihood.
+It says nothing about phishing, social engineering, malware,
+or a password reused on another service.
+Personal information other than the account's mail address and names,
+such as a birthday or a pet's name, is unknown to the check,
+so a password built from it can pass.
+An account invitation (`verifyUserMailAddressUnauthenticated`) is accepted without a session,
+and its link carries no mail address,
+so there the query rates a password without the account's mail address and names.
+A password built from them can show as sufficient
+and is only refused with `WEAK_PASSWORD` when the invitation is accepted;
+nothing is stored before that check, so the code stays valid for another attempt.
+Passing the user ID and verification code to the query was considered and rejected
+as too complex for this case.
+Words missing from the loaded dictionaries count as random characters,
+which overestimates them.
+Passwords are not compared against a database of breached passwords such as Have I Been Pwned;
+only the common password lists in the dictionaries cover breached passwords.
+A full strength bar in a client therefore means that a password meets this requirement,
+not that it is particularly strong.
 
 == LDAP
 

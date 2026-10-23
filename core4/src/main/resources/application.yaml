@@ -49,6 +49,10 @@ docker:
 security:
   password:
     bcrypt-strength: 12
+    context-words:
+      - arsnova
+      - particify
+    min-guesses-log10: 10
   jwt:
     validity-period: 100m
   challenge:

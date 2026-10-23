@@ -108,6 +108,22 @@ class ReusableChallengeTokenHttpTests {
         .forEach { assertForbidden(postGraphQl(token, it), it) }
   }
 
+  /** With an operation which allows the role. */
+  @Test
+  fun shouldReachOperationAllowingRole() {
+    val token = issueToken(solveChallenge())
+    val query =
+        """{ userPasswordStrength(query: { password: "x" }) { acceptable relativeStrength } }"""
+    val response = postGraphQl(token, query)
+    Assertions.assertEquals(HttpStatus.OK.value(), response.statusCode(), response.body())
+    val body = jsonMapper.readTree(response.body())
+    Assertions.assertTrue(body.at("/errors").isMissingNode, response.body())
+    Assertions.assertTrue(
+        body.at("/data/userPasswordStrength/acceptable").isBoolean, response.body())
+    Assertions.assertTrue(
+        body.at("/data/userPasswordStrength/relativeStrength").isNumber, response.body())
+  }
+
   /** Not `NOT_FOUND` either, which would disclose whether the room exists. */
   @Test
   fun shouldDenyPermissionCheckedOperation() {

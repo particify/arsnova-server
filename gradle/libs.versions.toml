@@ -29,6 +29,7 @@ spotless = "8.10.4"
 spring-boot-plugin = "4.1.2"
 spring-modulith = "2.1.2"
 springmockk = "5.0.1"
+zxcvbn = "1.9.0"
 
 [libraries]
 altcha = { module = "org.altcha:altcha", version.ref = "altcha" }
@@ -93,6 +94,7 @@ springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmoc
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
 thymeleaf-spring = { module = "org.thymeleaf:thymeleaf-spring6" }
 unboundid-ldapsdk = { module = "com.unboundid:unboundid-ldapsdk" }
+zxcvbn = { module = "com.nulab-inc:zxcvbn", version.ref = "zxcvbn" }
 
 [plugins]
 aspectj = { id = "io.freefair.aspectj.post-compile-weaving", version.ref = "aspectj-plugin" }

@@ -53,6 +53,7 @@ dependencies {
   implementation(libs.thymeleaf.spring)
   implementation(libs.altcha)
   implementation(libs.bucket4j)
+  implementation(libs.zxcvbn)
   compileOnly(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   compileOnly(libs.postgresql)
   developmentOnly(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
