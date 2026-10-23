@@ -1,6 +1,6 @@
 [versions]
 aspectj-plugin = "8.14.4"
-aspectj-rt = "1.9.25.1"
+aspectj-rt = "1.9.26"
 bucket4j = "8.15.0"
 checkstyle = "10.12.7"
 ektorp = "1.5.0"
