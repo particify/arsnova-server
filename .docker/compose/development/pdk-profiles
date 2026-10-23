@@ -28,13 +28,28 @@ import sys
 import yaml
 
 
+class ComposeLoader(yaml.SafeLoader):
+    """Reads Compose's merge tags (!reset, !override) as the plain values they tag."""
+
+
+def _construct_untagged(loader, suffix, node):
+    if isinstance(node, yaml.MappingNode):
+        return loader.construct_mapping(node)
+    if isinstance(node, yaml.SequenceNode):
+        return loader.construct_sequence(node)
+    return loader.construct_scalar(node)
+
+
+ComposeLoader.add_multi_constructor("!", _construct_untagged)
+
+
 def profiles_by_service(paths):
     """Service name -> the profiles gating it, merged across every source that mentions it."""
     gated = {}
     for path in paths:
         try:
             with open(path) as source:
-                document = yaml.safe_load(source) or {}
+                document = yaml.load(source, Loader=ComposeLoader) or {}
         except FileNotFoundError:
             # Compose reads the same list and will complain about a real absence itself.
             continue
