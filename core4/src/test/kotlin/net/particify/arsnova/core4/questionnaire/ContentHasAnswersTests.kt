@@ -5,13 +5,16 @@ package net.particify.arsnova.core4.questionnaire
 
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
+import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.questionnaire.answer.Answer
 import net.particify.arsnova.core4.questionnaire.answer.AnswerRepository
 import net.particify.arsnova.core4.questionnaire.answer.AnswerResultState
 import net.particify.arsnova.core4.questionnaire.content.ChoiceContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
+import net.particify.arsnova.core4.questionnaire.content.NumericContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.api.ContentAnswersFieldController
+import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireServiceImpl
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireType
 import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
@@ -80,5 +83,78 @@ class ContentHasAnswersTests {
 
     Assertions.assertEquals(true, result[answered])
     Assertions.assertEquals(false, result[unanswered])
+  }
+
+  /** What an answer was given under is locked, while the labels of the options stay editable. */
+  @Test
+  fun shouldLockTheSettingsOfAnAnsweredChoiceContent() {
+    val questionnaire =
+        questionnaireService.create(ROOM_ID, "Lock ${UUID.randomUUID()}", QuestionnaireType.SURVEY)
+    val choice = createChoiceContent(questionnaire.id!!)
+    answer(choice)
+
+    val relabelled =
+        contentService.update(
+            choice.id!!,
+            "Choice content",
+            ChoiceContentFormatData(listOf("A", "Bee"), listOf(0), false),
+            null,
+            true,
+            null)
+    Assertions.assertEquals(
+        listOf("A", "Bee"), (relabelled.formatData as ChoiceContentFormatData).options)
+    Assertions.assertThrows(ContentFormatDataInvalidException::class.java) {
+      contentService.update(
+          choice.id!!,
+          "Choice content",
+          ChoiceContentFormatData(listOf("Bee", "A"), listOf(0), false),
+          null,
+          true,
+          null)
+    }
+  }
+
+  @Test
+  fun shouldLockTheRangeOfAnAnsweredNumericContent() {
+    val questionnaire =
+        questionnaireService.create(ROOM_ID, "Lock ${UUID.randomUUID()}", QuestionnaireType.SURVEY)
+    val numeric =
+        contentService.create(
+            questionnaire.id!!, "Numeric", NumericContentFormatData(0.0, 10.0), null, true, null)
+    answer(numeric)
+
+    val renamed =
+        contentService.update(
+            numeric.id!!, "Renamed", NumericContentFormatData(0.0, 10.0), null, true, null)
+    Assertions.assertEquals("Renamed", renamed.body)
+    listOf(NumericContentFormatData(-10.0, 20.0), NumericContentFormatData(0.0, 5.0)).forEach {
+      Assertions.assertThrows(
+          ContentFormatDataInvalidException::class.java,
+          { contentService.update(numeric.id!!, "Numeric", it, null, true, null) },
+          "$it")
+    }
+  }
+
+  @Test
+  fun shouldLockTheWeightOfAnAnsweredContent() {
+    val questionnaire =
+        questionnaireService.create(ROOM_ID, "Lock ${UUID.randomUUID()}", QuestionnaireType.SURVEY)
+    val choice = createChoiceContent(questionnaire.id!!)
+    answer(choice)
+
+    Assertions.assertThrows(InvalidInputException::class.java) {
+      contentService.update(
+          choice.id!!,
+          "Choice content",
+          ChoiceContentFormatData(listOf("A", "B"), listOf(0), false),
+          null,
+          true,
+          2)
+    }
+  }
+
+  private fun answer(content: Content) {
+    answerRepository.saveAndFlush(
+        Answer(round = content.activeRound, result = AnswerResultState.NEUTRAL))
   }
 }

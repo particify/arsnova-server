@@ -39,19 +39,18 @@ constructor(
   }
 
   /**
-   * An answer's result and points are decided when it is given and never recomputed, so changing
-   * what counts as correct afterwards would leave stored results disagreeing with the content. The
-   * range stays editable: it does not take part in scoring and stored answers keep their values.
+   * An answer's result and points are stored when it is given, while a participant's score is
+   * recomputed from it, so changing what counts as correct afterwards would set the two apart. The
+   * range is fixed as well, as the results chart only shows answers within it.
    */
   override fun validateChange(current: ContentFormatData, hasAnswers: () -> Boolean) {
     val currentFormatData =
         current as? NumericContentFormatData
             ?: throw ContentFormatDataInvalidException("Content is not a numeric content")
-    val scoringChanged =
-        currentFormatData.correctNumber != correctNumber || currentFormatData.tolerance != tolerance
-    if (scoringChanged && hasAnswers()) {
+    if (currentFormatData != this && hasAnswers()) {
       throw ContentFormatDataInvalidException(
-          "The correct number and tolerance must not be changed once the content has answers")
+          "The range, correct number and tolerance must not be changed once the content has " +
+              "answers")
     }
   }
 

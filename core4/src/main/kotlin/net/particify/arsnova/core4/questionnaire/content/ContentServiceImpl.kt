@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.questionnaire.content
 
 import jakarta.transaction.Transactional
 import java.util.UUID
+import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.questionnaire.answer.AnswerRepository
 import net.particify.arsnova.core4.questionnaire.event.ContentCreatedEvent
 import net.particify.arsnova.core4.questionnaire.event.ContentDeletedEvent
@@ -114,7 +115,9 @@ class ContentServiceImpl(
     val current = content.formatData!!
     val merged = formatData.mergeWith(current)
     merged.validate()
-    merged.validateChange(current) { hasAnswers(id) }
+    val answered by lazy { hasAnswers(id) }
+    merged.validateChange(current) { answered }
+    validateWeightChange(content, merged, weight) { answered }
     content.body = body
     content.formatData = merged
     content.duration = duration
@@ -124,6 +127,24 @@ class ContentServiceImpl(
     // worth is recomputed the same way creation derives it.
     content.points = if (merged.hasCorrectAnswer()) Content.calculateBasePoints(weight) else 0
     return contentRepository.save(content)
+  }
+
+  /**
+   * The leaderboard sums the points stored with each answer, while a participant's own score is
+   * recomputed from the content's current worth, so a new weight would set the two apart. A content
+   * without a correct answer is worth nothing whatever its weight.
+   */
+  private fun validateWeightChange(
+      content: Content,
+      formatData: ContentFormatData,
+      weight: Int?,
+      hasAnswers: () -> Boolean
+  ) {
+    val weightChanged =
+        Content.calculateBasePoints(content.weight) != Content.calculateBasePoints(weight)
+    if (weightChanged && formatData.hasCorrectAnswer() && hasAnswers()) {
+      throw InvalidInputException("The weight must not be changed once the content has answers")
+    }
   }
 
   /**

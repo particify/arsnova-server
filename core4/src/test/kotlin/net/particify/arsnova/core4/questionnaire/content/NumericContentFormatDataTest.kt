@@ -73,8 +73,24 @@ class NumericContentFormatDataTest {
   }
 
   @Test
-  fun shouldKeepRangeEditableOnceAnswered() {
-    NumericContentFormatData(-5.0, 50.0, 10.0, 2.5).validateChange(withTolerance) { true }
+  fun shouldLockTheRangeOnceAnswered() {
+    listOf(
+            NumericContentFormatData(1.0, 100.0, 10.0, 2.5),
+            NumericContentFormatData(0.0, 99.0, 10.0, 2.5),
+            NumericContentFormatData(-5.0, 150.0, 10.0, 2.5))
+        .forEach {
+          Assertions.assertThrows(
+              ContentFormatDataInvalidException::class.java,
+              { it.validateChange(withTolerance) { true } },
+              "$it")
+        }
+  }
+
+  @Test
+  fun shouldNotConsultAnswersForAnUnchangedRange() {
+    NumericContentFormatData(0.0, 100.0, 10.0, 2.5).validateChange(withTolerance) {
+      Assertions.fail("Answers must not be looked up for an unchanged range")
+    }
   }
 
   @Test

@@ -26,8 +26,8 @@ constructor(@JsonProperty("correctAnswer") val correctAnswer: Boolean? = null) :
   override fun withoutSolution() = copy(correctAnswer = null)
 
   /**
-   * An answer's result and points are decided when it is given and never recomputed, so moving the
-   * correct answer afterwards would leave stored results disagreeing with the content.
+   * An answer's result and points are stored when it is given, while a participant's score is
+   * recomputed from it, so moving the correct answer afterwards would set the two apart.
    */
   override fun validateChange(current: ContentFormatData, hasAnswers: () -> Boolean) {
     val currentFormatData =
