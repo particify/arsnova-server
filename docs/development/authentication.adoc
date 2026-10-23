@@ -23,6 +23,19 @@ The client fetches a challenge via `GET` request to `/api/challenge` and sends i
 If the challenge is verified successfully, the server responds with an authentication token.
 This token has a short expiration time and is only accepted to authenticate a single request.
 
+A solution posted with `"reusable": true` is exchanged for a reusable token instead,
+which lets a client without a session use a few queries for a limited time.
+It is valid for any number of requests until it expires,
+after `security.challenge.reusable-token-validity` (5 minutes by default),
+but authenticates only GraphQL requests over HTTP.
+It grants only the role `CHALLENGE_SOLVED_REUSABLE`,
+so it reaches only the operations whose authorization allows that role explicitly,
+apart from introspection, which any authenticated request can use.
+It belongs to no account, so permission checks on domain objects deny it.
+It is signed with a key derived from the JWT secret for reusable tokens,
+so no other service accepts it as a session,
+and issuing it consumes the challenge, so one solution yields exactly one token.
+
 == Login throttling
 
 `POST /api/auth/login` is rate limited per submitted username.

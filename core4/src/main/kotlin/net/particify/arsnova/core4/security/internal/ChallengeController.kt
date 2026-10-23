@@ -13,7 +13,10 @@ import org.springframework.web.server.ResponseStatusException
 
 @Controller
 @RestController
-class ChallengeController(val challengeService: ChallengeService) {
+class ChallengeController(
+    val challengeService: ChallengeService,
+    private val reusableTokens: ReusableChallengeTokens
+) {
   @GetMapping("/challenge")
   fun challenge(): String {
     return challengeService.generateChallenge().toJson()
@@ -32,10 +35,29 @@ class ChallengeController(val challengeService: ChallengeService) {
             else -> "Verification failed"
           })
     }
-    return TokenResponse(challengeService.createJwtForSolution(encodedPayload.solution))
+    if (!encodedPayload.reusable) {
+      return TokenResponse(challengeService.createJwtForSolution(encodedPayload.solution))
+    }
+    return reusableToken(encodedPayload.solution)
   }
 
-  data class ChallengePayload(val solution: String)
+  /**
+   * The token is reusable until it expires, so the solution is consumed now rather than when a
+   * token is presented: it cannot be exchanged for a second token of either kind.
+   */
+  private fun reusableToken(solution: String): TokenResponse {
+    val id = challengeService.challengeId(solution)
+    if (!challengeService.useId(id)) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Challenge solution already used")
+    }
+    return TokenResponse(reusableTokens.issue(id))
+  }
+
+  /**
+   * @property reusable whether to issue a token which is valid for any number of requests until it
+   *   expires. Otherwise, the token authorizes a single anonymous operation.
+   */
+  data class ChallengePayload(val solution: String, val reusable: Boolean = false)
 
   data class TokenResponse(val token: String)
 }

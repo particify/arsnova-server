@@ -10,6 +10,7 @@ private const val SECRET = "weaksecret1234567890123456789012"
 private const val BCRYPT_STRENGTH = 12
 private const val CHALLENGE_VALIDITY_SECONDS = 60L
 private const val CHALLENGE_ITERATIONS = 5000
+private const val REUSABLE_CHALLENGE_TOKEN_MINUTES = 5L
 private const val LOGIN_ATTEMPT_LIMIT = 20L
 private const val EXTERNAL_SESSION_DAYS = 30L
 private const val REMEMBER_ME_DAYS = 180L
@@ -29,7 +30,8 @@ fun securityProperties(
                 "PBKDF2/SHA-256",
                 SECRET,
                 CHALLENGE_ITERATIONS,
-                CHALLENGE_ITERATIONS),
+                CHALLENGE_ITERATIONS,
+                Duration.ofMinutes(REUSABLE_CHALLENGE_TOKEN_MINUTES)),
         login = login,
         roomCreatorRole = roomCreatorRole,
         authorizeUriHeader = "X-Forwarded-Uri",

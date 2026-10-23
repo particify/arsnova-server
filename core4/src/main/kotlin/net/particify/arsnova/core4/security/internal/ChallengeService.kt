@@ -56,6 +56,9 @@ class ChallengeService(
         "challenge-$id", listOf(CHALLENGE_SOLVED_ROLE), expirationTime = expires)
   }
 
+  fun challengeId(solution: String): UUID =
+      UUID.fromString(parsePayload(solution).challenge.parameters.data["id"].toString())
+
   private fun parsePayload(solution: String): Altcha.Payload {
     return jsonMapper.readValue(Base64.getDecoder().decode(solution), Altcha.Payload::class.java)
   }
