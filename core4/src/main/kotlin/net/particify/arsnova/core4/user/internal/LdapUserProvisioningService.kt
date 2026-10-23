@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.user.internal
 
 import java.time.Instant
 import java.util.UUID
+import net.particify.arsnova.core4.user.MailAddressValidation
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.sso.LdapProperties
 import net.particify.arsnova.core4.user.sso.LdapProperties.ImportedAttribute
@@ -27,7 +28,8 @@ class LdapUserProvisioningService(
     private val userRepository: UserRepository,
     private val externalLoginRepository: ExternalLoginRepository,
     private val ldapProperties: LdapProperties,
-    private val linkingStrategyRegistry: ExternalLoginLinkingStrategyRegistry
+    private val linkingStrategyRegistry: ExternalLoginLinkingStrategyRegistry,
+    private val mailAddressValidation: MailAddressValidation
 ) {
   companion object {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -165,14 +167,19 @@ class LdapUserProvisioningService(
   }
 
   /**
-   * An address which another account already holds is skipped instead of failing the login: the
-   * unique constraint would otherwise reject the account on every attempt. An entry carrying no
+   * An address which is not valid or which another account already holds is skipped instead of
+   * failing the login: the unique constraint would otherwise reject the account on every attempt,
+   * and an invalid one would be mailed and shown as the account's address. An entry carrying no
    * address at all leaves the stored one untouched, so a directory which stops releasing the
    * attribute does not clear the address of every account which logs in afterwards.
    */
   private fun updateMailAddress(user: User, mailAddress: String?) {
     val normalized = mailAddress?.lowercase() ?: return
     if (normalized == user.mailAddress) {
+      return
+    }
+    if (!mailAddressValidation.isValid(normalized)) {
+      logger.warn("Mail address {} is not valid. Not importing it for the LDAP user.", normalized)
       return
     }
     if (userRepository.existsByMailAddress(normalized)) {

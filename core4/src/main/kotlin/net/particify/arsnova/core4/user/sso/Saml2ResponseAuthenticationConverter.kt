@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.user.sso
 
 import java.time.Instant
 import java.util.UUID
+import net.particify.arsnova.core4.user.MailAddressValidation
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.internal.ExternalLogin
 import net.particify.arsnova.core4.user.internal.ExternalLoginLinkingStrategyRegistry
@@ -29,6 +30,7 @@ class Saml2ResponseAuthenticationConverter(
     private val externalLoginRepository: ExternalLoginRepository,
     private val saml2Properties: ExtendedSaml2RelyingPartyProperties,
     private val linkingStrategyRegistry: ExternalLoginLinkingStrategyRegistry,
+    private val mailAddressValidation: MailAddressValidation,
     private val loginHooks: List<Saml2LoginHook>
 ) : Converter<ResponseToken, Saml2Authentication> {
   companion object {
@@ -168,6 +170,15 @@ class Saml2ResponseAuthenticationConverter(
           externalId)
       return
     }
+    // An address imported before addresses were validated must not become the username either.
+    if (registration.usernameMapping == UsernameMapping.MAIL_ADDRESS &&
+        !mailAddressValidation.isValid(username)) {
+      logger.warn(
+          "Mail address {} is not valid. Leaving the account of the SAML user {} unverified.",
+          username,
+          externalId)
+      return
+    }
     if (userRepository.existsByUsername(username)) {
       logger.warn(
           "Username {} is already in use. Leaving the account of the SAML user unverified.",
@@ -205,14 +216,19 @@ class Saml2ResponseAuthenticationConverter(
   ): String? = attributes[registration.attributeMapping.mailAddress]?.firstOrNull()?.toString()
 
   /**
-   * An asserted address which another account already holds is skipped instead of failing the
-   * login: the unique constraint would otherwise reject the account on every attempt. An assertion
+   * An asserted address which is not valid or which another account already holds is skipped
+   * instead of failing the login: the unique constraint would otherwise reject the account on every
+   * attempt, and an invalid one would be mailed and shown as the account's address. An assertion
    * carrying no address at all leaves the stored one untouched, so an identity provider which stops
    * releasing the attribute does not clear the address of every account which logs in afterwards.
    */
   internal fun updateMailAddress(user: User, mailAddress: String?) {
     val normalized = mailAddress?.lowercase() ?: return
     if (normalized == user.mailAddress) {
+      return
+    }
+    if (!mailAddressValidation.isValid(normalized)) {
+      logger.warn("Mail address {} is not valid. Not importing it for the SAML user.", normalized)
       return
     }
     if (userRepository.existsByMailAddress(normalized)) {

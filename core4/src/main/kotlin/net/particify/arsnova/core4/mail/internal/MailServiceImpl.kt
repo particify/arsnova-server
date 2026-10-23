@@ -3,18 +3,22 @@
  */
 package net.particify.arsnova.core4.mail.internal
 
+import jakarta.mail.internet.AddressException
+import jakarta.mail.internet.InternetAddress
 import jakarta.mail.internet.MimeMessage
 import java.io.UnsupportedEncodingException
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import net.particify.arsnova.core4.common.ServiceProperties
+import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.mail.MailService
 import net.particify.arsnova.core4.mail.config.MailProperties
 import net.particify.arsnova.core4.mail.exception.MailAddressTemporarilyBlockedException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.mail.MailException
+import org.springframework.mail.MailPreparationException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.scheduling.annotation.Scheduled
@@ -35,7 +39,8 @@ class MailServiceImpl(
   @Volatile var staleBlockedAddresses: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
   override fun sendMail(address: String, template: String, data: Map<String, Any>, locale: Locale) {
-    if (!tryBlockAddress(address)) {
+    val recipient = parseRecipient(address)
+    if (!tryBlockAddress(recipient.address.lowercase())) {
       throw MailAddressTemporarilyBlockedException()
     }
     val msg: MimeMessage = mailSender.createMimeMessage()
@@ -43,7 +48,7 @@ class MailServiceImpl(
     try {
       msg.setHeader("Auto-Submitted", "auto-generated")
       helper.setFrom(mailProperties.senderAddress, mailProperties.senderName)
-      helper.setTo(address)
+      helper.setTo(recipient)
       helper.setSubject(processTemplate("${template}_subject", data, TemplateMode.TEXT, locale))
       helper.setText(
           processTemplate(template, data, TemplateMode.TEXT, locale),
@@ -56,12 +61,30 @@ class MailServiceImpl(
       throw e
     } catch (e: jakarta.mail.MessagingException) {
       logger.warn("Mail \"{}\" could not be sent because of MessagingException.", template, e)
+      throw MailPreparationException(e)
     } catch (e: UnsupportedEncodingException) {
       logger.error(
           "Mail \"{}\" could not be sent because of the use of an unsupported encoding.",
           template,
           e)
     }
+  }
+
+  /**
+   * Accepts a bare address only. JavaMail would otherwise also accept a display name, a comment or
+   * an address list, and deliver to an address which is not the one stored for the account.
+   */
+  private fun parseRecipient(address: String): InternetAddress {
+    val recipient =
+        try {
+          InternetAddress(address, true)
+        } catch (e: AddressException) {
+          throw InvalidInputException("Invalid recipient mail address", e)
+        }
+    if (recipient.personal != null || recipient.address != address) {
+      throw InvalidInputException("Invalid recipient mail address")
+    }
+    return recipient
   }
 
   private fun processTemplate(

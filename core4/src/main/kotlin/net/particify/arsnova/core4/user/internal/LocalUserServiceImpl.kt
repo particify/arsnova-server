@@ -15,6 +15,7 @@ import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.mail.MailService
 import net.particify.arsnova.core4.user.LocalAccountPolicy
 import net.particify.arsnova.core4.user.LocalUserService
+import net.particify.arsnova.core4.user.MailAddressValidation
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
 import net.particify.arsnova.core4.user.event.UserMailVerifiedEvent
@@ -42,6 +43,7 @@ class LocalUserServiceImpl(
     private val mailService: MailService,
     private val eventPublisher: ApplicationEventPublisher,
     private val localAccountPolicy: LocalAccountPolicy,
+    private val mailAddressValidation: MailAddressValidation,
     mailProperties: UserMailProperties
 ) : LocalUserService {
   companion object {
@@ -54,6 +56,7 @@ class LocalUserServiceImpl(
   private val passwordResetUriPattern = mailProperties.passwordResetUriPattern
 
   fun claimUnverifiedUser(user: User, mailAddress: String, password: String, locale: Locale): User {
+    mailAddressValidation.validate(mailAddress)
     checkAccountCreationAllowed(user)
     checkMailAddressAllowed(mailAddress)
     if (user.mailAddress != null) {
@@ -74,6 +77,7 @@ class LocalUserServiceImpl(
       password: String,
       locale: Locale
   ): User {
+    mailAddressValidation.validate(mailAddress)
     checkLocalAccountsEnabled()
     checkMailAddressAllowed(mailAddress)
     if (user.mailAddress == null || user.password == null) {
@@ -108,6 +112,7 @@ class LocalUserServiceImpl(
       data: Map<String, Any>,
       locale: Locale
   ): User {
+    mailAddressValidation.validate(mailAddress)
     checkAccountCreationAllowed(inviter)
     checkInvitedMailAddressAllowed(inviter, mailAddress)
     val invitee = userService.createAccount()
