@@ -40,6 +40,7 @@ ektorp-spring = { module = "org.ektorp:org.ektorp.spring", version.ref = "ektorp
 graphql-scalars = { module = "com.graphql-java:graphql-java-extended-scalars", version.ref = "graphql-scalars" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 hibernate-bom = { module = "org.hibernate.orm:hibernate-platform", version.ref = "hibernate" }
+jackson-csv = { module = "tools.jackson.dataformat:jackson-dataformat-csv" }
 jackson-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 java-jwt = { module = "com.auth0:java-jwt", version.ref = "java-jwt" }
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }

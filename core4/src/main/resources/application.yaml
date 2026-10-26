@@ -35,6 +35,12 @@ spring:
   rabbitmq:
     host: rabbitmq
 
+  # Caps uploads such as content imports; larger requests are answered with 413.
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 2MB
+
 docker:
   compose:
     file:

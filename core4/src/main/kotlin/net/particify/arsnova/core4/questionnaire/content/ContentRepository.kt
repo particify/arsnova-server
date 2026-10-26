@@ -14,6 +14,8 @@ interface ContentRepository : JpaRepository<Content, UUID> {
       scrollPosition: ScrollPosition
   ): Window<Content>
 
+  fun findAllByQuestionnaireIdOrderByPosition(questionnaireId: UUID): List<Content>
+
   fun countByQuestionnaireId(questionnaireId: UUID): Int
 
   fun deleteByQuestionnaireId(questionnaireId: UUID): Int
