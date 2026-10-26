@@ -45,6 +45,10 @@ data class ContentCsvRecord(
             "duration",
         )
 
+    /** The name of [COLUMNS] which [name] matches regardless of case, if any. */
+    fun columnOf(name: String?): String? =
+        name?.trim()?.let { trimmed -> COLUMNS.find { it.equals(trimmed, ignoreCase = true) } }
+
     /** Cells of columns missing from [cells] are taken as empty. */
     fun fromCells(cells: Map<String, String?>): ContentCsvRecord =
         ContentCsvRecord(

@@ -214,6 +214,24 @@ class ContentCsvTests {
   }
 
   @Test
+  fun shouldMatchHeaderNamesRegardlessOfCaseAndReportUnknownColumns() {
+    val questionnaire = createQuestionnaire()
+    val text =
+        listOf(
+                "Format,BODY, Options ,Comment,abstentionsallowed,Points,comment,,",
+                "choice,Pick one,\"A\nB\",A note,FALSE,3,,,")
+            .joinToString("\n")
+    val result = import(questionnaire, text)
+    Assertions.assertEquals(
+        ContentCsvImportResult(1, 1, listOf(), listOf("Comment", "Points", "comment")), result)
+    val content = contentsOf(questionnaire).single()
+    Assertions.assertEquals("Pick one", content.body)
+    Assertions.assertEquals(
+        ChoiceContentFormatData(listOf("A", "B"), listOf(), false), content.formatData)
+    Assertions.assertFalse(content.abstentionsAllowed)
+  }
+
+  @Test
   fun shouldReportEachInvalidRecordAndImportTheOthers() {
     val questionnaire = createQuestionnaire()
     val text =
@@ -363,6 +381,7 @@ class ContentCsvTests {
         .andExpect(jsonPath("$.totalLines").value(1))
         .andExpect(jsonPath("$.importedLines").value(1))
         .andExpect(jsonPath("$.errorLines").isEmpty())
+        .andExpect(jsonPath("$.unknownColumns").isEmpty())
     Assertions.assertEquals(listOf("Slide"), contentsOf(target).map { it.body })
   }
 
@@ -386,10 +405,11 @@ class ContentCsvTests {
   @Test
   fun shouldReportImportErrorsAsJson() {
     val questionnaire = createQuestionnaire()
-    perform(importRequest(questionnaire.id!!, "format,body\nGRID,Grid".toByteArray()))
+    perform(importRequest(questionnaire.id!!, "format,body,extra\nGRID,Grid,".toByteArray()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.errorLines[0].line").value(1))
         .andExpect(jsonPath("$.errorLines[0].reason").value("UNKNOWN_FORMAT"))
+        .andExpect(jsonPath("$.unknownColumns[0]").value("extra"))
   }
 
   @Test

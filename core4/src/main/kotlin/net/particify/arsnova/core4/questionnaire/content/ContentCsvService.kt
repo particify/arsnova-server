@@ -66,7 +66,7 @@ class ContentCsvService(
     val questionnaire =
         questionnaireRepository.findByIdOrNull(questionnaireId)
             ?: throw QuestionnaireNotFoundException(questionnaireId)
-    val records = readRecords(text)
+    val (records, unknownColumns) = readRecords(text)
     if (records.size > MAX_RECORDS) {
       throw InvalidInputException("A file may hold at most $MAX_RECORDS contents")
     }
@@ -79,7 +79,8 @@ class ContentCsvService(
           val error = create(questionnaireId, line.number, line.content!!)
           if (error == null) importedLines++ else errors.add(error)
         }
-    return ContentCsvImportResult(lines.size, importedLines, errors.sortedBy { it.line })
+    return ContentCsvImportResult(
+        lines.size, importedLines, errors.sortedBy { it.line }, unknownColumns)
   }
 
   private fun create(questionnaireId: UUID, number: Int, content: DecodedContent) =
@@ -110,16 +111,25 @@ class ContentCsvService(
         ImportLine(record.number, null, ContentCsvImportError(record.number, e.reason, e.message))
       }
 
-  /** The first row is the header. Blank rows are no records and are skipped. */
-  private fun readRecords(text: String): List<NumberedRecord> {
+  /**
+   * The first row is the header, whose column names are matched regardless of case. Blank rows are
+   * no records and are skipped.
+   */
+  private fun readRecords(text: String): CsvFile {
     val content = text.removePrefix(BYTE_ORDER_MARK)
     val schema = CsvSchema.emptySchema().withColumnSeparator(detectSeparator(content))
     val rows =
         readRows(mapper.readerFor(List::class.java).with(schema).readValues(content)).filterNot {
           it is CsvRow.Values && it.cells.all(String?::isNullOrBlank)
         }
-    val header = (rows.firstOrNull() as? CsvRow.Values)?.cells?.map { it?.trim() }.orEmpty()
-    return rows.drop(1).mapIndexed { index, row -> NumberedRecord(index + 1, header, row) }
+    val names = (rows.firstOrNull() as? CsvRow.Values)?.cells?.map { it?.trim() }.orEmpty()
+    val header = names.map { ContentCsvRecord.columnOf(it) ?: it }
+    // A spreadsheet may append separators to the header, which name no column.
+    val unknownColumns =
+        names.filterNotNull().filter { it.isNotEmpty() && ContentCsvRecord.columnOf(it) == null }
+    return CsvFile(
+        rows.drop(1).mapIndexed { index, row -> NumberedRecord(index + 1, header, row) },
+        unknownColumns.distinct())
   }
 
   /**
@@ -154,6 +164,8 @@ class ContentCsvService(
     val header = text.lineSequence().firstOrNull().orEmpty()
     return SEPARATORS.firstOrNull { it in header } ?: DelimitedTextFormat.CSV.separator
   }
+
+  private data class CsvFile(val records: List<NumberedRecord>, val unknownColumns: List<String>)
 
   private sealed interface CsvRow {
     data class Values(val cells: List<String?>) : CsvRow

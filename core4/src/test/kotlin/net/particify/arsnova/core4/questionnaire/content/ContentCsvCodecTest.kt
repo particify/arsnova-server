@@ -211,6 +211,16 @@ class ContentCsvCodecTest {
   }
 
   @Test
+  fun shouldMatchColumnNamesRegardlessOfCase() {
+    Assertions.assertEquals("format", ContentCsvRecord.columnOf("Format"))
+    Assertions.assertEquals("correctOptions", ContentCsvRecord.columnOf(" CORRECTOPTIONS "))
+    Assertions.assertEquals("abstentionsAllowed", ContentCsvRecord.columnOf("abstentionsallowed"))
+    Assertions.assertNull(ContentCsvRecord.columnOf("comment"))
+    Assertions.assertNull(ContentCsvRecord.columnOf(""))
+    Assertions.assertNull(ContentCsvRecord.columnOf(null))
+  }
+
+  @Test
   fun shouldRejectUnknownFormatsAndMissingBody() {
     assertRejected(ContentCsvImportErrorReason.UNKNOWN_FORMAT) {
       decoder.decode(record("format" to "GRID"))

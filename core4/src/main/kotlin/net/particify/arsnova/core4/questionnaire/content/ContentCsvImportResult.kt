@@ -3,11 +3,15 @@
  */
 package net.particify.arsnova.core4.questionnaire.content
 
-/** Lines are numbered by record, counting from the first one after the header. */
+/**
+ * Lines are numbered by record, counting from the first one after the header. [unknownColumns]
+ * names the header's columns which are not read, in the order of the header.
+ */
 data class ContentCsvImportResult(
     val totalLines: Int,
     val importedLines: Int,
     val errorLines: List<ContentCsvImportError>,
+    val unknownColumns: List<String> = listOf(),
 )
 
 data class ContentCsvImportError(
