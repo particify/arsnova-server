@@ -16,6 +16,8 @@ import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireServiceImpl
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireType
+import net.particify.arsnova.core4.questionnaire.round.Round
+import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
 import net.particify.arsnova.core4.user.UserService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -31,6 +33,7 @@ import org.springframework.test.context.ActiveProfiles
 
 private val ROOM_ID = UUID.fromString("3f9cecb5-6dbf-45cc-b630-4af700d474b6")
 private val OWNER_ID = UUID.fromString("9c778494-9b52-424d-8c7f-f4936629facb")
+private val OTHER_USER_ID = UUID.fromString("43389844-708b-469d-8d22-abdd2eb88777")
 private val OPTIONS = listOf("Right", "Wrong")
 private const val CORRECT_INDEX = 0
 private const val WRONG_INDEX = 1
@@ -44,11 +47,16 @@ class QuestionnaireAnswerResultTests {
   @Autowired lateinit var contentService: ContentServiceImpl
   @Autowired lateinit var graphQlService: ExecutionGraphQlService
   @Autowired lateinit var questionnaireService: QuestionnaireServiceImpl
+  @Autowired lateinit var roundService: RoundServiceImpl
   @Autowired lateinit var userService: UserService
 
   @BeforeEach
   fun authenticateUser() {
-    val user = userService.loadUserById(OWNER_ID)!!
+    authenticate(OWNER_ID)
+  }
+
+  private fun authenticate(userId: UUID) {
+    val user = userService.loadUserById(userId)!!
     SecurityContextHolder.getContext().authentication =
         UsernamePasswordAuthenticationToken(user, null, user.authorities)
   }
@@ -174,5 +182,46 @@ class QuestionnaireAnswerResultTests {
         listOf(Triple(OWNER_ID, Content.BASE_POINTS, AnswerResultState.CORRECT)),
         projected.map { Triple(it.userId, it.points, it.result) })
     Assertions.assertEquals(fromEntities, projected)
+  }
+
+  /** Stores a scored answer as the authenticated user, as given before any rule could refuse it. */
+  private fun storeAnswer(round: Round, points: Int, hidden: Boolean = false) =
+      answerRepository.saveAndFlush(
+          Answer(
+              round = round,
+              formatData = ChoiceAnswerFormatData(listOf(CORRECT_INDEX)),
+              result = AnswerResultState.CORRECT,
+              points = points,
+              hidden = hidden))
+
+  /**
+   * The leaderboard ranks the active round of each content only, so a new round starts it over, and
+   * an answer hidden from the statistics still scores.
+   */
+  @Test
+  fun shouldSumTheLeaderboardScoresOfTheActiveRoundsPerUser() {
+    val first = createChoiceContent(listOf(CORRECT_INDEX))
+    val questionnaireId = first.questionnaire!!.id!!
+    val second =
+        contentService.create(
+            questionnaireId,
+            "Pick another",
+            ChoiceContentFormatData(OPTIONS, listOf(CORRECT_INDEX), false),
+            null,
+            true,
+            null)
+    storeAnswer(first.activeRound!!, points = 100)
+    val secondRound = roundService.startNewRound(first.id!!)
+    storeAnswer(secondRound, points = 7)
+    authenticate(OTHER_USER_ID)
+    storeAnswer(secondRound, points = 5, hidden = true)
+    storeAnswer(second.activeRound!!, points = 3)
+
+    val sums =
+        answerRepository.sumPointsByQuestionnaireIdGroupByCreatedBy(questionnaireId).associate {
+          it.get(0, UUID::class.java) to (it.get(1) as Number?)?.toLong()
+        }
+
+    Assertions.assertEquals(mapOf(OWNER_ID to 7L, OTHER_USER_ID to 8L), sums)
   }
 }
