@@ -6,6 +6,7 @@ package net.particify.arsnova.core4.questionnaire.content
 import java.util.UUID
 import net.particify.arsnova.core4.common.exception.InvalidInputException
 import net.particify.arsnova.core4.questionnaire.answer.AnswerRepository
+import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireRepository
 import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
 import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
@@ -41,14 +42,15 @@ class ContentSettingsValidationTest {
     Mockito.verifyNoInteractions(contentRepository, questionnaireRepository)
   }
 
+  /** The ranges are decided product rules, so they are spelled out rather than read back. */
   @Test
-  fun shouldRejectWeightOutsideTheRange() {
-    listOf(0, -1, Content.WEIGHT_RANGE.last + 1).forEach { assertRejected(weight = it) }
+  fun shouldRejectWeightOutsideOneToFive() {
+    listOf(0, -1, 6).forEach { assertRejected(weight = it) }
   }
 
   @Test
-  fun shouldRejectDurationOutsideTheRange() {
-    listOf(0, -1, Content.DURATION_RANGE.last + 1).forEach { assertRejected(duration = it) }
+  fun shouldRejectDurationOutsideOneToThreeThousandSixHundredSeconds() {
+    listOf(0, -1, 3601).forEach { assertRejected(duration = it) }
   }
 
   @Test
@@ -56,18 +58,24 @@ class ContentSettingsValidationTest {
     listOf("", " ", "x".repeat(Content.MAX_BODY_LENGTH + 1)).forEach { assertRejected(body = it) }
   }
 
+  /**
+   * Accepted settings pass on to loading the questionnaire, which the mocked repository does not
+   * find.
+   */
   @Test
   fun shouldAcceptTheRangeLimits() {
-    val questionnaireId = UUID.randomUUID()
-    Assertions.assertThrows(RuntimeException::class.java) {
-      contentService.create(
-          questionnaireId,
-          "x".repeat(Content.MAX_BODY_LENGTH),
-          formatData,
-          Content.DURATION_RANGE.last,
-          true,
-          Content.WEIGHT_RANGE.last)
+    listOf(1 to 1, 3600 to 5, null to null).forEach { (duration, weight) ->
+      val questionnaireId = UUID.randomUUID()
+      Assertions.assertThrows(QuestionnaireNotFoundException::class.java) {
+        contentService.create(
+            questionnaireId,
+            "x".repeat(Content.MAX_BODY_LENGTH),
+            formatData,
+            duration,
+            true,
+            weight)
+      }
+      Mockito.verify(questionnaireRepository).findById(questionnaireId)
     }
-    Mockito.verify(questionnaireRepository).findById(questionnaireId)
   }
 }

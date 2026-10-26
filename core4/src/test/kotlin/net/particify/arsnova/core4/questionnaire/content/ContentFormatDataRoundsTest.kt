@@ -41,4 +41,17 @@ class ContentFormatDataRoundsTest {
   fun shouldSupportRoundsForBinary() {
     Assertions.assertTrue(BinaryContentFormatData().supportsRounds())
   }
+
+  /**
+   * A deliberate product decision, shared with the web client, rather than a default to inherit.
+   */
+  @Test
+  fun shouldNotSupportRoundsForShortAnswerSortPrioritizationAndText() {
+    listOf(
+            ShortAnswerContentFormatData(listOf("Paris")),
+            SortContentFormatData(listOf("A", "B"), null),
+            PrioritizationContentFormatData(listOf("A", "B")),
+            TextContentFormatData(false))
+        .forEach { Assertions.assertFalse(it.supportsRounds(), it.format) }
+  }
 }
