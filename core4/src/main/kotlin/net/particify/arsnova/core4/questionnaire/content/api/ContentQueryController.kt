@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.questionnaire.content.api
 
 import java.util.UUID
 import net.particify.arsnova.core4.common.TextRenderingService
+import net.particify.arsnova.core4.common.TextRenderingService.TextRenderingOptions
 import net.particify.arsnova.core4.questionnaire.answer.AnswerRepository
 import net.particify.arsnova.core4.questionnaire.answer.AnswerResultState
 import net.particify.arsnova.core4.questionnaire.content.AnswerOption
@@ -56,7 +57,7 @@ class ContentQueryController(
 
   @SchemaMapping(typeName = "Content")
   fun bodyRendered(content: Content): String? {
-    return textRenderingService.renderText(content.body)
+    return textRenderingService.renderText(content.body, TextRenderingOptions.EXTENDED_MARKDOWN)
   }
 
   @SchemaMapping(typeName = "Content")
@@ -66,7 +67,8 @@ class ContentQueryController(
 
   @SchemaMapping(typeName = "FlashcardContentFormatData")
   fun answerRendered(formatData: FlashcardContentFormatData): String? {
-    return textRenderingService.renderText(formatData.answer)
+    return textRenderingService.renderText(
+        formatData.answer, TextRenderingOptions.EXTENDED_MARKDOWN)
   }
 
   @SchemaMapping(typeName = "ChoiceContentFormatData")

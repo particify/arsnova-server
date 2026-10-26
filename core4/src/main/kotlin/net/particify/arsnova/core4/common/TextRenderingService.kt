@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.common
@@ -55,6 +55,11 @@ class TextRenderingService(properties: TextRenderingProperties) {
       @field:JsonProperty("latex") val latexEnabled: Boolean = true,
       @field:JsonProperty val markdownFeatureset: MarkdownFeatureset? = MarkdownFeatureset.SIMPLE
   ) {
+    companion object {
+      /** For texts authored as documents, such as content bodies, rather than as short labels. */
+      val EXTENDED_MARKDOWN = TextRenderingOptions(markdownFeatureset = MarkdownFeatureset.EXTENDED)
+    }
+
     enum class MarkdownFeatureset {
       MINIMUM,
       SIMPLE,

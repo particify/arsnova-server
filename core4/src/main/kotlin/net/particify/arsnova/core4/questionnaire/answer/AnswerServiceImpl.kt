@@ -251,7 +251,7 @@ class AnswerServiceImpl(
   private fun addToResult(result: QuestionnaireAnswerResult, content: Content, answer: Answer?) {
     if (content.formatData!!.hasCorrectAnswer()) {
       result.scorableContentCount++
-      content.points?.let { result.maxScore += it }
+      result.maxScore += basePoints(content)
     }
     // A content without an active round has never been answered.
     val round = content.activeRound
