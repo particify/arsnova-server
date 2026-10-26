@@ -6,7 +6,6 @@ package net.particify.arsnova.core4.questionnaire.content
 import java.util.UUID
 import net.particify.arsnova.core4.common.DelimitedTextFormat
 import net.particify.arsnova.core4.common.exception.InvalidInputException
-import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInvalidException
 import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFoundException
 import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireRepository
@@ -57,8 +56,8 @@ class ContentCsvService(
 
   /**
    * Checks every record before creating the contents of the valid ones, so that an invalid record
-   * does not abort the import. Not transactional on purpose: each content is created in a
-   * transaction of its own, as a failure inside a shared one would roll back all of them.
+   * does not abort the import. The valid ones are then created in a single transaction: any failure
+   * there rolls back the whole import and propagates rather than leaving it half done.
    *
    * A file of more than [MAX_RECORDS] records is rejected as a whole before anything is created.
    */
@@ -71,31 +70,10 @@ class ContentCsvService(
       throw InvalidInputException("A file may hold at most $MAX_RECORDS contents")
     }
     val lines = records.map { decode(it, questionnaire) }
-    val errors = lines.mapNotNull { it.error }.toMutableList()
-    var importedLines = 0
-    lines
-        .filter { it.content != null }
-        .forEach { line ->
-          val error = create(questionnaireId, line.number, line.content!!)
-          if (error == null) importedLines++ else errors.add(error)
-        }
+    val created = contentService.createAll(questionnaireId, lines.mapNotNull { it.content })
     return ContentCsvImportResult(
-        lines.size, importedLines, errors.sortedBy { it.line }, unknownColumns)
+        lines.size, created.size, lines.mapNotNull { it.error }, unknownColumns)
   }
-
-  private fun create(questionnaireId: UUID, number: Int, content: DecodedContent) =
-      try {
-        contentService.create(
-            questionnaireId,
-            content.body,
-            content.formatData,
-            content.duration,
-            content.abstentionsAllowed,
-            null)
-        null
-      } catch (e: ContentFormatDataInvalidException) {
-        ContentCsvImportError(number, ContentCsvImportErrorReason.INVALID_FORMAT_DATA, e.message)
-      }
 
   private fun decode(record: NumberedRecord, questionnaire: Questionnaire): ImportLine =
       try {

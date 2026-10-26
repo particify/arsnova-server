@@ -26,12 +26,17 @@ import net.particify.arsnova.core4.questionnaire.content.WordcloudContentFormatD
 import net.particify.arsnova.core4.questionnaire.questionnaire.Questionnaire
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireServiceImpl
 import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireType
+import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
+import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnairesChangedEvent
+import net.particify.arsnova.core4.questionnaire.round.Round
+import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
 import net.particify.arsnova.core4.security.internal.JwtUtils
 import net.particify.arsnova.core4.user.UserService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
@@ -42,6 +47,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.test.context.TestSecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.RequestBuilder
 import org.springframework.test.web.servlet.ResultActions
@@ -106,7 +112,9 @@ class ContentCsvTests {
   @Autowired lateinit var contentService: ContentServiceImpl
   @Autowired lateinit var jwtUtils: JwtUtils
   @Autowired lateinit var mockMvc: MockMvc
+  @Autowired lateinit var questionnaireEventPublisher: QuestionnaireEventPublisher
   @Autowired lateinit var questionnaireService: QuestionnaireServiceImpl
+  @MockitoSpyBean lateinit var roundService: RoundServiceImpl
   @Autowired lateinit var userService: UserService
 
   @BeforeEach
@@ -312,6 +320,41 @@ class ContentCsvTests {
     Assertions.assertEquals(listOf(selected.formatData), formatDataOf(copy))
   }
 
+  @Test
+  fun shouldSignalTheQuestionnaireChangeOnceForTheWholeImport() {
+    val questionnaire = createQuestionnaire()
+    val events = mutableListOf<QuestionnairesChangedEvent>()
+    val subscription =
+        questionnaireEventPublisher
+            .questionnairesChangedFlux()
+            .filter { it.questionnaireId == questionnaire.id }
+            .subscribe { events.add(it) }
+    // The sink hands a new subscriber what was emitted without one, such as the creation's event.
+    events.clear()
+    try {
+      Assertions.assertEquals(11, import(questionnaire, V3_CSV).importedLines)
+    } finally {
+      subscription.dispose()
+    }
+    Assertions.assertEquals(listOf(QuestionnairesChangedEvent(ROOM_ID, questionnaire.id!!)), events)
+  }
+
+  @Test
+  fun shouldRollBackTheWholeImportOnAFailureOtherThanAnInvalidRecord() {
+    val questionnaire = createQuestionnaire()
+    var rounds = 0
+    Mockito.doAnswer {
+          if (++rounds == 2) throw IllegalStateException("Failure on the second record")
+          it.callRealMethod()
+        }
+        .`when`(roundService)
+        .save(Mockito.any(Round::class.java))
+    Assertions.assertThrows(IllegalStateException::class.java) {
+      import(questionnaire, "format,body\nSLIDE,First\nSLIDE,Second\nSLIDE,Third")
+    }
+    Assertions.assertEquals(listOf<Content>(), contentsOf(questionnaire))
+  }
+
   private fun tooManyRecords() =
       (listOf("format,body") + (0..ContentCsvService.MAX_RECORDS).map { "SLIDE,Slide $it" })
           .joinToString("\n")
@@ -420,6 +463,7 @@ class ContentCsvTests {
     perform(exportRequest(questionnaire.id!!, "charset" to "ISO-8859-1"))
         .andExpect(status().isBadRequest())
     perform(exportRequest(UUID.randomUUID())).andExpect(status().isNotFound())
+    perform(importRequest(UUID.randomUUID(), V3_CSV.toByteArray())).andExpect(status().isNotFound())
     perform(asUser(OWNER_ID, multipart("/questionnaire/${questionnaire.id}/contents-import")))
         .andExpect(status().isBadRequest())
     perform(importRequest(questionnaire.id!!, tooManyRecords().toByteArray()))
