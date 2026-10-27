@@ -37,6 +37,9 @@ private val OTHER_ROUND_ID = UUID.randomUUID()
 private val CONTENT_ID = UUID.randomUUID()
 private val QUESTIONNAIRE_ID = UUID.randomUUID()
 
+// A questionnaire without a room is a template, whose contents are visible to all of its readers.
+private val ROOM_ID = UUID.randomUUID()
+
 // Must match ANSWERS_UPDATE_SAMPLE_INTERVAL of the controller under test.
 private val SAMPLE_INTERVAL = Duration.ofSeconds(3)
 private val VERIFY_TIMEOUT = Duration.ofSeconds(10)
@@ -61,7 +64,8 @@ class AnswerSubscriptionControllerTest {
           permissionEvaluator)
   private val participant = TestingAuthenticationToken("participant", null, "ROLE_USER")
   private val editor = TestingAuthenticationToken("editor", null, "ROLE_USER")
-  private val questionnaire = Questionnaire(id = QUESTIONNAIRE_ID, published = true)
+  private val questionnaire =
+      Questionnaire(id = QUESTIONNAIRE_ID, roomId = ROOM_ID, published = true)
   private val content =
       Content(
           id = CONTENT_ID,
@@ -169,6 +173,7 @@ class AnswerSubscriptionControllerTest {
         .verify(VERIFY_TIMEOUT)
 
     Mockito.verify(permissionEvaluator).hasPermission(participant, CONTENT_ID, "Content", "write")
+    Mockito.verify(permissionEvaluator).hasPermission(participant, ROOM_ID, "Room", "moderate")
     Mockito.verifyNoMoreInteractions(permissionEvaluator)
   }
 

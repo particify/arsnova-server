@@ -26,17 +26,24 @@ class RoundPermissionEvaluator(
   ): DomainPermissionEvaluation {
     logger.debug("hasPermission({}, {}, {})", user, targetDomainObject, permission)
     val parentPermission =
-        when (permission) {
-          "write" -> "write"
-          "read" -> "read"
-          "readStatistics" -> "readStatistics"
-          "delete" -> "write"
-          else -> return DomainPermissionEvaluation(false)
-        }
+        contentPermission(targetDomainObject, permission)
+            ?: return DomainPermissionEvaluation(false)
     return DomainPermissionEvaluation(
         null,
         DomainPermissionEvaluation.PermissionReference(
             "Content", targetDomainObject.content!!.id!!, parentPermission))
+  }
+
+  private fun contentPermission(round: Round, permission: Any): String? {
+    // A template's contents are never presented, so nothing about their rounds is accessible.
+    if (round.content?.questionnaire?.isRoomless() != false) return null
+    return when (permission) {
+      "write" -> "write"
+      "read" -> "read"
+      "readStatistics" -> "readStatistics"
+      "delete" -> "write"
+      else -> null
+    }
   }
 
   override fun findOneByKey(key: Any): Round {

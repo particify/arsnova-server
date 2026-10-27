@@ -20,6 +20,7 @@ import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireRepo
 import net.particify.arsnova.core4.questionnaire.questionnaire.api.QuestionnaireEventPublisher
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
+import net.particify.arsnova.core4.questionnaire.template.RoomlessQuestionnaireChangedEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Window
@@ -47,6 +48,8 @@ class ContentServiceImpl(
         questionnaireRepository.findByIdOrNull(questionnaireId)
             ?: throw QuestionnaireNotFoundException(questionnaireId)
 
+    // A template's contents are all visible to whoever may read the template.
+    if (questionnaire.isRoomless()) return window
     return Window.from(
         window.filter { content -> isPublished(content, questionnaire) }.toList(),
         window::positionAt,
@@ -130,8 +133,16 @@ class ContentServiceImpl(
     persistedContents.forEach {
       applicationEventPublisher.publishEvent(ContentCreatedEvent(it.id!!))
     }
+    publishRoomlessChanged(questionnaire)
     questionnaireEventPublisher.publishQuestionnairesChanged(questionnaire)
     return persistedContents
+  }
+
+  /** Lets the template module tell that a template's contents or settings were edited. */
+  fun publishRoomlessChanged(questionnaire: Questionnaire) {
+    if (questionnaire.isRoomless()) {
+      applicationEventPublisher.publishEvent(RoomlessQuestionnaireChangedEvent(questionnaire.id!!))
+    }
   }
 
   @Transactional
@@ -159,6 +170,7 @@ class ContentServiceImpl(
     // Both the weight and the format data's correctness criteria can change here, so the content's
     // worth is recomputed the same way creation derives it.
     content.points = if (merged.hasCorrectAnswer()) Content.calculateBasePoints(weight) else 0
+    content.questionnaire?.let(::publishRoomlessChanged)
     return contentRepository.save(content)
   }
 
@@ -195,6 +207,7 @@ class ContentServiceImpl(
   @Transactional
   fun updateTextAnswersPublished(id: UUID, published: Boolean): Content {
     val content = contentRepository.findByIdOrNull(id) ?: throw ContentNotFoundException(id)
+    content.questionnaire!!.requireRoomId()
     asTextFormatData(content)
     content.formatData = TextContentFormatData(published)
     val persistedContent = contentRepository.save(content)
@@ -229,6 +242,7 @@ class ContentServiceImpl(
     questionnaire.releaseReferencesTo(content)
     questionnaire.contents.remove(content)
     contentRepository.deleteById(id)
+    publishRoomlessChanged(questionnaire)
     questionnaireEventPublisher.publishQuestionnairesChanged(questionnaire)
     return id
   }
@@ -265,6 +279,7 @@ class ContentServiceImpl(
       update: (T) -> Unit
   ): Content {
     val content = contentRepository.findByIdOrNull(id) ?: throw ContentNotFoundException(id)
+    content.questionnaire!!.requireRoomId()
     val formatData = formatDataOf<T>(content, formatName)
     update(formatData)
     content.formatData = formatData
@@ -293,6 +308,7 @@ class ContentServiceImpl(
     persistedContent = contentRepository.save(persistedContent)
     applicationEventPublisher.publishEvent(
         ContentDuplicatedEvent(content.id!!, persistedContent.id!!))
+    publishRoomlessChanged(persistedQuestionnaire)
     questionnaireEventPublisher.publishQuestionnairesChanged(persistedQuestionnaire)
     return persistedContent
   }
@@ -310,6 +326,10 @@ class ContentServiceImpl(
         questionnaireRepository.findByIdOrNull(targetQuestionnaireId)
             ?: throw QuestionnaireNotFoundException(targetQuestionnaireId)
     val sourceQuestionnaire = content.questionnaire!!
+    // Templates are copied as a whole through the template operations, which also reset the state
+    // a presentation accumulates. Single contents neither enter nor leave a template.
+    sourceQuestionnaire.requireRoomId()
+    targetQuestionnaire.requireRoomId()
     if (sourceQuestionnaire.id == targetQuestionnaire.id) {
       return content
     }

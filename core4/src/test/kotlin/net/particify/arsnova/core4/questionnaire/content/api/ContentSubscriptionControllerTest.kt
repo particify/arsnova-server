@@ -27,6 +27,9 @@ import reactor.test.StepVerifier
 
 private val QUESTIONNAIRE_ID = UUID.randomUUID()
 
+// A questionnaire without a room is a template, whose contents are visible to all of its readers.
+private val ROOM_ID = UUID.randomUUID()
+
 // Must match STATS_UPDATE_SAMPLE_INTERVAL of the controller under test.
 private val SAMPLE_INTERVAL = Duration.ofSeconds(3)
 private val VERIFY_TIMEOUT = Duration.ofSeconds(10)
@@ -50,6 +53,7 @@ class ContentSubscriptionControllerTest {
   private val questionnaire =
       Questionnaire(
           id = QUESTIONNAIRE_ID,
+          roomId = ROOM_ID,
           published = true,
           publishingMode = QuestionnairePublishingMode.UP_TO)
   private val releasedContent = content(position = 0)

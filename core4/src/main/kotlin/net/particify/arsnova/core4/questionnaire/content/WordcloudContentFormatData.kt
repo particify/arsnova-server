@@ -35,6 +35,8 @@ class WordcloudContentFormatData(val maxAnswers: Int) : KeywordBanning {
     return merged
   }
 
+  override fun withoutRuntimeState(): ContentFormatData = WordcloudContentFormatData(maxAnswers)
+
   override fun validateAnswer(answerFormatData: AnswerFormatData) {
     super.validateAnswer(answerFormatData)
     val words = (answerFormatData as WordcloudAnswerFormatData).words

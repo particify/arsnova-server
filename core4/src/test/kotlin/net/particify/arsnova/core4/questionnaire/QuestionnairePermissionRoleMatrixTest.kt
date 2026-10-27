@@ -23,6 +23,8 @@ import net.particify.arsnova.core4.questionnaire.questionnaire.QuestionnaireRepo
 import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundPermissionEvaluator
 import net.particify.arsnova.core4.questionnaire.round.RoundRepository
+import net.particify.arsnova.core4.questionnaire.template.TemplatePermissionEvaluator
+import net.particify.arsnova.core4.questionnaire.template.TemplateRepository
 import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomPermissionEvaluator
@@ -68,7 +70,10 @@ class QuestionnairePermissionRoleMatrixTest {
   private val answerRepository = Mockito.mock(AnswerRepository::class.java)
   private val answerEvaluator = AnswerPermissionEvaluator(answerRepository)
   private val contentEvaluator = ContentPermissionEvaluator(contentRepository)
-  private val questionnaireEvaluator = QuestionnairePermissionEvaluator(questionnaireRepository)
+  private val questionnaireEvaluator =
+      QuestionnairePermissionEvaluator(
+          questionnaireRepository,
+          TemplatePermissionEvaluator(Mockito.mock(TemplateRepository::class.java)))
   private val roundEvaluator = RoundPermissionEvaluator(roundRepository)
   private val permissionEvaluator =
       DelegatingPermissionEvaluator(

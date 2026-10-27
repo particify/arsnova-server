@@ -14,6 +14,8 @@ data class TextContentFormatData
 constructor(@JsonProperty("answersPublished") val answersPublished: Boolean) : ContentFormatData {
   override val format = "TEXT"
 
+  override fun withoutRuntimeState(): ContentFormatData = TextContentFormatData(false)
+
   /**
    * Retains whether the answers are published. Publishing is a separate operation and must not be
    * reset by editing the content.

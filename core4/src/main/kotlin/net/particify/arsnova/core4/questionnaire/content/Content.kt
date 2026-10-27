@@ -41,6 +41,14 @@ data class Content(
     var points: Int? = null,
     @Column(name = "position", insertable = false, updatable = false) var position: Int? = null,
     @Embedded var auditMetadata: AuditMetadata = AuditMetadata(),
+    var sourceTemplateId: UUID? = null,
+    var sourceContentId: UUID? = null,
+    // Snapshots per content, so a content moved into another questionnaire keeps its licence and
+    // its credit.
+    var sourceTemplateLicenseId: String? = null,
+    var sourceTemplateAttribution: String? = null,
+    // The templates the template this content was copied from was made from, nearest first.
+    @JdbcTypeCode(SqlTypes.JSON) var upstreamAttributions: List<TemplateCredit> = listOf(),
 ) {
   companion object {
     const val MAX_DURATION = 3600L
@@ -96,6 +104,11 @@ data class Content(
         weight = this.weight,
         abstentionsAllowed = this.abstentionsAllowed,
         points = this.points,
+        sourceTemplateId = this.sourceTemplateId,
+        sourceContentId = this.sourceContentId,
+        sourceTemplateLicenseId = this.sourceTemplateLicenseId,
+        sourceTemplateAttribution = this.sourceTemplateAttribution,
+        upstreamAttributions = this.upstreamAttributions,
     )
   }
 }

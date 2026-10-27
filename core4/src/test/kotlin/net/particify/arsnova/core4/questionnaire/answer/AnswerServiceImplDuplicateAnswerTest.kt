@@ -44,7 +44,7 @@ class AnswerServiceImplDuplicateAnswerTest {
     val content =
         Content(
             id = UUID.randomUUID(),
-            questionnaire = Questionnaire(id = UUID.randomUUID()),
+            questionnaire = Questionnaire(id = UUID.randomUUID(), roomId = UUID.randomUUID()),
             formatData = ChoiceContentFormatData(listOf("A", "B"), null, false))
     Mockito.`when`(roundRepository.findById(ROUND_ID))
         .thenReturn(Optional.of(Round(id = ROUND_ID, content = content)))

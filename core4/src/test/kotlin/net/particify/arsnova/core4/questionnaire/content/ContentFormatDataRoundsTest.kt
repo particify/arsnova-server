@@ -12,6 +12,8 @@ class ContentFormatDataRoundsTest {
     val formatData =
         object : ContentFormatData {
           override val format = "UNSUPPORTED"
+
+          override fun withoutRuntimeState() = this
         }
     Assertions.assertFalse(formatData.supportsRounds())
   }

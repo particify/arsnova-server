@@ -28,6 +28,7 @@ class QuestionnairePublishingServiceImpl(
     val content =
         contentRepository.findByIdOrNull(contentId) ?: throw ContentNotFoundException(contentId)
     val questionnaire = content.questionnaire!!
+    questionnaire.requireRoomId()
     requireMode(questionnaire, QuestionnairePublishingMode.LIVE)
     questionnaire.activeRound?.let {
       it.stopAnswering()
@@ -56,6 +57,7 @@ class QuestionnairePublishingServiceImpl(
     val questionnaire =
         questionnaireRepository.findByIdOrNull(questionnaireId)
             ?: throw QuestionnaireNotFoundException(questionnaireId)
+    questionnaire.requireRoomId()
     requireMode(questionnaire, QuestionnairePublishingMode.LIVE)
     val round =
         questionnaire.activeRound
@@ -73,6 +75,7 @@ class QuestionnairePublishingServiceImpl(
     val questionnaire =
         questionnaireRepository.findByIdOrNull(questionnaireId)
             ?: throw QuestionnaireNotFoundException(questionnaireId)
+    questionnaire.requireRoomId()
     val content =
         contentRepository.findByIdOrNull(contentId)?.takeIf {
           it.questionnaire?.id == questionnaireId

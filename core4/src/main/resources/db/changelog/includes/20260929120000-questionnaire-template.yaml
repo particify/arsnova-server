@@ -1,0 +1,216 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: arsnova
+      labels: ddl,questionnaire
+      context: default
+      comment: Allow room-less questionnaires, which hold the contents of templates
+      changes:
+        - dropNotNullConstraint:
+            schemaName: questionnaire
+            tableName: questionnaire
+            columnName: room_id
+            columnDataType: uuid
+        - sql: >-
+            ALTER TABLE "questionnaire"."questionnaire"
+            ADD CONSTRAINT "roomless_unpublished_check" CHECK (room_id IS NOT NULL OR published = false)
+      rollback:
+        - sql: ALTER TABLE "questionnaire"."questionnaire" DROP CONSTRAINT "roomless_unpublished_check"
+        - addNotNullConstraint:
+            schemaName: questionnaire
+            tableName: questionnaire
+            columnName: room_id
+            columnDataType: uuid
+  - changeSet:
+      id: 2
+      author: arsnova
+      labels: ddl,questionnaire
+      context: default
+      comment: Track the template a questionnaire or content was copied from
+      changes:
+        - addColumn:
+            schemaName: questionnaire
+            tableName: questionnaire
+            columns:
+              - column:
+                  name: source_template_id
+                  type: uuid
+        - createIndex:
+            schemaName: questionnaire
+            tableName: questionnaire
+            column:
+              - name: source_template_id
+        - addColumn:
+            schemaName: questionnaire
+            tableName: content
+            columns:
+              - column:
+                  name: source_template_id
+                  type: uuid
+              - column:
+                  name: source_content_id
+                  type: uuid
+              - column:
+                  name: source_template_license_id
+                  type: varchar(64)
+              - column:
+                  name: source_template_attribution
+                  type: varchar(500)
+              - column:
+                  name: upstream_attributions
+                  type: jsonb
+                  defaultValueComputed: "'[]'::jsonb"
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 3
+      author: arsnova
+      labels: ddl,questionnaire
+      context: default
+      comment: Create the tables of templates and their tags
+      changes:
+        - createTable:
+            schemaName: questionnaire
+            tableName: template
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    foreignKeyName: questionnaire_id_fkey
+                    references: '"questionnaire"."questionnaire"(id)'
+              - column:
+                  name: version
+                  type: smallint
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(2000)
+              - column:
+                  name: language
+                  type: varchar(8)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: license_id
+                  type: varchar(64)
+                  constraints:
+                    foreignKeyName: license_id_fkey
+                    references: '"license"."license"(id)'
+              - column:
+                  name: attribution
+                  type: varchar(500)
+              - column:
+                  name: ai_generated
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: published
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: source_questionnaire_id
+                  type: uuid
+              - column:
+                  name: created_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: created_by_fkey
+                    references: '"user"."user"(id)'
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: updated_by_fkey
+                    references: '"user"."user"(id)'
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+        - sql: >-
+            ALTER TABLE "questionnaire"."template"
+            ADD CONSTRAINT "template_published_license_check" CHECK (published = false OR license_id IS NOT NULL)
+        - createIndex:
+            schemaName: questionnaire
+            tableName: template
+            column:
+              - name: created_by
+        - createIndex:
+            schemaName: questionnaire
+            tableName: template
+            column:
+              - name: source_questionnaire_id
+        - createTable:
+            schemaName: questionnaire
+            tableName: template_tag
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: language
+                  type: varchar(8)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: verified
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+        - sql: CREATE UNIQUE INDEX "template_tag_language_name_idx" ON "questionnaire"."template_tag" (language, lower(name))
+        - createTable:
+            schemaName: questionnaire
+            tableName: template_tag_mapping
+            columns:
+              - column:
+                  name: template_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: template_id_fkey
+                    references: '"questionnaire"."template"(id)'
+                    nullable: false
+              - column:
+                  name: tag_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: tag_id_fkey
+                    references: '"questionnaire"."template_tag"(id)'
+                    nullable: false
+        - addPrimaryKey:
+            schemaName: questionnaire
+            tableName: template_tag_mapping
+            columnNames: template_id, tag_id
+        - createIndex:
+            schemaName: questionnaire
+            tableName: template_tag_mapping
+            columns:
+              - column:
+                  name: tag_id

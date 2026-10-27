@@ -64,7 +64,7 @@ class LeaderboardServiceImpl(
     val questionnaire =
         questionnaireRepository.findByIdOrNull(questionnaireId)
             ?: throw QuestionnaireNotFoundException(questionnaireId)
-    val aliases = roomUserAliasService.findAliasMappingsByRoomId(questionnaire.roomId!!)
+    val aliases = roomUserAliasService.findAliasMappingsByRoomId(questionnaire.requireRoomId())
     val currentResults = if (contentId != null) findCurrentResults(contentId) else emptyMap()
     return rankByScore(findScores(questionnaireId)).map {
       RawLeaderboardEntry(

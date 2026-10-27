@@ -16,6 +16,7 @@ import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.common.UuidGenerator
 import net.particify.arsnova.core4.questionnaire.content.Content
+import net.particify.arsnova.core4.questionnaire.exception.RoomlessQuestionnaireException
 import net.particify.arsnova.core4.questionnaire.round.Round
 import org.hibernate.annotations.JdbcType
 import org.hibernate.dialect.type.PostgreSQLEnumJdbcType
@@ -40,12 +41,19 @@ class Questionnaire(
     @ManyToOne var publishedUpToContent: Content? = null,
     @ManyToOne var activeRound: Round? = null,
     @Embedded var auditMetadata: AuditMetadata = AuditMetadata(),
+    var sourceTemplateId: UUID? = null,
 ) {
   companion object {
     const val MAX_NAME_LENGTH = 50
   }
 
   fun isLive(): Boolean = publishingMode == QuestionnairePublishingMode.LIVE
+
+  /** Room-less questionnaires hold the contents of a template. */
+  fun isRoomless(): Boolean = roomId == null
+
+  /** Rejects operations which only make sense for a questionnaire presented in a room. */
+  fun requireRoomId(): UUID = roomId ?: throw RoomlessQuestionnaireException(id)
 
   /** A questionnaire which releases contents one by one starts with its first one released. */
   fun releaseFirstContent(content: Content) {

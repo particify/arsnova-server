@@ -40,11 +40,16 @@ class RoundServiceNewRoundTest {
   private val formatWithoutRounds =
       object : ContentFormatData {
         override val format = "WITHOUT_ROUNDS"
+
+        override fun withoutRuntimeState() = this
       }
 
   private fun liveQuestionnaire(): Questionnaire {
     val questionnaire =
-        Questionnaire(id = UUID.randomUUID(), publishingMode = QuestionnairePublishingMode.LIVE)
+        Questionnaire(
+            id = UUID.randomUUID(),
+            roomId = UUID.randomUUID(),
+            publishingMode = QuestionnairePublishingMode.LIVE)
     listOf("First", "Second", "Third").forEach {
       val content =
           Content(

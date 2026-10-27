@@ -41,6 +41,9 @@ private val OTHER_ROUND_ID = UUID.randomUUID()
 private val CONTENT_ID = UUID.randomUUID()
 private val QUESTIONNAIRE_ID = UUID.randomUUID()
 
+// A questionnaire without a room is a template, whose contents are visible to all of its readers.
+private val ROOM_ID = UUID.randomUUID()
+
 // Must match STATS_UPDATE_SAMPLE_INTERVAL of the controller under test.
 private val SAMPLE_INTERVAL = Duration.ofSeconds(3)
 private val VERIFY_TIMEOUT = Duration.ofSeconds(10)
@@ -66,7 +69,8 @@ class RoundStatsSubscriptionControllerTest {
           ContentPermissionEvaluator(Mockito.mock(ContentRepository::class.java)),
           permissionEvaluator)
   private val questionnaire =
-      Questionnaire(id = QUESTIONNAIRE_ID, published = true, statisticsPublished = true)
+      Questionnaire(
+          id = QUESTIONNAIRE_ID, roomId = ROOM_ID, published = true, statisticsPublished = true)
   private val content = Content(id = CONTENT_ID, questionnaire = questionnaire, position = 0)
   private val choiceStats = ChoiceContentRoundStats(listOf(2, 1))
 

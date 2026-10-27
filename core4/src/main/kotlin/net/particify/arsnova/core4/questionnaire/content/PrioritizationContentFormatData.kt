@@ -21,6 +21,8 @@ data class PrioritizationContentFormatData
 constructor(@JsonProperty("options") val options: List<String>) : ContentFormatData {
   override val format = "PRIORITIZATION"
 
+  override fun withoutRuntimeState() = this
+
   /**
    * Exposed to the client so it does not need its own copy of the budget the server enforces. It is
    * derived, so it stays out of the persisted format data.

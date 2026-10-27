@@ -45,6 +45,7 @@ class AnswerServiceImpl(
 
   private fun findAnswerableRound(roundId: UUID): Round {
     val round = roundRepository.findByIdOrNull(roundId) ?: throw RoundNotFoundException(roundId)
+    round.content?.questionnaire?.requireRoomId()
     if (round.closed) throw RoundClosedException(roundId)
     if (round.content?.formatData?.answerable() == false) throw RoundClosedException(roundId)
     if (!round.acceptsAnswers()) throw RoundExpiredException(roundId)
@@ -203,6 +204,7 @@ class AnswerServiceImpl(
     val questionnaire =
         questionnaireRepository.findByIdOrNull(questionnaireId)
             ?: throw QuestionnaireNotFoundException(questionnaireId)
+    questionnaire.requireRoomId()
     val contents =
         contentServiceImpl
             .findByQuestionnaireIdOrderByPosition(questionnaireId, ScrollPosition.offset())
@@ -230,6 +232,7 @@ class AnswerServiceImpl(
     val questionnaire =
         questionnaireRepository.findByIdOrNull(questionnaireId)
             ?: throw QuestionnaireNotFoundException(questionnaireId)
+    questionnaire.requireRoomId()
     val contents =
         contentServiceImpl
             .findByQuestionnaireIdOrderByPosition(questionnaireId, ScrollPosition.offset())

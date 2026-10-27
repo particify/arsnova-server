@@ -67,6 +67,7 @@ class QuestionnaireServiceImpl(
   @Transactional
   fun updatePublished(id: UUID, published: Boolean): Questionnaire {
     val questionnaire = findByIdOrNull(id) ?: throw QuestionnaireNotFoundException(id)
+    questionnaire.requireRoomId()
     questionnaire.published = published
     val persisted = questionnaireRepository.save(questionnaire)
     questionnaireEventPublisher.publishQuestionnaireUpdated(id)
@@ -85,12 +86,18 @@ class QuestionnaireServiceImpl(
       leaderboardEnabled: Boolean?
   ): Questionnaire {
     val questionnaire = findByIdOrNull(id) ?: throw QuestionnaireNotFoundException(id)
-    if (name != null && name != questionnaire.name) {
-      validateName(name)
-      if (questionnaireRepository.findByRoomIdAndName(questionnaire.roomId!!, name) != null) {
+    val newName = name?.takeIf { it != questionnaire.name }
+    val newPublished = published?.takeIf { it != questionnaire.published }
+    // A template owns the name of its questionnaire, and a room-less one is never published.
+    // Resending the current values is a no-op either way.
+    if (newName != null || newPublished != null) questionnaire.requireRoomId()
+    if (newName != null) {
+      validateName(newName)
+      val roomId = questionnaire.requireRoomId()
+      if (questionnaireRepository.findByRoomIdAndName(roomId, newName) != null) {
         throw QuestionnaireWithNameAlreadyExistsException()
       }
-      questionnaire.name = name
+      questionnaire.name = newName
     }
     if (published != null) {
       questionnaire.published = published
@@ -108,6 +115,7 @@ class QuestionnaireServiceImpl(
       questionnaire.leaderboardEnabled = leaderboardEnabled
     }
     val persisted = questionnaireRepository.save(questionnaire)
+    contentServiceImpl.publishRoomlessChanged(questionnaire)
     questionnaireEventPublisher.publishQuestionnaireUpdated(id)
     questionnaireEventPublisher.publishQuestionnairesChanged(persisted)
     return persisted
@@ -162,7 +170,7 @@ class QuestionnaireServiceImpl(
   fun duplicate(id: UUID, newName: String): Questionnaire {
     validateName(newName)
     val original = findByIdOrNull(id) ?: throw QuestionnaireNotFoundException(id)
-    val roomId = checkNotNull(original.roomId)
+    val roomId = original.requireRoomId()
     if (questionnaireRepository.findByRoomIdAndName(roomId, newName) != null) {
       throw QuestionnaireWithNameAlreadyExistsException()
     }
@@ -171,21 +179,23 @@ class QuestionnaireServiceImpl(
 
   /**
    * Copies [original] into [roomId] with its settings and its contents in order. Rounds and answers
-   * are not copied: every content starts over with a fresh round.
+   * are not copied: every content starts over with a fresh round. A null [roomId] makes the
+   * room-less copy of a template, which is never published.
    */
   @Transactional
-  fun duplicate(original: Questionnaire, roomId: UUID, name: String?): Questionnaire {
+  fun duplicate(original: Questionnaire, roomId: UUID?, name: String?): Questionnaire {
     val copy =
         questionnaireRepository.save(
             Questionnaire(
                 roomId = roomId,
                 name = name,
                 type = original.type,
-                published = original.published,
+                published = roomId != null && original.published,
                 publishingMode = original.publishingMode,
                 statisticsPublished = original.statisticsPublished,
                 correctOptionsPublished = original.correctOptionsPublished,
-                leaderboardEnabled = original.leaderboardEnabled))
+                leaderboardEnabled = original.leaderboardEnabled,
+                sourceTemplateId = original.sourceTemplateId))
     original.contents.toList().forEach { contentServiceImpl.duplicate(it, copy) }
     copy.publishedUpToContent = copiedPublishedUpToContent(original, copy)
     val persisted = questionnaireRepository.save(copy)
@@ -211,6 +221,7 @@ class QuestionnaireServiceImpl(
     questionnaire.contents.sortWith(
         compareBy { contentIds.indexOf(it.id).takeIf { index -> index >= 0 } ?: Int.MAX_VALUE })
     val persisted = questionnaireRepository.save(questionnaire)
+    contentServiceImpl.publishRoomlessChanged(questionnaire)
     questionnaireEventPublisher.publishQuestionnaireUpdated(questionnaireId)
     return persisted
   }
@@ -219,6 +230,7 @@ class QuestionnaireServiceImpl(
   fun resetAnswerResultsByQuestionnaireId(id: UUID): Boolean {
     val questionnaire =
         questionnaireRepository.findByIdOrNull(id) ?: throw QuestionnaireNotFoundException(id)
+    questionnaire.requireRoomId()
     questionnaire.activeRound = null
     val contents =
         contentRepository.findByQuestionnaireIdOrderByPosition(id, ScrollPosition.offset())

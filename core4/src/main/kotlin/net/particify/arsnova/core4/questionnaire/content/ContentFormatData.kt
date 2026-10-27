@@ -42,6 +42,9 @@ interface ContentFormatData {
    */
   fun validateChange(current: ContentFormatData, hasAnswers: () -> Boolean) {}
 
+  /** Drops state a presentation accumulates (banned keywords, published answers) for a template. */
+  fun withoutRuntimeState(): ContentFormatData
+
   /** Carries over state the server owns and the client does not send back. */
   fun mergeWith(current: ContentFormatData): ContentFormatData = this
 

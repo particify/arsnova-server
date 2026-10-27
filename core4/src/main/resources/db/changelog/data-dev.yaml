@@ -61,3 +61,18 @@ databaseChangeLog:
             tableName: round
             primaryKey: id
             file: db/data-dev/questionnaire/round.csv
+        - loadUpdateData:
+            schemaName: questionnaire
+            tableName: template
+            primaryKey: id
+            file: db/data-dev/questionnaire/template.csv
+        - loadUpdateData:
+            schemaName: questionnaire
+            tableName: template_tag
+            primaryKey: id
+            file: db/data-dev/questionnaire/template_tag.csv
+        # A table of key columns only leaves loadUpdateData nothing to update.
+        - sql: >-
+            INSERT INTO "questionnaire"."template_tag_mapping" (template_id, tag_id)
+            VALUES ('221964c6-ce39-48c8-8bd7-566a7017fe33', '30daefdf-0622-43cd-af18-9d3dfe29684f')
+            ON CONFLICT DO NOTHING

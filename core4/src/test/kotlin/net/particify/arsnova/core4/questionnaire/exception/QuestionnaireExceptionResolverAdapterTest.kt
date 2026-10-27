@@ -59,7 +59,8 @@ class QuestionnaireExceptionResolverAdapterTest {
             QuestionnaireWithNameAlreadyExistsException(),
             RoundClosedException(ID),
             RoundExpiredException(ID),
-            RoundsNotSupportedException("FORMAT"))
+            RoundsNotSupportedException("FORMAT"),
+            RoomlessQuestionnaireException(ID))
         .forEach {
           val error = resolve(it)
           Assertions.assertEquals(ErrorType.BAD_REQUEST, error?.errorType, it.message)

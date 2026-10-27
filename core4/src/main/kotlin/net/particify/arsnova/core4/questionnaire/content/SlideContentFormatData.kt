@@ -8,6 +8,8 @@ import net.particify.arsnova.core4.questionnaire.exception.ContentFormatDataInva
 class SlideContentFormatData : ContentFormatData {
   override val format = "SLIDE"
 
+  override fun withoutRuntimeState() = this
+
   override fun answerable() = false
 
   /** A slide carries no settings, so every instance equals every other. */

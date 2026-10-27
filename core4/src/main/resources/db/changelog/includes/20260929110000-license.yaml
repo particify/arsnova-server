@@ -1,0 +1,60 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: arsnova
+      labels: ddl,license
+      comment: Create initial definitions for license module
+      changes:
+        - sql: CREATE SCHEMA "license"
+      rollback:
+        - sql: DROP SCHEMA "license"
+  - changeSet:
+      id: 2
+      author: arsnova
+      labels: ddl,license
+      context: default
+      comment: Create the table of licences
+      changes:
+        - createTable:
+            schemaName: license
+            tableName: license
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: url
+                  type: varchar(500)
+              - column:
+                  name: selectable
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: position
+                  type: smallint
+                  constraints:
+                    nullable: false
+  # Seeded once, so that an operator's change to a licence survives a restart.
+  # The CSV is part of this changeset's checksum and must not change:
+  # a licence added later gets a changeset of its own.
+  - changeSet:
+      id: 3
+      author: arsnova
+      labels: data,license
+      context: default
+      comment: Load the licences
+      changes:
+        - loadData:
+            schemaName: license
+            tableName: license
+            file: db/data/license/license.csv

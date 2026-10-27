@@ -76,6 +76,7 @@ class RoundServiceImpl(
     val format = content.formatData!!
     if (!format.supportsRounds()) throw RoundsNotSupportedException(format.format)
     val questionnaire = content.questionnaire!!
+    questionnaire.requireRoomId()
     val live = questionnaire.isLive()
     val currentRound = content.activeRound
     currentRound?.let { stopAnswering(it) }

@@ -32,6 +32,7 @@ type Questionnaire {
   correctOptionsPublished: Boolean
   leaderboardEnabled: Boolean
   contentCount: Int
+  sourceTemplateId: ID
 }
 
 enum QuestionnaireType {
