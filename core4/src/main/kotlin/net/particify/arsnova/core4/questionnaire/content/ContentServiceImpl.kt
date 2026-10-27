@@ -80,25 +80,58 @@ class ContentServiceImpl(
         questionnaireRepository.findByIdOrNull(questionnaireId)
             ?: throw QuestionnaireNotFoundException(questionnaireId)
     val content =
-        Content(
-            questionnaire = questionnaire,
-            body = body,
-            formatData = formatData,
-            duration = duration,
-            weight = weight ?: 1,
-            abstentionsAllowed = abstentionsAllowed ?: true,
-            points = if (formatData.hasCorrectAnswer()) Content.calculateBasePoints(weight) else 0)
-    questionnaire.contents.add(content)
-    questionnaire.releaseFirstContent(content)
+        newContent(
+            questionnaire,
+            DecodedContent(body, formatData, duration, abstentionsAllowed ?: true),
+            weight)
+    return persistNewContents(questionnaire, listOf(content)).single()
+  }
+
+  /**
+   * Creates the contents in their order, all or none of them. Unlike creating them one by one, the
+   * questionnaire is saved and its subscribers are told about the change only once.
+   */
+  @Transactional
+  fun createAll(questionnaireId: UUID, contents: List<DecodedContent>): List<Content> {
+    contents.forEach {
+      Content.validateSettings(it.body, it.duration, null)
+      it.formatData.validate()
+    }
+    val questionnaire =
+        questionnaireRepository.findByIdOrNull(questionnaireId)
+            ?: throw QuestionnaireNotFoundException(questionnaireId)
+    if (contents.isEmpty()) return listOf()
+    return persistNewContents(questionnaire, contents.map { newContent(questionnaire, it, null) })
+  }
+
+  private fun newContent(questionnaire: Questionnaire, content: DecodedContent, weight: Int?) =
+      Content(
+          questionnaire = questionnaire,
+          body = content.body,
+          formatData = content.formatData,
+          duration = content.duration,
+          weight = weight ?: 1,
+          abstentionsAllowed = content.abstentionsAllowed,
+          points =
+              if (content.formatData.hasCorrectAnswer()) Content.calculateBasePoints(weight) else 0)
+
+  private fun persistNewContents(
+      questionnaire: Questionnaire,
+      contents: List<Content>
+  ): List<Content> {
+    questionnaire.contents.addAll(contents)
+    questionnaire.releaseFirstContent(contents.first())
     questionnaireRepository.save(questionnaire)
-    var persistedContent = questionnaire.contents.last()
-    val round = Round.initial(persistedContent, questionnaire.isLive())
-    val persistedRound = roundService.save(round)
-    persistedContent.activeRound = persistedRound
-    persistedContent = contentRepository.save(persistedContent)
-    applicationEventPublisher.publishEvent(ContentCreatedEvent(persistedContent.id!!))
+    val persistedContents =
+        questionnaire.contents.takeLast(contents.size).map { content ->
+          content.activeRound = roundService.save(Round.initial(content, questionnaire.isLive()))
+          contentRepository.save(content)
+        }
+    persistedContents.forEach {
+      applicationEventPublisher.publishEvent(ContentCreatedEvent(it.id!!))
+    }
     questionnaireEventPublisher.publishQuestionnairesChanged(questionnaire)
-    return persistedContent
+    return persistedContents
   }
 
   @Transactional

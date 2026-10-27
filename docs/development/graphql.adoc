@@ -4,6 +4,7 @@ With version 4, we are switching from a REST- to a GraphQL-based API.
 GraphQL gives a lot of control to the client and provides more flexibility.
 As a consequence, it also introduces a lot of new complexity.
 Caching in particular is much more difficult when comparing to a REST API.
+File downloads and uploads, such as exports and imports, stay on REST.
 Some of the complexity is abstracted away by libraries.
 Still, it is important to understand the concepts of GraphQL to design and use the API efficiently.
 We use https://docs.spring.io/spring-graphql/reference/index.html[Spring for GraphQL] on the backend side
