@@ -78,6 +78,10 @@ enum RoomRole {
   NONE
 }
 
+extend enum ViolationReportTargetType {
+  ROOM
+}
+
 type RoomStats {
   id: ID!
   activeMemberCount: Int

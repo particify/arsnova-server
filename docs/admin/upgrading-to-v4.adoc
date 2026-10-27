@@ -4,7 +4,7 @@ Version 4 replaces the core service with `core4` and changes the configuration i
 once: the services' own settings, the Docker Compose layout with its env files, and the certificates
 for HTTPS and SAML.
 The v3 core keeps running alongside `core4`, because contents, answers, live feedback, room user
-aliases, content templates and violation reports have not moved yet.
+aliases and content templates have not moved yet.
 
 This is a one-way, data-touching upgrade.
 Read it through before starting, and take backups of every volume first.

@@ -1,0 +1,53 @@
+extend type Query {
+  adminViolationReportsByDecided(
+    decided: Boolean!
+    first: Int
+    after: String
+    last: Int
+    before: String
+  ): ViolationReportConnection
+}
+
+extend type Mutation {
+  createViolationReport(input: CreateViolationReportInput!): UUID!
+  adminDecideViolationReport(
+    id: UUID!
+    decision: ViolationReportDecision!
+  ): ViolationReport!
+}
+
+type ViolationReport {
+  id: ID!
+  targetType: ViolationReportTargetType!
+  targetId: UUID!
+  reason: ViolationReportReason!
+  description: String!
+  decision: ViolationReportDecision
+  createdBy: UUID
+  createdAt: DateTime!
+  updatedBy: UUID
+  updatedAt: DateTime
+}
+
+enum ViolationReportDecision {
+  INVALID
+  REMOVAL
+}
+
+enum ViolationReportReason {
+  ADVERTISING
+  COPYRIGHT
+  DISINFORMATION
+  HATE_SPEECH
+  OTHER
+}
+
+# Each module owning reportable entities adds its value with `extend enum`.
+enum ViolationReportTargetType
+
+input CreateViolationReportInput {
+  targetType: ViolationReportTargetType!
+  targetId: UUID!
+  reason: ViolationReportReason!
+  description: String!
+}

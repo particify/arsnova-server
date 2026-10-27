@@ -11,6 +11,7 @@ extend type Query {
   adminUserStats: AdminUserStats
   adminAnnouncementStats: AdminAnnouncementStats
   adminQnaStats: AdminQnaStats
+  adminViolationReportStats: AdminViolationReportStats
 }
 
 type AdminUserStats {
@@ -45,4 +46,21 @@ type AdminAnnouncementStats {
 
 type AdminQnaStats {
   postCount: Int!
+}
+
+type AdminViolationReportStats {
+  totalCount: Int!
+  undecidedCount: Int!
+  countsByReason: [ViolationReportReasonCount!]!
+  countsByDecision: [ViolationReportDecisionCount!]!
+}
+
+type ViolationReportReasonCount {
+  reason: ViolationReportReason!
+  count: Int!
+}
+
+type ViolationReportDecisionCount {
+  decision: ViolationReportDecision!
+  count: Int!
 }

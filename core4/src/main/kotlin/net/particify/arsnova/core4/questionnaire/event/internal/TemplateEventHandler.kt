@@ -6,7 +6,10 @@ package net.particify.arsnova.core4.questionnaire.event.internal
 import java.time.Instant
 import net.particify.arsnova.core4.questionnaire.template.RoomlessQuestionnaireChangedEvent
 import net.particify.arsnova.core4.questionnaire.template.TemplateServiceImpl
+import net.particify.arsnova.core4.questionnaire.template.TemplateViolationReportTarget
 import net.particify.arsnova.core4.user.event.UserDeletedEvent
+import net.particify.arsnova.core4.violationreport.event.ViolationReportDecidedEvent
+import net.particify.arsnova.core4.violationreport.event.ViolationReportDecision
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.data.repository.findByIdOrNull
@@ -35,5 +38,17 @@ class TemplateEventHandler(private val templateServiceImpl: TemplateServiceImpl)
     val template = templateServiceImpl.findByIdOrNull(event.id) ?: return
     template.auditMetadata.updatedAt = Instant.now()
     templateServiceImpl.save(template)
+  }
+
+  /** Reports outlive their targets, so the template may be gone already. */
+  @EventListener
+  fun handleViolationReportDecided(event: ViolationReportDecidedEvent) {
+    if (event.targetType != TemplateViolationReportTarget.TYPE ||
+        event.decision != ViolationReportDecision.REMOVAL ||
+        templateServiceImpl.findByIdOrNull(event.targetId) == null) {
+      return
+    }
+    logger.debug("Deleting template due to violation report decision: {}", event)
+    templateServiceImpl.delete(event.targetId)
   }
 }

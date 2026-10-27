@@ -26,6 +26,9 @@ so a module boundary is enforced by a test rather than by convention alone.
 |`security`
 |Authentication, the tokens issued to clients and other services, method security, and the permission contract the domain modules implement.
 
+|`violationreport`
+|Reports of violations on other modules' entities, such as rooms and templates, and the decisions on them.
+
 |`room`
 |Rooms, memberships and room roles, and the permissions on rooms.
 
@@ -52,6 +55,7 @@ The modules form this stack, from top to bottom:
 system
 qna, announcement, questionnaire
 room
+violationreport
 security
 user
 mail, license
@@ -81,8 +85,10 @@ Two details of that list are easy to miss:
   e.g. service implementations and repositories,
   which would otherwise sit in the base package.
 * A named interface publishes a sub-package or single types as a contract:
-** `events` in `user`, `room`, `qna`, `announcement` and `questionnaire`
+** `events` in `user`, `room`, `qna`, `announcement`, `questionnaire` and `violationreport`
    for the module's domain events,
+   in `violationreport` also for `ViolationReportTarget`,
+   which the modules owning reportable entities implement,
 ** `user::sso` for the SAML, OpenID Connect and LDAP configuration and provisioning types
    that `security` builds on,
 ** `security::permission` for the permission contract,

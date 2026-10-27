@@ -1,8 +1,8 @@
 = Migration from v3
 
 Data from a v3 installation can be imported into core4:
-user profiles, rooms and their memberships, announcements, and the Q&A with its settings, posts and
-votes.
+user profiles, rooms and their memberships, announcements, the Q&A with its settings, posts and
+votes, and violation reports.
 The sources are v3's CouchDB database, the room access of the authorization service and the database
 of the Q&A service.
 
