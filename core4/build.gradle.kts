@@ -98,6 +98,28 @@ dependencies {
 
 kotlin { compilerOptions { freeCompilerArgs.addAll("-Xjsr305=strict") } }
 
+// Lets a project that builds on this one run these tests against its own runtime classpath. Only
+// the capability selects it, so resolving this project as a dependency is unaffected.
+val testSuiteDependencies = configurations.dependencyScope("testSuiteDependencies")
+
+dependencies { testSuiteDependencies(project(path)) }
+
+configurations.consumable("testSuiteRuntimeElements") {
+  extendsFrom(
+      configurations.testImplementation.get(),
+      configurations.testRuntimeOnly.get(),
+      testSuiteDependencies.get())
+  attributes {
+    attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
+    attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.LIBRARY))
+  }
+  outgoing {
+    capability("${project.group}:${project.name}-test-suite:${project.version}")
+    val output = sourceSets.test.get().output
+    artifacts(provider { output.files }) { builtBy(output) }
+  }
+}
+
 tasks.bootRun {
   args =
       listOf(
