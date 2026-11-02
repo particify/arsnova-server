@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 
 /**
  * The REST counterpart of [QuestionnaireExceptionResolverAdapter] for the exceptions the module's
- * REST endpoints raise. Deliberately no ResponseEntityExceptionHandler: only one advice may extend
- * it, and the proprietary build already has one.
+ * REST endpoints raise. Deliberately no ResponseEntityExceptionHandler: extending it claims the
+ * exceptions Spring MVC raises itself and answers them with ProblemDetail, replacing the error page
+ * browsers get.
  */
 @RestControllerAdvice
 class QuestionnaireRestExceptionHandler {
