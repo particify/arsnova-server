@@ -109,8 +109,9 @@ tasks.bootRun {
 
 tasks.withType<Test> {
   useJUnitPlatform()
-  // Gradle's default of 512m does not hold the application contexts the test context cache keeps.
-  maxHeapSize = "1g"
+  // Spring Modulith keeps the module model of ModularityTests until the JVM exits, next to the
+  // application contexts the test context cache keeps.
+  maxHeapSize = "1536m"
 }
 
 // AOT processing decides at build time which beans exist, so the environment the build runs in
