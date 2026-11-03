@@ -49,6 +49,13 @@ docker:
 security:
   password:
     bcrypt-strength: 12
+    context-words:
+      - arsnova
+      - particify
+    dictionary-languages:
+      - en
+      - de
+    min-guesses-log10: 10
   jwt:
     validity-period: 100m
   challenge:
@@ -56,6 +63,7 @@ security:
     algorithm: PBKDF2/SHA-256
     iteration-cost: 5_000
     max-iterations: 5_000
+    reusable-token-validity: 5m
   login:
     attempt-limit: 20
     attempt-window: 2m

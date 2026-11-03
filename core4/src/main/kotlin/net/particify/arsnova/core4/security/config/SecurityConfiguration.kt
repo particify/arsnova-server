@@ -11,6 +11,7 @@ import net.particify.arsnova.core4.security.internal.ChallengeJwtAuthenticationF
 import net.particify.arsnova.core4.security.internal.Http401UnauthenticatedEntryPoint
 import net.particify.arsnova.core4.security.internal.RefreshAuthenticationFilter
 import net.particify.arsnova.core4.security.internal.RefreshableRelyingPartyRegistrationRepository
+import net.particify.arsnova.core4.security.internal.ReusableChallengeAuthenticationFilter
 import net.particify.arsnova.core4.security.internal.Saml2AssertionConsumerServiceConfigurer
 import net.particify.arsnova.core4.security.internal.Saml2AuthenticationFailureHandler
 import net.particify.arsnova.core4.security.internal.Saml2ResponseValidation
@@ -51,6 +52,7 @@ private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
 class SecurityConfiguration(
     private val refreshAuthenticationFilter: RefreshAuthenticationFilter,
     private val challengeJwtAuthenticationFilter: ChallengeJwtAuthenticationFilter,
+    private val reusableChallengeAuthenticationFilter: ReusableChallengeAuthenticationFilter,
     private val userJwtAuthenticationFilter: UserJwtAuthenticationFilter
 ) {
   @Bean
@@ -105,6 +107,8 @@ class SecurityConfiguration(
         }
         .addFilterBefore(
             refreshAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+        .addFilterBefore(
+            reusableChallengeAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
         .addFilterBefore(
             challengeJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
         .addFilterBefore(

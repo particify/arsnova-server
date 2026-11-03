@@ -7,16 +7,33 @@ import java.time.Instant
 import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
+import net.particify.arsnova.core4.common.exception.InvalidInputException
+import net.particify.arsnova.core4.user.exception.InvalidPasswordException
 import net.particify.arsnova.core4.user.exception.InvalidUserStateException
 import net.particify.arsnova.core4.user.exception.InvalidVerificationCodeException
+import net.particify.arsnova.core4.user.exception.WeakPasswordException
 import net.particify.arsnova.core4.user.internal.LocalUserServiceImpl
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.ActiveProfiles
+
+/** Random, so that nothing but its length and character set make it hard to guess. */
+private const val STRONG_PASSWORD = "sXQodP0UYeGQXuXE"
+
+private val WEAK_PASSWORDS = listOf("abcXYZ123!", "AaBbCc123", "1qay2wsx", "P@ssw0rd", "Aaaaaaaa")
+
+/** Strong passwords which cannot be set: two that a login form cannot reproduce, one too long. */
+private val INVALID_PASSWORDS =
+    listOf(
+        "$STRONG_PASSWORD ",
+        "\u00A0$STRONG_PASSWORD",
+        "sXQodP0U\nYeGQXuXE",
+        "ä".repeat(30) + STRONG_PASSWORD)
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -31,7 +48,7 @@ class LocalUserServiceTests {
     val mailAddress = "shouldClaimUnverifiedUser@example.com"
     val user = User()
     Assertions.assertDoesNotThrow {
-      localUserService.claimUnverifiedUser(user, mailAddress, "password", Locale.ENGLISH)
+      localUserService.claimUnverifiedUser(user, mailAddress, STRONG_PASSWORD, Locale.ENGLISH)
     }
     Assertions.assertEquals(mailAddress.lowercase(), user.unverifiedMailAddress)
     Assertions.assertNull(user.mailAddress)
@@ -170,8 +187,163 @@ class LocalUserServiceTests {
     val user =
         localUserService.initiatePasswordSetup(
             User(mailAddress = "shouldcompletepasswordsetup@example.com"), Locale.ENGLISH)
-    localUserService.completePasswordReset(user, "password", user.verificationCode!!)
+    localUserService.completePasswordReset(user, STRONG_PASSWORD, user.verificationCode!!)
     Assertions.assertNotNull(user.password)
     Assertions.assertNotNull(user.passwordChangedAt)
   }
+
+  @Test
+  fun shouldNotClaimUnverifiedUserWithWeakPassword() {
+    WEAK_PASSWORDS.forEach {
+      val user = User()
+      assertThrows<WeakPasswordException>(it) {
+        localUserService.claimUnverifiedUser(
+            user, "shouldNotClaimWithWeakPassword@example.com", it, Locale.ENGLISH)
+      }
+      Assertions.assertNull(user.password)
+    }
+  }
+
+  @Test
+  fun shouldNotClaimUnverifiedUserWithInvalidPassword() {
+    INVALID_PASSWORDS.forEach {
+      val user = User()
+      assertThrows<InvalidPasswordException>(it) {
+        localUserService.claimUnverifiedUser(
+            user, "shouldNotClaimWithInvalidPassword@example.com", it, Locale.ENGLISH)
+      }
+      Assertions.assertNull(user.password)
+      Assertions.assertNull(user.unverifiedMailAddress)
+    }
+  }
+
+  @Test
+  fun shouldClaimUnverifiedUserWithPassphrase() {
+    val user = User()
+    val passphrase = "quorvex blandimor tessaly"
+    localUserService.claimUnverifiedUser(
+        user, "shouldClaimWithPassphrase@example.com", passphrase, Locale.ENGLISH)
+    Assertions.assertTrue(passwordEncoder.matches(passphrase, user.password))
+  }
+
+  @Test
+  fun shouldNotVerifyMailWithInvalidPassword() {
+    INVALID_PASSWORDS.forEach {
+      val user =
+          User(
+              unverifiedMailAddress = "shouldNotVerifyMailWithInvalidPassword@example.com",
+              verificationCode = 12345678,
+              verificationExpiresAt = Instant.now().plusSeconds(10))
+      assertThrows<InvalidPasswordException>(it) {
+        localUserService.completeMailVerification(user, user.verificationCode!!, it)
+      }
+      Assertions.assertNull(user.password)
+    }
+  }
+
+  @Test
+  fun shouldNotVerifyMailWithWeakPassword() {
+    WEAK_PASSWORDS.forEach {
+      val user =
+          User(
+              unverifiedMailAddress = "shouldNotVerifyMailWithWeakPassword@example.com",
+              verificationCode = 12345678,
+              verificationExpiresAt = Instant.now().plusSeconds(10))
+      assertThrows<WeakPasswordException>(it) {
+        localUserService.completeMailVerification(user, user.verificationCode!!, it)
+      }
+      Assertions.assertNull(user.password)
+    }
+  }
+
+  @Test
+  fun shouldVerifyMailWithStrongPassword() {
+    val user =
+        User(
+            unverifiedMailAddress = "shouldVerifyMailWithStrongPassword@example.com",
+            verificationCode = 12345678,
+            verificationExpiresAt = Instant.now().plusSeconds(10))
+    localUserService.completeMailVerification(user, user.verificationCode!!, STRONG_PASSWORD)
+    Assertions.assertTrue(passwordEncoder.matches(STRONG_PASSWORD, user.password))
+  }
+
+  @Test
+  fun shouldNotResetToWeakPassword() {
+    val user =
+        localUserService.initiatePasswordSetup(
+            User(mailAddress = "shouldnotresettoweakpassword@example.com"), Locale.ENGLISH)
+    WEAK_PASSWORDS.forEach {
+      assertThrows<WeakPasswordException>(it) {
+        localUserService.completePasswordReset(user, it, user.verificationCode!!)
+      }
+      Assertions.assertNull(user.password)
+    }
+  }
+
+  @Test
+  fun shouldNotResetToInvalidPassword() {
+    val user =
+        localUserService.initiatePasswordSetup(
+            User(mailAddress = "shouldnotresettoinvalidpassword@example.com"), Locale.ENGLISH)
+    INVALID_PASSWORDS.forEach {
+      assertThrows<InvalidPasswordException>(it) {
+        localUserService.completePasswordReset(user, it, user.verificationCode!!)
+      }
+      Assertions.assertNull(user.password)
+    }
+  }
+
+  @Test
+  fun shouldNotUpdateToInvalidPassword() {
+    val user = localAccountUser("shouldNotUpdateToInvalidPassword@example.com")
+    INVALID_PASSWORDS.forEach {
+      assertThrows<InvalidPasswordException>(it) {
+        localUserService.updatePassword(user, STRONG_PASSWORD, it)
+      }
+      Assertions.assertTrue(passwordEncoder.matches(STRONG_PASSWORD, user.password))
+    }
+  }
+
+  /** Passwords set before the rule existed keep working, so the old one is checked unchanged. */
+  @Test
+  fun shouldUpdateFromPasswordWithOuterWhitespace() {
+    val oldPassword = " $STRONG_PASSWORD\t"
+    val user =
+        User(
+            mailAddress = "shouldUpdateFromPasswordWithOuterWhitespace@example.com",
+            password = passwordEncoder.encode(oldPassword))
+    localUserService.updatePassword(user, oldPassword, STRONG_PASSWORD)
+    Assertions.assertTrue(passwordEncoder.matches(STRONG_PASSWORD, user.password))
+  }
+
+  @Test
+  fun shouldNotUpdateToWeakPassword() {
+    val user = localAccountUser("shouldNotUpdateToWeakPassword@example.com")
+    WEAK_PASSWORDS.forEach {
+      assertThrows<WeakPasswordException>(it) {
+        localUserService.updatePassword(user, STRONG_PASSWORD, it)
+      }
+      Assertions.assertTrue(passwordEncoder.matches(STRONG_PASSWORD, user.password))
+    }
+  }
+
+  @Test
+  fun shouldUpdateToStrongPassword() {
+    val user = localAccountUser("shouldUpdateToStrongPassword@example.com")
+    val newPassword = STRONG_PASSWORD.reversed()
+    localUserService.updatePassword(user, STRONG_PASSWORD, newPassword)
+    Assertions.assertTrue(passwordEncoder.matches(newPassword, user.password))
+  }
+
+  /** A wrong old password is reported as such, whatever the new one is. */
+  @Test
+  fun shouldCheckOldPasswordBeforeNewOne() {
+    val user = localAccountUser("shouldCheckOldPasswordBeforeNewOne@example.com")
+    assertThrows<InvalidInputException> {
+      localUserService.updatePassword(user, "wrong-old-password", WEAK_PASSWORDS.first())
+    }
+  }
+
+  private fun localAccountUser(mailAddress: String) =
+      User(mailAddress = mailAddress, password = passwordEncoder.encode(STRONG_PASSWORD))
 }

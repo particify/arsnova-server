@@ -21,6 +21,7 @@ import net.particify.arsnova.core4.user.UserService
 import net.particify.arsnova.core4.user.event.UserMailVerifiedEvent
 import net.particify.arsnova.core4.user.event.UserPasswordChangedEvent
 import net.particify.arsnova.core4.user.exception.AccountCreationNotAllowedException
+import net.particify.arsnova.core4.user.exception.InvalidPasswordException
 import net.particify.arsnova.core4.user.exception.InvalidUserStateException
 import net.particify.arsnova.core4.user.exception.InvalidVerificationCodeException
 import net.particify.arsnova.core4.user.exception.MailAddressAlreadyInUseException
@@ -44,6 +45,7 @@ class LocalUserServiceImpl(
     private val eventPublisher: ApplicationEventPublisher,
     private val localAccountPolicy: LocalAccountPolicy,
     private val mailAddressValidation: MailAddressValidation,
+    private val passwordPolicy: PasswordPolicy,
     mailProperties: UserMailProperties
 ) : LocalUserService {
   companion object {
@@ -62,9 +64,11 @@ class LocalUserServiceImpl(
     if (user.mailAddress != null) {
       throw InvalidUserStateException("Account not claimable", user.id!!)
     }
+    checkNewPassword(user, password, mailAddress)
+    val encodedPassword = encodePassword(password)
     initiateVerification(user)
     user.unverifiedMailAddress = mailAddress
-    user.password = passwordEncoder.encode(password)
+    user.password = encodedPassword
     val persistedUser = userRepository.save(user)
     val template = determineMailVerificationTemplate(user)
     sendVerificationMail(persistedUser, template, locale)
@@ -141,7 +145,8 @@ class LocalUserServiceImpl(
       if (!user.password.isNullOrEmpty()) {
         throw InvalidInputException("Password is already set")
       }
-      user.password = passwordEncoder.encode(password)
+      checkNewPassword(user, password, user.unverifiedMailAddress)
+      user.password = encodePassword(password)
     }
     return updateMailAddressFromUnverified(user)
   }
@@ -189,7 +194,8 @@ class LocalUserServiceImpl(
       throw InvalidUserStateException("Password reset not initiated", user.id!!)
     }
     checkVerificationCode(user, verificationCode)
-    user.password = passwordEncoder.encode(password)
+    checkNewPassword(user, password, user.mailAddress)
+    user.password = encodePassword(password)
     user.passwordChangedAt = Instant.now()
     user.resetVerification()
     val persistedUser = userRepository.save(user)
@@ -221,6 +227,19 @@ class LocalUserServiceImpl(
     }
   }
 
+  private fun checkNewPassword(user: User, password: String, mailAddress: String?) {
+    PasswordValidator.check(password)
+    passwordPolicy.checkStrength(password, mailAddress, user.givenName, user.surname)
+  }
+
+  /** A password the encoder cannot store, such as an overly long one, is a client error. */
+  private fun encodePassword(password: String): String? =
+      try {
+        passwordEncoder.encode(password)
+      } catch (e: IllegalArgumentException) {
+        throw InvalidPasswordException(e)
+      }
+
   private fun initiateVerification(user: User) {
     user.resetVerification()
     user.verificationCode = generateNumericCode()
@@ -249,7 +268,8 @@ class LocalUserServiceImpl(
     if (!passwordEncoder.matches(oldPassword, user.password)) {
       throw InvalidInputException("Incorrect old password")
     }
-    user.password = passwordEncoder.encode(newPassword)
+    checkNewPassword(user, newPassword, user.mailAddress)
+    user.password = encodePassword(newPassword)
     user.passwordChangedAt = Instant.now()
     val persistedUser = userRepository.save(user)
     eventPublisher.publishEvent(UserPasswordChangedEvent(persistedUser.id!!))

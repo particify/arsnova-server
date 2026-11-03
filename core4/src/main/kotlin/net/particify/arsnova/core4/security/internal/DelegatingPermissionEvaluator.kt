@@ -35,7 +35,7 @@ class DelegatingPermissionEvaluator(
   ): Boolean {
     logger.debug("hasPermission({}, {}, {})", authentication, targetDomainObject, permission)
     requireNotNull(targetDomainObject)
-    val user = authentication.principal as? User ?: error("Unexpected principal type")
+    val user = authentication.principal as? User ?: return false
     val evaluator =
         permissionEvaluators.find { it.supports(targetDomainObject::class) }
             ?: error("Unsupported type '${targetDomainObject::class.simpleName}'")
@@ -57,6 +57,9 @@ class DelegatingPermissionEvaluator(
       permission: Any
   ): Boolean {
     logger.debug("hasPermission({}, {}, {}, {})", authentication, targetId, targetType, permission)
+    if (authentication.principal !is User) {
+      return false
+    }
     val evaluator =
         permissionEvaluators.find { it.supports(targetType) }
             ?: error("Unsupported type '$targetType'")

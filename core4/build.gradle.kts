@@ -4,6 +4,7 @@ import org.springframework.boot.gradle.tasks.aot.AbstractAot
 
 plugins {
   jacoco
+  id("net.particify.arsnova.password-dictionaries")
   `java-test-fixtures`
   alias(libs.plugins.detekt)
   alias(libs.plugins.graalvm.native)
@@ -53,6 +54,7 @@ dependencies {
   implementation(libs.thymeleaf.spring)
   implementation(libs.altcha)
   implementation(libs.bucket4j)
+  implementation(libs.zxcvbn)
   compileOnly(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   compileOnly(libs.postgresql)
   developmentOnly(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
@@ -109,6 +111,8 @@ tasks.bootRun {
 
 tasks.withType<Test> {
   useJUnitPlatform()
+  // CI runs only this project's tests, so they take those of the included build along.
+  dependsOn(gradle.includedBuild("build-logic").task(":test"))
   // Spring Modulith keeps the module model of ModularityTests until the JVM exits, next to the
   // application contexts the test context cache keeps.
   maxHeapSize = "1536m"
@@ -187,7 +191,8 @@ detekt {
   buildUponDefaultConfig = true
   config.setFrom("detekt.yaml")
   // Only the main and test source sets are analyzed by default.
-  source.from("src/testFixtures/kotlin")
+  source.from(
+      "src/testFixtures/kotlin", "../build-logic/src/main/kotlin", "../build-logic/src/test/kotlin")
 }
 
 spotless {
@@ -230,4 +235,19 @@ spotless {
   }
 
   tasks.withType<Jar> { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+}
+
+// The zxcvbn-ts packages whose word lists the password-dictionaries plugin generates into the
+// resources: every entry of their own version catalog.
+val dictionaryCatalog = versionCatalogs.named("passwordDictionaries")
+
+dictionaryCatalog.libraryAliases.forEach { alias ->
+  dependencies {
+    passwordDictionaryPackages(dictionaryCatalog.findLibrary(alias).get()) {
+      artifact {
+        type = "tgz"
+        extension = "tgz"
+      }
+    }
+  }
 }

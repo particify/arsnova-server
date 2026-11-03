@@ -14,11 +14,26 @@ plugins {
   alias(libs.plugins.kotlin.spring) apply false
   alias(libs.plugins.ktlint) apply false
   alias(libs.plugins.spotbugs) apply false
-  alias(libs.plugins.spotless) apply false
+  alias(libs.plugins.spotless)
   alias(libs.plugins.spring.boot) apply false
 }
 
-subprojects {
+// The included build-logic build has no Spotless of its own, and the target of a project's Spotless
+// must lie within the project.
+spotless {
+  ratchetFrom("origin/master")
+  kotlin {
+    target("build-logic/src/**/*.kt")
+    ktfmt(libs.versions.ktfmt.get())
+    licenseHeader("/* Copyright \$YEAR Particify GmbH\n * SPDX-License-Identifier: MIT\n */")
+  }
+  kotlinGradle {
+    target("build-logic/*.gradle.kts")
+    ktfmt(libs.versions.ktfmt.get())
+  }
+}
+
+allprojects {
   repositories {
     mavenCentral()
   }

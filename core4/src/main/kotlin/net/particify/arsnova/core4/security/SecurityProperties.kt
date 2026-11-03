@@ -46,6 +46,8 @@ data class SecurityProperties(
       @field:Size(min = 32) val secret: String,
       @field:Positive val iterationCost: Int,
       @field:Positive val maxIterations: Int,
+      /** How long a reusable token, which a solution can be exchanged for, stays valid. */
+      val reusableTokenValidity: Duration,
   )
 
   data class Login(
