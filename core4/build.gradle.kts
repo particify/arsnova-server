@@ -135,9 +135,37 @@ tasks.withType<Test> {
   useJUnitPlatform()
   // CI runs only this project's tests, so they take those of the included build along.
   dependsOn(gradle.includedBuild("build-logic").task(":test"))
-  // Spring Modulith keeps the module model of ModularityTests until the JVM exits, next to the
-  // application contexts the test context cache keeps.
+  // The application contexts the test context cache keeps come close to 1g.
   maxHeapSize = "1536m"
+}
+
+// Spring Modulith keeps the module model until the JVM exits, so it gets a JVM of its own rather
+// than sitting next to the application contexts the test context cache keeps.
+val modularityTests = "net.particify.arsnova.core4.ModularityTests"
+
+val modularityTest =
+    tasks.register<Test>("modularityTest") {
+      description = "Runs $modularityTests."
+      group = LifecycleBasePlugin.VERIFICATION_GROUP
+      testClassesDirs = sourceSets.test.get().output.classesDirs
+      // Without the AOT output even with -Paot: its generated classes in the application's packages
+      // would be analyzed as part of the modules.
+      classpath =
+          withoutAot(
+              sourceSets.test.get().runtimeClasspath,
+              "aotTest",
+              "processTestAot",
+              sourceSets.test.get().output,
+              sourceSets.main.get().output,
+              configurations.testRuntimeClasspath)
+      filter { includeTestsMatching(modularityTests) }
+      extensions.configure<JacocoTaskExtension> { isEnabled = false }
+      mustRunAfter(tasks.test)
+    }
+
+tasks.test {
+  filter { excludeTestsMatching(modularityTests) }
+  finalizedBy(modularityTest)
 }
 
 // AOT processing decides at build time which beans exist, so the environment the build runs in

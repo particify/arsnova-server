@@ -58,7 +58,7 @@ unit_test:
       - $OUTPUT_DIR/reports
       - $OUTPUT_DIR/test-results
     reports:
-      junit: $OUTPUT_DIR/test-results/test/TEST-*.xml
+      junit: $OUTPUT_DIR/test-results/*/TEST-*.xml
   coverage: '/Code coverage: \d+\.\d+/'
   script:
     - ../gradlew $GRADLE_CLI_OPTS test jacocoTestReport -x classes
