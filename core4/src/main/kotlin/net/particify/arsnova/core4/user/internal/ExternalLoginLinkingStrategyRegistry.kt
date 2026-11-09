@@ -7,6 +7,7 @@ import java.util.UUID
 import net.particify.arsnova.core4.user.ExternalLoginLinkingStrategy
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.sso.LdapProperties
+import net.particify.arsnova.core4.user.sso.OidcProperties
 import org.springframework.stereotype.Component
 
 /**
@@ -20,7 +21,8 @@ import org.springframework.stereotype.Component
 class ExternalLoginLinkingStrategyRegistry(
     strategies: List<ExternalLoginLinkingStrategy>,
     ldapProperties: LdapProperties,
-    saml2Properties: ExtendedSaml2RelyingPartyProperties
+    saml2Properties: ExtendedSaml2RelyingPartyProperties,
+    oidcProperties: OidcProperties
 ) {
   private val strategiesByName = strategies.associateBy { it.name }
   private val availableNames = strategiesByName.keys.sorted().joinToString(", ").ifEmpty { "none" }
@@ -31,6 +33,7 @@ class ExternalLoginLinkingStrategyRegistry(
     }
     validate(ldapProperties.registration.mapValues { it.value.linkingStrategy })
     validate(saml2Properties.registration.mapValues { it.value.linkingStrategy })
+    validate(oidcProperties.registration.mapValues { it.value.linkingStrategy })
   }
 
   /** `null` for a registration which selects no strategy, which is then never linked. */

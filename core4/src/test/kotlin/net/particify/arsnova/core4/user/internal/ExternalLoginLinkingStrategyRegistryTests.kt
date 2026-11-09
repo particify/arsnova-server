@@ -9,6 +9,7 @@ import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
 import net.particify.arsnova.core4.user.sso.LdapProperties
+import net.particify.arsnova.core4.user.sso.OidcProperties
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -18,6 +19,7 @@ private const val STRATEGY_NAME = "test-strategy"
 private const val UNKNOWN_STRATEGY_NAME = "no-such-strategy"
 private const val LDAP_REGISTRATION_ID = "5f0a2c48-9d31-4c7e-8b52-6a1e3f0d9c74"
 private const val SAML_REGISTRATION_ID = "7c3e5a19-2b84-4d60-9f13-8e5a6c2b0d47"
+private const val OIDC_REGISTRATION_ID = "9e4f6b2a-3c95-4e71-8a24-7f6b5d3c1e58"
 
 /**
  * The configuration is validated while the registry is constructed, and the registry is a singleton
@@ -45,6 +47,15 @@ class ExternalLoginLinkingStrategyRegistryTests {
     assertMessageNames(exception, SAML_REGISTRATION_ID)
   }
 
+  @Test
+  fun shouldRejectUnknownStrategySelectedByOidcRegistration() {
+    val exception =
+        assertThrows<IllegalArgumentException> {
+          createRegistry(oidcStrategy = UNKNOWN_STRATEGY_NAME)
+        }
+    assertMessageNames(exception, OIDC_REGISTRATION_ID)
+  }
+
   /** What a build without any strategy of its own reports, so the message has to stay useful. */
   @Test
   fun shouldReportThatNoStrategyIsAvailableWhenNoneIsRegistered() {
@@ -64,7 +75,8 @@ class ExternalLoginLinkingStrategyRegistryTests {
   @Test
   fun shouldAcceptRegistrationsSelectingARegisteredStrategy() {
     assertDoesNotThrow {
-      createRegistry(ldapStrategy = STRATEGY_NAME, saml2Strategy = STRATEGY_NAME)
+      createRegistry(
+          ldapStrategy = STRATEGY_NAME, saml2Strategy = STRATEGY_NAME, oidcStrategy = STRATEGY_NAME)
     }
   }
 
@@ -90,10 +102,14 @@ class ExternalLoginLinkingStrategyRegistryTests {
   private fun createRegistry(
       strategies: List<ExternalLoginLinkingStrategy> = listOf(strategy),
       ldapStrategy: String? = null,
-      saml2Strategy: String? = null
+      saml2Strategy: String? = null,
+      oidcStrategy: String? = null
   ) =
       ExternalLoginLinkingStrategyRegistry(
-          strategies, ldapProperties(ldapStrategy), saml2Properties(saml2Strategy))
+          strategies,
+          ldapProperties(ldapStrategy),
+          saml2Properties(saml2Strategy),
+          oidcProperties(oidcStrategy))
 
   private fun ldapProperties(strategyName: String?) =
       LdapProperties(
@@ -109,6 +125,15 @@ class ExternalLoginLinkingStrategyRegistryTests {
           mapOf(
               UUID.fromString(SAML_REGISTRATION_ID) to
                   ExtendedRegistration().apply { linkingStrategy = strategyName }))
+
+  private fun oidcProperties(strategyName: String?) =
+      OidcProperties(
+          mapOf(
+              UUID.fromString(OIDC_REGISTRATION_ID) to
+                  OidcProperties.Registration(
+                      issuerUri = "https://idp.example.com",
+                      clientId = "client",
+                      linkingStrategy = strategyName)))
 }
 
 private class TestLinkingStrategy(override val name: String) : ExternalLoginLinkingStrategy {

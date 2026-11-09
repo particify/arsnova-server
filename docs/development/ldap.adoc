@@ -17,8 +17,8 @@ external login.
 The user ID is read from the directory rather than taken from the submitted username, so it stays
 stable no matter which case a user typed.
 It also becomes the account's username, which is what makes the account verified.
-There is deliberately no option to use the mail address instead, as there is for SAML
-(link:sso.adoc[]):
+There is deliberately no option to use the mail address instead,
+as there is for SAML and OpenID Connect (link:sso.adoc[]):
 a directory always has a dedicated user ID attribute, and `user-id-attribute` already selects which
 one that is.
 Two consequences follow from that, and neither of them fails the login:

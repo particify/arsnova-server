@@ -1,15 +1,17 @@
 = Single Sign On
 
-SAML is available as a login provider.
+SAML and OpenID Connect are available as login providers.
 Every configured registration is advertised through `GET /api/configuration` and rendered as an
 additional SSO provider on the login screen.
-A login is started at `/api/saml2/authenticate/{registrationId}`,
+`/api/auth/sso/{registrationId}` starts a login through whichever of the two the registration uses.
+For SAML that is `/api/saml2/authenticate/{registrationId}`,
 and the service provider metadata is served at
-`/api/saml2/service-provider-metadata/{registrationId}`.
+`/api/saml2/service-provider-metadata/{registrationId}`;
+OpenID Connect is covered in <<OpenID Connect>>.
 A session started through SSO always carries the short lifetime and cannot ask to be remembered.
 It also ends after `security.login.external-session-max-age` however actively it is used until then,
 because the identity provider does not tell us when it revokes an account.
-An identity provider which bounds the session itself, through `SessionNotOnOrAfter` of the
+A SAML identity provider which bounds the session itself, through `SessionNotOnOrAfter` of the
 assertion's authentication statement, ends it earlier where that bound is the earlier one.
 The assertion's own `NotOnOrAfter` is not read for this:
 it limits how long the assertion may be replayed rather than how long the session lasts.
@@ -17,8 +19,8 @@ link:authentication.adoc[] covers the tokens themselves.
 
 Users are authenticated by the identity provider.
 On the first successful login, an account is created and linked to the registration through an
-external login, keyed by the asserted ID attribute.
-Every later login updates the account from the asserted attributes.
+external login, keyed by the asserted ID attribute or claim.
+Every later login updates the account from the asserted attributes or claims.
 
 == Configuration
 
@@ -329,12 +331,12 @@ The language tag is not configurable yet, so a German product name is published 
 
 The account's username is what makes it verified, and it is also its public display ID -- the
 identifier another user enters to share a room.
-It is not a credential: a SAML user is always located through their external login,
-never through the username.
+It is not a credential: a SAML or OpenID Connect user is always located through their external
+login, never through the username.
 
 `username-mapping` decides where it comes from:
 
-`ID`:: The value of the `id` attribute, lowercased.
+`ID`:: The value of the `id` attribute or claim, lowercased.
   Correct when that attribute is something a person recognises, such as a login name or a scoped
   identifier.
 `MAIL_ADDRESS`:: The mail address, which is the default.
@@ -342,7 +344,7 @@ never through the username.
   type.
 
 Since the mail address is also what a local account's username is derived from, `MAIL_ADDRESS` puts
-SAML and local accounts into one namespace on purpose.
+single sign-on and local accounts into one namespace on purpose.
 
 Two consequences follow, and neither of them fails the login:
 a username which is already in use leaves the account unverified,
@@ -354,6 +356,80 @@ There is deliberately no such option for LDAP.
 A directory always has a dedicated user ID attribute, and which attribute that is can already be
 configured, so the choice a SAML deployment has to make does not arise there.
 See link:ldap.adoc[].
+
+== OpenID Connect
+
+An OpenID Connect registration uses the authorization code flow with PKCE,
+which is also sent by a client authenticating with a secret.
+A login is started at `/api/oauth2/authorization/{registrationId}`,
+and the provider sends the browser back to `/api/login/oauth2/code/{registrationId}`,
+which is the redirect URI to register with it.
+Like a SAML login, it ends in a session with the short lifetime,
+bounded by `security.login.external-session-max-age`;
+no claim is read to end it earlier, and logging out does not reach the provider.
+
+[source,yaml]
+----
+security:
+  oidc:
+    registration:
+      a7313d3a-1a45-474a-897d-fb7e26efb0db:
+        issuer-uri: https://idp.example.com/realms/example
+        client-id: arsnova
+        client-secret: secret
+        title: Example IdP
+----
+
+Registrations are keyed by a UUID, which is also the provider ID the account's external login is
+stored under.
+An empty map -- the default -- disables OpenID Connect.
+
+`issuer-uri`:: Issuer identifier of the provider.
+  Required.
+  The discovery document is read from `{issuer-uri}/.well-known/openid-configuration`,
+  and has to name exactly this issuer, trailing slash included.
+`client-id`:: Required.
+`client-secret`:: Secret the client authenticates to the token endpoint with:
+  `client_secret_basic` where the discovery document lists it, `client_secret_post` otherwise.
+  Unset makes the registration a public client, which relies on PKCE alone,
+  and blank is rejected while the application starts.
+`scope`:: `openid`, `email` and `profile` by default.
+  It has to include `openid`, and the application refuses to start otherwise.
+`claim-mapping.id`:: Name of the claim the account's external login is keyed on, `sub` by default.
+  It has to be stable and unique per provider, which `sub` is guaranteed to be:
+  a login whose value changes is taken for a new user,
+  and one arriving with a value another user had is given that user's account.
+  A login fails with the error code `missing_id_claim` if the claim is missing.
+`require-verified-mail-address`:: Whether the mail address is accepted only when the
+  `email_verified` claim is `true`, as a boolean or as the string `true`.
+  `true` by default.
+  An address which is not accepted is treated as absent: it is neither stored,
+  nor offered to a linking strategy, nor used as the username.
+  Microsoft Entra ID never sends `email_verified`, so a registration with it has to set this to
+  `false` to receive addresses at all -- which trusts the tenant to control them.
+`username-mapping`, `linking-strategy`, `title`, `order`:: As for SAML,
+  with `OIDC` as the default title.
+
+The mail address, given name and surname are read from the standard claims `email`,
+`given_name` and `family_name`.
+Claims are read from the ID token and, where the discovery document lists a UserInfo endpoint and
+the access token grants `profile`, `email`, `address` or `phone`, from the UserInfo response as
+well.
+These values are applied like asserted SAML attributes: the mail address is lowercased and
+skipped when another account holds it, and a claim which is missing leaves the stored value alone.
+Login hooks receive every claim as a list of values: a scalar as a list of one,
+an array as its elements, and a JSON object as a list holding that object.
+`null` values are dropped.
+
+The discovery document is read on the first login rather than while the application starts,
+so a provider which is down does not keep the application from starting.
+A document which was read is kept until the application restarts,
+and endpoints the provider moves afterwards need one.
+A failure is logged once at `ERROR`, and the next attempt to log in after 30 seconds reads the
+document again;
+until one succeeds, starting a login answers with the error page.
+The discovery request times out after 5 seconds connecting and 10 seconds reading;
+the token, UserInfo and JWKS requests use the library defaults.
 
 == Development environment
 
@@ -380,6 +456,13 @@ The development environment includes Keycloak to help with the development of SS
 A realm configuration is included and automatically imported at startup.
 The Keycloak service can be accessed at http://localhost:8080 (username: `admin`,
 password: `admin`).
+
+The realm also has an OpenID Connect client, `arsnova-dev-oidc`, which core4's development
+configuration registers as `a7313d3a-1a45-474a-897d-fb7e26efb0db`.
+Its issuer is `http://keycloak:8080/realms/dev`.
+Keycloak derives the issuer from the host a request names,
+so the browser and core4 both have to reach it as `keycloak:8080`, as the SAML login already
+requires.
 
 The realm ships two users which can log in through SSO, `saml-owner` and `saml-participant`,
 each with a verified mail address at `example.com` and a password equal to its username.
@@ -475,14 +558,14 @@ link:v3-migration.adoc[] covers the migration itself:
 the provider mapping a registration has to be paired with, how usernames and mail addresses are
 settled, and what happens to an account which shares its address with a local one.
 
-One thing is specific to SAML.
+One thing is specific to SAML and OpenID Connect.
 v3 had one installation-wide `security.user-display-id-attribute`, with the values `loginId` and
 `mail` and `loginId` as its default.
 `username-mapping` replaces it per registration, and its default is the other one --
 so a v3 installation migrating with default configuration needs `username-mapping: ID` to keep the
 display IDs its users know.
-The v3 value the migration carries over is `loginId`,
-which for SAML was the value of v3's own `user-id-attribute`, not the mail address.
+The v3 value the migration carries over is `loginId`, not the mail address:
+for SAML the value of v3's own `user-id-attribute`, for OpenID Connect the `sub` claim.
 
 == Limitations
 

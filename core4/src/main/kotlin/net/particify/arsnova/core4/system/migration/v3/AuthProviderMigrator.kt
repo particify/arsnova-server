@@ -4,11 +4,13 @@
 package net.particify.arsnova.core4.system.migration.v3
 
 import java.time.Instant
+import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.user.MailAddressValidation
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.internal.ExternalLogin
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.OidcProperties
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component
 class AuthProviderMigrator(
     private val properties: MigrationProperties,
     private val saml2Properties: ExtendedSaml2RelyingPartyProperties,
+    private val oidcProperties: OidcProperties,
     private val mailAddressValidation: MailAddressValidation
 ) {
   companion object {
@@ -65,7 +68,7 @@ class AuthProviderMigrator(
    * which keeps an address shared by several users cannot be determined while documents are
    * streamed in, so [UserMigrationPostProcessor] settles both columns once all users exist. An
    * address which is not valid is dropped: settling it would make it the account's address, and for
-   * a SAML registration mapping usernames to addresses its username as well.
+   * a SAML or OIDC registration mapping usernames to addresses its username as well.
    */
   private fun migrateExternalLogin(newUser: User, userProfile: UserProfile): Boolean {
     val authProvider = userProfile.authProvider
@@ -74,11 +77,11 @@ class AuthProviderMigrator(
       logger.warn("No ID mapping for authentication provider found: {}", authProvider)
       return false
     }
-    if (authProvider == UserProfile.AuthProvider.SAML &&
-        saml2Properties.registration[providerId] == null) {
+    if (isMissingRegistration(authProvider, providerId)) {
       logger.warn(
-          "No SAML registration found for provider {}. Without it the username mapping is " +
+          "No {} registration found for provider {}. Without it the username mapping is " +
               "unknown, and a wrong username would be permanent.",
+          authProvider,
           providerId)
       return false
     }
@@ -93,6 +96,14 @@ class AuthProviderMigrator(
             auditMetadata = AuditMetadata(createdAt = Instant.now()))
     return true
   }
+
+  /** Only SAML and OIDC registrations choose how the username is mapped. */
+  private fun isMissingRegistration(authProvider: UserProfile.AuthProvider, providerId: UUID) =
+      when (authProvider) {
+        UserProfile.AuthProvider.SAML -> providerId !in saml2Properties.registration
+        UserProfile.AuthProvider.OIDC -> providerId !in oidcProperties.registration
+        else -> false
+      }
 
   private fun validMailAddressOrNull(mailAddress: String): String? {
     if (mailAddressValidation.isValid(mailAddress)) {

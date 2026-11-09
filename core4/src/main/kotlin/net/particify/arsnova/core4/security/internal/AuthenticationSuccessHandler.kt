@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import net.particify.arsnova.core4.security.RefreshCookieComponent
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.sso.OidcLoginPrincipal
 import net.particify.arsnova.core4.user.sso.Saml2SessionAuthentication
 import org.springframework.http.MediaType
 import org.springframework.security.core.Authentication
@@ -37,7 +38,7 @@ class AuthenticationSuccessHandler(private val refreshCookieComponent: RefreshCo
   ) {
     val session = request.getSession(false)
     if (session == null || session.getAttribute(URL_ATTRIBUTE) == null) {
-      val user = authentication.principal as User
+      val user = user(authentication)
       val subject = user.id.toString()
       val endsAt = (authentication as? Saml2SessionAuthentication)?.endsAt
       refreshCookieComponent.addForExternalLogin(
@@ -49,4 +50,13 @@ class AuthenticationSuccessHandler(private val refreshCookieComponent: RefreshCo
     }
     super.onAuthenticationSuccess(request, response, authentication)
   }
+
+  /**
+   * An OpenID Connect login has to carry an `OidcUser` as its principal, which wraps the account.
+   */
+  private fun user(authentication: Authentication): User =
+      when (val principal = authentication.principal) {
+        is OidcLoginPrincipal -> principal.user
+        else -> principal as User
+      }
 }

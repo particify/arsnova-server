@@ -44,6 +44,7 @@ dependencies {
   implementation(libs.spring.security)
   implementation(libs.spring.security.jose)
   implementation(libs.spring.security.ldap)
+  implementation(libs.spring.security.oauth2.client)
   implementation(libs.spring.security.saml)
   implementation(libs.spring.validation)
   implementation(libs.spring.websocket)
@@ -67,6 +68,7 @@ dependencies {
   testFixturesApi(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   testFixturesApi(libs.spring.test) { exclude(module = "mockito-core") }
   testFixturesImplementation(libs.bouncycastle.pkix)
+  testFixturesImplementation(libs.spring.security.jose)
   testFixturesImplementation(libs.spring.security.saml)
   testImplementation(libs.kotlin.junit)
   testImplementation(libs.reactor.test)

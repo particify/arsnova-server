@@ -12,6 +12,7 @@ import net.particify.arsnova.core4.user.internal.LocalAccountProperties
 import net.particify.arsnova.core4.user.internal.localAccount
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.sso.LdapProperties
+import net.particify.arsnova.core4.user.sso.OidcProperties
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -61,6 +62,7 @@ class LegacyConfigurationLocalAccountTests {
       LegacyConfigurationController(
               LdapProperties(),
               LocalAccountPolicy(localAccount),
+              OidcProperties(),
               RoomCreationPolicy(securityProperties()),
               ExtendedSaml2RelyingPartyProperties(),
               securityProperties(),

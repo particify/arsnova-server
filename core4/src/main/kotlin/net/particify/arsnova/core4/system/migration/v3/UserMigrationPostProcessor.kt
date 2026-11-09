@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import java.util.UUID
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.OidcProperties
 import net.particify.arsnova.core4.user.sso.UsernameMapping
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -124,7 +125,8 @@ private val PARKED_MAIL_ADDRESSES =
 class UserMigrationPostProcessor(
     @PersistenceContext private val entityManager: EntityManager,
     private val properties: MigrationProperties,
-    private val saml2Properties: ExtendedSaml2RelyingPartyProperties
+    private val saml2Properties: ExtendedSaml2RelyingPartyProperties,
+    private val oidcProperties: OidcProperties
 ) {
   companion object {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -147,12 +149,11 @@ class UserMigrationPostProcessor(
    */
   private fun settleUsernames() {
     var settled = 0
-    val mailMappedProviderId = mailMappedProviderId()
-    if (mailMappedProviderId != null) {
+    for (providerId in mailMappedProviderIds()) {
       settled +=
           entityManager
               .createNativeQuery(SETTLE_USERNAMES_FROM_MAIL_ADDRESS)
-              .setParameter("providerId", mailMappedProviderId.toString())
+              .setParameter("providerId", providerId.toString())
               .executeUpdate()
     }
     settled += entityManager.createNativeQuery(SETTLE_USERNAMES_FROM_EXTERNAL_ID).executeUpdate()
@@ -160,14 +161,21 @@ class UserMigrationPostProcessor(
   }
 
   /**
-   * The provider whose username is the mail address rather than the external ID. Only SAML offers
-   * that mapping, and the migration configuration names at most one provider ID per v3 provider.
+   * The providers whose username is the mail address rather than the external ID. Only SAML and
+   * OIDC offer that mapping, and the migration configuration names at most one provider ID per v3
+   * provider.
    */
-  private fun mailMappedProviderId(): UUID? {
-    val providerId =
-        properties.authenticationProviderMapping[UserProfile.AuthProvider.SAML.name] ?: return null
-    val registration = saml2Properties.registration[providerId]
-    return if (registration?.usernameMapping == UsernameMapping.MAIL_ADDRESS) providerId else null
+  private fun mailMappedProviderIds(): List<UUID> {
+    val mapping = properties.authenticationProviderMapping
+    val saml = mapping[UserProfile.AuthProvider.SAML.name]
+    val oidc = mapping[UserProfile.AuthProvider.OIDC.name]
+    return listOfNotNull(
+        saml?.takeIf {
+          saml2Properties.registration[it]?.usernameMapping == UsernameMapping.MAIL_ADDRESS
+        },
+        oidc?.takeIf {
+          oidcProperties.registration[it]?.usernameMapping == UsernameMapping.MAIL_ADDRESS
+        })
   }
 
   @Suppress("UNCHECKED_CAST")

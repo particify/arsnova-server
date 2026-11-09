@@ -12,6 +12,7 @@ import net.particify.arsnova.core4.user.internal.ExternalLogin
 import net.particify.arsnova.core4.user.internal.UserRepository
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.sso.OidcProperties
 import net.particify.arsnova.core4.user.sso.UsernameMapping
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -24,6 +25,7 @@ import org.springframework.transaction.support.TransactionTemplate
 
 private val LDAP_PROVIDER_ID = UUID.fromString("b1a0f5c6-6f4a-4a7e-9d2b-1f0c9a7e5d31")
 private val SAML_PROVIDER_ID = UUID.fromString("c2b1a6d7-7a5b-4b8f-8e3c-2a1dab8f6e42")
+private val OIDC_PROVIDER_ID = UUID.fromString("d3c2b7e8-8b6c-4c9a-9f4d-3b2ebc9a7f53")
 
 /**
  * The post-passes run against every unsettled account in the database, so these tests assert on the
@@ -98,6 +100,17 @@ class UserMigrationPostProcessorTests {
   }
 
   @Test
+  fun shouldUseMailAddressAsUsernameForMailMappedOidcProvider() {
+    val address = "postpass-oidc-mail-mapped@example.com"
+    val external =
+        createExternalUser(OIDC_PROVIDER_ID, "postpass-oidc-mail-mapped-subject", address)
+    settle(oidcMailMappedProviderId = OIDC_PROVIDER_ID)
+    val settled = reload(external)
+    Assertions.assertEquals(address, settled.mailAddress)
+    Assertions.assertEquals(address, settled.username)
+  }
+
+  @Test
   fun shouldFallBackToExternalIdWhenMailAddressIsNotAvailable() {
     val shared = "postpass-mail-taken@example.com"
     createLocalUser(shared)
@@ -126,8 +139,9 @@ class UserMigrationPostProcessorTests {
   private fun identities(vararg users: User): List<Pair<String?, String?>> =
       users.map { reload(it) }.map { it.mailAddress to it.username }
 
-  private fun settle(mailMappedProviderId: UUID? = null) {
+  private fun settle(mailMappedProviderId: UUID? = null, oidcMailMappedProviderId: UUID? = null) {
     val registrations = mutableMapOf<UUID, ExtendedRegistration>()
+    val oidcRegistrations = mutableMapOf<UUID, OidcProperties.Registration>()
     val providerMapping = mutableMapOf<String, UUID>()
     if (mailMappedProviderId != null) {
       val registration = ExtendedRegistration()
@@ -135,11 +149,17 @@ class UserMigrationPostProcessorTests {
       registrations[mailMappedProviderId] = registration
       providerMapping[UserProfile.AuthProvider.SAML.name] = mailMappedProviderId
     }
+    if (oidcMailMappedProviderId != null) {
+      oidcRegistrations[oidcMailMappedProviderId] =
+          OidcProperties.Registration(issuerUri = "https://idp.invalid", clientId = "client")
+      providerMapping[UserProfile.AuthProvider.OIDC.name] = oidcMailMappedProviderId
+    }
     val postProcessor =
         UserMigrationPostProcessor(
             entityManager,
             migrationProperties.copy(authenticationProviderMapping = providerMapping),
-            ExtendedSaml2RelyingPartyProperties(registrations))
+            ExtendedSaml2RelyingPartyProperties(registrations),
+            OidcProperties(oidcRegistrations))
     TransactionTemplate(transactionManager).executeWithoutResult {
       postProcessor.settleIdentities()
     }

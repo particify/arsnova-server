@@ -11,6 +11,7 @@ import net.particify.arsnova.core4.system.config.UiProperties
 import net.particify.arsnova.core4.user.LocalAccountPolicy
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.sso.LdapProperties
+import net.particify.arsnova.core4.user.sso.OidcProperties
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -24,6 +25,7 @@ private const val REMEMBER_ME_ENABLED = "rememberMeEnabled"
 class LegacyConfigurationController(
     private val ldapProperties: LdapProperties,
     private val localAccountPolicy: LocalAccountPolicy,
+    private val oidcProperties: OidcProperties,
     private val roomCreationPolicy: RoomCreationPolicy,
     private val saml2Properties: ExtendedSaml2RelyingPartyProperties,
     private val securityProperties: SecurityProperties,
@@ -34,6 +36,7 @@ class LegacyConfigurationController(
   fun configuration(): LegacyConfiguration {
     return LegacyConfiguration(
         buildSaml2ProviderList()
+            .plus(buildOidcProviderList())
             .plus(buildLocalProviderList())
             .plus(buildLdapProviderList())
             .plus(
@@ -75,6 +78,18 @@ class LegacyConfigurationController(
 
   private fun buildSaml2ProviderList(): List<LegacyAuthenticationProvider> {
     return saml2Properties.registration.map {
+      LegacyAuthenticationProvider(
+          id = it.key.toString(),
+          title = it.value.title,
+          order = it.value.order,
+          allowedRoles = allowedRoles(roomCreationPolicy.mayVerifiedAccountsCreateRooms()),
+          type = LegacyAuthenticationProvider.Type.SSO,
+      )
+    }
+  }
+
+  private fun buildOidcProviderList(): List<LegacyAuthenticationProvider> {
+    return oidcProperties.registration.map {
       LegacyAuthenticationProvider(
           id = it.key.toString(),
           title = it.value.title,

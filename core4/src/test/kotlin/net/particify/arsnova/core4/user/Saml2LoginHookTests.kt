@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 
-private const val REFUSAL_ERROR_CODE = "test_refusal"
+const val REFUSAL_ERROR_CODE = "test_refusal"
 
 /** A role from the predefined data which no account is given by provisioning itself. */
 private const val HOOK_ROLE = "ADMIN"

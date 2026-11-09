@@ -8,7 +8,10 @@ import net.particify.arsnova.core4.common.PublicRoutes
 import net.particify.arsnova.core4.common.ServiceProperties
 import net.particify.arsnova.core4.security.internal.AuthenticationSuccessHandler
 import net.particify.arsnova.core4.security.internal.ChallengeJwtAuthenticationFilter
+import net.particify.arsnova.core4.security.internal.DiscardingOAuth2AuthorizedClientRepository
 import net.particify.arsnova.core4.security.internal.Http401UnauthenticatedEntryPoint
+import net.particify.arsnova.core4.security.internal.OidcAuthenticationFailureHandler
+import net.particify.arsnova.core4.security.internal.OidcClientRegistrationRepository
 import net.particify.arsnova.core4.security.internal.RefreshAuthenticationFilter
 import net.particify.arsnova.core4.security.internal.RefreshableRelyingPartyRegistrationRepository
 import net.particify.arsnova.core4.security.internal.ReusableChallengeAuthenticationFilter
@@ -19,6 +22,8 @@ import net.particify.arsnova.core4.security.internal.Saml2SpMetadataFactory
 import net.particify.arsnova.core4.security.internal.UserJwtAuthenticationFilter
 import net.particify.arsnova.core4.user.ADMIN_ROLE
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
+import net.particify.arsnova.core4.user.sso.OidcLoginUserService
+import net.particify.arsnova.core4.user.sso.OidcProperties
 import net.particify.arsnova.core4.user.sso.Saml2ResponseAuthenticationConverter
 import org.slf4j.LoggerFactory
 import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest
@@ -28,12 +33,14 @@ import org.springframework.core.env.Environment
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.ProviderManager
 import org.springframework.security.config.Customizer
+import org.springframework.security.config.ObjectPostProcessor
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter
 import org.springframework.security.saml2.provider.service.authentication.AbstractSaml2AuthenticationRequest
 import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider
 import org.springframework.security.saml2.provider.service.metadata.Saml2MetadataResponseResolver
@@ -65,6 +72,8 @@ class SecurityConfiguration(
       relyingPartyRegistrations: RelyingPartyRegistrationRepository?,
       saml2AuthenticationRequestRepository:
           Saml2AuthenticationRequestRepository<AbstractSaml2AuthenticationRequest>,
+      oidcProperties: OidcProperties,
+      oidcLoginUserService: OidcLoginUserService,
       publicRoutesList: List<PublicRoutes>,
       configurers: List<SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity>>
   ): SecurityFilterChain {
@@ -149,7 +158,43 @@ class SecurityConfiguration(
                   saml2AuthenticationRequestRepository),
               Customizer.withDefaults())
     }
+    if (oidcProperties.registration.isNotEmpty()) {
+      configureOidcLogin(http, oidcProperties, oidcLoginUserService, authenticationSuccessHandler)
+    }
     return http.build()
+  }
+
+  /**
+   * The repository is handed to the configurer rather than published as a bean, so a lookup by type
+   * in the application context does not find it. The configurer does publish it as a shared object
+   * of this chain, though: another configurer keeping client registrations of its own has to be
+   * given them explicitly rather than look them up there.
+   *
+   * Nothing reuses the provider's tokens once the account is provisioned, so they are not stored.
+   */
+  private fun configureOidcLogin(
+      http: HttpSecurity,
+      oidcProperties: OidcProperties,
+      oidcLoginUserService: OidcLoginUserService,
+      authenticationSuccessHandler: AuthenticationSuccessHandler
+  ) {
+    val failureHandler = OidcAuthenticationFailureHandler(oidcProperties.registration.keys)
+    http.oauth2Login {
+      it.clientRegistrationRepository(OidcClientRegistrationRepository(oidcProperties))
+          .authorizedClientRepository(DiscardingOAuth2AuthorizedClientRepository)
+          .userInfoEndpoint { userInfo -> userInfo.oidcUserService(oidcLoginUserService) }
+          .successHandler(authenticationSuccessHandler)
+          .failureHandler(failureHandler)
+          .withObjectPostProcessor(
+              object : ObjectPostProcessor<OAuth2AuthorizationRequestRedirectFilter> {
+                override fun <O : OAuth2AuthorizationRequestRedirectFilter> postProcess(
+                    filter: O
+                ): O {
+                  filter.setAuthenticationFailureHandler(failureHandler)
+                  return filter
+                }
+              })
+    }
   }
 
   @Bean
