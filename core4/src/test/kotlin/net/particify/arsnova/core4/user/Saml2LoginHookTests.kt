@@ -6,7 +6,6 @@ package net.particify.arsnova.core4.user
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
 import net.particify.arsnova.core4.user.internal.UserServiceImpl
-import net.particify.arsnova.core4.user.sso.Saml2LoginHook
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,8 +15,6 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import org.springframework.security.saml2.core.Saml2Error
-import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticationException
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
@@ -47,7 +44,7 @@ class Saml2LoginHookTestConfiguration {
 }
 
 /** Records every call and applies whatever a test has armed it with. */
-class RecordingSaml2LoginHook : Saml2LoginHook {
+class RecordingSaml2LoginHook : ExternalLoginHook {
   data class Call(val registrationId: UUID, val attributes: Map<String, List<Any>>)
 
   val beforeCalls = mutableListOf<Call>()
@@ -58,7 +55,7 @@ class RecordingSaml2LoginHook : Saml2LoginHook {
   override fun beforeProvisioning(registrationId: UUID, attributes: Map<String, List<Any>>) {
     beforeCalls += Call(registrationId, attributes)
     if (refuse) {
-      throw Saml2AuthenticationException(Saml2Error(REFUSAL_ERROR_CODE, "Refused by test hook."))
+      throw ExternalLoginRefusedException(REFUSAL_ERROR_CODE, "Refused by test hook.")
     }
   }
 
@@ -79,7 +76,7 @@ class RecordingSaml2LoginHook : Saml2LoginHook {
   }
 }
 
-/** Drives SAML logins through the filter chain with a [Saml2LoginHook] in the context. */
+/** Drives SAML logins through the filter chain with an [ExternalLoginHook] in the context. */
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
