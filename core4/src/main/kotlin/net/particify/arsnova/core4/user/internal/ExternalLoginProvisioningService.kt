@@ -17,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional
 /**
  * Creates or updates the account behind a single sign-on login, independent of the protocol which
  * carried it, and calls the [ExternalLoginHook]s around that.
+ *
+ * External IDs, mail addresses and usernames are personal data, so they are logged at DEBUG only:
+ * the INFO and WARN lines say what happened, and the DEBUG line following each names the values.
  */
 @Service
 class ExternalLoginProvisioningService(
@@ -74,9 +77,14 @@ class ExternalLoginProvisioningService(
             .find(linkingStrategy)
             ?.findLinkTarget(identity.registrationId, identity.externalId, identity.mailAddress)
     if (linkTarget == null) {
-      logger.info("Creating new account for external user {}...", identity.externalId)
+      logger.info("Creating new account for a login via registration {}.", identity.registrationId)
+      logger.debug("Creating new account for external user {}.", identity.externalId)
     } else {
       logger.info(
+          "Attaching a login via registration {} to existing account {}.",
+          identity.registrationId,
+          linkTarget.id)
+      logger.debug(
           "Attaching external user {} to existing account {}.", identity.externalId, linkTarget.id)
     }
     return linkTarget
@@ -104,25 +112,22 @@ class ExternalLoginProvisioningService(
     val username = resolveUsername(usernameMapping, externalId, user.mailAddress)
     if (username == null) {
       logger.warn(
-          "No value available for username mapping {}. Leaving the account of the external user " +
-              "{} unverified.",
-          usernameMapping,
-          externalId)
+          "No value available for username mapping {}. Leaving the account unverified.",
+          usernameMapping)
+      logger.debug("No username for external user {}.", externalId)
       return
     }
     // An address imported before addresses were validated must not become the username either.
     if (usernameMapping == UsernameMapping.MAIL_ADDRESS &&
         !mailAddressValidation.isValid(username)) {
-      logger.warn(
-          "Mail address {} is not valid. Leaving the account of the external user {} unverified.",
-          username,
-          externalId)
+      logger.warn("Mail address is not valid. Leaving the account unverified.")
+      logger.debug(
+          "Mail address {} of external user {} is not valid as a username.", username, externalId)
       return
     }
     if (userRepository.existsByUsername(username)) {
-      logger.warn(
-          "Username {} is already in use. Leaving the account of the external user unverified.",
-          username)
+      logger.warn("Username is already in use. Leaving the account unverified.")
+      logger.debug("Username {} of external user {} is already in use.", username, externalId)
       return
     }
     user.username = username
@@ -151,13 +156,13 @@ class ExternalLoginProvisioningService(
       return
     }
     if (!mailAddressValidation.isValid(normalized)) {
-      logger.warn(
-          "Mail address {} is not valid. Not importing it for the external user.", normalized)
+      logger.warn("Mail address is not valid. Not importing it for the external user.")
+      logger.debug("Mail address {} is not valid.", normalized)
       return
     }
     if (userRepository.existsByMailAddress(normalized)) {
-      logger.warn(
-          "Mail address {} is already in use. Not importing it for the external user.", normalized)
+      logger.warn("Mail address is already in use. Not importing it for the external user.")
+      logger.debug("Mail address {} is already in use.", normalized)
       return
     }
     user.mailAddress = normalized
