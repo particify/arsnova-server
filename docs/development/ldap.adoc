@@ -28,6 +28,8 @@ and a mail address which is already in use is not imported.
 == Configuration
 
 Registrations are keyed by a UUID, which is also the provider ID sent on login.
+It has to differ from the ID of every other LDAP, SAML and OpenID Connect registration,
+and the application refuses to start otherwise.
 An empty map -- the default -- disables LDAP, so nothing has to be configured to keep it off.
 
 [source,yaml]

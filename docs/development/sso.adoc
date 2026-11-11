@@ -26,6 +26,8 @@ Every later login updates the account from the asserted attributes or claims.
 
 Registrations are keyed by a UUID, which is also the provider ID the account's external login is
 stored under.
+It has to differ from the ID of every other LDAP, SAML and OpenID Connect registration,
+and the application refuses to start otherwise.
 An empty map -- the default -- disables SAML, so nothing has to be configured to keep it off.
 
 [source,yaml]
@@ -382,6 +384,8 @@ security:
 
 Registrations are keyed by a UUID, which is also the provider ID the account's external login is
 stored under.
+It has to differ from the ID of every other LDAP, SAML and OpenID Connect registration,
+and the application refuses to start otherwise.
 An empty map -- the default -- disables OpenID Connect.
 
 `issuer-uri`:: Issuer identifier of the provider.
