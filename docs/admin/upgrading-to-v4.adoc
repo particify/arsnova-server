@@ -103,8 +103,9 @@ problem and close to undiagnosable from the logs.
 `core4` reads an optional configuration file from `core4-config/application.yaml`, mounted into the
 container at `/etc/arsnova/core4/`.
 It exists because some settings cannot be expressed as environment variables at all:
-LDAP and SAML registrations are keyed by UUID, and relaxed binding cannot recover the hyphens from a
-variable name, while `ui.*` keys are camelCase and lose their capitalisation the same way.
+LDAP, OpenID Connect and SAML registrations are keyed by UUID,
+and relaxed binding cannot recover the hyphens from a variable name,
+while `ui.*` keys are camelCase and lose their capitalisation the same way.
 
 Four properties are required and have no default, so `core4` will not start until the file supplies
 them:
@@ -149,6 +150,7 @@ Do not carry them into the v3 core's file.
 |`arsnova.security.jwt.server-id` |`security.jwt.issuer`
 |`arsnova.security.login-try-limit` |`security.login.attempt-limit`
 |`arsnova.security.authentication-providers.ldap[0].*` |`security.ldap.registration.<uuid>.*`
+|`arsnova.security.authentication-providers.oidc[0].*` |`security.oidc.registration.<uuid>.*`
 |`arsnova.security.authentication-providers.saml.*` |`security.saml2.relyingparty.registration.<uuid>.*`
 |`arsnova.security.authentication-providers.*.allowed-roles` |`security.room-creator-role.auto-assign-to`
 |`arsnova.security.authentication-providers.registered.enabled` |`security.local-account.enabled`
@@ -213,11 +215,11 @@ curl -sg -u <user>:<password> \
 ----
 
 `<provider>` is the `authProvider` of the configured entry, spelled as v3 spelled it: `ARSNOVA`
-for a local account, or `LDAP` or `SAML`.
-A `CAS` or `OIDC` entry is not worth the lookup -- those accounts are imported but have no way to
-log in under v4, as below, so the role would be granted to an account nobody can reach.
-An installation whose administrators were all CAS or OIDC accounts needs a new one under a provider
-v4 still supports, and the version 3 stack has to be up to create it.
+for a local account, or `LDAP`, `OIDC` or `SAML`.
+A `CAS` entry is not worth the lookup -- those accounts are imported but have no way to log in
+under v4, as below, so the role would be granted to an account nobody can reach.
+An installation whose administrators were all CAS accounts needs a new one under a provider v4
+still supports, and the version 3 stack has to be up to create it.
 
 `allowed-roles` did not survive as a per-provider list.
 v4 decides by the account's verified state rather than by the provider it was created through,
@@ -231,7 +233,7 @@ Note also that v4 enforces the setting on the server; in v3 only the web client 
 Some settings have no v4 equivalent and are simply gone: the guest provider can no longer be
 disabled, its title is fixed and the local provider's follows `service.product-name`, registration
 and password-reset mail texts are message bundles rather than configuration, `arsnova.templates.*`
-was replaced by `mail.*-uri-pattern` with **different placeholders**, and CAS and OIDC accounts are
+was replaced by `mail.*-uri-pattern` with **different placeholders**, and CAS accounts are
 imported but cannot be used to log in.
 `arsnova.system.read-only` still works for the v3 core and the Q&A service, but `core4` has no
 read-only mode, so a read-only installation is only partly read-only under v4.
@@ -446,6 +448,49 @@ Once it is known to have refreshed, drop `acs.location` and `metadata-path` and 
 `decryption.credentials` is a choice rather than a leftover:
 keeping it keeps the encryption key in the published metadata,
 and assertions encrypted.
+
+=== OIDC
+
+v3 configured a single provider as a list entry, v4 keys it by UUID like the other registrations:
+
+[source,yaml]
+----
+security:
+  oidc:
+    registration:
+      a7313d3a-1a45-474a-897d-fb7e26efb0db:
+        issuer-uri: https://idp.example.com/realms/example
+        client-id: arsnova
+        client-secret: secret
+        title: OIDC
+        username-mapping: ID
+----
+
+`issuer` became `issuer-uri` and `secret` became `client-secret`; `client-id`, `title` and `order`
+keep their names.
+`issuer-uri` has to be exactly the issuer the provider's discovery document names,
+trailing slash included, where v3 only appended the discovery path to it;
+a mismatch shows only at the first login.
+The same UUID has to appear under `persistence.v3-migration.authentication-provider-mapping.OIDC`,
+and the migrated accounts are found again because v3 keyed them on the `sub` claim as well.
+
+`username-mapping` has to be set explicitly, as for SAML:
+v3's `security.user-display-id-attribute` applied to OIDC accounts too, and its default `loginId`
+was the `sub` claim, while v4's per-registration default is the mail address.
+Omitting it changes the public display ID of every OIDC user,
+and a username the data migration writes is permanent.
+
+**v3's callback URL is not served any more.**
+Register `https://app.example.com/api/login/oauth2/code/<uuid>` as a redirect URI with the provider
+before switching over;
+it has to name the registration's UUID.
+
+v3 requested only the `openid` scope and imported the `email` claim without asking whether the
+provider had verified it.
+v4 requests `email` and `profile` as well, and by default ignores an address the provider does not
+mark as verified, see link:../development/sso.adoc[].
+A provider which never sends `email_verified`, such as Microsoft Entra ID, needs
+`require-verified-mail-address: false` to import addresses at all.
 
 == Gateway
 

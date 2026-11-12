@@ -17,8 +17,8 @@ external login.
 The user ID is read from the directory rather than taken from the submitted username, so it stays
 stable no matter which case a user typed.
 It also becomes the account's username, which is what makes the account verified.
-There is deliberately no option to use the mail address instead, as there is for SAML
-(link:sso.adoc[]):
+There is deliberately no option to use the mail address instead,
+as there is for SAML and OpenID Connect (link:sso.adoc[]):
 a directory always has a dedicated user ID attribute, and `user-id-attribute` already selects which
 one that is.
 Two consequences follow from that, and neither of them fails the login:
@@ -28,6 +28,8 @@ and a mail address which is already in use is not imported.
 == Configuration
 
 Registrations are keyed by a UUID, which is also the provider ID sent on login.
+It has to differ from the ID of every other LDAP, SAML and OpenID Connect registration,
+and the application refuses to start otherwise.
 An empty map -- the default -- disables LDAP, so nothing has to be configured to keep it off.
 
 [source,yaml]

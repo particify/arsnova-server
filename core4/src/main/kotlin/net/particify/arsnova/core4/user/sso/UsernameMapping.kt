@@ -3,16 +3,16 @@
  */
 package net.particify.arsnova.core4.user.sso
 
-/** Which asserted value becomes the username of an account authenticated through SAML. */
+/** Which asserted value becomes the username of an account authenticated through single sign-on. */
 enum class UsernameMapping {
   ID,
   MAIL_ADDRESS,
 }
 
 /**
- * Determines the username for a SAML user, or `null` if the mapped value is not available. The
- * value is lowercased because usernames are looked up lowercased, both as a display ID and on
- * login.
+ * Determines the username for a single sign-on user, or `null` if the mapped value is not
+ * available. The value is lowercased because usernames are looked up lowercased, both as a display
+ * ID and on login.
  */
 internal fun resolveUsername(
     mapping: UsernameMapping,

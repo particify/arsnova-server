@@ -14,6 +14,15 @@ security:
     secret: weaksecret1234567890123456789012
   challenge:
     secret: weaksecret1234567890123456789012
+  oidc:
+    registration:
+      a7313d3a-1a45-474a-897d-fb7e26efb0db:
+        # Keycloak derives the issuer from the requested host, so browser and backend have to reach
+        # it under the same name.
+        issuer-uri: http://keycloak:8080/realms/dev
+        client-id: arsnova-dev-oidc
+        client-secret: weak-dev-oidc-secret
+        title: Keycloak (OIDC)
   saml2:
     # credentials-path is only used in dev environment to simplify overriding with environment variables.
     credentials-path: file:credentials
@@ -36,6 +45,7 @@ security:
 persistence:
   v3-migration:
     authentication-provider-mapping:
+      OIDC: a7313d3a-1a45-474a-897d-fb7e26efb0db
       SAML: fc62cd95-bea9-4aa3-987d-fa976ef300f3
 
 mail:

@@ -49,6 +49,28 @@
   },
   "clients": [
     {
+      "id": "5d1e7f3a-9c2b-4e8d-a6f4-0b3c5d7e9f12",
+      "clientId": "arsnova-dev-oidc",
+      "name": "arsnova (OIDC)",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "weak-dev-oidc-secret",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "https://apisix:9443/api/login/oauth2/code/a7313d3a-1a45-474a-897d-fb7e26efb0db",
+        "https://localhost:9443/api/login/oauth2/code/a7313d3a-1a45-474a-897d-fb7e26efb0db"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": ["basic", "email", "profile"]
+    },
+    {
       "id": "cb6d2c8c-7122-49c7-a677-61c4e38cf26d",
       "clientId": "http://arsnova-server-core4:8080/api/saml2/service-provider-metadata/fc62cd95-bea9-4aa3-987d-fa976ef300f3",
       "redirectUris": [

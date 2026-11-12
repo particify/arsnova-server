@@ -4,9 +4,8 @@
 package net.particify.arsnova.core4.user
 
 import net.particify.arsnova.core4.TestcontainersConfiguration
+import net.particify.arsnova.core4.user.internal.ExternalLoginProvisioningService
 import net.particify.arsnova.core4.user.internal.UserRepository
-import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
-import net.particify.arsnova.core4.user.sso.Saml2ResponseAuthenticationConverter
 import net.particify.arsnova.core4.user.sso.UsernameMapping
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -16,7 +15,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
 /**
- * Covers the account provisioning of the SAML converter. Driving the conversion itself would mean
+ * Covers the account provisioning behind SAML logins. Driving the conversion itself would mean
  * fabricating a signed response, so the two steps which touch the unique columns are exercised
  * directly.
  */
@@ -24,20 +23,20 @@ import org.springframework.test.context.ActiveProfiles
 @ActiveProfiles("test")
 @Import(TestcontainersConfiguration::class)
 class Saml2UserProvisioningTests {
-  @Autowired lateinit var converter: Saml2ResponseAuthenticationConverter
+  @Autowired lateinit var provisioning: ExternalLoginProvisioningService
   @Autowired lateinit var userRepository: UserRepository
 
   @Test
   fun shouldAssignMailAddressAsUsername() {
     val user = User(mailAddress = "Saml.Mail.Mapping@example.com")
-    converter.assignUsername(user, registration(UsernameMapping.MAIL_ADDRESS), "Subject-1")
+    provisioning.assignUsername(user, UsernameMapping.MAIL_ADDRESS, "Subject-1")
     Assertions.assertEquals("saml.mail.mapping@example.com", user.username)
   }
 
   @Test
   fun shouldAssignLowercasedIdAsUsername() {
     val user = User(mailAddress = "saml.id.mapping@example.com")
-    converter.assignUsername(user, registration(UsernameMapping.ID), "Saml-Subject-2")
+    provisioning.assignUsername(user, UsernameMapping.ID, "Saml-Subject-2")
     Assertions.assertEquals("saml-subject-2", user.username)
   }
 
@@ -46,7 +45,7 @@ class Saml2UserProvisioningTests {
   fun shouldLeaveUserUnverifiedWithoutMailAddress() {
     val user = User()
     Assertions.assertDoesNotThrow {
-      converter.assignUsername(user, registration(UsernameMapping.MAIL_ADDRESS), "Subject-3")
+      provisioning.assignUsername(user, UsernameMapping.MAIL_ADDRESS, "Subject-3")
     }
     Assertions.assertNull(user.username)
   }
@@ -55,7 +54,7 @@ class Saml2UserProvisioningTests {
   @Test
   fun shouldLeaveUserUnverifiedWithInvalidMailAddress() {
     val user = User(mailAddress = "saml.invalid.username@example.com>")
-    converter.assignUsername(user, registration(UsernameMapping.MAIL_ADDRESS), "Subject-4")
+    provisioning.assignUsername(user, UsernameMapping.MAIL_ADDRESS, "Subject-4")
     Assertions.assertNull(user.username)
   }
 
@@ -64,14 +63,14 @@ class Saml2UserProvisioningTests {
     val taken = "saml-username-collision"
     userRepository.save(User(username = taken))
     val user = User()
-    converter.assignUsername(user, registration(UsernameMapping.ID), taken)
+    provisioning.assignUsername(user, UsernameMapping.ID, taken)
     Assertions.assertNull(user.username)
   }
 
   @Test
   fun shouldImportMailAddress() {
     val user = User()
-    converter.updateMailAddress(user, "Saml.Import@example.com")
+    provisioning.updateMailAddress(user, "Saml.Import@example.com")
     Assertions.assertEquals("saml.import@example.com", user.mailAddress)
   }
 
@@ -80,7 +79,7 @@ class Saml2UserProvisioningTests {
   fun shouldNotImportInvalidMailAddress() {
     val stored = "saml-invalid-import@example.com"
     val user = User(mailAddress = stored)
-    converter.updateMailAddress(user, "'Saml Import' <saml-invalid-import@example.net>")
+    provisioning.updateMailAddress(user, "'Saml Import' <saml-invalid-import@example.net>")
     Assertions.assertEquals(stored, user.mailAddress)
   }
 
@@ -93,7 +92,7 @@ class Saml2UserProvisioningTests {
     val taken = "saml-mail-collision@example.com"
     userRepository.save(User(mailAddress = taken))
     val user = User()
-    converter.updateMailAddress(user, taken)
+    provisioning.updateMailAddress(user, taken)
     Assertions.assertNull(user.mailAddress)
   }
 
@@ -105,7 +104,7 @@ class Saml2UserProvisioningTests {
   fun shouldKeepOwnMailAddressOnRepeatedLogin() {
     val own = "saml-repeated-login@example.com"
     val user = userRepository.save(User(mailAddress = own))
-    converter.updateMailAddress(user, own)
+    provisioning.updateMailAddress(user, own)
     Assertions.assertEquals(own, user.mailAddress)
   }
 
@@ -117,13 +116,7 @@ class Saml2UserProvisioningTests {
   fun shouldKeepStoredMailAddressWithoutAssertedAddress() {
     val stored = "saml-missing-attribute@example.com"
     val user = User(mailAddress = stored)
-    converter.updateMailAddress(user, null)
+    provisioning.updateMailAddress(user, null)
     Assertions.assertEquals(stored, user.mailAddress)
-  }
-
-  private fun registration(usernameMapping: UsernameMapping): ExtendedRegistration {
-    val registration = ExtendedRegistration()
-    registration.usernameMapping = usernameMapping
-    return registration
   }
 }

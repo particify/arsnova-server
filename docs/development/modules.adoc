@@ -21,7 +21,7 @@ so a module boundary is enforced by a test rather than by convention alone.
 |The catalogue of licences that shared content is published under, such as templates of question series.
 
 |`user`
-|Accounts, roles, local accounts and their policy, and provisioning of accounts from SAML and LDAP logins.
+|Accounts, roles, local accounts and their policy, and provisioning of accounts from SAML, OpenID Connect and LDAP logins.
 
 |`security`
 |Authentication, the tokens issued to clients and other services, method security, and the permission contract the domain modules implement.
@@ -83,7 +83,7 @@ Two details of that list are easy to miss:
 * A named interface publishes a sub-package or single types as a contract:
 ** `events` in `user`, `room`, `qna`, `announcement` and `questionnaire`
    for the module's domain events,
-** `user::sso` for the SAML and LDAP configuration and provisioning types
+** `user::sso` for the SAML, OpenID Connect and LDAP configuration and provisioning types
    that `security` builds on,
 ** `security::permission` for the permission contract,
    the only part of `security` the domain modules may use.

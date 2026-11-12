@@ -11,6 +11,7 @@ import net.particify.arsnova.core4.user.MailAddressValidation
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties.ExtendedRegistration
+import net.particify.arsnova.core4.user.sso.OidcProperties
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -127,13 +128,12 @@ class AuthProviderMigratorTests {
    * Without the registration the username mapping is unknown, and a guessed username would be
    * permanent, so the account is skipped instead.
    */
-  @Test
-  fun shouldSkipSamlProviderWithoutRegistration() {
+  @ParameterizedTest
+  @EnumSource(UserProfile.AuthProvider::class, names = ["OIDC", "SAML"])
+  fun shouldSkipProviderWithoutRegistration(authProvider: UserProfile.AuthProvider) {
     val user = newUser(MIXED_CASE_LOGIN_ID)
-    val migrator = migrator(registrations = mapOf())
-    val migrated =
-        migrator.migrateIdentity(
-            user, userProfile(UserProfile.AuthProvider.SAML, MIXED_CASE_LOGIN_ID))
+    val migrator = migrator(registrations = mapOf(), oidcRegistrations = mapOf())
+    val migrated = migrator.migrateIdentity(user, userProfile(authProvider, MIXED_CASE_LOGIN_ID))
     Assertions.assertFalse(migrated)
     Assertions.assertTrue(user.externalLogins.isEmpty())
   }
@@ -152,7 +152,12 @@ class AuthProviderMigratorTests {
       providerMapping: Map<String, UUID> =
           PROVIDER_IDS.entries.associate { it.key.name to it.value },
       registrations: Map<UUID, ExtendedRegistration> =
-          mapOf(PROVIDER_IDS.getValue(UserProfile.AuthProvider.SAML) to ExtendedRegistration())
+          mapOf(PROVIDER_IDS.getValue(UserProfile.AuthProvider.SAML) to ExtendedRegistration()),
+      oidcRegistrations: Map<UUID, OidcProperties.Registration> =
+          mapOf(
+              PROVIDER_IDS.getValue(UserProfile.AuthProvider.OIDC) to
+                  OidcProperties.Registration(
+                      issuerUri = "https://idp.invalid", clientId = "client"))
   ) =
       AuthProviderMigrator(
           MigrationProperties(
@@ -163,6 +168,7 @@ class AuthProviderMigratorTests {
               roomAccessUrl = URI.create("http://authz.invalid"),
               authenticationProviderMapping = providerMapping),
           ExtendedSaml2RelyingPartyProperties(registrations),
+          OidcProperties(oidcRegistrations),
           MailAddressValidation(Validation.buildDefaultValidatorFactory().validator))
 
   /** Mirrors how [Migrator] populates an account before the provider rules are applied. */

@@ -82,6 +82,7 @@ spring-modulith-test = { module = "org.springframework.modulith:spring-modulith-
 spring-security = { module = "org.springframework.boot:spring-boot-starter-security" }
 spring-security-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }
 spring-security-ldap = { module = "org.springframework.security:spring-security-ldap" }
+spring-security-oauth2-client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
 spring-security-saml = { module = "org.springframework.boot:spring-boot-starter-security-saml2" }
 spring-security-test = { module = "org.springframework.security:spring-security-test" }
 spring-test = { module = "org.springframework.boot:spring-boot-starter-test" }

@@ -91,7 +91,7 @@ Example: `PORT=8100 ./particifyctl run`
 
 Some settings cannot be expressed as environment variables, because Spring's relaxed binding cannot
 recover a UUID's hyphens or a camelCase key from a variable name.
-LDAP and SAML registrations and the `ui.*` settings are therefore configured in
+LDAP, OpenID Connect and SAML registrations and the `ui.*` settings are therefore configured in
 `core4-config/application.yaml`, which is mounted into the `core4` container.
 
 `core4` requires `mail.sender-address`, `mail.sender-name` and `service.root-url`, none of which
@@ -169,6 +169,7 @@ then run `./particifyctl update-gateway` followed by `./particifyctl update-conf
 The gateway otherwise reports the request to the services as plaintext,
 because it replaces `X-Forwarded-Proto` with its own scheme,
 and every URL they generate then names `http` -- SAML endpoints, published service metadata,
+the OpenID Connect redirect URI, which the provider then rejects as unregistered,
 and the origin a WebSocket handshake is checked against.
 `HTTPS_PORT` in this arrangement names the port the front proxy serves rather than one the gateway
 listens on.
