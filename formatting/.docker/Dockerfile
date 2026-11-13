@@ -1,4 +1,4 @@
-FROM node:24.22.2-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8 AS build
+FROM node:26.13.0-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS build
 
 ARG COREPACK_VERSION
 
@@ -11,7 +11,7 @@ COPY package.json yarn.lock .yarnrc.yml ./
 
 RUN yarn workspaces focus --production
 
-FROM node:24.22.2-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8
+FROM node:26.13.0-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94
 
 ENV BUILD_DIR=lib
 ENV NODE_ENV=production
