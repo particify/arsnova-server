@@ -1,6 +1,9 @@
 variables:
   BUILD_DIR: lib
+  # renovate: datasource=npm depName=corepack
+  COREPACK_VERSION: 0.36.0
   YARN_CACHE_FOLDER: .yarn-cache
+  YARN_ENABLE_GLOBAL_CACHE: "false"
 
 # Override rules from parent CI config
 workflow:
@@ -14,6 +17,8 @@ default:
     - echo "$PROJECT"
     - cd "$PROJECT"
     - export PATH="`pwd`/node_modules/.bin:$PATH"
+    - npm install --global "corepack@$COREPACK_VERSION"
+    - corepack enable
     - date
   after_script:
     - date
@@ -42,7 +47,7 @@ yarn_populate_cache:
   script:
     - echo Populating cache...
     - umask 0000
-    - yarn --frozen-lockfile
+    - yarn install --immutable
 
 yarn_install:
   stage: .pre
@@ -55,7 +60,7 @@ yarn_install:
     policy: pull
   script:
     - umask 0000
-    - yarn --frozen-lockfile
+    - yarn install --immutable
 
 eslint:
   stage: test
@@ -67,11 +72,13 @@ eslint:
 
 docker_image:
   stage: deploy
-  dependencies:
-    - yarn_install
+  dependencies: []
   image:
     name: gcr.io/kaniko-project/executor:debug@sha256:2562c4fe551399514277ffff7dcca9a3b1628c4ea38cb017d7286dc6ea52f4cd
     entrypoint: [""]
+  # The default before_script needs npm, which the Kaniko image lacks.
+  before_script:
+    - date
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: on_success
@@ -94,3 +101,4 @@ docker_image:
       --dockerfile "$KANIKO_DOCKERFILE"
       --destination "$DOCKER_IMAGE:$DOCKER_TAG"
       --build-arg "BUILD_DIR=`echo $BUILD_DIR`"
+      --build-arg "COREPACK_VERSION=`echo $COREPACK_VERSION`"

@@ -20,6 +20,9 @@ application-local.yaml
 build/
 
 # Node.js/NPM/Yarn
+**/.yarn/*
+!**/.yarn/patches
+!**/.yarn/versions
 node_modules/
 npm-debug.log*
 yarn-debug.log*
