@@ -52,9 +52,7 @@ build_project:
           - "gradle/**/*"
           - "platform/**/*"
           - "$PROJECT/**/*"
-        # GitLab does not support variables in compare_to (tested against 15.5)
-        #compare_to: $CI_DEFAULT_BRANCH
-        compare_to: master
+        compare_to: "3.x"
       when: on_success
     - if: $CI_PIPELINE_SOURCE == "web"
       when: manual
