@@ -20,8 +20,11 @@ package net.particify.arsnova.core.persistence.couchdb.migrations;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonView;
 import java.util.HashMap;
 import java.util.Map;
+
+import net.particify.arsnova.core.model.serialization.View;
 
 /**
  * This abstract class should be implemented by inner classes of
@@ -40,11 +43,13 @@ public abstract class InnerMigrationEntity {
   }
 
   @JsonAnySetter
+  @JsonView(View.Persistence.class)
   public void setProperty(final String key, final Object value) {
     properties.put(key, value);
   }
 
   @JsonAnyGetter
+  @JsonView(View.Persistence.class)
   public Map<String, Object> getProperties() {
     return properties;
   }

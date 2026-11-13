@@ -97,11 +97,13 @@ public abstract class MigrationEntity {
   }
 
   @JsonAnySetter
+  @JsonView(View.Persistence.class)
   public void setProperty(final String key, final Object value) {
     properties.put(key, value);
   }
 
   @JsonAnyGetter
+  @JsonView(View.Persistence.class)
   public Map<String, Object> getProperties() {
     return properties;
   }
