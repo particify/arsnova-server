@@ -23,6 +23,8 @@ spring.datasource.password=arsnovacomment
 spring.jpa.hibernate.ddl-auto=validate
 spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.PostgreSQLDialect
 
+spring.jackson.deserialization.fail-on-null-for-primitives=false
+
 security.jwt.secret=secret
 
 spring.flyway.baselineOnMigrate=true
