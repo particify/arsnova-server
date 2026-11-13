@@ -25,9 +25,11 @@ import java.util.Map;
 
 import net.particify.arsnova.core.model.serialization.View;
 
-@JsonView(View.Admin.class)
+// Security: While only intended to be accessed with ROLE_ADMIN,
+// using the Public.class view is fine here because the whole endpoint is restricted.
+@JsonView(View.Public.class)
 public class Statistics {
-  @JsonView(View.Admin.class)
+  @JsonView(View.Public.class)
   public static class UserProfileStats {
     private int totalCount;
 
@@ -81,7 +83,7 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Admin.class)
+  @JsonView(View.Public.class)
   public static class RoomStats {
     private int totalCount;
 
@@ -117,7 +119,7 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Admin.class)
+  @JsonView(View.Public.class)
   public static class ContentGroupStats {
     private int totalCount;
 
@@ -180,7 +182,7 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Admin.class)
+  @JsonView(View.Public.class)
   public static class ContentStats {
     private int totalCount;
 
@@ -225,7 +227,7 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Admin.class)
+  @JsonView(View.Public.class)
   public static class ContentGroupTemplateStats {
     private int totalCount;
 
@@ -270,7 +272,7 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Admin.class)
+  @JsonView(View.Public.class)
   public static class ContentTemplateStats {
     private int totalCount;
 
@@ -296,7 +298,7 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Admin.class)
+  @JsonView(View.Public.class)
   public static class AnswerStats {
     private int totalCount;
 
@@ -332,7 +334,7 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Admin.class)
+  @JsonView(View.Public.class)
   public static class AnnouncementStats {
     private int totalCount;
 
@@ -359,7 +361,7 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Admin.class)
+  @JsonView(View.Public.class)
   public static class ViolationReportStats {
     private int totalCount;
 
