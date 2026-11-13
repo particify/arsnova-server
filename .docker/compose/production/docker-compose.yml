@@ -1,7 +1,7 @@
 version: "3"
 services:
   couchdb:
-    image: particify/couchdb:3.5@sha256:12486b4e09af3d37598bacae7d945c7d911370b6a3f027516979af0e5fe31014
+    image: particify/couchdb:3.5@sha256:683c26a7d8ce6f44cb858e2ca4da82a4b5af90c1227887711f756098840ac397
     environment:
       COUCHDB_USER: arsnova
       COUCHDB_PASSWORD: arsnova
@@ -24,7 +24,7 @@ services:
     volumes:
       - postgresql_data_comment:/var/lib/postgresql/data
   rabbitmq:
-    image: particify/rabbitmq-stomp:4.3-alpine@sha256:01451bf27e28206d617912a1f14055f89e9f0253b7cd8bfa0b7ac8d911c60617
+    image: particify/rabbitmq-stomp:4.3-alpine@sha256:c57eb6705ed4a7764e2f5f4738d085d12c582a071dcfc8152629066230d7c6ba
     environment:
       RABBITMQ_NODENAME: rabbit@localhost
     volumes:
@@ -138,7 +138,7 @@ services:
     environment:
       SERVER_PORT: 3000
   arsnova-proxy:
-    image: particify/arsnova-proxy:3@sha256:f431909169b6306f5ace6d876944a94a3747b594f229bc3e956f6b2e7382c0bc
+    image: particify/arsnova-proxy:3@sha256:b869b150c1af4cfe85ee92025647da23174b2064e6f1bbe3c7fe6d60d36a0c04
     depends_on:
       - arsnova-backend-core
       - arsnova-auth-service
