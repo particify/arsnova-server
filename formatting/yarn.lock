@@ -10,9 +10,9 @@
     eslint-visitor-keys "^3.4.3"
 
 "@eslint-community/regexpp@^4.11.0", "@eslint-community/regexpp@^4.12.1":
-  version "4.12.2"
-  resolved "https://registry.yarnpkg.com/@eslint-community/regexpp/-/regexpp-4.12.2.tgz#bccdf615bcf7b6e8db830ec0b8d21c9a25de597b"
-  integrity sha512-EriSTlt5OC9/7SXkRSCAhfSxxoSUgBm33OH+IkwbdpgoqsSsUg7y3uh+IICI/Qg4BBWr3U2i39RpmycbxMq4ew==
+  version "4.12.3"
+  resolved "https://registry.yarnpkg.com/@eslint-community/regexpp/-/regexpp-4.12.3.tgz#332c2660e7dd03ce7017ea3354123fb19b21cdd6"
+  integrity sha512-R76UKbvsqI68DJJVTVyqFKqU98CN4+B+acxNfEA2IFarSzP0SjtKf/3+fFiXzTyv5Fj3PxLkGHe2wnVWWMxobQ==
 
 "@eslint/config-array@^0.21.0":
   version "0.21.2"
@@ -267,9 +267,9 @@ body-parser@^2.2.0:
     type-is "^2.1.0"
 
 brace-expansion@^1.1.7:
-  version "1.1.21"
-  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.21.tgz#edf4fab5c64d051aea5a8def49aba1c7522279f3"
-  integrity sha512-9zeA+KLZNNzglF2TPKRQEDyx6Yby7daAkuy8MiPzpXPsYDWi/DRM8jmwUDxokQjYqBpv5DgPiwD4h4ZZSy1Ujw==
+  version "1.1.22"
+  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.22.tgz#82f87655acd0bae5c8a717bb0a81573e43ab42c0"
+  integrity sha512-CKLDTuSsN0+r1ThM0WkzzBI7dnPI6xEGfa/JnVYIK9JNBA1N1NyPwXVHor//NKD/y3sDxp764sZdLhFK7pH8XQ==
   dependencies:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
@@ -465,14 +465,14 @@ ee-first@1.1.1:
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
 encodeurl@^2.0.0:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-2.0.1.tgz#f268548822bd87b5b4fdce83c56388c6d33c9de6"
-  integrity sha512-Ev/hIyePLZtpL98x562lvPtenrUfGr0lfaf44HFZ+hDEwso7ccV9QAZrEVLg0hxNAzygaAFxy2dYaAKKM0G06A==
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-2.0.3.tgz#d3895ecc5f498ae0b8840bcf670e1fcaf519f44d"
+  integrity sha512-mIteYONiEfc4xWf2F1WXovh1c8npzS00vNeiUPdwFF+QlVJni+gNvpQltLMQhob8rew/bWWc/bGTuUr0EUGt0w==
 
 enhanced-resolve@^5.17.1:
-  version "5.26.1"
-  resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-5.26.1.tgz#444213a1efe5be80c1c2ae045aa0fd14269ee07f"
-  integrity sha512-PPnnSJq3azKOIewXR/uppBV/6h98dprBJ/WaQ9Qgj10xX1lJLNfg+XShpbsrSqcDSy2yYYyhfXM1wWhftqgyzw==
+  version "5.27.0"
+  resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-5.27.0.tgz#5a5b25b79e79500f3710995c7a50cabe08fdcdb1"
+  integrity sha512-Do6BB2xzlcc/odFg+XEYyneAx4T/WfywO71yw9ePS2tVfRsf7JVR4mUeELadIeHzixkzbG5DpluiEFPi2WGfYQ==
   dependencies:
     graceful-fs "^4.2.4"
     tapable "^2.3.3"
@@ -995,9 +995,9 @@ gopd@^1.0.1, gopd@^1.2.0:
   integrity sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==
 
 graceful-fs@^4.2.4:
-  version "4.2.11"
-  resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.11.tgz#4183e4e8bf08bb6e05bbb2f7d2e0c8f712ca40e3"
-  integrity sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==
+  version "4.2.12"
+  resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.12.tgz#7f6162dee07bc600281cea1b038e5f7cf215a6c2"
+  integrity sha512-iuyGF2E4oafQfPsRrG2wtY2ILupMhvtdrhzrxB+0VcjsPpSPttpfYdjnGFGsTi5MaJFjI1jOKHPQ6UTbTj9TAw==
 
 has-bigints@^1.0.2:
   version "1.1.0"
