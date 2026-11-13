@@ -1,8 +1,5 @@
 package net.particify.arsnova.comments.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,8 +12,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.databind.json.JsonMapper;
 
 import net.particify.arsnova.comments.exception.BadRequestException;
 import net.particify.arsnova.comments.model.Comment;
@@ -32,18 +31,18 @@ public class CommentService {
   final CommentRepository repository;
   final VoteRepository voteRepository;
   final VoteService voteService;
-  private ObjectMapper objectMapper;
+  private JsonMapper jsonMapper;
 
   @Autowired
   public CommentService(
       CommentRepository repository,
       VoteRepository voteRepository,
       VoteService voteService,
-      ObjectMapper objectMapper) {
+      JsonMapper jsonMapper) {
     this.repository = repository;
     this.voteRepository = voteRepository;
     this.voteService = voteService;
-    this.objectMapper = objectMapper;
+    this.jsonMapper = jsonMapper;
   }
 
   public Comment get(UUID id) {
@@ -97,8 +96,8 @@ public class CommentService {
       throw new BadRequestException("Tried changing an archived comment.");
     }
     Object obj = propertyGetter.apply(entity);
-    ObjectReader reader = objectMapper.readerForUpdating(obj);
-    JsonNode tree = objectMapper.valueToTree(changes);
+    ObjectReader reader = jsonMapper.readerForUpdating(obj);
+    JsonNode tree = jsonMapper.valueToTree(changes);
     reader.readValue(tree);
     final Comment patchedEntity = repository.save(entity);
 
@@ -111,7 +110,7 @@ public class CommentService {
 
   public Iterable<Comment> patch(final Iterable<Comment> entities, final Map<String, Object> changes,
                final Function<Comment, ? extends Object> propertyGetter) throws IOException {
-    final JsonNode tree = objectMapper.valueToTree(changes);
+    final JsonNode tree = jsonMapper.valueToTree(changes);
     for (Comment entity : entities) {
       // Archived comments should not be changed anymore
       if (entity.getArchiveId() != null) {
@@ -119,7 +118,7 @@ public class CommentService {
         throw new BadRequestException("Tried changing an archived comment.");
       }
       Object obj = propertyGetter.apply(entity);
-      ObjectReader reader = objectMapper.readerForUpdating(obj);
+      ObjectReader reader = jsonMapper.readerForUpdating(obj);
       reader.readValue(tree);
     }
 

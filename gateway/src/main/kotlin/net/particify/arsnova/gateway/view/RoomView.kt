@@ -27,7 +27,7 @@ class RoomView(
   fun getSummaries(roomIds: List<String>): Flux<Optional<RoomSummary>> =
     authProcessor
       .getAuthentication()
-      .map { authentication ->
+      .mapNotNull { authentication ->
         authentication.credentials
       }.cast(String::class.java)
       .flatMapMany { jwt: String ->

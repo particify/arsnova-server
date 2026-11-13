@@ -7,7 +7,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import tools.jackson.databind.json.JsonMapper;
 
 import net.particify.arsnova.comments.model.Comment;
 import net.particify.arsnova.comments.model.Vote;
@@ -38,13 +37,13 @@ public class CommentServiceTest {
   VoteService voteService;
 
   @Mock
-  ObjectMapper objectMapper;
+  JsonMapper jsonMapper;
 
   private CommentService service;
 
   @BeforeEach
   public void setup() {
-    service = new CommentService(repository, voteRepository, voteService, objectMapper);
+    service = new CommentService(repository, voteRepository, voteService, jsonMapper);
   }
 
   @Test

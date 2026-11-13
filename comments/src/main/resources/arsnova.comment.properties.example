@@ -30,6 +30,6 @@ spring.flyway.baselineOnMigrate=true
 # RabbitMQ DLQ config
 spring.rabbitmq.listener.simple.retry.enabled=true
 spring.rabbitmq.listener.simple.retry.initial-interval=3s
-spring.rabbitmq.listener.simple.retry.max-attempts=3
+spring.rabbitmq.listener.simple.retry.max-retries=2
 spring.rabbitmq.listener.simple.retry.max-interval=10s
 spring.rabbitmq.listener.simple.retry.multiplier=2

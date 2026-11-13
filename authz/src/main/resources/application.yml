@@ -34,7 +34,7 @@ spring:
         retry:
           enabled: true
           initial-interval: 3s
-          max-attempts: 3
+          max-retries: 2
           max-interval: 10s
           multiplier: 2
 security:

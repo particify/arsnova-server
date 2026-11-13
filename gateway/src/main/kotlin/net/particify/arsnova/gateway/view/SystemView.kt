@@ -31,7 +31,7 @@ class SystemView(
       .filter { authentication: Authentication ->
         authProcessor.isAdminOrMonitoring(authentication)
       }.switchIfEmpty(Mono.error(ForbiddenException()))
-      .map { authentication ->
+      .mapNotNull { authentication ->
         authentication.credentials
       }.cast(String::class.java)
       .flatMap { jwt ->
@@ -51,7 +51,7 @@ class SystemView(
       .filter { authentication: Authentication ->
         authProcessor.isAdminOrMonitoring(authentication)
       }.switchIfEmpty(Mono.error(ForbiddenException()))
-      .map { authentication ->
+      .mapNotNull { authentication ->
         authentication.credentials
       }.cast(String::class.java)
       .flatMap { jwt ->

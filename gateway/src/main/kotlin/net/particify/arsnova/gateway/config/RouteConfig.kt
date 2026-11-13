@@ -79,7 +79,7 @@ class RouteConfig(
             ).filters { f ->
               f.filter(authFilter.apply(AuthFilter.Config()))
               f.requestRateLimiter { r ->
-                r.rateLimiter = requestRateLimiter
+                r.setRateLimiter(requestRateLimiter)
               }
             }.uri(httpGatewayProperties.routing.endpoints.commentService)
         },
@@ -89,7 +89,7 @@ class RouteConfig(
             .filters { f ->
               f.filter(addMembershipFilter.apply(AddMembershipFilter.Config()))
               f.requestRateLimiter { r ->
-                r.rateLimiter = requestRateLimiter
+                r.setRateLimiter(requestRateLimiter)
               }
             }.uri(httpGatewayProperties.routing.endpoints.core)
         },
@@ -101,7 +101,7 @@ class RouteConfig(
               f.filter(authFilter.apply(AuthFilter.Config()))
               f.filter(removeMembershipFilter.apply(RemoveMembershipFilter.Config()))
               f.requestRateLimiter { r ->
-                r.rateLimiter = requestRateLimiter
+                r.setRateLimiter(requestRateLimiter)
               }
             }.uri(httpGatewayProperties.routing.endpoints.core)
         },
@@ -114,7 +114,7 @@ class RouteConfig(
             ).filters { f ->
               f.filter(authFilter.apply(AuthFilter.Config()))
               f.requestRateLimiter { r ->
-                r.rateLimiter = requestRateLimiter
+                r.setRateLimiter(requestRateLimiter)
               }
             }.uri(httpGatewayProperties.routing.endpoints.core)
         },
@@ -125,7 +125,7 @@ class RouteConfig(
               f.filter(roomShortIdFilter.apply(RoomShortIdFilter.Config()))
               f.filter(authFilter.apply(AuthFilter.Config(false)))
               f.requestRateLimiter { r ->
-                r.rateLimiter = requestRateLimiter
+                r.setRateLimiter(requestRateLimiter)
               }
             }.uri(httpGatewayProperties.routing.endpoints.core)
         },
@@ -135,7 +135,7 @@ class RouteConfig(
             .filters { f ->
               f.filter(roomCreationAuthFilter.apply(AddRoomCreatorAccessFilter.Config()))
               f.requestRateLimiter { r ->
-                r.rateLimiter = requestRateLimiter
+                r.setRateLimiter(requestRateLimiter)
               }
             }.uri(httpGatewayProperties.routing.endpoints.core)
         },
@@ -149,7 +149,7 @@ class RouteConfig(
               f.filter(authFilter.apply(AuthFilter.Config()))
               f.filter(roomAuthFilter.apply(UpdateRoomAccessFilter.Config()))
               f.requestRateLimiter { r ->
-                r.rateLimiter = requestRateLimiter
+                r.setRateLimiter(requestRateLimiter)
               }
             }.uri(httpGatewayProperties.routing.endpoints.core)
         },
@@ -159,7 +159,7 @@ class RouteConfig(
             .filters { f ->
               f.filter(authFilter.apply(AuthFilter.Config()))
               f.requestRateLimiter { r ->
-                r.rateLimiter = requestRateLimiter
+                r.setRateLimiter(requestRateLimiter)
               }
             }.uri(httpGatewayProperties.routing.endpoints.wsGateway)
         },
@@ -170,7 +170,7 @@ class RouteConfig(
               f.filter(roomShortIdFilter.apply(RoomShortIdFilter.Config()))
               f.filter(authFilter.apply(AuthFilter.Config()))
               f.requestRateLimiter { r ->
-                r.rateLimiter = requestRateLimiter
+                r.setRateLimiter(requestRateLimiter)
               }
             }.uri(httpGatewayProperties.routing.endpoints.core)
         },
@@ -182,7 +182,7 @@ class RouteConfig(
               "/template/tag/**",
             ).filters { f ->
               f.requestRateLimiter { r ->
-                r.rateLimiter = requestRateLimiter
+                r.setRateLimiter(requestRateLimiter)
               }
             }.uri(httpGatewayProperties.routing.endpoints.core)
         },
@@ -196,7 +196,7 @@ class RouteConfig(
               "/violationreport/**",
             ).filters { f ->
               f.requestRateLimiter { r ->
-                r.rateLimiter = requestRateLimiter
+                r.setRateLimiter(requestRateLimiter)
               }
             }.uri(httpGatewayProperties.routing.endpoints.core)
         },
@@ -206,7 +206,7 @@ class RouteConfig(
             .filters { f ->
               f.rewritePath("^$UTIL_PREFIX/formatting", "")
               f.requestRateLimiter { r ->
-                r.rateLimiter = requestRateLimiter
+                r.setRateLimiter(requestRateLimiter)
               }
             }.uri(httpGatewayProperties.routing.endpoints.formattingService)
         },
@@ -240,7 +240,7 @@ class RouteConfig(
         },
       )
 
-    if (httpGatewayProperties.routing.endpoints.proxyMetrics != null) {
+    httpGatewayProperties.routing.endpoints.proxyMetrics?.let { proxyMetrics ->
       routes =
         routes.plus(
           RouteBuilderSpec("metrics-proxy") { p ->
@@ -248,7 +248,7 @@ class RouteConfig(
               .path("/management/proxy/prometheus")
               .filters { f ->
                 f.rewritePath("^/management/proxy", "")
-              }.uri(httpGatewayProperties.routing.endpoints.proxyMetrics)
+              }.uri(proxyMetrics)
           },
         )
     }

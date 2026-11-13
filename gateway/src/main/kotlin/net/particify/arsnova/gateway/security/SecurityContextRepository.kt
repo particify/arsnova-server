@@ -20,11 +20,11 @@ class SecurityContextRepository(
   private val logger = LoggerFactory.getLogger(javaClass)
 
   override fun save(
-    swe: ServerWebExchange?,
+    swe: ServerWebExchange,
     sc: SecurityContext?,
-  ): Mono<Void?>? = throw UnsupportedOperationException("Not supported yet.")
+  ): Mono<Void> = throw UnsupportedOperationException("Not supported yet.")
 
-  override fun load(serverWebExchange: ServerWebExchange): Mono<SecurityContext?>? {
+  override fun load(serverWebExchange: ServerWebExchange): Mono<SecurityContext> {
     logger.trace("Trying to parse user's authorities from JWT.")
     val authHeader = serverWebExchange.request.headers.getFirst("Authorization")
 
@@ -47,7 +47,7 @@ class SecurityContextRepository(
           TOKEN_PREFIX + authPair.second,
           authorities,
         )
-      }.map { authentication ->
+      }.map<SecurityContext> { authentication ->
         logger.trace("User's authentication: {}", authentication)
         SecurityContextImpl(authentication)
       }
