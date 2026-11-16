@@ -104,9 +104,14 @@ app.post('/render-multiple', (req, res) => {
   res.status(error ? 400 : 200).send(texts);
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`${appName} listening at port ${port}.`);
 });
+
+// As PID 1 (e.g. in a container), Node.js does not exit on these signals without a handler.
+for (const signal of ['SIGINT', 'SIGTERM']) {
+  process.on(signal, () => server.close(() => process.exit(0)));
+}
 
 function render(text, options) {
   if (options) {
