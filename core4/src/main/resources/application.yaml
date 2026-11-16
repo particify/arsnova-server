@@ -25,6 +25,7 @@ spring:
         order_inserts: true
 
   liquibase:
+    analytics-enabled: false
     contexts: default
 
   graphql:
