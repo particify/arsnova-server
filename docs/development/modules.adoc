@@ -115,6 +115,19 @@ and `RoomRoleLookup`, which `room` implements
 so that `security` can issue room tokens without depending on `room`.
 `common` defines `PublicRoutes` for modules which add routes that need no authentication.
 
+Registration in a lower module::
+A lower module which serves an open set of higher modules does not list them,
+neither as types nor as enum values or strings:
+such a list is a dependency pointing up,
+and every new member would have to change the lower module.
+Instead, each higher module registers itself through a contract the lower module defines,
+and the lower module collects whatever is registered.
+`DelegatingPermissionEvaluator` in `security` works this way:
+it asks the registered `DomainPermissionEvaluator` implementations which type they support
+and names none of the types itself.
+Whether a set is open depends on whether a new member would require a change in the lower module,
+not on how many members there are today.
+
 Errors belong to their module::
 A module raises its own exceptions and maps them to API errors itself.
 Other modules use a throwing lookup instead of throwing a foreign exception,
@@ -138,6 +151,16 @@ for code that is removed once the migration is no longer needed.
 
 It fails on cycles, on references to types a module does not expose,
 and on dependencies a module has not declared.
+
+It checks type references only.
+A module can still depend on another one through data,
+which the test cannot see and which only fails at runtime or when the other module changes:
+
+* a string naming another module's type, such as the type names passed to `hasPermission`,
+* an enum, a database enum type or a GraphQL enum whose values stand for other modules' concepts,
+* a foreign key into another module's schema.
+
+These have to point down the stack just like a type reference.
 The same test writes documentation with module and component diagrams (PlantUML)
 to `core4/build/spring-modulith-docs/`.
 
@@ -154,6 +177,9 @@ Adding a dependency on another module::
 * Does it use only the base package or a named interface of the other module?
 * Is it listed in the module's `allowedDependencies`,
   including the named interface if one is used?
+* Does the module name another module's types or concepts in strings, enums or foreign keys?
+  These count as dependencies too, and `ModularityTests` does not see them.
+  If they stand for an open set of higher modules, use a registration contract instead.
 
 Adding a module::
 * Decide where it sits in the stack and add it to this document.
