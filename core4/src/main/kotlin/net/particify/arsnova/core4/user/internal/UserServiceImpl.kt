@@ -102,7 +102,7 @@ class UserServiceImpl(
       // Setting createdAt explicitly to ensure this also works during v3 migrations.
       user =
           User(username = GHOST_USER_NAME, auditMetadata = AuditMetadata(createdAt = Instant.now()))
-      userRepository.save(user)
+      user = userRepository.save(user)
     }
     return user
   }
