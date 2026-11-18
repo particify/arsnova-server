@@ -60,12 +60,6 @@ map $http_x_forwarded_proto $forwarded_scheme {
   ''      $forwarded_scheme_fallback;
 }
 
-# Extract port from request's Host header
-map $http_host $request_port {
-  default     '';
-  ~:([0-9]+)$ $1;
-}
-
 # Set request's port as fallback if request was not already forwarded.
 map $http_x_forwarded_for $forwarded_port_fallback {
   default '';

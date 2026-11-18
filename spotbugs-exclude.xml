@@ -47,6 +47,11 @@
         <Class name="~.*\$[0-9]+" />
         <Field name="~\$.*" />
       </And>
+      <And>
+        <!-- Ignore generated fields. -->
+        <Bug pattern="MS_EXPOSE_REP" />
+        <Class name="~.*\$([0-9]+|Companion)" />
+      </And>
     </Or>
   </Match>
 </FindBugsFilter>
