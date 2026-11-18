@@ -74,6 +74,12 @@ Make sure to trigger the `docker_image_dev` job in GitLab's pipeline view and de
 
 === PostgreSQL updates
 
-When the PostgreSQL image was updated to a new major version, `pg_upgrade.sh` needs to be run to perform a database migration.
-The script expects the service name, the old and the new PostgreSQL version as parameters.
-There is no rollback support, so backups for the PostgreSQL volumes should be created before running the script.
+When the PostgreSQL image is updated to a new major version, the existing data has to be upgraded with `pg_upgrade.sh`.
+There is no rollback support, so back up the volumes first.
+
+. Stop the containers with `docker-compose stop`.
+. Back up the volumes `particify_postgresql_data_auth` and `particify_postgresql_data_comment`.
+. Run `./pg_upgrade.sh auth` and `./pg_upgrade.sh comment`.
+. Start the containers with `docker-compose up -d`.
+
+If an upgrade fails, restore the backup before running the script again.
