@@ -193,6 +193,12 @@ resolve_engine() {
   fi
   PDK_ENGINE=${PDK_ENGINE:-docker}
   export PDK_ENGINE
+  # Pointing this at another checkout's .podman directory makes this one a client of that engine,
+  # sharing its images and caches instead of starting an engine of its own. Normalized because the
+  # instance hash below is derived from it: a second spelling would start a second service on the
+  # same storage.
+  PDK_PODMAN_DIR=$(readlink -m "${PDK_PODMAN_DIR:-$LOCAL_ROOT_DIR/.podman}")
+  export PDK_PODMAN_DIR
   case "$PDK_ENGINE" in
     docker)
       DOCKER_BIN=docker
@@ -201,7 +207,7 @@ resolve_engine() {
       ;;
     podman)
       DOCKER_BIN=podman
-      export CONTAINER_HOST="unix://$LOCAL_ROOT_DIR/.podman/run/podman.sock"
+      export CONTAINER_HOST="unix://$PDK_PODMAN_DIR/run/podman.sock"
       # Suppresses the ">>>> Executing external compose provider ..." banner "podman compose"
       # prints on every single invocation - purely cosmetic, confirmed via podman's own binary
       # strings (ComposeWarningLogs / PODMAN_COMPOSE_WARNING_LOGS) and by testing the env var
@@ -289,11 +295,17 @@ warn_if_runroot_drifted() {
   echo "  systemctl --user stop $UNIT_NAME && $PDK_CMD set-engine podman" >&2
 }
 
-ensure_podman_service() {
-  PODMAN_STATE_DIR="$LOCAL_ROOT_DIR/.podman"
-  PODMAN_SOCKET="$PODMAN_STATE_DIR/run/podman.sock"
-  INSTANCE_HASH=$(echo -n "$LOCAL_ROOT_DIR" | sha256sum | cut -c1-16)
+# The hash is taken from the directory holding .podman, so every checkout sharing an engine via
+# PDK_PODMAN_DIR resolves to the unit of the checkout that owns it.
+set_podman_instance_vars() {
+  PODMAN_STATE_DIR="$PDK_PODMAN_DIR"
+  INSTANCE_HASH=$(echo -n "$(dirname "$PODMAN_STATE_DIR")" | sha256sum | cut -c1-16)
   UNIT_NAME="pdk-podman-$INSTANCE_HASH.service"
+}
+
+ensure_podman_service() {
+  set_podman_instance_vars
+  PODMAN_SOCKET="$PODMAN_STATE_DIR/run/podman.sock"
 
   # Only data/config (persistent storage) go under the project directory - that's what
   # actually provides the container/image isolation this feature exists for (podman ps/logs
@@ -398,9 +410,12 @@ ensure_podman_service() {
 # below (see its early-exit call site) since that's exactly what a broken instance can't
 # get through.
 reset_podman() {
-  PODMAN_STATE_DIR="$LOCAL_ROOT_DIR/.podman"
-  INSTANCE_HASH=$(echo -n "$LOCAL_ROOT_DIR" | sha256sum | cut -c1-16)
-  UNIT_NAME="pdk-podman-$INSTANCE_HASH.service"
+  set_podman_instance_vars
+  if [ "$PODMAN_STATE_DIR" != "$LOCAL_ROOT_DIR/.podman" ]; then
+    echo "ERROR: this checkout uses the engine in $PODMAN_STATE_DIR (PDK_PODMAN_DIR)." >&2
+    echo "Reset it from the checkout that owns it." >&2
+    return 1
+  fi
 
   if command -v systemctl &> /dev/null; then
     systemctl --user stop "$UNIT_NAME" 2>/dev/null
@@ -556,7 +571,7 @@ set_engine() {
 
   case "$1" in
     podman)
-      echo "Podman service ready at unix://$LOCAL_ROOT_DIR/.podman/run/podman.sock."
+      echo "Podman service ready at unix://$PDK_PODMAN_DIR/run/podman.sock."
       echo "Compose provider: $(podman compose version 2>&1 | head -n1)"
 
       if [ "$(loginctl show-user "$USER" --property=Linger --value 2>/dev/null)" != "yes" ]; then
