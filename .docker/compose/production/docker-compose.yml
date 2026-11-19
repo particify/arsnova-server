@@ -138,7 +138,7 @@ services:
     environment:
       SERVER_PORT: 3000
   arsnova-proxy:
-    image: particify/arsnova-proxy:3@sha256:b0e11e88aeb1deec6425b907f8c84cc31ffcc1088b44e85fb42a9cce84130b46
+    image: particify/arsnova-proxy:3@sha256:bc436b0252c695d949fae1c63a6219920e7ae093c4508118cc284abec8f4f40d
     depends_on:
       - arsnova-backend-core
       - arsnova-auth-service
