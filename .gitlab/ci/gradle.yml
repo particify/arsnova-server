@@ -7,6 +7,11 @@ variables:
   GRADLE_RO_DEP_CACHE: /root/.gradle-ro-cache
   GRADLE_OPTS: -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false
   GRADLE_CLI_OPTS: --no-daemon --console=plain --build-cache
+  # The checkout is shared with other branches' jobs on a runner slot,
+  # some of which run as a non-root user and leave it owned by that user.
+  GIT_CONFIG_COUNT: "1"
+  GIT_CONFIG_KEY_0: safe.directory
+  GIT_CONFIG_VALUE_0: $CI_PROJECT_DIR
 
 # Override rules from parent CI config
 workflow:
