@@ -21,10 +21,10 @@ import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class MembershipViewTest(
-  @Mock private val authProcessor: AuthProcessor,
-  @Mock private val roomAccessService: RoomAccessService,
-  @Mock private val roomService: RoomService,
-  @Mock private val userService: UserService,
+  @param:Mock private val authProcessor: AuthProcessor,
+  @param:Mock private val roomAccessService: RoomAccessService,
+  @param:Mock private val roomService: RoomService,
+  @param:Mock private val userService: UserService,
 ) {
   private val membershipView = MembershipView(authProcessor, roomAccessService, roomService, userService)
 

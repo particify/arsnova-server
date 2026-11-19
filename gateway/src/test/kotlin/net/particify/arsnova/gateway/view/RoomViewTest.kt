@@ -21,11 +21,11 @@ import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class RoomViewTest(
-  @Mock private val authProcessor: AuthProcessor,
-  @Mock private val roomService: RoomService,
-  @Mock private val contentService: ContentService,
-  @Mock private val commentService: CommentService,
-  @Mock private val wsGatewayService: WsGatewayService,
+  @param:Mock private val authProcessor: AuthProcessor,
+  @param:Mock private val roomService: RoomService,
+  @param:Mock private val contentService: ContentService,
+  @param:Mock private val commentService: CommentService,
+  @param:Mock private val wsGatewayService: WsGatewayService,
 ) {
   private val roomView = RoomView(authProcessor, roomService, contentService, commentService, wsGatewayService)
 
