@@ -238,8 +238,8 @@ public class ContentGroup extends Entity implements RoomIdAware {
     final ContentGroup that = (ContentGroup) o;
 
     return Objects.equals(name, that.name)
-      && Objects.equals(groupType, that.groupType)
-      && Objects.equals(contentIds, that.contentIds);
+        && Objects.equals(groupType, that.groupType)
+        && Objects.equals(contentIds, that.contentIds);
   }
 
   @Override
