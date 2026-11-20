@@ -95,7 +95,7 @@ class SubscriptionDeliveryTests {
     Assertions.assertTrue(response.errors.isEmpty(), response.errors.toString())
     return Flux.from(response.getData<Publisher<ExecutionResult>>()!!).map {
       Assertions.assertTrue(it.errors.isEmpty(), it.errors.toString())
-      it.getData<Map<String, Any?>>()
+      it.getData<Map<String, Any?>>()!!
     }
   }
 

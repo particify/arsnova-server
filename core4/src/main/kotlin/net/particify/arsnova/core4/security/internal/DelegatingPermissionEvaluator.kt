@@ -8,6 +8,7 @@ import kotlin.Any
 import net.particify.arsnova.core4.security.DomainPermissionEvaluator
 import net.particify.arsnova.core4.user.User
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.security.access.PermissionEvaluator
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
@@ -18,14 +19,16 @@ import org.springframework.stereotype.Component
  */
 @Component
 class DelegatingPermissionEvaluator(
-    permissionEvaluators: List<DomainPermissionEvaluator<out Any>>
+    // Method security creates this evaluator while building its advisor, so the domain evaluators
+    // and the persistence beans behind them are only resolved on first use. Unlike @Lazy, an
+    // ObjectProvider needs no proxy, so this does not depend on proxy support in a native image.
+    permissionEvaluatorProvider: ObjectProvider<DomainPermissionEvaluator<*>>
 ) : PermissionEvaluator {
   private val logger = LoggerFactory.getLogger(this::class.java)
-  val permissionEvaluators: List<DomainPermissionEvaluator<Any>> =
-      permissionEvaluators.map { it as DomainPermissionEvaluator<Any> }
-
-  init {
+  val permissionEvaluators: List<DomainPermissionEvaluator<Any>> by lazy {
+    val permissionEvaluators = permissionEvaluatorProvider.orderedStream().toList()
     logger.debug("Registered DomainPermissionEvaluators: {}", permissionEvaluators)
+    permissionEvaluators.map { it as DomainPermissionEvaluator<Any> }
   }
 
   override fun hasPermission(

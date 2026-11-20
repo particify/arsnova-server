@@ -31,12 +31,14 @@ import net.particify.arsnova.core4.room.RoomPermissionEvaluator
 import net.particify.arsnova.core4.room.RoomRole
 import net.particify.arsnova.core4.room.internal.MembershipRepository
 import net.particify.arsnova.core4.room.internal.RoomRepository
+import net.particify.arsnova.core4.security.DomainPermissionEvaluator
 import net.particify.arsnova.core4.security.internal.DelegatingPermissionEvaluator
 import net.particify.arsnova.core4.user.User
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 
@@ -77,12 +79,16 @@ class QuestionnairePermissionRoleMatrixTest {
   private val roundEvaluator = RoundPermissionEvaluator(roundRepository)
   private val permissionEvaluator =
       DelegatingPermissionEvaluator(
-          listOf(
-              answerEvaluator,
-              contentEvaluator,
-              questionnaireEvaluator,
-              RoomPermissionEvaluator(membershipRepository, roomRepository),
-              roundEvaluator))
+          object : ObjectProvider<DomainPermissionEvaluator<*>> {
+            override fun orderedStream() =
+                listOf<DomainPermissionEvaluator<*>>(
+                        answerEvaluator,
+                        contentEvaluator,
+                        questionnaireEvaluator,
+                        RoomPermissionEvaluator(membershipRepository, roomRepository),
+                        roundEvaluator)
+                    .stream()
+          })
 
   init {
     Mockito.`when`(roomRepository.findById(ROOM_ID)).thenReturn(Optional.of(Room(id = ROOM_ID)))

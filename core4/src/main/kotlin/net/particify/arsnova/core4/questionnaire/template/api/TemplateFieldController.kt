@@ -91,10 +91,11 @@ class TemplateFieldController(
       templates: List<Template>,
       context: GraphQLContext
   ): Map<UUID, QuestionnaireSummary> {
+    // Only null if the mapping function returns null.
     val cache: MutableMap<UUID, QuestionnaireSummary> =
         context.computeIfAbsent(SUMMARIES_CONTEXT_KEY) {
           ConcurrentHashMap<UUID, QuestionnaireSummary>()
-        }
+        }!!
     val missing = templates.mapNotNull { it.id }.filterNot { cache.containsKey(it) }
     if (missing.isNotEmpty()) cache.putAll(templateQuestionnaireService.findSummaries(missing))
     return cache

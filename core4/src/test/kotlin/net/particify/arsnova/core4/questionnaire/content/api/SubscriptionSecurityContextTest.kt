@@ -101,7 +101,7 @@ class SubscriptionSecurityContextTest {
         Flux.from(response.getData<org.reactivestreams.Publisher<ExecutionResult>>()!!)
             .blockFirst(TIMEOUT)!!
     Assertions.assertNull(emissionAuthentication.get(), "emitted with the subscriber's context")
-    val data = result.getData<Map<String, Map<String, Map<String, Any?>>>>()
+    val data = result.getData<Map<String, Map<String, Map<String, Any?>>>>()!!
     return data["contentUpdated"]!!["formatData"]!!["correctOptionIndexes"]
   }
 
