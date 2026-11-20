@@ -35,11 +35,9 @@ tasks.withType<Test> {
   useJUnitPlatform()
 }
 
-tasks.jib {
-  jib {
-    from {
-      image = "eclipse-temurin:21-alpine"
-    }
+jib {
+  from {
+    setImage(libs.versions.eclipse.temurin.container.image)
   }
 }
 
