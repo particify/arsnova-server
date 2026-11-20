@@ -1,6 +1,5 @@
 package net.particify.arsnova.authz.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import net.particify.arsnova.authz.model.event.RoomAccessSyncEvent
 import net.particify.arsnova.authz.model.event.RoomAccessSyncRequest
 import org.springframework.amqp.core.BindingBuilder.bind
@@ -14,12 +13,13 @@ import org.springframework.amqp.rabbit.core.RabbitAdmin
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.amqp.support.converter.ClassMapper
 import org.springframework.amqp.support.converter.DefaultClassMapper
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter
 import org.springframework.amqp.support.converter.MessageConverter
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.task.TaskExecutor
+import tools.jackson.databind.json.JsonMapper
 
 @Configuration
 @EnableConfigurationProperties(AuthServiceProperties::class)
@@ -139,7 +139,7 @@ class RabbitConfig(
   }
 
   @Bean
-  fun jsonMessageConverter(objectMapper: ObjectMapper): MessageConverter = Jackson2JsonMessageConverter(objectMapper)
+  fun jsonMessageConverter(jsonMapper: JsonMapper): MessageConverter = JacksonJsonMessageConverter(jsonMapper)
 
   @Bean
   fun classMapper(): ClassMapper {

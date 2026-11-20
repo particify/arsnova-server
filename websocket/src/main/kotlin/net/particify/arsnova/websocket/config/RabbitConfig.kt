@@ -3,7 +3,7 @@ package net.particify.arsnova.websocket.config
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter
 import org.springframework.amqp.support.converter.MessageConverter
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -40,7 +40,7 @@ class RabbitConfig(
 
   @Bean
   fun jsonMessageConverter(): MessageConverter {
-    val converter = Jackson2JsonMessageConverter()
+    val converter = JacksonJsonMessageConverter()
     return converter
   }
 }

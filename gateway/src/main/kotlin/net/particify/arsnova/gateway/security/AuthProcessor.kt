@@ -17,7 +17,7 @@ class AuthProcessor {
   fun getAuthentication(): Mono<Authentication> =
     ReactiveSecurityContextHolder
       .getContext()
-      .map { securityContext ->
+      .mapNotNull { securityContext ->
         securityContext.authentication
       }.switchIfEmpty(Mono.error(UnauthorizedException()))
 

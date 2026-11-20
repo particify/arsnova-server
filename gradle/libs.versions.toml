@@ -13,8 +13,8 @@ lms-connector = "1.0.2"
 pac4j = "6.2.2"
 spotbugs-annotations = "4.10.5"
 spotbugs-plugin = "6.5.13"
-spring-boot-plugin = "3.5.16"
-spring-cloud = "2025.0.3"
+spring-boot-plugin = "4.2.0"
+spring-cloud = "2026.0.0"
 springmockk = "4.0.2"
 
 [libraries]

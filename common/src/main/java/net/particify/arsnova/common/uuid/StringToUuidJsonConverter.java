@@ -1,11 +1,11 @@
 package net.particify.arsnova.common.uuid;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.databind.util.Converter;
 import java.util.UUID;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.type.TypeFactory;
+import tools.jackson.databind.util.StdConverter;
 
-public class StringToUuidJsonConverter implements Converter<String, UUID> {
+public class StringToUuidJsonConverter extends StdConverter<String, UUID> {
   @Override
   public UUID convert(final String value) {
     return UuidHelper.stringToUuid(value);
