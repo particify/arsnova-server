@@ -53,7 +53,7 @@ tasks.withType<Test> {
 
 jib {
   from {
-    image = "eclipse-temurin:25-jre-alpine"
+    setImage(libs.versions.eclipse.temurin.container.image)
   }
 }
 
