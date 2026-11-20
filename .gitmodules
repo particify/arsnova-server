@@ -1,3 +1,4 @@
 [submodule "webclient"]
 	path = webclient
 	url = ../arsnova-webclient
+	branch = .
