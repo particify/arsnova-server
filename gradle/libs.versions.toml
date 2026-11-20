@@ -2,7 +2,7 @@
 aspectj-plugin = "9.8.3"
 aspectj-rt = "1.9.27"
 bucket4j = "8.22.0"
-checkstyle = "10.12.7"
+checkstyle = "14.4.0"
 ektorp = "1.5.0"
 guava = "33.7.2-jre"
 java-jwt = "4.6.2"
