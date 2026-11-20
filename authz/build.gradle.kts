@@ -55,11 +55,9 @@ tasks.withType<Test> {
   useJUnitPlatform()
 }
 
-tasks.jib {
-  jib {
-    from {
-      image = "eclipse-temurin:21-alpine"
-    }
+jib {
+  from {
+    image = "eclipse-temurin:21-alpine"
   }
 }
 
