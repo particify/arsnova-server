@@ -4,6 +4,16 @@
     "local>particify/dev/devops/renovate-dependency-bot//presets/default"
   ],
   "baseBranchPatterns": ["master", "3.x"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "datasourceTemplate": "docker",
+      "managerFilePatterns": ["/^gradle/libs\\.versions\\.toml$/"],
+      "matchStrings": [
+        "[\\w-]+-container-image = \"(?<depName>[^\":@]+):(?<currentValue>[^\"@]+)@(?<currentDigest>sha256:[a-f0-9]{64})\""
+      ]
+    }
+  ],
   "packageRules": [
     {
       "matchPackageNames": ["com.graphql-java:graphql-java-extended-scalars"],
