@@ -52,7 +52,7 @@ tasks.withType<Test> {
 
 jib {
   from {
-    image = "eclipse-temurin:21-alpine"
+    image = "eclipse-temurin:25-alpine"
   }
 }
 
