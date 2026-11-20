@@ -85,6 +85,10 @@ type TemplateUpstreamAttribution {
   templateId: ID!
 }
 
+extend enum ViolationReportTargetType {
+  TEMPLATE
+}
+
 input TemplateQueryInput {
   language: String
   search: String

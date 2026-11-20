@@ -12,6 +12,7 @@ import org.springframework.modulith.PackageInfo
         [
             "common",
             "license",
+            "violationreport::events",
             "room",
             "room::events",
             "security::permission",

@@ -50,7 +50,6 @@ routes:
       - /api/language/*
       - /api/management/stats
       - /api/template/*
-      - /api/violationreport/*
     upstream_id: core-v3
     plugin_config_id: path-rewrite
   - id: websocket
