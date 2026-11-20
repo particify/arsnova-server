@@ -1,4 +1,4 @@
-FROM nginx:1.30-alpine@sha256:caf4e1e032a20f9c3c5e28fc7f25ffd768ad8677b4975c54193075997b3a97e3
+FROM nginx:1.31-alpine@sha256:fb4658584bd9a916ffb6f6e365f97c25cfdb2923801f551ea08356e695f14ff7
 
 ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
 
