@@ -21,11 +21,13 @@ import net.particify.arsnova.core4.questionnaire.round.RoundRepository
 import net.particify.arsnova.core4.questionnaire.template.Template
 import net.particify.arsnova.core4.questionnaire.template.TemplatePermissionEvaluator
 import net.particify.arsnova.core4.questionnaire.template.TemplateRepository
+import net.particify.arsnova.core4.security.DomainPermissionEvaluator
 import net.particify.arsnova.core4.security.internal.DelegatingPermissionEvaluator
 import net.particify.arsnova.core4.user.User
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.security.authentication.TestingAuthenticationToken
 
 private val CREATOR_ID = UUID.randomUUID()
@@ -41,13 +43,17 @@ class RoomlessPermissionTest {
   private val templatePermissionEvaluator = TemplatePermissionEvaluator(templateRepository)
   private val permissionEvaluator =
       DelegatingPermissionEvaluator(
-          listOf(
-              AnswerPermissionEvaluator(Mockito.mock(AnswerRepository::class.java)),
-              ContentPermissionEvaluator(contentRepository),
-              QuestionnairePermissionEvaluator(
-                  questionnaireRepository, templatePermissionEvaluator),
-              RoundPermissionEvaluator(Mockito.mock(RoundRepository::class.java)),
-              templatePermissionEvaluator))
+          object : ObjectProvider<DomainPermissionEvaluator<*>> {
+            override fun orderedStream() =
+                listOf<DomainPermissionEvaluator<*>>(
+                        AnswerPermissionEvaluator(Mockito.mock(AnswerRepository::class.java)),
+                        ContentPermissionEvaluator(contentRepository),
+                        QuestionnairePermissionEvaluator(
+                            questionnaireRepository, templatePermissionEvaluator),
+                        RoundPermissionEvaluator(Mockito.mock(RoundRepository::class.java)),
+                        templatePermissionEvaluator)
+                    .stream()
+          })
 
   // Unpublished and not releasing anything, which would hide a room questionnaire's contents.
   private val roomless =

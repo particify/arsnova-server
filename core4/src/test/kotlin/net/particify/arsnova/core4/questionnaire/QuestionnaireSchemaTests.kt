@@ -25,7 +25,7 @@ class QuestionnaireSchemaTests {
       graphQlSource.schema().queryType.getFieldDefinition(name)
 
   private fun mutation(name: String): GraphQLFieldDefinition =
-      graphQlSource.schema().mutationType.getFieldDefinition(name)
+      graphQlSource.schema().mutationType!!.getFieldDefinition(name)
 
   private fun assertRequired(field: GraphQLFieldDefinition, vararg arguments: String) {
     arguments.forEach {
@@ -83,7 +83,7 @@ class QuestionnaireSchemaTests {
   fun shouldReturnNullableContentFromEveryFormatMutation() {
     graphQlSource
         .schema()
-        .mutationType
+        .mutationType!!
         .fieldDefinitions
         .filter { it.name.matches(Regex("(create|update)Questionnaire\\w+Content")) }
         .forEach {
@@ -94,10 +94,10 @@ class QuestionnaireSchemaTests {
 
   @Test
   fun shouldDeclareFormatDataFieldsTheModelAlwaysHas() {
-    val textFormatData = graphQlSource.schema().getObjectType("TextContentFormatData")
+    val textFormatData = graphQlSource.schema().getObjectType("TextContentFormatData")!!
     Assertions.assertInstanceOf(
         GraphQLNonNull::class.java, textFormatData.getFieldDefinition("answersPublished").type)
-    val scaleFormatData = graphQlSource.schema().getObjectType("ScaleContentFormatData")
+    val scaleFormatData = graphQlSource.schema().getObjectType("ScaleContentFormatData")!!
     listOf("template", "neutralOption").forEach {
       Assertions.assertInstanceOf(
           GraphQLNonNull::class.java, scaleFormatData.getFieldDefinition(it).type, it)
@@ -109,7 +109,7 @@ class QuestionnaireSchemaTests {
     val schema = graphQlSource.schema()
     listOf(
             query("questionnaireLeaderboardByQuestionnaireId"),
-            schema.subscriptionType.getFieldDefinition("questionnaireLeaderboardUpdated"))
+            schema.subscriptionType!!.getFieldDefinition("questionnaireLeaderboardUpdated"))
         .forEach { Assertions.assertInstanceOf(GraphQLNonNull::class.java, it.type, it.name) }
   }
 

@@ -30,17 +30,16 @@ repositories {
 dependencies {
   implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
   implementation(platform(libs.spring.modulith.bom))
-  implementation(enforcedPlatform(libs.hibernate.bom))
   implementation(project(":common"))
   implementation(libs.kotlin.reflect)
   implementation(libs.spring.actuator)
-  implementation(libs.spring.amqp)
   implementation(libs.spring.cache)
   implementation(libs.spring.graphql)
   implementation(libs.spring.jpa)
   implementation(libs.spring.liquibase)
   implementation(libs.spring.mail)
   implementation(libs.spring.modulith)
+  implementation(libs.spring.rabbitmq)
   implementation(libs.spring.security)
   implementation(libs.spring.security.jose)
   implementation(libs.spring.security.ldap)
@@ -91,8 +90,13 @@ dependencies {
   }
 
   constraints {
+    // Hibernate 7.4 applies User's @SoftDelete to its roles join table, see HHH-20652.
+    implementation(libs.hibernate.core) { version { strictly(libs.versions.hibernate.get()) } }
     implementation(libs.opensaml.api)
     implementation(libs.opensaml.impl)
+    testFixturesImplementation(libs.hibernate.core) {
+      version { strictly(libs.versions.hibernate.get()) }
+    }
     testFixturesImplementation(libs.opensaml.api)
     testFixturesImplementation(libs.opensaml.impl)
   }

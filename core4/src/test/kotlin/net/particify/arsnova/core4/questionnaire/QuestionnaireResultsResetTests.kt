@@ -111,7 +111,7 @@ class QuestionnaireResultsResetTests {
         Flux.from(response.getData<Publisher<ExecutionResult>>()!!)
             .map {
               Assertions.assertTrue(it.errors.isEmpty(), it.errors.toString())
-              it.getData<Map<String, Any?>>().getValue(field) as Map<*, *>
+              it.getData<Map<String, Any?>>()!!.getValue(field) as Map<*, *>
             }
             .materialize()
             .subscribe { signals.add(it) })

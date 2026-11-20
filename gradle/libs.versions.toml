@@ -27,7 +27,7 @@ querydsl = "7.7"
 spotbugs-plugin = "6.5.13"
 spotless = "8.11.0"
 spring-boot-plugin = "4.2.0"
-spring-modulith = "2.1.2"
+spring-modulith = "2.2.0"
 springmockk = "5.0.1"
 zxcvbn = "1.9.0"
 
@@ -40,7 +40,7 @@ ektorp = { module = "org.ektorp:org.ektorp", version.ref = "ektorp" }
 ektorp-spring = { module = "org.ektorp:org.ektorp.spring", version.ref = "ektorp" }
 graphql-scalars = { module = "com.graphql-java:graphql-java-extended-scalars", version.ref = "graphql-scalars" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
-hibernate-bom = { module = "org.hibernate.orm:hibernate-platform", version.ref = "hibernate" }
+hibernate-core = { module = "org.hibernate.orm:hibernate-core", version.ref = "hibernate" }
 jackson-csv = { module = "tools.jackson.dataformat:jackson-dataformat-csv" }
 jackson-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 java-jwt = { module = "com.auth0:java-jwt", version.ref = "java-jwt" }
@@ -61,7 +61,6 @@ querydsl-apt = { module = "io.github.openfeign.querydsl:querydsl-apt", version.r
 reactor-test = { module = "io.projectreactor:reactor-test" }
 spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugs-annotations" }
 spring-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
-spring-amqp = { module = "org.springframework.boot:spring-boot-starter-amqp" }
 spring-boot-security-test = { module = "org.springframework.boot:spring-boot-security-test" }
 spring-cache = { module = "org.springframework.boot:spring-boot-starter-cache" }
 spring-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
@@ -79,6 +78,7 @@ spring-modulith-events-amqp = { module = "org.springframework.modulith:spring-mo
 spring-modulith-jpa = { module = "org.springframework.modulith:spring-modulith-starter-jpa" }
 spring-modulith-observability = { module = "org.springframework.modulith:spring-modulith-observability" }
 spring-modulith-test = { module = "org.springframework.modulith:spring-modulith-starter-test" }
+spring-rabbitmq = { module = "org.springframework.boot:spring-boot-starter-rabbitmq" }
 spring-security = { module = "org.springframework.boot:spring-boot-starter-security" }
 spring-security-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }
 spring-security-ldap = { module = "org.springframework.security:spring-security-ldap" }
