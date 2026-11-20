@@ -15,7 +15,7 @@ spotbugs-annotations = "4.10.5"
 spotbugs-plugin = "6.5.13"
 spring-boot-plugin = "4.2.0"
 spring-cloud = "2026.0.0"
-springmockk = "4.0.2"
+springmockk = "5.0.1"
 
 [libraries]
 aspectj-rt = { module = "org.aspectj:aspectjrt", version.ref = "aspectj-rt" }
