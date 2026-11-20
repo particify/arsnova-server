@@ -225,7 +225,7 @@ fun withoutAot(
 }
 
 jib {
-  from { image = "eclipse-temurin:25-alpine" }
+  from { image = "eclipse-temurin:25-jre-alpine" }
   // Spring Boot adds developmentOnly to runtimeClasspath, which Jib packages by default.
   configurationName = "productionRuntimeClasspath"
 }
