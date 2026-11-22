@@ -3,7 +3,7 @@
   "extends": [
     "local>particify/dev/devops/renovate-dependency-bot//presets/default"
   ],
-  "baseBranchPatterns": ["master", "3.x"],
+  "baseBranchPatterns": ["master", "3.14"],
   "customManagers": [
     {
       "customType": "regex",
