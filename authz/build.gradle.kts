@@ -33,7 +33,6 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-flyway")
   implementation("org.springframework.security:spring-security-oauth2-jose")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-  implementation("io.projectreactor:reactor-tools")
   implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
   implementation("io.micrometer:micrometer-registry-prometheus")
   implementation("org.postgresql:postgresql")
