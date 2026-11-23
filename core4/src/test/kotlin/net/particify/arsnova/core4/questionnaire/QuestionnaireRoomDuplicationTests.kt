@@ -89,7 +89,8 @@ class QuestionnaireRoomDuplicationTests {
   fun shouldCopySeriesWithSettingsAndContentsButNoAnswers() {
     val user = authenticate()
     val room =
-        roomService.create(Room(shortId = roomService.generateShortId(), name = "Source"), user)
+        roomService.create(
+            Room(shortId = roomService.generateShortId(), name = "Source"), user.id!!)
     val survey = questionnaireService.create(room.id!!, "Survey", QuestionnaireType.SURVEY)
     questionnaireService.update(
         survey.id!!, null, true, QuestionnairePublishingMode.UP_TO, false, null, null)
@@ -102,7 +103,7 @@ class QuestionnaireRoomDuplicationTests {
     val presented = createChoiceContent(quiz.id!!, "Presented")
     publishingService.startLiveContent(presented.id!!)
 
-    val copyId = roomService.duplicate(room, "Copy", user).id!!
+    val copyId = roomService.duplicate(room, "Copy", user.id!!).id!!
 
     val copies = questionnaireService.findByRoomIdOrderByName(copyId)
     Assertions.assertEquals(listOf("Quiz", "Survey"), copies.map { it.name })
@@ -137,7 +138,7 @@ class QuestionnaireRoomDuplicationTests {
   fun shouldDuplicateQuestionnaireWithinItsRoom() {
     val user = authenticate()
     val room =
-        roomService.create(Room(shortId = roomService.generateShortId(), name = "Room"), user)
+        roomService.create(Room(shortId = roomService.generateShortId(), name = "Room"), user.id!!)
     val original = questionnaireService.create(room.id!!, "Original", QuestionnaireType.MIXED)
     listOf("First", "Second").forEach { createChoiceContent(original.id!!, it) }
 
@@ -156,7 +157,7 @@ class QuestionnaireRoomDuplicationTests {
   fun shouldRejectDuplicateWithTakenName() {
     val user = authenticate()
     val room =
-        roomService.create(Room(shortId = roomService.generateShortId(), name = "Room"), user)
+        roomService.create(Room(shortId = roomService.generateShortId(), name = "Room"), user.id!!)
     val original = questionnaireService.create(room.id!!, "Original", QuestionnaireType.SURVEY)
     questionnaireService.create(room.id!!, "Taken", QuestionnaireType.SURVEY)
     Assertions.assertThrows(QuestionnaireWithNameAlreadyExistsException::class.java) {
@@ -168,7 +169,7 @@ class QuestionnaireRoomDuplicationTests {
   fun shouldRejectDuplicateByNonMember() {
     val user = authenticate()
     val room =
-        roomService.create(Room(shortId = roomService.generateShortId(), name = "Room"), user)
+        roomService.create(Room(shortId = roomService.generateShortId(), name = "Room"), user.id!!)
     val original = questionnaireService.create(room.id!!, "Original", QuestionnaireType.SURVEY)
     authenticate(OTHER_USER_ID)
     Assertions.assertThrows(AccessDeniedException::class.java) {

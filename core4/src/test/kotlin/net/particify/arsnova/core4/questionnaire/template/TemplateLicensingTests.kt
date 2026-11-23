@@ -87,7 +87,8 @@ class TemplateLicensingTests {
   }
 
   private fun createRoom(user: User): Room =
-      roomService.create(Room(shortId = roomService.generateShortId(), name = "Templates"), user)
+      roomService.create(
+          Room(shortId = roomService.generateShortId(), name = "Templates"), user.id!!)
 
   private fun addQuestion(questionnaireId: UUID): Content =
       contentService.create(

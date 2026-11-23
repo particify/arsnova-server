@@ -39,7 +39,7 @@ class RoomMutationController(
   @MutationMapping
   @PreAuthorize("hasRole('ROOM_CREATOR')")
   fun createRoom(@Argument input: CreateRoomInput, @AuthenticationPrincipal user: User): Room {
-    return roomService.create(input.toRoom(roomService.generateShortId()), user)
+    return roomService.create(input.toRoom(roomService.generateShortId()), user.id!!)
   }
 
   @MutationMapping
@@ -50,7 +50,7 @@ class RoomMutationController(
     val room =
         (if (input.id != null) roomService.findByIdOrNull(input.id)
         else roomService.findOneByShortId(input.shortId!!)) ?: throw RoomNotFoundException(input.id)
-    return membershipService.joinRoom(room, user)
+    return membershipService.joinRoom(room, user.id!!)
   }
 
   @MutationMapping
@@ -171,12 +171,12 @@ class RoomMutationController(
       @AuthenticationPrincipal user: User
   ): Room {
     val room = roomService.findByIdOrNull(input.id) ?: throw RoomNotFoundException(input.id)
-    return roomService.duplicate(room, input.newName, user)
+    return roomService.duplicate(room, input.newName, user.id!!)
   }
 
   @MutationMapping
   @PreAuthorize("hasRole('ROOM_CREATOR')")
   fun duplicateDemoRoom(@AuthenticationPrincipal user: User, locale: Locale): Room {
-    return roomService.duplicateDemo(user, locale)
+    return roomService.duplicateDemo(user.id!!, locale)
   }
 }

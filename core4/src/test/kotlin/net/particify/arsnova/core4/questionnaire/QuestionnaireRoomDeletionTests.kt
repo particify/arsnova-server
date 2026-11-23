@@ -63,7 +63,8 @@ class QuestionnaireRoomDeletionTests {
     SecurityContextHolder.getContext().authentication =
         UsernamePasswordAuthenticationToken(user, null, user.authorities)
     return roomService.create(
-        Room(shortId = roomService.generateShortId(), name = "Deletion ${UUID.randomUUID()}"), user)
+        Room(shortId = roomService.generateShortId(), name = "Deletion ${UUID.randomUUID()}"),
+        user.id!!)
   }
 
   private fun createChoiceContent(questionnaireId: UUID): Content =

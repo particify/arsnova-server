@@ -127,7 +127,8 @@ class TemplateTests {
   }
 
   private fun createRoom(user: User): Room =
-      roomService.create(Room(shortId = roomService.generateShortId(), name = "Templates"), user)
+      roomService.create(
+          Room(shortId = roomService.generateShortId(), name = "Templates"), user.id!!)
 
   private fun createQuizWithContents(user: User): Questionnaire {
     val room = createRoom(user)

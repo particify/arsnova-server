@@ -64,9 +64,9 @@ class TemplateAdministrationTests {
 
   private fun createPublishedTemplate(): Template {
     authenticate(CREATOR_ID)
-    val user = userService.loadUserById(CREATOR_ID)!!
     val room =
-        roomService.create(Room(shortId = roomService.generateShortId(), name = "Admin"), user)
+        roomService.create(
+            Room(shortId = roomService.generateShortId(), name = "Admin"), CREATOR_ID)
     val questionnaire = questionnaireService.create(room.id!!, "Admin", QuestionnaireType.SURVEY)
     contentService.create(
         questionnaire.id!!,

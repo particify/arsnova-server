@@ -95,15 +95,14 @@ class ViolationReportTests {
 
   private fun createRoom(): Room {
     authenticate(CREATOR_ID)
-    val user = userService.loadUserById(CREATOR_ID)!!
     return roomService.create(
-        Room(shortId = roomService.generateShortId(), name = "Reported"), user)
+        Room(shortId = roomService.generateShortId(), name = "Reported"), CREATOR_ID)
   }
 
   /** Only members may read, and so report, a room. */
   private fun createRoomJoinedByReporter(): Room {
     val room = createRoom()
-    membershipService.joinRoom(room, userService.loadUserById(REPORTER_ID)!!)
+    membershipService.joinRoom(room, REPORTER_ID)
     return room
   }
 

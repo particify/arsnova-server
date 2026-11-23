@@ -21,6 +21,6 @@ class VoteMutationController(private val voteService: VoteServiceImpl) {
   @PreAuthorize("hasPermission(#input.postId, 'Post', 'read')")
   fun voteQnaPost(@Argument input: VoteInput, @AuthenticationPrincipal user: User): Post {
     require(input.value == 1 || input.value == -1) { "Vote value must be +1 or -1." }
-    return voteService.vote(input.value, input.postId, user)
+    return voteService.vote(input.value, input.postId, user.id!!)
   }
 }

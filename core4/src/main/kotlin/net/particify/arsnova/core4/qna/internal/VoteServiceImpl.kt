@@ -28,9 +28,9 @@ class VoteServiceImpl(
 ) {
 
   @Transactional
-  fun vote(value: Int, postId: UUID, user: User): Post {
+  fun vote(value: Int, postId: UUID, userId: UUID): Post {
     val post = postRepository.findByIdOrNull(postId) ?: throw PostNotFoundException(postId)
-    val existingVote = voteRepository.findByPostIdAndUserId(postId, user.id!!)
+    val existingVote = voteRepository.findByPostIdAndUserId(postId, userId)
     val delta =
         if (existingVote != null) {
           if (existingVote.value == value) {
@@ -44,7 +44,8 @@ class VoteServiceImpl(
             delta
           }
         } else {
-          voteRepository.save(Vote(post = Post(id = postId), user = user, value = value))
+          voteRepository.save(
+              Vote(post = Post(id = postId), user = User(id = userId), value = value))
           applicationEventPublisher.publishEvent(VoteCreatedEvent(postId))
           value
         }
