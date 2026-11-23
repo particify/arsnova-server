@@ -19,17 +19,16 @@
 package net.particify.arsnova.core.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonView;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.boot.actuate.endpoint.OperationResponseBody;
 
-import net.particify.arsnova.core.model.serialization.View;
-
-// Security: While only intended to be accessed with ROLE_ADMIN,
-// using the Public.class view is fine here because the whole endpoint is restricted.
-@JsonView(View.Public.class)
-public class Statistics {
-  @JsonView(View.Public.class)
+/**
+ * Statistics exposed via Actuator. Implementing {@link OperationResponseBody}
+ * makes sure that Actuator's object mapper is used for serialization instead
+ * of the default mapper with its serialization views.
+ */
+public class Statistics implements OperationResponseBody {
   public static class UserProfileStats {
     private int totalCount;
 
@@ -83,7 +82,6 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Public.class)
   public static class RoomStats {
     private int totalCount;
 
@@ -119,7 +117,6 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Public.class)
   public static class ContentGroupStats {
     private int totalCount;
 
@@ -182,7 +179,6 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Public.class)
   public static class ContentStats {
     private int totalCount;
 
@@ -227,7 +223,6 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Public.class)
   public static class ContentGroupTemplateStats {
     private int totalCount;
 
@@ -272,7 +267,6 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Public.class)
   public static class ContentTemplateStats {
     private int totalCount;
 
@@ -298,7 +292,6 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Public.class)
   public static class AnswerStats {
     private int totalCount;
 
@@ -334,7 +327,6 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Public.class)
   public static class AnnouncementStats {
     private int totalCount;
 
@@ -361,7 +353,6 @@ public class Statistics {
     }
   }
 
-  @JsonView(View.Public.class)
   public static class ViolationReportStats {
     private int totalCount;
 
