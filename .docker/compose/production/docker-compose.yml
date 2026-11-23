@@ -84,7 +84,6 @@ services:
       SECURITY_JWT_PUBLIC_SECRET: $JWT_SECRET
       SECURITY_JWT_INTERNAL_SECRET: $JWT_SECRET
       SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
-    command: /jetty/start.jar --module=http-forwarded
   arsnova-ws-gateway:
     image: particify/arsnova-server-websocket:$WSGW_TAG
     depends_on:
@@ -100,7 +99,6 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
-    command: /jetty/start.jar --module=http-forwarded
   arsnova-auth-service:
     image: particify/arsnova-server-authz:$AUTH_TAG
     depends_on:
@@ -115,7 +113,6 @@ services:
       RABBITMQ_PASSWORD: guest
       SECURITY_JWT_SECRET: $JWT_SECRET
       SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
-    command: /jetty/start.jar --module=http-forwarded
   arsnova-comment-service:
     image: particify/arsnova-server-comments:$COMMENT_TAG
     depends_on:
@@ -129,7 +126,6 @@ services:
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
       SECURITY_JWT_SECRET: $JWT_SECRET
-    command: /jetty/start.jar --module=http-forwarded
   arsnova-web:
     image: particify/arsnova-webclient:$WEB_TAG
   arsnova-formatting-service:
