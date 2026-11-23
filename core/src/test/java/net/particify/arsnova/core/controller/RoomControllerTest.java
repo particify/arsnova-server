@@ -164,6 +164,29 @@ public class RoomControllerTest {
     assertEquals(listOfContentGroup.get(0).getName(), stats.getGroupStats().get(0).getGroupName());
   }
 
+  @Test
+  @WithMockUser("TestUser")
+  public void shouldRejectFindQueryWithoutProperties() throws Exception {
+    mockMvc.perform(post("/room/-/find")
+        .content("{}")
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)
+        .with(csrf()))
+        .andExpect(status().isBadRequest());
+  }
+
+  /* Entity properties need to be wrapped by a find query. Passing an entity directly is invalid. */
+  @Test
+  @WithMockUser("TestUser")
+  public void shouldRejectFindQueryWithUnwrappedProperties() throws Exception {
+    mockMvc.perform(post("/room/-/find")
+        .content("{\"shortId\": \"12345678\"}")
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)
+        .with(csrf()))
+        .andExpect(status().isBadRequest());
+  }
+
   private List<ContentGroup> createContentGroupsWithContents(
       final String roomId, final int numberOfGroups, final int numberOfContents) {
     final List<ContentGroup> listOfGroups = new ArrayList<>();

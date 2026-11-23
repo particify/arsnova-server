@@ -21,6 +21,7 @@ package net.particify.arsnova.core.controller;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -190,7 +191,7 @@ public abstract class AbstractEntityController<E extends Entity> {
   }
 
   @PostMapping({FIND_MAPPING, LEGACY_FIND_MAPPING})
-  public List<E> find(@RequestBody final FindQuery<E> findQuery) throws OperationNotSupportedException {
+  public List<E> find(@RequestBody @Valid final FindQuery<E> findQuery) throws OperationNotSupportedException {
     if (findQueryService != null) {
       logger.debug("Resolving find query: {}", findQuery);
       final Set<String> ids = findQueryService.resolveQuery(findQuery);
