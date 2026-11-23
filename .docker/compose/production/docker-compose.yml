@@ -1,4 +1,3 @@
-version: "3"
 services:
   couchdb:
     image: particify/couchdb:3.5@sha256:683c26a7d8ce6f44cb858e2ca4da82a4b5af90c1227887711f756098840ac397
