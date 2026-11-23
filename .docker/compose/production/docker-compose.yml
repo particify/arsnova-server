@@ -24,7 +24,7 @@ services:
     volumes:
       - postgresql_data_comment:/var/lib/postgresql/data
   rabbitmq:
-    image: particify/rabbitmq-stomp:4.3-alpine@sha256:c57eb6705ed4a7764e2f5f4738d085d12c582a071dcfc8152629066230d7c6ba
+    image: particify/rabbitmq-stomp:4.4-alpine@sha256:b26251895d63096b902bce0d4fc3ac4b09abb975a34545b5230cfffb9ec372fa
     environment:
       RABBITMQ_NODENAME: rabbit@localhost
     volumes:
