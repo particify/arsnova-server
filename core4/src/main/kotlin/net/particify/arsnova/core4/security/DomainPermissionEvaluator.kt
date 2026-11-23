@@ -3,14 +3,18 @@
  */
 package net.particify.arsnova.core4.security
 
+import java.util.UUID
 import kotlin.reflect.KClass
-import net.particify.arsnova.core4.user.User
 import org.springframework.modulith.NamedInterface
 
 /** Implementations evaluate permissions for a specific domain type [T]. */
 @NamedInterface("permission")
 interface DomainPermissionEvaluator<T : Any> {
-  fun hasPermission(user: User, targetDomainObject: T, permission: Any): DomainPermissionEvaluation
+  fun hasPermission(
+      userId: UUID,
+      targetDomainObject: T,
+      permission: Any
+  ): DomainPermissionEvaluation
 
   fun findOneByKey(key: Any): T
 

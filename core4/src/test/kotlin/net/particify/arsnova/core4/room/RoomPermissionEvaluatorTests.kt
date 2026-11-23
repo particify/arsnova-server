@@ -90,7 +90,7 @@ class RoomPermissionEvaluatorTests {
 
   private fun hasPermission(user: User, permission: String): Boolean? =
       roomPermissionEvaluator
-          .hasPermission(user, roomPermissionEvaluator.findOneByKey(ROOM_ID), permission)
+          .hasPermission(user.id!!, roomPermissionEvaluator.findOneByKey(ROOM_ID), permission)
           .hasPermission
 
   private fun member(role: RoomRole): User {
