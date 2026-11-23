@@ -126,6 +126,17 @@ public class ContentNegotiationTest {
         .andExpect(content().string(containsString("\"totalCount\":42")));
   }
 
+  /* Statistics are serialized by Actuator's object mapper, which unlike the default mapper keeps empty maps. */
+  @Test
+  @WithMockUser(value = "TestUser", roles = {"USER", "ADMIN"})
+  public void shouldSerializeStatsWithActuatorObjectMapper() throws Exception {
+    when(statisticsRepository.getStatistics()).thenReturn(new Statistics());
+
+    mockMvc.perform(get("/management/stats").header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("\"countByAuthProvider\":{}")));
+  }
+
   @ParameterizedTest
   @MethodSource("managementAcceptHeaders")
   public void shouldRespondWithJsonForHealthEndpoint(final String accept) throws Exception {
