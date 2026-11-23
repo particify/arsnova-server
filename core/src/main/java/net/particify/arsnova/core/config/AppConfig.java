@@ -45,7 +45,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -102,11 +102,18 @@ public class AppConfig implements WebMvcConfigurer {
   @Autowired
   private WebEndpointProperties webEndpointProperties;
 
+  /**
+   * Customizes the message converters auto-configured by Spring Boot. The
+   * converter list must not be replaced via
+   * {@link #configureMessageConverters(List)}. That would also disable the
+   * converters and customizations Spring Boot provides, e.g., for Actuator.
+   */
   @Override
-  public void configureMessageConverters(final List<HttpMessageConverter<?>> converters) {
-    converters.add(defaultJsonMessageConverter());
-    converters.add(stringMessageConverter());
-    converters.add(byteArrayHttpMessageConverter());
+  public void configureMessageConverters(final HttpMessageConverters.ServerBuilder builder) {
+    builder
+        .withJsonConverter(defaultJsonMessageConverter())
+        .withStringConverter(stringMessageConverter())
+        .addCustomConverter(byteArrayHttpMessageConverter());
   }
 
   @Override
@@ -168,6 +175,9 @@ public class AppConfig implements WebMvcConfigurer {
     final List<MediaType> mediaTypes = new ArrayList<>();
     mediaTypes.add(API_V3_MEDIA_TYPE);
     mediaTypes.add(MediaType.APPLICATION_JSON);
+    /* Required for Actuator's media types. This converter is the only JSON converter, so the Public view still
+     * applies by default. */
+    mediaTypes.add(new MediaType("application", "*+json"));
     converter.setSupportedMediaTypes(mediaTypes);
 
     return converter;
