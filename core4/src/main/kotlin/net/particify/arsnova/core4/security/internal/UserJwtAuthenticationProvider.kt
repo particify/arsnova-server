@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.security.internal
 
 import java.util.UUID
 import net.particify.arsnova.core4.security.RoomCreationPolicy
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import net.particify.arsnova.core4.user.UserService
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.BadCredentialsException
@@ -27,10 +28,10 @@ class UserJwtAuthenticationProvider(
     try {
       val jwt = jwtUtils.decodeJwt(authentication.credentials as String)
       val user =
-          userService.loadUserById(UUID.fromString(jwt.subject))
+          userService.loadUserById(UUID.fromString(jwt.subject))?.let(AuthenticatedUser::of)
               ?: throw BadCredentialsException("User for JWT not found.")
-      var authorities = user.authorities.plus(authentication.authorities)
-      if (user.username != null) {
+      var authorities = user.authorities().plus(authentication.authorities)
+      if (user.verified) {
         authorities = authorities.plus(ROLE_VERIFIED)
       }
       if (roomCreationPolicy.mayCreateRooms(user)) {

@@ -21,6 +21,7 @@ import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.internal.RoomServiceImpl
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.authenticationOf
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.data.domain.ScrollPosition
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
 
@@ -60,8 +60,7 @@ class QuestionnaireRoomDeletionTests {
 
   private fun createRoom(): Room {
     val user = userService.loadUserById(USER_ID)!!
-    SecurityContextHolder.getContext().authentication =
-        UsernamePasswordAuthenticationToken(user, null, user.authorities)
+    SecurityContextHolder.getContext().authentication = authenticationOf(user)
     return roomService.create(
         Room(shortId = roomService.generateShortId(), name = "Deletion ${UUID.randomUUID()}"),
         user.id!!)

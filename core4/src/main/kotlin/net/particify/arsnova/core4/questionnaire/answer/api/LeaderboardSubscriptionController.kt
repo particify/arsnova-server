@@ -7,7 +7,7 @@ import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.answer.LeaderboardPage
 import net.particify.arsnova.core4.questionnaire.answer.LeaderboardServiceImpl
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.graphql.data.method.annotation.SubscriptionMapping
@@ -50,7 +50,7 @@ class LeaderboardSubscriptionController(
       @Argument questionnaireId: UUID,
       @Argument contentId: UUID?,
       @Argument limit: Int?,
-      @AuthenticationPrincipal user: User,
+      @AuthenticationPrincipal user: AuthenticatedUser,
       locale: Locale
   ): Flux<LeaderboardPage> {
     contentId?.let { leaderboardServiceImpl.requireContentOfQuestionnaire(questionnaireId, it) }

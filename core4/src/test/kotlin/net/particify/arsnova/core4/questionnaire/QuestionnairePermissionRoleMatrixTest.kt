@@ -33,6 +33,7 @@ import net.particify.arsnova.core4.room.internal.MembershipRepository
 import net.particify.arsnova.core4.room.internal.RoomRepository
 import net.particify.arsnova.core4.security.DomainPermissionEvaluator
 import net.particify.arsnova.core4.security.internal.DelegatingPermissionEvaluator
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import net.particify.arsnova.core4.user.User
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
@@ -136,7 +137,8 @@ class QuestionnairePermissionRoleMatrixTest {
 
   private fun assertGrantedTo(target: Any, permission: String, granted: Set<RoomRole>) {
     ROLES.forEach { role ->
-      val authentication = TestingAuthenticationToken(userWithRole(role), null)
+      val authentication =
+          TestingAuthenticationToken(AuthenticatedUser.of(userWithRole(role)), null)
       Assertions.assertEquals(
           granted.contains(role),
           permissionEvaluator.hasPermission(authentication, target, permission),
@@ -311,7 +313,7 @@ class QuestionnairePermissionRoleMatrixTest {
     val content = content(questionnaire(published = false))
     ROLES.forEach { role ->
       SecurityContextHolder.getContext().authentication =
-          TestingAuthenticationToken(userWithRole(role), null)
+          TestingAuthenticationToken(AuthenticatedUser.of(userWithRole(role)), null)
       try {
         Assertions.assertEquals(
             role in EDITORS + RoomRole.MODERATOR,

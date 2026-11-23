@@ -20,6 +20,7 @@ import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.internal.MembershipServiceImpl
 import net.particify.arsnova.core4.room.internal.RoomServiceImpl
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.authenticationOf
 import net.particify.arsnova.core4.violationreport.event.ViolationReportDecision
 import net.particify.arsnova.core4.violationreport.internal.ViolationReportRepository
 import net.particify.arsnova.core4.violationreport.internal.api.CreateViolationReportInput
@@ -35,7 +36,6 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.ExecutionGraphQlResponse
 import org.springframework.graphql.ExecutionGraphQlService
 import org.springframework.graphql.execution.ErrorType
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
@@ -89,8 +89,7 @@ class ViolationReportTests {
           Access.ADMIN -> listOf("ROLE_VERIFIED", "ROLE_ADMIN")
         }
     SecurityContextHolder.getContext().authentication =
-        UsernamePasswordAuthenticationToken(
-            user, null, user.authorities + extraRoles.map(::SimpleGrantedAuthority))
+        authenticationOf(user, user.authorities + extraRoles.map(::SimpleGrantedAuthority))
   }
 
   private fun createRoom(): Room {

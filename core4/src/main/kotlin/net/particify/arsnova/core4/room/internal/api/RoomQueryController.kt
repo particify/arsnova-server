@@ -15,7 +15,7 @@ import net.particify.arsnova.core4.room.exception.MembershipNotFoundException
 import net.particify.arsnova.core4.room.exception.RoomNotFoundException
 import net.particify.arsnova.core4.room.internal.MembershipServiceImpl
 import net.particify.arsnova.core4.room.internal.RoomServiceImpl
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import org.springframework.data.domain.Example
 import org.springframework.data.domain.ExampleMatcher
 import org.springframework.data.domain.ScrollPosition
@@ -62,7 +62,7 @@ class RoomQueryController(
   fun roomMemberships(
       @Argument query: RoomQueryInput?,
       subrange: ScrollSubrange,
-      @AuthenticationPrincipal user: User
+      @AuthenticationPrincipal user: AuthenticatedUser
   ): Window<Membership> {
     val queryBuilder = BooleanBuilder()
     queryBuilder.and(QMembership.membership.user.id.eq(user.id))
@@ -92,9 +92,9 @@ class RoomQueryController(
   @PreAuthorize("hasPermission(#shortId, 'Room', 'read')")
   fun roomMembershipByShortId(
       @Argument shortId: String,
-      @AuthenticationPrincipal user: User
+      @AuthenticationPrincipal user: AuthenticatedUser
   ): Membership {
-    return membershipService.findOneByUserIdAndRoomShortId(user?.id!!, shortId.toInt())
+    return membershipService.findOneByUserIdAndRoomShortId(user.id, shortId.toInt())
         ?: throw MembershipNotFoundException()
   }
 

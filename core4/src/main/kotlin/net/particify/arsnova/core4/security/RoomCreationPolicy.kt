@@ -4,7 +4,7 @@
 package net.particify.arsnova.core4.security
 
 import net.particify.arsnova.core4.security.SecurityProperties.RoomCreatorRole.AutoAssignment
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import org.springframework.stereotype.Component
 
 /**
@@ -15,9 +15,8 @@ import org.springframework.stereotype.Component
  */
 @Component
 class RoomCreationPolicy(private val securityProperties: SecurityProperties) {
-  fun mayCreateRooms(user: User): Boolean =
-      if (user.username != null) mayVerifiedAccountsCreateRooms()
-      else mayUnverifiedAccountsCreateRooms()
+  fun mayCreateRooms(user: AuthenticatedUser): Boolean =
+      if (user.verified) mayVerifiedAccountsCreateRooms() else mayUnverifiedAccountsCreateRooms()
 
   fun mayVerifiedAccountsCreateRooms(): Boolean = autoAssignTo() != AutoAssignment.NONE
 

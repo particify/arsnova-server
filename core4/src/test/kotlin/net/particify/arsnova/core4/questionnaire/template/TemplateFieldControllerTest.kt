@@ -8,10 +8,10 @@ import java.util.UUID
 import net.particify.arsnova.core4.common.AuditMetadata
 import net.particify.arsnova.core4.questionnaire.template.api.TemplateFieldController
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.authenticationOf
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 
 private const val PAGE_SIZE = 100
 
@@ -47,7 +47,7 @@ class TemplateFieldControllerTest {
     Mockito.`when`(tagRepository.findWithTemplateIdByTemplateIds(Mockito.anyCollection()))
         .thenReturn(listOf(arrayOf(templates.first().id!!, tag)))
     val context = GraphQLContext.newContext().build()
-    val principal = UsernamePasswordAuthenticationToken(creator, null, listOf())
+    val principal = authenticationOf(creator, listOf())
 
     val counts = controller.contentCount(templates, context)
     val types = controller.questionnaireType(templates, context)
@@ -69,7 +69,7 @@ class TemplateFieldControllerTest {
   @Test
   fun shouldHideTheSourceFromOthersWithoutLookingItUp() {
     val other = User(id = UUID.randomUUID())
-    val principal = UsernamePasswordAuthenticationToken(other, null, listOf())
+    val principal = authenticationOf(other, listOf())
     Assertions.assertEquals(
         mapOf<Template, UUID>(), controller.sourceQuestionnaireId(templates, principal))
     Assertions.assertEquals(

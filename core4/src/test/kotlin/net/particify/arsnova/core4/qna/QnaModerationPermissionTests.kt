@@ -15,6 +15,7 @@ import net.particify.arsnova.core4.room.internal.MembershipServiceImpl
 import net.particify.arsnova.core4.security.internal.DelegatingPermissionEvaluator
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.authenticationOf
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -22,7 +23,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
@@ -164,8 +164,7 @@ class QnaModerationPermissionTests {
       permissionEvaluator.hasPermission(
           authentication(user), checkNotNull(targetId), targetType, permission)
 
-  private fun authentication(user: User): Authentication =
-      UsernamePasswordAuthenticationToken.authenticated(user, null, listOf())
+  private fun authentication(user: User): Authentication = authenticationOf(user, listOf())
 
   private fun member(role: RoomRole): User {
     val user = userService.createAccount()

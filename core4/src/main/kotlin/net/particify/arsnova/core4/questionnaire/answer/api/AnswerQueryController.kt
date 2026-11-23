@@ -13,7 +13,7 @@ import net.particify.arsnova.core4.questionnaire.answer.AnswerServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.ContentAnswerResult
 import net.particify.arsnova.core4.questionnaire.answer.QuestionnaireAnswerResult
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
@@ -34,11 +34,11 @@ class AnswerQueryController(
   @PreAuthorize("hasPermission(#roundId, 'Round', 'read')")
   fun questionnaireAnswerByRoundId(
       @Argument roundId: UUID,
-      @AuthenticationPrincipal user: User
+      @AuthenticationPrincipal user: AuthenticatedUser
   ): Answer? {
     return answerServiceImpl.findByRoundIdAndAuditMetadataCreatedBy(
         roundId,
-        user.id!!,
+        user.id,
     )
   }
 
@@ -52,21 +52,21 @@ class AnswerQueryController(
   @PreAuthorize("hasPermission(#questionnaireId, 'Questionnaire', 'read')")
   fun questionnaireContentAnswerResultsByQuestionnaireId(
       @Argument questionnaireId: UUID,
-      @AuthenticationPrincipal user: User,
+      @AuthenticationPrincipal user: AuthenticatedUser,
   ): List<ContentAnswerResult> {
     return answerResultVisibility.contentResults(
         questionnaireId,
-        answerServiceImpl.findQuestionnaireContentAnswerResults(questionnaireId, user.id!!))
+        answerServiceImpl.findQuestionnaireContentAnswerResults(questionnaireId, user.id))
   }
 
   @QueryMapping
   @PreAuthorize("hasPermission(#questionnaireId, 'Questionnaire', 'read')")
   fun questionnaireAnswerResultsByQuestionnaireId(
       @Argument questionnaireId: UUID,
-      @AuthenticationPrincipal user: User,
+      @AuthenticationPrincipal user: AuthenticatedUser,
   ): QuestionnaireAnswerResult {
     return answerResultVisibility.questionnaireResult(
-        answerServiceImpl.findQuestionnaireAnswerResults(questionnaireId, user.id!!))
+        answerServiceImpl.findQuestionnaireAnswerResults(questionnaireId, user.id))
   }
 
   @SchemaMapping(typeName = "Answer")

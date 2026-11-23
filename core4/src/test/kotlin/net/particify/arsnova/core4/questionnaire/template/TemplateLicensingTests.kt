@@ -24,6 +24,7 @@ import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.internal.RoomServiceImpl
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.authenticationOf
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -34,7 +35,6 @@ import org.springframework.context.annotation.Import
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.graphql.ExecutionGraphQlService
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.support.TransactionTemplate
@@ -81,8 +81,7 @@ class TemplateLicensingTests {
   private fun authenticate(userId: UUID): User = authenticate(userService.loadUserById(userId)!!)
 
   private fun authenticate(user: User): User {
-    SecurityContextHolder.getContext().authentication =
-        UsernamePasswordAuthenticationToken(user, null, user.authorities)
+    SecurityContextHolder.getContext().authentication = authenticationOf(user)
     return user
   }
 

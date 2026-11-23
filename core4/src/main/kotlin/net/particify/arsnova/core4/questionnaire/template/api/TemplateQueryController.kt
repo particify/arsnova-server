@@ -16,7 +16,7 @@ import net.particify.arsnova.core4.questionnaire.template.TemplateQuestionnaireS
 import net.particify.arsnova.core4.questionnaire.template.TemplateServiceImpl
 import net.particify.arsnova.core4.questionnaire.template.TemplateTag
 import net.particify.arsnova.core4.questionnaire.template.TemplateTagServiceImpl
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import org.springframework.data.domain.OffsetScrollPosition
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Sort
@@ -46,7 +46,7 @@ class TemplateQueryController(
 
   @QueryMapping
   fun currentUserTemplates(
-      @AuthenticationPrincipal user: User,
+      @AuthenticationPrincipal user: AuthenticatedUser,
       subrange: ScrollSubrange
   ): Window<Template> {
     val position =

@@ -16,6 +16,7 @@ import net.particify.arsnova.core4.questionnaire.template.api.TemplateQueryContr
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.internal.RoomServiceImpl
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.authenticationOf
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -23,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
@@ -58,8 +58,7 @@ class TemplateAdministrationTests {
     val user = userService.loadUserById(userId)!!
     val authorities =
         if (admin) user.authorities + SimpleGrantedAuthority("ROLE_ADMIN") else user.authorities
-    SecurityContextHolder.getContext().authentication =
-        UsernamePasswordAuthenticationToken(user, null, authorities)
+    SecurityContextHolder.getContext().authentication = authenticationOf(user, authorities)
   }
 
   private fun createPublishedTemplate(): Template {

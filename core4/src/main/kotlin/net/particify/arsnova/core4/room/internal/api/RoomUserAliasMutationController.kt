@@ -6,7 +6,7 @@ package net.particify.arsnova.core4.room.internal.api
 import java.util.Locale
 import net.particify.arsnova.core4.room.RoomUserAlias
 import net.particify.arsnova.core4.room.internal.RoomUserAliasServiceImpl
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
@@ -22,9 +22,9 @@ class RoomUserAliasMutationController(private val roomUserAliasService: RoomUser
   @PreAuthorize("hasPermission(#input.roomId, 'Room', 'read')")
   fun setRoomUserAlias(
       @Argument input: SetRoomUserAliasInput,
-      @AuthenticationPrincipal user: User,
+      @AuthenticationPrincipal user: AuthenticatedUser,
       locale: Locale
   ): RoomUserAlias {
-    return roomUserAliasService.set(input.roomId, user.id!!, input.alias, input.seed, locale)
+    return roomUserAliasService.set(input.roomId, user.id, input.alias, input.seed, locale)
   }
 }

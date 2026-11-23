@@ -12,7 +12,7 @@ import net.particify.arsnova.core4.room.internal.api.RoomMutationController
 import net.particify.arsnova.core4.security.internal.JwtUtils
 import net.particify.arsnova.core4.security.internal.UserJwtAuthentication
 import net.particify.arsnova.core4.security.internal.UserJwtAuthenticationProvider
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import net.particify.arsnova.core4.user.UserService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -58,25 +58,25 @@ abstract class RoomCreationAuthorizationTestSupport {
     SecurityContextHolder.clearContext()
   }
 
-  protected fun authenticateVerifiedUser(): User = authenticate(VERIFIED_USER_ID)
+  protected fun authenticateVerifiedUser(): AuthenticatedUser = authenticate(VERIFIED_USER_ID)
 
-  protected fun authenticateUnverifiedUser(): User =
+  protected fun authenticateUnverifiedUser(): AuthenticatedUser =
       authenticate(checkNotNull(userService.createAccount().id))
 
-  protected fun createRoom(user: User): Room =
+  protected fun createRoom(user: AuthenticatedUser): Room =
       roomMutationController.createRoom(CreateRoomInput("Created room"), user)
 
-  protected fun duplicateOwnedRoom(user: User): Room =
+  protected fun duplicateOwnedRoom(user: AuthenticatedUser): Room =
       roomMutationController.duplicateRoom(DuplicateRoomInput(OWNED_ROOM_ID, "Copy"), user)
 
-  protected fun duplicateDemoRoom(user: User): Room =
+  protected fun duplicateDemoRoom(user: AuthenticatedUser): Room =
       roomMutationController.duplicateDemoRoom(user, Locale.ENGLISH)
 
   /**
    * The provider reads the account's roles, which are only reachable while a transaction is open:
    * outside a request there is no session to load them lazily from.
    */
-  protected fun authenticate(userId: UUID): User {
+  protected fun authenticate(userId: UUID): AuthenticatedUser {
     val token = jwtUtils.encodeJwt(userId.toString(), listOf())
     val authentication =
         checkNotNull(
@@ -84,7 +84,7 @@ abstract class RoomCreationAuthorizationTestSupport {
               authenticationProvider.authenticate(UserJwtAuthentication(token))
             })
     SecurityContextHolder.getContext().authentication = authentication
-    return authentication.principal as User
+    return authentication.principal as AuthenticatedUser
   }
 }
 

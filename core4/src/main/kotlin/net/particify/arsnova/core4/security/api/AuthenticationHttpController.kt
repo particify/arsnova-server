@@ -21,7 +21,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -44,13 +43,13 @@ class AuthenticationHttpController(
   @PostMapping("/refresh")
   @PreAuthorize("hasRole('REFRESH')")
   fun refreshAuthentication(
-      @AuthenticationPrincipal user: User,
       authentication: Authentication,
       request: HttpServletRequest,
       response: HttpServletResponse
   ): AuthenticationWrapper {
     if (authentication !is RefreshJwtAuthentication)
         throw AccessDeniedException("Refresh not allowed for authentication")
+    val user = checkNotNull(authentication.user)
     try {
       userService.updateLastActivityAt(user)
     } catch (e: ObjectOptimisticLockingFailureException) {
@@ -59,7 +58,7 @@ class AuthenticationHttpController(
       throw ResponseStatusException(
           HttpStatus.TOO_MANY_REQUESTS, "Request rejected due to optimistic locking failure.", e)
     }
-    val subject = authentication.principal!!.id.toString()
+    val subject = user.id.toString()
     val accessToken = jwtUtils.encodeJwt(subject, user.roles.map { it.name!! })
     refreshCookieComponent.renew(
         subject, user.tokenVersion!!, authentication.sessionLifetime, request, response)

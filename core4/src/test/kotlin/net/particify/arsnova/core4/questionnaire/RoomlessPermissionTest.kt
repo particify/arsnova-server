@@ -23,7 +23,7 @@ import net.particify.arsnova.core4.questionnaire.template.TemplatePermissionEval
 import net.particify.arsnova.core4.questionnaire.template.TemplateRepository
 import net.particify.arsnova.core4.security.DomainPermissionEvaluator
 import net.particify.arsnova.core4.security.internal.DelegatingPermissionEvaluator
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -76,7 +76,9 @@ class RoomlessPermissionTest {
 
   private fun allowed(userId: UUID, target: Any, permission: String) =
       permissionEvaluator.hasPermission(
-          TestingAuthenticationToken(User(id = userId), null), target, permission)
+          TestingAuthenticationToken(AuthenticatedUser(userId, emptySet(), false), null),
+          target,
+          permission)
 
   @Test
   fun shouldLetTheCreatorReadAndChangeButNotDeleteOrRankTheQuestionnaire() {

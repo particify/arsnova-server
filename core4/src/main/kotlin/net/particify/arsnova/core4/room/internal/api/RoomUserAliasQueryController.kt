@@ -7,7 +7,7 @@ import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.room.RoomUserAlias
 import net.particify.arsnova.core4.room.internal.RoomUserAliasServiceImpl
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
@@ -24,9 +24,9 @@ class RoomUserAliasQueryController(private val roomUserAliasService: RoomUserAli
   @PreAuthorize("hasPermission(#roomId, 'Room', 'read')")
   fun roomUserAliasByRoomId(
       @Argument roomId: UUID,
-      @AuthenticationPrincipal user: User,
+      @AuthenticationPrincipal user: AuthenticatedUser,
       locale: Locale
   ): RoomUserAlias {
-    return roomUserAliasService.retrieveOrGenerate(roomId, user.id!!, locale)
+    return roomUserAliasService.retrieveOrGenerate(roomId, user.id, locale)
   }
 }

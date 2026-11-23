@@ -134,7 +134,7 @@ class UserPasswordStrengthQueryTests {
   private fun authenticate(user: User) {
     SecurityContextHolder.getContext().authentication =
         UsernamePasswordAuthenticationToken.authenticated(
-            user, null, listOf(SimpleGrantedAuthority("ROLE_USER")))
+            AuthenticatedUser.of(user), null, listOf(SimpleGrantedAuthority("ROLE_USER")))
   }
 
   @Suppress("UNCHECKED_CAST")

@@ -14,7 +14,8 @@ import net.particify.arsnova.core4.questionnaire.template.Template
 import net.particify.arsnova.core4.questionnaire.template.TemplateQuestionnaireService
 import net.particify.arsnova.core4.questionnaire.template.TemplateTag
 import net.particify.arsnova.core4.questionnaire.template.TemplateTagServiceImpl
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
+import net.particify.arsnova.core4.user.userId
 import org.springframework.graphql.data.method.annotation.BatchMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.security.core.Authentication
@@ -40,7 +41,10 @@ class TemplateFieldController(
   }
 
   @SchemaMapping(typeName = "Template")
-  fun createdByCurrentUser(template: Template, @AuthenticationPrincipal user: User): Boolean {
+  fun createdByCurrentUser(
+      template: Template,
+      @AuthenticationPrincipal user: AuthenticatedUser
+  ): Boolean {
     return isCreator(template, user.id)
   }
 
@@ -55,7 +59,7 @@ class TemplateFieldController(
    */
   @BatchMapping(typeName = "Template")
   fun sourceQuestionnaireId(templates: List<Template>, principal: Principal?): Map<Template, UUID> {
-    val userId = ((principal as? Authentication)?.principal as? User)?.id
+    val userId = (principal as? Authentication).userId()
     val sources =
         templates
             .filter { isCreator(it, userId) }
