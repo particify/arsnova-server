@@ -19,6 +19,7 @@ import net.particify.arsnova.core4.room.internal.RoomServiceImpl
 import net.particify.arsnova.core4.user.LocalUserService
 import net.particify.arsnova.core4.user.MAIL_ADDRESS_MAX_LENGTH
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.UserService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
@@ -33,7 +34,8 @@ import org.springframework.stereotype.Controller
 class RoomMutationController(
     private val roomService: RoomServiceImpl,
     private val membershipService: MembershipServiceImpl,
-    private val localUserService: LocalUserService
+    private val localUserService: LocalUserService,
+    private val userService: UserService
 ) {
 
   @MutationMapping
@@ -131,7 +133,11 @@ class RoomMutationController(
     val room = roomService.findByIdOrNull(roomId) ?: error("Room not found.")
     val invitee =
         localUserService.inviteUser(
-            user, mailAddress, "invitation-verification", mapOf("room" to room), locale)
+            userService.getUserById(user.id!!),
+            mailAddress,
+            "invitation-verification",
+            mapOf("room" to room),
+            locale)
     val membership = Membership(room = Room(id = roomId), user = User(id = invitee.id))
     membership.role = role
     return membershipService.save(membership)

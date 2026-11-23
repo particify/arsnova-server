@@ -27,8 +27,8 @@ class UserQueryController(
     private val passwordPolicy: PasswordPolicy
 ) {
   @QueryMapping
-  fun currentUser(@AuthenticationPrincipal user: User): User {
-    return user
+  fun currentUser(@AuthenticationPrincipal principal: User): User {
+    return userService.getUserById(principal.id!!)
   }
 
   @QueryMapping
@@ -49,10 +49,11 @@ class UserQueryController(
   @PreAuthorize("hasRole('USER') or hasRole('CHALLENGE_SOLVED_REUSABLE')")
   fun userPasswordStrength(
       @Argument query: UserPasswordStrengthQueryInput,
-      @AuthenticationPrincipal user: User?,
+      @AuthenticationPrincipal principal: User?,
       locale: Locale
   ): PasswordStrength {
     PasswordValidator.check(query.password)
+    val user = principal?.let { userService.getUserById(it.id!!) }
     val inputs =
         listOf(
             user?.mailAddress,

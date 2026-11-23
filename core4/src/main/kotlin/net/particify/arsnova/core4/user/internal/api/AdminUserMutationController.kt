@@ -39,7 +39,11 @@ class AdminUserMutationController(
       locale: Locale
   ): User {
     return localUserService.inviteUser(
-        user, mailAddress, "admin-invitation-verification", mapOf(), locale)
+        userService.getUserById(user.id!!),
+        mailAddress,
+        "admin-invitation-verification",
+        mapOf(),
+        locale)
   }
 
   @MutationMapping

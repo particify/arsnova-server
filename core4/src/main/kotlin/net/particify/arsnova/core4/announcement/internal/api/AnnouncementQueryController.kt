@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.announcement.internal.api
@@ -64,7 +64,8 @@ class AnnouncementQueryController(
   }
 
   @QueryMapping
-  fun announcementsMetaForCurrentUser(@AuthenticationPrincipal user: User): AnnouncementMeta {
+  fun announcementsMetaForCurrentUser(@AuthenticationPrincipal principal: User): AnnouncementMeta {
+    val user = userService.getUserById(principal.id!!)
     val memberships = membershipService.findByUserId(user.id!!, ScrollPosition.offset())
     val roomIds = memberships.map { it.room?.id!! }.toSet()
     val count =
