@@ -28,9 +28,9 @@ This repository contains files to integrate all of the Particify services and se
 
 === Running
 
-. Run `PORT=<port> docker-compose up`. Append `-d` to run in detached mode for production.
-. Run `docker-compose down` stop and remove the containers.
-. Run `docker-compose pull` to update the images.
+. Run `PORT=<port> docker compose up`. Append `-d` to run in detached mode for production.
+. Run `docker compose down` stop and remove the containers.
+. Run `docker compose pull` to update the images.
 
 === Configuration
 
@@ -67,7 +67,7 @@ The default configuration can be adjusted via environment variables:
 |FORMATTING_TAG|3.14.20261123 |Docker tag (repository branch) for Formatting Service
 |=======
 
-Example: `PORT=8100 WEB_TAG=my-dev-branch docker-compose up`
+Example: `PORT=8100 WEB_TAG=my-dev-branch docker compose up`
 
 NOTE: Docker images are not automatically created for development branches.
 Make sure to trigger the `docker_image_dev` job in GitLab's pipeline view and delete the image from the registry once it is no longer needed.
@@ -77,9 +77,9 @@ Make sure to trigger the `docker_image_dev` job in GitLab's pipeline view and de
 When the PostgreSQL image is updated to a new major version, the existing data has to be upgraded with `pg_upgrade.sh`.
 There is no rollback support, so back up the volumes first.
 
-. Stop the containers with `docker-compose stop`.
+. Stop the containers with `docker compose stop`.
 . Back up the volumes `particify_postgresql_data_auth` and `particify_postgresql_data_comment`.
 . Run `./pg_upgrade.sh auth` and `./pg_upgrade.sh comment`.
-. Start the containers with `docker-compose up -d`.
+. Start the containers with `docker compose up -d`.
 
 If an upgrade fails, restore the backup before running the script again.
