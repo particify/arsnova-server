@@ -9,8 +9,9 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 
 /**
- * The principal of a request authenticated by an access token. It holds only what authorization
- * needs, so a request which needs more of the account loads it by [id].
+ * The principal of every request authenticated as an account, whether by an access or refresh token
+ * or, in development, by HTTP Basic. It holds only what authorization needs, so a request which
+ * needs more of the account loads it by [id].
  *
  * @param roles the names of the account's roles
  * @param verified whether the account has a username, which only a verified mail address grants
