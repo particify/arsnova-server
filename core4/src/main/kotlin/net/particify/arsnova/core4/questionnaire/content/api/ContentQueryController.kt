@@ -17,8 +17,6 @@ import net.particify.arsnova.core4.questionnaire.content.PrioritizationContentFo
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
 import net.particify.arsnova.core4.questionnaire.content.SortContentFormatData
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
-import net.particify.arsnova.core4.questionnaire.round.Round
-import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Window
 import org.springframework.data.repository.findByIdOrNull
@@ -34,7 +32,6 @@ import org.springframework.stereotype.Controller
 class ContentQueryController(
     private val contentServiceImpl: ContentServiceImpl,
     private val textRenderingService: TextRenderingService,
-    private val roundService: RoundServiceImpl,
     private val answerRepository: AnswerRepository,
     private val solutionVisibility: SolutionVisibility
 ) {
@@ -58,11 +55,6 @@ class ContentQueryController(
   @SchemaMapping(typeName = "Content")
   fun bodyRendered(content: Content): String? {
     return textRenderingService.renderText(content.body, TextRenderingOptions.EXTENDED_MARKDOWN)
-  }
-
-  @SchemaMapping(typeName = "Content")
-  fun activeRound(content: Content): Round? {
-    return roundService.findByContentIdOrderByRoundNo(content.id!!).lastOrNull()
   }
 
   @SchemaMapping(typeName = "FlashcardContentFormatData")
@@ -90,7 +82,7 @@ class ContentQueryController(
   @SchemaMapping(typeName = "Content")
   fun answerCount(content: Content): Int? {
     if (!solutionVisibility.maySeeStatistics(content)) return null
-    return activeRound(content)?.id?.let { answerRepository.countByRoundIdAndHiddenFalse(it) } ?: 0
+    return content.activeRound?.id?.let { answerRepository.countByRoundIdAndHiddenFalse(it) } ?: 0
   }
 
   @SchemaMapping(typeName = "Content")
@@ -106,7 +98,7 @@ class ContentQueryController(
   }
 
   private fun countByResult(content: Content, result: AnswerResultState): Int =
-      activeRound(content)?.id?.let {
+      content.activeRound?.id?.let {
         answerRepository.countByRoundIdAndHiddenFalseAndResult(it, result)
       } ?: 0
 

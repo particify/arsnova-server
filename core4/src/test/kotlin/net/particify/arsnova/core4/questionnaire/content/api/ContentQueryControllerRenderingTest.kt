@@ -12,7 +12,6 @@ import net.particify.arsnova.core4.questionnaire.content.Content
 import net.particify.arsnova.core4.questionnaire.content.ContentServiceImpl
 import net.particify.arsnova.core4.questionnaire.content.FlashcardContentFormatData
 import net.particify.arsnova.core4.questionnaire.content.SolutionVisibility
-import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 
@@ -23,7 +22,6 @@ class ContentQueryControllerRenderingTest {
       ContentQueryController(
           Mockito.mock(ContentServiceImpl::class.java),
           textRenderingService,
-          Mockito.mock(RoundServiceImpl::class.java),
           Mockito.mock(AnswerRepository::class.java),
           Mockito.mock(SolutionVisibility::class.java))
 
