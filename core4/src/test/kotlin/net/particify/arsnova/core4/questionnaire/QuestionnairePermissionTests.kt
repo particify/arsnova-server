@@ -25,8 +25,10 @@ import net.particify.arsnova.core4.questionnaire.questionnaire.api.Questionnaire
 import net.particify.arsnova.core4.questionnaire.round.api.RoundMutationController
 import net.particify.arsnova.core4.questionnaire.round.api.RoundQueryController
 import net.particify.arsnova.core4.questionnaire.round.api.RoundStatsSubscriptionController
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.authenticationOf
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -36,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
 
@@ -90,8 +91,7 @@ class QuestionnairePermissionTests {
 
   private fun authenticate(userId: UUID): User {
     val user = userService.loadUserById(userId)!!
-    SecurityContextHolder.getContext().authentication =
-        UsernamePasswordAuthenticationToken(user, null, user.authorities)
+    SecurityContextHolder.getContext().authentication = authenticationOf(user)
     return user
   }
 
@@ -219,13 +219,14 @@ class QuestionnairePermissionTests {
         },
         { answerMutationController.createQuestionnaireAbstention(roundId) },
         { answerMutationController.deleteQuestionnaireAnswersByContentId(contentId) },
-        { answerQueryController.questionnaireAnswerByRoundId(roundId, user) },
+        { answerQueryController.questionnaireAnswerByRoundId(roundId, AuthenticatedUser.of(user)) },
         {
           answerQueryController.questionnaireContentAnswerResultsByQuestionnaireId(
-              questionnaireId, user)
+              questionnaireId, AuthenticatedUser.of(user))
         },
         {
-          answerQueryController.questionnaireAnswerResultsByQuestionnaireId(questionnaireId, user)
+          answerQueryController.questionnaireAnswerResultsByQuestionnaireId(
+              questionnaireId, AuthenticatedUser.of(user))
         },
     )
   }
@@ -253,9 +254,11 @@ class QuestionnairePermissionTests {
     answerMutationController.createQuestionnaireChoiceAnswer(
         CreateChoiceAnswerInput(roundIdOf(content), listOf(0)))
     Assertions.assertNotNull(
-        answerQueryController.questionnaireAnswerByRoundId(roundIdOf(content), user))
+        answerQueryController.questionnaireAnswerByRoundId(
+            roundIdOf(content), AuthenticatedUser.of(user)))
     Assertions.assertNotNull(
-        answerQueryController.questionnaireAnswerResultsByQuestionnaireId(questionnaire.id!!, user))
+        answerQueryController.questionnaireAnswerResultsByQuestionnaireId(
+            questionnaire.id!!, AuthenticatedUser.of(user)))
   }
 
   @Test
@@ -269,13 +272,17 @@ class QuestionnairePermissionTests {
             CreateChoiceAnswerInput(roundIdOf(content), listOf(0)))
     Assertions.assertEquals(AnswerResultState.CORRECT, answer.result)
     Assertions.assertEquals(AnswerResultState.NEUTRAL, answerQueryController.result(answer))
-    val queried = answerQueryController.questionnaireAnswerByRoundId(roundIdOf(content), user)!!
+    val queried =
+        answerQueryController.questionnaireAnswerByRoundId(
+            roundIdOf(content), AuthenticatedUser.of(user))!!
     Assertions.assertEquals(AnswerResultState.NEUTRAL, answerQueryController.result(queried))
     authenticate(OWNER_ID)
     Assertions.assertEquals(AnswerResultState.CORRECT, answerQueryController.result(answer))
     publishSolution(questionnaire, true)
     authenticate(OTHER_USER_ID)
-    val published = answerQueryController.questionnaireAnswerByRoundId(roundIdOf(content), user)!!
+    val published =
+        answerQueryController.questionnaireAnswerByRoundId(
+            roundIdOf(content), AuthenticatedUser.of(user))!!
     Assertions.assertEquals(AnswerResultState.CORRECT, answerQueryController.result(published))
   }
 

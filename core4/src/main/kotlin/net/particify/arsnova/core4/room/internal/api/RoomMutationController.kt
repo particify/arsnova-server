@@ -16,9 +16,11 @@ import net.particify.arsnova.core4.room.exception.MembershipNotFoundException
 import net.particify.arsnova.core4.room.exception.RoomNotFoundException
 import net.particify.arsnova.core4.room.internal.MembershipServiceImpl
 import net.particify.arsnova.core4.room.internal.RoomServiceImpl
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import net.particify.arsnova.core4.user.LocalUserService
 import net.particify.arsnova.core4.user.MAIL_ADDRESS_MAX_LENGTH
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.UserService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
@@ -33,24 +35,31 @@ import org.springframework.stereotype.Controller
 class RoomMutationController(
     private val roomService: RoomServiceImpl,
     private val membershipService: MembershipServiceImpl,
-    private val localUserService: LocalUserService
+    private val localUserService: LocalUserService,
+    private val userService: UserService
 ) {
 
   @MutationMapping
   @PreAuthorize("hasRole('ROOM_CREATOR')")
-  fun createRoom(@Argument input: CreateRoomInput, @AuthenticationPrincipal user: User): Room {
-    return roomService.create(input.toRoom(roomService.generateShortId()), user)
+  fun createRoom(
+      @Argument input: CreateRoomInput,
+      @AuthenticationPrincipal user: AuthenticatedUser
+  ): Room {
+    return roomService.create(input.toRoom(roomService.generateShortId()), user.id)
   }
 
   @MutationMapping
-  fun joinRoom(@Argument input: JoinRoomInput, @AuthenticationPrincipal user: User): Membership {
+  fun joinRoom(
+      @Argument input: JoinRoomInput,
+      @AuthenticationPrincipal user: AuthenticatedUser
+  ): Membership {
     if (input.id == null && input.shortId == null) {
       throw InvalidInputException("One of id or shortId is required.")
     }
     val room =
         (if (input.id != null) roomService.findByIdOrNull(input.id)
         else roomService.findOneByShortId(input.shortId!!)) ?: throw RoomNotFoundException(input.id)
-    return membershipService.joinRoom(room, user)
+    return membershipService.joinRoom(room, user.id)
   }
 
   @MutationMapping
@@ -122,7 +131,7 @@ class RoomMutationController(
       @Argument roomId: UUID,
       @Argument @Email @Size(max = MAIL_ADDRESS_MAX_LENGTH) mailAddress: String,
       @Argument role: RoomRole,
-      @AuthenticationPrincipal user: User,
+      @AuthenticationPrincipal user: AuthenticatedUser,
       locale: Locale
   ): Membership {
     if (role == RoomRole.OWNER || role == RoomRole.PARTICIPANT) {
@@ -131,7 +140,11 @@ class RoomMutationController(
     val room = roomService.findByIdOrNull(roomId) ?: error("Room not found.")
     val invitee =
         localUserService.inviteUser(
-            user, mailAddress, "invitation-verification", mapOf("room" to room), locale)
+            userService.getUserById(user.id),
+            mailAddress,
+            "invitation-verification",
+            mapOf("room" to room),
+            locale)
     val membership = Membership(room = Room(id = roomId), user = User(id = invitee.id))
     membership.role = role
     return membershipService.save(membership)
@@ -153,7 +166,7 @@ class RoomMutationController(
   @PreAuthorize("hasPermission(#roomId, 'Room', 'read')")
   fun revokeRoomMembership(
       @Argument roomId: UUID,
-      @AuthenticationPrincipal user: User
+      @AuthenticationPrincipal user: AuthenticatedUser
   ): Membership {
     val id = Membership.RoomUserId(roomId, user.id)
     val membership = membershipService.findByIdOrNull(id) ?: throw MembershipNotFoundException(id)
@@ -168,15 +181,15 @@ class RoomMutationController(
   @PreAuthorize("hasRole('ROOM_CREATOR') and hasPermission(#input.id, 'Room', 'administer')")
   fun duplicateRoom(
       @Argument input: DuplicateRoomInput,
-      @AuthenticationPrincipal user: User
+      @AuthenticationPrincipal user: AuthenticatedUser
   ): Room {
     val room = roomService.findByIdOrNull(input.id) ?: throw RoomNotFoundException(input.id)
-    return roomService.duplicate(room, input.newName, user)
+    return roomService.duplicate(room, input.newName, user.id)
   }
 
   @MutationMapping
   @PreAuthorize("hasRole('ROOM_CREATOR')")
-  fun duplicateDemoRoom(@AuthenticationPrincipal user: User, locale: Locale): Room {
-    return roomService.duplicateDemo(user, locale)
+  fun duplicateDemoRoom(@AuthenticationPrincipal user: AuthenticatedUser, locale: Locale): Room {
+    return roomService.duplicateDemo(user.id, locale)
   }
 }

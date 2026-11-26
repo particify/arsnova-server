@@ -12,6 +12,7 @@ import net.particify.arsnova.core4.qna.internal.QnaRepository
 import net.particify.arsnova.core4.qna.internal.ReplyRepository
 import net.particify.arsnova.core4.qna.internal.ReplyServiceImpl
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.authenticationOf
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -20,7 +21,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
@@ -100,8 +100,7 @@ class ReplyServiceTests {
     Assertions.assertTrue(replyRepository.findByPostId(postId()).isEmpty())
   }
 
-  private fun authentication(user: User): Authentication =
-      UsernamePasswordAuthenticationToken.authenticated(user, null, listOf())
+  private fun authentication(user: User): Authentication = authenticationOf(user, listOf())
 
   private fun createReply(body: String): Reply =
       replyService.create(Reply(post = Post(id = postId()), body = body))

@@ -19,6 +19,7 @@ import net.particify.arsnova.core4.room.event.RoomDeletedEvent
 import net.particify.arsnova.core4.room.event.RoomDuplicatedEvent
 import net.particify.arsnova.core4.room.exception.RoomNotFoundException
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.UserService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -28,7 +29,8 @@ class RoomServiceImpl(
     private val roomRepository: RoomRepository,
     private val roomUserAliasRepository: RoomUserAliasRepository,
     private val applicationEventPublisher: ApplicationEventPublisher,
-    private val roomProperties: RoomProperties
+    private val roomProperties: RoomProperties,
+    private val userService: UserService
 ) : RoomService, RoomRepository by roomRepository {
   companion object {
     private val SHORT_ID_MAX: Int = (10.0.pow(Room.SHORT_ID_LENGTH) - 1).toInt()
@@ -41,11 +43,11 @@ class RoomServiceImpl(
   }
 
   @Transactional
-  fun create(room: Room, user: User, isDuplication: Boolean = false): Room {
+  fun create(room: Room, userId: UUID, isDuplication: Boolean = false): Room {
     val membership =
         Membership(
             room = room,
-            user = user,
+            user = User(id = userId),
             role = RoomRole.OWNER,
             lastActivityAt = Instant.now(),
         )
@@ -63,22 +65,22 @@ class RoomServiceImpl(
   }
 
   @Transactional
-  fun duplicate(room: Room, newName: String, user: User): Room {
+  fun duplicate(room: Room, newName: String, userId: UUID): Room {
     val newRoom = room.copy(generateShortId(), newName)
-    val persistedRoom = create(newRoom, user, true)
+    val persistedRoom = create(newRoom, userId, true)
     applicationEventPublisher.publishEvent(RoomDuplicatedEvent(room.id!!, persistedRoom.id!!))
     return persistedRoom
   }
 
   @Transactional
-  fun duplicateDemo(user: User, locale: Locale): Room {
-    val language = user.language ?: locale.language
+  fun duplicateDemo(userId: UUID, locale: Locale): Room {
+    val language = userService.getUserById(userId).language ?: locale.language
     val demoProperties =
         roomProperties.demo.find { it.language == language }
             ?: roomProperties.demo.firstOrNull()
             ?: throw RoomNotFoundException()
     val demoRoom = findOneByShortId(demoProperties.shortId) ?: throw RoomNotFoundException()
-    val persistedRoom = duplicate(demoRoom, demoRoom.name!!, user)
+    val persistedRoom = duplicate(demoRoom, demoRoom.name!!, userId)
     applicationEventPublisher.publishEvent(DemoRoomDuplicatedEvent(persistedRoom.id!!))
     return persistedRoom
   }

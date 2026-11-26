@@ -10,6 +10,7 @@ import net.particify.arsnova.core4.security.internal.AuthenticationSuccessHandle
 import net.particify.arsnova.core4.security.internal.ChallengeJwtAuthenticationFilter
 import net.particify.arsnova.core4.security.internal.DiscardingOAuth2AuthorizedClientRepository
 import net.particify.arsnova.core4.security.internal.Http401UnauthenticatedEntryPoint
+import net.particify.arsnova.core4.security.internal.HttpBasicPrincipalFilter
 import net.particify.arsnova.core4.security.internal.OidcAuthenticationFailureHandler
 import net.particify.arsnova.core4.security.internal.OidcClientRegistrationRepository
 import net.particify.arsnova.core4.security.internal.RefreshAuthenticationFilter
@@ -19,6 +20,7 @@ import net.particify.arsnova.core4.security.internal.Saml2AssertionConsumerServi
 import net.particify.arsnova.core4.security.internal.Saml2AuthenticationFailureHandler
 import net.particify.arsnova.core4.security.internal.Saml2ResponseValidation
 import net.particify.arsnova.core4.security.internal.Saml2SpMetadataFactory
+import net.particify.arsnova.core4.security.internal.UserAuthorities
 import net.particify.arsnova.core4.security.internal.UserJwtAuthenticationFilter
 import net.particify.arsnova.core4.user.ADMIN_ROLE
 import net.particify.arsnova.core4.user.sso.ExtendedSaml2RelyingPartyProperties
@@ -50,6 +52,7 @@ import org.springframework.security.saml2.provider.service.web.Saml2Authenticati
 import org.springframework.security.web.DefaultSecurityFilterChain
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 
 private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
 
@@ -60,6 +63,7 @@ class SecurityConfiguration(
     private val refreshAuthenticationFilter: RefreshAuthenticationFilter,
     private val challengeJwtAuthenticationFilter: ChallengeJwtAuthenticationFilter,
     private val reusableChallengeAuthenticationFilter: ReusableChallengeAuthenticationFilter,
+    private val userAuthorities: UserAuthorities,
     private val userJwtAuthenticationFilter: UserJwtAuthenticationFilter
 ) {
   @Bean
@@ -82,9 +86,11 @@ class SecurityConfiguration(
       logger.debug("Additional public routes: {}", publicRoutes)
     }
     if (environment.activeProfiles.contains("dev")) {
-      http.httpBasic(Customizer.withDefaults()).authorizeHttpRequests { authorize ->
-        authorize.requestMatchers("/graphiql").permitAll()
-      }
+      http
+          .httpBasic(Customizer.withDefaults())
+          .addFilterAfter(
+              HttpBasicPrincipalFilter(userAuthorities), BasicAuthenticationFilter::class.java)
+          .authorizeHttpRequests { authorize -> authorize.requestMatchers("/graphiql").permitAll() }
     }
     for (configurer in configurers) {
       http.with(configurer, Customizer.withDefaults())

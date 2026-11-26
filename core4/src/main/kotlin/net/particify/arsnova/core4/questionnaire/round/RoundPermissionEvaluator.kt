@@ -8,7 +8,6 @@ import kotlin.reflect.KClass
 import net.particify.arsnova.core4.questionnaire.exception.RoundNotFoundException
 import net.particify.arsnova.core4.security.DomainPermissionEvaluation
 import net.particify.arsnova.core4.security.DomainPermissionEvaluator
-import net.particify.arsnova.core4.user.User
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
@@ -20,11 +19,11 @@ class RoundPermissionEvaluator(
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun hasPermission(
-      user: User,
+      userId: UUID,
       targetDomainObject: Round,
       permission: Any
   ): DomainPermissionEvaluation {
-    logger.debug("hasPermission({}, {}, {})", user, targetDomainObject, permission)
+    logger.debug("hasPermission({}, {}, {})", userId, targetDomainObject, permission)
     val parentPermission =
         contentPermission(targetDomainObject, permission)
             ?: return DomainPermissionEvaluation(false)

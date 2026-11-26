@@ -42,8 +42,10 @@ import net.particify.arsnova.core4.questionnaire.template.api.TemplateQueryInput
 import net.particify.arsnova.core4.questionnaire.template.api.UpdateTemplateInput
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.internal.RoomServiceImpl
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.authenticationOf
 import net.particify.arsnova.core4.user.event.UserDeletedEvent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -57,7 +59,6 @@ import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.graphql.data.query.ScrollSubrange
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.support.TransactionTemplate
@@ -121,13 +122,13 @@ class TemplateTests {
   private fun authenticate(userId: UUID): User = authenticate(userService.loadUserById(userId)!!)
 
   private fun authenticate(user: User): User {
-    SecurityContextHolder.getContext().authentication =
-        UsernamePasswordAuthenticationToken(user, null, user.authorities)
+    SecurityContextHolder.getContext().authentication = authenticationOf(user)
     return user
   }
 
   private fun createRoom(user: User): Room =
-      roomService.create(Room(shortId = roomService.generateShortId(), name = "Templates"), user)
+      roomService.create(
+          Room(shortId = roomService.generateShortId(), name = "Templates"), user.id!!)
 
   private fun createQuizWithContents(user: User): Questionnaire {
     val room = createRoom(user)
@@ -176,7 +177,7 @@ class TemplateTests {
       templateFieldController.tags(listOf(template))[template].orEmpty()
 
   private fun sourceOf(template: Template, user: User): UUID? {
-    val principal = UsernamePasswordAuthenticationToken(user, null, user.authorities)
+    val principal = authenticationOf(user)
     return templateFieldController.sourceQuestionnaireId(listOf(template), principal)[template]
   }
 
@@ -249,11 +250,11 @@ class TemplateTests {
         },
         {
           answerQueryController.questionnaireAnswerResultsByQuestionnaireId(
-              questionnaireId, creator)
+              questionnaireId, AuthenticatedUser.of(creator))
         },
         {
           answerQueryController.questionnaireContentAnswerResultsByQuestionnaireId(
-              questionnaireId, creator)
+              questionnaireId, AuthenticatedUser.of(creator))
         },
     )
   }
@@ -409,9 +410,11 @@ class TemplateTests {
     contentService.update(content.id!!, "Towns", WordcloudContentFormatData(), null, true, null)
     Assertions.assertEquals(
         listOf(edited.id, newer.id),
-        templateQueryController.currentUserTemplates(creator, subrange).content.take(2).map {
-          it.id
-        })
+        templateQueryController
+            .currentUserTemplates(AuthenticatedUser.of(creator), subrange)
+            .content
+            .take(2)
+            .map { it.id })
   }
 
   @Test
@@ -474,7 +477,7 @@ class TemplateTests {
         { roundMutationController.startQuestionnaireContentRound(contents.first().id!!) },
         {
           leaderboardQueryController.questionnaireLeaderboardByQuestionnaireId(
-              questionnaireId, null, null, otherUser, Locale.ENGLISH)
+              questionnaireId, null, null, AuthenticatedUser.of(otherUser), Locale.ENGLISH)
         },
         {
           contentMutationController.copyQuestionnaireContentToQuestionnaire(

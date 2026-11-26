@@ -10,7 +10,6 @@ import net.particify.arsnova.core4.room.internal.MembershipRepository
 import net.particify.arsnova.core4.room.internal.RoomRepository
 import net.particify.arsnova.core4.security.DomainPermissionEvaluation
 import net.particify.arsnova.core4.security.DomainPermissionEvaluator
-import net.particify.arsnova.core4.user.User
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
@@ -23,13 +22,12 @@ class RoomPermissionEvaluator(
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun hasPermission(
-      user: User,
+      userId: UUID,
       targetDomainObject: Room,
       permission: Any
   ): DomainPermissionEvaluation {
-    logger.debug("hasPermission({}, {}, {})", user, targetDomainObject, permission)
-    val membership =
-        membershipRepository.findOneByRoomIdAndUserId(targetDomainObject.id!!, user.id!!)
+    logger.debug("hasPermission({}, {}, {})", userId, targetDomainObject, permission)
+    val membership = membershipRepository.findOneByRoomIdAndUserId(targetDomainObject.id!!, userId)
     return DomainPermissionEvaluation(
         when (membership?.role) {
           RoomRole.OWNER -> true

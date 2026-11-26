@@ -32,6 +32,7 @@ import net.particify.arsnova.core4.questionnaire.round.Round
 import net.particify.arsnova.core4.questionnaire.round.RoundServiceImpl
 import net.particify.arsnova.core4.security.internal.JwtUtils
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.authenticationOf
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -43,7 +44,6 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.mock.web.MockMultipartFile
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.test.context.TestSecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
@@ -129,8 +129,7 @@ class ContentCsvTests {
 
   private fun authenticate(userId: UUID) {
     val user = userService.loadUserById(userId)!!
-    SecurityContextHolder.getContext().authentication =
-        UsernamePasswordAuthenticationToken(user, null, user.authorities)
+    SecurityContextHolder.getContext().authentication = authenticationOf(user)
   }
 
   private fun createQuestionnaire(type: QuestionnaireType = QuestionnaireType.MIXED) =

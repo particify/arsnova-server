@@ -5,6 +5,7 @@ package net.particify.arsnova.core4.user.internal.api
 
 import java.util.Locale
 import java.util.Optional
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import net.particify.arsnova.core4.user.QUser
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.exception.UserNotFoundException
@@ -27,8 +28,8 @@ class UserQueryController(
     private val passwordPolicy: PasswordPolicy
 ) {
   @QueryMapping
-  fun currentUser(@AuthenticationPrincipal user: User): User {
-    return user
+  fun currentUser(@AuthenticationPrincipal principal: AuthenticatedUser): User {
+    return userService.getUserById(principal.id)
   }
 
   @QueryMapping
@@ -49,10 +50,11 @@ class UserQueryController(
   @PreAuthorize("hasRole('USER') or hasRole('CHALLENGE_SOLVED_REUSABLE')")
   fun userPasswordStrength(
       @Argument query: UserPasswordStrengthQueryInput,
-      @AuthenticationPrincipal user: User?,
+      @AuthenticationPrincipal principal: AuthenticatedUser?,
       locale: Locale
   ): PasswordStrength {
     PasswordValidator.check(query.password)
+    val user = principal?.let { userService.getUserById(it.id) }
     val inputs =
         listOf(
             user?.mailAddress,
@@ -78,7 +80,10 @@ class UserQueryController(
   /** How another account signs in is not disclosed, so the field stays unresolved for it. */
   @SchemaMapping(typeName = "User", field = "localPasswordSet")
   @PreAuthorize("authenticated")
-  fun localPasswordSet(user: User, @AuthenticationPrincipal principal: User?): Boolean? {
+  fun localPasswordSet(
+      user: User,
+      @AuthenticationPrincipal principal: AuthenticatedUser?
+  ): Boolean? {
     if (principal?.id != user.id) {
       return null
     }

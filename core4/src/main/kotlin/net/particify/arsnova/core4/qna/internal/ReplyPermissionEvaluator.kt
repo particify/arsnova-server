@@ -9,7 +9,6 @@ import net.particify.arsnova.core4.qna.Reply
 import net.particify.arsnova.core4.qna.exception.ReplyNotFoundException
 import net.particify.arsnova.core4.security.DomainPermissionEvaluation
 import net.particify.arsnova.core4.security.DomainPermissionEvaluator
-import net.particify.arsnova.core4.user.User
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
@@ -20,11 +19,11 @@ class ReplyPermissionEvaluator(private val replyRepository: ReplyRepository) :
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun hasPermission(
-      user: User,
+      userId: UUID,
       targetDomainObject: Reply,
       permission: Any
   ): DomainPermissionEvaluation {
-    logger.debug("hasPermission({}, {}, {})", user, targetDomainObject, permission)
+    logger.debug("hasPermission({}, {}, {})", userId, targetDomainObject, permission)
     return DomainPermissionEvaluation(
         null,
         DomainPermissionEvaluation.PermissionReference(

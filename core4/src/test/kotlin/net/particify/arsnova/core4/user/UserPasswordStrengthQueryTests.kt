@@ -7,6 +7,7 @@ import java.time.Duration
 import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
+import net.particify.arsnova.core4.user.internal.UserServiceImpl
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -36,6 +37,7 @@ private const val SURNAME = "Blandimor"
 @Import(TestcontainersConfiguration::class)
 class UserPasswordStrengthQueryTests {
   @Autowired lateinit var graphQlService: ExecutionGraphQlService
+  @Autowired lateinit var userService: UserServiceImpl
 
   @AfterEach
   fun clearSecurityContext() {
@@ -50,7 +52,7 @@ class UserPasswordStrengthQueryTests {
 
   @Test
   fun shouldEstimateForGuest() {
-    authenticate(User(id = UUID.randomUUID()))
+    authenticate(account())
     Assertions.assertEquals(
         mapOf("acceptable" to true, "relativeStrength" to 1.0, "hint" to null),
         strength(NAME_PASSWORD))
@@ -76,13 +78,13 @@ class UserPasswordStrengthQueryTests {
 
   @Test
   fun shouldUseNamesOfCaller() {
-    authenticate(User(id = UUID.randomUUID(), givenName = GIVEN_NAME, surname = SURNAME))
+    authenticate(account(GIVEN_NAME, SURNAME))
     Assertions.assertEquals(false, strength(NAME_PASSWORD)["acceptable"])
   }
 
   @Test
   fun shouldUsePassedMailAddress() {
-    authenticate(User(id = UUID.randomUUID()))
+    authenticate(account())
     val password = "${SURNAME}2024!x"
     Assertions.assertEquals(true, strength(password)["acceptable"])
     Assertions.assertEquals(
@@ -92,7 +94,7 @@ class UserPasswordStrengthQueryTests {
   /** Rejected as when it is set, so the client does not rate a password it cannot submit. */
   @Test
   fun shouldReportInvalidPasswordWithErrorCode() {
-    authenticate(User(id = UUID.randomUUID()))
+    authenticate(account())
     @Suppress("UNCHECKED_CAST")
     val error = (query("$NAME_PASSWORD ").toMap()["errors"] as List<Map<String, Any>>).single()
     Assertions.assertEquals(
@@ -101,7 +103,7 @@ class UserPasswordStrengthQueryTests {
 
   @Test
   fun shouldLocalizeHintByRequestLocale() {
-    authenticate(User(id = UUID.randomUUID()))
+    authenticate(account())
     Assertions.assertEquals(
         "Das ist sehr ähnlich zu einem häufig verwendeten Passwort.",
         strength("Passwort123", locale = Locale.GERMAN)["hint"])
@@ -121,10 +123,18 @@ class UserPasswordStrengthQueryTests {
         override fun getPrincipal() = null
       }
 
+  /** The resolver reads the names from the stored account rather than from the principal. */
+  private fun account(givenName: String? = null, surname: String? = null): User =
+      userService.save(
+          User(
+              givenName = givenName,
+              surname = surname,
+              roles = mutableSetOf(userService.findRoleByName("USER"))))
+
   private fun authenticate(user: User) {
     SecurityContextHolder.getContext().authentication =
         UsernamePasswordAuthenticationToken.authenticated(
-            user, null, listOf(SimpleGrantedAuthority("ROLE_USER")))
+            AuthenticatedUser.of(user), null, listOf(SimpleGrantedAuthority("ROLE_USER")))
   }
 
   @Suppress("UNCHECKED_CAST")

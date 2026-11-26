@@ -6,7 +6,7 @@ package net.particify.arsnova.core4.security.internal
 import java.io.Serializable
 import kotlin.Any
 import net.particify.arsnova.core4.security.DomainPermissionEvaluator
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.userId
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.security.access.PermissionEvaluator
@@ -38,12 +38,12 @@ class DelegatingPermissionEvaluator(
   ): Boolean {
     logger.debug("hasPermission({}, {}, {})", authentication, targetDomainObject, permission)
     requireNotNull(targetDomainObject)
-    val user = authentication.principal as? User ?: return false
+    val userId = authentication.userId() ?: return false
     val evaluator =
         permissionEvaluators.find { it.supports(targetDomainObject::class) }
             ?: error("Unsupported type '${targetDomainObject::class.simpleName}'")
     logger.trace("Delegating to {}", evaluator::class.simpleName)
-    val evaluation = evaluator.hasPermission(user, targetDomainObject, permission)
+    val evaluation = evaluator.hasPermission(userId, targetDomainObject, permission)
     val parentPermission = evaluation.permissionReference
     return evaluation.hasPermission
         ?: hasPermission(
@@ -60,7 +60,7 @@ class DelegatingPermissionEvaluator(
       permission: Any
   ): Boolean {
     logger.debug("hasPermission({}, {}, {}, {})", authentication, targetId, targetType, permission)
-    if (authentication.principal !is User) {
+    if (authentication.userId() == null) {
       return false
     }
     val evaluator =

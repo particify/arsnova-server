@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.Size
 import java.util.Locale
 import java.util.UUID
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import net.particify.arsnova.core4.user.LocalUserService
 import net.particify.arsnova.core4.user.MAIL_ADDRESS_MAX_LENGTH
 import net.particify.arsnova.core4.user.User
@@ -35,11 +36,15 @@ class AdminUserMutationController(
   @MutationMapping
   fun adminCreateUser(
       @Argument @Email @Size(max = MAIL_ADDRESS_MAX_LENGTH) mailAddress: String,
-      @AuthenticationPrincipal user: User,
+      @AuthenticationPrincipal user: AuthenticatedUser,
       locale: Locale
   ): User {
     return localUserService.inviteUser(
-        user, mailAddress, "admin-invitation-verification", mapOf(), locale)
+        userService.getUserById(user.id),
+        mailAddress,
+        "admin-invitation-verification",
+        mapOf(),
+        locale)
   }
 
   @MutationMapping

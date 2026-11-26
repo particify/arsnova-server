@@ -20,8 +20,10 @@ import net.particify.arsnova.core4.room.Membership
 import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomRole
 import net.particify.arsnova.core4.room.internal.MembershipServiceImpl
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.UserService
+import net.particify.arsnova.core4.user.authenticationOf
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -30,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
 
@@ -86,8 +87,7 @@ class QuestionnaireModerationPermissionTests {
   }
 
   private fun authenticate(user: User) {
-    SecurityContextHolder.getContext().authentication =
-        UsernamePasswordAuthenticationToken(user, null, user.authorities)
+    SecurityContextHolder.getContext().authentication = authenticationOf(user)
   }
 
   /** Created after the questionnaire, so that auditing saw the owner as its creator. */
@@ -168,7 +168,7 @@ class QuestionnaireModerationPermissionTests {
     val moderator = authenticateMember(RoomRole.MODERATOR)
     Assertions.assertNotNull(
         leaderboardQueryController.questionnaireLeaderboardByQuestionnaireId(
-            questionnaire.id!!, null, null, moderator, Locale.ENGLISH))
+            questionnaire.id!!, null, null, AuthenticatedUser.of(moderator), Locale.ENGLISH))
   }
 
   @Test
@@ -176,7 +176,7 @@ class QuestionnaireModerationPermissionTests {
     val participant = authenticateMember(RoomRole.PARTICIPANT)
     Assertions.assertThrows(AccessDeniedException::class.java) {
       leaderboardQueryController.questionnaireLeaderboardByQuestionnaireId(
-          questionnaire.id!!, null, null, participant, Locale.ENGLISH)
+          questionnaire.id!!, null, null, AuthenticatedUser.of(participant), Locale.ENGLISH)
     }
   }
 }

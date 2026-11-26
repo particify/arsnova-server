@@ -6,7 +6,6 @@ package net.particify.arsnova.core4.questionnaire.questionnaire
 import java.util.UUID
 import net.particify.arsnova.core4.questionnaire.template.TemplatePermissionEvaluator
 import net.particify.arsnova.core4.questionnaire.template.TemplateRepository
-import net.particify.arsnova.core4.user.User
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -28,7 +27,9 @@ class QuestionnairePermissionEvaluatorTest {
             published = published,
             leaderboardEnabled = leaderboardEnabled)
     val reference =
-        evaluator.hasPermission(User(), questionnaire, "readLeaderboard").permissionReference
+        evaluator
+            .hasPermission(UUID.randomUUID(), questionnaire, "readLeaderboard")
+            .permissionReference
     Assertions.assertEquals("Room", reference?.targetClassName)
     Assertions.assertEquals(ROOM_ID, reference?.id)
     return reference?.permission

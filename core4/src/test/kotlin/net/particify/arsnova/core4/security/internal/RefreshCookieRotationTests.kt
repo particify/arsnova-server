@@ -100,7 +100,7 @@ class RefreshCookieRotationTests {
     val token = headerFor(headers, REFRESH_TOKEN_COOKIE).substringAfter("=").substringBefore(";")
     val authentication = provider.authenticate(RefreshJwtAuthentication(token))
     Assertions.assertTrue(authentication.isAuthenticated)
-    Assertions.assertEquals(user, authentication.principal)
+    Assertions.assertEquals(user, (authentication as RefreshJwtAuthentication).user)
   }
 
   /** A rotation continues the session, so it cannot decide the lifetime anew. */

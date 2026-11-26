@@ -3,13 +3,19 @@
  */
 package net.particify.arsnova.core4.security.internal
 
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import net.particify.arsnova.core4.user.User
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
 
 class RefreshJwtAuthentication(
     private val token: String,
-    private var principal: User? = null,
+    private var principal: AuthenticatedUser? = null,
+    /**
+     * The account itself, which a refresh updates. It is the instance whose token version was
+     * verified, so a concurrent invalidation fails the refresh rather than being renewed past.
+     */
+    val user: User? = null,
     grantedAuthorities: Set<GrantedAuthority> = emptySet(),
     val sessionLifetime: RefreshSessionLifetime = RefreshSessionLifetime(),
 ) : AbstractAuthenticationToken(grantedAuthorities) {

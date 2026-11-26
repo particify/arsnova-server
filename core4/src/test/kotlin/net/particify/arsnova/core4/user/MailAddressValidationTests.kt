@@ -22,7 +22,6 @@ import org.springframework.graphql.ExecutionGraphQlResponse
 import org.springframework.graphql.ExecutionGraphQlService
 import org.springframework.graphql.execution.ErrorType
 import org.springframework.graphql.support.DefaultExecutionGraphQlRequest
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -60,7 +59,10 @@ class MailAddressValidationTests {
   @Autowired lateinit var graphQlService: ExecutionGraphQlService
 
   private val administrator =
-      User(username = "admin", roles = mutableSetOf(Role().apply { name = ADMIN_ROLE }))
+      User(
+          id = UUID.randomUUID(),
+          username = "admin",
+          roles = mutableSetOf(Role().apply { name = ADMIN_ROLE }))
 
   @AfterEach
   fun clearAuthentication() {
@@ -128,7 +130,10 @@ class MailAddressValidationTests {
   @MethodSource("invalidMailAddresses")
   fun shouldReportInvalidMailAddressForRoomInvitationAsBadRequest(mailAddress: String) {
     authenticate(
-        User(username = "verified", roles = mutableSetOf(Role().apply { name = "VERIFIED" })))
+        User(
+            id = UUID.randomUUID(),
+            username = "verified",
+            roles = mutableSetOf(Role().apply { name = "VERIFIED" })))
     assertBadRequest(execute(ROOM_INVITATION_MUTATION, mailAddress))
   }
 
@@ -151,8 +156,7 @@ class MailAddressValidationTests {
   }
 
   private fun authenticate(user: User) {
-    SecurityContextHolder.getContext().authentication =
-        UsernamePasswordAuthenticationToken(user, null, user.authorities)
+    SecurityContextHolder.getContext().authentication = authenticationOf(user)
   }
 
   private fun execute(document: String, mailAddress: String): ExecutionGraphQlResponse {

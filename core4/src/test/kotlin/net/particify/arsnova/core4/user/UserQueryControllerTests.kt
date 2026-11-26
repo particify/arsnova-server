@@ -30,19 +30,23 @@ class UserQueryControllerTests {
   @Test
   fun shouldResolveLocalPasswordSet() {
     Assertions.assertEquals(
-        true, userQueryController.localPasswordSet(localAccountUser, localAccountUser))
+        true,
+        userQueryController.localPasswordSet(
+            localAccountUser, AuthenticatedUser.of(localAccountUser)))
   }
 
   @Test
   fun shouldResolveLocalPasswordSetWithoutPassword() {
     Assertions.assertEquals(
-        false, userQueryController.localPasswordSet(directoryUser, directoryUser))
+        false,
+        userQueryController.localPasswordSet(directoryUser, AuthenticatedUser.of(directoryUser)))
   }
 
   /** The lookup by display ID returns the same type, which must not disclose this. */
   @Test
   fun shouldNotResolveLocalPasswordSetOfOtherUser() {
-    Assertions.assertNull(userQueryController.localPasswordSet(directoryUser, localAccountUser))
+    Assertions.assertNull(
+        userQueryController.localPasswordSet(directoryUser, AuthenticatedUser.of(localAccountUser)))
   }
 
   @Test

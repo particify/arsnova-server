@@ -3,19 +3,16 @@
  */
 package net.particify.arsnova.core4.security
 
+import java.util.UUID
 import net.particify.arsnova.core4.security.SecurityProperties.RoomCreatorRole.AutoAssignment
-import net.particify.arsnova.core4.user.Role
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class RoomCreationPolicyTests {
-  private val verifiedUser = User(username = "user@example.com")
-  private val unverifiedUser = User()
-  private val adminUser =
-      User(
-          username = "admin@example.com",
-          roles = mutableSetOf(Role().apply { name = "ADMIN" }, Role().apply { name = "USER" }))
+  private val verifiedUser = AuthenticatedUser(UUID.randomUUID(), setOf("USER"), true)
+  private val unverifiedUser = AuthenticatedUser(UUID.randomUUID(), setOf("USER"), false)
+  private val adminUser = AuthenticatedUser(UUID.randomUUID(), setOf("ADMIN", "USER"), true)
 
   @Test
   fun shouldAllowEveryAccountForAllAccounts() {

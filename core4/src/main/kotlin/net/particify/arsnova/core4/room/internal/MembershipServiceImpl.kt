@@ -47,8 +47,8 @@ class MembershipServiceImpl(
         ?: throw MembershipNotFoundException()
   }
 
-  fun joinRoom(room: Room, user: User): Membership {
-    var membership = findOneByRoomIdAndUserId(room.id!!, user.id!!)
+  fun joinRoom(room: Room, userId: UUID): Membership {
+    var membership = findOneByRoomIdAndUserId(room.id!!, userId)
     val persistedMembership =
         if (membership == null) {
           if (demoShortIds.contains(room.shortId)) {
@@ -57,7 +57,7 @@ class MembershipServiceImpl(
           membership =
               Membership(
                   room = room,
-                  user = user,
+                  user = User(id = userId),
                   role = RoomRole.PARTICIPANT,
                   lastActivityAt = Instant.now())
           save(membership)

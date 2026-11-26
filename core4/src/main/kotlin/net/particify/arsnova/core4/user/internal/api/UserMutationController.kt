@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Size
 import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.common.LanguageIso639
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import net.particify.arsnova.core4.user.MAIL_ADDRESS_MAX_LENGTH
 import net.particify.arsnova.core4.user.User
 import net.particify.arsnova.core4.user.exception.UserNotFoundException
@@ -32,28 +33,31 @@ class UserMutationController(
   fun claimUnverifiedUser(
       @Argument @Email @Size(max = MAIL_ADDRESS_MAX_LENGTH) mailAddress: String,
       @Argument password: String,
-      @AuthenticationPrincipal user: User,
+      @AuthenticationPrincipal principal: AuthenticatedUser,
       locale: Locale
   ): User {
-    return localUserService.claimUnverifiedUser(user, mailAddress, password, locale)
+    return localUserService.claimUnverifiedUser(
+        currentUser(principal), mailAddress, password, locale)
   }
 
   @MutationMapping
   fun updateUserMailAddress(
       @Argument @Email @Size(max = MAIL_ADDRESS_MAX_LENGTH) mailAddress: String,
       @Argument password: String,
-      @AuthenticationPrincipal user: User,
+      @AuthenticationPrincipal principal: AuthenticatedUser,
       locale: Locale
   ): User {
-    return localUserService.initiateMailVerification(user, mailAddress, password, locale)
+    return localUserService.initiateMailVerification(
+        currentUser(principal), mailAddress, password, locale)
   }
 
   @MutationMapping
   fun verifyUserMailAddress(
       @Argument @Pattern(regexp = "\\d+") verificationCode: String,
-      @AuthenticationPrincipal user: User
+      @AuthenticationPrincipal principal: AuthenticatedUser
   ): User {
-    return localUserService.completeMailVerification(user, verificationCode.toInt())
+    return localUserService.completeMailVerification(
+        currentUser(principal), verificationCode.toInt())
   }
 
   @MutationMapping
@@ -71,16 +75,17 @@ class UserMutationController(
   fun updateUserPassword(
       @Argument oldPassword: String,
       @Argument newPassword: String,
-      @AuthenticationPrincipal user: User
+      @AuthenticationPrincipal principal: AuthenticatedUser
   ): User {
-    return localUserService.updatePassword(user, oldPassword, newPassword)
+    return localUserService.updatePassword(currentUser(principal), oldPassword, newPassword)
   }
 
   @MutationMapping
   fun updateUserDetails(
       @Argument input: UpdateUserDetailsInput,
-      @AuthenticationPrincipal user: User
+      @AuthenticationPrincipal principal: AuthenticatedUser
   ): User {
+    val user = currentUser(principal)
     user.givenName = input.givenName
     user.surname = input.surname
     return userService.save(user)
@@ -89,22 +94,24 @@ class UserMutationController(
   @MutationMapping
   fun updateUserLanguage(
       @Argument @LanguageIso639 languageCode: String,
-      @AuthenticationPrincipal user: User
+      @AuthenticationPrincipal principal: AuthenticatedUser
   ): User {
+    val user = currentUser(principal)
     user.language = languageCode
     return userService.save(user)
   }
 
   @MutationMapping
-  fun deleteUser(@AuthenticationPrincipal user: User): UUID {
-    return userService.markAccountForDeletion(user).id!!
+  fun deleteUser(@AuthenticationPrincipal principal: AuthenticatedUser): UUID {
+    return userService.markAccountForDeletion(currentUser(principal)).id!!
   }
 
   @MutationMapping
   fun updateUserUiSettings(
       @Argument input: MutableMap<String, Any>,
-      @AuthenticationPrincipal user: User
+      @AuthenticationPrincipal principal: AuthenticatedUser
   ): Map<String, Any> {
+    val user = currentUser(principal)
     user.uiSettings.putAll(input)
     return userService.save(user).uiSettings
   }
@@ -136,13 +143,23 @@ class UserMutationController(
   }
 
   @MutationMapping
-  fun requestUserPasswordSetup(@AuthenticationPrincipal user: User, locale: Locale): Boolean {
-    localUserService.initiatePasswordSetup(user, locale)
+  fun requestUserPasswordSetup(
+      @AuthenticationPrincipal principal: AuthenticatedUser,
+      locale: Locale
+  ): Boolean {
+    localUserService.initiatePasswordSetup(currentUser(principal), locale)
     return true
   }
 
   @MutationMapping
-  fun resendVerificationMail(@AuthenticationPrincipal user: User, locale: Locale): Boolean {
-    return localUserService.restartVerification(user, locale)
+  fun resendVerificationMail(
+      @AuthenticationPrincipal principal: AuthenticatedUser,
+      locale: Locale
+  ): Boolean {
+    return localUserService.restartVerification(currentUser(principal), locale)
   }
+
+  /** The account as stored, which is what a request reads and changes, not the principal. */
+  private fun currentUser(principal: AuthenticatedUser): User =
+      userService.getUserById(principal.id)
 }

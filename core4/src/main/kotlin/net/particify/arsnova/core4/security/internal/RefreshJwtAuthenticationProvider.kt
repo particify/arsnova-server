@@ -7,6 +7,7 @@ import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import net.particify.arsnova.core4.user.UserService
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.BadCredentialsException
@@ -56,7 +57,11 @@ class RefreshJwtAuthenticationProvider(
     if (sessionLifetime.hasEnded()) throw BadCredentialsException("Session has ended")
     val updatedUser = if (isLegacy) userService.invalidateToken(user) else user
     return RefreshJwtAuthentication(
-        token, updatedUser, setOf(SimpleGrantedAuthority("ROLE_$REFRESH_ROLE")), sessionLifetime)
+        token,
+        AuthenticatedUser.of(updatedUser),
+        updatedUser,
+        setOf(SimpleGrantedAuthority("ROLE_$REFRESH_ROLE")),
+        sessionLifetime)
   }
 
   override fun supports(authentication: Class<*>): Boolean {

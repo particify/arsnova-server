@@ -9,7 +9,7 @@ import net.particify.arsnova.core4.questionnaire.answer.LeaderboardPage
 import net.particify.arsnova.core4.questionnaire.answer.LeaderboardServiceImpl
 import net.particify.arsnova.core4.questionnaire.answer.RawLeaderboardEntry
 import net.particify.arsnova.core4.questionnaire.exception.ContentNotFoundException
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -55,8 +55,8 @@ class LeaderboardSubscriptionControllerTest {
    */
   @Test
   fun shouldStopEmittingOnceLeaderboardIsNoLongerReadable() {
-    val user = User(id = UUID.randomUUID())
-    val first = listOf(RawLeaderboardEntry(user.id!!, null, 500, 1, null))
+    val user = AuthenticatedUser(UUID.randomUUID(), setOf("USER"), false)
+    val first = listOf(RawLeaderboardEntry(user.id, null, 500, 1, null))
     val second = listOf<RawLeaderboardEntry>()
     val firstPage = LeaderboardPage(listOf(), null, 1)
     Mockito.`when`(registry.leaderboardFlux(QUESTIONNAIRE_ID, null))
@@ -75,8 +75,8 @@ class LeaderboardSubscriptionControllerTest {
 
   @Test
   fun shouldCutEachSharedRankingToThePageOfTheSubscriber() {
-    val user = User(id = UUID.randomUUID())
-    val first = listOf(RawLeaderboardEntry(user.id!!, null, 500, 1, null))
+    val user = AuthenticatedUser(UUID.randomUUID(), setOf("USER"), false)
+    val first = listOf(RawLeaderboardEntry(user.id, null, 500, 1, null))
     val second = listOf<RawLeaderboardEntry>()
     val firstPage = LeaderboardPage(listOf(), null, 1)
     val secondPage = LeaderboardPage(listOf(), null, 0)
@@ -100,8 +100,8 @@ class LeaderboardSubscriptionControllerTest {
    */
   @Test
   fun shouldApplyTheResultVisibilityOfTheSubscriberToEveryPage() {
-    val user = User(id = UUID.randomUUID())
-    val ranking = listOf(RawLeaderboardEntry(user.id!!, null, 500, 1, null))
+    val user = AuthenticatedUser(UUID.randomUUID(), setOf("USER"), false)
+    val ranking = listOf(RawLeaderboardEntry(user.id, null, 500, 1, null))
     val page = LeaderboardPage(listOf(), null, 1)
     Mockito.`when`(leaderboardService.maySeeUnpublishedResults(QUESTIONNAIRE_ID, CONTENT_ID))
         .thenReturn(true)
@@ -124,7 +124,11 @@ class LeaderboardSubscriptionControllerTest {
         .thenThrow(ContentNotFoundException(CONTENT_ID))
     Assertions.assertThrows(ContentNotFoundException::class.java) {
       controller.questionnaireLeaderboardUpdated(
-          QUESTIONNAIRE_ID, CONTENT_ID, LIMIT, User(id = UUID.randomUUID()), LOCALE)
+          QUESTIONNAIRE_ID,
+          CONTENT_ID,
+          LIMIT,
+          AuthenticatedUser(UUID.randomUUID(), setOf("USER"), false),
+          LOCALE)
     }
     Mockito.verifyNoInteractions(registry)
   }

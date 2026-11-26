@@ -18,7 +18,7 @@ import net.particify.arsnova.core4.qna.QPost
 import net.particify.arsnova.core4.qna.internal.PostRepository
 import net.particify.arsnova.core4.qna.internal.PostServiceImpl
 import net.particify.arsnova.core4.qna.internal.VoteRepository
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Window
@@ -111,11 +111,11 @@ class PostQueryController(
   }
 
   @SchemaMapping(typeName = "Post")
-  fun userVote(post: Post, @AuthenticationPrincipal user: User?): Int {
+  fun userVote(post: Post, @AuthenticationPrincipal user: AuthenticatedUser?): Int {
     if (user == null) {
       return 0
     }
-    val vote = voteRepository.findByPostIdAndUserId(post.id!!, user.id!!)
+    val vote = voteRepository.findByPostIdAndUserId(post.id!!, user.id)
     return vote?.value ?: 0
   }
 

@@ -9,7 +9,6 @@ import net.particify.arsnova.core4.questionnaire.exception.QuestionnaireNotFound
 import net.particify.arsnova.core4.questionnaire.template.TemplatePermissionEvaluator
 import net.particify.arsnova.core4.security.DomainPermissionEvaluation
 import net.particify.arsnova.core4.security.DomainPermissionEvaluator
-import net.particify.arsnova.core4.user.User
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
@@ -22,13 +21,13 @@ class QuestionnairePermissionEvaluator(
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun hasPermission(
-      user: User,
+      userId: UUID,
       targetDomainObject: Questionnaire,
       permission: Any
   ): DomainPermissionEvaluation {
-    logger.debug("hasPermission({}, {}, {})", user, targetDomainObject, permission)
+    logger.debug("hasPermission({}, {}, {})", userId, targetDomainObject, permission)
     val roomId = targetDomainObject.roomId
-    return if (roomId == null) templatePermission(user, targetDomainObject, permission)
+    return if (roomId == null) templatePermission(userId, targetDomainObject, permission)
     else roomPermission(targetDomainObject, roomId, permission)
   }
 
@@ -60,7 +59,7 @@ class QuestionnairePermissionEvaluator(
    * published itself, so the published-dependent mapping of [roomPermission] does not apply.
    */
   private fun templatePermission(
-      user: User,
+      userId: UUID,
       questionnaire: Questionnaire,
       permission: Any
   ): DomainPermissionEvaluation {
@@ -73,7 +72,7 @@ class QuestionnairePermissionEvaluator(
           else -> return DomainPermissionEvaluation(false)
         }
     val template = templatePermissionEvaluator.findOneByKey(questionnaire.id!!)
-    return templatePermissionEvaluator.hasPermission(user, template, templatePermission)
+    return templatePermissionEvaluator.hasPermission(userId, template, templatePermission)
   }
 
   override fun findOneByKey(key: Any): Questionnaire {

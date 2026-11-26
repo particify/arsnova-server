@@ -1,4 +1,4 @@
-/* Copyright 2025 Particify GmbH
+/* Copyright 2025-2026 Particify GmbH
  * SPDX-License-Identifier: MIT
  */
 package net.particify.arsnova.core4.announcement.internal.api
@@ -11,7 +11,7 @@ import net.particify.arsnova.core4.announcement.Announcement
 import net.particify.arsnova.core4.announcement.internal.AnnouncementServiceImpl
 import net.particify.arsnova.core4.common.TextRenderingService
 import net.particify.arsnova.core4.room.MembershipService
-import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.AuthenticatedUser
 import net.particify.arsnova.core4.user.UserService
 import org.springframework.data.domain.ScrollPosition
 import org.springframework.data.domain.Window
@@ -43,10 +43,10 @@ class AnnouncementQueryController(
 
   @QueryMapping
   fun announcementsForCurrentUser(
-      @AuthenticationPrincipal user: User,
+      @AuthenticationPrincipal user: AuthenticatedUser,
       subrange: ScrollSubrange
   ): Window<Announcement> {
-    return announcementsByUserId(user.id!!, subrange)
+    return announcementsByUserId(user.id, subrange)
   }
 
   @QueryMapping
@@ -64,8 +64,11 @@ class AnnouncementQueryController(
   }
 
   @QueryMapping
-  fun announcementsMetaForCurrentUser(@AuthenticationPrincipal user: User): AnnouncementMeta {
-    val memberships = membershipService.findByUserId(user.id!!, ScrollPosition.offset())
+  fun announcementsMetaForCurrentUser(
+      @AuthenticationPrincipal principal: AuthenticatedUser
+  ): AnnouncementMeta {
+    val user = userService.getUserById(principal.id)
+    val memberships = membershipService.findByUserId(principal.id, ScrollPosition.offset())
     val roomIds = memberships.map { it.room?.id!! }.toSet()
     val count =
         announcementService.countByRoomIdInAndAuditMetadataCreatedAtGreaterThan(

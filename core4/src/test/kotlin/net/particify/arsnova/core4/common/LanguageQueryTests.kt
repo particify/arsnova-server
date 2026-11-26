@@ -8,6 +8,7 @@ import java.util.Locale
 import java.util.UUID
 import net.particify.arsnova.core4.TestcontainersConfiguration
 import net.particify.arsnova.core4.user.User
+import net.particify.arsnova.core4.user.authenticationOf
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -18,7 +19,6 @@ import org.springframework.graphql.ExecutionGraphQlResponse
 import org.springframework.graphql.ExecutionGraphQlService
 import org.springframework.graphql.execution.ErrorType
 import org.springframework.graphql.support.DefaultExecutionGraphQlRequest
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
@@ -70,8 +70,7 @@ class LanguageQueryTests {
 
   private fun authenticate() {
     SecurityContextHolder.getContext().authentication =
-        UsernamePasswordAuthenticationToken.authenticated(
-            User(id = UUID.randomUUID()), null, listOf(SimpleGrantedAuthority("ROLE_USER")))
+        authenticationOf(User(id = UUID.randomUUID()), listOf(SimpleGrantedAuthority("ROLE_USER")))
   }
 
   @Suppress("UNCHECKED_CAST")
