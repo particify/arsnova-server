@@ -12,9 +12,7 @@ import net.particify.arsnova.core4.room.Room
 import net.particify.arsnova.core4.room.RoomUserAlias
 import net.particify.arsnova.core4.room.RoomUserAliasProjection
 import net.particify.arsnova.core4.room.RoomUserAliasService
-import net.particify.arsnova.core4.room.event.RoomUserAliasChangedEvent
 import net.particify.arsnova.core4.user.User
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 
@@ -23,8 +21,7 @@ private const val ALREADY_CREATED_MESSAGE = "Alias has already been created."
 @Service
 class RoomUserAliasServiceImpl(
     private val roomUserAliasRepository: RoomUserAliasRepository,
-    private val roomUserAliasGenerator: RoomUserAliasGenerator,
-    private val applicationEventPublisher: ApplicationEventPublisher
+    private val roomUserAliasGenerator: RoomUserAliasGenerator
 ) : RoomUserAliasService, RoomUserAliasRepository by roomUserAliasRepository {
   override fun findOneByRoomIdAndUserId(roomId: UUID, userId: UUID): RoomUserAlias? {
     return roomUserAliasRepository.findOneByRoomIdAndUserId(roomId, userId)
@@ -67,7 +64,6 @@ class RoomUserAliasServiceImpl(
                 user = User(id = userId),
                 alias = alias?.let(::normalizeAlias),
                 seed = seed ?: ThreadLocalRandom.current().nextInt()))
-    applicationEventPublisher.publishEvent(RoomUserAliasChangedEvent(roomId, userId))
     return localizeIfGenerated(persistedAlias, locale)
   }
 
