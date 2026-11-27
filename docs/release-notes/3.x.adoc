@@ -1,0 +1,99 @@
+= Release notes for 3.x
+
+== 3.14.20261123
+This release brings the server and webclient platforms up to date,
+including major updates of Spring Boot and Angular,
+and moves the bundled PostgreSQL to a newer major version.
+It introduces no new features.
+These third-party updates include fixes for *critical security vulnerabilities*.
+Some components in the previous release, such as Spring Boot 3.5 and PostgreSQL 13,
+no longer receive security updates at all.
+*Upgrade as soon as possible.*
+If you can't upgrade right away, see <<v3.14.20261123-temporary-measures>> below.
+
+=== Upgrade
+The upgrade includes a major PostgreSQL version change (13 → 17) for the auth and comment databases,
+which has to be migrated manually.
+There is no rollback, so back up first.
+
+. Stop the containers: `docker compose stop`
+. Back up the volumes `particify_postgresql_data_auth` and `particify_postgresql_data_comment`.
+. Back up the directory containing your Compose configuration,
+then replace its contents with the release archive (`.tar.gz`).
+The `pg_upgrade.sh` from earlier releases won't work for this upgrade.
+. Carry over your configuration from the backup:
+all settings in your env file except the `+*_TAG+` variables and a `COMPOSE_FILE` line from the temporary measures,
+and any changes you made to `docker-compose.prod.yml`.
+If you use your own environment instead of `prod`, restore its files and run `./set-env.sh <env>` again.
+. `docker compose pull`
+. `./pg_upgrade.sh auth` and `./pg_upgrade.sh comment`
+. `docker compose up -d`
+. Verify:
+* `docker compose exec arsnova-proxy nginx -v` reports `nginx/1.31.9`.
+* `docker compose exec arsnova-backend-core java -version` reports `25.0.5.1`.
+* `docker compose exec arsnova-formatting-service node -v` reports `v26.13.0`.
+
+If a database upgrade fails, restore its backup before running the script again.
+
+If you override `spring.rabbitmq.listener.simple.retry.max-attempts` (authz or comments),
+rename it to `max-retries` and subtract one: `max-attempts=3` becomes `max-retries=2`.
+
+[#v3.14.20261123-temporary-measures]
+=== Temporary measures for 3.13
+These measures only cover the most critical issues:
+https://nginx.org/en/security_advisories.html[vulnerabilities in nginx], which the proxy is based on,
+the Java vulnerability https://adoptium.net/news/2026/11/temurin-november-2026-cspu-java4shell[CVE-2026-114938] ("Java4Shell")
+and the Node.js vulnerability https://nodejs.org/en/blog/vulnerability/october-2026-security-releases[CVE-2026-111497] ("Node2Shell"),
+which affects the formatting service.
+They don't replace the upgrade.
+
+. In the directory containing your Compose configuration, create `docker-compose.security.yml`:
++
+[source,yaml]
+----
+services:
+  arsnova-proxy:
+    image: particify/arsnova-proxy:3.13@sha256:bc436b0252c695d949fae1c63a6219920e7ae093c4508118cc284abec8f4f40d
+  arsnova-backend-core:
+    environment:
+      JAVA_TOOL_OPTIONS: -XX:-UseBASE64Intrinsics
+  arsnova-http-gateway:
+    environment:
+      JAVA_TOOL_OPTIONS: -XX:-UseBASE64Intrinsics
+  arsnova-ws-gateway:
+    environment:
+      JAVA_TOOL_OPTIONS: -XX:-UseBASE64Intrinsics
+  arsnova-auth-service:
+    environment:
+      JAVA_TOOL_OPTIONS: -XX:-UseBASE64Intrinsics
+  arsnova-comment-service:
+    environment:
+      JAVA_TOOL_OPTIONS: -XX:-UseBASE64Intrinsics
+  arsnova-formatting-service:
+    image: particify/arsnova-server-formatting:3.13.20261113@sha256:c574d574e2d8864dbcccf510daa699e2aab602ab6a8d1d23db3d9b5372a423e3
+----
++
+If you already set `JAVA_TOOL_OPTIONS`, add the flag to your existing value.
+. Add this line to `.env`:
++
+----
+COMPOSE_FILE=docker-compose.yml:docker-compose.override.yml:docker-compose.security.yml
+----
+. `docker compose pull arsnova-proxy arsnova-formatting-service && docker compose up -d`
+. Verify:
+* `docker compose exec arsnova-proxy nginx -v` reports `nginx/1.30.7`.
+* `docker compose exec arsnova-formatting-service node -v` reports `v22.23.5`.
+* `docker compose logs | grep 'Picked up JAVA_TOOL_OPTIONS'` lists all five Java services with `-XX:-UseBASE64Intrinsics`.
+
+When you upgrade to 3.14, delete `docker-compose.security.yml` and don't carry the `COMPOSE_FILE` line over.
+
+=== Updates
+* *Server:* Spring Boot 4.2.
+The images now run on a Java 25 JRE.
+* *Webclient:* Angular 22
+* *Formatting service:* Node.js 26
+* *Images:* PostgreSQL 17, RabbitMQ 4.4, nginx 1.31
+* Further dependency updates throughout
+
+=== Fixes
+* Malformed find requests are now rejected with 400 instead of failing with 500.
